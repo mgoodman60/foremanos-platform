@@ -1,0 +1,385 @@
+/**
+ * Cost Rollup Service
+ * Aggregates daily costs from labor, materials, and equipment
+ * Updates budget items and creates daily cost summaries
+ */
+
+import { prisma } from '@/lib/db';
+import { startOfDay, endOfDay, format } from 'date-fns';
+import { syncBudgetFromSchedule } from './budget-sync-service';
+
+export interface DailyCostSummary {
+  date: Date;
+  laborCost: number;
+  materialCost: number;
+  equipmentCost: number;
+  subcontractorCost: number;
+  totalCost: number;
+  laborHours: number;
+  workerCount: number;
+}
+
+export interface CostRollupResult {
+  success: boolean;
+  date: Date;
+  summary: DailyCostSummary;
+  budgetItemsUpdated: number;
+  evmRefreshed: boolean;
+}
+
+/**
+ * Get labor costs for a specific date
+ */
+async function getLaborCostsForDate(
+  projectId: string,
+  date: Date
+): Promise<{ totalCost: number; totalHours: number; workerCount: number }> {
+  const dayStart = startOfDay(date);
+  const dayEnd = endOfDay(date);
+
+  const laborEntries = await prisma.laborEntry.findMany({
+    where: {
+      projectId,
+      date: { gte: dayStart, lte: dayEnd },
+      status: 'APPROVED', // Only count approved labor
+    },
+  });
+
+  const totalCost = laborEntries.reduce((sum, entry) => sum + entry.totalCost, 0);
+  const totalHours = laborEntries.reduce((sum, entry) => sum + entry.hoursWorked, 0);
+  
+  // Estimate worker count from worker names (each unique name = 1 worker entry)
+  const uniqueWorkers = new Set(laborEntries.map(e => e.workerName));
+  const workerCount = uniqueWorkers.size;
+
+  return { totalCost, totalHours, workerCount };
+}
+
+/**
+ * Get material costs for a specific date
+ */
+async function getMaterialCostsForDate(
+  projectId: string,
+  date: Date
+): Promise<number> {
+  const dayStart = startOfDay(date);
+  const dayEnd = endOfDay(date);
+
+  // Get received procurement items for the date
+  const deliveries = await prisma.procurement.findMany({
+    where: {
+      projectId,
+      actualDelivery: { gte: dayStart, lte: dayEnd },
+      status: 'RECEIVED',
+    },
+  });
+
+  return deliveries.reduce((sum, d) => sum + (d.actualCost || 0), 0);
+}
+
+/**
+ * Get equipment costs for a specific date (from daily report equipment data)
+ */
+async function getEquipmentCostsForDate(
+  projectId: string,
+  date: Date
+): Promise<number> {
+  const dayStart = startOfDay(date);
+  const dayEnd = endOfDay(date);
+
+  // Check for equipment usage from daily reports
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      projectId,
+      conversationType: 'daily_report',
+      dailyReportDate: { gte: dayStart, lte: dayEnd },
+    },
+    select: { equipmentData: true },
+  });
+
+  let totalCost = 0;
+  for (const conv of conversations) {
+    const equipment = (conv.equipmentData as any[]) || [];
+    // Sum up equipment rental/usage costs if specified
+    for (const eq of equipment) {
+      totalCost += eq.dailyCost || eq.cost || 0;
+    }
+  }
+
+  return totalCost;
+}
+
+/**
+ * Get subcontractor costs for a specific date (from invoices or commitments)
+ */
+async function getSubcontractorCostsForDate(
+  projectId: string,
+  date: Date
+): Promise<number> {
+  const dayStart = startOfDay(date);
+  const dayEnd = endOfDay(date);
+
+  // Get approved invoices for the date
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      projectId,
+      invoiceDate: { gte: dayStart, lte: dayEnd },
+      status: 'APPROVED',
+    },
+  });
+
+  return invoices.reduce((sum, inv) => sum + inv.amount, 0);
+}
+
+/**
+ * Calculate and save daily cost summary
+ */
+export async function calculateDailyCosts(
+  projectId: string,
+  date: Date
+): Promise<DailyCostSummary> {
+  // Get all cost categories
+  const laborData = await getLaborCostsForDate(projectId, date);
+  const materialCost = await getMaterialCostsForDate(projectId, date);
+  const equipmentCost = await getEquipmentCostsForDate(projectId, date);
+  const subcontractorCost = await getSubcontractorCostsForDate(projectId, date);
+
+  const summary: DailyCostSummary = {
+    date,
+    laborCost: laborData.totalCost,
+    materialCost,
+    equipmentCost,
+    subcontractorCost,
+    totalCost: laborData.totalCost + materialCost + equipmentCost + subcontractorCost,
+    laborHours: laborData.totalHours,
+    workerCount: laborData.workerCount,
+  };
+
+  return summary;
+}
+
+/**
+ * Update project budget totals with accumulated actuals
+ */
+async function updateProjectBudgetTotals(projectId: string): Promise<number> {
+  // Get the project budget
+  const budget = await prisma.projectBudget.findUnique({
+    where: { projectId },
+    include: { BudgetItem: { where: { isActive: true } } },
+  });
+
+  if (!budget) return 0;
+
+  // Calculate total actual costs from budget items
+  const totalActualCost = budget.BudgetItem.reduce(
+    (sum, item) => sum + item.actualCost,
+    0
+  );
+
+  const totalActualHours = budget.BudgetItem.reduce(
+    (sum, item) => sum + item.actualHours,
+    0
+  );
+
+  console.log(`[CostRollup] Budget totals: $${totalActualCost.toFixed(2)} spent across ${budget.BudgetItem.length} items, ${totalActualHours.toFixed(1)} total hours`);
+
+  return budget.BudgetItem.length;
+}
+
+/**
+ * Recalculate budget item actuals from all linked labor and procurement entries
+ * Useful for reconciliation or corrections
+ */
+export async function recalculateBudgetItemActuals(projectId: string): Promise<number> {
+  const budget = await prisma.projectBudget.findUnique({
+    where: { projectId },
+    include: { BudgetItem: { where: { isActive: true } } },
+  });
+
+  if (!budget) return 0;
+
+  let updatedCount = 0;
+
+  for (const item of budget.BudgetItem) {
+    // Sum approved labor entries for this budget item
+    const laborAgg = await prisma.laborEntry.aggregate({
+      where: {
+        budgetItemId: item.id,
+        status: 'APPROVED',
+      },
+      _sum: {
+        hoursWorked: true,
+        totalCost: true,
+      },
+    });
+
+    // Sum received procurement for this budget item
+    const procurementAgg = await prisma.procurement.aggregate({
+      where: {
+        budgetItemId: item.id,
+        status: 'RECEIVED',
+      },
+      _sum: {
+        actualCost: true,
+      },
+    });
+
+    const laborHours = laborAgg._sum.hoursWorked || 0;
+    const laborCost = laborAgg._sum.totalCost || 0;
+    const materialCost = procurementAgg._sum.actualCost || 0;
+    const totalActualCost = laborCost + materialCost;
+
+    // Update budget item if values changed
+    if (item.actualHours !== laborHours || item.actualCost !== totalActualCost) {
+      await prisma.budgetItem.update({
+        where: { id: item.id },
+        data: {
+          actualHours: laborHours,
+          actualCost: totalActualCost,
+        },
+      });
+      updatedCount++;
+      console.log(`[CostRollup] Recalculated ${item.name}: ${laborHours} hours, $${totalActualCost.toFixed(2)}`);
+    }
+  }
+
+  return updatedCount;
+}
+
+/**
+ * Main cost rollup function - call after daily report finalization
+ */
+export async function performDailyCostRollup(
+  projectId: string,
+  date: Date,
+  userId?: string
+): Promise<CostRollupResult> {
+  console.log(`[CostRollup] Starting rollup for project ${projectId} on ${format(date, 'yyyy-MM-dd')}`);
+
+  try {
+    // 1. Calculate daily costs
+    const summary = await calculateDailyCosts(projectId, date);
+    console.log(`[CostRollup] Daily summary: Labor $${summary.laborCost.toFixed(2)}, Materials $${summary.materialCost.toFixed(2)}, Equipment $${summary.equipmentCost.toFixed(2)}, Total $${summary.totalCost.toFixed(2)}`);
+
+    // 2. Store daily snapshot in BudgetSnapshot
+    const dayStart = startOfDay(date);
+    const existingSnapshot = await prisma.budgetSnapshot.findFirst({
+      where: {
+        projectId,
+        snapshotDate: dayStart,
+      },
+    });
+
+    if (existingSnapshot) {
+      await prisma.budgetSnapshot.update({
+        where: { id: existingSnapshot.id },
+        data: {
+          actualCost: summary.totalCost,
+          // Preserve other fields if they exist
+        },
+      });
+    } else {
+      await prisma.budgetSnapshot.create({
+        data: {
+          Project: { connect: { id: projectId } },
+          snapshotDate: dayStart,
+          actualCost: summary.totalCost,
+          plannedValue: 0, // Will be updated by EVM sync
+          earnedValue: 0,
+          percentComplete: 0, // Will be updated by EVM sync
+        },
+      });
+    }
+
+    // 3. Update project budget totals
+    const budgetItemsUpdated = await updateProjectBudgetTotals(projectId);
+
+    // 4. Trigger EVM/budget sync to recalculate metrics
+    let evmRefreshed = false;
+    try {
+      await syncBudgetFromSchedule(projectId, userId);
+      evmRefreshed = true;
+      console.log('[CostRollup] EVM metrics refreshed');
+    } catch (error) {
+      console.error('[CostRollup] Error refreshing EVM:', error);
+    }
+
+    console.log(`[CostRollup] Rollup complete for ${format(date, 'yyyy-MM-dd')}`);
+
+    return {
+      success: true,
+      date,
+      summary,
+      budgetItemsUpdated,
+      evmRefreshed,
+    };
+  } catch (error) {
+    console.error('[CostRollup] Error:', error);
+    return {
+      success: false,
+      date,
+      summary: {
+        date,
+        laborCost: 0,
+        materialCost: 0,
+        equipmentCost: 0,
+        subcontractorCost: 0,
+        totalCost: 0,
+        laborHours: 0,
+        workerCount: 0,
+      },
+      budgetItemsUpdated: 0,
+      evmRefreshed: false,
+    };
+  }
+}
+
+/**
+ * Get cost summary for a date range (for reports/dashboards)
+ */
+export async function getCostSummaryForRange(
+  projectId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<{
+  totalLabor: number;
+  totalMaterial: number;
+  totalEquipment: number;
+  totalSubcontractor: number;
+  grandTotal: number;
+  totalHours: number;
+  dailyBreakdown: DailyCostSummary[];
+}> {
+  const dailyBreakdown: DailyCostSummary[] = [];
+  
+  let totalLabor = 0;
+  let totalMaterial = 0;
+  let totalEquipment = 0;
+  let totalSubcontractor = 0;
+  let totalHours = 0;
+
+  // Iterate through each day in the range
+  const current = new Date(startDate);
+  while (current <= endDate) {
+    const summary = await calculateDailyCosts(projectId, current);
+    dailyBreakdown.push(summary);
+    
+    totalLabor += summary.laborCost;
+    totalMaterial += summary.materialCost;
+    totalEquipment += summary.equipmentCost;
+    totalSubcontractor += summary.subcontractorCost;
+    totalHours += summary.laborHours;
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    totalLabor,
+    totalMaterial,
+    totalEquipment,
+    totalSubcontractor,
+    grandTotal: totalLabor + totalMaterial + totalEquipment + totalSubcontractor,
+    totalHours,
+    dailyBreakdown,
+  };
+}

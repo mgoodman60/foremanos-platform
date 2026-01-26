@@ -1,0 +1,25 @@
+ForemanOS Product Tour - Voiceover Script (90 seconds)
+
+[0:00-0:08] HOOK
+Tired of wasting hours searching through project documents? ForemanOS brings AI-powered intelligence to your construction projects.
+
+[0:08-0:18] PROBLEM
+Every day, site managers lose valuable time digging through folders, scrolling through emails, and hunting for critical information. Budget details, specifications, schedules - all buried somewhere.
+
+[0:18-0:30] SOLUTION
+ForemanOS changes everything. Simply upload your project documents - plans, budgets, schedules, permits - and our AI instantly understands them.
+
+[0:30-0:45] DEMO - CHAT INTERFACE
+Need to know the parking requirements? Just ask. Want budget breakdowns? Ask. Schedule conflicts? Ask. Get instant, accurate answers with source citations from your actual project documents.
+
+[0:45-0:58] BENEFITS
+No more endless searching. No more missed details. Just text your question and get answers in seconds - whether you're in the office or on the jobsite.
+
+[0:58-1:12] FEATURES
+Secure document storage. Real-time updates. Team collaboration. Guest access for clients and inspectors. All your project intelligence in one place.
+
+[1:12-1:25] SOCIAL PROOF
+Join hundreds of contractors already saving 10+ hours per week. From electrical to plumbing, landscaping to general contracting - ForemanOS works for your trade.
+
+[1:25-1:30] CTA
+Ready to bring control back to your jobsite? Start your free trial today.

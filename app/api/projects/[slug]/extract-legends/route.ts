@@ -1,0 +1,200 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import {
+  extractLegendEntries,
+  storeLegend,
+  mergeLegendWithSymbolLibrary
+} from '@/lib/legend-extractor';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { getFileUrl } from '@/lib/s3';
+
+const execAsync = promisify(exec);
+
+/**
+ * POST /api/projects/[slug]/extract-legends
+ * 
+ * Extracts legend sections from all documents in a project
+ */
+export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+    const body = await req.json();
+    const { documentId, forceReprocess } = body;
+
+    // Get project with documents that have title blocks
+    const project = await prisma.project.findUnique({
+      where: { slug },
+      include: {
+        Document: {
+          where: documentId ? { id: documentId } : undefined,
+          include: {
+            DocumentChunk: {
+              where: {
+                pageNumber: 1,
+                sheetNumber: { not: null } // Only process sheets with title blocks
+              },
+              take: 1
+            },
+            SheetLegend: true
+          }
+        }
+      }
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const results: any[] = [];
+    let successCount = 0;
+    let errorCount = 0;
+    let skippedCount = 0;
+
+    // Process each document
+    for (const document of project.Document) {
+      // Skip non-PDF documents
+      if (!document.name.toLowerCase().endsWith('.pdf')) {
+        continue;
+      }
+
+      // Skip if already has legend (unless force reprocess)
+      if (!forceReprocess && document.SheetLegend.length > 0) {
+        skippedCount++;
+        continue;
+      }
+
+      // Skip if no cloud storage path
+      if (!document.cloud_storage_path) {
+        console.log(`Skipping ${document.name} - no cloud storage path`);
+        continue;
+      }
+
+      // Get sheet number and discipline from first chunk
+      const chunk = document.DocumentChunk[0];
+      if (!chunk || !chunk.sheetNumber) {
+        console.log(`Skipping ${document.name} - no sheet number`);
+        continue;
+      }
+
+      console.log(`Processing legends for ${document.name} (Sheet ${chunk.sheetNumber})...`);
+
+      try {
+        // Get the PDF file
+        const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
+        const response = await fetch(fileUrl);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to download file: ${response.statusText}`);
+        }
+
+        const buffer = Buffer.from(await response.arrayBuffer());
+        const tempPdfPath = path.join('/tmp', `legend-${document.id}.pdf`);
+        await fs.writeFile(tempPdfPath, buffer);
+
+        try {
+          // Convert first page to image
+          const tempImagePath = path.join('/tmp', `legend-${document.id}`);
+          await execAsync(
+            `pdftoppm -jpeg -f 1 -l 1 -scale-to 1500 "${tempPdfPath}" "${tempImagePath}"`
+          );
+
+          const imageFile = `${tempImagePath}-1.jpg`;
+          if (!require('fs').existsSync(imageFile)) {
+            throw new Error('Failed to convert PDF to image');
+          }
+
+          // Read image as base64
+          const imageBuffer = require('fs').readFileSync(imageFile);
+          const imageBase64 = imageBuffer.toString('base64');
+
+          // Extract legend
+          const extractionResult = await extractLegendEntries(
+            imageBase64,
+            chunk.sheetNumber,
+            chunk.discipline as any
+          );
+
+          if (extractionResult.success && extractionResult.legend) {
+            // Store in database
+            await storeLegend(
+              project.id,
+              document.id,
+              extractionResult.legend
+            );
+
+            results.push({
+              documentId: document.id,
+              documentName: document.name,
+              sheetNumber: chunk.sheetNumber,
+              success: true,
+              entriesFound: extractionResult.legend.legendEntries.length,
+              confidence: extractionResult.confidence,
+              method: extractionResult.method
+            });
+
+            successCount++;
+          } else {
+            results.push({
+              documentId: document.id,
+              documentName: document.name,
+              sheetNumber: chunk.sheetNumber,
+              success: false,
+              error: extractionResult.error || 'No legend found'
+            });
+
+            errorCount++;
+          }
+
+          // Clean up image
+          require('fs').unlinkSync(imageFile);
+        } finally {
+          // Clean up PDF
+          await fs.unlink(tempPdfPath).catch(() => {});
+        }
+      } catch (docError) {
+        console.error(`Error processing document ${document.id}:`, docError);
+        results.push({
+          documentId: document.id,
+          documentName: document.name,
+          success: false,
+          error: docError instanceof Error ? docError.message : 'Unknown error'
+        });
+        errorCount++;
+      }
+    }
+
+    // Merge with symbol library
+    if (successCount > 0) {
+      try {
+        await mergeLegendWithSymbolLibrary(slug);
+      } catch (mergeError) {
+        console.error('Error merging with symbol library:', mergeError);
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Processed ${successCount + errorCount + skippedCount} documents`,
+      successCount,
+      errorCount,
+      skippedCount,
+      results
+    });
+  } catch (error) {
+    console.error('Legend extraction error:', error);
+    return NextResponse.json(
+      { error: 'Failed to extract legends' },
+      { status: 500 }
+    );
+  }
+}

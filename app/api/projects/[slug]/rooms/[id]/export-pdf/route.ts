@@ -1,0 +1,199 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+// Room Sheet PDF Export API
+// Generates a comprehensive single-page PDF with all room data
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { slug: string; id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug, id: roomId } = params;
+
+    // Get project
+    const project = await prisma.project.findUnique({
+      where: { slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Get room with all related data
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+      include: {
+        FinishScheduleItem: true,
+      },
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 });
+    }
+
+    // Get MEP equipment for this room
+    const mepEquipment = await prisma.mEPEquipment.findMany({
+      where: {
+        projectId: project.id,
+        OR: [
+          { room: { contains: room.name, mode: 'insensitive' } },
+          { room: { contains: room.roomNumber || '', mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    // Get takeoff items for this room - first try room-specific, then all project items
+    let takeoffItems = await prisma.takeoffLineItem.findMany({
+      where: {
+        MaterialTakeoff: {
+          projectId: project.id,
+        },
+        OR: [
+          { location: { contains: room.name, mode: 'insensitive' } },
+          { location: { contains: room.roomNumber || '', mode: 'insensitive' } },
+        ],
+      },
+      include: {
+        MaterialTakeoff: true,
+      },
+    });
+
+    // If no room-specific takeoffs found, include ALL project takeoffs
+    if (takeoffItems.length === 0) {
+      takeoffItems = await prisma.takeoffLineItem.findMany({
+        where: {
+          MaterialTakeoff: {
+            projectId: project.id,
+          },
+        },
+        include: {
+          MaterialTakeoff: true,
+        },
+        orderBy: [
+          { category: 'asc' },
+          { itemName: 'asc' },
+        ],
+      });
+    }
+
+    // Group finish schedule items by category and de-duplicate
+    const finishesByCategory: Record<string, any[]> = {};
+    const seenFinishes = new Set<string>();
+    
+    (room.FinishScheduleItem || []).forEach((item: any) => {
+      const category = item.category || 'Other';
+      
+      // Create a unique key based on item properties to detect duplicates
+      const uniqueKey = [
+        item.finishType || '',
+        item.material || '',
+        item.manufacturer || '',
+        item.modelNumber || '',
+        item.code || ''
+      ].join('|').toLowerCase().trim();
+      
+      // Skip if we've already seen this exact item
+      if (seenFinishes.has(uniqueKey) && uniqueKey !== '||||') {
+        return;
+      }
+      seenFinishes.add(uniqueKey);
+      
+      if (!finishesByCategory[category]) {
+        finishesByCategory[category] = [];
+      }
+      
+      // Clean up item names (remove underscores)
+      const cleanedItem = {
+        ...item,
+        finishType: item.finishType?.replace(/_/g, ' ')?.trim(),
+        material: item.material?.replace(/_/g, ' ')?.trim(),
+        manufacturer: item.manufacturer?.replace(/_/g, ' ')?.trim(),
+        modelNumber: item.modelNumber?.replace(/_/g, ' ')?.trim(),
+        notes: item.notes?.replace(/_/g, ' ')?.trim(),
+      };
+      
+      finishesByCategory[category].push(cleanedItem);
+    });
+
+    // Group MEP by equipment type
+    const mepBySystem: Record<string, any[]> = {};
+    mepEquipment.forEach((item) => {
+      const system = item.equipmentType || 'Other';
+      if (!mepBySystem[system]) {
+        mepBySystem[system] = [];
+      }
+      mepBySystem[system].push(item);
+    });
+
+    // Group takeoff items by category with cleaned names
+    const takeoffByCategory: Record<string, any[]> = {};
+    takeoffItems.forEach((item) => {
+      const category = (item.category || 'Other').replace(/_/g, ' ').trim();
+      if (!takeoffByCategory[category]) {
+        takeoffByCategory[category] = [];
+      }
+      // Clean up item names (remove underscores)
+      const cleanedItem = {
+        ...item,
+        itemName: item.itemName?.replace(/_/g, ' ')?.trim(),
+        description: item.description?.replace(/_/g, ' ')?.trim(),
+        notes: item.notes?.replace(/_/g, ' ')?.trim(),
+      };
+      takeoffByCategory[category].push(cleanedItem);
+    });
+
+    // Build comprehensive room data
+    const roomData = {
+      project: {
+        name: project.name,
+        slug: project.slug,
+      },
+      room: {
+        id: room.id,
+        name: room.name,
+        roomNumber: room.roomNumber,
+        type: room.type,
+        floorNumber: room.floorNumber,
+        area: room.area,
+        gridLocation: room.gridLocation,
+        status: room.status,
+        percentComplete: room.percentComplete,
+        notes: room.notes,
+        tradeType: room.tradeType,
+        assignedTo: room.assignedTo,
+      },
+      finishSchedule: {
+        categories: Object.keys(finishesByCategory),
+        items: finishesByCategory,
+        totalItems: room.FinishScheduleItem?.length || 0,
+      },
+      mepEquipment: {
+        systems: Object.keys(mepBySystem),
+        items: mepBySystem,
+        totalItems: mepEquipment.length,
+      },
+      takeoffItems: {
+        categories: Object.keys(takeoffByCategory),
+        items: takeoffByCategory,
+        totalItems: takeoffItems.length,
+        totalCost: takeoffItems.reduce((sum, item) => sum + (item.totalCost || 0), 0),
+      },
+      exportedAt: new Date().toISOString(),
+    };
+
+    return NextResponse.json(roomData);
+  } catch (error) {
+    console.error('[Room Export] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to export room data' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,262 @@
+/**
+ * Web Search Utility for Hybrid RAG System
+ * 
+ * Provides supplementary information from the web to bolster document-based answers.
+ * Used as a fallback when document information is insufficient or for general
+ * construction standards, building codes, and industry best practices.
+ * 
+ * IMPORTANT: Web results SUPPLEMENT documents, never override them.
+ */
+
+export interface WebSearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+  source: string;
+}
+
+export interface WebSearchResponse {
+  results: WebSearchResult[];
+  query: string;
+  hasResults: boolean;
+}
+
+/**
+ * Determines if a query would benefit from web search
+ * 
+ * Web search is REQUIRED for:
+ * - ALL building code questions (IBC, IRC, NEC, IPC, IMC, IECC, etc.)
+ * - ALL fire safety codes (NFPA)
+ * - ALL accessibility standards (ADA, ANSI)
+ * - ALL regulatory compliance questions
+ * - Material standards (ASTM, ASCE, ACI)
+ * - Safety regulations (OSHA)
+ * 
+ * Web search is NOT needed for:
+ * - Project-specific questions (covered by documents)
+ * - Sheet/page references
+ * - Document measurements
+ * - Project schedules/budgets
+ */
+export function shouldUseWebSearch(query: string, documentChunksFound: number): boolean {
+  const lowerQuery = query.toLowerCase();
+  
+  // AGGRESSIVE WEB SEARCH FOR ALL CODE/REGULATION QUESTIONS
+  // Building codes, fire codes, accessibility, and compliance ALWAYS need web search
+  
+  const buildingCodeKeywords = [
+    // Building Codes
+    'ibc', 'international building code', 'building code', 'code requirement',
+    'code compliance', 'code section', 'irc', 'residential code',
+    
+    // Fire Safety
+    'nfpa', 'fire code', 'fire safety', 'fire protection', 'sprinkler',
+    'fire alarm', 'egress', 'exit', 'fire rating', 'fire resistance',
+    
+    // Accessibility
+    'ada', 'accessibility', 'accessible', 'ansi', 'wheelchair',
+    'handrail', 'ramp', 'clearance requirement',
+    
+    // Electrical
+    'nec', 'electrical code', 'wiring', 'circuit', 'outlet requirement',
+    
+    // Plumbing
+    'ipc', 'plumbing code', 'upc', 'fixture requirement',
+    
+    // Mechanical
+    'imc', 'mechanical code', 'hvac code', 'ventilation requirement',
+    
+    // Energy
+    'iecc', 'energy code', 'insulation requirement',
+    
+    // General Compliance
+    'compliant', 'compliance', 'regulation', 'standard', 'required by code',
+    'code requires', 'meets code', 'code minimum', 'code maximum',
+    'osha', 'astm', 'asce', 'aci',
+    
+    // Code-related questions
+    'what does the code say', 'what code requires', 'is this allowed',
+    'is this permitted', 'what is required', 'minimum requirement',
+    'maximum allowed',
+  ];
+  
+  // Check if query is about codes or regulations
+  const needsCodeLookup = buildingCodeKeywords.some(keyword => lowerQuery.includes(keyword));
+  if (needsCodeLookup) {
+    console.log('🔍 [WEB SEARCH TRIGGERED] Code/regulation query detected');
+    return true;
+  }
+  
+  // For all other queries, rely on document RAG only
+  return false;
+}
+
+/**
+ * Performs web search and returns formatted results with citations
+ */
+export async function performWebSearch(query: string): Promise<WebSearchResponse> {
+  try {
+    const apiKey = process.env.ABACUSAI_API_KEY;
+    if (!apiKey) {
+      console.warn('⚠️ Web search skipped: API key not configured');
+      return { results: [], query, hasResults: false };
+    }
+    
+    // Enhance query with construction context
+    const enhancedQuery = enhanceQueryForConstruction(query);
+    
+    console.log('🔍 Performing web search:', enhancedQuery);
+    
+    // Perform web search using Abacus AI API
+    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a web search assistant. Extract relevant information from search results and format as structured data.'
+          },
+          {
+            role: 'user',
+            content: `Search the web for construction-related information: "${enhancedQuery}"\n\nProvide 3-5 relevant sources with:\n1. Title\n2. URL\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
+          }
+        ],
+        web_search: true, // Enable web search
+        stream: false,
+        max_tokens: 1500,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error('❌ Web search API error:', response.status);
+      return { results: [], query, hasResults: false };
+    }
+    
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    
+    // Extract URLs and create results
+    let results: WebSearchResult[] = [];
+    
+    // Pattern to extract URLs
+    const urlPattern = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/g;
+    const urls = content.match(urlPattern) || [];
+    
+    // Try to parse structured content
+    const lines = content.split('\n').filter((line: string) => line.trim());
+    let currentResult: Partial<WebSearchResult> = {};
+    
+    for (const line of lines) {
+      const lower = line.toLowerCase();
+      if (lower.includes('title:') || lower.includes('**title')) {
+        if (currentResult.url) {
+          results.push(currentResult as WebSearchResult);
+        }
+        currentResult = { title: line.replace(/.*title:?\s*/i, '').replace(/\*\*/g, '').trim() };
+      } else if (lower.includes('url:') || lower.includes('link:')) {
+        const urlMatch = line.match(urlPattern);
+        if (urlMatch) {
+          currentResult.url = urlMatch[0];
+          try {
+            currentResult.source = new URL(urlMatch[0]).hostname.replace('www.', '');
+          } catch {
+            currentResult.source = 'web';
+          }
+        }
+      } else if (lower.includes('snippet:') || lower.includes('description:')) {
+        currentResult.snippet = line.replace(/.*snippet:?\s*/i, '').replace(/.*description:?\s*/i, '').replace(/\*\*/g, '').trim();
+      } else if (currentResult.title && !currentResult.snippet && line.length > 20 && !line.includes('http')) {
+        currentResult.snippet = line.replace(/\*\*/g, '').trim();
+      }
+    }
+    
+    // Add last result
+    if (currentResult.url) {
+      results.push(currentResult as WebSearchResult);
+    }
+    
+    // Fallback: Create basic results from URLs if parsing failed
+    if (results.length === 0 && urls.length > 0) {
+      results = urls.slice(0, 5).map((url: string, index: number) => ({
+        title: `Construction Reference ${index + 1}`,
+        url: url,
+        snippet: content.substring(Math.max(0, content.indexOf(url) - 100), content.indexOf(url) + 200).trim(),
+        source: (() => {
+          try {
+            return new URL(url).hostname.replace('www.', '');
+          } catch {
+            return 'web';
+          }
+        })()
+      }));
+    }
+    
+    // Filter out invalid results
+    results = results.filter(r => r.url && r.title);
+    
+    console.log(`✅ Found ${results.length} web results`);
+    
+    return {
+      results: results.slice(0, 5), // Limit to 5 results
+      query: enhancedQuery,
+      hasResults: results.length > 0
+    };
+    
+  } catch (error) {
+    console.error('❌ Web search error:', error);
+    return {
+      results: [],
+      query,
+      hasResults: false
+    };
+  }
+}
+
+/**
+ * Enhances query with construction-specific context
+ */
+function enhanceQueryForConstruction(query: string): string {
+  const lowerQuery = query.toLowerCase();
+  
+  // Add construction context if not already present
+  if (!lowerQuery.includes('construction') && !lowerQuery.includes('building')) {
+    // Add context based on query type
+    if (lowerQuery.includes('code') || lowerQuery.includes('requirement')) {
+      return `${query} construction building code`;
+    }
+    if (lowerQuery.includes('depth') || lowerQuery.includes('footing') || lowerQuery.includes('foundation')) {
+      return `${query} construction standards`;
+    }
+  }
+  
+  return query;
+}
+
+/**
+ * Formats web search results for LLM context
+ */
+export function formatWebResultsForContext(webResults: WebSearchResult[]): string {
+  if (webResults.length === 0) {
+    return '';
+  }
+  
+  let formatted = '\n\n=== WEB SEARCH RESULTS (SUPPLEMENTARY INFORMATION) ===\n\n';
+  formatted += 'The following information from the web can SUPPLEMENT (not override) the document information:\n\n';
+  
+  webResults.forEach((result, index) => {
+    formatted += `[Web Source ${index + 1}]\n`;
+    formatted += `Title: ${result.title}\n`;
+    formatted += `URL: ${result.url}\n`;
+    formatted += `Content: ${result.snippet}\n`;
+    formatted += `Source: ${result.source}\n\n`;
+  });
+  
+  formatted += '=== END WEB SEARCH RESULTS ===\n';
+  
+  return formatted;
+}

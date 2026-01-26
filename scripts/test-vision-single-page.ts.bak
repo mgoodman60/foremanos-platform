@@ -1,0 +1,117 @@
+/**
+ * Test script to process just the first page of Plans.pdf
+ */
+
+import { PrismaClient } from '@prisma/client';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { PDFDocument } from 'pdf-lib';
+
+const prisma = new PrismaClient();
+
+async function testSinglePage() {
+  console.log('🧪 Testing vision processing on single page...\n');
+  
+  // Find Plans.pdf
+  const plansDoc = await prisma.document.findFirst({
+    where: { name: 'Plans.pdf' },
+  });
+  
+  if (!plansDoc) {
+    console.error('❌ Plans.pdf not found');
+    process.exit(1);
+  }
+  
+  const pdfPath = path.join(process.cwd(), 'public', plansDoc.filePath || 'documents/Plans.pdf');
+  console.log(`📄 PDF path: ${pdfPath}\n`);
+  
+  // Convert page 4 (C-102 site plan with parking lot)
+  const pageNum = 4;
+  const tempDir = '/tmp/vision-test';
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+  
+  const outputPrefix = path.join(tempDir, `page-${pageNum}`);
+  
+  console.log(`🖼️  Converting page ${pageNum} to image...`);
+  execSync(`pdftoppm -png -f ${pageNum} -l ${pageNum} -singlefile "${pdfPath}" "${outputPrefix}"`, {
+    stdio: 'pipe'
+  });
+  
+  const imagePath = `${outputPrefix}.png`;
+  console.log(`✅ Image created: ${imagePath}`);
+  console.log(`📊 Image size: ${(fs.statSync(imagePath).size / 1024 / 1024).toFixed(2)} MB\n`);
+  
+  // Read and convert to base64
+  const imageBuffer = fs.readFileSync(imagePath);
+  const base64 = imageBuffer.toString('base64');
+  const imageData = `data:image/png;base64,${base64}`;
+  
+  console.log(`📏 Base64 length: ${base64.length} characters\n`);
+  
+  // Test API call
+  console.log('🤖 Calling GPT-4o vision API...\n');
+  
+  const apiKey = process.env.ABACUSAI_API_KEY;
+  if (!apiKey) {
+    console.error('❌ ABACUSAI_API_KEY not found');
+    process.exit(1);
+  }
+  
+  const prompt = `Analyze this construction plan page and extract:
+1. Sheet number (e.g., C-102)
+2. Scale notation (e.g., 1"=20')
+3. Any labeled dimensions
+4. Major elements visible (parking lot, building, etc.)
+
+Provide in JSON format.`;
+  
+  const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: { url: imageData },
+            },
+          ],
+        },
+      ],
+      max_tokens: 1000,
+    }),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ API Error:', errorText);
+    process.exit(1);
+  }
+  
+  const data = await response.json();
+  const content = data.choices[0].message.content;
+  
+  console.log('✅ Vision API Response:\n');
+  console.log(content);
+  console.log('\n');
+  
+  // Clean up
+  fs.unlinkSync(imagePath);
+  fs.rmdirSync(tempDir);
+  
+  console.log('✅ Test successful!');
+}
+
+testSinglePage()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

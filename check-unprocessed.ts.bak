@@ -1,0 +1,56 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  try {
+    const docs = await prisma.document.findMany({
+      where: { processed: false },
+      select: {
+        id: true,
+        name: true,
+        fileName: true,
+        processed: true,
+        pagesProcessed: true,
+        fileSize: true,
+        createdAt: true,
+        processorType: true,
+        project: { select: { name: true, slug: true } }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    });
+    
+    console.log('\n=== UNPROCESSED DOCUMENTS ===\n');
+    docs.forEach((doc: any, i: number) => {
+      console.log(`${i + 1}. ${doc.name}`);
+      console.log(`   File: ${doc.fileName}`);
+      console.log(`   Size: ${((doc.fileSize || 0) / 1024 / 1024).toFixed(2)}MB`);
+      console.log(`   Project: ${doc.project?.name}`);
+      console.log(`   Processor: ${doc.processorType || 'unknown'}`);
+      console.log(`   Uploaded: ${doc.createdAt}`);
+      console.log(`   Document ID: ${doc.id}\n`);
+    });
+    
+    const processedCount = await prisma.document.count({ where: { processed: true } });
+    const unprocessedCount = await prisma.document.count({ where: { processed: false } });
+    
+    console.log('\n=== SUMMARY ===');
+    console.log(`✅ Processed documents: ${processedCount}`);
+    console.log(`⏳ Unprocessed documents: ${unprocessedCount}`);
+    
+    // Check for document chunks
+    if (docs.length > 0) {
+      const firstDocId = docs[0].id;
+      const chunks = await prisma.documentChunk.count({ where: { documentId: firstDocId } });
+      console.log(`\n📄 Chunks for most recent document (${docs[0].name}): ${chunks}`);
+    }
+    
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();

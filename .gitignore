@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Build outputs
+.next/
+.build/
+out/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/migrations/*_migration_lock.toml
+
+# Testing
+coverage/
+.nyc_output
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts
+
+# Abacus AI specific
+.abacus.donotdelete
+
+# Large files / Sample data (add to Git LFS if needed)
+public/documents/*.pdf
+public/regulatory-documents/*.pdf
+*.mp4
+*.mp3
+assets/tour/video_temp/
+
+# Package lock (use yarn.lock instead)
+package-lock.json

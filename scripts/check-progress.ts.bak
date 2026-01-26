@@ -1,0 +1,36 @@
+import { prisma } from '../lib/db';
+
+async function checkProgress() {
+  const doc = await prisma.document.findUnique({
+    where: { id: 'cmk633er50001n508fpe1licm' },
+    include: {
+      _count: { select: { chunks: true } },
+      processingQueue: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+  });
+  
+  if (!doc) {
+    console.log('Document not found');
+    return;
+  }
+  
+  console.log('Document:', doc.name);
+  console.log('Chunks:', doc._count.chunks, '/ 45');
+  console.log('Pages processed:', doc.pagesProcessed, '/ 45');
+  
+  if (doc.processingQueue[0]) {
+    const q = doc.processingQueue[0];
+    console.log('\\nQueue status:', q.status);
+    console.log('Batch:', q.currentBatch, '/', q.totalBatches);
+    console.log('Progress:', q.pagesProcessed, '/', q.totalPages);
+    console.log('Retries:', q.retriesCount);
+  }
+}
+
+checkProgress()
+  .then(() => process.exit(0))
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

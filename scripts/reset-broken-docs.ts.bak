@@ -1,0 +1,78 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('\n=== RESETTING BROKEN DOCUMENTS ===\n');
+  
+  // Find documents that are marked as processed but have 0 pages
+  const brokenDocs = await prisma.document.findMany({
+    where: {
+      processed: true,
+      pagesProcessed: 0,
+      deletedAt: null,
+    },
+    include: {
+      project: {
+        select: {
+          name: true,
+          slug: true,
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc',
+    }
+  });
+
+  if (brokenDocs.length === 0) {
+    console.log('✅ No broken documents found!');
+    await prisma.$disconnect();
+    return;
+  }
+
+  console.log(`Found ${brokenDocs.length} broken documents:\n`);
+  brokenDocs.forEach((doc, index) => {
+    console.log(`${index + 1}. ${doc.fileName} (${doc.project?.name || 'Unknown'})`);
+    console.log(`   ID: ${doc.id}`);
+    console.log(`   Created: ${doc.createdAt}`);
+    console.log(`   Processed: ${doc.processed}, Pages: ${doc.pagesProcessed}`);
+    console.log(`   Queue Status: ${doc.queueStatus}`);
+    console.log('');
+  });
+
+  console.log(`\n🔄 Resetting ${brokenDocs.length} documents...\n`);
+
+  // Reset each document
+  for (const doc of brokenDocs) {
+    try {
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: {
+          processed: false,
+          pagesProcessed: 0,
+          processingCost: 0,
+          processedAt: null,
+          queueStatus: 'none',
+          lastProcessingError: 'Reset due to pdftoppm filename bug',
+          processingRetries: 0,
+        },
+      });
+      console.log(`✅ Reset ${doc.fileName}`);
+    } catch (error) {
+      console.error(`❌ Failed to reset ${doc.fileName}:`, error);
+    }
+  }
+
+  console.log(`\n✅ Reset complete!\n`);
+  console.log(`Next steps:`);
+  console.log(`1. Run: npx tsx scripts/manual-process-documents.ts`);
+  console.log(`2. Or upload the documents again through the UI\n`);
+
+  await prisma.$disconnect();
+}
+
+main().catch((error) => {
+  console.error('Error:', error);
+  process.exit(1);
+});

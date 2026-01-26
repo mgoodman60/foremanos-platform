@@ -1,0 +1,55 @@
+import { prisma } from '../lib/db';
+
+async function checkStatus() {
+  try {
+    console.log('📊 Onboarding Status Summary\n');
+    console.log('=' .repeat(50) + '\n');
+
+    // Get overall stats
+    const totalUsers = await prisma.user.count();
+    const completedOnboarding = await prisma.user.count({
+      where: { hasCompletedOnboarding: true },
+    });
+    const notCompleted = totalUsers - completedOnboarding;
+
+    console.log('Overall Statistics:');
+    console.log(`  Total Users: ${totalUsers}`);
+    console.log(`  Completed Onboarding: ${completedOnboarding}`);
+    console.log(`  Not Completed: ${notCompleted}`);
+    console.log('');
+
+    // Group by role and onboarding status
+    const byRole = await prisma.user.groupBy({
+      by: ['role', 'hasCompletedOnboarding'],
+      _count: {
+        id: true,
+      },
+    });
+
+    console.log('Status by Role:');
+    const roles = ['admin', 'client', 'guest', 'pending'];
+    
+    roles.forEach((role: any) => {
+      const completed = byRole.find((r: any) => r.role === role && r.hasCompletedOnboarding)?._count.id || 0;
+      const notCompleted = byRole.find((r: any) => r.role === role && !r.hasCompletedOnboarding)?._count.id || 0;
+      const total = completed + notCompleted;
+      
+      if (total > 0) {
+        console.log(`  ${role.toUpperCase()}:`);
+        console.log(`    - Completed: ${completed}`);
+        console.log(`    - Not Completed: ${notCompleted}`);
+        console.log(`    - Total: ${total}`);
+      }
+    });
+
+    console.log('');
+    console.log('ℹ️  Note: Pending users will see the wizard after approval');
+
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+checkStatus();

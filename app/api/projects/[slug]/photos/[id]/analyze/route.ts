@@ -1,0 +1,75 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { processUploadedPhoto } from '@/lib/photo-analyzer';
+
+/**
+ * POST /api/projects/[slug]/photos/[id]/analyze
+ * 
+ * Trigger AI analysis for a photo (description, tags, OCR)
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { slug: string; id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug, id } = params;
+
+    // Get photo
+    const photo = await prisma.roomPhoto.findUnique({
+      where: { id },
+    });
+
+    if (!photo) {
+      return NextResponse.json({ error: 'Photo not found' }, { status: 404 });
+    }
+
+    // Verify project
+    const project = await prisma.project.findUnique({
+      where: { slug },
+    });
+
+    if (!project || photo.projectId !== project.id) {
+      return NextResponse.json(
+        { error: 'Photo not found in this project' },
+        { status: 404 }
+      );
+    }
+
+    // Process the photo
+    console.log(`[Photo Analysis] Starting analysis for photo ${id}`);
+    await processUploadedPhoto(id, slug);
+
+    // Get updated photo
+    const updatedPhoto = await prisma.roomPhoto.findUnique({
+      where: { id },
+      include: {
+        Room: true,
+        FinishScheduleItem: true,
+      },
+    });
+
+    console.log(`[Photo Analysis] Completed analysis for photo ${id}`);
+
+    return NextResponse.json({
+      success: true,
+      photo: updatedPhoto,
+      message: 'Photo analysis completed',
+    });
+  } catch (error: any) {
+    console.error('[Photo Analysis] Error:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to analyze photo',
+        message: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}

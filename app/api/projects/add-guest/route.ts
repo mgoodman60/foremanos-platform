@@ -1,0 +1,72 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { guestUsername } = await request.json();
+
+    if (!guestUsername) {
+      return NextResponse.json({ error: 'Guest username is required' }, { status: 400 });
+    }
+
+    // Find project by guest username
+    const project = await prisma.project.findUnique({
+      where: { guestUsername },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: 'No project found with this guest username' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user already has access
+    const existingMember = await prisma.projectMember.findUnique({
+      where: {
+        userId_projectId: {
+          userId: session.user.id,
+          projectId: project.id,
+        },
+      },
+    });
+
+    if (existingMember) {
+      return NextResponse.json(
+        { error: 'You already have access to this project' },
+        { status: 400 }
+      );
+    }
+
+    // Add user as guest member
+    await prisma.projectMember.create({
+      data: {
+        userId: session.user.id,
+        projectId: project.id,
+        role: 'guest',
+      },
+    });
+
+    return NextResponse.json({
+      projectName: project.name,
+      message: 'Guest access granted',
+    });
+  } catch (error) {
+    console.error('Error adding guest access:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

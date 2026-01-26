@@ -1,0 +1,96 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import {
+  processDocumentForSync,
+  syncAllProjectDocuments,
+  getProjectSyncStatus,
+} from '@/lib/document-auto-sync';
+
+// GET /api/projects/[slug]/sync - Get sync status for all features
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { slug: params.slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const status = await getProjectSyncStatus(project.id);
+
+    return NextResponse.json({
+      success: true,
+      projectId: project.id,
+      projectName: project.name,
+      ...status,
+    });
+  } catch (error) {
+    console.error('[Sync API] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to get sync status' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/projects/[slug]/sync - Trigger sync for project
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { slug: params.slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const { documentId, feature } = body;
+
+    let result;
+
+    if (documentId) {
+      // Sync specific document
+      result = await processDocumentForSync(documentId, project.id);
+      return NextResponse.json({
+        success: true,
+        type: 'document',
+        result,
+      });
+    } else {
+      // Sync all documents
+      result = await syncAllProjectDocuments(project.id);
+      return NextResponse.json({
+        success: true,
+        type: 'project',
+        documentsProcessed: result.processed,
+        results: result.results,
+      });
+    }
+  } catch (error: any) {
+    console.error('[Sync API] Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to sync' },
+      { status: 500 }
+    );
+  }
+}

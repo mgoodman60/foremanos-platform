@@ -1,0 +1,4 @@
+app/api/projects/[slug]/members/route.ts
+app/api/projects/[slug]/members/[userId]/route.ts
+app/api/projects/invitations/[id]/accept/route.ts
+app/api/projects/invitations/[id]/decline/route.ts

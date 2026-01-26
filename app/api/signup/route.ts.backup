@@ -1,0 +1,140 @@
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/db';
+import { checkRateLimit, createRateLimitResponse } from '@/lib/rate-limiter';
+import { logActivity, createNotification } from '@/lib/audit-log';
+import { sendWelcomeEmail, sendNewSignupNotification } from '@/lib/email-service';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  try {
+    // Get IP for rate limiting
+    const ip = request.headers.get('x-forwarded-for') || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+
+    // Apply rate limiting
+    const rateLimit = await checkRateLimit({ type: 'auth', identifier: ip });
+    if (!rateLimit.allowed) {
+      return createRateLimitResponse(rateLimit);
+    }
+
+    const body = await request.json();
+    const { email, username, password, confirmPassword } = body;
+
+    // Validation
+    if (!email || !username || !password) {
+      return NextResponse.json(
+        { error: 'Email, username, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    if (password !== confirmPassword) {
+      return NextResponse.json(
+        { error: 'Passwords do not match' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 3) {
+      return NextResponse.json(
+        { error: 'Password must be at least 3 characters long' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists (case-insensitive)
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: { equals: email, mode: 'insensitive' } },
+          { username: { equals: username, mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'User with this email or username already exists' },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user with pending status
+    const user = await prisma.user.create({
+      data: {
+        email,
+        username,
+        password: hashedPassword,
+        role: 'pending', // Users start as pending
+        approved: false, // Requires admin approval
+      },
+    });
+
+    // Log the signup activity
+    await logActivity({
+      userId: user.id,
+      action: 'user_signup',
+      resource: 'user',
+      resourceId: user.id,
+      details: {
+        email: user.email,
+        username: user.username,
+      },
+      request,
+    });
+
+    // Send welcome email to the new user
+    if (user.email) {
+      await sendWelcomeEmail(user.email, user.username, user.id);
+    }
+
+    // Send email notification to admins about new signup
+    await sendNewSignupNotification(
+      user.email || 'N/A',
+      user.username,
+      user.role
+    ).catch(error => {
+      console.error('Error sending signup notification to admins:', error);
+    });
+
+    // Notify all admins about new signup
+    const admins = await prisma.user.findMany({
+      where: { role: 'admin' },
+      select: { id: true, username: true },
+    });
+
+    for (const admin of admins) {
+      await createNotification({
+        userId: admin.id,
+        type: 'new_signup',
+        subject: 'New User Signup Pending Approval',
+        body: `User ${username} (${email}) has signed up and is awaiting approval.`,
+      });
+    }
+
+    return NextResponse.json(
+      {
+        message: 'Signup successful! Your account is pending admin approval. You will be notified once approved.',
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          status: 'pending',
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Signup error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

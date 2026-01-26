@@ -1,0 +1,85 @@
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const prisma = new PrismaClient();
+
+async function checkPage5() {
+  try {
+    // Get Plans.pdf
+    const doc = await prisma.document.findFirst({
+      where: {
+        name: 'Plans.pdf'
+      }
+    });
+
+    if (!doc) {
+      console.log('Plans.pdf not found');
+      return;
+    }
+
+    // Get chunk for page 5
+    const chunk = await prisma.documentChunk.findFirst({
+      where: {
+        documentId: doc.id,
+        pageNumber: 5
+      }
+    });
+
+    if (!chunk) {
+      console.log('Page 5 not found');
+      return;
+    }
+
+    const metadata = chunk.metadata as any;
+    
+    console.log('='.repeat(80));
+    console.log('PAGE 5 OF PLANS.PDF');
+    console.log('='.repeat(80));
+    console.log(`Page: ${chunk.pageNumber}`);
+    console.log(`Sheet Number: ${metadata?.sheet_number || 'N/A'}`);
+    console.log(`Scale: ${metadata?.scale || 'N/A'}`);
+    
+    if (metadata?.labeled_dimensions && metadata.labeled_dimensions.length > 0) {
+      console.log(`\nLabeled Dimensions (${metadata.labeled_dimensions.length}):`);
+      console.log(JSON.stringify(metadata.labeled_dimensions, null, 2));
+    } else {
+      console.log(`\nLabeled Dimensions: None`);
+    }
+    
+    if (metadata?.derived_dimensions && metadata.derived_dimensions.length > 0) {
+      console.log(`\nDerived Dimensions (${metadata.derived_dimensions.length}):`);
+      console.log(JSON.stringify(metadata.derived_dimensions, null, 2));
+    } else {
+      console.log(`\nDerived Dimensions: None`);
+    }
+    
+    if (metadata?.elements && metadata.elements.length > 0) {
+      console.log(`\nElements (${metadata.elements.length}):`);
+      console.log(JSON.stringify(metadata.elements, null, 2));
+    } else {
+      console.log(`\nElements: None`);
+    }
+    
+    if (metadata?.notes && metadata.notes.length > 0) {
+      console.log(`\nNotes (${metadata.notes.length}):`);
+      console.log(JSON.stringify(metadata.notes, null, 2));
+    } else {
+      console.log(`\nNotes: None`);
+    }
+    
+    console.log(`\n${'='.repeat(80)}`);
+    console.log('FULL CONTENT:');
+    console.log('='.repeat(80));
+    console.log(chunk.content);
+    console.log('\n');
+
+  } catch (error) {
+    console.error('Error checking page 5:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+checkPage5();

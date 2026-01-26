@@ -1,0 +1,285 @@
+import { PrismaClient } from '@prisma/client';
+import { convert } from 'pdf-poppler';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const prisma = new PrismaClient();
+const CHUNK_SIZE = 2000; // Characters per chunk
+const CHUNK_OVERLAP = 200; // Overlap between chunks
+
+interface ProcessingResult {
+  success: boolean;
+  pagesProcessed: number;
+  chunksCreated: number;
+  totalCost: number;
+  errors: string[];
+}
+
+/**
+ * Process regulatory PDF with Claude Haiku OCR
+ */
+async function processRegulatoryPDF(
+  filePath: string,
+  regulatoryDocId: string,
+  projectId: string
+): Promise<ProcessingResult> {
+  const result: ProcessingResult = {
+    success: false,
+    pagesProcessed: 0,
+    chunksCreated: 0,
+    totalCost: 0,
+    errors: [],
+  };
+
+  try {
+    // Create temp directory for images
+    const tempDir = path.join(__dirname, '../temp_regulatory_images');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    console.log(`📄 Processing PDF: ${filePath}`);
+    console.log(`🔍 Converting PDF pages to images...`);
+
+    // Convert PDF to images
+    const opts = {
+      format: 'png',
+      out_dir: tempDir,
+      out_prefix: 'page',
+      page: null, // Process all pages
+    };
+
+    await convert(filePath, opts);
+
+    // Get all generated images
+    const imageFiles = fs.readdirSync(tempDir)
+      .filter(f => f.startsWith('page-') && f.endsWith('.png'))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/page-(\d+)\.png/)?.[1] || '0');
+        const numB = parseInt(b.match(/page-(\d+)\.png/)?.[1] || '0');
+        return numA - numB;
+      });
+
+    console.log(`📸 Generated ${imageFiles.length} page images`);
+
+    // Process each page with Claude Haiku
+    let fullText = '';
+    const costPerPage = 0.001; // Claude Haiku cost
+
+    for (let i = 0; i < imageFiles.length; i++) {
+      const imageFile = imageFiles[i];
+      const imagePath = path.join(tempDir, imageFile);
+      const pageNum = i + 1;
+
+      try {
+        console.log(`🔤 Processing page ${pageNum}/${imageFiles.length}...`);
+
+        // Read image as base64
+        const imageBuffer = fs.readFileSync(imagePath);
+        const base64Image = imageBuffer.toString('base64');
+
+        // Call Claude Haiku for OCR
+        const response = await fetch('https://routellm.abacus.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Extract all text from this regulatory document page. Maintain the original structure, headings, and section numbers. Return only the extracted text, no commentary.'
+                  },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:image/png;base64,${base64Image}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 4096,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Claude API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const pageText = data.choices[0].message.content;
+
+        fullText += `\n\n[Page ${pageNum}]\n${pageText}`;
+        result.pagesProcessed++;
+        result.totalCost += costPerPage;
+
+        // Clean up image file
+        fs.unlinkSync(imagePath);
+
+        // Rate limiting - wait 100ms between requests
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+      } catch (error: any) {
+        console.error(`❌ Error processing page ${pageNum}:`, error.message);
+        result.errors.push(`Page ${pageNum}: ${error.message}`);
+      }
+    }
+
+    // Clean up temp directory
+    fs.rmSync(tempDir, { recursive: true, force: true });
+
+    console.log(`\n✅ OCR Complete: ${result.pagesProcessed} pages processed`);
+    console.log(`💰 Total cost: $${result.totalCost.toFixed(3)}`);
+
+    // Chunk the full text
+    console.log(`\n📝 Chunking text...`);
+    const chunks = chunkText(fullText, CHUNK_SIZE, CHUNK_OVERLAP);
+    console.log(`📦 Created ${chunks.length} chunks`);
+
+    // Store chunks in database
+    console.log(`\n💾 Storing chunks in database...`);
+    for (let i = 0; i < chunks.length; i++) {
+      try {
+        await prisma.documentChunk.create({
+          data: {
+            regulatoryDocumentId: regulatoryDocId,
+            chunkIndex: i,
+            content: chunks[i],
+            metadata: JSON.stringify({
+              chunkIndex: i,
+              totalChunks: chunks.length,
+              source: 'regulatory',
+            }),
+          },
+        });
+        result.chunksCreated++;
+      } catch (error: any) {
+        console.error(`❌ Error storing chunk ${i}:`, error.message);
+        result.errors.push(`Chunk ${i}: ${error.message}`);
+      }
+    }
+
+    // Update regulatory document status
+    await prisma.regulatoryDocument.update({
+      where: { id: regulatoryDocId },
+      data: {
+        processed: true,
+        processorType: 'claude-haiku',
+        processingCost: result.totalCost,
+        pagesProcessed: result.pagesProcessed,
+      },
+    });
+
+    console.log(`\n✅ Processing complete!`);
+    console.log(`   Pages: ${result.pagesProcessed}`);
+    console.log(`   Chunks: ${result.chunksCreated}`);
+    console.log(`   Cost: $${result.totalCost.toFixed(3)}`);
+    console.log(`   Errors: ${result.errors.length}`);
+
+    result.success = true;
+    return result;
+
+  } catch (error: any) {
+    console.error('❌ Fatal error:', error);
+    result.errors.push(`Fatal: ${error.message}`);
+    return result;
+  }
+}
+
+/**
+ * Chunk text with overlap
+ */
+function chunkText(text: string, chunkSize: number, overlap: number): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+
+  while (start < text.length) {
+    const end = Math.min(start + chunkSize, text.length);
+    chunks.push(text.substring(start, end));
+    start += chunkSize - overlap;
+  }
+
+  return chunks;
+}
+
+/**
+ * Main execution
+ */
+async function main() {
+  try {
+    console.log('🚀 Starting ADA 2010 Standards processing...\n');
+
+    // Find or create ADA regulatory document
+    const projectSlug = 'morehead-senior-center';
+    const project = await prisma.project.findUnique({
+      where: { slug: projectSlug },
+    });
+
+    if (!project) {
+      throw new Error(`Project not found: ${projectSlug}`);
+    }
+
+    console.log(`📂 Project: ${project.name} (${project.slug})`);
+
+    // Check if ADA doc already exists
+    let adaDoc = await prisma.regulatoryDocument.findFirst({
+      where: {
+        projectId: project.id,
+        type: 'ada',
+        standard: 'ADA 2010 Standards',
+      },
+    });
+
+    if (!adaDoc) {
+      console.log('📄 Creating ADA regulatory document record...');
+      adaDoc = await prisma.regulatoryDocument.create({
+        data: {
+          projectId: project.id,
+          type: 'ada',
+          jurisdiction: 'Federal',
+          standard: 'ADA 2010 Standards',
+          version: '2010',
+          sourceUrl: 'https://archive.ada.gov/regs2010/2010ADAStandards/2010ADAStandards.pdf',
+          processed: false,
+        },
+      });
+    } else if (adaDoc.processed) {
+      console.log('⚠️  ADA document already processed. Skipping...');
+      process.exit(0);
+    }
+
+    console.log(`📋 Regulatory Doc ID: ${adaDoc.id}\n`);
+
+    // Process the PDF
+    const pdfPath = path.join(__dirname, '../public/regulatory-documents/ADA_2010_Standards.pdf');
+    
+    if (!fs.existsSync(pdfPath)) {
+      throw new Error(`PDF not found: ${pdfPath}`);
+    }
+
+    const result = await processRegulatoryPDF(pdfPath, adaDoc.id, project.id);
+
+    if (result.success) {
+      console.log('\n🎉 SUCCESS! ADA 2010 Standards are now available for RAG queries.');
+    } else {
+      console.log('\n⚠️  Processing completed with errors. Check logs above.');
+    }
+
+  } catch (error: any) {
+    console.error('\n❌ Fatal error:', error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();

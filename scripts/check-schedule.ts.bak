@@ -1,0 +1,57 @@
+import { prisma } from '../lib/db';
+
+async function checkSchedule() {
+  // Check all documents
+  const docs = await prisma.document.findMany({
+    select: {
+      id: true,
+      name: true,
+      accessLevel: true,
+      _count: {
+        select: { chunks: true }
+      }
+    }
+  });
+  
+  console.log('\n📚 Documents in database:');
+  docs.forEach((doc: any) => {
+    console.log(`  - ${doc.name}: ${doc._count.chunks} chunks (access: ${doc.accessLevel})`);
+  });
+  
+  // Check Schedule.pdf specifically
+  const schedule = docs.find((d: any) => d.name === 'Schedule.pdf');
+  if (schedule) {
+    const chunks = await prisma.documentChunk.findMany({
+      where: { documentId: schedule.id },
+      select: { content: true },
+      take: 5
+    });
+    
+    console.log('\n📅 Schedule.pdf sample chunks:');
+    chunks.forEach((chunk: any, i: number) => {
+      console.log(`\nChunk ${i + 1}: ${chunk.content.substring(0, 300)}...`);
+    });
+    
+    // Search for end date or completion related content
+    const endDateChunks = await prisma.documentChunk.findMany({
+      where: {
+        documentId: schedule.id,
+        OR: [
+          { content: { contains: 'completion', mode: 'insensitive' } },
+          { content: { contains: 'end date', mode: 'insensitive' } },
+          { content: { contains: 'finish', mode: 'insensitive' } }
+        ]
+      },
+      take: 3
+    });
+    
+    console.log('\n🎯 Chunks mentioning completion/end date:');
+    endDateChunks.forEach((chunk: any, i: number) => {
+      console.log(`\nChunk ${i + 1}: ${chunk.content.substring(0, 400)}...`);
+    });
+  }
+  
+  await prisma.$disconnect();
+}
+
+checkSchedule().catch(console.error);

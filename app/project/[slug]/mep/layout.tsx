@@ -1,0 +1,30 @@
+import { Suspense } from 'react';
+import MEPNavigation from '@/components/mep/MEPNavigation';
+
+export default function MEPLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: { slug: string };
+}) {
+  return (
+    <div className="min-h-screen bg-[#0D1117]">
+      <div className="border-b border-gray-700 bg-[#161B22] px-6 py-4">
+        <h1 className="text-xl font-semibold text-white">MEP Tracking</h1>
+        <p className="text-sm text-gray-400">Mechanical, Electrical, Plumbing & Fire Protection</p>
+      </div>
+      <MEPNavigation projectSlug={params.slug} />
+      <Suspense fallback={
+        <div className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-32 bg-gray-800 rounded-lg" />
+            <div className="h-64 bg-gray-800 rounded-lg" />
+          </div>
+        </div>
+      }>
+        {children}
+      </Suspense>
+    </div>
+  );
+}

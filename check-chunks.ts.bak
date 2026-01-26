@@ -1,0 +1,47 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  try {
+    const docId = 'cmk633er50001n508fpe1licm'; // Plans.pdf
+    
+    const chunks = await prisma.documentChunk.findMany({
+      where: { documentId: docId },
+      select: {
+        id: true,
+        pageNumber: true,
+        chunkIndex: true,
+        content: true,
+        metadata: true,
+        sheetNumber: true,
+        discipline: true,
+        scaleData: true
+      },
+      orderBy: { pageNumber: 'asc' },
+      take: 5
+    });
+    
+    console.log('\n=== DOCUMENT CHUNKS ===\n');
+    chunks.forEach((chunk: any, i: number) => {
+      console.log(`Chunk ${i + 1}:`);
+      console.log(`  Page: ${chunk.pageNumber}`);
+      console.log(`  Sheet: ${chunk.sheetNumber || 'N/A'}`);
+      console.log(`  Discipline: ${chunk.discipline || 'N/A'}`);
+      console.log(`  Content length: ${chunk.content?.length || 0} chars`);
+      console.log(`  Content preview: ${chunk.content?.substring(0, 200) || 'No content'}...`);
+      console.log(`  Has scale data: ${!!chunk.scaleData}`);
+      console.log(`  Metadata: ${JSON.stringify(chunk.metadata, null, 2)}\n`);
+    });
+    
+    const totalChunks = await prisma.documentChunk.count({ where: { documentId: docId } });
+    console.log(`Total chunks: ${totalChunks}`);
+    
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();

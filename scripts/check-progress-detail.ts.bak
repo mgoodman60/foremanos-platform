@@ -1,0 +1,67 @@
+import { PrismaClient } from '@prisma/client';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const prisma = new PrismaClient();
+
+async function checkProgress() {
+  try {
+    // Check Geotech document chunks details
+    console.log('━━━ GEOTECH.PDF CHUNK ANALYSIS ━━━\n');
+    
+    const geotechDoc = await prisma.document.findFirst({
+      where: { name: 'Geotech.pdf' },
+      include: {
+        chunks: {
+          take: 5,
+          orderBy: { id: 'desc' },
+          select: {
+            id: true,
+            content: true,
+            metadata: true,
+            createdAt: true
+          }
+        },
+        _count: { select: { chunks: true } }
+      }
+    });
+    
+    if (geotechDoc) {
+      console.log(`Total Chunks: ${geotechDoc._count.chunks}`);
+      console.log(`Pages Processed: ${geotechDoc.pagesProcessed || 0}`);
+      console.log(`Cost: $${(geotechDoc.processingCost || 0).toFixed(4)}`);
+      console.log(`\nMost Recent 5 Chunks:`);
+      geotechDoc.chunks.forEach((chunk: any, i: number) => {
+        console.log(`\n${i + 1}. ID: ${chunk.id}`);
+        console.log(`   Created: ${chunk.createdAt}`);
+        console.log(`   Content Length: ${chunk.content.length} chars`);
+        console.log(`   First 100 chars: ${chunk.content.substring(0, 100)}...`);
+      });
+    }
+    
+    // Check NFPA progress
+    console.log('\n\n━━━ NFPA 101 2012 PROGRESS ━━━\n');
+    
+    const nfpaDoc = await prisma.regulatoryDocument.findFirst({
+      where: { standard: 'NFPA 101 2012' }
+    });
+    
+    if (nfpaDoc) {
+      console.log(`Pages Processed: ${nfpaDoc.pagesProcessed}/505`);
+      console.log(`Total Chunks: ${await prisma.documentChunk.count({
+        where: { regulatoryDocumentId: nfpaDoc.id }
+      })}`);
+      console.log(`Cost: $${nfpaDoc.processingCost.toFixed(2)}`);
+      console.log(`Status: ${nfpaDoc.processed ? 'Complete' : 'In Progress'}`);
+      console.log(`Last Updated: ${nfpaDoc.updatedAt}`);
+    }
+    
+    await prisma.$disconnect();
+  } catch (error) {
+    console.error('Error:', error);
+    process.exit(1);
+  }
+}
+
+checkProgress();

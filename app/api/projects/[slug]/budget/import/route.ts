@@ -1,0 +1,90 @@
+/**
+ * Budget Import API
+ * POST /api/projects/[slug]/budget/import
+ * 
+ * Imports the Walker Company budget data for One Senior Care - Morehead
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { importOneSeniorCareBudget, getBudgetSummaryByPhase } from '@/lib/budget-importer';
+import { enhanceProjectData } from '@/lib/project-data-enhancer';
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+    console.log(`[Budget Import API] Starting import for project: ${slug}`);
+
+    // Import budget
+    const importResult = await importOneSeniorCareBudget(slug);
+    
+    if (!importResult.success) {
+      return NextResponse.json({ 
+        error: importResult.error || 'Import failed' 
+      }, { status: 500 });
+    }
+
+    // Run enhancement after budget import
+    const enhanceResult = await enhanceProjectData(slug);
+
+    // Get summary
+    const summary = await getBudgetSummaryByPhase(slug);
+
+    return NextResponse.json({
+      success: true,
+      import: {
+        itemsCreated: importResult.itemsCreated,
+        totalBudget: importResult.totalBudget,
+      },
+      enhancement: enhanceResult.improvements,
+      summary: summary.phases,
+      totalBudgeted: summary.totalBudgeted,
+      totalActual: summary.totalActual,
+    });
+
+  } catch (error) {
+    console.error('[Budget Import API] Error:', error);
+    return NextResponse.json(
+      { error: `Import failed: ${error}` },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+    const summary = await getBudgetSummaryByPhase(slug);
+
+    return NextResponse.json({
+      phases: summary.phases,
+      totalBudgeted: summary.totalBudgeted,
+      totalActual: summary.totalActual,
+      contractAmount: 2985000,
+    });
+
+  } catch (error) {
+    console.error('[Budget API] Error:', error);
+    return NextResponse.json(
+      { error: `Failed to get budget: ${error}` },
+      { status: 500 }
+    );
+  }
+}

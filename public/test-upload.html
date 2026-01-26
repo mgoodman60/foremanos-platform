@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test - ForemanOS</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #003B71;
+            margin-top: 0;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        button {
+            background: #F97316;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #EA580C;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+        .progress {
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .file-info {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 ForemanOS Upload Diagnostic Tool</h1>
+        <p>This page helps diagnose upload issues by testing file uploads directly.</p>
+        
+        <div class="upload-area">
+            <h3>Select a File to Test</h3>
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
+            <div class="file-info" id="fileInfo" style="display: none;"></div>
+        </div>
+        
+        <button id="testBtn" onclick="testUpload()" disabled>Test Upload</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div class="progress" id="progress" style="display: none;"></div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const testBtn = document.getElementById('testBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const progress = document.getElementById('progress');
+        const results = document.getElementById('results');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                fileInfo.innerHTML = `
+                    <strong>File:</strong> ${file.name}<br>
+                    <strong>Size:</strong> ${sizeMB} MB (${file.size} bytes)<br>
+                    <strong>Type:</strong> ${file.type}
+                `;
+                fileInfo.style.display = 'block';
+                testBtn.disabled = false;
+            } else {
+                fileInfo.style.display = 'none';
+                testBtn.disabled = true;
+            }
+        });
+
+        async function testUpload() {
+            const file = fileInput.files[0];
+            if (!file) {
+                addResult('error', 'No file selected');
+                return;
+            }
+
+            testBtn.disabled = true;
+            progress.style.display = 'block';
+            progress.textContent = 'Starting upload test...';
+
+            const startTime = Date.now();
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                progress.textContent = 'Uploading to /api/test-upload...';
+
+                const response = await fetch('/api/test-upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const endTime = Date.now();
+                const totalTime = endTime - startTime;
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    addResult('success', `✅ Upload Test SUCCESSFUL\n\nTotal Time: ${totalTime}ms\n\n${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addResult('error', `❌ Upload Test FAILED\n\nStatus: ${response.status}\nTotal Time: ${totalTime}ms\n\n${JSON.stringify(data, null, 2)}`);
+                }
+            } catch (error) {
+                const endTime = Date.now();
+                const totalTime = endTime - startTime;
+                addResult('error', `❌ Upload Test ERROR\n\nTotal Time: ${totalTime}ms\nError: ${error.message}`);
+            } finally {
+                progress.style.display = 'none';
+                testBtn.disabled = false;
+            }
+        }
+
+        function addResult(type, message) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+            results.insertBefore(resultDiv, results.firstChild);
+        }
+
+        function clearResults() {
+            results.innerHTML = '';
+        }
+    </script>
+</body>
+</html>

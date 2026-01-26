@@ -1,0 +1,59 @@
+/**
+ * Submittal Verification API
+ * POST: Verify all line items against project requirements
+ */
+
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { verifySubmittalQuantities } from '@/lib/submittal-verification-service';
+import { createVerificationAuditLog } from '@/lib/verification-audit-service';
+
+export async function POST(
+  request: Request,
+  { params }: { params: { slug: string; id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get project ID from slug
+    const project = await prisma.project.findUnique({
+      where: { slug: params.slug },
+      select: { id: true }
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Run verification
+    const report = await verifySubmittalQuantities(params.id);
+
+    // Log to audit trail
+    try {
+      await createVerificationAuditLog(
+        project.id,
+        session.user.id,
+        session.user.username || session.user.email || 'Unknown',
+        report,
+        'SINGLE_SUBMITTAL',
+        'manual'
+      );
+    } catch (auditError) {
+      console.error('[Audit Log Error]:', auditError);
+      // Don't fail the verification if audit logging fails
+    }
+
+    return NextResponse.json({ report });
+  } catch (error) {
+    console.error('[Submittal Verify Error]:', error);
+    return NextResponse.json(
+      { error: 'Failed to verify submittal' },
+      { status: 500 }
+    );
+  }
+}

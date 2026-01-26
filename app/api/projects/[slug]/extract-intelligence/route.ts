@@ -1,0 +1,206 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { runIntelligenceExtraction } from '@/lib/intelligence-orchestrator';
+
+/**
+ * POST /api/projects/[slug]/extract-intelligence
+ * 
+ * Manually trigger intelligence extraction (Phase A, B, C) for documents
+ * Useful for re-processing or processing documents that were added before
+ * the automatic extraction system was implemented.
+ */
+export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Only admins can trigger extraction
+    if (session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const { slug } = params;
+    const body = await req.json();
+    const { documentId, phases, skipExisting } = body;
+
+    // Get project
+    const project = await prisma.project.findUnique({
+      where: { slug },
+      include: {
+        Document: documentId ? {
+          where: { id: documentId },
+        } : {
+          where: { processed: true }, // Only extract from processed documents
+        },
+      },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    if (project.Document.length === 0) {
+      return NextResponse.json(
+        { error: 'No documents found to process' },
+        { status: 404 }
+      );
+    }
+
+    // Trigger extraction for all documents
+    const results = [];
+    const requestedPhases = phases || ['A', 'B', 'C'];
+
+    console.log(`\n🚀 Manual intelligence extraction triggered by ${session.user?.email}`);
+    console.log(`   Project: ${project.name}`);
+    console.log(`   Documents: ${project.Document.length}`);
+    console.log(`   Phases: ${requestedPhases.join(', ')}\n`);
+
+    for (const document of project.Document) {
+      try {
+        const result = await runIntelligenceExtraction({
+          documentId: document.id,
+          projectSlug: slug,
+          phases: requestedPhases,
+          skipExisting: skipExisting !== false, // Default to true
+        });
+
+        results.push({
+          documentName: document.name,
+          ...result,
+        });
+      } catch (error: any) {
+        console.error(`Failed to extract intelligence from ${document.name}:`, error);
+        results.push({
+          documentId: document.id,
+          documentName: document.name,
+          success: false,
+          error: error.message,
+        });
+      }
+    }
+
+    // Calculate summary
+    const summary = {
+      totalDocuments: results.length,
+      successful: results.filter(r => r.success).length,
+      failed: results.filter(r => !r.success).length,
+      phasesRun: requestedPhases,
+    };
+
+    return NextResponse.json({
+      success: true,
+      summary,
+      results,
+    });
+  } catch (error: any) {
+    console.error('Intelligence extraction API error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to trigger intelligence extraction' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/projects/[slug]/extract-intelligence
+ * 
+ * Get extraction status and statistics
+ */
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+
+    // Get project with extraction statistics
+    const project = await prisma.project.findUnique({
+      where: { slug },
+      include: {
+        Document: {
+          select: {
+            id: true,
+            name: true,
+            processed: true,
+            _count: {
+              select: {
+                DocumentChunk: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Get chunk statistics
+    const chunks = await prisma.documentChunk.findMany({
+      where: {
+        Document: {
+          projectId: project.id,
+        },
+      },
+      select: {
+        sheetNumber: true,
+        scaleData: true,
+        dimensions: true,
+        annotations: true,
+        crossReferences: true,
+        titleBlockData: true,
+        metadata: true,
+      },
+    });
+
+    // Calculate extraction statistics
+    const stats = {
+      totalChunks: chunks.length,
+      phaseA: {
+        titleBlocks: chunks.filter((c: any) => c.titleBlockData).length,
+        scales: chunks.filter((c: any) => c.scaleData).length,
+        sheets: new Set(chunks.filter((c: any) => c.sheetNumber).map((c: any) => c.sheetNumber)).size,
+      },
+      phaseB: {
+        dimensions: chunks.filter((c: any) => c.dimensions).length,
+        annotations: chunks.filter((c: any) => c.annotations).length,
+        crossReferences: chunks.filter((c: any) => c.crossReferences).length,
+      },
+      phaseC: {
+        spatialReferences: chunks.filter((c: any) => {
+          const meta = c.metadata as any;
+          return meta?.spatialReference != null;
+        }).length,
+        mepElements: chunks.filter((c: any) => {
+          const meta = c.metadata as any;
+          return meta?.mepElements != null && meta.mepElements.length > 0;
+        }).length,
+      },
+    };
+
+    return NextResponse.json({
+      Project: {
+        id: project.id,
+        name: project.name,
+        slug: project.slug,
+      },
+      documents: project.Document,
+      extractionStats: stats,
+    });
+  } catch (error: any) {
+    console.error('Get extraction stats error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to get extraction statistics' },
+      { status: 500 }
+    );
+  }
+}

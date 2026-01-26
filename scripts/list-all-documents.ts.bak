@@ -1,0 +1,48 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function listDocuments() {
+  console.log('All Documents in Database:');
+  console.log('='.repeat(70));
+  
+  const docs = await prisma.document.findMany({
+    select: {
+      id: true,
+      name: true,
+      fileType: true,
+      projectId: true,
+      createdAt: true,
+      _count: {
+        select: {
+          chunks: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  
+  if (docs.length === 0) {
+    console.log('No documents found');
+  } else {
+    docs.forEach((doc, i) => {
+      console.log(`${i + 1}. ${doc.name}`);
+      console.log(`   ID: ${doc.id}`);
+      console.log(`   Type: ${doc.fileType}`);
+      console.log(`   Project: ${doc.projectId || 'none'}`);
+      console.log(`   Chunks: ${doc._count.chunks}`);
+      console.log(`   Created: ${doc.createdAt.toISOString()}`);
+      console.log('');
+    });
+  }
+  
+  console.log(`Total: ${docs.length} documents`);
+  console.log('='.repeat(70));
+}
+
+listDocuments()
+  .then(() => process.exit(0))
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

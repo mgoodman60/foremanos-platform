@@ -1,0 +1,84 @@
+import { prisma } from '../lib/db';
+
+async function updateExistingUsers() {
+  try {
+    console.log('Starting bulk update of existing users...\n');
+
+    // Get count of users who haven't completed onboarding
+    const usersToUpdate = await prisma.user.count({
+      where: {
+        hasCompletedOnboarding: false,
+        role: {
+          not: 'pending', // Don't update pending users - they should see wizard
+        },
+      },
+    });
+
+    console.log(`Found ${usersToUpdate} users to update`);
+
+    if (usersToUpdate === 0) {
+      console.log('\nNo users to update. All existing users already have onboarding status set.');
+      return;
+    }
+
+    // Update all non-pending users to mark onboarding as completed
+    const result = await prisma.user.updateMany({
+      where: {
+        hasCompletedOnboarding: false,
+        role: {
+          not: 'pending',
+        },
+      },
+      data: {
+        hasCompletedOnboarding: true,
+      },
+    });
+
+    console.log(`\n✅ Successfully updated ${result.count} users`);
+    console.log('These users will no longer see the onboarding wizard.\n');
+
+    // Show summary
+    const statusByRole = await prisma.user.groupBy({
+      by: ['role'],
+      _count: {
+        id: true,
+      },
+      where: {
+        hasCompletedOnboarding: true,
+      },
+    });
+
+    console.log('📊 Onboarding Status by Role:');
+    statusByRole.forEach((group: any) => {
+      console.log(`  - ${group.role}: ${group._count.id} users completed`);
+    });
+
+    // Show pending users who will still see wizard
+    const pendingCount = await prisma.user.count({
+      where: {
+        role: 'pending',
+      },
+    });
+
+    if (pendingCount > 0) {
+      console.log(`\nℹ️  ${pendingCount} pending users will see wizard after approval`);
+    }
+
+  } catch (error) {
+    console.error('❌ Error updating users:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Run the update
+updateExistingUsers()
+  .then(() => {
+    console.log('\n✨ Bulk update completed successfully!');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('Failed to complete bulk update');
+    process.exit(1);
+  });

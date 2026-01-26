@@ -1,0 +1,55 @@
+import { prisma } from '../lib/db';
+
+async function waitForCompletion() {
+  const docId = 'cmk633er50001n508fpe1licm';
+  let lastChunks = 0;
+  let attempts = 0;
+  const maxAttempts = 60; // 10 minutes max
+  
+  while (attempts < maxAttempts) {
+    const doc = await prisma.document.findUnique({
+      where: { id: docId },
+      include: {
+        _count: { select: { chunks: true } },
+        processingQueue: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+    
+    if (!doc) break;
+    
+    const chunks = doc._count.chunks;
+    const queue = doc.processingQueue[0];
+    
+    if (chunks !== lastChunks) {
+      console.log(`[${new Date().toISOString()}] Progress: ${chunks}/45 chunks (${Math.round(chunks/45*100)}%)`);
+      lastChunks = chunks;
+    }
+    
+    if (chunks >= 45 || !queue || queue.status === 'completed') {
+      console.log('\\n✅ Processing complete!');
+      console.log(`Final: ${chunks}/45 chunks`);
+      break;
+    }
+    
+    if (queue.status === 'failed') {
+      console.log('\\n❌ Processing failed');
+      console.log('Last error:', queue.lastError);
+      break;
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 10000)); // 10 seconds
+    attempts++;
+  }
+  
+  if (attempts >= maxAttempts) {
+    console.log('\\n⚠️  Timeout reached');
+  }
+}
+
+waitForCompletion()
+  .then(() => process.exit(0))
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

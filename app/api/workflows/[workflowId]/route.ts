@@ -1,0 +1,41 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../../../lib/auth-options';
+import { getWorkflowById } from '../../../../lib/workflow-service';
+
+/**
+ * GET /api/workflows/[workflowId]
+ * Get a specific workflow template with all steps
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { workflowId: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { workflowId } = params;
+
+    if (!workflowId) {
+      return NextResponse.json({ error: 'Workflow ID required' }, { status: 400 });
+    }
+
+    // Get workflow template
+    const workflow = await getWorkflowById(workflowId);
+
+    if (!workflow) {
+      return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ workflow });
+  } catch (error) {
+    console.error('Error fetching workflow:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch workflow' },
+      { status: 500 }
+    );
+  }
+}

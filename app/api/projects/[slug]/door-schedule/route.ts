@@ -1,0 +1,121 @@
+/**
+ * Door Schedule API Endpoint
+ * 
+ * GET - Retrieve all doors for a project
+ * POST - Extract door schedule from documents
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { processDoorScheduleForProject } from '@/lib/door-schedule-extractor';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+
+    // Find project
+    const project = await prisma.project.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Get all doors for the project
+    const doors = await prisma.doorScheduleItem.findMany({
+      where: { projectId: project.id },
+      orderBy: { doorNumber: 'asc' },
+      include: {
+        Room: {
+          select: {
+            id: true,
+            name: true,
+            roomNumber: true,
+            type: true,
+          },
+        },
+      },
+    });
+
+    // Group doors by type for summary
+    const doorsByType: Record<string, number> = {};
+    const doorsByFireRating: Record<string, number> = {};
+    
+    for (const door of doors) {
+      const type = door.doorType || 'Unknown';
+      doorsByType[type] = (doorsByType[type] || 0) + 1;
+      
+      if (door.fireRating) {
+        doorsByFireRating[door.fireRating] = (doorsByFireRating[door.fireRating] || 0) + 1;
+      }
+    }
+
+    return NextResponse.json({
+      doors,
+      summary: {
+        totalDoors: doors.length,
+        byType: doorsByType,
+        byFireRating: doorsByFireRating,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Door Schedule API] Error:', error?.message || error);
+    return NextResponse.json(
+      { error: 'Failed to fetch door schedule' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+
+    // Check if project exists
+    const project = await prisma.project.findUnique({
+      where: { slug },
+      select: { id: true, name: true },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    console.log(`[Door Schedule API] Starting extraction for project: ${slug}`);
+
+    // Extract door schedule from documents
+    const result = await processDoorScheduleForProject(project.id);
+
+    return NextResponse.json({
+      success: result.success,
+      doorsExtracted: result.doorsExtracted,
+      errors: result.errors,
+    });
+  } catch (error: any) {
+    console.error('[Door Schedule API] Extraction error:', error?.message || error);
+    return NextResponse.json(
+      { error: error?.message || 'Failed to extract door schedule' },
+      { status: 500 }
+    );
+  }
+}

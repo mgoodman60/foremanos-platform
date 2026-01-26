@@ -1,0 +1,126 @@
+/**
+ * MEP Maintenance Schedule Detail API
+ * GET: Get single schedule with logs
+ * PATCH: Update schedule
+ * DELETE: Delete schedule
+ */
+
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { slug: string; id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const schedule = await prisma.mEPMaintenanceSchedule.findUnique({
+      where: { id: params.id },
+      include: {
+        system: { select: { systemNumber: true, name: true, systemType: true } },
+        equipment: { select: { equipmentTag: true, name: true, equipmentType: true } },
+        logs: {
+          orderBy: { completedDate: 'desc' },
+          take: 20,
+        },
+      }
+    });
+
+    if (!schedule) {
+      return NextResponse.json({ error: 'Schedule not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ schedule });
+  } catch (error) {
+    console.error('[MEP Maintenance GET Error]:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch maintenance schedule' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { slug: string; id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const {
+      name,
+      frequency,
+      intervalDays,
+      taskDescription,
+      checklist,
+      estimatedDuration,
+      assignedTo,
+      assignedContractor,
+      nextDueDate,
+      isActive,
+    } = body;
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (frequency !== undefined) updateData.frequency = frequency;
+    if (intervalDays !== undefined) updateData.intervalDays = intervalDays;
+    if (taskDescription !== undefined) updateData.taskDescription = taskDescription;
+    if (checklist !== undefined) updateData.checklist = checklist;
+    if (estimatedDuration !== undefined) updateData.estimatedDuration = estimatedDuration;
+    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
+    if (assignedContractor !== undefined) updateData.assignedContractor = assignedContractor;
+    if (nextDueDate !== undefined) updateData.nextDueDate = new Date(nextDueDate);
+    if (isActive !== undefined) updateData.isActive = isActive;
+
+    const schedule = await prisma.mEPMaintenanceSchedule.update({
+      where: { id: params.id },
+      data: updateData,
+      include: {
+        system: { select: { systemNumber: true, name: true } },
+        equipment: { select: { equipmentTag: true, name: true } },
+      }
+    });
+
+    return NextResponse.json({ schedule });
+  } catch (error) {
+    console.error('[MEP Maintenance PATCH Error]:', error);
+    return NextResponse.json(
+      { error: 'Failed to update maintenance schedule' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { slug: string; id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await prisma.mEPMaintenanceSchedule.delete({
+      where: { id: params.id }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('[MEP Maintenance DELETE Error]:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete maintenance schedule' },
+      { status: 500 }
+    );
+  }
+}

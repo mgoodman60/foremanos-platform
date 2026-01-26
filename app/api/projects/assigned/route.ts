@@ -1,0 +1,34 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!session.user.assignedProjectId) {
+      return NextResponse.json({ error: 'No assigned project' }, { status: 404 });
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { id: session.user.assignedProjectId },
+      select: { slug: true },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ slug: project.slug });
+  } catch (error) {
+    console.error('Error fetching assigned project:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

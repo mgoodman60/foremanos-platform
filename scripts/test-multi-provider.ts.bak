@@ -1,0 +1,182 @@
+/**
+ * Test Multi-Provider Vision API System
+ * 
+ * Tests the multi-provider vision system with a sample construction document page
+ */
+
+import { analyzeWithMultiProvider, getProviderDisplayName } from '../lib/vision-api-multi-provider';
+import { performQualityCheck, formatQualityReport } from '../lib/vision-api-quality';
+import { prisma } from '../lib/db';
+import { getFileUrl } from '../lib/s3';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { writeFile, unlink, readFile } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import * as fs from 'fs';
+
+const execPromise = promisify(exec);
+
+const testPrompt = `Analyze this construction document page and extract:
+
+1. Sheet number (if visible)
+2. Sheet title/name
+3. Drawing scale (e.g., 1"=20', 1:100)
+4. Discipline (Architectural, Structural, MEP, Civil)
+5. All visible dimensions with units
+6. Room/space labels and numbers
+7. Door and window tags
+8. Grid lines and coordinates
+9. Notes and specifications
+10. Legend entries (symbols and their meanings)
+11. Title block information
+12. Any callouts or detail references
+
+Return as JSON with these fields:
+{
+  "sheetNumber": string | null,
+  "sheetTitle": string | null,
+  "scale": string | null,
+  "discipline": string | null,
+  "dimensions": [{"value": string, "label": string}],
+  "rooms": [{"number": string, "name": string}],
+  "doors": [string],
+  "windows": [string],
+  "gridLines": [string],
+  "notes": [string],
+  "legendEntries": [{"symbol": string, "meaning": string}],
+  "titleBlock": object | null,
+  "callouts": [string]
+}`;
+
+async function testMultiProvider() {
+  const tempFiles: string[] = [];
+
+  try {
+    console.log('\n======================================');
+    console.log('Multi-Provider Vision API Test');
+    console.log('======================================\n');
+
+    // Get Plans.pdf document
+    console.log('Fetching Plans.pdf document...');
+    const document = await prisma.document.findFirst({
+      where: {
+        fileName: 'Plans.pdf',
+      },
+    });
+
+    if (!document || !document.cloud_storage_path) {
+      throw new Error('Plans.pdf not found in database');
+    }
+
+    console.log(`✓ Found document: ${document.fileName}\n`);
+
+    // Download PDF
+    console.log('Downloading PDF from S3...');
+    const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
+    const response = await fetch(fileUrl);
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    const tempPdfPath = join(tmpdir(), `test-multi-provider-${Date.now()}.pdf`);
+    await writeFile(tempPdfPath, buffer);
+    tempFiles.push(tempPdfPath);
+    console.log('✓ PDF downloaded\n');
+
+    // Test with page 1
+    const testPage = 1;
+    console.log(`Converting page ${testPage} to image...`);
+    const imageBaseName = join(tmpdir(), `test-page-${testPage}`);
+    await execPromise(
+      `pdftoppm -jpeg -f ${testPage} -l ${testPage} -scale-to 1500 "${tempPdfPath}" "${imageBaseName}"`
+    );
+
+    const imageFile = `${imageBaseName}-1.jpg`;
+    tempFiles.push(imageFile);
+
+    if (!fs.existsSync(imageFile)) {
+      throw new Error('Failed to convert PDF page to image');
+    }
+    console.log('✓ Image created\n');
+
+    // Read image as base64
+    const imageBuffer = await readFile(imageFile);
+    const imageBase64 = imageBuffer.toString('base64');
+    console.log(`Image size: ${(imageBase64.length / 1024).toFixed(2)} KB\n`);
+
+    // Test multi-provider system
+    console.log('Testing multi-provider vision API...\n');
+    const startTime = Date.now();
+
+    const result = await analyzeWithMultiProvider(
+      imageBase64,
+      testPrompt,
+      50 // Minimum quality score
+    );
+
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+    console.log('\n======================================');
+    console.log('Test Results');
+    console.log('======================================\n');
+
+    console.log(`Success: ${result.success}`);
+    console.log(`Provider Used: ${getProviderDisplayName(result.provider)}`);
+    console.log(`Confidence Score: ${result.confidenceScore}/100`);
+    console.log(`Total Attempts: ${result.attempts}`);
+    console.log(`Time Elapsed: ${elapsed}s`);
+
+    if (result.success && result.content) {
+      console.log(`\nResponse Length: ${result.content.length} characters\n`);
+
+      try {
+        const parsedData = JSON.parse(result.content);
+        
+        // Perform quality check
+        const qualityCheck = performQualityCheck(parsedData, testPage);
+        console.log(formatQualityReport(qualityCheck, testPage));
+
+        console.log('Extracted Data Summary:');
+        console.log(`- Sheet Number: ${parsedData.sheetNumber || 'N/A'}`);
+        console.log(`- Sheet Title: ${parsedData.sheetTitle || 'N/A'}`);
+        console.log(`- Scale: ${parsedData.scale || 'N/A'}`);
+        console.log(`- Discipline: ${parsedData.discipline || 'N/A'}`);
+        console.log(`- Dimensions: ${parsedData.dimensions?.length || 0}`);
+        console.log(`- Rooms: ${parsedData.rooms?.length || 0}`);
+        console.log(`- Doors: ${parsedData.doors?.length || 0}`);
+        console.log(`- Windows: ${parsedData.windows?.length || 0}`);
+        console.log(`- Grid Lines: ${parsedData.gridLines?.length || 0}`);
+        console.log(`- Notes: ${parsedData.notes?.length || 0}`);
+      } catch (parseError) {
+        console.error('\n❌ Failed to parse response as JSON');
+        console.log('\nRaw response preview:');
+        console.log(result.content.substring(0, 500) + '...');
+      }
+    } else {
+      console.log(`\n❌ Error: ${result.error}`);
+    }
+
+    console.log('\n✅ Multi-provider test complete\n');
+
+  } catch (error: any) {
+    console.error('\n❌ Test failed:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+  } finally {
+    // Cleanup temp files
+    console.log('Cleaning up temp files...');
+    for (const file of tempFiles) {
+      try {
+        if (fs.existsSync(file)) {
+          await unlink(file);
+        }
+      } catch (cleanupError) {
+        console.error(`Failed to cleanup ${file}:`, cleanupError);
+      }
+    }
+    console.log('✓ Cleanup complete\n');
+
+    await prisma.$disconnect();
+  }
+}
+
+testMultiProvider();

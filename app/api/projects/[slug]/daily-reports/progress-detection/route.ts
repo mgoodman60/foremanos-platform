@@ -1,0 +1,100 @@
+/**
+ * Progress Detection API
+ * Analyzes photos and reports to detect schedule progress
+ */
+
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import {
+  detectProgressFromDailyReport,
+  applyProgressUpdates,
+  getSiteProgressSummary,
+  analyzeConstructionPhoto,
+} from '@/lib/progress-detection-service';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const project = await prisma.project.findFirst({
+      where: { slug: params.slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Get site-wide progress summary
+    const summary = await getSiteProgressSummary(project.id);
+
+    return NextResponse.json(summary);
+  } catch (error) {
+    console.error('[Progress Detection API] Error:', error);
+    return NextResponse.json({ error: 'Failed to get progress summary' }, { status: 500 });
+  }
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const project = await prisma.project.findFirst({
+      where: { slug: params.slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const { action, reportId, photoUrl, updates } = body;
+
+    if (action === 'analyze-report' && reportId) {
+      // Detect progress from a specific daily report
+      const detections = await detectProgressFromDailyReport(project.id, reportId);
+      return NextResponse.json({
+        success: true,
+        detections,
+        message: `Found ${detections.length} potential progress updates`,
+      });
+    }
+
+    if (action === 'analyze-photo' && photoUrl) {
+      // Analyze a single photo
+      const analysis = await analyzeConstructionPhoto(photoUrl, `Project: ${project.name}`);
+      return NextResponse.json({
+        success: true,
+        analysis,
+      });
+    }
+
+    if (action === 'apply-updates' && updates) {
+      // Apply progress updates to schedule
+      const result = await applyProgressUpdates(updates, session.user.id);
+      return NextResponse.json({
+        success: true,
+        updated: result.updated,
+        errors: result.errors,
+      });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch (error) {
+    console.error('[Progress Detection API] Error:', error);
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
+  }
+}

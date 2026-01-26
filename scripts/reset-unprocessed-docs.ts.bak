@@ -1,0 +1,100 @@
+import 'dotenv/config';
+import { prisma } from '../lib/db';
+
+/**
+ * Reset documents that are marked as processed but have 0 pages
+ * This typically happens when processing fails silently
+ */
+async function resetBrokenDocs() {
+  console.log('=== RESETTING BROKEN DOCUMENTS ===\n');
+
+  try {
+    // Find documents that are marked as processed but have no pages
+    const brokenDocs = await prisma.document.findMany({
+      where: {
+        processed: true,
+        pagesProcessed: { lte: 0 },
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        fileName: true,
+        category: true,
+        queueStatus: true,
+        processingRetries: true,
+        lastProcessingError: true,
+        createdAt: true,
+        project: {
+          select: { name: true, slug: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (brokenDocs.length === 0) {
+      console.log('\u2705 No broken documents found! All documents are properly processed.\n');
+      return;
+    }
+
+    console.log(`Found ${brokenDocs.length} documents to reset:\n`);
+    
+    for (const doc of brokenDocs) {
+      console.log(`  \u274c ${doc.name} (${doc.fileName})`);
+      console.log(`     Project: ${doc.project?.name || 'Unknown'}`);
+      console.log(`     Category: ${doc.category}`);
+      console.log(`     Status: ${doc.queueStatus}`);
+      console.log(`     Retries: ${doc.processingRetries}`);
+      if (doc.lastProcessingError) {
+        console.log(`     Error: ${doc.lastProcessingError.substring(0, 100)}...`);
+      }
+      console.log(`     Uploaded: ${doc.createdAt.toLocaleString()}\n`);
+    }
+
+    console.log(`\n\u26a0\ufe0f  Resetting ${brokenDocs.length} documents...\n`);
+
+    // Reset all broken documents
+    const result = await prisma.document.updateMany({
+      where: {
+        processed: true,
+        pagesProcessed: { lte: 0 },
+        deletedAt: null,
+      },
+      data: {
+        processed: false,
+        queueStatus: 'none',
+        processingCost: 0,
+        processedAt: null,
+        lastProcessingError: 'Document was marked as processed but had 0 pages. Reset for reprocessing.',
+        processingRetries: 0,
+      },
+    });
+
+    console.log(`\u2705 Successfully reset ${result.count} documents!\n`);
+    console.log('Next steps:');
+    console.log('1. Run: yarn tsx scripts/manual-process-documents.ts');
+    console.log('2. Or use Admin Panel \u2192 Process Queue \u2192 "Process Queue Now"');
+    console.log('3. Or use the retry API: POST /api/documents/retry-failed\n');
+
+    // Show summary by project
+    const projectSummary = brokenDocs.reduce((acc, doc) => {
+      const projectName = doc.project?.name || 'Unknown';
+      acc[projectName] = (acc[projectName] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    console.log('\nDocuments by project:');
+    for (const [project, count] of Object.entries(projectSummary)) {
+      console.log(`  - ${project}: ${count} documents`);
+    }
+    console.log('');
+
+  } catch (error: any) {
+    console.error('\u274c Error:', error);
+    console.error('Stack:', error.stack);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+resetBrokenDocs();

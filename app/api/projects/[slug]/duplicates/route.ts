@@ -1,0 +1,163 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { removeDuplicates } from '@/lib/duplicate-detector';
+import { requireProjectPermission } from '@/lib/project-permissions';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * POST /api/projects/[slug]/duplicates
+ * Remove duplicate documents from a project
+ */
+export async function POST(
+  request: Request,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+
+    // Get project
+    const project = await prisma.project.findUnique({
+      where: { slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const userId = session.user.id;
+    const userRole = session.user.role;
+
+    // Check if user has permission (only owners and admins can remove duplicates)
+    if (userRole !== 'admin') {
+      const { allowed } = await requireProjectPermission(userId, slug, 'upload');
+      
+      if (!allowed) {
+        return NextResponse.json(
+          { error: 'Only project owners can remove duplicates' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Remove duplicates
+    console.log(`Removing duplicates from project ${project.id} (${slug})...`);
+    const result = await removeDuplicates(project.id);
+
+    if (result.errors.length > 0) {
+      console.error('Errors during duplicate removal:', result.errors);
+    }
+
+    return NextResponse.json({
+      message: 'Duplicate removal complete',
+      removed: result.removed,
+      kept: result.kept,
+      errors: result.errors,
+    });
+  } catch (error) {
+    console.error('Error removing duplicates:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/projects/[slug]/duplicates
+ * Get count of duplicate documents in a project
+ */
+export async function GET(
+  request: Request,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = params;
+
+    // Get project
+    const project = await prisma.project.findUnique({
+      where: { slug },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const userId = session.user.id;
+    const userRole = session.user.role;
+
+    // Check if user has access to project
+    if (userRole !== 'admin') {
+      const { allowed } = await requireProjectPermission(userId, slug, 'view');
+      
+      if (!allowed) {
+        return NextResponse.json(
+          { error: 'Access denied' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Get all documents
+    const documents = await prisma.document.findMany({
+      where: {
+        projectId: project.id,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        fileName: true,
+        fileSize: true,
+        oneDriveHash: true,
+      },
+    });
+
+    // Count duplicates
+    const seenHashes = new Set<string>();
+    const seenSignatures = new Set<string>();
+    let duplicateCount = 0;
+
+    for (const doc of documents) {
+      if (doc.oneDriveHash) {
+        if (seenHashes.has(doc.oneDriveHash)) {
+          duplicateCount++;
+        } else {
+          seenHashes.add(doc.oneDriveHash);
+        }
+      } else {
+        const signature = `${doc.fileName}-${doc.fileSize || 0}`;
+        if (seenSignatures.has(signature)) {
+          duplicateCount++;
+        } else {
+          seenSignatures.add(signature);
+        }
+      }
+    }
+
+    return NextResponse.json({
+      totalDocuments: documents.length,
+      duplicateCount,
+      uniqueCount: documents.length - duplicateCount,
+    });
+  } catch (error) {
+    console.error('Error checking duplicates:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

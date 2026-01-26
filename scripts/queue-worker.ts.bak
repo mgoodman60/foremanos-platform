@@ -1,0 +1,60 @@
+/**
+ * Queue Worker Script
+ * Processes documents in the queue with Cloudflare-safe batching
+ * Run this as a cron job every 5 minutes
+ * Cron pattern: star-slash-5 star star star star
+ */
+
+import { processNextQueuedBatch } from '../lib/document-processing-queue';
+import { prisma } from '../lib/db';
+
+async function runQueueWorker() {
+  console.log('\n=== QUEUE WORKER STARTED ===');
+  console.log(new Date().toISOString());
+
+  try {
+    // Check queue status
+    const queueStats = await prisma.processingQueue.groupBy({
+      by: ['status'],
+      _count: true,
+    });
+
+    console.log('\nQueue Stats:');
+    queueStats.forEach(stat => {
+      console.log(`  ${stat.status}: ${stat._count} documents`);
+    });
+
+    // Process batches (max 5 per run to avoid long-running processes)
+    let batchesProcessed = 0;
+    const maxBatches = 5;
+    let continueProcessing = true;
+
+    while (continueProcessing && batchesProcessed < maxBatches) {
+      console.log(`\nProcessing batch ${batchesProcessed + 1}...`);
+      continueProcessing = await processNextQueuedBatch();
+      
+      if (continueProcessing) {
+        batchesProcessed++;
+        console.log(`✅ Batch ${batchesProcessed} completed`);
+        
+        // Wait 2 seconds between batches to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+
+    console.log(`\n✓ Queue worker completed: ${batchesProcessed} batches processed`);
+    console.log('=== QUEUE WORKER FINISHED ===\n');
+
+  } catch (error: any) {
+    console.error('\n❌ Queue worker error:', error.message);
+    console.error(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Run worker
+runQueueWorker().then(() => process.exit(0)).catch(err => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});

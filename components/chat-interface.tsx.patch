@@ -1,0 +1,7 @@
+--- Add Workflow Feature to Chat Interface ---
+
+This patch adds:
+1. Import WorkflowModal component
+2. Add state for workflow modal
+3. Add Guided Report button in header
+4. Handle workflow completion

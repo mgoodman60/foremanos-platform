@@ -1,0 +1,36 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function enableDailyReports() {
+  console.log('Enabling daily reports for all projects...');
+  
+  const result = await prisma.project.updateMany({
+    where: {
+      dailyReportEnabled: false
+    },
+    data: {
+      dailyReportEnabled: true
+    }
+  });
+  
+  console.log(`✅ Enabled daily reports for ${result.count} projects`);
+  
+  // Show all projects
+  const projects = await prisma.project.findMany({
+    select: {
+      id: true,
+      name: true,
+      dailyReportEnabled: true
+    }
+  });
+  
+  console.log('\nAll projects:');
+  projects.forEach((p: any) => {
+    console.log(`  - ${p.name}: ${p.dailyReportEnabled ? '✅ Enabled' : '❌ Disabled'}`);
+  });
+}
+
+enableDailyReports()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

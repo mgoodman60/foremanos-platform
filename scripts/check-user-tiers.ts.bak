@@ -1,0 +1,50 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function checkUserTiers() {
+  console.log('Checking user subscription tiers...');
+  
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      role: true,
+      subscriptionTier: true,
+      approved: true
+    }
+  });
+  
+  console.log('\nAll users:');
+  users.forEach((u: any) => {
+    console.log(`  - ${u.email} (${u.username || 'no username'})`);
+    console.log(`    Role: ${u.role}`);
+    console.log(`    Tier: ${u.subscriptionTier}`);
+    console.log(`    Approved: ${u.approved ? '✅' : '❌'}`);
+    console.log('');
+  });
+  
+  // Now update all users to have Pro tier if they don't already
+  const eligibleTiers = ['pro', 'team', 'business', 'enterprise'];
+  
+  const usersToUpdate = users.filter((u: any) => !eligibleTiers.includes(u.subscriptionTier));
+  
+  if (usersToUpdate.length > 0) {
+    console.log(`\nUpdating ${usersToUpdate.length} users to Pro tier...`);
+    
+    for (const user of usersToUpdate) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { subscriptionTier: 'pro' }
+      });
+      console.log(`  ✅ Updated ${user.email} to Pro tier`);
+    }
+  } else {
+    console.log('\n✅ All users already have eligible tiers');
+  }
+}
+
+checkUserTiers()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

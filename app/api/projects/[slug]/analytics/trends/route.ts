@@ -1,0 +1,38 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { getProgressTrends } from '@/lib/analytics-service';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const period = (searchParams.get('period') as 'weekly' | 'monthly') || 'weekly';
+    const lookback = parseInt(searchParams.get('lookback') || '12');
+
+    const project = await prisma.project.findUnique({
+      where: { slug: params.slug }
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    const trends = await getProgressTrends(project.id, period, lookback);
+    return NextResponse.json(trends);
+  } catch (error) {
+    console.error('[Analytics Trends] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch trends' },
+      { status: 500 }
+    );
+  }
+}

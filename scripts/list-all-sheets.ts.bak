@@ -1,0 +1,51 @@
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const prisma = new PrismaClient();
+
+async function listAllSheets() {
+  try {
+    // Get Plans.pdf
+    const doc = await prisma.document.findFirst({
+      where: {
+        name: 'Plans.pdf'
+      }
+    });
+
+    if (!doc) {
+      console.log('Plans.pdf not found');
+      return;
+    }
+
+    // Get all chunks
+    const chunks = await prisma.documentChunk.findMany({
+      where: {
+        documentId: doc.id
+      },
+      orderBy: {
+        chunkIndex: 'asc'
+      }
+    });
+
+    console.log(`Total chunks in Plans.pdf: ${chunks.length}\n`);
+    console.log('Sheet listing:\n');
+    
+    for (const chunk of chunks) {
+      const metadata = chunk.metadata as any;
+      const sheetNumber = metadata?.sheet_number || 'Unknown';
+      const scale = metadata?.scale || 'N/A';
+      const page = chunk.pageNumber || 'N/A';
+      
+      console.log(`Page ${page}: Sheet ${sheetNumber} (Scale: ${scale})`);
+    }
+
+  } catch (error) {
+    console.error('Error listing sheets:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+listAllSheets();
