@@ -59,6 +59,195 @@ import { getBIMContext } from './bim-rag-indexer';
 import { getMEPScheduleContext } from './mep-schedule-extractor';
 import { getDoorScheduleContext } from './door-schedule-extractor';
 import { getWindowScheduleContext } from './window-schedule-extractor';
+import type { Prisma, DocumentCategory } from '@prisma/client';
+
+// ============================================================================
+// TYPE DEFINITIONS FOR JSON FIELDS
+// ============================================================================
+
+/** Zone information extracted from construction plans */
+interface ZoneInfo {
+  name: string;
+  area?: number;
+  type?: string;
+}
+
+/** Title block data extracted from drawing sheets */
+interface TitleBlockData {
+  projectName?: string;
+  architect?: string;
+  engineer?: string;
+  issueDate?: string;
+  projectNumber?: string;
+  sheetTitle?: string;
+  drawnBy?: string;
+  checkedBy?: string;
+  scale?: string;
+  revision?: string;
+}
+
+/** Scale information for a drawing */
+interface ScaleInfo {
+  scaleString: string;
+  scaleRatio: number;
+  format?: string;
+  viewportName?: string;
+}
+
+/** Scale data for a document chunk */
+interface ScaleData {
+  primaryScale?: ScaleInfo;
+  secondaryScales?: ScaleInfo[];
+  hasMultipleScales?: boolean;
+  scaleCount?: number;
+}
+
+/** Dimension item extracted from plans */
+interface DimensionItem {
+  originalText?: string;
+  context?: string;
+  type?: string;
+  critical?: boolean;
+  confidence?: number;
+  value?: number;
+  unit?: string;
+}
+
+/** Callout item from detail references */
+interface CalloutItem {
+  type?: string;
+  detailNumber?: string;
+  sheetReference?: string;
+  description?: string;
+  confidence?: number;
+}
+
+/** Annotation item from construction notes */
+interface AnnotationItem {
+  type?: string;
+  text?: string;
+  priority?: 'critical' | 'important' | 'informational';
+  requirements?: string[];
+  confidence?: number;
+}
+
+/** Metadata stored in DocumentChunk JSON field */
+interface ChunkMetadata {
+  documentName?: string;
+  accessLevel?: string;
+  category?: string;
+  sheetNumber?: string;
+  scale?: string;
+  projectName?: string;
+  architect?: string;
+  engineer?: string;
+  issueDate?: string;
+  labeled_dimensions?: string[];
+  derived_dimensions?: string[];
+  zones?: ZoneInfo[];
+  hasLegend?: boolean;
+  legendEntriesCount?: number;
+  hasHatchPatterns?: boolean;
+  hatchPatternsCount?: number;
+  notesCount?: number;
+  materialQuantitiesCount?: number;
+  submittalsCount?: number;
+  inspectionsCount?: number;
+  equipmentSpecsCount?: number;
+  mepCallouts?: string[];
+  regulatoryType?: string;
+  standard?: string;
+  jurisdiction?: string;
+}
+
+/** Scored chunk for ranking during retrieval */
+interface ScoredChunk {
+  chunk: DocumentChunk;
+  score: number;
+}
+
+/** Prisma Document with chunks included */
+interface DocumentWithChunks {
+  id: string;
+  name: string;
+  accessLevel: string;
+  category: DocumentCategory;
+  DocumentChunk: Array<{
+    id: string;
+    content: string;
+    documentId: string | null;
+    regulatoryDocumentId?: string | null;
+    pageNumber: number | null;
+    metadata: Prisma.JsonValue;
+    sheetNumber?: string | null;
+    titleBlockData?: Prisma.JsonValue;
+    revision?: string | null;
+    dateIssued?: Date | null;
+    discipline?: string | null;
+  }>;
+}
+
+/** Detail callout from Prisma with document relation */
+interface DetailCalloutWithDocument {
+  id: string;
+  projectId: string;
+  sheetNumber: string | null;
+  callouts: Prisma.JsonValue;
+  confidence: number;
+  Document: {
+    name: string;
+  } | null;
+}
+
+/** Dimension annotation from Prisma with document relation */
+interface DimensionAnnotationWithDocument {
+  id: string;
+  projectId: string;
+  sheetNumber: string | null;
+  dimensions: Prisma.JsonValue;
+  confidence: number;
+  Document: {
+    name: string;
+  } | null;
+}
+
+/** Enhanced annotation from Prisma with document relation */
+interface EnhancedAnnotationWithDocument {
+  id: string;
+  projectId: string;
+  sheetNumber: string | null;
+  annotations: Prisma.JsonValue;
+  confidence: number;
+  Document: {
+    name: string;
+  } | null;
+}
+
+/** Regulatory document chunk with metadata */
+interface RegulatoryChunk {
+  id: string;
+  content: string;
+  documentId: string | null;
+  regulatoryDocumentId: string | null;
+  pageNumber: number | null;
+  metadata: Prisma.JsonValue;
+  isRegulatory: boolean;
+  score?: number;
+  RegulatoryDocument?: {
+    type: string;
+    standard: string;
+    jurisdiction: string | null;
+  } | null;
+}
+
+/** Admin correction for RAG enhancement */
+interface ScoredCorrection extends AdminCorrection {
+  score: number;
+}
+
+// ============================================================================
+// DOCUMENT CHUNK INTERFACE
+// ============================================================================
 
 interface DocumentChunk {
   id: string;
@@ -66,15 +255,39 @@ interface DocumentChunk {
   documentId: string;
   regulatoryDocumentId?: string | null;
   pageNumber: number | null;
-  metadata: any;
+  metadata: ChunkMetadata;
   isRegulatory?: boolean;
   documentCategory?: string;
   documentName?: string;
   sheetNumber?: string | null;
-  titleBlockData?: any;
+  titleBlockData?: TitleBlockData;
   revision?: string | null;
   dateIssued?: Date | null;
   discipline?: string | null;
+}
+
+/** Equipment item in a critical path */
+interface PathEquipmentItem {
+  id: string;
+  name: string;
+  type?: string;
+  location?: { x: number; y: number };
+}
+
+/** Conflict in MEP path analysis */
+interface PathConflict {
+  id: string;
+  type: string;
+  severity: 'low' | 'medium' | 'high';
+  description?: string;
+  location?: { x: number; y: number };
+}
+
+/** Critical path in MEP routing */
+interface CriticalPath {
+  equipment: PathEquipmentItem[];
+  efficiency: number;
+  conflicts: PathConflict[];
 }
 
 interface Phase3ContextData {
@@ -124,11 +337,7 @@ interface Phase3ContextData {
     avgDistance: number;
     totalConflicts: number;
     overallEfficiency: number;
-    criticalPaths: Array<{
-      equipment: any[];
-      efficiency: number;
-      conflicts: any[];
-    }>;
+    criticalPaths: CriticalPath[];
   };
 }
 
@@ -153,17 +362,18 @@ export async function retrieveRelevantDocuments(
 ): Promise<{ chunks: DocumentChunk[]; documentNames: string[] }> {
   try {
     // CRITICAL: Filter by project FIRST to ensure complete project isolation
-    const whereClause: any = {
+    const whereClause: Prisma.DocumentWhereInput = {
       processed: true,
     };
 
     // MUST filter by project - this ensures no cross-project document leakage
     if (projectSlug) {
+      const projects = await prisma.project.findMany({
+        where: { slug: projectSlug },
+        select: { id: true }
+      });
       whereClause.projectId = {
-        in: await prisma.project.findMany({
-          where: { slug: projectSlug },
-          select: { id: true }
-        }).then((projects: any) => projects.map((p: any) => p.id))
+        in: projects.map((p) => p.id)
       };
     } else {
       // If no projectSlug provided, return empty results to prevent cross-project access
@@ -194,27 +404,32 @@ export async function retrieveRelevantDocuments(
     const queryIntent = detectQueryIntent(query);
 
     // Score and rank chunks
-    const scoredChunks: Array<{ chunk: any; score: number }> = [];
+    const scoredChunks: ScoredChunk[] = [];
 
     for (const doc of documents) {
       for (const chunk of doc.DocumentChunk) {
         let score = calculateRelevanceScore(chunk.content, keywords, query, doc.name);
-        
+
         // Apply category boost based on query intent
         if (score > 0) {
-          score = applyCategoryBoost(score, (doc as any).category, queryIntent);
-          
+          score = applyCategoryBoost(score, doc.category, queryIntent);
+
+          const existingMetadata = (typeof chunk.metadata === 'object' && chunk.metadata !== null)
+            ? chunk.metadata as Record<string, unknown>
+            : {};
+
           scoredChunks.push({
             chunk: {
               ...chunk,
-              documentCategory: (doc as any).category,
+              documentId: chunk.documentId || '',
+              documentCategory: doc.category,
               documentName: doc.name,
               metadata: {
-                ...(typeof chunk.metadata === 'object' ? chunk.metadata : {}),
+                ...existingMetadata,
                 documentName: doc.name,
                 accessLevel: doc.accessLevel,
-                category: (doc as any).category,
-              },
+                category: doc.category,
+              } as ChunkMetadata,
             },
             score,
           });
@@ -844,7 +1059,7 @@ export async function retrieveRegulatoryChunks(
   query: string,
   projectSlug: string,
   limit: number = 5
-): Promise<any[]> {
+): Promise<RegulatoryChunk[]> {
   try {
     // Get project ID
     const project = await prisma.project.findUnique({
@@ -876,12 +1091,12 @@ export async function retrieveRegulatoryChunks(
     const chunks = await prisma.documentChunk.findMany({
       where: {
         regulatoryDocumentId: {
-          in: regulatoryDocs.map((d: any) => d.id),
+          in: regulatoryDocs.map((d) => d.id),
         },
         OR: keywords.map(keyword => ({
           content: {
             contains: keyword,
-            mode: 'insensitive' as any,
+            mode: 'insensitive' as Prisma.QueryMode,
           },
         })),
       },
@@ -898,7 +1113,7 @@ export async function retrieveRegulatoryChunks(
     });
 
     // Score chunks based on keyword matches
-    const scoredChunks = chunks.map((chunk: any) => {
+    const scoredChunks = chunks.map((chunk) => {
       const content = chunk.content.toLowerCase();
       let score = 0;
 
@@ -909,16 +1124,16 @@ export async function retrieveRegulatoryChunks(
       });
 
       // Boost ADA standards for accessibility questions
-      if (chunk.regulatoryDocument.type === 'ada' && 
-          (query.toLowerCase().includes('accessible') || 
+      if (chunk.RegulatoryDocument?.type === 'ada' &&
+          (query.toLowerCase().includes('accessible') ||
            query.toLowerCase().includes('ada') ||
            query.toLowerCase().includes('parking'))) {
         score += 50;
       }
 
       // Boost building codes for structural/safety questions
-      if (chunk.regulatoryDocument.type === 'building_code' && 
-          (query.toLowerCase().includes('code') || 
+      if (chunk.RegulatoryDocument?.type === 'building_code' &&
+          (query.toLowerCase().includes('code') ||
            query.toLowerCase().includes('required'))) {
         score += 40;
       }
@@ -926,7 +1141,7 @@ export async function retrieveRegulatoryChunks(
       return {
         ...chunk,
         score,
-        isRegulatory: true,
+        isRegulatory: true as const,
         // Map regulatoryDocumentId to documentId for compatibility
         documentId: chunk.regulatoryDocumentId || chunk.documentId,
       };
@@ -934,15 +1149,15 @@ export async function retrieveRegulatoryChunks(
 
     // Sort by score and take top chunks
     return scoredChunks
-      .sort((a: any, b: any) => b.score - a.score)
+      .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map(({ score, regulatoryDocument, ...chunk }: any) => ({
+      .map(({ score: _score, RegulatoryDocument, ...chunk }) => ({
         ...chunk,
         metadata: {
-          ...chunk.metadata,
-          regulatoryType: regulatoryDocument.type,
-          standard: regulatoryDocument.standard,
-          jurisdiction: regulatoryDocument.jurisdiction,
+          ...(typeof chunk.metadata === 'object' && chunk.metadata !== null ? chunk.metadata : {}),
+          regulatoryType: RegulatoryDocument?.type,
+          standard: RegulatoryDocument?.standard,
+          jurisdiction: RegulatoryDocument?.jurisdiction,
         },
       }));
   } catch (error) {
@@ -974,7 +1189,7 @@ export async function retrieveRelevantCorrections(
     }
 
     // Build where clause
-    const whereClause: any = {
+    const whereClause: Prisma.AdminCorrectionWhereInput = {
       isActive: true,
     };
 
@@ -984,7 +1199,7 @@ export async function retrieveRelevantCorrections(
         where: { slug: projectSlug },
         select: { id: true }
       });
-      
+
       if (project) {
         whereClause.OR = [
           { projectId: project.id },
@@ -1010,10 +1225,10 @@ export async function retrieveRelevantCorrections(
     });
 
     // Score and rank corrections based on keyword overlap
-    const scoredCorrections = corrections.map((correction: any) => {
+    const scoredCorrections: ScoredCorrection[] = corrections.map((correction) => {
       let score = 0;
-      const correctionKeywords = correction.keywords.map((k: string) => k.toLowerCase());
-      
+      const correctionKeywords = correction.keywords.map((k) => k.toLowerCase());
+
       // Calculate keyword overlap
       for (const queryWord of queryWords) {
         for (const keyword of correctionKeywords) {
@@ -1028,8 +1243,8 @@ export async function retrieveRelevantCorrections(
         .toLowerCase()
         .replace(/[^\w\s]/g, '')
         .split(/\s+/);
-      
-      const commonWords = queryWords.filter((word: string) => 
+
+      const commonWords = queryWords.filter((word) =>
         questionWords.includes(word)
       );
       score += commonWords.length * 5;
@@ -1042,15 +1257,15 @@ export async function retrieveRelevantCorrections(
 
     // Return top matches
     const relevantCorrections = scoredCorrections
-      .filter((c: any) => c.score > 0)
-      .sort((a: any, b: any) => b.score - a.score)
+      .filter((c) => c.score > 0)
+      .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
     // Increment usage count for matched corrections
     if (relevantCorrections.length > 0) {
       await prisma.adminCorrection.updateMany({
         where: {
-          id: { in: relevantCorrections.map((c: any) => c.id) },
+          id: { in: relevantCorrections.map((c) => c.id) },
         },
         data: {
           usageCount: { increment: 1 },
@@ -1121,13 +1336,13 @@ export function generateContextWithCorrections(
         // ENHANCED: Extract and display OCR metadata for construction plans
         let ocrMetadata = '';
         if (chunk.metadata) {
-          const meta = chunk.metadata as any;
-          
+          const meta = chunk.metadata;
+
           // Add scale information (critical for dimensions)
           if (meta.scale) {
             ocrMetadata += `\n  📏 Scale: ${meta.scale}`;
           }
-          
+
           // Add title block information (project context)
           if (meta.projectName || meta.architect || meta.engineer) {
             ocrMetadata += `\n  📋 Title Block:`;
@@ -1136,7 +1351,7 @@ export function generateContextWithCorrections(
             if (meta.engineer) ocrMetadata += ` | Engineer: ${meta.engineer}`;
             if (meta.issueDate) ocrMetadata += ` | Date: ${meta.issueDate}`;
           }
-          
+
           // Add dimensions (labeled and derived)
           if (meta.labeled_dimensions || meta.derived_dimensions) {
             ocrMetadata += `\n  📐 Dimensions:`;
@@ -1147,43 +1362,43 @@ export function generateContextWithCorrections(
               ocrMetadata += ` (derived: ${meta.derived_dimensions.join(', ')})`;
             }
           }
-          
+
           // Add zones/areas (spatial organization)
           if (meta.zones && meta.zones.length > 0) {
-            const zoneNames = meta.zones.map((z: any) => z.name).join(', ');
+            const zoneNames = meta.zones.map((z) => z.name).join(', ');
             ocrMetadata += `\n  🗺️  Zones: ${zoneNames}`;
           }
-          
+
           // Add legend entries (material/pattern definitions)
           if (meta.hasLegend && meta.legendEntriesCount) {
             ocrMetadata += `\n  🔑 Legend: ${meta.legendEntriesCount} entries (material/pattern definitions included)`;
           }
-          
+
           // Add hatch patterns (visual material indicators)
           if (meta.hasHatchPatterns && meta.hatchPatternsCount) {
             ocrMetadata += `\n  🎨 Hatch Patterns: ${meta.hatchPatternsCount} identified (see content for details)`;
           }
-          
+
           // Add note count
           if (meta.notesCount) {
             ocrMetadata += `\n  📝 Notes: ${meta.notesCount} construction notes`;
           }
-          
+
           // PHASE 1: Material Quantity Takeoffs
           if (meta.materialQuantitiesCount && meta.materialQuantitiesCount > 0) {
             ocrMetadata += `\n  💰 Material Quantities: ${meta.materialQuantitiesCount} items with cost estimation data`;
           }
-          
+
           // PHASE 1: Submittal Requirements
           if (meta.submittalsCount && meta.submittalsCount > 0) {
             ocrMetadata += `\n  📋 Submittal Requirements: ${meta.submittalsCount} items requiring approval`;
           }
-          
+
           // PHASE 1: Inspection & Testing Requirements
           if (meta.inspectionsCount && meta.inspectionsCount > 0) {
             ocrMetadata += `\n  🔍 Inspection/Testing: ${meta.inspectionsCount} quality control requirements`;
           }
-          
+
           // PHASE 1: Equipment Specifications
           if (meta.equipmentSpecsCount && meta.equipmentSpecsCount > 0) {
             ocrMetadata += `\n  ⚙️  Equipment Specs: ${meta.equipmentSpecsCount} items with detailed specifications`;
@@ -1297,7 +1512,12 @@ export async function retrievePhase3Context(
         },
         take: 10 // Limit takeoffs
       });
-      phase3Data.materials = takeoffs.map((t: any) => ({ ...t, lineItems: t.TakeoffLineItem || [] })) as any;
+      phase3Data.materials = takeoffs.map((t) => ({
+        id: t.id,
+        name: t.name,
+        description: t.description,
+        lineItems: t.TakeoffLineItem || []
+      }));
     }
 
     // Detect if query is about MEP equipment
@@ -1324,15 +1544,15 @@ export async function retrievePhase3Context(
 
       // Aggregate MEP callouts
       const mepMap = new Map<string, { trade: string; count: number }>();
-      
-      mepChunks.forEach((chunk: any) => {
-        const metadata = chunk.metadata as any;
+
+      mepChunks.forEach((chunk) => {
+        const metadata = chunk.metadata as ChunkMetadata | null;
         if (metadata?.mepCallouts) {
-          const callouts = Array.isArray(metadata.mepCallouts) 
-            ? metadata.mepCallouts 
+          const callouts = Array.isArray(metadata.mepCallouts)
+            ? metadata.mepCallouts
             : [];
-          
-          callouts.forEach((callout: string) => {
+
+          callouts.forEach((callout) => {
             const upper = callout.toUpperCase();
             let trade = 'Other';
             
@@ -1424,7 +1644,7 @@ export async function retrievePhase3Context(
     }
 
     return phase3Data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error retrieving Phase 3 context:', error);
     return {};
   }
@@ -1890,17 +2110,17 @@ export async function getScaleContext(
     const sheetNumber = sheetMatch ? sheetMatch[1] : null;
 
     // Get scales for the project
-    const where: any = {
+    const whereClause: Prisma.DocumentChunkWhereInput = {
       Document: { projectId: project.id },
-      scaleData: { not: null },
+      scaleData: { not: Prisma.DbNull },
     };
 
     if (sheetNumber) {
-      where.sheetNumber = sheetNumber;
+      whereClause.sheetNumber = sheetNumber;
     }
 
     const chunks = await prisma.documentChunk.findMany({
-      where,
+      where: whereClause,
       select: {
         sheetNumber: true,
         scaleData: true,
@@ -1914,17 +2134,17 @@ export async function getScaleContext(
     }
 
     let context = '\n\n=== SCALE INFORMATION ===\n';
-    
+
     if (sheetNumber) {
       context += `Scale information for sheet ${sheetNumber}:\n\n`;
     } else {
       context += `Available scales in project (${chunks.length} sheets):\n\n`;
     }
 
-    chunks.forEach((chunk: any) => {
+    chunks.forEach((chunk) => {
       if (!chunk.scaleData) return;
-      
-      const scaleData = chunk.scaleData as any;
+
+      const scaleData = chunk.scaleData as ScaleData;
       context += `Sheet ${chunk.sheetNumber}:\n`;
       context += `  Scale: ${scaleData.primaryScale?.scaleString || 'Unknown'}\n`;
       context += `  Ratio: ${scaleData.primaryScale?.scaleRatio || 'N/A'}\n`;
@@ -1932,7 +2152,7 @@ export async function getScaleContext(
       if (scaleData.hasMultipleScales) {
         context += `  ⚠️  Multiple scales on this sheet (${scaleData.scaleCount} total)\n`;
         if (scaleData.secondaryScales && scaleData.secondaryScales.length > 0) {
-          scaleData.secondaryScales.forEach((s: any) => {
+          scaleData.secondaryScales.forEach((s) => {
             context += `     - ${s.scaleString} ${s.viewportName ? `(${s.viewportName})` : ''}\n`;
           });
         }
@@ -2014,15 +2234,15 @@ export async function getDrawingTypeContext(
     }
 
     // Build query for drawing types
-    const where: any = { projectId: project.id };
+    const drawingTypeWhere: Prisma.DrawingTypeWhereInput = { projectId: project.id };
     if (sheetNumber) {
-      where.sheetNumber = sheetNumber;
+      drawingTypeWhere.sheetNumber = sheetNumber;
     } else if (matchedType) {
-      where.type = matchedType;
+      drawingTypeWhere.type = matchedType;
     }
 
     const drawingTypes = await prisma.drawingType.findMany({
-      where,
+      where: drawingTypeWhere,
       select: {
         sheetNumber: true,
         type: true,
@@ -2069,14 +2289,14 @@ export async function getDrawingTypeContext(
     };
 
     let context = '\n\n=== DRAWING TYPE INFORMATION ===\n';
-    
+
     if (sheetNumber) {
       context += `Drawing type for sheet ${sheetNumber}:\n\n`;
     } else {
       context += `Available drawing types in project (${drawingTypes.length} sheets):\n\n`;
     }
 
-    drawingTypes.forEach((dt: any) => {
+    drawingTypes.forEach((dt) => {
       const typeLabel = typeLabels[dt.type] || dt.type;
       const subtypeLabel = subtypeLabels[dt.subtype] || dt.subtype;
       const confidence = (dt.confidence * 100).toFixed(0);
@@ -2216,22 +2436,22 @@ export async function retrievePhaseBContext(
 
       if (callouts.length > 0) {
         context += '\n=== DETAIL CALLOUTS & CROSS-REFERENCES ===\n';
-        
+
         // Group by sheet
-        const bySheet = callouts.reduce((acc: any, callout: any) => {
+        type CalloutWithDocument = typeof callouts[number];
+        const bySheet = callouts.reduce<Record<string, CalloutWithDocument[]>>((acc, callout) => {
           const sheet = callout.sheetNumber || 'Unknown';
           if (!acc[sheet]) acc[sheet] = [];
           acc[sheet].push(callout);
           return acc;
-        }, {} as Record<string, typeof callouts>);
+        }, {});
 
         Object.entries(bySheet).slice(0, 5).forEach(([sheet, sheetCallouts]) => {
-          const callouts_arr = sheetCallouts as any[];
-          context += `\nSheet ${sheet} (${callouts_arr[0].document.name}):\n`;
-          callouts_arr.slice(0, 5).forEach((callout: any) => {
-            const data = callout.callouts as any;
-            const calloutArray = Array.isArray(data) ? data : (data ? [data] : []);
-            calloutArray.slice(0, 3).forEach((item: any) => {
+          context += `\nSheet ${sheet} (${sheetCallouts[0].Document?.name || 'Unknown'}):\n`;
+          sheetCallouts.slice(0, 5).forEach((callout) => {
+            const data = callout.callouts;
+            const calloutArray: CalloutItem[] = Array.isArray(data) ? data as CalloutItem[] : (data ? [data as CalloutItem] : []);
+            calloutArray.slice(0, 3).forEach((item) => {
               context += `  • ${item.type?.toUpperCase() || 'DETAIL'}: ${item.detailNumber || ''} `;
               if (item.sheetReference) {
                 context += `→ See Sheet ${item.sheetReference}`;
@@ -2262,39 +2482,42 @@ export async function retrievePhaseBContext(
 
       if (dimensions.length > 0) {
         context += '\n=== EXTRACTED DIMENSIONS ===\n';
-        
+
         // Extract keywords from query
         const queryWords = query.toLowerCase().split(/\s+/);
-        
+
+        // Helper to parse dimension data
+        const parseDimensionData = (data: Prisma.JsonValue): DimensionItem[] => {
+          return Array.isArray(data) ? data as DimensionItem[] : (data ? [data as DimensionItem] : []);
+        };
+
         // Filter dimensions relevant to query
-        const relevantDims = dimensions.filter((dim: any) => {
-          const data = dim.dimensions as any;
-          const dimArray = Array.isArray(data) ? data : (data ? [data] : []);
-          const text = dimArray.map((item: any) => [
+        type DimensionWithDocument = typeof dimensions[number];
+        const relevantDims = dimensions.filter((dim) => {
+          const dimArray = parseDimensionData(dim.dimensions);
+          const text = dimArray.map((item) => [
             item.originalText || '',
             item.context || '',
             item.type || '',
             dim.sheetNumber || ''
           ].join(' ')).join(' ').toLowerCase();
-          
-          return queryWords.some(word => text.includes(word)) || dimArray.some((item: any) => item.critical);
+
+          return queryWords.some(word => text.includes(word)) || dimArray.some((item) => item.critical);
         }).slice(0, 10);
 
         // Group by sheet
-        const dimsBySheet = relevantDims.reduce((acc: any, dim: any) => {
+        const dimsBySheet = relevantDims.reduce<Record<string, DimensionWithDocument[]>>((acc, dim) => {
           const sheet = dim.sheetNumber || 'Unknown';
           if (!acc[sheet]) acc[sheet] = [];
           acc[sheet].push(dim);
           return acc;
-        }, {} as Record<string, typeof relevantDims>);
+        }, {});
 
         Object.entries(dimsBySheet).slice(0, 5).forEach(([sheet, sheetDims]) => {
-          const dims_arr = sheetDims as any[];
           context += `\nSheet ${sheet}:\n`;
-          dims_arr.forEach((dim: any) => {
-            const data = dim.dimensions as any;
-            const dimArray = Array.isArray(data) ? data : (data ? [data] : []);
-            dimArray.slice(0, 3).forEach((item: any) => {
+          sheetDims.forEach((dim) => {
+            const dimArray = parseDimensionData(dim.dimensions);
+            dimArray.slice(0, 3).forEach((item) => {
               context += `  • ${item.originalText || ''}`;
               if (item.context) {
                 context += ` - ${item.context}`;
@@ -2325,30 +2548,35 @@ export async function retrievePhaseBContext(
 
       if (annotations.length > 0) {
         context += '\n=== ANNOTATIONS & REQUIREMENTS ===\n';
-        
+
+        // Helper to parse annotation data
+        const parseAnnotationData = (data: Prisma.JsonValue): AnnotationItem[] => {
+          return Array.isArray(data) ? data as AnnotationItem[] : (data ? [data as AnnotationItem] : []);
+        };
+
+        // Helper to check priority
+        const hasPriority = (data: Prisma.JsonValue, priority: string): boolean => {
+          const parsed = parseAnnotationData(data);
+          if (!Array.isArray(data) && data && typeof data === 'object' && 'priority' in data) {
+            return (data as AnnotationItem).priority === priority;
+          }
+          return parsed.some((d) => d.priority === priority);
+        };
+
         // Separate by priority
-        const critical = annotations.filter((a: any) => {
-          const data = a.annotations as any;
-          return data.priority === 'critical' || (Array.isArray(data) && data.some((d: any) => d.priority === 'critical'));
-        });
-        const important = annotations.filter((a: any) => {
-          const data = a.annotations as any;
-          return data.priority === 'important' || (Array.isArray(data) && data.some((d: any) => d.priority === 'important'));
-        });
-        const informational = annotations.filter((a: any) => {
-          const data = a.annotations as any;
-          return data.priority === 'informational' || (Array.isArray(data) && data.some((d: any) => d.priority === 'informational'));
-        });
+        type AnnotationWithDocument = typeof annotations[number];
+        const critical = annotations.filter((a) => hasPriority(a.annotations, 'critical'));
+        const important = annotations.filter((a) => hasPriority(a.annotations, 'important'));
+        const informational = annotations.filter((a) => hasPriority(a.annotations, 'informational'));
 
         if (critical.length > 0) {
           context += '\n⚠️  CRITICAL ANNOTATIONS:\n';
-          critical.slice(0, 5).forEach((ann: any) => {
-            const data = ann.annotations as any;
-            const annArray = Array.isArray(data) ? data : (data ? [data] : []);
-            annArray.slice(0, 2).forEach((item: any) => {
+          critical.slice(0, 5).forEach((ann) => {
+            const annArray = parseAnnotationData(ann.annotations);
+            annArray.slice(0, 2).forEach((item) => {
               context += `  • [${item.type?.toUpperCase() || 'NOTE'}] ${item.text || ''}\n`;
               if (item.requirements && item.requirements.length > 0) {
-                item.requirements.slice(0, 2).forEach((req: string) => {
+                item.requirements.slice(0, 2).forEach((req) => {
                   context += `    ✓ ${req}\n`;
                 });
               }
@@ -2358,10 +2586,9 @@ export async function retrievePhaseBContext(
 
         if (important.length > 0) {
           context += '\n⚡ IMPORTANT ANNOTATIONS:\n';
-          important.slice(0, 5).forEach((ann: any) => {
-            const data = ann.annotations as any;
-            const annArray = Array.isArray(data) ? data : (data ? [data] : []);
-            annArray.slice(0, 2).forEach((item: any) => {
+          important.slice(0, 5).forEach((ann) => {
+            const annArray = parseAnnotationData(ann.annotations);
+            annArray.slice(0, 2).forEach((item) => {
               context += `  • [${item.type?.toUpperCase() || 'NOTE'}] ${item.text || ''}\n`;
             });
           });
@@ -2369,10 +2596,9 @@ export async function retrievePhaseBContext(
 
         if (informational.length > 0 && !critical.length && !important.length) {
           context += '\n📝 INFORMATIONAL NOTES:\n';
-          informational.slice(0, 5).forEach((ann: any) => {
-            const data = ann.annotations as any;
-            const annArray = Array.isArray(data) ? data : (data ? [data] : []);
-            annArray.slice(0, 3).forEach((item: any) => {
+          informational.slice(0, 5).forEach((ann) => {
+            const annArray = parseAnnotationData(ann.annotations);
+            annArray.slice(0, 3).forEach((item) => {
               context += `  • ${item.text || ''}\n`;
             });
           });
@@ -2416,24 +2642,38 @@ export async function retrievePhaseBContext(
  * @param projectSlug The project slug for context
  * @returns Enriched chunks with title block, legend, and dimension metadata
  */
+/** Dimension data structure for chunk enrichment */
+interface DimensionData {
+  dimensions: Prisma.JsonValue;
+  dimensionCount: number;
+  dimensionSummary: Prisma.JsonValue;
+}
+
+/** Title block chunk data */
+interface TitleBlockChunk {
+  id: string;
+  sheetNumber: string | null;
+  titleBlockData: Prisma.JsonValue;
+}
+
 export async function enrichWithPhaseAMetadata(
-  chunks: any[],
+  chunks: DocumentChunk[],
   projectSlug: string
-): Promise<any[]> {
+): Promise<DocumentChunk[]> {
   try {
     // Get project ID
     const project = await prisma.project.findUnique({
       where: { slug: projectSlug },
       select: { id: true },
     });
-    
+
     if (!project) {
       return chunks;
     }
-    
+
     // Get document IDs from chunks (filter out null values)
     const documentIds = [...new Set(chunks.map(c => c.documentId).filter(Boolean))] as string[];
-    
+
     // Fetch title block, dimension data, and other metadata for these documents
     const allChunks = await prisma.documentChunk.findMany({
       where: {
@@ -2452,21 +2692,21 @@ export async function enrichWithPhaseAMetadata(
         dimensionSummary: true,
       },
     });
-    
+
     // Filter to only chunks with title block data
-    const titleBlocksByDoc = allChunks.filter((chunk: any) => chunk.titleBlockData !== null);
-    
+    const titleBlocksByDoc = allChunks.filter((chunk) => chunk.titleBlockData !== null);
+
     // Create dimension lookup by chunk ID
-    const dimensionMap = new Map(
+    const dimensionMap = new Map<string, DimensionData>(
       allChunks
-        .filter((c: any) => c.dimensions && c.dimensionCount && c.dimensionCount > 0)
-        .map((c: any) => [c.id, {
+        .filter((c) => c.dimensions && c.dimensionCount && c.dimensionCount > 0)
+        .map((c) => [c.id, {
           dimensions: c.dimensions,
-          dimensionCount: c.dimensionCount,
+          dimensionCount: c.dimensionCount!,
           dimensionSummary: c.dimensionSummary,
         }])
     );
-    
+
     // Fetch legend data for this project
     const legends = await prisma.sheetLegend.findMany({
       where: {
@@ -2479,66 +2719,65 @@ export async function enrichWithPhaseAMetadata(
         discipline: true,
       },
     });
-    
+
     // Create lookup maps
-    const titleBlockMap = new Map(
-      titleBlocksByDoc.map((tb: any) => [tb.sheetNumber || '', tb])
+    type TitleBlockEntry = typeof allChunks[number];
+    const titleBlockMap = new Map<string, TitleBlockEntry>(
+      titleBlocksByDoc.map((tb) => [tb.sheetNumber || '', tb])
     );
-    
-    const legendMap = new Map(
-      legends.map((l: any) => [l.sheetNumber || '', l.legendEntries])
+
+    const legendMap = new Map<string, Prisma.JsonValue>(
+      legends.map((l) => [l.sheetNumber || '', l.legendEntries])
     );
-    
+
     // Enrich chunks with Phase A metadata
     return chunks.map(chunk => {
-      const meta = (chunk.metadata || {}) as any;
+      const meta: ChunkMetadata & Record<string, unknown> = { ...(chunk.metadata || {}) };
       const sheetNumber = meta.sheetNumber || chunk.sheetNumber;
-      
+
       // Add title block data if available
       if (sheetNumber && titleBlockMap.has(sheetNumber)) {
-        const titleBlock = titleBlockMap.get(sheetNumber) as any;
+        const titleBlock = titleBlockMap.get(sheetNumber);
         if (titleBlock && titleBlock.titleBlockData) {
-          const tbData = titleBlock.titleBlockData as any;
-          meta.titleBlock = {
+          const tbData = titleBlock.titleBlockData as TitleBlockData;
+          (meta as Record<string, unknown>).titleBlock = {
             projectName: tbData.projectName,
             projectNumber: tbData.projectNumber,
             sheetTitle: tbData.sheetTitle,
-            dateIssued: tbData.dateIssued,
+            dateIssued: tbData.issueDate,
             revision: tbData.revision,
-            revisionDate: tbData.revisionDate,
             drawnBy: tbData.drawnBy,
             checkedBy: tbData.checkedBy,
             scale: tbData.scale,
-            discipline: tbData.discipline,
           };
-          meta.hasTitleBlock = true;
+          (meta as Record<string, unknown>).hasTitleBlock = true;
         }
       }
-      
+
       // Add legend data if available
       if (sheetNumber && legendMap.has(sheetNumber)) {
-        const legendEntries = legendMap.get(sheetNumber) as any[];
-        if (legendEntries && legendEntries.length > 0) {
-          meta.legendEntries = legendEntries;
+        const legendEntries = legendMap.get(sheetNumber);
+        if (legendEntries && Array.isArray(legendEntries) && legendEntries.length > 0) {
+          (meta as Record<string, unknown>).legendEntries = legendEntries;
           meta.hasLegend = true;
           meta.legendEntriesCount = legendEntries.length;
         }
       }
-      
+
       // Add dimension data if available (Phase B.2)
       if (chunk.id && dimensionMap.has(chunk.id)) {
-        const dimData = dimensionMap.get(chunk.id) as any;
+        const dimData = dimensionMap.get(chunk.id);
         if (dimData) {
-          meta.dimensions = dimData.dimensions;
-          meta.dimensionCount = dimData.dimensionCount;
-          meta.dimensionSummary = dimData.dimensionSummary;
-          meta.hasDimensions = true;
+          (meta as Record<string, unknown>).dimensions = dimData.dimensions;
+          (meta as Record<string, unknown>).dimensionCount = dimData.dimensionCount;
+          (meta as Record<string, unknown>).dimensionSummary = dimData.dimensionSummary;
+          (meta as Record<string, unknown>).hasDimensions = true;
         }
       }
-      
+
       return {
         ...chunk,
-        metadata: meta,
+        metadata: meta as ChunkMetadata,
       };
     });
   } catch (error) {
@@ -2651,12 +2890,13 @@ export async function getCalloutContext(query: string, projectSlug: string): Pro
     
     const callouts = await getProjectCallouts(project.id);
     if (callouts.length === 0) return '';
-    
+
     let context = '=== DETAIL CALLOUTS & CROSS-REFERENCES ===\n\n';
     context += `Total Callouts: ${callouts.length}\n\n`;
-    
+
     // Group by type
-    const byType: { [key: string]: any[] } = {};
+    type ProjectCallout = typeof callouts[number];
+    const byType: Record<string, ProjectCallout[]> = {};
     for (const callout of callouts) {
       if (!byType[callout.type]) byType[callout.type] = [];
       byType[callout.type].push(callout);
@@ -2835,7 +3075,7 @@ export function enhanceSymbolContextWithStandardLibrary(symbolContext: string): 
 export async function generateEnhancedContext(
   query: string,
   projectSlug: string,
-  chunks: any[],
+  chunks: DocumentChunk[],
   corrections: AdminCorrection[]
 ): Promise<string> {
   let context = await generateContextWithCorrections(chunks, corrections);

@@ -164,7 +164,7 @@ export const authOptions: NextAuthOptions = {
             prisma.user.update({
               where: { id: user.id },
               data: { lastLoginAt: new Date() },
-            }).catch((error: any) => {
+            }).catch((error: unknown) => {
               console.error('[AUTH] Error updating lastLoginAt:', error);
             }),
             
@@ -176,7 +176,7 @@ export const authOptions: NextAuthOptions = {
                 username: user.username,
                 role: user.role,
               },
-            }).catch((error: any) => {
+            }).catch((error: unknown) => {
               console.error('[AUTH] Error logging activity:', error);
             }),
             
@@ -185,7 +185,7 @@ export const authOptions: NextAuthOptions = {
               user.username,
               'N/A', // IP address not available in JWT callback
               'N/A'  // User agent not available in JWT callback
-            ).catch((error: any) => {
+            ).catch((error: unknown) => {
               console.error('[AUTH] Error sending sign-in notification:', error);
             }),
           ]).catch(() => {

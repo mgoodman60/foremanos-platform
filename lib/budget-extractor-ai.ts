@@ -168,7 +168,16 @@ Respond with ONLY valid JSON in this exact format:
 
   try {
     const parsed = JSON.parse(jsonMatch[0]);
-    const items: ExtractedBudgetItem[] = (parsed.items || []).map((item: any) => ({
+    interface ParsedBudgetItem {
+      name?: string;
+      description?: string;
+      costCode?: string;
+      budgetedAmount?: string | number;
+      unit?: string;
+      quantity?: string | number;
+      unitCost?: string | number;
+    }
+    const items: ExtractedBudgetItem[] = ((parsed.items || []) as ParsedBudgetItem[]).map((item) => ({
       name: item.name || 'Unknown Item',
       description: item.description || undefined,
       costCode: item.costCode || undefined,
@@ -202,7 +211,7 @@ async function extractBudgetFromChunks(
     throw new Error('No document chunks found');
   }
 
-  const allText = chunks.map((c: any) => c.content).join('\n\n');
+  const allText = chunks.map((c) => c.content).join('\n\n');
 
   const prompt = `Analyze this budget/cost estimate text and extract ALL line items.
 
@@ -239,15 +248,24 @@ Respond with ONLY valid JSON:
 
   try {
     const parsed = JSON.parse(jsonMatch[0]);
-    return (parsed.items || []).map((item: any) => ({
+    interface ParsedItem {
+      name?: string;
+      description?: string;
+      costCode?: string;
+      budgetedAmount?: string | number;
+      unit?: string;
+      quantity?: string | number;
+      unitCost?: string | number;
+    }
+    return ((parsed.items || []) as ParsedItem[]).map((item) => ({
       name: item.name || 'Unknown',
       description: item.description,
       costCode: item.costCode,
       tradeType: inferTradeType(item.costCode, item.name),
-      budgetedAmount: parseFloat(item.budgetedAmount) || 0,
+      budgetedAmount: parseFloat(String(item.budgetedAmount)) || 0,
       unit: item.unit,
-      quantity: item.quantity ? parseFloat(item.quantity) : undefined,
-      unitCost: item.unitCost ? parseFloat(item.unitCost) : undefined,
+      quantity: item.quantity ? parseFloat(String(item.quantity)) : undefined,
+      unitCost: item.unitCost ? parseFloat(String(item.unitCost)) : undefined,
     }));
   } catch {
     return [];

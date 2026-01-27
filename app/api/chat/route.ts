@@ -519,7 +519,7 @@ export async function POST(request: NextRequest) {
     // Always use web search for images (code compliance checks)
     const useWebSearch = !!image || shouldUseWebSearch(message || '', chunks.length);
     let webSearchContext = '';
-    let webSearchResults: any[] = [];
+    let webSearchResults: Array<{ title: string; url: string; snippet: string }> = [];
     
     if (useWebSearch) {
       console.log('🌐 Hybrid search: Performing web search to supplement document information...');
@@ -539,7 +539,7 @@ export async function POST(request: NextRequest) {
     const accessibleDocs = getAccessibleDocuments(userRole);
     
     // Build document filter based on user role
-    let docFilter: any;
+    let docFilter: { accessLevel?: { in: string[] } | string };
     if (userRole === 'admin') {
       docFilter = {}; // Admin can see all documents
     } else if (userRole === 'client') {
@@ -556,7 +556,7 @@ export async function POST(request: NextRequest) {
     const contextPrompt = `You are an AI assistant for One Senior Care Construction Site ChatBot. You have access to project documents and can help with questions about schedules, plans, specifications, and construction site details.
 
 **Available Project Documents:**
-${documents.map((d: any) => `- ${d.name} (${d.accessLevel})`).join('\n')}
+${documents.map((d) => `- ${d.name} (${d.accessLevel})`).join('\n')}
 
 **User Access Level:** ${(userRole === 'admin' || userRole === 'client') ? 'Full Access (Admin/Client - Access to All Documents)' : 'Guest Access (Limited - Access to Public Documents Only)'}
 
@@ -1175,15 +1175,20 @@ Cross-check: This aligns with the 'typical commercial bay' notation shown on She
     }
 
     // Build user message with optional image
-    let userMessage: any;
+    type TextContent = { type: 'text'; text: string };
+    type ImageContent = { type: 'image_url'; image_url: { url: string } };
+    type MessageContent = string | Array<TextContent | ImageContent>;
+    type ChatMessage = { role: 'user' | 'system'; content: MessageContent };
+
+    let userMessage: ChatMessage;
     if (image) {
       // Vision-enabled message with image
       userMessage = {
         role: 'user',
         content: [
-          ...(message ? [{ type: 'text', text: message }] : [{ type: 'text', text: 'Please analyze this image from the project.' }]),
+          ...(message ? [{ type: 'text' as const, text: message }] : [{ type: 'text' as const, text: 'Please analyze this image from the project.' }]),
           {
-            type: 'image_url',
+            type: 'image_url' as const,
             image_url: {
               url: image,
             },
@@ -1196,7 +1201,16 @@ Cross-check: This aligns with the 'typical commercial bay' notation shown on She
     }
 
     // Build API request body with optional reasoning_effort for GPT-5.2
-    const requestBody: any = {
+    interface LLMRequestBody {
+      model: string;
+      messages: ChatMessage[];
+      stream: boolean;
+      max_tokens: number;
+      web_search: boolean;
+      reasoning_effort?: string;
+    }
+
+    const requestBody: LLMRequestBody = {
       model: selectedModel, // Use complexity-based model selection
       messages: [
         { role: 'system', content: contextPrompt },
@@ -1228,7 +1242,7 @@ Cross-check: This aligns with the 'typical commercial bay' notation shown on She
       console.error('LLM API error response:', errorText);
       
       // Preserve the HTTP status code for better error handling on the client
-      const error: any = new Error(`LLM API request failed: ${errorText}`);
+      const error = new Error(`LLM API request failed: ${errorText}`) as Error & { status?: number };
       error.status = response.status;
       throw error;
     }
@@ -1332,7 +1346,7 @@ Cross-check: This aligns with the 'typical commercial bay' notation shown on She
                     // ========================================
                     try {
                       // Extract citation data from chunks used
-                      const citations = enrichedChunks.slice(0, 5).map((chunk: any) => ({
+                      const citations = enrichedChunks.slice(0, 5).map((chunk: EnhancedChunk) => ({
                         id: chunk.id,
                         documentName: chunk.documentName || 'Unknown Document',
                         documentId: chunk.documentId,
@@ -1391,16 +1405,17 @@ Cross-check: This aligns with the 'typical commercial bay' notation shown on She
         'Connection': 'keep-alive',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Chat API error:', error);
     console.error('Error details:', error instanceof Error ? error.message : String(error));
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    
+
     // Preserve the original HTTP status code if available (e.g., 503 from LLM API)
-    const statusCode = error.status || 500;
-    
+    const errorWithStatus = error as Error & { status?: number };
+    const statusCode = errorWithStatus.status || 500;
+
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to process chat request',
         details: error instanceof Error ? error.message : String(error)
       },

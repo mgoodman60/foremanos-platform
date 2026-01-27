@@ -3,6 +3,80 @@
 import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Loader2, Box } from 'lucide-react';
 
+// Autodesk Viewer Types
+interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface ViewerCamera {
+  position: Vector3;
+  target: Vector3;
+  up: Vector3;
+  fov: number;
+  isPerspective: boolean;
+}
+
+interface ViewerBounds {
+  min: Vector3;
+  max: Vector3;
+}
+
+interface PropertyResult {
+  dbId: number;
+  name: string;
+  externalId?: string;
+  properties: Array<{
+    displayName: string;
+    displayValue: string | number;
+    displayCategory: string;
+    attributeName: string;
+    type: number;
+    units?: string;
+    hidden: boolean;
+    precision?: number;
+  }>;
+}
+
+interface ViewerModel {
+  getObjectTree(callback: (tree: ObjectTreeNode | null) => void): void;
+  getInstanceTree(): InstanceTree | null;
+  getData(): ModelData;
+}
+
+interface ObjectTreeNode {
+  nodeId: number;
+  name: string;
+  children?: ObjectTreeNode[];
+}
+
+interface InstanceTree {
+  getRootId(): number;
+  getChildCount(dbId: number): number;
+  enumNodeChildren(dbId: number, callback: (childId: number) => void, recursive?: boolean): void;
+  getNodeName(dbId: number): string;
+}
+
+interface ModelData {
+  urn: string;
+  basePath: string;
+}
+
+interface ViewerSelectionEvent {
+  dbIdArray: number[];
+  fragIdsArray: number[];
+  nodeArray: number[];
+  model: ViewerModel;
+  type: string;
+  target: Autodesk.Viewing.GuiViewer3D;
+}
+
+interface ViewerEvent {
+  type: string;
+  target: Autodesk.Viewing.GuiViewer3D;
+}
+
 declare global {
   interface Window {
     Autodesk: typeof Autodesk;
@@ -15,52 +89,52 @@ declare namespace Autodesk {
       constructor(container: HTMLElement, config?: object);
       start(): number;
       finish(): void;
-      loadDocumentNode(document: Document, node: BubbleNode): Promise<any>;
+      loadDocumentNode(document: Document, node: BubbleNode): Promise<ViewerModel>;
       setTheme(theme: string): void;
-      fitToView(ids?: number[], model?: any, immediate?: boolean): void;
+      fitToView(ids?: number[], model?: ViewerModel, immediate?: boolean): void;
       setGhosting(value: boolean): void;
       showAll(): void;
       hideAll(): void;
       isolate(ids?: number[]): void;
-      getProperties(dbId: number, successCallback: (result: any) => void, errorCallback?: (error: any) => void): void;
+      getProperties(dbId: number, successCallback: (result: PropertyResult) => void, errorCallback?: (error: Error) => void): void;
       select(ids: number[]): void;
       clearSelection(): void;
       getSelection(): number[];
-      search(text: string, onSuccess: (dbIds: number[]) => void, onError: (error: any) => void, attributeNames?: string[]): void;
+      search(text: string, onSuccess: (dbIds: number[]) => void, onError: (error: Error) => void, attributeNames?: string[]): void;
       getHiddenNodes(): number[];
       hide(dbIds: number[]): void;
       show(dbIds: number[]): void;
       setBackgroundColor(r: number, g: number, b: number, r2: number, g2: number, b2: number): void;
-      addEventListener(event: string, callback: (e: any) => void): void;
-      removeEventListener(event: string, callback: (e: any) => void): void;
-      getExtension(id: string): Promise<any>;
-      loadExtension(id: string, options?: object): Promise<any>;
+      addEventListener(event: string, callback: (e: ViewerSelectionEvent | ViewerEvent) => void): void;
+      removeEventListener(event: string, callback: (e: ViewerSelectionEvent | ViewerEvent) => void): void;
+      getExtension(id: string): Promise<object>;
+      loadExtension(id: string, options?: object): Promise<object>;
       unloadExtension(id: string): boolean;
-      model: any;
+      model: ViewerModel;
       navigation: {
-        setRequestTransitionWithUp(position: any, target: any, fov?: number, up?: any, worldUp?: any): void;
-        getPosition(): any;
-        getTarget(): any;
-        getCamera(): any;
-        setView(position: any, target: any): void;
+        setRequestTransitionWithUp(position: Vector3, target: Vector3, fov?: number, up?: Vector3, worldUp?: Vector3): void;
+        getPosition(): Vector3;
+        getTarget(): Vector3;
+        getCamera(): ViewerCamera;
+        setView(position: Vector3, target: Vector3): void;
         setVerticalFov(fov: number): void;
         getVerticalFov(): number;
-        setPivotPoint(point: any, lockPivot?: boolean, lockPan?: boolean): void;
-        fitBounds(immediate: boolean, bounds: any): void;
+        setPivotPoint(point: Vector3, lockPivot?: boolean, lockPan?: boolean): void;
+        fitBounds(immediate: boolean, bounds: ViewerBounds): void;
       };
       impl: {
-        setViewFromCamera(camera: any): void;
+        setViewFromCamera(camera: ViewerCamera): void;
         invalidate(needsClear: boolean, needsRender?: boolean, overlayDirty?: boolean): void;
       };
       prefs: {
-        set(name: string, value: any): void;
-        get(name: string): any;
+        set(name: string, value: string | number | boolean): void;
+        get(name: string): string | number | boolean | undefined;
       };
       container: HTMLElement;
     }
 
     class Document {
-      static load(urn: string, onSuccess: (doc: Document) => void, onError: (error: any) => void, accessTokenFn: () => string): void;
+      static load(urn: string, onSuccess: (doc: Document) => void, onError: (error: Error) => void, accessTokenFn: () => string): void;
       getRoot(): BubbleNode;
     }
 
@@ -106,12 +180,12 @@ export interface ViewerHandle {
   hide: (ids: number[]) => void;
   show: (ids: number[]) => void;
   search: (text: string) => Promise<number[]>;
-  getProperties: (dbId: number) => Promise<any>;
-  setCamera: (position: any, target: any) => void;
-  getCamera: () => { position: any; target: any } | null;
-  loadExtension: (id: string, options?: object) => Promise<any>;
-  getExtension: (id: string) => Promise<any>;
-  getModelTree: () => Promise<any>;
+  getProperties: (dbId: number) => Promise<PropertyResult>;
+  setCamera: (position: Vector3, target: Vector3) => void;
+  getCamera: () => { position: Vector3; target: Vector3 } | null;
+  loadExtension: (id: string, options?: object) => Promise<object>;
+  getExtension: (id: string) => Promise<object>;
+  getModelTree: () => Promise<ObjectTreeNode>;
 }
 
 interface ForgeViewerEnhancedProps {
@@ -148,7 +222,7 @@ const ForgeViewerEnhanced = forwardRef<ViewerHandle, ForgeViewerEnhancedProps>(
       getProperties: (dbId: number) => new Promise((resolve, reject) => {
         viewerRef.current?.getProperties(dbId, resolve, reject);
       }),
-      setCamera: (position: any, target: any) => {
+      setCamera: (position: Vector3, target: Vector3) => {
         viewerRef.current?.navigation.setView(position, target);
       },
       getCamera: () => {
@@ -162,7 +236,7 @@ const ForgeViewerEnhanced = forwardRef<ViewerHandle, ForgeViewerEnhancedProps>(
       getExtension: (id: string) => viewerRef.current?.getExtension(id) || Promise.reject('No viewer'),
       getModelTree: () => new Promise((resolve, reject) => {
         if (!viewerRef.current?.model) return reject('No model loaded');
-        viewerRef.current.model.getObjectTree((tree: any) => {
+        viewerRef.current.model.getObjectTree((tree) => {
           if (tree) resolve(tree);
           else reject('Failed to get object tree');
         });
@@ -260,8 +334,9 @@ const ForgeViewerEnhanced = forwardRef<ViewerHandle, ForgeViewerEnhancedProps>(
           viewer.setBackgroundColor(22, 27, 34, 22, 27, 34);
 
           // Selection change handler
-          viewer.addEventListener(window.Autodesk.Viewing.SELECTION_CHANGED_EVENT, (e: any) => {
-            onSelectionChanged?.(e.dbIdArray || []);
+          viewer.addEventListener(window.Autodesk.Viewing.SELECTION_CHANGED_EVENT, (e) => {
+            const selectionEvent = e as ViewerSelectionEvent;
+            onSelectionChanged?.(selectionEvent.dbIdArray || []);
           });
 
           const documentId = `urn:${urn}`;

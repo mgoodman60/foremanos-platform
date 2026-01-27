@@ -1,6 +1,6 @@
 /**
  * Daily Report Finalization Service (Phase 6)
- * 
+ *
  * Handles automatic finalization of daily reports at 18:00 project time:
  * - Timezone-aware scheduling
  * - User activity detection and warnings
@@ -13,6 +13,84 @@
 import { prisma } from './db';
 import { getFileUrl, generatePresignedUploadUrl } from './s3';
 import { format, parseISO } from 'date-fns';
+import type { Prisma } from '@prisma/client';
+
+// =============================================
+// TYPE DEFINITIONS FOR JSON FIELDS
+// =============================================
+
+/** Work entry by trade in daily report */
+interface WorkByTradeEntry {
+  trade: string;
+  company?: string;
+  description?: string;
+  location?: string;
+  crewSize?: number;
+}
+
+/** Crew entry in daily report */
+interface CrewEntry {
+  trade?: string;
+  company?: string;
+  count: number;
+}
+
+/** Report data stored in conversation JSON field */
+interface ReportData {
+  workByTrade?: WorkByTradeEntry[];
+  crew?: CrewEntry[];
+  notes?: string;
+  [key: string]: unknown;
+}
+
+/** Photo data stored in conversation JSON field */
+interface PhotoEntry {
+  id: string;
+  cloud_storage_path: string;
+  isPublic?: boolean;
+  caption?: string;
+  location?: string;
+  aiDescription?: string;
+  aiConfidence?: number;
+}
+
+/** Weather snapshot data */
+interface WeatherSnapshot {
+  time: string;
+  temperature?: number;
+  conditions?: string;
+  humidity?: number;
+  windSpeed?: number;
+}
+
+/** Material delivery entry */
+interface MaterialDelivery {
+  sub?: string;
+  material: string;
+  quantity?: number;
+}
+
+/** Equipment data entry */
+interface EquipmentEntry {
+  name: string;
+  type?: string;
+}
+
+/** Schedule update entry */
+interface ScheduleUpdateEntry {
+  activity: string;
+  plannedStatus?: string;
+  actualStatus?: string;
+}
+
+/** Quantity calculation entry */
+interface QuantityCalculation {
+  type: string;
+  description?: string;
+  location?: string;
+  actualQuantity?: number;
+  unit?: string;
+}
 
 // Helper functions to replace date-fns-tz
 function toZonedTime(date: Date, timezone: string): Date {
@@ -72,9 +150,11 @@ export async function hasReportData(conversationId: string): Promise<boolean> {
 
   // Check if there's meaningful data
   const hasMessages = (conversation.ChatMessage?.length || 0) > 1;
-  const hasReportData = !!conversation.reportData && Object.keys(conversation.reportData as any).length > 0;
+  const reportData = conversation.reportData as ReportData | null;
+  const hasReportData = !!reportData && Object.keys(reportData).length > 0;
   const hasWeather = !!conversation.weatherSnapshots;
-  const hasPhotos = !!conversation.photos && (conversation.photos as any[]).length > 0;
+  const photos = conversation.photos as PhotoEntry[] | null;
+  const hasPhotos = !!photos && photos.length > 0;
   const hasSchedule = !!conversation.scheduleUpdates;
   const hasCalculations = !!conversation.quantityCalculations;
 
@@ -138,7 +218,7 @@ async function generateReportPDF(conversationId: string): Promise<string> {
     : format(new Date(), 'yyyy-MM-dd');
 
   // Prepare photo URLs (convert S3 paths to signed URLs)
-  const photos = conversation.photos as any[] || [];
+  const photos = (conversation.photos as PhotoEntry[] | null) || [];
   const photoData = await Promise.all(
     photos.map(async (photo) => {
       const url = await getFileUrl(photo.cloud_storage_path, photo.isPublic || false);
@@ -160,8 +240,8 @@ async function generateReportPDF(conversationId: string): Promise<string> {
   }
 
   // Prepare work entries
-  const reportData = conversation.reportData as any || {};
-  const workPerformed = (reportData.workByTrade || []).map((w: any) => ({
+  const reportData = (conversation.reportData as ReportData | null) || {};
+  const workPerformed = (reportData.workByTrade || []).map((w) => ({
     trade: w.trade,
     company: w.company,
     description: w.description,
@@ -170,10 +250,10 @@ async function generateReportPDF(conversationId: string): Promise<string> {
   }));
 
   // Calculate total crew size
-  const totalCrewSize = (reportData.crew || []).reduce((sum: number, c: any) => sum + (c.count || 0), 0);
+  const totalCrewSize = (reportData.crew || []).reduce((sum, c) => sum + (c.count || 0), 0);
 
   // Prepare weather snapshots
-  const weatherSnapshots = (conversation.weatherSnapshots as any[] || []).map((w: any) => ({
+  const weatherSnapshots = ((conversation.weatherSnapshots as WeatherSnapshot[] | null) || []).map((w) => ({
     time: w.time,
     temperature: w.temperature,
     conditions: w.conditions,
@@ -182,27 +262,27 @@ async function generateReportPDF(conversationId: string): Promise<string> {
   }));
 
   // Prepare material deliveries
-  const materialDeliveries = (conversation.materialDeliveries as any[] || []).map((m: any) => ({
+  const materialDeliveries = ((conversation.materialDeliveries as MaterialDelivery[] | null) || []).map((m) => ({
     sub: m.sub,
     material: m.material,
     quantity: m.quantity,
   }));
 
   // Prepare equipment
-  const equipment = (conversation.equipmentData as any[] || []).map((e: any) => ({
+  const equipment = ((conversation.equipmentData as EquipmentEntry[] | null) || []).map((e) => ({
     name: e.name,
     type: e.type,
   }));
 
   // Prepare schedule updates
-  const scheduleUpdates = (conversation.scheduleUpdates as any[] || []).map((s: any) => ({
+  const scheduleUpdates = ((conversation.scheduleUpdates as ScheduleUpdateEntry[] | null) || []).map((s) => ({
     activity: s.activity,
     plannedStatus: s.plannedStatus,
     actualStatus: s.actualStatus,
   }));
 
   // Prepare quantity calculations
-  const quantityCalculations = (conversation.quantityCalculations as any[] || []).map((q: any) => ({
+  const quantityCalculations = ((conversation.quantityCalculations as QuantityCalculation[] | null) || []).map((q) => ({
     type: q.type,
     description: q.description,
     location: q.location,
@@ -236,7 +316,7 @@ async function generateReportPDF(conversationId: string): Promise<string> {
 
   // Generate PDF
   const pdfBuffer = await ReactPDF.renderToBuffer(
-    React.createElement(DailyReportPDF, { data: pdfData }) as any
+    React.createElement(DailyReportPDF, { data: pdfData }) as React.ReactElement
   );
 
   // Upload to S3
@@ -399,7 +479,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 2. Weather data
     if (conversation.weatherSnapshots) {
-      const snapshots = conversation.weatherSnapshots as any[];
+      const snapshots = conversation.weatherSnapshots as WeatherSnapshot[];
       snapshots.forEach((w) => {
         chunks.push(
           `Weather at ${w.time}: ${w.temperature}°F, ${w.conditions}, Humidity: ${w.humidity}%, Wind: ${w.windSpeed} mph`
@@ -409,10 +489,10 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 3. Work performed
     if (conversation.reportData) {
-      const data = conversation.reportData as any;
-      
+      const data = conversation.reportData as ReportData;
+
       if (data.workByTrade) {
-        data.workByTrade.forEach((w: any) => {
+        data.workByTrade.forEach((w) => {
           chunks.push(
             `Work performed by ${w.trade} (${w.company}): ${w.description} at ${w.location || 'site'}`
           );
@@ -420,7 +500,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
       }
 
       if (data.crew) {
-        data.crew.forEach((c: any) => {
+        data.crew.forEach((c) => {
           chunks.push(`Crew: ${c.company} with ${c.count} workers`);
         });
       }
@@ -428,7 +508,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 4. Photo captions
     if (conversation.photos) {
-      const photos = conversation.photos as any[];
+      const photos = conversation.photos as PhotoEntry[];
       photos.forEach((p) => {
         if (p.caption) {
           chunks.push(`Photo: ${p.caption} (Location: ${p.location || 'unknown'})`);
@@ -438,7 +518,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 5. Schedule updates
     if (conversation.scheduleUpdates) {
-      const updates = conversation.scheduleUpdates as any[];
+      const updates = conversation.scheduleUpdates as ScheduleUpdateEntry[];
       updates.forEach((u) => {
         chunks.push(
           `Schedule update: ${u.activity} - Planned: ${u.plannedStatus}, Actual: ${u.actualStatus}`
@@ -448,7 +528,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 6. Quantity calculations
     if (conversation.quantityCalculations) {
-      const calcs = conversation.quantityCalculations as any[];
+      const calcs = conversation.quantityCalculations as QuantityCalculation[];
       calcs.forEach((c) => {
         chunks.push(
           `Quantity: ${c.description} at ${c.location} - ${c.actualQuantity} ${c.unit}`
@@ -555,8 +635,8 @@ async function processScheduleUpdatesAfterFinalization(
     });
 
     const reportContent = messages
-      .filter((m: any) => m.userRole === 'user')
-      .map((m: any) => m.message)
+      .filter((m) => m.userRole === 'user')
+      .map((m) => m.message)
       .join('\n\n');
 
     if (!reportContent) {
@@ -988,7 +1068,7 @@ export async function getReportsReadyForFinalization(): Promise<string[]> {
       select: { id: true },
     });
 
-    readyConversations.push(...conversations.map((c: any) => c.id));
+    readyConversations.push(...conversations.map((c) => c.id));
   }
 
   return readyConversations;

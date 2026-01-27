@@ -79,12 +79,31 @@ interface LaborMaterialReviewProps {
   projectSlug: string;
 }
 
+interface LaborUpdates {
+  workerName: string;
+  hoursWorked: number;
+  hourlyRate: number;
+  totalCost: number;
+  description: string | null;
+  budgetItemId?: string;
+}
+
+interface MaterialUpdates {
+  description: string;
+  quantity: number | null;
+  unit: string | null;
+  actualCost: number | null;
+  budgetItemId?: string;
+}
+
+type ReviewUpdates = LaborUpdates | MaterialUpdates;
+
 export default function LaborMaterialReview({ projectSlug }: LaborMaterialReviewProps) {
   const [data, setData] = useState<ReviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('labor-pending');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [editModal, setEditModal] = useState<{ type: 'labor' | 'material'; item: any } | null>(null);
+  const [editModal, setEditModal] = useState<{ type: 'labor' | 'material'; item: LaborEntry | MaterialEntry } | null>(null);
   const [processing, setProcessing] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -155,7 +174,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
     }
   };
 
-  const handleEdit = async (type: 'labor' | 'material', id: string, updates: any) => {
+  const handleEdit = async (type: 'labor' | 'material', id: string, updates: ReviewUpdates) => {
     setProcessing(true);
     try {
       const res = await fetch(`/api/projects/${projectSlug}/budget/review/${id}`, {
@@ -644,10 +663,10 @@ function EditEntryModal({
   processing
 }: {
   type: 'labor' | 'material';
-  item: any;
+  item: LaborEntry | MaterialEntry;
   budgetItems: BudgetItem[];
   onClose: () => void;
-  onSave: (type: 'labor' | 'material', id: string, updates: any) => void;
+  onSave: (type: 'labor' | 'material', id: string, updates: ReviewUpdates) => void;
   processing: boolean;
 }) {
   const [formData, setFormData] = useState(item);

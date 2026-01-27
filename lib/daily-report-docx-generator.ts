@@ -6,6 +6,68 @@
 
 import PizZip from 'pizzip';
 
+// Input types for formatDailyReportForExport
+interface ReportInput {
+  id: string;
+  reportNumber: number;
+  reportDate: Date;
+  status: string;
+  createdByUser?: { username?: string; name?: string };
+  submittedAt?: Date;
+  approvedAt?: Date;
+  approvedBy?: string;
+  weatherCondition?: string;
+  temperatureHigh?: number;
+  temperatureLow?: number;
+  humidity?: number;
+  precipitation?: number;
+  windSpeed?: number;
+  weatherNotes?: string;
+  workPerformed?: string;
+  workPlanned?: string;
+  delaysEncountered?: string;
+  delayHours?: number;
+  delayReason?: string;
+  safetyIncidents?: number;
+  safetyNotes?: string;
+  materialsReceived?: Array<{ description?: string; quantity?: string | number; supplier?: string }>;
+  visitors?: Array<{ name?: string; company?: string; timeIn?: string; timeOut?: string }>;
+}
+
+interface ProjectInput {
+  name: string;
+  slug: string;
+  address?: string;
+  clientName?: string;
+}
+
+interface LaborEntry {
+  trade?: string;
+  subcontractor?: string;
+  headcount?: number;
+  hoursWorked?: number;
+  hourlyRate?: number;
+  notes?: string;
+}
+
+interface EquipmentEntry {
+  equipmentName?: string;
+  name?: string;
+  hoursUsed?: number;
+  hours?: number;
+  status?: string;
+  notes?: string;
+}
+
+interface ProgressEntry {
+  area?: string;
+  location?: string;
+  activity?: string;
+  description?: string;
+  percentComplete?: number;
+  notes?: string;
+}
+
 export interface DailyReportData {
   project: {
     name: string;
@@ -324,11 +386,11 @@ function generateDocxContent(textContent: string, data: DailyReportData): Uint8A
  * Format daily report data for export
  */
 export function formatDailyReportForExport(
-  report: any,
-  project: any,
-  laborEntries: any[],
-  equipmentEntries: any[],
-  progressEntries: any[]
+  report: ReportInput,
+  project: ProjectInput,
+  laborEntries: LaborEntry[],
+  equipmentEntries: EquipmentEntry[],
+  progressEntries: ProgressEntry[]
 ): DailyReportData {
   return {
     project: {
@@ -382,14 +444,14 @@ export function formatDailyReportForExport(
       notes: entry.notes || undefined,
     })),
     materials: Array.isArray(report.materialsReceived)
-      ? report.materialsReceived.map((m: any) => ({
+      ? report.materialsReceived.map((m) => ({
           description: m.description || 'Unknown',
           quantity: m.quantity || '-',
           supplier: m.supplier || undefined,
         }))
       : [],
     visitors: Array.isArray(report.visitors)
-      ? report.visitors.map((v: any) => ({
+      ? report.visitors.map((v) => ({
           name: v.name || 'Unknown',
           company: v.company || undefined,
           timeIn: v.timeIn || undefined,

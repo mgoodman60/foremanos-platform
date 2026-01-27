@@ -4,6 +4,30 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry-util';
 
+interface ProjectWithCounts {
+  id: string;
+  name: string;
+  slug: string;
+  guestUsername: string | null;
+  ownerId: string;
+  status: string;
+  createdAt: Date;
+  _count: {
+    Document: number;
+    ProjectMember: number;
+  };
+  User_Project_ownerIdToUser: {
+    username: string;
+  } | null;
+  ProjectMember?: Array<{
+    role: string;
+  }>;
+}
+
+interface PrismaError extends Error {
+  code?: string;
+}
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -21,7 +45,7 @@ export async function GET() {
     const userRole = session.user.role;
 
     // Fetch owned projects (where user is the owner)
-    const ownedProjects: any[] = await withDatabaseRetry(
+    const ownedProjects: ProjectWithCounts[] = await withDatabaseRetry(
       () => prisma.project.findMany({
         where: { ownerId: userId },
         include: {
@@ -41,7 +65,7 @@ export async function GET() {
     );
 
     // Fetch shared projects (where user is a member but not owner)
-    const sharedProjects: any[] = await withDatabaseRetry(
+    const sharedProjects: ProjectWithCounts[] = await withDatabaseRetry(
       () => prisma.project.findMany({
         where: {
           ProjectMember: {
@@ -72,7 +96,7 @@ export async function GET() {
     );
 
     // If admin, also fetch all projects
-    let allProjects: any[] = [];
+    let allProjects: ProjectWithCounts[] = [];
     if (userRole === 'admin') {
       allProjects = await withDatabaseRetry(
         () => prisma.project.findMany({
@@ -93,7 +117,7 @@ export async function GET() {
       );
     }
 
-    const formatProject = (project: any, userMemberRole?: string) => ({
+    const formatProject = (project: ProjectWithCounts, userMemberRole?: string) => ({
       id: project.id,
       name: project.name,
       slug: project.slug,
@@ -107,8 +131,8 @@ export async function GET() {
       status: project.status,
     });
 
-    const formattedOwnedProjects = ownedProjects.map((p: any) => formatProject(p, 'owner'));
-    const formattedSharedProjects = sharedProjects.map((p: any) => 
+    const formattedOwnedProjects = ownedProjects.map((p) => formatProject(p, 'owner'));
+    const formattedSharedProjects = sharedProjects.map((p) =>
       formatProject(p, p.ProjectMember?.[0]?.role)
     );
 
@@ -136,25 +160,26 @@ export async function GET() {
     return NextResponse.json({
       ownedProjects: formattedOwnedProjects,
       sharedProjects: formattedSharedProjects,
-      projects: userRole === 'admin' ? allProjects.map((p: any) => formatProject(p)) : 
+      projects: userRole === 'admin' ? allProjects.map((p) => formatProject(p)) : 
                 [...formattedOwnedProjects, ...formattedSharedProjects], // backward compatibility
       stats: {
         totalProjects: formattedOwnedProjects.length + formattedSharedProjects.length,
         totalDocuments,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Error fetching dashboard data:', error);
-    
+
     // Return more specific error messages
-    if (error?.code?.startsWith('P1')) {
-      return NextResponse.json({ 
-        error: 'Database connection error. Please try again.' 
+    const prismaError = error as PrismaError;
+    if (prismaError?.code?.startsWith('P1')) {
+      return NextResponse.json({
+        error: 'Database connection error. Please try again.'
       }, { status: 503 });
     }
-    
-    return NextResponse.json({ 
-      error: 'Internal server error' 
+
+    return NextResponse.json({
+      error: 'Internal server error'
     }, { status: 500 });
   }
 }

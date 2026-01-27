@@ -69,8 +69,8 @@ async function ensureConnection(retryDelay = 1000) {
     connectionAttempts = 0 // Reset on success
     console.log('[DB] Connected successfully')
     
-  } catch (error: any) {
-    console.error('[DB] Connection error:', error.message)
+  } catch (error: unknown) {
+    console.error('[DB] Connection error:', error instanceof Error ? error.message : String(error))
     isConnected = false
     
     // Exponential backoff for retries

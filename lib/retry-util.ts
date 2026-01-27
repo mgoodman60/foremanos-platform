@@ -10,8 +10,8 @@ export interface RetryOptions {
   initialDelay?: number;
   maxDelay?: number;
   backoffFactor?: number;
-  shouldRetry?: (error: any) => boolean;
-  onRetry?: (attempt: number, error: any) => void;
+  shouldRetry?: (error: unknown) => boolean;
+  onRetry?: (attempt: number, error: unknown) => void;
 }
 
 const DEFAULT_OPTIONS: Required<RetryOptions> = {
@@ -19,29 +19,30 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
   initialDelay: 500,
   maxDelay: 5000,
   backoffFactor: 2,
-  shouldRetry: (error: any) => {
+  shouldRetry: (error: unknown) => {
+    const err = error as Error & { status?: number };
     // Retry on connection errors, timeouts, and 5xx errors
-    if (error?.message?.includes('connect') || 
-        error?.message?.includes('timeout') ||
-        error?.message?.includes('ECONNREFUSED') ||
-        error?.message?.includes('upstream')) {
+    if (err?.message?.includes('connect') ||
+        err?.message?.includes('timeout') ||
+        err?.message?.includes('ECONNREFUSED') ||
+        err?.message?.includes('upstream')) {
       return true;
     }
-    
+
     // Retry on HTTP 5xx errors
-    if (error?.status >= 500 && error?.status < 600) {
+    if (err?.status !== undefined && err.status >= 500 && err.status < 600) {
       return true;
     }
-    
+
     // Retry on network errors
-    if (error?.name === 'NetworkError' || error?.name === 'TypeError') {
+    if (err?.name === 'NetworkError' || err?.name === 'TypeError') {
       return true;
     }
-    
+
     return false;
   },
   onRetry: (attempt, error) => {
-    console.log(`[Retry] Attempt ${attempt} failed:`, error.message);
+    console.log(`[Retry] Attempt ${attempt} failed:`, error instanceof Error ? error.message : String(error));
   },
 };
 
@@ -60,12 +61,12 @@ export async function withRetry<T>(
   options: RetryOptions = {}
 ): Promise<T> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  let lastError: any;
-  
+  let lastError: unknown;
+
   for (let attempt = 0; attempt <= opts.maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
       
       // Don't retry if we've exhausted attempts or error is not retryable
@@ -102,7 +103,7 @@ export async function fetchWithRetry(
       
       // Throw on 5xx errors so they can be retried
       if (response.status >= 500 && response.status < 600) {
-        const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as Error & { status: number };
         error.status = response.status;
         throw error;
       }
@@ -125,19 +126,20 @@ export async function withDatabaseRetry<T>(
     {
       maxRetries: 3,
       initialDelay: 1000,
-      shouldRetry: (error: any) => {
+      shouldRetry: (error: unknown) => {
+        const err = error as Error & { code?: string };
         // Retry on Prisma connection errors
-        if (error?.code === 'P1001' || // Can't reach database
-            error?.code === 'P1002' || // Timeout
-            error?.code === 'P1017' || // Connection lost
-            error?.message?.includes('connect') ||
-            error?.message?.includes('timeout')) {
+        if (err?.code === 'P1001' || // Can't reach database
+            err?.code === 'P1002' || // Timeout
+            err?.code === 'P1017' || // Connection lost
+            err?.message?.includes('connect') ||
+            err?.message?.includes('timeout')) {
           return true;
         }
         return false;
       },
       onRetry: (attempt, error) => {
-        console.log(`[DB Retry] ${operationName} - Attempt ${attempt} failed:`, error.message);
+        console.log(`[DB Retry] ${operationName} - Attempt ${attempt} failed:`, error instanceof Error ? error.message : String(error));
       },
     }
   );

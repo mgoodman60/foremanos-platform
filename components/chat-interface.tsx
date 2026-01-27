@@ -143,23 +143,23 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           const suggestions: string[] = [];
           
           // Check for specific document types and generate relevant questions
-          const hasSchedule = documents.some((doc: any) => 
+          const hasSchedule = documents.some((doc: { name: string }) => 
             doc.name.toLowerCase().includes('schedule') || 
             doc.name.toLowerCase().includes('timeline')
           );
-          const hasPlans = documents.some((doc: any) => 
+          const hasPlans = documents.some((doc: { name: string }) => 
             doc.name.toLowerCase().includes('plan') || 
             doc.name.toLowerCase().includes('blueprint')
           );
-          const hasBudget = documents.some((doc: any) => 
+          const hasBudget = documents.some((doc: { name: string }) => 
             doc.name.toLowerCase().includes('budget') || 
             doc.name.toLowerCase().includes('cost')
           );
-          const hasSpecs = documents.some((doc: any) => 
+          const hasSpecs = documents.some((doc: { name: string }) => 
             doc.name.toLowerCase().includes('spec') || 
             doc.name.toLowerCase().includes('requirement')
           );
-          const hasGeotech = documents.some((doc: any) => 
+          const hasGeotech = documents.some((doc: { name: string }) => 
             doc.name.toLowerCase().includes('geotech') || 
             doc.name.toLowerCase().includes('soil')
           );
@@ -521,9 +521,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       // Reload conversation to get updated finalized state
       await loadConversationMessages(activeConversationId);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[FINALIZATION] Error:', error);
-      toast.error(error.message || 'Failed to submit report', { id: toastId });
+      toast.error(error instanceof Error ? error.message : 'Failed to submit report', { id: toastId });
     } finally {
       setIsFinalizingReport(false);
     }
@@ -556,7 +556,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       
       // Map messages from database format (message + response) to UI format
       const loadedMessages: Message[] = [];
-      data.messages.forEach((msg: any) => {
+      data.messages.forEach((msg: { id: string; message: string; response: string; createdAt: string; hasImage?: boolean }) => {
         // Add user message if it exists and is not empty
         if (msg.message && msg.message.trim()) {
           loadedMessages.push({

@@ -151,7 +151,7 @@ export default function TakeoffsPage() {
       if (!res.ok) throw new Error('Failed to load takeoffs');
       const data = await res.json();
       setTakeoffs(data.takeoffs);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading takeoffs:', error);
       toast.error('Failed to load material takeoffs');
     } finally {
@@ -165,7 +165,7 @@ export default function TakeoffsPage() {
       if (!res.ok) throw new Error('Failed to load line items');
       const data = await res.json();
       setLineItems(data.takeoff.lineItems || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading line items:', error);
       toast.error('Failed to load line items');
     }
@@ -195,7 +195,7 @@ export default function TakeoffsPage() {
       
       toast.success(`Generated ${data.lineItemCount} items from ${data.roomCount} rooms!`, { id: 'generate-takeoffs' });
       loadTakeoffs();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating takeoffs:', error);
       toast.error(error.message || 'Failed to generate takeoffs', { id: 'generate-takeoffs' });
     } finally {
@@ -241,7 +241,7 @@ export default function TakeoffsPage() {
       );
       setShowEnhancedModal(false);
       loadTakeoffs();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error in enhanced extraction:', error);
       toast.error(error.message || 'Failed to extract takeoffs', { id: 'enhanced-extract' });
     } finally {
@@ -267,7 +267,7 @@ export default function TakeoffsPage() {
       
       toast.success(verified ? 'Item verified' : 'Item rejected');
       loadLineItems(selectedTakeoff.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error verifying line item:', error);
       toast.error('Failed to update verification status');
     }
@@ -292,7 +292,7 @@ export default function TakeoffsPage() {
       setShowCreateModal(false);
       setNewTakeoff({ name: '', description: '', status: 'draft' });
       loadTakeoffs();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating takeoff:', error);
       toast.error('Failed to create takeoff');
     }
@@ -310,7 +310,7 @@ export default function TakeoffsPage() {
       
       toast.success('Takeoff deleted successfully');
       loadTakeoffs();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting takeoff:', error);
       toast.error('Failed to delete takeoff');
     }
@@ -329,7 +329,7 @@ export default function TakeoffsPage() {
       if (selectedTakeoff?.id === takeoffId) {
         setSelectedTakeoff({ ...selectedTakeoff, status: 'approved' });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error approving takeoff:', error);
       toast.error('Failed to approve takeoff');
     }
@@ -367,7 +367,7 @@ export default function TakeoffsPage() {
         verified: false
       });
       loadLineItems(selectedTakeoff.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding line item:', error);
       toast.error('Failed to add line item');
     }
@@ -391,7 +391,7 @@ export default function TakeoffsPage() {
       toast.success('Line item updated successfully');
       setEditingLineItem(null);
       loadLineItems(selectedTakeoff.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating line item:', error);
       toast.error('Failed to update line item');
     }
@@ -410,7 +410,7 @@ export default function TakeoffsPage() {
       
       toast.success('Line item deleted successfully');
       loadLineItems(selectedTakeoff.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting line item:', error);
       toast.error('Failed to delete line item');
     }
@@ -456,7 +456,7 @@ export default function TakeoffsPage() {
       URL.revokeObjectURL(url);
       
       toast.success('Export completed successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error exporting:', error);
       toast.error('Failed to export takeoff');
     } finally {

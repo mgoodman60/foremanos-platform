@@ -4,8 +4,91 @@
  */
 
 import { prisma } from './db';
-// ProcurementStatus type is inferred from Prisma
+import type { Prisma, ProcurementStatus } from '@prisma/client';
 import { addMonths, addWeeks, startOfMonth, endOfMonth, startOfWeek, endOfWeek, format, differenceInMonths, differenceInWeeks, isBefore, isAfter, eachMonthOfInterval, eachWeekOfInterval } from 'date-fns';
+
+// =============================================
+// TYPE DEFINITIONS
+// =============================================
+
+/** Payment application line item for creation */
+interface PaymentApplicationLineItem {
+  budgetItemId: string;
+  costCode: string;
+  description: string;
+  scheduledValue: number;
+  fromPreviousApp: number;
+  thisApplication: number;
+  materialsStored: number;
+  totalCompleted: number;
+  percentComplete: number;
+  balanceToFinish: number;
+  retainage: number;
+}
+
+/** Payment application with items */
+interface PaymentApplicationWithItems {
+  id: string;
+  projectId: string;
+  budgetId: string;
+  applicationNumber: number;
+  periodStart: Date;
+  periodEnd: Date;
+  scheduledValue: number;
+  previouslyApproved: number;
+  currentPeriod: number;
+  totalCompleted: number;
+  retainage: number;
+  retainagePercent: number;
+  netDue: number;
+  status: string;
+  createdBy: string;
+  items: Array<{
+    id: string;
+    budgetItemId: string;
+    costCode: string;
+    description: string;
+    scheduledValue: number;
+    fromPreviousApp: number;
+    thisApplication: number;
+    materialsStored: number;
+    totalCompleted: number;
+    percentComplete: number;
+    balanceToFinish: number;
+    retainage: number;
+  }>;
+}
+
+/** Cash flow forecast period data */
+interface CashFlowForecastPeriod {
+  projectId: string;
+  periodDate: Date;
+  periodType: 'WEEKLY' | 'MONTHLY';
+  plannedInflow: number;
+  actualInflow: number;
+  forecastInflow: number;
+  plannedOutflow: number;
+  actualOutflow: number;
+  forecastOutflow: number;
+  plannedNet: number;
+  actualNet: number;
+  forecastNet: number;
+  cumulativePlanned: number;
+  cumulativeActual: number;
+  cumulativeForecast: number;
+  isLocked: boolean;
+  period?: string;
+}
+
+/** Payment application update data */
+interface PaymentApplicationUpdateData {
+  status: string;
+  approvedAt?: Date;
+  approvedBy?: string;
+  reviewedAt?: Date;
+  reviewedBy?: string;
+  rejectionReason?: string;
+}
 
 // =============================================
 // PAYMENT APPLICATION MANAGEMENT
@@ -16,7 +99,7 @@ export async function generatePaymentApplication(
   periodStart: Date,
   periodEnd: Date,
   userId: string
-): Promise<any> {
+): Promise<PaymentApplicationWithItems> {
   // Get project and budget
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -47,7 +130,7 @@ export async function generatePaymentApplication(
   const previouslyApproved = lastApp?.totalCompleted || 0;
 
   // Calculate current period progress from budget items
-  const items: any[] = [];
+  const items: PaymentApplicationLineItem[] = [];
   let totalScheduledValue = 0;
   let totalCurrentPeriod = 0;
   let totalMaterialsStored = 0;
@@ -60,7 +143,7 @@ export async function generatePaymentApplication(
         where: { taskId: { in: budgetItem.linkedTaskIds } }
       });
       percentComplete = tasks.length > 0
-        ? tasks.reduce((sum: number, t: any) => sum + t.percentComplete, 0) / tasks.length
+        ? tasks.reduce((sum, t) => sum + t.percentComplete, 0) / tasks.length
         : 0;
     } else {
       // Estimate from actual vs budgeted costs
@@ -125,7 +208,7 @@ export async function generatePaymentApplication(
       status: 'DRAFT',
       createdBy: userId,
       items: {
-        create: items.map((item: any) => ({
+        create: items.map((item) => ({
           budgetItemId: item.budgetItemId,
           costCode: item.costCode,
           description: item.description,
@@ -157,7 +240,7 @@ export async function reviewPaymentApplication(
   const now = new Date();
 
   let status: string;
-  let data: any = {};
+  let data: PaymentApplicationUpdateData;
 
   switch (action) {
     case 'approve':
@@ -211,24 +294,24 @@ export async function getPaymentApplicationSummary(projectId: string) {
   });
 
   const totalBilled = payApps
-    .filter((pa: any) => pa.status !== 'REJECTED')
-    .reduce((sum: number, pa: any) => sum + pa.currentPeriod, 0);
+    .filter((pa) => pa.status !== 'REJECTED')
+    .reduce((sum, pa) => sum + pa.currentPeriod, 0);
 
   const totalApproved = payApps
-    .filter((pa: any) => ['APPROVED', 'PARTIALLY_PAID', 'PAID'].includes(pa.status))
-    .reduce((sum: number, pa: any) => sum + pa.currentPeriod, 0);
+    .filter((pa) => ['APPROVED', 'PARTIALLY_PAID', 'PAID'].includes(pa.status))
+    .reduce((sum, pa) => sum + pa.currentPeriod, 0);
 
   const totalPaid = payApps
-    .filter((pa: any) => pa.status === 'PAID')
-    .reduce((sum: number, pa: any) => sum + pa.netDue, 0);
+    .filter((pa) => pa.status === 'PAID')
+    .reduce((sum, pa) => sum + pa.netDue, 0);
 
   const totalRetainage = payApps
-    .filter((pa: any) => pa.status !== 'REJECTED')
-    .reduce((sum: number, pa: any) => sum + pa.retainage, 0);
+    .filter((pa) => pa.status !== 'REJECTED')
+    .reduce((sum, pa) => sum + pa.retainage, 0);
 
   const pendingPayment = payApps
-    .filter((pa: any) => ['APPROVED', 'PARTIALLY_PAID'].includes(pa.status))
-    .reduce((sum: number, pa: any) => sum + pa.netDue, 0);
+    .filter((pa) => ['APPROVED', 'PARTIALLY_PAID'].includes(pa.status))
+    .reduce((sum, pa) => sum + pa.netDue, 0);
 
   return {
     totalContractValue: budget?.totalBudget || 0,
@@ -252,7 +335,7 @@ export async function generateCashFlowForecast(
   projectId: string,
   periodType: 'WEEKLY' | 'MONTHLY' = 'MONTHLY',
   periodsAhead: number = 12
-): Promise<any[]> {
+): Promise<CashFlowForecastPeriod[]> {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
@@ -290,7 +373,7 @@ export async function generateCashFlowForecast(
     where: { projectId, periodType }
   });
 
-  const forecasts: any[] = [];
+  const forecasts: CashFlowForecastPeriod[] = [];
   let cumulativePlanned = 0;
   let cumulativeActual = 0;
   let cumulativeForecast = 0;
@@ -321,10 +404,9 @@ export async function generateCashFlowForecast(
       });
 
       // Sum budgeted costs for tasks in period
-      plannedOutflow = tasksInPeriod.reduce((sum: number, task: any) => {
+      plannedOutflow = tasksInPeriod.reduce((sum, task) => {
         const taskCost = task.budgetedCost || 0;
         // Prorate cost if task spans multiple periods
-        const taskDuration = task.duration || 1;
         const totalPeriods = periodType === 'MONTHLY'
           ? differenceInMonths(new Date(task.endDate), new Date(task.startDate)) || 1
           : differenceInWeeks(new Date(task.endDate), new Date(task.startDate)) || 1;
@@ -351,7 +433,7 @@ export async function generateCashFlowForecast(
           status: { in: ['APPROVED', 'PAID'] }
         }
       });
-      actualOutflow = invoices.reduce((sum: number, inv: any) => sum + inv.amount, 0);
+      actualOutflow = invoices.reduce((sum, inv) => sum + inv.amount, 0);
     }
 
     // Calculate planned inflow from payment apps
@@ -375,7 +457,7 @@ export async function generateCashFlowForecast(
           status: 'PAID'
         }
       });
-      actualInflow = payApps.reduce((sum: number, pa: any) => sum + pa.netDue, 0);
+      actualInflow = payApps.reduce((sum, pa) => sum + pa.netDue, 0);
     }
 
     // Forecast (blend of planned and actual trends)
@@ -443,14 +525,14 @@ export async function getCashFlowSummary(projectId: string) {
   });
 
   const now = new Date();
-  const pastPeriods = forecasts.filter((f: any) => isBefore(new Date(f.periodDate), now));
-  const futurePeriods = forecasts.filter((f: any) => isAfter(new Date(f.periodDate), now));
+  const pastPeriods = forecasts.filter((f) => isBefore(new Date(f.periodDate), now));
+  const futurePeriods = forecasts.filter((f) => isAfter(new Date(f.periodDate), now));
 
   return {
-    totalPlannedInflow: forecasts.reduce((sum: number, f: any) => sum + f.plannedInflow, 0),
-    totalActualInflow: pastPeriods.reduce((sum: number, f: any) => sum + f.actualInflow, 0),
-    totalPlannedOutflow: forecasts.reduce((sum: number, f: any) => sum + f.plannedOutflow, 0),
-    totalActualOutflow: pastPeriods.reduce((sum: number, f: any) => sum + f.actualOutflow, 0),
+    totalPlannedInflow: forecasts.reduce((sum, f) => sum + f.plannedInflow, 0),
+    totalActualInflow: pastPeriods.reduce((sum, f) => sum + f.actualInflow, 0),
+    totalPlannedOutflow: forecasts.reduce((sum, f) => sum + f.plannedOutflow, 0),
+    totalActualOutflow: pastPeriods.reduce((sum, f) => sum + f.actualOutflow, 0),
     projectedNetCash: forecasts[forecasts.length - 1]?.cumulativeForecast || 0,
     currentNetCash: pastPeriods[pastPeriods.length - 1]?.cumulativeActual || 0,
     remainingPeriods: futurePeriods.length,
@@ -528,7 +610,7 @@ export async function updateProcurementStatus(
   const procurement = await prisma.procurement.update({
     where: { id: procurementId },
     data: {
-      status: status as any,
+      status: status as ProcurementStatus,
       ...additionalData
     }
   });
@@ -559,13 +641,13 @@ export async function getProcurementDashboard(projectId: string) {
   const now = new Date();
 
   // Group by status
-  const byStatus = procurements.reduce((acc: any, p: any) => {
+  const byStatus = procurements.reduce<Record<string, number>>((acc, p) => {
     acc[p.status] = (acc[p.status] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
   // Find at-risk items (required date approaching but not ordered)
-  const atRisk = procurements.filter((p: any) => {
+  const atRisk = procurements.filter((p) => {
     if (!p.requiredDate || ['RECEIVED', 'INSTALLED', 'CANCELLED'].includes(p.status)) {
       return false;
     }
@@ -577,16 +659,16 @@ export async function getProcurementDashboard(projectId: string) {
   });
 
   // Long lead items
-  const longLeadItems = procurements.filter((p: any) => p.itemType === 'LONG_LEAD_ITEM');
+  const longLeadItems = procurements.filter((p) => p.itemType === 'LONG_LEAD_ITEM');
 
   // Calculate totals
-  const totalBudgeted = procurements.reduce((sum: number, p: any) => sum + (p.budgetedCost || 0), 0);
+  const totalBudgeted = procurements.reduce((sum, p) => sum + (p.budgetedCost || 0), 0);
   const totalCommitted = procurements
-    .filter((p: any) => ['ORDERED', 'IN_TRANSIT', 'RECEIVED', 'INSTALLED'].includes(p.status))
-    .reduce((sum: number, p: any) => sum + (p.quotedCost || p.budgetedCost || 0), 0);
+    .filter((p) => ['ORDERED', 'IN_TRANSIT', 'RECEIVED', 'INSTALLED'].includes(p.status))
+    .reduce((sum, p) => sum + (p.quotedCost || p.budgetedCost || 0), 0);
   const totalActual = procurements
-    .filter((p: any) => p.actualCost)
-    .reduce((sum: number, p: any) => sum + (p.actualCost || 0), 0);
+    .filter((p) => p.actualCost !== null)
+    .reduce((sum, p) => sum + (p.actualCost || 0), 0);
 
   return {
     total: procurements.length,
@@ -635,7 +717,7 @@ export async function calculateCostForecast(projectId: string) {
 
   let percentComplete = 0;
   if (schedule) {
-    percentComplete = schedule.ScheduleTask.reduce((sum: number, t: any) => sum + t.percentComplete, 0) / 
+    percentComplete = schedule.ScheduleTask.reduce((sum, t) => sum + t.percentComplete, 0) /
       (schedule.ScheduleTask.length || 1);
   } else {
     percentComplete = bac > 0 ? (ac / bac) * 100 : 0;

@@ -76,8 +76,8 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
       toast.success('User approved successfully');
       onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to approve user');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to approve user');
     } finally {
       setLoading(false);
       setActionUserId(null);
@@ -98,8 +98,8 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
       toast.success('User rejected and removed');
       onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to reject user');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to reject user');
     } finally {
       setLoading(false);
       setActionUserId(null);
@@ -118,8 +118,8 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
       toast.success('User deleted successfully');
       onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete user');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete user');
     } finally {
       setLoading(false);
       setActionUserId(null);
@@ -140,8 +140,8 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
       toast.success('Subscription tier updated successfully');
       onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update subscription tier');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update subscription tier');
     } finally {
       setLoading(false);
       setEditTierUserId(null);
@@ -186,8 +186,8 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
       
       toast.success('User created successfully!');
       onRefresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create user');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create user');
     } finally {
       setLoading(false);
     }
