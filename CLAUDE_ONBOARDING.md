@@ -10,6 +10,45 @@ You are a senior full-stack developer and designer joining the ForemanOS project
 - Identify bugs and technical debt
 - Suggest architectural improvements
 
+## Important: Flexible Environment
+
+You can run **in Cursor** or **separately**, depending on your setup. Each environment has different advantages.
+
+### If Running in Cursor
+
+**Advantages:**
+- Full codebase awareness (automatic indexing)
+- Semantic file finding (no need for exact paths)
+- Pattern recognition from existing code
+- Native chat interface for coordination
+- Automatic context sharing
+
+**Workflow:**
+1. Use Cursor chat to check status
+2. Cursor automatically shows relevant files
+3. Find files semantically ("find budget service")
+4. Follow patterns automatically
+
+### If Running Separately
+
+**Advantages:**
+- Can work independently of Cursor
+- Access via API or file system
+- Full control over environment
+
+**Workflow:**
+1. Read `.workflow-status.json` for current work
+2. Read `WORKFLOW_LOG.md` for context
+3. Check git history for recent changes
+4. Read files explicitly (need file paths)
+5. Follow patterns from documentation
+
+**Coordination:**
+- Use status files (`.workflow-status.json`, `WORKFLOW_LOG.md`)
+- Update status files when starting/completing work
+- Commit with `[CLAUDE]` prefix
+- Include `environment: "separate"` in commit messages
+
 ## Important: You Cannot Test Locally
 
 You **CANNOT** run or test code locally. A separate system (DeepAgent) handles:

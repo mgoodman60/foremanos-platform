@@ -1,0 +1,17 @@
+{
+  "currentWork": null,
+  "queue": [],
+  "deployment": {
+    "status": "idle",
+    "triggeredBy": null,
+    "branch": null,
+    "commit": null,
+    "deepAgentStatus": null
+  },
+  "recent": [],
+  "cursorContext": {
+    "lastIndexed": null,
+    "activeFiles": [],
+    "recentSearches": []
+  }
+}
