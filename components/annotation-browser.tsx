@@ -429,7 +429,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
 
               <ScrollArea className="h-[500px]">
                 <div className="space-y-2">
-                  {filteredAnnotations.map((ann: any, idx) => (
+                  {filteredAnnotations.map((ann: Annotation, idx) => (
                     <div
                       key={`${ann.id}-${idx}`}
                       className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
@@ -493,7 +493,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
             <TabsContent value="requirements">
               <ScrollArea className="h-[500px]">
                 <div className="space-y-2">
-                  {allRequirements.map((item: any, idx) => (
+                  {allRequirements.map((item, idx) => (
                     <div
                       key={idx}
                       className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg"

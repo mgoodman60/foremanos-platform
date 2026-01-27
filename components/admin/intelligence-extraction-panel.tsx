@@ -45,7 +45,7 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
       } else {
         throw new Error('Failed to fetch stats');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching extraction stats:', error);
       toast.error('Failed to load extraction statistics');
     } finally {
@@ -74,7 +74,7 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
         const error = await response.json();
         throw new Error(error.error || 'Extraction failed');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Extraction error:', error);
       toast.error(`Extraction failed: ${error.message}`);
     } finally {

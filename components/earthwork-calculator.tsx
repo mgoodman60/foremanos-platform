@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 
 interface EarthworkCalculatorProps {
   projectSlug: string;
-  onCalculationComplete?: (result: any) => void;
+  onCalculationComplete?: (result: CalculationResult) => void;
 }
 
 interface Document {
@@ -113,7 +113,16 @@ export default function EarthworkCalculator({
     setReport('');
     
     try {
-      let payload: any = { method, soilType };
+      interface EarthworkPayload {
+        method: string;
+        soilType: string;
+        areaSF?: number;
+        avgCutDepthFt?: number;
+        avgFillDepthFt?: number;
+        documentIds?: string[];
+        siteParams?: { siteAreaSF: number };
+      }
+      const payload: EarthworkPayload = { method, soilType };
       
       if (method === 'simple') {
         if (!areaSF) {
@@ -164,8 +173,8 @@ export default function EarthworkCalculator({
         onCalculationComplete(data.result);
       }
       
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to calculate earthwork');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to calculate earthwork');
     } finally {
       setLoading(false);
     }

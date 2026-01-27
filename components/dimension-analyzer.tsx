@@ -74,8 +74,8 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
 
       const data = await response.json();
       setSheets(data.sheets || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
 
       const data = await response.json();
       setConflicts(data.conflicts || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching conflicts:', err);
     }
   };
@@ -350,7 +350,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
             {filteredDimensions.length === 0 ? (
               <p className="text-center text-gray-500 py-8">No dimensions found</p>
             ) : (
-              filteredDimensions.map((dim: any, idx) => (
+              filteredDimensions.map((dim: Dimension, idx) => (
                 <div
                   key={idx}
                   className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"

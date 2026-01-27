@@ -378,7 +378,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
 
               <ScrollArea className="h-[500px]">
                 <div className="space-y-2">
-                  {filteredDimensions.map((dim: any, idx) => (
+                  {filteredDimensions.map((dim: Dimension, idx) => (
                     <div
                       key={`${dim.id}-${idx}`}
                       className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
@@ -428,7 +428,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
             <TabsContent value="chains">
               <ScrollArea className="h-[500px]">
                 <div className="space-y-4">
-                  {allChains.map((chain: any, idx) => (
+                  {allChains.map((chain: DimensionChain, idx) => (
                     <div
                       key={idx}
                       className={`p-4 border rounded-lg ${
@@ -488,7 +488,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
               ) : (
                 <ScrollArea className="h-[500px]">
                   <div className="space-y-4">
-                    {invalidChains.map((chain: any, idx) => (
+                    {invalidChains.map((chain: DimensionChain, idx) => (
                       <div
                         key={idx}
                         className="p-4 bg-red-950/30 border border-red-900 rounded-lg"

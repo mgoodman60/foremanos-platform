@@ -135,7 +135,7 @@ async function sendEmailDirect({
     const data = await response.json();
     console.log('✅ Email sent via Resend:', { to, subject, id: data.id });
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If rate limit, throw to retry
     if (error.message === 'RATE_LIMIT') {
       throw error;

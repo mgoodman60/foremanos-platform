@@ -141,13 +141,18 @@ export default function ForecastActualChart({
     };
   }, [data]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  interface TooltipPayloadEntry {
+    color: string;
+    name: string;
+    value: number;
+  }
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string }) => {
     if (!active || !payload) return null;
-    
+
     return (
       <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-3 shadow-xl">
         <p className="text-sm font-semibold text-white mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry, index: number) => (
           <div key={index} className="flex items-center justify-between gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />

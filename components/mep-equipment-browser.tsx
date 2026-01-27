@@ -127,9 +127,20 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
   const [extracting, setExtracting] = useState(false);
   const [showLocationAssignment, setShowLocationAssignment] = useState(false);
   const [assigningLocations, setAssigningLocations] = useState(false);
+  interface LocationItem {
+    id: string;
+    name: string;
+    room?: string;
+    [key: string]: unknown;
+  }
+  interface LocationRoom {
+    id: string;
+    name: string;
+    level?: string;
+  }
   const [locationData, setLocationData] = useState<{
-    items: any[];
-    rooms: any[];
+    items: LocationItem[];
+    rooms: LocationRoom[];
     stats: { total: number; withLocation: number; withoutLocation: number };
   } | null>(null);
   const [selectedAssignments, setSelectedAssignments] = useState<Record<string, string>>({});
@@ -169,7 +180,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       } else {
         toast.error('MEP extraction completed with errors');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.dismiss('mep-extract');
       console.error('MEP extraction error:', error);
       toast.error(error.message || 'Failed to extract MEP data');
@@ -189,7 +200,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       setEquipment(data.equipment || []);
       setConflicts(data.conflicts || []);
       setStats(data.stats || null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching MEP data:', error);
       toast.error('Failed to load MEP equipment');
     } finally {
@@ -203,7 +214,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       if (!response.ok) throw new Error('Failed to fetch location data');
       const data = await response.json();
       setLocationData(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching location data:', error);
       toast.error('Failed to load location assignment data');
     }
@@ -246,7 +257,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       await fetchMEPData();
       await fetchLocationData();
       setSelectedAssignments({});
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error assigning locations:', error);
       toast.error(error.message || 'Failed to assign locations');
     } finally {
@@ -276,7 +287,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       // Refresh data
       await fetchMEPData();
       await fetchLocationData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.dismiss('auto-assign');
       console.error('Error auto-assigning locations:', error);
       toast.error(error.message || 'Failed to auto-assign locations');

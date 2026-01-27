@@ -45,7 +45,22 @@ interface SubmittalListProps {
   projectSlug: string;
 }
 
-const STATUS_CONFIG: Record<string, { color: string; icon: any; label: string }> = {
+interface SubmittalFormData {
+  title: string;
+  submittalType: string;
+  specSection: string;
+  dueDate: string;
+  submittedBy: string;
+  contactEmail: string;
+}
+
+interface SubmittalReviewData {
+  status?: string;
+  reviewComments?: string;
+  stampStatus?: string;
+}
+
+const STATUS_CONFIG: Record<string, { color: string; icon: React.ComponentType<{ className?: string }>; label: string }> = {
   PENDING: { color: 'bg-gray-600', icon: Clock, label: 'Pending' },
   SUBMITTED: { color: 'bg-blue-600', icon: FileText, label: 'Submitted' },
   UNDER_REVIEW: { color: 'bg-yellow-600', icon: Clock, label: 'Under Review' },
@@ -104,7 +119,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
     sub.submittalNumber.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleAddSubmittal = async (formData: any) => {
+  const handleAddSubmittal = async (formData: SubmittalFormData) => {
     try {
       const res = await fetch(`/api/projects/${projectSlug}/mep/submittals`, {
         method: 'POST',
@@ -125,7 +140,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
     }
   };
 
-  const handleReview = async (submittalId: string, reviewData: any) => {
+  const handleReview = async (submittalId: string, reviewData: SubmittalReviewData) => {
     try {
       const res = await fetch(`/api/projects/${projectSlug}/mep/submittals/${submittalId}`, {
         method: 'PATCH',
@@ -348,7 +363,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
   );
 }
 
-function AddSubmittalModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (data: any) => void }) {
+function AddSubmittalModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (data: SubmittalFormData) => void }) {
   const [formData, setFormData] = useState({
     title: '',
     submittalType: 'PRODUCT_DATA',
@@ -469,10 +484,10 @@ function ReviewSubmittalModal({
   submittal, 
   onClose, 
   onSubmit 
-}: { 
-  submittal: Submittal; 
-  onClose: () => void; 
-  onSubmit: (data: any) => void;
+}: {
+  submittal: Submittal;
+  onClose: () => void;
+  onSubmit: (data: SubmittalReviewData & { resubmitDue?: string }) => void;
 }) {
   const [formData, setFormData] = useState({
     status: 'APPROVED',

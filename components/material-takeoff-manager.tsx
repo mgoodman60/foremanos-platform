@@ -248,7 +248,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       if (data.takeoffs && data.takeoffs.length > 0 && !selectedTakeoff) {
         setSelectedTakeoff(data.takeoffs[0]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching takeoffs:', error);
       toast.error('Failed to load material takeoffs');
     } finally {
@@ -633,7 +633,15 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   };
 
   // Convert budget item to virtual takeoff line item
-  const budgetItemToTakeoffItem = (budgetItem: any): TakeoffLineItem => ({
+  interface BudgetItemInput {
+    id: string;
+    name: string;
+    description?: string;
+    phaseName?: string;
+    budgetedAmount?: number;
+    costCode?: string;
+  }
+  const budgetItemToTakeoffItem = (budgetItem: BudgetItemInput): TakeoffLineItem => ({
     id: `budget-${budgetItem.id}`,
     category: budgetItem.phaseName || 'Budget Item',
     itemName: budgetItem.name,
@@ -812,7 +820,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       
       setShowAddModal(false);
       toast.success('Item added successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding item:', error);
       toast.error(error.message || 'Failed to add item');
     } finally {
@@ -856,7 +864,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       }
       
       toast.success('Item deleted');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting item:', error);
       toast.error(error.message || 'Failed to delete item');
     }
@@ -946,7 +954,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       
       clearSelection();
       toast.success(`Verified ${count} items`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error bulk verifying:', error);
       toast.error(error.message || 'Failed to verify items');
     } finally {

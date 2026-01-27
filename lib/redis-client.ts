@@ -122,7 +122,7 @@ export async function checkRedisHealth(): Promise<{
     const latency = Date.now() - start;
     
     return { connected: true, latency };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { connected: false, error: error.message };
   }
 }
