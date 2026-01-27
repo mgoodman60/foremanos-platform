@@ -80,7 +80,7 @@ This document assigns specific roles and tasks for the ForemanOS improvement pro
    - [ ] Test component integration
    - [ ] Verify no breaking changes
 
-**Commit Convention:** `[CLAUDE] Phase 1: Refactor Material Takeoff Manager`
+**Commit Convention:** `[CLAUDE CODE] Phase 1: Refactor Material Takeoff Manager`
 
 #### Codex's Responsibilities
 **Priority: High | Estimated Time: 2-3 days**
@@ -400,7 +400,7 @@ This document assigns specific roles and tasks for the ForemanOS improvement pro
 ### Communication Protocol
 
 1. **Update `.workflow-status.json`** after completing each task
-2. **Commit with proper prefix** (`[CLAUDE]`, `[CODEX]`, `[CURSOR]`)
+2. **Commit with proper prefix** (`[CLAUDE CODE]`, `[CODEX]`, `[CURSOR]`)
 3. **Update `WORKFLOW_LOG.md`** with progress notes
 4. **Use commit messages** to communicate changes clearly
 

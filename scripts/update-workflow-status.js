@@ -6,7 +6,7 @@
  * based on git activity and commit messages.
  * 
  * Supports all agents:
- *   - [CLAUDE] - Claude's commits
+ *   - [CLAUDE CODE] - Claude Code's commits
  *   - [CODEX] - Codex's commits
  *   - [HUMAN] - Human's commits
  * 
@@ -55,15 +55,19 @@ function writeStatus(status) {
 
 // Parse commit message for agent and task
 function parseCommitMessage(message) {
-  const claudeMatch = message.match(/\[CLAUDE\]\s*(.+)/i);
+  const claudeCodeMatch = message.match(/\[CLAUDE CODE\]\s*(.+)/i);
   const codexMatch = message.match(/\[CODEX\]\s*(.+)/i);
+  const cursorMatch = message.match(/\[CURSOR\]\s*(.+)/i);
   const humanMatch = message.match(/\[HUMAN\]\s*(.+)/i);
   
-  if (claudeMatch) {
-    return { agent: 'claude', task: claudeMatch[1].split('\n')[0].trim() };
+  if (claudeCodeMatch) {
+    return { agent: 'claude-code', task: claudeCodeMatch[1].split('\n')[0].trim() };
   }
   if (codexMatch) {
     return { agent: 'codex', task: codexMatch[1].split('\n')[0].trim() };
+  }
+  if (cursorMatch) {
+    return { agent: 'cursor', task: cursorMatch[1].split('\n')[0].trim() };
   }
   if (humanMatch) {
     return { agent: 'human', task: humanMatch[1].split('\n')[0].trim() };

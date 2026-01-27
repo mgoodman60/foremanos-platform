@@ -46,7 +46,7 @@ You can run **in Cursor** or **separately**, depending on your setup. Each envir
 **Coordination:**
 - Use status files (`.workflow-status.json`, `WORKFLOW_LOG.md`)
 - Update status files when starting/completing work
-- Commit with `[CLAUDE]` prefix
+- Commit with `[CLAUDE CODE]` prefix
 - Include `environment: "separate"` in commit messages
 
 ## Important: You Cannot Test Locally

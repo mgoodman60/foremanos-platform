@@ -5,7 +5,7 @@ This document explains how to automate workflow status updates so you don't have
 ## How It Works
 
 The automation system detects:
-- **Commits** - Automatically updates status when you commit with `[CLAUDE]`, `[CODEX]`, or `[HUMAN]` prefixes
+- **Commits** - Automatically updates status when you commit with `[CLAUDE CODE]`, `[CODEX]`, `[CURSOR]`, or `[HUMAN]` prefixes
   - Works for all agents: Claude, Codex, and Human
   - Detects agent from commit message prefix
   - Updates status files automatically
@@ -34,7 +34,7 @@ Git hooks run automatically after commits. The hook is already set up at `.git/h
 Use the wrapper script instead of `git` directly:
 
 ```powershell
-# Instead of: git commit -m "[CLAUDE] My task"
+# Instead of: git commit -m "[CLAUDE CODE] My task"
 .\scripts\git-wrapper.ps1 commit -m "[CLAUDE] My task"
 
 # Instead of: git push
@@ -65,7 +65,7 @@ I'll read the git log and update status automatically for any agent (Claude, Cod
 
 ### After Commit
 
-If your commit message has `[CLAUDE]`, `[CODEX]`, or `[HUMAN]`:
+If your commit message has `[CLAUDE CODE]`, `[CODEX]`, `[CURSOR]`, or `[HUMAN]`:
 
 1. **If you have `currentWork` set:**
    - Moves it to `recent` (marks as complete)
@@ -97,7 +97,7 @@ You still need to manually update (or ask me):
 # 2. Do your work...
 
 # 3. Commit with prefix
-git commit -m "[CLAUDE] Implement budget export feature"
+git commit -m "[CLAUDE CODE] Implement budget export feature"
 
 # ✅ Status automatically updated!
 # - currentWork moved to recent
@@ -138,7 +138,7 @@ git commit -m "[CODEX] Create migration script for budget data"
 # After committing
 You: "Update status from my latest commit"
 Claude: [Reads git log, updates status automatically]
-# Works for [CLAUDE], [CODEX], and [HUMAN] commits
+# Works for [CLAUDE CODE], [CODEX], [CURSOR], and [HUMAN] commits
 ```
 
 ## Configuration
@@ -218,7 +218,7 @@ Ask Claude to:
 ## Summary
 
 **Automatic:**
-- ✅ Status updates after commits (with `[CLAUDE]`, `[CODEX]`, or `[HUMAN]` prefixes)
+- ✅ Status updates after commits (with `[CLAUDE CODE]`, `[CODEX]`, `[CURSOR]`, or `[HUMAN]` prefixes)
 - ✅ Works for all agents: Claude, Codex, and Human
 - ✅ Deployment status after push
 - ✅ Moving completed work to recent

@@ -1,7 +1,7 @@
 {
   "currentWork": {
     "phase": "Phase 1: Material Takeoff Manager Refactoring",
-    "claude": {
+    "claude-code": {
       "status": "completed",
       "task": "Refactor MaterialTakeoffManager - reduced from 2,289 to 1,537 lines",
       "files": ["components/material-takeoff-manager.tsx", "components/takeoff/", "hooks/"],

@@ -167,7 +167,7 @@ Human-readable log. All agents can read this for context.
 
 5. **Complete Work**
    - Update status files
-   - Commit with `[CLAUDE]` prefix
+   - Commit with `[CLAUDE CODE]` prefix
    - Add notes about what Codex should do next
 
 #### If Running Separately:
@@ -203,7 +203,7 @@ Human-readable log. All agents can read this for context.
 
 5. **Complete Work**
    - Update status files
-   - Commit with `[CLAUDE]` prefix
+   - Commit with `[CLAUDE CODE]` prefix
    - Add notes about what Codex should do next
 
 ### For Codex
@@ -323,9 +323,9 @@ Claude can: Read it (in Cursor automatically, separately with path),
 
 ### Examples
 
-**Claude (in Cursor):**
+**Claude Code (in Cursor):**
 ```
-[CLAUDE] Refactor budget service for better error handling
+[CLAUDE CODE] Refactor budget service for better error handling
 
 - Extracted error handling to separate utility
 - Added retry logic for database operations
@@ -335,9 +335,9 @@ Claude can: Read it (in Cursor automatically, separately with path),
 - Ready for Codex to add tests
 ```
 
-**Claude (separate):**
+**Claude Code (separate):**
 ```
-[CLAUDE] Refactor budget service for better error handling
+[CLAUDE CODE] Refactor budget service for better error handling
 
 - Extracted error handling to separate utility
 - Added retry logic for database operations
@@ -492,8 +492,9 @@ Claude can: Read it (in Cursor automatically, separately with path),
 - `human/[feature-name]`
 
 ### Commit Prefixes
-- `[CLAUDE]` - Claude's work
+- `[CLAUDE CODE]` - Claude Code's work (this assistant)
 - `[CODEX]` - Codex's work
+- `[CURSOR]` - Cursor's built-in AI features
 - `[HUMAN]` - Your direct work
 - `[DEEPAGENT]` - Deployment notes
 
