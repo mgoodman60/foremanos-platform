@@ -57,6 +57,19 @@ export interface MEPData {
   items: MEPItem[];
   totalCost: number;
   itemsCreated: number;
+  exists?: boolean;
+  electrical?: {
+    itemCount: number;
+    total: number;
+  };
+  plumbing?: {
+    itemCount: number;
+    total: number;
+  };
+  hvac?: {
+    itemCount: number;
+    total: number;
+  };
 }
 
 export interface MEPItem {

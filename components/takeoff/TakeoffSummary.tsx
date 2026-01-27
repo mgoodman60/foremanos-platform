@@ -65,46 +65,46 @@ export function TakeoffSummary({
       )}
 
       {/* MEP Summary - if available */}
-      {mepData && (mepData as any).exists && (
+      {mepData && mepData.exists && (
         <div className="mt-4 p-3 bg-[#1F2328] rounded-lg border border-gray-700">
           <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
             <Zap className="h-4 w-4 text-yellow-500" />
             MEP Systems Summary
           </h4>
           <div className="grid grid-cols-3 gap-2 text-xs">
-            {(mepData as any).electrical?.itemCount > 0 && (
+            {mepData.electrical && mepData.electrical.itemCount > 0 && (
               <div className="p-2 bg-[#2d333b] rounded">
                 <span className="text-yellow-400">⚡ Electrical</span>
-                <div className="text-[#F8FAFC]">{(mepData as any).electrical.itemCount} items</div>
+                <div className="text-[#F8FAFC]">{mepData.electrical.itemCount} items</div>
                 <div className="text-green-400">
-                  ${((mepData as any).electrical.total || 0).toLocaleString()}
+                  ${(mepData.electrical.total || 0).toLocaleString()}
                 </div>
               </div>
             )}
-            {(mepData as any).plumbing?.itemCount > 0 && (
+            {mepData.plumbing && mepData.plumbing.itemCount > 0 && (
               <div className="p-2 bg-[#2d333b] rounded">
                 <span className="text-blue-400">💧 Plumbing</span>
-                <div className="text-[#F8FAFC]">{(mepData as any).plumbing.itemCount} items</div>
+                <div className="text-[#F8FAFC]">{mepData.plumbing.itemCount} items</div>
                 <div className="text-green-400">
-                  ${((mepData as any).plumbing.total || 0).toLocaleString()}
+                  ${(mepData.plumbing.total || 0).toLocaleString()}
                 </div>
               </div>
             )}
-            {(mepData as any).hvac?.itemCount > 0 && (
+            {mepData.hvac && mepData.hvac.itemCount > 0 && (
               <div className="p-2 bg-[#2d333b] rounded">
                 <span className="text-cyan-400">🌬️ HVAC</span>
-                <div className="text-[#F8FAFC]">{(mepData as any).hvac.itemCount} items</div>
+                <div className="text-[#F8FAFC]">{mepData.hvac.itemCount} items</div>
                 <div className="text-green-400">
-                  ${((mepData as any).hvac.total || 0).toLocaleString()}
+                  ${(mepData.hvac.total || 0).toLocaleString()}
                 </div>
               </div>
             )}
           </div>
-          {(mepData as any).totalCost > 0 && (
+          {mepData.totalCost > 0 && (
             <div className="mt-2 text-right text-sm text-gray-400">
               MEP Total:{' '}
               <span className="text-green-400 font-medium">
-                ${((mepData as any).totalCost || 0).toLocaleString()}
+                ${(mepData.totalCost || 0).toLocaleString()}
               </span>
             </div>
           )}
