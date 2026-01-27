@@ -543,8 +543,17 @@ You: "What components use the budget service?"
    - Create `.workflow-status.json` (empty structure)
    - Create `WORKFLOW_LOG.md` (template)
 
-4. **Start Working**
+4. **Generate Agent Tasks** (when handing off work)
+   ```bash
+   # Generate task files for the next agent
+   node scripts/generate-agent-tasks.js codex
+   node scripts/generate-agent-tasks.js cursor
+   ```
+   See `WORKFLOW_TASK_GENERATION.md` for details.
+
+5. **Start Working**
    - Check status files
+   - Read your `{AGENT}_QUICK_START.md` file
    - Claim work
    - Update status as you work
    - Commit with proper prefixes
