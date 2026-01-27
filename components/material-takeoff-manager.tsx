@@ -1,55 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Calculator,
-  ChevronDown,
-  ChevronRight,
-  Search,
   Download,
   X,
   FileText,
   DollarSign,
-  Ruler,
-  CheckCircle2,
-  AlertCircle,
-  Package,
-  Layers,
-  Filter,
-  TrendingUp,
-  Edit2,
-  CheckCheck,
-  Sparkles,
   Plus,
-  Trash2,
   AlertTriangle,
-  Info,
   ArrowRightCircle,
   Combine,
   FileStack,
   ShieldCheck,
   HardHat,
   Brain,
-  Wrench,
   BarChart2,
-  Settings,
   RefreshCw,
-  Zap,
   Globe
 } from 'lucide-react';
-import { TakeoffLineItemEditModal } from './takeoff-line-item-edit-modal';
-import { TakeoffAddItemModal } from './takeoff-add-item-modal';
-import { UnitPriceManager } from './unit-price-manager';
-import { TakeoffBudgetSyncModal } from './takeoff-budget-sync-modal';
-import { TakeoffAggregationModal } from './takeoff-aggregation-modal';
-import { TakeoffQADashboard } from './takeoff-qa-dashboard';
-import { TakeoffLaborPlanning } from './takeoff-labor-planning';
-import TakeoffLearningPanel from './takeoff-learning-panel';
 import EarthworkCalculator from './earthwork-calculator';
 import TakeoffDataChecklist from './takeoff-data-checklist';
-import { PriceUpdateModal } from './price-update-modal';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -58,51 +30,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { toast } from 'sonner';
-import { CSI_DIVISIONS, type CSIDivision } from '@/lib/csi-divisions';
+import { CSI_DIVISIONS } from '@/lib/csi-divisions';
 import { QuickActionMenu, type ActionItem } from '@/components/ui/header-action-menu';
 
-interface TakeoffLineItem {
-  id: string;
-  category: string;
-  itemName: string;
-  description?: string;
-  quantity: number;
-  unit: string;
-  unitCost?: number;
-  totalCost?: number;
-  location?: string;
-  sheetNumber?: string;
-  gridLocation?: string;
-  notes?: string;
-  confidence?: number;
-  verified: boolean;
-}
-
-interface MaterialTakeoff {
-  id: string;
-  name: string;
-  description?: string;
-  status: string;
-  totalCost?: number;
-  lineItems: TakeoffLineItem[];
-  document?: {
-    id: string;
-    name: string;
-  };
-  createdAt: string;
-}
-
-interface CategorySummary {
-  category: string;
-  itemCount: number;
-  totalCost: number;
-  items: TakeoffLineItem[];
-}
+// Import new infrastructure
+import type { TakeoffLineItem, MaterialTakeoff, CategorySummary, CostSummary, MEPData, BudgetItem } from '@/types/takeoff';
+import { useTakeoffData } from '@/hooks/useTakeoffData';
+import { useTakeoffFilters } from '@/hooks/useTakeoffFilters';
+import { useTakeoffSelection } from '@/hooks/useTakeoffSelection';
+import { getCategorySummaries, getTotalQuantityByUnit, getTotalCost } from '@/lib/takeoff-calculations';
+import { getConfidenceColor } from '@/lib/takeoff-formatters';
+import { TakeoffFilters } from './takeoff/TakeoffFilters';
+import { TakeoffSummary } from './takeoff/TakeoffSummary';
+import { TakeoffActions } from './takeoff/TakeoffActions';
+import { TakeoffTable } from './takeoff/TakeoffTable';
+import { TakeoffModals } from './takeoff/TakeoffModals';
 
 interface MaterialTakeoffManagerProps {
   projectSlug: string;
@@ -111,21 +56,47 @@ interface MaterialTakeoffManagerProps {
 
 export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoffManagerProps) {
   const { data: session } = useSession() || {};
-  const [takeoffs, setTakeoffs] = useState<MaterialTakeoff[]>([]);
-  const [selectedTakeoff, setSelectedTakeoff] = useState<MaterialTakeoff | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [filterVerified, setFilterVerified] = useState<string>('all');
+  
+  // Use new hooks for data, filters, and selection
+  const {
+    takeoffs,
+    selectedTakeoff,
+    loading,
+    fetchTakeoffs,
+    selectTakeoff,
+    refreshTakeoffs,
+    setTakeoffs,
+    setSelectedTakeoff,
+  } = useTakeoffData(projectSlug);
+
+  const {
+    filteredItems,
+    searchQuery,
+    setSearchQuery,
+    filterCategory,
+    setFilterCategory,
+    filterVerified,
+    setFilterVerified,
+    viewMode,
+    setViewMode,
+    availableCategories,
+  } = useTakeoffFilters(selectedTakeoff, takeoffs);
+
+  const {
+    selectedItems,
+    toggleItemSelection,
+    selectAllItems,
+    clearSelection,
+    isSelected,
+    selectedCount,
+  } = useTakeoffSelection();
+
+  // Local state for UI
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'csi' | 'category'>('category');
   
   // Edit modal state
   const [editingItem, setEditingItem] = useState<TakeoffLineItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  
-  // Bulk selection state
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   
   // Add new item state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -139,10 +110,10 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   const [showLearning, setShowLearning] = useState(false);
   const [showPriceUpdate, setShowPriceUpdate] = useState(false);
   const [calculating, setCalculating] = useState(false);
-  const [costSummary, setCostSummary] = useState<any>(null);
-  const [mepData, setMepData] = useState<any>(null);
+  const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
+  const [mepData, setMepData] = useState<MEPData | null>(null);
   const [extractingMEP, setExtractingMEP] = useState(false);
-  const [budgetItems, setBudgetItems] = useState<any[]>([]);
+  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [hasBudgetDoc, setHasBudgetDoc] = useState(false);
 
   useEffect(() => {
@@ -256,42 +227,14 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     }
   };
 
-  // Filter line items by search and filters
-  const getFilteredItems = (): TakeoffLineItem[] => {
-    if (!selectedTakeoff) return [];
-
-    return selectedTakeoff.lineItems.filter((item) => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = 
-          item.itemName.toLowerCase().includes(query) ||
-          item.description?.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query) ||
-          item.location?.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      // Category filter
-      if (filterCategory !== 'all' && item.category !== filterCategory) {
-        return false;
-      }
-
-      // Verified filter
-      if (filterVerified === 'verified' && !item.verified) return false;
-      if (filterVerified === 'unverified' && item.verified) return false;
-
-      return true;
-    });
-  };
-
   // Get ALL items from ALL takeoffs (for CSI Division view aggregation)
-  const getAllTakeoffItems = (): TakeoffLineItem[] => {
+  // Note: This applies filters across all takeoffs for CSI view
+  const getAllTakeoffItems = useMemo((): TakeoffLineItem[] => {
     const allItems: TakeoffLineItem[] = [];
     
     takeoffs.forEach((takeoff) => {
       takeoff.lineItems.forEach((item) => {
-        // Apply same filters as getFilteredItems but across all takeoffs
+        // Apply same filters as filteredItems but across all takeoffs
         // Search filter
         if (searchQuery) {
           const query = searchQuery.toLowerCase();
@@ -317,30 +260,12 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     });
     
     return allItems;
-  };
+  }, [takeoffs, searchQuery, filterCategory, filterVerified]);
 
-  // Group items by category
-  const getCategorySummaries = (): CategorySummary[] => {
-    const filtered = getFilteredItems();
-    const groups: Record<string, CategorySummary> = {};
-
-    filtered.forEach((item) => {
-      if (!groups[item.category]) {
-        groups[item.category] = {
-          category: item.category,
-          itemCount: 0,
-          totalCost: 0,
-          items: []
-        };
-      }
-
-      groups[item.category].itemCount++;
-      groups[item.category].totalCost += item.totalCost || 0;
-      groups[item.category].items.push(item);
-    });
-
-    return Object.values(groups).sort((a, b) => b.totalCost - a.totalCost);
-  };
+  // Calculate summaries using utility functions
+  const categories = useMemo(() => getCategorySummaries(filteredItems), [filteredItems]);
+  const quantityTotals = useMemo(() => getTotalQuantityByUnit(filteredItems), [filteredItems]);
+  const totalCost = useMemo(() => getTotalCost(filteredItems), [filteredItems]);
 
   // Keyword to CSI division mapping - sorted by specificity (longer/more specific first)
   // IMPORTANT: More specific keywords should appear first within each division
@@ -657,9 +582,9 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     notes: `From Budget Document (Cost Code: ${budgetItem.costCode || 'N/A'})`,
   });
 
-  // Group by CSI division - merges budget items with takeoff items
-  // Budget items populate all divisions; takeoffs provide detail quantities
-  const getCSIDivisionGroups = (): Array<{ division: CSIDivision; categories: CategorySummary[]; fromBudget?: boolean }> => {
+  // Calculate CSI groups using utility function
+  // Note: CSI_KEYWORD_MAP is kept here for now - can be moved to utility later
+  const csiGroups = useMemo(() => {
     const divisionGroups: Map<number, Map<string, { items: TakeoffLineItem[]; totalCost: number; fromBudget: boolean }>> = new Map();
 
     // STEP 1: Add budget items first (these define the divisions and their budgeted costs)
@@ -905,8 +830,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
 
   // Select all unverified items
   const selectAllUnverified = () => {
-    const unverified = getFilteredItems().filter((item: TakeoffLineItem) => !item.verified);
-    setSelectedItems(new Set(unverified.map((item: TakeoffLineItem) => item.id)));
+    const unverified = filteredItems.filter((item: TakeoffLineItem) => !item.verified);
+    selectAllItems(unverified.map((item: TakeoffLineItem) => item.id));
   };
 
   // Clear selection
@@ -962,16 +887,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     }
   };
 
-  // Get confidence color - confidence is stored as 0-100
-  const getConfidenceColor = (confidence: number | undefined): string => {
-    if (confidence === undefined) return 'text-gray-500';
-    // Normalize: if > 1, it's already 0-100 scale
-    const normalized = confidence > 1 ? confidence : confidence * 100;
-    if (normalized >= 80) return 'text-green-500';
-    if (normalized >= 60) return 'text-yellow-500';
-    if (normalized >= 40) return 'text-orange-500';
-    return 'text-red-500';
-  };
+  // getConfidenceColor is now imported from lib/takeoff-formatters
 
   // Auto-calculate costs for all items
   const handleAutoCalculate = async () => {
@@ -1279,28 +1195,15 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     toast.success(`Exported ${divisionSummaries.reduce((sum, s) => sum + s.itemCount, 0)} items across ${divisionSummaries.length} divisions`);
   };
 
-  const getTotalQuantityByUnit = (): Record<string, number> => {
-    const filtered = getFilteredItems();
-    const totals: Record<string, number> = {};
+  // These are now calculated via useMemo above using utility functions
 
-    filtered.forEach((item) => {
-      if (!totals[item.unit]) {
-        totals[item.unit] = 0;
-      }
-      totals[item.unit] += item.quantity;
-    });
-
-    return totals;
-  };
-
-  const getTotalCost = (): number => {
-    return getFilteredItems().reduce((sum, item) => sum + (item.totalCost || 0), 0);
-  };
-
-  const categories = getCategorySummaries();
-  const csiGroups = getCSIDivisionGroups();
-  const quantityTotals = getTotalQuantityByUnit();
-  const totalCost = getTotalCost();
+  // Calculate CSI groups - keep existing function for now (uses CSI_KEYWORD_MAP)
+  // TODO: Move CSI_KEYWORD_MAP to utility and fully migrate
+  const csiGroups = useMemo(() => {
+    // Use existing getCSIDivisionGroups function (defined below)
+    // This will be fully migrated to utility in next iteration
+    return getCSIDivisionGroups();
+  }, [getAllTakeoffItems, budgetItems, hasBudgetDoc, takeoffs]);
 
   // Define action menu items
   const pricingActions: ActionItem[] = [
@@ -1309,7 +1212,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       label: 'Update from Web',
       icon: Globe,
       onClick: () => setShowPriceUpdate(true),
-      disabled: getFilteredItems().length === 0,
+      disabled: filteredItems.length === 0,
       variant: 'default',
       description: 'Search current market prices by location',
     },
@@ -1342,7 +1245,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       label: 'Sync to Budget',
       icon: ArrowRightCircle,
       onClick: () => setShowBudgetSync(true),
-      disabled: getFilteredItems().length === 0,
+      disabled: filteredItems.length === 0,
       description: 'Push takeoff to project budget',
     },
   ];
@@ -1484,82 +1387,15 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
         </div>
       )}
 
-      {/* Summary Stats */}
-      {selectedTakeoff && (
-        <div className="border-b border-gray-700 p-4">
-          <div className="grid grid-cols-4 gap-3">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-500">{selectedTakeoff.lineItems?.length || 0}</div>
-              <div className="text-xs text-gray-400">Total Items</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">{categories.length}</div>
-              <div className="text-xs text-gray-400">Categories</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-500">
-                ${totalCost > 0 ? totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}
-              </div>
-              <div className="text-xs text-gray-400">Total Cost</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-500">
-                {selectedTakeoff.lineItems?.filter(i => i.verified).length || 0}
-              </div>
-              <div className="text-xs text-gray-400">Verified</div>
-            </div>
-          </div>
-
-          {/* Quantity Summaries */}
-          {Object.keys(quantityTotals).length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Object.entries(quantityTotals).map(([unit, total]) => (
-                <Badge key={unit} variant="outline" className="text-xs">
-                  {total.toLocaleString(undefined, { maximumFractionDigits: 2 })} {unit}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* MEP Summary - if available */}
-          {mepData?.exists && (
-            <div className="mt-4 p-3 bg-[#1F2328] rounded-lg border border-gray-700">
-              <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-yellow-500" />
-                MEP Systems Summary
-              </h4>
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                {mepData.electrical?.itemCount > 0 && (
-                  <div className="p-2 bg-[#2d333b] rounded">
-                    <span className="text-yellow-400">⚡ Electrical</span>
-                    <div className="text-[#F8FAFC]">{mepData.electrical.itemCount} items</div>
-                    <div className="text-green-400">${(mepData.electrical.total || 0).toLocaleString()}</div>
-                  </div>
-                )}
-                {mepData.plumbing?.itemCount > 0 && (
-                  <div className="p-2 bg-[#2d333b] rounded">
-                    <span className="text-blue-400">💧 Plumbing</span>
-                    <div className="text-[#F8FAFC]">{mepData.plumbing.itemCount} items</div>
-                    <div className="text-green-400">${(mepData.plumbing.total || 0).toLocaleString()}</div>
-                  </div>
-                )}
-                {mepData.hvac?.itemCount > 0 && (
-                  <div className="p-2 bg-[#2d333b] rounded">
-                    <span className="text-cyan-400">🌬️ HVAC</span>
-                    <div className="text-[#F8FAFC]">{mepData.hvac.itemCount} items</div>
-                    <div className="text-green-400">${(mepData.hvac.total || 0).toLocaleString()}</div>
-                  </div>
-                )}
-              </div>
-              {mepData.totalCost > 0 && (
-                <div className="mt-2 text-right text-sm text-gray-400">
-                  MEP Total: <span className="text-green-400 font-medium">${(mepData.totalCost || 0).toLocaleString()}</span>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Summary - Using new component */}
+      <TakeoffSummary
+        takeoff={selectedTakeoff}
+        totalCost={totalCost}
+        categoryCount={categories.length}
+        quantityTotals={quantityTotals}
+        mepData={mepData}
+        costSummary={costSummary}
+      />
 
       {/* Content - Scrollable area starts here */}
       <ScrollArea className="flex-1 min-h-0">
@@ -1573,53 +1409,16 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
 
       {/* Earthwork Calculator - Moved to Analysis dropdown, only show inline if expanded */}
 
-      {/* Bulk Verification Toolbar */}
-      {selectedTakeoff && selectedTakeoff.lineItems.some((i: TakeoffLineItem) => !i.verified) && (
-        <div className="border-b border-gray-700 p-3 bg-[#2D333B]/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400">
-                {selectedItems.size > 0 ? (
-                  <span className="text-orange-400">{selectedItems.size} items selected</span>
-                ) : (
-                  <span>{selectedTakeoff.lineItems.filter((i: TakeoffLineItem) => !i.verified).length} unverified items</span>
-                )}
-              </span>
-              {selectedItems.size === 0 ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={selectAllUnverified}
-                  className="border-gray-600 text-xs"
-                >
-                  <CheckCheck className="mr-1 h-3 w-3" />
-                  Select All Unverified
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearSelection}
-                  className="text-xs text-gray-400"
-                >
-                  Clear Selection
-                </Button>
-              )}
-            </div>
-            {selectedItems.size > 0 && (
-              <Button
-                size="sm"
-                onClick={handleBulkVerify}
-                disabled={bulkVerifying}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <CheckCircle2 className="mr-1 h-4 w-4" />
-                {bulkVerifying ? 'Verifying...' : `Verify ${selectedItems.size} Items`}
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Bulk Actions - Using new component */}
+      <TakeoffActions
+        takeoff={selectedTakeoff}
+        selectedItems={selectedItems}
+        unverifiedCount={selectedTakeoff?.lineItems.filter((i) => !i.verified).length || 0}
+        onSelectAllUnverified={selectAllUnverified}
+        onClearSelection={clearSelection}
+        onBulkVerify={handleBulkVerify}
+        bulkVerifying={bulkVerifying}
+      />
 
       {/* Pricing Warning Banner */}
       {costSummary && costSummary.unpricedItems?.length > 0 && costSummary.unpricedItems.length > costSummary.pricedItemCount && (
@@ -1669,83 +1468,20 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
         </div>
       )}
 
-      {/* Compact Filters Row */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-gray-700 px-4 py-2">
-        {/* View Mode Toggle */}
-        <div className="flex rounded-md border border-gray-600 overflow-hidden">
-          <button
-            onClick={() => setViewMode('category')}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'category' ? 'bg-orange-500 text-white' : 'bg-[#2d333b] text-gray-300 hover:bg-[#3d434b]'}`}
-          >
-            Category
-          </button>
-          <button
-            onClick={() => setViewMode('csi')}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'csi' ? 'bg-orange-500 text-white' : 'bg-[#2d333b] text-gray-300 hover:bg-[#3d434b]'}`}
-          >
-            CSI Division
-          </button>
-        </div>
+      {/* Filters - Using new component */}
+      <TakeoffFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterCategory={filterCategory}
+        onCategoryChange={setFilterCategory}
+        filterVerified={filterVerified}
+        onVerifiedChange={setFilterVerified}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        availableCategories={availableCategories}
+      />
 
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-          <Input
-            placeholder="Search materials..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 bg-[#2d333b] border-gray-600 pl-8 text-sm text-[#F8FAFC] placeholder:text-gray-500"
-          />
-        </div>
-
-        {/* Category Filter */}
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="h-8 w-[140px] bg-[#2d333b] border-gray-600 text-sm text-[#F8FAFC]">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {Array.from(new Set(selectedTakeoff?.lineItems?.map(i => i.category) || [])).map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Status Filter */}
-        <Select value={filterVerified} onValueChange={setFilterVerified}>
-          <SelectTrigger className="h-8 w-[110px] bg-[#2d333b] border-gray-600 text-sm text-[#F8FAFC]">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="verified">Verified</SelectItem>
-            <SelectItem value="unverified">Unverified</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Clear Filters */}
-        {(searchQuery || filterCategory !== 'all' || filterVerified !== 'all') && (
-          <WithTooltip tooltip="Clear all filters">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearchQuery('');
-                setFilterCategory('all');
-                setFilterVerified('all');
-              }}
-              className="h-8 text-xs text-orange-500 hover:text-orange-400 hover:bg-[#2d333b]"
-            >
-              <X className="mr-1 h-3.5 w-3.5" />
-              Clear
-            </Button>
-          </WithTooltip>
-        )}
-      </div>
-
-      {/* Items Content */}
+      {/* Items Content - Using new TakeoffTable component */}
       <div className="pb-20">
         {loading ? (
           <div className="flex items-center justify-center p-8">
@@ -1762,7 +1498,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
               <p className="mt-2 text-xs text-gray-500">Process floor plans to extract quantities</p>
             </div>
           </div>
-        ) : getFilteredItems().length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
               <Package className="mx-auto mb-3 h-12 w-12 text-gray-600" />
@@ -1773,474 +1509,65 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
               </p>
             </div>
           </div>
-        ) : viewMode === 'csi' ? (
-          // CSI Division View - Aggregated from ALL takeoffs + Budget
-          <div className="p-4 space-y-2">
-            {/* Source indicator */}
-            <div className="flex flex-wrap items-center gap-2 p-2 bg-blue-900/30 border border-blue-700/50 rounded-lg mb-3">
-              <FileStack className="h-4 w-4 text-blue-400" />
-              <span className="text-sm text-blue-300">
-                {hasBudgetDoc ? (
-                  <>
-                    <DollarSign className="inline h-3 w-3 mr-1 text-green-400" />
-                    Budget document is source of truth for costs
-                  </>
-                ) : (
-                  `Showing items from all ${takeoffs.length} takeoff${takeoffs.length !== 1 ? 's' : ''}`
-                )}
-              </span>
-              {hasBudgetDoc && (
-                <Badge className="bg-green-900/50 text-green-300 border border-green-700">
-                  {budgetItems.length} budget items
-                </Badge>
-              )}
-              <Badge className="bg-blue-900/50 text-blue-300 border border-blue-700">
-                {getAllTakeoffItems().length} takeoff items
-              </Badge>
-            </div>
-            {csiGroups.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Layers className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p className="font-medium">No items to display</p>
-                <p className="text-sm mt-1">Upload a budget document or process takeoffs to see items by CSI division</p>
-              </div>
-            ) : null}
-            {csiGroups.map(({ division, categories: divCategories, fromBudget }) => (
-              <div key={division.number} className="space-y-1">
-                {/* Division Header */}
-                <div className={`rounded-lg px-3 py-2 ${fromBudget ? 'bg-green-900/20 border border-green-800/50' : 'bg-[#2d333b]'}`}>
-                  <div className="flex items-center gap-2">
-                    <Layers className={`h-4 w-4 ${fromBudget ? 'text-green-500' : 'text-orange-500'}`} />
-                    <span className="font-medium text-[#F8FAFC]">
-                      Division {String(division.number).padStart(2, '0')} - {division.name}
-                    </span>
-                    {fromBudget && (
-                      <Badge className="bg-green-900/50 text-green-300 border border-green-700 text-xs">
-                        <DollarSign className="h-3 w-3 mr-1" />Budget
-                      </Badge>
-                    )}
-                    <Badge variant="secondary" className="ml-auto">
-                      {divCategories.reduce((sum, cat) => sum + cat.itemCount, 0)} items
-                    </Badge>
-                    <span className="text-sm text-green-400 font-medium">
-                      ${divCategories.reduce((sum, cat) => sum + cat.totalCost, 0).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Categories in Division */}
-                <div className="ml-6 space-y-1">
-                  {divCategories.map((catSummary) => {
-                    const isBudgetCategory = !catSummary.category.includes('(Takeoff)');
-                    return (
-                    <div key={catSummary.category}>
-                      <button
-                        onClick={() => toggleCategory(catSummary.category)}
-                        className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-[#2d333b] transition-colors border ${
-                          isBudgetCategory && hasBudgetDoc 
-                            ? 'bg-green-900/10 border-green-800/30' 
-                            : 'bg-[#1F2328] border-gray-700'
-                        }`}
-                      >
-                        {expandedCategories.has(catSummary.category) ? (
-                          <ChevronDown className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
-                        )}
-                        {isBudgetCategory && hasBudgetDoc ? (
-                          <DollarSign className="h-4 w-4 text-green-400" />
-                        ) : (
-                          <Package className="h-4 w-4 text-blue-400" />
-                        )}
-                        <span className="font-medium text-[#F8FAFC] capitalize">{catSummary.category}</span>
-                        <div className="ml-auto flex items-center gap-3 text-xs text-gray-400">
-                          <span>{catSummary.itemCount} items</span>
-                          {catSummary.totalCost > 0 && (
-                            <span className="text-green-400">${catSummary.totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                          )}
-                        </div>
-                      </button>
-
-                      {/* Category Items */}
-                      {expandedCategories.has(catSummary.category) && (
-                        <div className="ml-6 mt-1 space-y-1">
-                          {catSummary.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-start gap-3 rounded-lg border border-gray-700 bg-[#1F2328] p-3 text-sm"
-                            >
-                              {/* Status Icon */}
-                              <div className="mt-1">
-                                {item.verified ? (
-                                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <AlertCircle className="h-4 w-4 text-orange-400" />
-                                )}
-                              </div>
-
-                              {/* Item Info */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-medium text-[#F8FAFC] truncate">{item.itemName}</h4>
-                                  {item.verified && (
-                                    <Badge variant="outline" className="text-xs text-green-400 border-green-700">
-                                      Verified
-                                    </Badge>
-                                  )}
-                                </div>
-
-                                {item.description && (
-                                  <p className="text-xs text-gray-400 mb-2">{item.description}</p>
-                                )}
-
-                                {/* Quantity Row */}
-                                <div className="flex items-center gap-4 text-xs text-gray-500">
-                                  <div className="flex items-center gap-1">
-                                    <Ruler className="h-3 w-3" />
-                                    <span className="font-medium text-orange-400">
-                                      {item.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })} {item.unit}
-                                    </span>
-                                    {/* Show calculated volume for concrete items */}
-                                    {(() => {
-                                      const vol = calculateConcreteVolume(item);
-                                      return vol ? (
-                                        <span className="text-blue-400 ml-1">
-                                          ({vol.volume.toLocaleString(undefined, { maximumFractionDigits: 1 })} {vol.unit})
-                                        </span>
-                                      ) : null;
-                                    })()}
-                                  </div>
-
-                                  {item.unitCost && (
-                                    <div className="flex items-center gap-1">
-                                      <DollarSign className="h-3 w-3" />
-                                      <span>${item.unitCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}/{item.unit}</span>
-                                    </div>
-                                  )}
-
-                                  {item.location && (
-                                    <div className="flex items-center gap-1">
-                                      <Layers className="h-3 w-3" />
-                                      <span>{item.location}</span>
-                                    </div>
-                                  )}
-
-                                  {item.sheetNumber && (
-                                    <div className="flex items-center gap-1">
-                                      <FileText className="h-3 w-3" />
-                                      <span>Sheet {item.sheetNumber}</span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {item.notes && (
-                                  <p className="mt-2 text-xs text-gray-500 italic">{item.notes}</p>
-                                )}
-                              </div>
-
-                              {/* Total Cost */}
-                              {item.totalCost && (
-                                <div className="flex-shrink-0 text-right">
-                                  <div className="text-sm font-medium text-green-400">
-                                    ${item.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                  </div>
-                                  <div className="text-xs text-gray-500">Total</div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
         ) : (
-          // Category View (default)
-          <div className="p-4 space-y-2">
-            {categories.map((catSummary) => (
-              <div key={catSummary.category}>
-                {/* Category Header */}
-                <button
-                  onClick={() => toggleCategory(catSummary.category)}
-                  className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
-                >
-                  {expandedCategories.has(catSummary.category) ? (
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  )}
-                  <Package className="h-4 w-4 text-orange-500" />
-                  <span className="font-medium text-[#F8FAFC] capitalize">{catSummary.category}</span>
-                  <div className="ml-auto flex items-center gap-3 text-xs text-gray-400">
-                    <span>{catSummary.itemCount} items</span>
-                    {catSummary.totalCost > 0 && (
-                      <span className="text-green-400 font-medium">
-                        ${catSummary.totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                      </span>
-                    )}
-                  </div>
-                </button>
-
-                {/* Category Items */}
-                {expandedCategories.has(catSummary.category) && (
-                  <div className="ml-6 mt-1 space-y-1">
-                    {catSummary.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`flex items-start gap-3 rounded-lg border bg-[#1F2328] p-3 text-sm transition-all cursor-pointer group ${
-                          selectedItems.has(item.id)
-                            ? 'border-orange-500 bg-orange-500/10'
-                            : 'border-gray-700 hover:border-orange-500'
-                        }`}
-                        onClick={() => handleEditItem(item)}
-                      >
-                        {/* Checkbox for bulk selection */}
-                        {!item.verified && (
-                          <div
-                            className="mt-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleItemSelection(item.id);
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedItems.has(item.id)}
-                              onChange={() => {}}
-                              className="h-4 w-4 rounded border-gray-600 bg-[#2D333B] text-orange-500 focus:ring-orange-500 cursor-pointer"
-                            />
-                          </div>
-                        )}
-
-                        {/* Status Icon */}
-                        <div className="mt-1">
-                          {item.verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <AlertCircle className="h-4 w-4 text-orange-400" />
-                          )}
-                        </div>
-
-                        {/* Item Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-[#F8FAFC] truncate">{item.itemName}</h4>
-                            {item.verified && (
-                              <Badge variant="outline" className="text-xs text-green-400 border-green-700">
-                                Verified
-                              </Badge>
-                            )}
-                            {/* Confidence indicator */}
-                            {item.confidence !== undefined && (
-                              <div className={`flex items-center gap-1 text-xs ${getConfidenceColor(item.confidence)}`}>
-                                <Sparkles className="h-3 w-3" />
-                                <span>{item.confidence > 1 ? item.confidence.toFixed(0) : (item.confidence * 100).toFixed(0)}%</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {item.description && (
-                            <p className="text-xs text-gray-400 mb-2">{item.description}</p>
-                          )}
-
-                          {/* Quantity Row */}
-                          <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <Ruler className="h-3 w-3" />
-                              <span className="font-medium text-orange-400">
-                                {item.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })} {item.unit}
-                              </span>
-                            </div>
-
-                            {item.unitCost ? (
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="h-3 w-3" />
-                                <span>${item.unitCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}/{item.unit}</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1 text-yellow-500">
-                                <DollarSign className="h-3 w-3" />
-                                <span>No price - click to add</span>
-                              </div>
-                            )}
-
-                            {item.location && (
-                              <div className="flex items-center gap-1">
-                                <Layers className="h-3 w-3" />
-                                <span>{item.location}</span>
-                              </div>
-                            )}
-
-                            {item.sheetNumber && (
-                              <div className="flex items-center gap-1">
-                                <FileText className="h-3 w-3" />
-                                <span>Sheet {item.sheetNumber}</span>
-                              </div>
-                            )}
-
-                            {item.gridLocation && (
-                              <div className="flex items-center gap-1">
-                                <span>Grid: {item.gridLocation}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {item.notes && (
-                            <p className="mt-2 text-xs text-gray-500 italic">{item.notes}</p>
-                          )}
-
-                          {/* Low confidence warning */}
-                          {item.confidence !== undefined && ((item.confidence > 1 ? item.confidence : item.confidence * 100) < 60) && !item.verified && (
-                            <div className="mt-2 flex items-center gap-1 text-xs text-yellow-500">
-                              <AlertCircle className="h-3 w-3" />
-                              <span>Low confidence - click to verify manually</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Total Cost & Edit */}
-                        <div className="flex-shrink-0 text-right flex flex-col items-end gap-2">
-                          {item.totalCost ? (
-                            <>
-                              <div className="text-sm font-medium text-green-400">
-                                ${item.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                              </div>
-                              <div className="text-xs text-gray-500">Total</div>
-                            </>
-                          ) : (
-                            <div className="text-xs text-gray-500">No cost</div>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity h-7 px-2"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditItem(item);
-                            }}
-                          >
-                            <Edit2 className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <TakeoffTable
+            items={filteredItems}
+            selectedItems={selectedItems}
+            onSelectItem={toggleItemSelection}
+            onEditItem={handleEditItem}
+            viewMode={viewMode}
+            expandedCategories={expandedCategories}
+            onToggleCategory={toggleCategory}
+            categories={categories}
+            csiGroups={csiGroups}
+            hasBudgetDoc={hasBudgetDoc}
+          />
         )}
       </div>
       </ScrollArea>
 
-      {/* Edit Modal */}
-      {selectedTakeoff && (
-        <TakeoffLineItemEditModal
-          open={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            setEditingItem(null);
-          }}
-          item={editingItem}
-          takeoffId={selectedTakeoff.id}
-          onSave={handleItemUpdate}
-        />
-      )}
-      
-      {/* Add Item Modal */}
-      {selectedTakeoff && (
-        <TakeoffAddItemModal
-          open={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onSave={handleAddItem}
-          saving={addingItem}
-        />
-      )}
-
-      {/* Unit Price Manager Modal */}
-      {showPriceManager && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-4xl mx-4">
-            <UnitPriceManager
-              projectSlug={projectSlug}
-              onClose={() => setShowPriceManager(false)}
-              onPricesUpdated={() => {
-                fetchTakeoffs();
-                fetchCostSummary();
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Budget Sync Modal */}
-      {selectedTakeoff && (
-        <TakeoffBudgetSyncModal
-          isOpen={showBudgetSync}
-          onClose={() => setShowBudgetSync(false)}
-          takeoffId={selectedTakeoff.id}
-          takeoffName={selectedTakeoff.name}
-          projectSlug={projectSlug}
-          onSyncComplete={() => {
-            fetchTakeoffs();
-            toast.success('Takeoff synced to budget successfully');
-          }}
-        />
-      )}
-
-      {/* Aggregation Modal */}
-      <TakeoffAggregationModal
-        isOpen={showAggregation}
-        onClose={() => setShowAggregation(false)}
+      {/* Modals - Using new TakeoffModals component */}
+      <TakeoffModals
+        takeoff={selectedTakeoff}
         projectSlug={projectSlug}
+        editingItem={editingItem}
+        showEditModal={showEditModal}
+        onCloseEditModal={() => {
+          setShowEditModal(false);
+          setEditingItem(null);
+        }}
+        onItemUpdate={handleItemUpdate}
+        showAddModal={showAddModal}
+        onCloseAddModal={() => setShowAddModal(false)}
+        onAddItem={handleAddItem}
+        addingItem={addingItem}
+        showPriceManager={showPriceManager}
+        onClosePriceManager={() => setShowPriceManager(false)}
+        onPricesUpdated={() => {
+          fetchTakeoffs();
+          fetchCostSummary();
+        }}
+        showBudgetSync={showBudgetSync}
+        onCloseBudgetSync={() => setShowBudgetSync(false)}
+        onSyncComplete={() => {
+          fetchTakeoffs();
+          toast.success('Takeoff synced to budget successfully');
+        }}
+        showAggregation={showAggregation}
+        onCloseAggregation={() => setShowAggregation(false)}
         onAggregationCreated={() => {
           fetchTakeoffs();
           toast.success('Aggregation created successfully');
         }}
-      />
-
-      {/* QA Dashboard */}
-      {selectedTakeoff && (
-        <TakeoffQADashboard
-          isOpen={showQA}
-          onClose={() => setShowQA(false)}
-          takeoffId={selectedTakeoff.id}
-          takeoffName={selectedTakeoff.name}
-          onRefresh={fetchTakeoffs}
-        />
-      )}
-
-      {/* Labor Planning */}
-      {selectedTakeoff && (
-        <TakeoffLaborPlanning
-          isOpen={showLaborPlanning}
-          onClose={() => setShowLaborPlanning(false)}
-          takeoffId={selectedTakeoff.id}
-          takeoffName={selectedTakeoff.name}
-        />
-      )}
-
-      {/* Learning Panel */}
-      {selectedTakeoff && showLearning && (
-        <TakeoffLearningPanel
-          takeoffId={selectedTakeoff.id}
-          takeoffName={selectedTakeoff.name}
-          onClose={() => setShowLearning(false)}
-          onRefresh={fetchTakeoffs}
-        />
-      )}
-
-      {/* Price Update Modal */}
-      <PriceUpdateModal
-        isOpen={showPriceUpdate}
-        onClose={() => setShowPriceUpdate(false)}
-        projectSlug={projectSlug}
-        onPricesUpdated={fetchTakeoffs}
+        showQA={showQA}
+        onCloseQA={() => setShowQA(false)}
+        onRefresh={fetchTakeoffs}
+        showLaborPlanning={showLaborPlanning}
+        onCloseLaborPlanning={() => setShowLaborPlanning(false)}
+        showLearning={showLearning}
+        onCloseLearning={() => setShowLearning(false)}
+        showPriceUpdate={showPriceUpdate}
+        onClosePriceUpdate={() => setShowPriceUpdate(false)}
       />
 
       {/* Cost Summary Banner */}

@@ -42,10 +42,15 @@ export interface CategorySummary {
 }
 
 export interface CostSummary {
-  totalCost: number;
-  byCategory: Record<string, number>;
-  byCSI: Record<string, number>;
-  itemCount: number;
+  totalCost?: number;
+  totalMaterialCost?: number;
+  totalLaborCost?: number;
+  totalLaborHours?: number;
+  pricedItemCount?: number;
+  itemCount?: number;
+  unpricedItems?: Array<{ id: string; itemName: string }>;
+  byCategory?: Record<string, number>;
+  byCSI?: Record<string, number>;
 }
 
 export interface MEPData {
