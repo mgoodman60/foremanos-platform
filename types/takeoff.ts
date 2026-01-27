@@ -3,6 +3,11 @@
  * Used across takeoff components, hooks, and utilities
  */
 
+/**
+ * Represents a single line item in a material takeoff
+ *
+ * @interface TakeoffLineItem
+ */
 export interface TakeoffLineItem {
   id: string;
   category: string;
@@ -20,6 +25,11 @@ export interface TakeoffLineItem {
   verified: boolean;
 }
 
+/**
+ * Represents a complete material takeoff with line items
+ *
+ * @interface MaterialTakeoff
+ */
 export interface MaterialTakeoff {
   id: string;
   name: string;
@@ -34,6 +44,11 @@ export interface MaterialTakeoff {
   createdAt: string;
 }
 
+/**
+ * Summary statistics for a category of takeoff items
+ *
+ * @interface CategorySummary
+ */
 export interface CategorySummary {
   category: string;
   itemCount: number;
@@ -41,6 +56,11 @@ export interface CategorySummary {
   items: TakeoffLineItem[];
 }
 
+/**
+ * Cost breakdown summary for takeoff items
+ *
+ * @interface CostSummary
+ */
 export interface CostSummary {
   totalCost?: number;
   totalMaterialCost?: number;
@@ -53,6 +73,11 @@ export interface CostSummary {
   byCSI?: Record<string, number>;
 }
 
+/**
+ * MEP (Mechanical, Electrical, Plumbing) system data
+ *
+ * @interface MEPData
+ */
 export interface MEPData {
   items: MEPItem[];
   totalCost: number;
@@ -72,6 +97,11 @@ export interface MEPData {
   };
 }
 
+/**
+ * Individual MEP system item
+ *
+ * @interface MEPItem
+ */
 export interface MEPItem {
   id: string;
   type: 'electrical' | 'plumbing' | 'hvac';
@@ -83,6 +113,11 @@ export interface MEPItem {
   location?: string;
 }
 
+/**
+ * Budget item from project budget
+ *
+ * @interface BudgetItem
+ */
 export interface BudgetItem {
   id: string;
   name: string;
@@ -93,6 +128,11 @@ export interface BudgetItem {
   costCode?: string;
 }
 
+/**
+ * Total calculations for takeoff items
+ *
+ * @interface TakeoffTotals
+ */
 export interface TakeoffTotals {
   totalCost: number;
   totalQuantity: number;
@@ -100,6 +140,11 @@ export interface TakeoffTotals {
   byCategory: Record<string, CategorySummary>;
 }
 
+/**
+ * CSI division grouping summary
+ *
+ * @interface CSIDivisionSummary
+ */
 export interface CSIDivisionSummary {
   division: {
     number: number;
