@@ -106,7 +106,7 @@ async function newRouteHandler(request: NextRequest, auth: Awaited<ReturnType<ty
     }
 
     // 6. Restricted query check
-    const restricted = checkRestrictedQuery(validation.body?.message || null, auth.userRole);
+    const restricted = await checkRestrictedQuery(validation.body?.message || null, auth.userRole);
     if (restricted.isRestricted) {
       // Save denial message to database
       await prisma.chatMessage.create({

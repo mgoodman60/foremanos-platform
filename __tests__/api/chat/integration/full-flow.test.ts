@@ -6,26 +6,41 @@ import { getServerSession } from 'next-auth';
 import { getCachedResponse } from '@/lib/query-cache';
 import { checkRateLimit, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkQueryLimit } from '@/lib/subscription';
-
-const featureFlagMock = vi.fn(() => true);
-const restrictedMock = vi.fn(() => ({ isRestricted: false, denialMessage: '' }));
+import { shouldUseNewRoute } from '@/lib/chat/feature-flags';
+import { checkRestrictedQuery } from '@/lib/chat/utils/restricted-query-check';
 
 vi.mock('@/lib/chat/feature-flags', () => ({
-  shouldUseNewRoute: featureFlagMock,
+  shouldUseNewRoute: vi.fn(() => true),
 }));
 
 vi.mock('@/lib/chat/utils/restricted-query-check', () => ({
-  checkRestrictedQuery: restrictedMock,
+  checkRestrictedQuery: vi.fn(() => ({ isRestricted: false, denialMessage: '' })),
 }));
+
+const shouldUseNewRouteMock = vi.mocked(shouldUseNewRoute);
+const checkRestrictedQueryMock = vi.mocked(checkRestrictedQuery);
 
 describe('Chat API Full Request Flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    featureFlagMock.mockReturnValue(true);
-    restrictedMock.mockReturnValue({ isRestricted: false, denialMessage: '' });
+    shouldUseNewRouteMock.mockReturnValue(true);
+    checkRestrictedQueryMock.mockReturnValue({ isRestricted: false, denialMessage: '' });
     process.env.ABACUSAI_API_KEY = 'test-key';
 
     vi.mocked(getCachedResponse).mockResolvedValue(null);
+    vi.mocked(checkRateLimit).mockResolvedValue({
+      success: true,
+      remaining: 99,
+      limit: 100,
+      retryAfter: 0,
+    } as never);
+    vi.mocked(createRateLimitHeaders).mockReturnValue({});
+    vi.mocked(checkQueryLimit).mockResolvedValue({
+      allowed: true,
+      limit: 100,
+      remaining: 99,
+      tier: 'pro',
+    } as never);
   });
 
   afterEach(() => {
@@ -154,7 +169,7 @@ describe('Chat API Full Request Flow', () => {
   });
 
   it('should enforce restricted query responses for guests', async () => {
-    restrictedMock.mockReturnValue({
+    checkRestrictedQueryMock.mockReturnValue({
       isRestricted: true,
       denialMessage: 'Access denied (mock).',
     });
