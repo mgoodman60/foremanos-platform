@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Chat API Snapshot Tests - Error Scenarios > should match snapshot for missing message and image > missing-message-and-image 1`] = `
+{
+  "body": {
+    "error": "Message or image is required",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 400,
+  "statusText": "",
+}
+`;
+
+exports[`Chat API Snapshot Tests - Error Scenarios > should match snapshot for missing projectSlug > missing-project-slug 1`] = `
+{
+  "body": {
+    "error": "Project context is required. Please access chat through a project page.",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 400,
+  "statusText": "",
+}
+`;

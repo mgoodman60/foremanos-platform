@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for calculation query > calculation-query 1`] = `
+{
+  "body": {
+    "cached": true,
+    "response": "Cached response for: Calculate the total volume of concrete needed",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 200,
+  "statusText": "",
+}
+`;
+
+exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for counting query > counting-query 1`] = `
+{
+  "body": {
+    "cached": true,
+    "response": "Cached response for: How many windows are in the building?",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 200,
+  "statusText": "",
+}
+`;
+
+exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for general text query > general-text-query 1`] = `
+{
+  "body": {
+    "cached": true,
+    "response": "Cached response for: What is the project schedule?",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 200,
+  "statusText": "",
+}
+`;
+
+exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for measurement query > measurement-query 1`] = `
+{
+  "body": {
+    "cached": true,
+    "response": "Cached response for: What is the height of the building?",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 200,
+  "statusText": "",
+}
+`;
