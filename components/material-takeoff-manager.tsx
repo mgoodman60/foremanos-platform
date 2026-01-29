@@ -590,7 +590,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     }
 
     // STEP 2: Add takeoff items (these provide detailed quantities and may update costs)
-    const allItems = getAllTakeoffItems();
+    const allItems = getAllTakeoffItems;
     
     if (typeof window !== 'undefined') {
       console.log('[CSI Debug] Aggregating from ALL takeoffs');
@@ -1000,8 +1000,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
 
   const exportToCSV = () => {
     // Export from CSI Division view (all takeoffs + budget)
-    const divisions = getCSIDivisionGroups();
-    const allItems = getAllTakeoffItems();
+    const divisions = csiGroups;
+    const allItems = getAllTakeoffItems;
     
     if (divisions.length === 0 && allItems.length === 0) {
       toast.error('No items to export');
@@ -1111,7 +1111,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     const unitTotals: Record<string, number> = {};
     const volumeTotals: Record<string, number> = {};
     
-    getAllTakeoffItems().forEach(item => {
+    getAllTakeoffItems.forEach(item => {
       unitTotals[item.unit] = (unitTotals[item.unit] || 0) + item.quantity;
       
       // Track volume for concrete items
@@ -1157,14 +1157,6 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   };
 
   // These are now calculated via useMemo above using utility functions
-
-  // Calculate CSI groups - keep existing function for now (uses CSI_KEYWORD_MAP)
-  // TODO: Move CSI_KEYWORD_MAP to utility and fully migrate
-  const csiGroups = useMemo(() => {
-    // Use existing getCSIDivisionGroups function (defined below)
-    // This will be fully migrated to utility in next iteration
-    return getCSIDivisionGroups();
-  }, [getAllTakeoffItems, budgetItems, hasBudgetDoc, takeoffs]);
 
   // Define action menu items
   const pricingActions: ActionItem[] = [
