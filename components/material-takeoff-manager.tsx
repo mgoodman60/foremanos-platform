@@ -762,9 +762,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       
       // Remove from selection if selected
       if (selectedItems.has(itemId)) {
-        const newSelected = new Set(selectedItems);
-        newSelected.delete(itemId);
-        setSelectedItems(newSelected);
+        toggleItemSelection(itemId);
       }
       
       toast.success('Item deleted');
@@ -800,11 +798,6 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   const selectAllUnverified = () => {
     const unverified = filteredItems.filter((item: TakeoffLineItem) => !item.verified);
     selectAllItems(unverified.map((item: TakeoffLineItem) => item.id));
-  };
-
-  // Clear selection
-  const clearSelection = () => {
-    setSelectedItems(new Set());
   };
 
   // Bulk verify selected items
