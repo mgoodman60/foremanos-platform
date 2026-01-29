@@ -206,27 +206,6 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     }
   };
 
-  const fetchTakeoffs = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/projects/${projectSlug}/takeoffs`);
-      if (!response.ok) throw new Error('Failed to fetch takeoffs');
-
-      const data = await response.json();
-      setTakeoffs(data.takeoffs || []);
-      
-      // Auto-select first takeoff if available
-      if (data.takeoffs && data.takeoffs.length > 0 && !selectedTakeoff) {
-        setSelectedTakeoff(data.takeoffs[0]);
-      }
-    } catch (error: unknown) {
-      console.error('Error fetching takeoffs:', error);
-      toast.error('Failed to load material takeoffs');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Get ALL items from ALL takeoffs (for CSI Division view aggregation)
   // Note: This applies filters across all takeoffs for CSI view
   const getAllTakeoffItems = useMemo((): TakeoffLineItem[] => {
@@ -815,17 +794,6 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     setTakeoffs((prev: MaterialTakeoff[]) =>
       prev.map((t: MaterialTakeoff) => (t.id === updatedTakeoff.id ? updatedTakeoff : t))
     );
-  };
-
-  // Toggle item selection for bulk operations
-  const toggleItemSelection = (itemId: string) => {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(itemId)) {
-      newSelected.delete(itemId);
-    } else {
-      newSelected.add(itemId);
-    }
-    setSelectedItems(newSelected);
   };
 
   // Select all unverified items
