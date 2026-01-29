@@ -2525,6 +2525,8 @@ model AutodeskModel {
   lastExtractedAt   DateTime? // When extraction was last run
   fileType          String?   // dwg, dxf, rvt, ifc, etc.
   is2D              Boolean   @default(false) // True for 2D drawings (DWG)
+  markups           Json?     // Markup annotations (replaces data/markups/ filesystem)
+  measurements      Json?     // Measurement data (replaces data/measurements/ filesystem)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 

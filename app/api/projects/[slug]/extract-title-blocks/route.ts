@@ -7,12 +7,8 @@ import {
   storeTitleBlockData,
   TitleBlockData
 } from '@/lib/title-block-extractor';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
+import { getFileUrl } from '@/lib/s3';
+import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
 
 /**
  * POST /api/projects/[slug]/extract-title-blocks
@@ -68,8 +64,13 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
           continue;
         }
 
-        // Download document from S3 if needed
-        const documentPath = await downloadDocument(document.cloud_storage_path);
+        // Download document from S3
+        const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to download document: ${response.statusText}`);
+        }
+        const pdfBuffer = Buffer.from(await response.arrayBuffer());
 
         // Process first page only (title blocks are usually on first page)
         const chunks = document.DocumentChunk.filter((c: any) => {
@@ -80,12 +81,18 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
         for (const chunk of chunks) {
           try {
-            // Convert first page to image
-            const imageBase64 = await pdfPageToBase64(documentPath, 1);
+            // Convert first page to image using serverless-compatible rasterization
+            const rasterResult = await rasterizeSinglePage(pdfBuffer, 1, {
+              dpi: 150,
+              maxWidth: 1500,
+              maxHeight: 1500,
+              format: 'jpeg',
+              quality: 90
+            });
 
             // Extract title block
             const extractionResult = await extractTitleBlock(
-              imageBase64,
+              rasterResult.base64,
               chunk.content || '',
               document.name
             );
@@ -125,9 +132,6 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
             errorCount++;
           }
         }
-
-        // Clean up temporary file
-        await fs.unlink(documentPath).catch(() => {});
       } catch (docError) {
         console.error(`Error processing document ${document.id}:`, docError);
         results.push({
@@ -156,48 +160,3 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
   }
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-async function downloadDocument(cloudStoragePath: string): Promise<string> {
-  // For now, assume documents are already accessible
-  // In production, you'd download from S3 here
-  const tempPath = path.join('/tmp', `doc-${Date.now()}.pdf`);
-  
-  // This is a placeholder - in production, download from S3
-  // For now, assume document is in public folder
-  const publicPath = path.join(process.cwd(), 'public', cloudStoragePath);
-  
-  try {
-    await fs.copyFile(publicPath, tempPath);
-    return tempPath;
-  } catch (error) {
-    throw new Error(`Failed to download document: ${cloudStoragePath}`);
-  }
-}
-
-async function pdfPageToBase64(pdfPath: string, pageNumber: number): Promise<string> {
-  const tempImagePath = path.join('/tmp', `page-${Date.now()}.jpg`);
-
-  try {
-    // Convert PDF page to image using pdftoppm
-    const command = `pdftoppm -jpeg -f ${pageNumber} -l ${pageNumber} -scale-to 1500 "${pdfPath}" "${tempImagePath.replace('.jpg', '')}"`;
-    await execAsync(command);
-
-    // The output file will have -1.jpg appended
-    const actualImagePath = tempImagePath.replace('.jpg', '-1.jpg');
-
-    // Read and convert to base64
-    const imageBuffer = await fs.readFile(actualImagePath);
-    const base64 = imageBuffer.toString('base64');
-
-    // Clean up
-    await fs.unlink(actualImagePath).catch(() => {});
-
-    return base64;
-  } catch (error) {
-    console.error('PDF to image conversion error:', error);
-    throw error;
-  }
-}

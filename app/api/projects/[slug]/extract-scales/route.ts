@@ -15,12 +15,7 @@ import {
   storeSheetScaleData,
   type SheetScaleData,
 } from '@/lib/scale-detector';
-import * as fs from 'fs';
-import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execPromise = promisify(exec);
+import { rasterizePdfToImages } from '@/lib/pdf-to-image-raster';
 
 export async function POST(req: Request, { params }: { params: { slug: string } }) {
   try {
@@ -75,42 +70,30 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
         // Download PDF from S3
         const { getFileUrl } = await import('@/lib/s3');
         const pdfUrl = await getFileUrl(document.cloud_storage_path || '', document.isPublic || false);
-        
+
         const pdfResponse = await fetch(pdfUrl);
-        const pdfBuffer = await pdfResponse.arrayBuffer();
-        
-        const tempDir = path.join('/tmp', `scale_extraction_${document.id}`);
-        if (!fs.existsSync(tempDir)) {
-          fs.mkdirSync(tempDir, { recursive: true });
-        }
+        const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
-        const pdfPath = path.join(tempDir, 'document.pdf');
-        fs.writeFileSync(pdfPath, Buffer.from(pdfBuffer));
-
-        // Convert PDF pages to images
-        await execPromise(`pdftoppm -jpeg -r 150 "${pdfPath}" "${tempDir}/page"`);
-
-        const imageFiles = fs.readdirSync(tempDir)
-          .filter(f => f.startsWith('page-') && f.endsWith('.jpg'))
-          .sort();
+        // Convert all PDF pages to images using serverless-compatible rasterization
+        const rasterizedPages = await rasterizePdfToImages(pdfBuffer, {
+          dpi: 150,
+          maxWidth: 2048,
+          maxHeight: 2048,
+          format: 'jpeg',
+          quality: 90
+        });
 
         // Process each page
-        for (let i = 0; i < imageFiles.length; i++) {
-          const imageFile = imageFiles[i];
-          const pageNumber = i + 1;
-          
-          console.log(`  📃 Processing page ${pageNumber}/${imageFiles.length}`);
+        for (const page of rasterizedPages) {
+          const pageNumber = page.pageNumber;
+
+          console.log(`  📃 Processing page ${pageNumber}/${rasterizedPages.length}`);
 
           // Use page number as sheet identifier
           const sheetNumber = `Page ${pageNumber}`;
 
-          // Read image
-          const imagePath = path.join(tempDir, imageFile);
-          const imageBuffer = fs.readFileSync(imagePath);
-          const imageBase64 = imageBuffer.toString('base64');
-
           // Try Vision API first
-          const visionResult = await detectScalesWithVision(imageBase64, sheetNumber);
+          const visionResult = await detectScalesWithVision(page.base64, sheetNumber);
 
           if (visionResult.success && visionResult.scales.length > 0) {
             // Store scale data
@@ -125,7 +108,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
             };
 
             await storeSheetScaleData(project.id, document.id, sheetNumber, scaleData);
-            
+
             extracted++;
             totalScales += visionResult.scales.length;
             console.log(`  ✓ Extracted ${visionResult.scales.length} scale(s) from page ${pageNumber}`);
@@ -133,9 +116,6 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
             console.log(`  ⚠️  No scales found on page ${pageNumber}`);
           }
         }
-
-        // Cleanup temp files
-        fs.rmSync(tempDir, { recursive: true, force: true });
 
       } catch (error) {
         console.error(`Error processing document ${document.name}:`, error);

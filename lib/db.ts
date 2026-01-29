@@ -90,15 +90,8 @@ async function ensureConnection(retryDelay = 1000) {
   }
 }
 
-// Health check interval (every 30 seconds)
-if (process.env.NODE_ENV !== 'test') {
-  setInterval(async () => {
-    if (!isConnected && !isConnecting) {
-      console.log('[DB] Health check: Connection lost, attempting reconnection...')
-      await ensureConnection()
-    }
-  }, 30000)
-}
+// Note: Health check interval removed for serverless compatibility
+// Prisma handles reconnection automatically on each request
 
 // Initialize connection
 ensureConnection()

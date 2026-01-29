@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/db';
-import * as fs from 'fs';
-import * as path from 'path';
 
 interface EmailParams {
   to: string;
@@ -18,59 +16,9 @@ const CONTACT_EMAIL = 'ForemanOS@outlook.com';
 // Standard footer for all emails
 const EMAIL_FOOTER = `\n\n${'─'.repeat(60)}\n\n⚠️ This is an automated no-reply email. Please do not respond to this message.\n\nFor questions or support, contact us at: ${CONTACT_EMAIL}\n\nBest regards,\nThe ForemanOS Team`;
 
-// Rate limiter: Track last email send time to avoid hitting Resend's 2 req/sec limit
-let lastEmailTime = 0;
-const MIN_EMAIL_INTERVAL = 600; // 600ms between emails (safer than 500ms)
-
-// Queue for emails to be sent
-const emailQueue: Array<() => Promise<void>> = [];
-let isProcessingQueue = false;
-
-// Load Resend API key from auth secrets
+// Get Resend API key from environment variable (serverless-compatible)
 function getResendApiKey(): string | null {
-  try {
-    const authSecretsPath = path.join(process.env.HOME || '/home/ubuntu', '.config', 'abacusai_auth_secrets.json');
-    if (fs.existsSync(authSecretsPath)) {
-      const authSecrets = JSON.parse(fs.readFileSync(authSecretsPath, 'utf-8'));
-      return authSecrets.resend?.secrets?.api_key?.value || null;
-    }
-  } catch (error) {
-    console.error('Error loading Resend API key:', error);
-  }
-  return null;
-}
-
-// Sleep utility for rate limiting
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Process email queue with rate limiting
-async function processEmailQueue() {
-  if (isProcessingQueue) return;
-  
-  isProcessingQueue = true;
-  
-  while (emailQueue.length > 0) {
-    const emailTask = emailQueue.shift();
-    if (emailTask) {
-      try {
-        // Ensure minimum interval between emails
-        const now = Date.now();
-        const timeSinceLastEmail = now - lastEmailTime;
-        if (timeSinceLastEmail < MIN_EMAIL_INTERVAL) {
-          await sleep(MIN_EMAIL_INTERVAL - timeSinceLastEmail);
-        }
-        
-        await emailTask();
-        lastEmailTime = Date.now();
-      } catch (error) {
-        console.error('Error processing email from queue:', error);
-      }
-    }
-  }
-  
-  isProcessingQueue = false;
+  return process.env.RESEND_API_KEY || null;
 }
 
 /**
@@ -124,8 +72,8 @@ async function sendEmailDirect({
         logEmailToConsole(to, subject, body, type);
         return true; // Don't fail, just log
       } else if (response.status === 429) {
-        console.warn('⚠️ Rate limit hit. Email queued for retry.');
-        throw new Error('RATE_LIMIT'); // Will be retried by queue
+        console.warn('⚠️ Rate limit hit. Please retry later.');
+        throw new Error('Rate limit exceeded - please retry later');
       } else {
         console.error('Resend API error:', errorData);
         throw new Error('Failed to send email via Resend');
@@ -136,11 +84,6 @@ async function sendEmailDirect({
     console.log('✅ Email sent via Resend:', { to, subject, id: data.id });
     return true;
   } catch (error: unknown) {
-    // If rate limit, throw to retry
-    if (error.message === 'RATE_LIMIT') {
-      throw error;
-    }
-    
     console.error('Error sending email via Resend, falling back to console:', error);
     logEmailToConsole(to, subject, body, type);
     return true; // Don't fail the whole operation
@@ -148,7 +91,8 @@ async function sendEmailDirect({
 }
 
 /**
- * Send email using Resend API with rate limiting and fallback to console logging
+ * Send email using Resend API with fallback to console logging
+ * Serverless-compatible: sends directly without in-memory queue
  */
 export async function sendEmail({
   to,
@@ -159,23 +103,8 @@ export async function sendEmail({
   type = 'info',
 }: EmailParams): Promise<{ success: boolean; notificationId?: string }> {
   try {
-    // Add email to queue for rate-limited sending
-    const emailPromise = new Promise<void>((resolve) => {
-      emailQueue.push(async () => {
-        try {
-          await sendEmailDirect({ to, subject, body, html, type });
-        } catch (error) {
-          console.error('Error sending email:', error);
-        }
-        resolve();
-      });
-    });
-
-    // Start processing queue if not already running
-    processEmailQueue();
-
-    // Don't wait for email to complete - return immediately
-    // (emails will be sent in background via queue)
+    // Send email directly (serverless-compatible - no queue)
+    await sendEmailDirect({ to, subject, body, html, type });
 
     // Create notification in database if userId is provided
     if (userId) {

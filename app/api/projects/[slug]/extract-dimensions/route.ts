@@ -5,12 +5,7 @@ import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
 import { getFileUrl } from '@/lib/s3';
 import { extractDimensionsWithVision, validateDimensionChains } from '@/lib/dimension-intelligence';
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
-import { exec } from 'child_process';
-
-const execAsync = promisify(exec);
+import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
 
 export async function POST(
   request: NextRequest,
@@ -88,13 +83,6 @@ export async function POST(
 
         const buffer = Buffer.from(await response.arrayBuffer());
 
-        // Create temp directory for processing
-        const tempDir = `/tmp/dim-extract-${document.id}-${Date.now()}`;
-        await execAsync(`mkdir -p ${tempDir}`);
-
-        const pdfPath = path.join(tempDir, 'document.pdf');
-        fs.writeFileSync(pdfPath, buffer);
-
         // Get sheet number from document metadata
         const sheetNumber = ((document as any).metadata)?.sheetNumber || document.name.replace(/\.pdf$/i, '');
 
@@ -108,21 +96,16 @@ export async function POST(
 
         const scaleData = scaleChunk?.scaleData as any;
 
-        // Convert first page to image
-        const imagePath = path.join(tempDir, 'page.jpg');
-        await execAsync(
-          `pdftoppm -jpeg -f 1 -l 1 -scale-to 2048 "${pdfPath}" "${tempDir}/page"`
-        );
+        // Convert first page to image using serverless-compatible rasterization
+        const rasterResult = await rasterizeSinglePage(buffer, 1, {
+          dpi: 150,
+          maxWidth: 2048,
+          maxHeight: 2048,
+          format: 'jpeg',
+          quality: 90
+        });
 
-        // Check if image was created
-        const actualImagePath = path.join(tempDir, 'page-1.jpg');
-        if (!fs.existsSync(actualImagePath)) {
-          throw new Error('Failed to convert PDF to image');
-        }
-
-        // Read image and convert to base64
-        const imageBuffer = fs.readFileSync(actualImagePath);
-        const imageBase64 = imageBuffer.toString('base64');
+        const imageBase64 = rasterResult.base64;
 
         // Extract dimensions using vision
         console.log(`[DIMENSION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...`);
@@ -205,9 +188,6 @@ export async function POST(
 
         totalDimensions += dimensions.length;
         processedSheets++;
-
-        // Cleanup temp files
-        await execAsync(`rm -rf ${tempDir}`);
 
       } catch (error: any) {
         console.error(`[DIMENSION EXTRACTION] Error processing ${document.name}:`, error);
