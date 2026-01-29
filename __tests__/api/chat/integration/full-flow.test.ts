@@ -14,7 +14,7 @@ vi.mock('@/lib/chat/feature-flags', () => ({
 }));
 
 vi.mock('@/lib/chat/utils/restricted-query-check', () => ({
-  checkRestrictedQuery: vi.fn(() => ({ isRestricted: false, denialMessage: '' })),
+  checkRestrictedQuery: vi.fn(() => Promise.resolve({ isRestricted: false, denialMessage: '' })),
 }));
 
 const shouldUseNewRouteMock = vi.mocked(shouldUseNewRoute);
@@ -24,7 +24,7 @@ describe('Chat API Full Request Flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     shouldUseNewRouteMock.mockReturnValue(true);
-    checkRestrictedQueryMock.mockReturnValue({ isRestricted: false, denialMessage: '' });
+    checkRestrictedQueryMock.mockResolvedValue({ isRestricted: false, denialMessage: '' });
     process.env.ABACUSAI_API_KEY = 'test-key';
 
     vi.mocked(getCachedResponse).mockResolvedValue(null);
@@ -169,7 +169,7 @@ describe('Chat API Full Request Flow', () => {
   });
 
   it('should enforce restricted query responses for guests', async () => {
-    checkRestrictedQueryMock.mockReturnValue({
+    checkRestrictedQueryMock.mockResolvedValue({
       isRestricted: true,
       denialMessage: 'Access denied (mock).',
     });

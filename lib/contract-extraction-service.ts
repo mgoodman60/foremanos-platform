@@ -5,10 +5,18 @@
 
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.ABACUSAI_API_KEY,
-  baseURL: 'https://api.abacus.ai/llm/v1',
-});
+// Lazy initialization to avoid build-time API key requirement
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    openaiInstance = new OpenAI({
+      apiKey: process.env.ABACUSAI_API_KEY || '',
+      baseURL: 'https://api.abacus.ai/llm/v1',
+    });
+  }
+  return openaiInstance;
+}
 
 export interface ExtractedContractData {
   // Identification
@@ -113,7 +121,7 @@ Provide the extracted data as a JSON object with these fields:
 
 ONLY respond with valid JSON. Do not include any other text.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'claude-3-5-sonnet',
       messages: [
         { role: 'system', content: systemPrompt },

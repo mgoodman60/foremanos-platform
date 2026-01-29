@@ -123,6 +123,6 @@ export async function checkRedisHealth(): Promise<{
     
     return { connected: true, latency };
   } catch (error: unknown) {
-    return { connected: false, error: error.message };
+    return { connected: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

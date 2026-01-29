@@ -52,7 +52,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   const { chunks: enhancedChunks, retrievalLog } = await twoPassRetrieval(
     message || '',
     projectSlug,
-    userRole,
+    userRole as "admin" | "client" | "guest",
     retrievalLimit
   );
 
@@ -312,7 +312,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   }
 
   // Get accessible documents for context
-  const accessibleDocs = getAccessibleDocuments(userRole);
+  const accessibleDocs = getAccessibleDocuments(userRole as "admin" | "client" | "guest");
 
   // Build document filter based on user role
   let docFilter: { accessLevel?: { in: string[] } | string };

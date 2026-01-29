@@ -7,10 +7,17 @@ import { prisma } from '@/lib/db';
 import OpenAI from 'openai';
 import { FeatureType, DataSourceType, DATA_SOURCE_PRIORITY, recordDataSource } from './document-intelligence-router';
 
-const openai = new OpenAI({
-  apiKey: process.env.ABACUSAI_API_KEY,
-  baseURL: 'https://routellm.abacus.ai/v1',
-});
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    openaiInstance = new OpenAI({
+      apiKey: process.env.ABACUSAI_API_KEY || '',
+      baseURL: 'https://routellm.abacus.ai/v1',
+    });
+  }
+  return openaiInstance;
+}
 
 // ============= SCALE SYNC =============
 export async function syncScaleData(
@@ -84,7 +91,7 @@ ${content.substring(0, 10000)}
 Return ONLY JSON array.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 3000,
@@ -92,7 +99,7 @@ Return ONLY JSON array.`;
 
     const text = response.choices[0]?.message?.content || '';
     const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
-    
+
     if (match) {
       const rooms = JSON.parse(match[0]);
       let created = 0, updated = 0;
@@ -179,7 +186,7 @@ ${content.substring(0, 10000)}
 Return ONLY JSON array.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 3000,
@@ -187,7 +194,7 @@ Return ONLY JSON array.`;
 
     const text = response.choices[0]?.message?.content || '';
     const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
-    
+
     if (match) {
       const doors = JSON.parse(match[0]);
       
@@ -236,7 +243,7 @@ ${content.substring(0, 10000)}
 Return ONLY JSON array.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 3000,
@@ -244,7 +251,7 @@ Return ONLY JSON array.`;
 
     const text = response.choices[0]?.message?.content || '';
     const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
-    
+
     if (match) {
       const items = JSON.parse(match[0]);
       
@@ -385,7 +392,7 @@ ${content.substring(0, 10000)}
 Return ONLY JSON array.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 2000,
@@ -393,7 +400,7 @@ Return ONLY JSON array.`;
 
     const text = response.choices[0]?.message?.content || '';
     const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
-    
+
     if (match) {
       const materials = JSON.parse(match[0]);
       

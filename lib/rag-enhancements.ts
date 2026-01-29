@@ -15,17 +15,84 @@
 
 import { prisma } from './db';
 
+/**
+ * Extended metadata interface for EnhancedChunk
+ * Includes all possible metadata properties that may be added during processing
+ */
+export interface EnhancedChunkMetadata {
+  // Base document metadata
+  documentName?: string;
+  accessLevel?: string;
+  category?: string;
+  sheetNumber?: string;
+  scale?: string;
+  projectName?: string;
+  architect?: string;
+  engineer?: string;
+  issueDate?: string;
+
+  // Spatial and location metadata
+  room_number?: string;
+  spatial_context?: string;
+  grid_references?: string[];
+
+  // System topology metadata (for MEP queries)
+  system_topology?: {
+    nodes: number;
+    connections: number;
+    flow: string;
+  };
+
+  // Isometric view metadata
+  isometric_view?: {
+    discipline: string;
+    elements: number;
+    levels: number;
+  };
+
+  // Conflict detection metadata
+  conflicts_detected?: {
+    total: number;
+    critical: number;
+    major: number;
+    types: string[];
+  };
+
+  // Additional metadata fields
+  labeled_dimensions?: string[];
+  derived_dimensions?: string[];
+  hasLegend?: boolean;
+  legendEntriesCount?: number;
+  hasHatchPatterns?: boolean;
+  hatchPatternsCount?: number;
+  notesCount?: number;
+  materialQuantitiesCount?: number;
+  submittalsCount?: number;
+  inspectionsCount?: number;
+  equipmentSpecsCount?: number;
+  mepCallouts?: string[];
+  regulatoryType?: string;
+  standard?: string;
+  jurisdiction?: string;
+
+  // Allow additional properties
+  [key: string]: unknown;
+}
+
 export interface EnhancedChunk {
   id: string;
   content: string;
   documentId: string | null;
   regulatoryDocumentId?: string | null;
   pageNumber: number | null;
-  metadata: any;
+  metadata: EnhancedChunkMetadata;
   isRegulatory?: boolean;
   chunkType?: 'page_overview' | 'detail_callout' | 'zone_area' | 'room_space' | 'schedule_row' | 'note' | 'legend';
   retrievalMethod?: 'precision' | 'context' | 'notes_first' | 'cross_reference';
   sourceReference?: string;
+  // Additional properties that may be populated from document data
+  documentName?: string;
+  sheetNumber?: string;
 }
 
 export interface MeasurementInfo {
@@ -3060,7 +3127,7 @@ export function detectMultipleScales(chunk: EnhancedChunk): MultiScaleDocument {
 
   return {
     documentId: chunk.documentId || '',
-    sheetNumber: metadata.sheet_number || 'Unknown',
+    sheetNumber: (metadata.sheet_number as string) || 'Unknown',
     defaultScale,
     additionalScales,
     scaleWarnings: warnings,
@@ -4068,7 +4135,7 @@ export function interpretIsometricView(chunk: EnhancedChunk): IsometricView {
     });
 
   return {
-    viewName: metadata.sheet_number || 'Unknown',
+    viewName: (metadata.sheet_number as string) || 'Unknown',
     discipline,
     elements,
     spatialHierarchy,

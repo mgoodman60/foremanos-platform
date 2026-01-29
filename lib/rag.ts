@@ -59,7 +59,7 @@ import { getBIMContext } from './bim-rag-indexer';
 import { getMEPScheduleContext } from './mep-schedule-extractor';
 import { getDoorScheduleContext } from './door-schedule-extractor';
 import { getWindowScheduleContext } from './window-schedule-extractor';
-import type { Prisma, DocumentCategory } from '@prisma/client';
+import { Prisma, type DocumentCategory } from '@prisma/client';
 
 // ============================================================================
 // TYPE DEFINITIONS FOR JSON FIELDS
@@ -158,6 +158,30 @@ interface ChunkMetadata {
   regulatoryType?: string;
   standard?: string;
   jurisdiction?: string;
+
+  // Dynamic properties added during processing
+  room_number?: string;
+  spatial_context?: string;
+  grid_references?: string[];
+  system_topology?: {
+    nodes: number;
+    connections: number;
+    flow: string;
+  };
+  isometric_view?: {
+    discipline: string;
+    elements: number;
+    levels: number;
+  };
+  conflicts_detected?: {
+    total: number;
+    critical: number;
+    major: number;
+    types: string[];
+  };
+
+  // Allow additional properties for extensibility
+  [key: string]: unknown;
 }
 
 /** Scored chunk for ranking during retrieval */
@@ -424,6 +448,7 @@ export async function retrieveRelevantDocuments(
               documentId: chunk.documentId || '',
               documentCategory: doc.category,
               documentName: doc.name,
+              titleBlockData: chunk.titleBlockData as TitleBlockData | undefined,
               metadata: {
                 ...existingMetadata,
                 documentName: doc.name,
@@ -2437,10 +2462,10 @@ export async function retrievePhaseBContext(
       if (callouts.length > 0) {
         context += '\n=== DETAIL CALLOUTS & CROSS-REFERENCES ===\n';
 
-        // Group by sheet
+        // Group by source sheet
         type CalloutWithDocument = typeof callouts[number];
         const bySheet = callouts.reduce<Record<string, CalloutWithDocument[]>>((acc, callout) => {
-          const sheet = callout.sheetNumber || 'Unknown';
+          const sheet = callout.sourceSheet || 'Unknown';
           if (!acc[sheet]) acc[sheet] = [];
           acc[sheet].push(callout);
           return acc;
@@ -2448,19 +2473,15 @@ export async function retrievePhaseBContext(
 
         Object.entries(bySheet).slice(0, 5).forEach(([sheet, sheetCallouts]) => {
           context += `\nSheet ${sheet} (${sheetCallouts[0].Document?.name || 'Unknown'}):\n`;
-          sheetCallouts.slice(0, 5).forEach((callout) => {
-            const data = callout.callouts;
-            const calloutArray: CalloutItem[] = Array.isArray(data) ? data as CalloutItem[] : (data ? [data as CalloutItem] : []);
-            calloutArray.slice(0, 3).forEach((item) => {
-              context += `  • ${item.type?.toUpperCase() || 'DETAIL'}: ${item.detailNumber || ''} `;
-              if (item.sheetReference) {
-                context += `→ See Sheet ${item.sheetReference}`;
-              }
-              if (item.description) {
-                context += `\n    ${item.description}`;
-              }
-              context += `\n`;
-            });
+          sheetCallouts.slice(0, 15).forEach((callout) => {
+            context += `  • ${callout.type?.toUpperCase() || 'DETAIL'}: ${callout.number || ''} `;
+            if (callout.sheetReference) {
+              context += `→ See Sheet ${callout.sheetReference}`;
+            }
+            if (callout.description) {
+              context += `\n    ${callout.description}`;
+            }
+            context += `\n`;
           });
         });
         context += '\n';

@@ -131,12 +131,19 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
     id: string;
     name: string;
     room?: string;
-    [key: string]: unknown;
+    location?: string;
+    category?: string;
+    itemName?: string;
+    description?: string;
+    quantity?: number | string;
+    unit?: string;
   }
   interface LocationRoom {
     id: string;
     name: string;
     level?: string;
+    roomNumber?: string;
+    floorNumber?: string | number;
   }
   const [locationData, setLocationData] = useState<{
     items: LocationItem[];
@@ -183,7 +190,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
     } catch (error: unknown) {
       toast.dismiss('mep-extract');
       console.error('MEP extraction error:', error);
-      toast.error(error.message || 'Failed to extract MEP data');
+      toast.error(error instanceof Error ? error.message : 'Failed to extract MEP data');
     } finally {
       setExtracting(false);
     }
@@ -259,7 +266,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       setSelectedAssignments({});
     } catch (error: unknown) {
       console.error('Error assigning locations:', error);
-      toast.error(error.message || 'Failed to assign locations');
+      toast.error(error instanceof Error ? error.message : 'Failed to assign locations');
     } finally {
       setAssigningLocations(false);
     }
@@ -290,7 +297,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
     } catch (error: unknown) {
       toast.dismiss('auto-assign');
       console.error('Error auto-assigning locations:', error);
-      toast.error(error.message || 'Failed to auto-assign locations');
+      toast.error(error instanceof Error ? error.message : 'Failed to auto-assign locations');
     } finally {
       setAssigningLocations(false);
     }
@@ -918,16 +925,16 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            {item.category.toLowerCase().includes('electric') && (
+                            {item.category?.toLowerCase().includes('electric') && (
                               <Zap className="h-4 w-4 text-yellow-500 flex-shrink-0" />
                             )}
-                            {item.category.toLowerCase().includes('plumb') && (
+                            {item.category?.toLowerCase().includes('plumb') && (
                               <Droplets className="h-4 w-4 text-cyan-500 flex-shrink-0" />
                             )}
-                            {item.category.toLowerCase().includes('hvac') && (
+                            {item.category?.toLowerCase().includes('hvac') && (
                               <Wrench className="h-4 w-4 text-blue-500 flex-shrink-0" />
                             )}
-                            {(item.category.toLowerCase().includes('fire') || item.category.toLowerCase().includes('alarm')) && (
+                            {(item.category?.toLowerCase().includes('fire') || item.category?.toLowerCase().includes('alarm')) && (
                               <Flame className="h-4 w-4 text-red-500 flex-shrink-0" />
                             )}
                             <span className="font-medium text-sm truncate">
@@ -935,7 +942,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                             </span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {item.category} • Qty: {item.quantity} {item.unit}
+                            {item.category ?? ''} • Qty: {String(item.quantity ?? '')} {item.unit ?? ''}
                           </div>
                         </div>
                         <Select

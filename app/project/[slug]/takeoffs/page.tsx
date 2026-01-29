@@ -196,8 +196,9 @@ export default function TakeoffsPage() {
       toast.success(`Generated ${data.lineItemCount} items from ${data.roomCount} rooms!`, { id: 'generate-takeoffs' });
       loadTakeoffs();
     } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An error occurred';
       console.error('Error generating takeoffs:', error);
-      toast.error(error.message || 'Failed to generate takeoffs', { id: 'generate-takeoffs' });
+      toast.error(message || 'Failed to generate takeoffs', { id: 'generate-takeoffs' });
     } finally {
       setIsGenerating(false);
     }
@@ -242,8 +243,9 @@ export default function TakeoffsPage() {
       setShowEnhancedModal(false);
       loadTakeoffs();
     } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An error occurred';
       console.error('Error in enhanced extraction:', error);
-      toast.error(error.message || 'Failed to extract takeoffs', { id: 'enhanced-extract' });
+      toast.error(message || 'Failed to extract takeoffs', { id: 'enhanced-extract' });
     } finally {
       setIsEnhancedExtracting(false);
     }

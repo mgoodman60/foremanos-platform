@@ -182,10 +182,10 @@ Respond with ONLY valid JSON in this exact format:
       description: item.description || undefined,
       costCode: item.costCode || undefined,
       tradeType: inferTradeType(item.costCode, item.name),
-      budgetedAmount: parseFloat(item.budgetedAmount) || 0,
+      budgetedAmount: parseFloat(String(item.budgetedAmount)) || 0,
       unit: item.unit || undefined,
-      quantity: item.quantity ? parseFloat(item.quantity) : undefined,
-      unitCost: item.unitCost ? parseFloat(item.unitCost) : undefined,
+      quantity: item.quantity ? parseFloat(String(item.quantity)) : undefined,
+      unitCost: item.unitCost ? parseFloat(String(item.unitCost)) : undefined,
     }));
 
     console.log(`[BUDGET_EXTRACTOR] Extracted ${items.length} budget items`);

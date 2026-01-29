@@ -61,7 +61,7 @@ export async function saveCachedResponse(
   complexity: string,
   model: string
 ): Promise<void> {
-  await cacheResponse(message, response, projectSlug, documentIds, complexity, model);
+  await cacheResponse(message, response, projectSlug, documentIds, complexity as "medium" | "simple" | "complex", model);
   console.log(`💾 [CACHE SAVE] Cached ${complexity} query response (${model})`);
 }
 
@@ -75,7 +75,7 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
   // Analyze query complexity and select appropriate model
   const complexityAnalysis = message
     ? analyzeQueryComplexity(message)
-    : { complexity: 'complex' as const, reason: 'Image analysis requires GPT-5.2 vision', model: 'gpt-5.2' };
+    : { complexity: 'complex' as "medium" | "simple" | "complex", reason: 'Image analysis requires GPT-5.2 vision', model: 'gpt-5.2' };
 
   // Images always use GPT-5.2 (vision required)
   const selectedModel = image ? 'gpt-5.2' : complexityAnalysis.model;

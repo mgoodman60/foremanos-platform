@@ -8,6 +8,11 @@ import {
 } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 
+interface ViewerExtension {
+  activate(): void;
+  deactivate(): void;
+}
+
 interface ViewerToolbarProps {
   viewerRef: React.RefObject<ViewerHandle>;
   onToolChange?: (tool: string | null) => void;
@@ -92,7 +97,7 @@ export default function ViewerToolbar({
     if (!viewer) return;
 
     try {
-      const ext = await viewer.getExtension('Autodesk.Section');
+      const ext = await viewer.getExtension('Autodesk.Section') as ViewerExtension | null;
       if (ext) {
         if (sectionActive) {
           ext.deactivate();
@@ -118,7 +123,7 @@ export default function ViewerToolbar({
     if (!viewer) return;
 
     try {
-      const ext = await viewer.getExtension('Autodesk.Measure');
+      const ext = await viewer.getExtension('Autodesk.Measure') as ViewerExtension | null;
       if (ext) {
         if (measureActive) {
           ext.deactivate();

@@ -78,11 +78,12 @@ export function TakeoffModals({
   return (
     <>
       {/* Edit Item Modal */}
-      {editingItem && (
+      {editingItem && takeoff && (
         <TakeoffLineItemEditModal
           open={showEditModal}
           onClose={onCloseEditModal}
           item={editingItem}
+          takeoffId={takeoff.id}
           onSave={onItemUpdate}
         />
       )}
@@ -148,17 +149,15 @@ export function TakeoffModals({
           onClose={onCloseLaborPlanning}
           takeoffId={takeoff.id}
           takeoffName={takeoff.name}
-          projectSlug={projectSlug}
         />
       )}
 
       {/* Learning Panel */}
-      {takeoff && (
+      {takeoff && showLearning && (
         <TakeoffLearningPanel
-          isOpen={showLearning}
-          onClose={onCloseLearning}
           takeoffId={takeoff.id}
-          projectSlug={projectSlug}
+          takeoffName={takeoff.name}
+          onClose={onCloseLearning}
         />
       )}
 
@@ -167,6 +166,7 @@ export function TakeoffModals({
         isOpen={showPriceUpdate}
         onClose={onClosePriceUpdate}
         projectSlug={projectSlug}
+        onPricesUpdated={onPricesUpdated}
       />
     </>
   );

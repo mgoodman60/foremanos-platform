@@ -7,13 +7,8 @@ import {
   storeLegend,
   mergeLegendWithSymbolLibrary
 } from '@/lib/legend-extractor';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { getFileUrl } from '@/lib/s3';
-
-const execAsync = promisify(exec);
+import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
 
 /**
  * POST /api/projects/[slug]/extract-legends
@@ -98,68 +93,51 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         }
 
         const buffer = Buffer.from(await response.arrayBuffer());
-        const tempPdfPath = path.join('/tmp', `legend-${document.id}.pdf`);
-        await fs.writeFile(tempPdfPath, buffer);
 
-        try {
-          // Convert first page to image
-          const tempImagePath = path.join('/tmp', `legend-${document.id}`);
-          await execAsync(
-            `pdftoppm -jpeg -f 1 -l 1 -scale-to 1500 "${tempPdfPath}" "${tempImagePath}"`
+        // Convert first page to image using serverless-compatible rasterizer
+        const rasterResult = await rasterizeSinglePage(buffer, 1, {
+          dpi: 150,
+          maxWidth: 1500,
+          format: 'jpeg'
+        });
+        const imageBase64 = rasterResult.base64;
+
+        // Extract legend
+        const extractionResult = await extractLegendEntries(
+          imageBase64,
+          chunk.sheetNumber,
+          chunk.discipline as any
+        );
+
+        if (extractionResult.success && extractionResult.legend) {
+          // Store in database
+          await storeLegend(
+            project.id,
+            document.id,
+            extractionResult.legend
           );
 
-          const imageFile = `${tempImagePath}-1.jpg`;
-          if (!require('fs').existsSync(imageFile)) {
-            throw new Error('Failed to convert PDF to image');
-          }
+          results.push({
+            documentId: document.id,
+            documentName: document.name,
+            sheetNumber: chunk.sheetNumber,
+            success: true,
+            entriesFound: extractionResult.legend.legendEntries.length,
+            confidence: extractionResult.confidence,
+            method: extractionResult.method
+          });
 
-          // Read image as base64
-          const imageBuffer = require('fs').readFileSync(imageFile);
-          const imageBase64 = imageBuffer.toString('base64');
+          successCount++;
+        } else {
+          results.push({
+            documentId: document.id,
+            documentName: document.name,
+            sheetNumber: chunk.sheetNumber,
+            success: false,
+            error: extractionResult.error || 'No legend found'
+          });
 
-          // Extract legend
-          const extractionResult = await extractLegendEntries(
-            imageBase64,
-            chunk.sheetNumber,
-            chunk.discipline as any
-          );
-
-          if (extractionResult.success && extractionResult.legend) {
-            // Store in database
-            await storeLegend(
-              project.id,
-              document.id,
-              extractionResult.legend
-            );
-
-            results.push({
-              documentId: document.id,
-              documentName: document.name,
-              sheetNumber: chunk.sheetNumber,
-              success: true,
-              entriesFound: extractionResult.legend.legendEntries.length,
-              confidence: extractionResult.confidence,
-              method: extractionResult.method
-            });
-
-            successCount++;
-          } else {
-            results.push({
-              documentId: document.id,
-              documentName: document.name,
-              sheetNumber: chunk.sheetNumber,
-              success: false,
-              error: extractionResult.error || 'No legend found'
-            });
-
-            errorCount++;
-          }
-
-          // Clean up image
-          require('fs').unlinkSync(imageFile);
-        } finally {
-          // Clean up PDF
-          await fs.unlink(tempPdfPath).catch(() => {});
+          errorCount++;
         }
       } catch (docError) {
         console.error(`Error processing document ${document.id}:`, docError);

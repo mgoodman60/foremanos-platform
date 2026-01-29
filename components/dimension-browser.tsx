@@ -40,6 +40,7 @@ interface Dimension {
   };
   chainId?: string;
   validationErrors?: string[];
+  sheetNumber?: string;
 }
 
 interface DimensionChain {
@@ -49,6 +50,7 @@ interface DimensionChain {
   expectedTotal?: number;
   valid: boolean;
   errorMessage?: string;
+  sheetNumber?: string;
 }
 
 interface SheetDimensions {

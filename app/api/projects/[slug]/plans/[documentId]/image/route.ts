@@ -4,9 +4,6 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { downloadFile, getFileUrl } from '@/lib/s3';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,32 +100,6 @@ export async function GET(
       return NextResponse.json({ error: 'No PDF URL available' }, { status: 404 });
     }
 
-    // Check if we have a cached image
-    const cacheDir = path.join(os.tmpdir(), 'plan-images');
-    if (!fs.existsSync(cacheDir)) {
-      fs.mkdirSync(cacheDir, { recursive: true });
-    }
-
-    const cacheKey = `${documentId}-page${pageNumber}`;
-    const cachedImagePath = path.join(cacheDir, `${cacheKey}.png`);
-
-    // Return cached image if it exists and is less than 1 hour old
-    if (fs.existsSync(cachedImagePath)) {
-      const stats = fs.statSync(cachedImagePath);
-      const ageInMs = Date.now() - stats.mtimeMs;
-      const oneHourInMs = 60 * 60 * 1000;
-
-      if (ageInMs < oneHourInMs) {
-        const imageBuffer = fs.readFileSync(cachedImagePath);
-        return new NextResponse(imageBuffer, {
-          headers: {
-            'Content-Type': 'image/png',
-            'Cache-Control': 'public, max-age=3600'
-          }
-        });
-      }
-    }
-
     // Try to get PDF buffer from multiple sources
     let pdfBuffer: Buffer | null = null;
 
@@ -167,9 +138,6 @@ export async function GET(
           maxHeight: 2048,
           format: 'png'
         });
-
-        // Cache the image
-        fs.writeFileSync(cachedImagePath, rasterResult.buffer);
 
         return new NextResponse(rasterResult.buffer, {
           headers: {

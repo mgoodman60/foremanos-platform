@@ -653,6 +653,28 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
   );
 }
 
+// Type guard to check if an entry is a LaborEntry
+function isLaborEntry(entry: LaborEntry | MaterialEntry): entry is LaborEntry {
+  return 'workerName' in entry && 'hoursWorked' in entry && 'hourlyRate' in entry;
+}
+
+// Form data types for the edit modal (using string values for inputs)
+interface LaborFormData {
+  workerName: string;
+  hoursWorked: string;
+  hourlyRate: string;
+  description: string | null;
+  budgetItemId: string | null;
+}
+
+interface MaterialFormData {
+  description: string;
+  quantity: string;
+  unit: string | null;
+  actualCost: string;
+  budgetItemId: string | null;
+}
+
 // Edit Entry Modal Component
 function EditEntryModal({
   type,
@@ -669,25 +691,52 @@ function EditEntryModal({
   onSave: (type: 'labor' | 'material', id: string, updates: ReviewUpdates) => void;
   processing: boolean;
 }) {
-  const [formData, setFormData] = useState(item);
+  // Initialize form data based on type
+  const [laborFormData, setLaborFormData] = useState<LaborFormData>(() => {
+    if (isLaborEntry(item)) {
+      return {
+        workerName: item.workerName,
+        hoursWorked: String(item.hoursWorked),
+        hourlyRate: String(item.hourlyRate),
+        description: item.description,
+        budgetItemId: item.budgetItem?.id || null,
+      };
+    }
+    return { workerName: '', hoursWorked: '0', hourlyRate: '0', description: null, budgetItemId: null };
+  });
+
+  const [materialFormData, setMaterialFormData] = useState<MaterialFormData>(() => {
+    if (!isLaborEntry(item)) {
+      return {
+        description: item.description,
+        quantity: item.quantity != null ? String(item.quantity) : '',
+        unit: item.unit,
+        actualCost: item.actualCost != null ? String(item.actualCost) : '',
+        budgetItemId: item.budgetItem?.id || null,
+      };
+    }
+    return { description: '', quantity: '', unit: null, actualCost: '', budgetItemId: null };
+  });
 
   const handleSave = () => {
     if (type === 'labor') {
+      const hours = parseFloat(laborFormData.hoursWorked);
+      const rate = parseFloat(laborFormData.hourlyRate);
       onSave(type, item.id, {
-        workerName: formData.workerName,
-        hoursWorked: parseFloat(formData.hoursWorked),
-        hourlyRate: parseFloat(formData.hourlyRate),
-        totalCost: parseFloat(formData.hoursWorked) * parseFloat(formData.hourlyRate),
-        description: formData.description,
-        budgetItemId: formData.budgetItemId,
+        workerName: laborFormData.workerName,
+        hoursWorked: hours,
+        hourlyRate: rate,
+        totalCost: hours * rate,
+        description: laborFormData.description,
+        budgetItemId: laborFormData.budgetItemId || undefined,
       });
     } else {
       onSave(type, item.id, {
-        description: formData.description,
-        quantity: formData.quantity ? parseFloat(formData.quantity) : null,
-        unit: formData.unit,
-        actualCost: formData.actualCost ? parseFloat(formData.actualCost) : null,
-        budgetItemId: formData.budgetItemId,
+        description: materialFormData.description,
+        quantity: materialFormData.quantity ? parseFloat(materialFormData.quantity) : null,
+        unit: materialFormData.unit,
+        actualCost: materialFormData.actualCost ? parseFloat(materialFormData.actualCost) : null,
+        budgetItemId: materialFormData.budgetItemId || undefined,
       });
     }
   };
@@ -700,15 +749,15 @@ function EditEntryModal({
             Edit {type === 'labor' ? 'Labor' : 'Material'} Entry
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {type === 'labor' ? (
             <>
               <div>
                 <label className="text-sm text-gray-400">Worker Name</label>
                 <Input
-                  value={formData.workerName}
-                  onChange={(e) => setFormData({ ...formData, workerName: e.target.value })}
+                  value={laborFormData.workerName}
+                  onChange={(e) => setLaborFormData({ ...laborFormData, workerName: e.target.value })}
                   className="bg-[#1F2328] border-gray-600 text-white"
                 />
               </div>
@@ -718,8 +767,8 @@ function EditEntryModal({
                   <Input
                     type="number"
                     step="0.5"
-                    value={formData.hoursWorked}
-                    onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
+                    value={laborFormData.hoursWorked}
+                    onChange={(e) => setLaborFormData({ ...laborFormData, hoursWorked: e.target.value })}
                     className="bg-[#1F2328] border-gray-600 text-white"
                   />
                 </div>
@@ -728,8 +777,8 @@ function EditEntryModal({
                   <Input
                     type="number"
                     step="0.01"
-                    value={formData.hourlyRate}
-                    onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
+                    value={laborFormData.hourlyRate}
+                    onChange={(e) => setLaborFormData({ ...laborFormData, hourlyRate: e.target.value })}
                     className="bg-[#1F2328] border-gray-600 text-white"
                   />
                 </div>
@@ -737,8 +786,8 @@ function EditEntryModal({
               <div>
                 <label className="text-sm text-gray-400">Description</label>
                 <Textarea
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  value={laborFormData.description || ''}
+                  onChange={(e) => setLaborFormData({ ...laborFormData, description: e.target.value })}
                   className="bg-[#1F2328] border-gray-600 text-white"
                 />
               </div>
@@ -748,8 +797,8 @@ function EditEntryModal({
               <div>
                 <label className="text-sm text-gray-400">Description</label>
                 <Input
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  value={materialFormData.description}
+                  onChange={(e) => setMaterialFormData({ ...materialFormData, description: e.target.value })}
                   className="bg-[#1F2328] border-gray-600 text-white"
                 />
               </div>
@@ -758,16 +807,16 @@ function EditEntryModal({
                   <label className="text-sm text-gray-400">Quantity</label>
                   <Input
                     type="number"
-                    value={formData.quantity || ''}
-                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                    value={materialFormData.quantity}
+                    onChange={(e) => setMaterialFormData({ ...materialFormData, quantity: e.target.value })}
                     className="bg-[#1F2328] border-gray-600 text-white"
                   />
                 </div>
                 <div>
                   <label className="text-sm text-gray-400">Unit</label>
                   <Input
-                    value={formData.unit || ''}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                    value={materialFormData.unit || ''}
+                    onChange={(e) => setMaterialFormData({ ...materialFormData, unit: e.target.value })}
                     className="bg-[#1F2328] border-gray-600 text-white"
                   />
                 </div>
@@ -777,8 +826,8 @@ function EditEntryModal({
                 <Input
                   type="number"
                   step="0.01"
-                  value={formData.actualCost || ''}
-                  onChange={(e) => setFormData({ ...formData, actualCost: e.target.value })}
+                  value={materialFormData.actualCost}
+                  onChange={(e) => setMaterialFormData({ ...materialFormData, actualCost: e.target.value })}
                   className="bg-[#1F2328] border-gray-600 text-white"
                 />
               </div>
@@ -788,8 +837,14 @@ function EditEntryModal({
           <div>
             <label className="text-sm text-gray-400">Link to Budget Item</label>
             <Select
-              value={formData.budgetItemId || ''}
-              onValueChange={(v) => setFormData({ ...formData, budgetItemId: v || null })}
+              value={(type === 'labor' ? laborFormData.budgetItemId : materialFormData.budgetItemId) || ''}
+              onValueChange={(v) => {
+                if (type === 'labor') {
+                  setLaborFormData({ ...laborFormData, budgetItemId: v || null });
+                } else {
+                  setMaterialFormData({ ...materialFormData, budgetItemId: v || null });
+                }
+              }}
             >
               <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
                 <SelectValue placeholder="Select budget item..." />

@@ -7,10 +7,17 @@
 import { prisma } from '@/lib/db';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.ABACUSAI_API_KEY,
-  baseURL: 'https://api.abacus.ai/llm/v1',
-});
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    openaiInstance = new OpenAI({
+      apiKey: process.env.ABACUSAI_API_KEY || '',
+      baseURL: 'https://api.abacus.ai/llm/v1',
+    });
+  }
+  return openaiInstance;
+}
 
 // Construction phase patterns for progress estimation
 const PHASE_PROGRESS_INDICATORS = {
@@ -94,7 +101,7 @@ export async function analyzeConstructionPhoto(
   projectContext?: string
 ): Promise<PhotoAnalysis> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
@@ -167,7 +174,7 @@ export async function analyzeReportForProgress(
   try {
     const taskList = scheduleTasks.map(t => `- ${t.name} (currently ${t.percentComplete}%)`).join('\n');
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {

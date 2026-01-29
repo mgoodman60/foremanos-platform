@@ -185,7 +185,7 @@ export interface ViewerHandle {
   getCamera: () => { position: Vector3; target: Vector3 } | null;
   loadExtension: (id: string, options?: object) => Promise<object>;
   getExtension: (id: string) => Promise<object>;
-  getModelTree: () => Promise<ObjectTreeNode>;
+  getModelTree: () => Promise<InstanceTree>;
 }
 
 interface ForgeViewerEnhancedProps {
@@ -236,10 +236,12 @@ const ForgeViewerEnhanced = forwardRef<ViewerHandle, ForgeViewerEnhancedProps>(
       getExtension: (id: string) => viewerRef.current?.getExtension(id) || Promise.reject('No viewer'),
       getModelTree: () => new Promise((resolve, reject) => {
         if (!viewerRef.current?.model) return reject('No model loaded');
-        viewerRef.current.model.getObjectTree((tree) => {
-          if (tree) resolve(tree);
-          else reject('Failed to get object tree');
-        });
+        const instanceTree = viewerRef.current.model.getInstanceTree();
+        if (instanceTree) {
+          resolve(instanceTree);
+        } else {
+          reject('Failed to get instance tree');
+        }
       }),
     }));
 

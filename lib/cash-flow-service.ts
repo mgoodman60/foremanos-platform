@@ -82,7 +82,7 @@ interface CashFlowForecastPeriod {
 
 /** Payment application update data */
 interface PaymentApplicationUpdateData {
-  status: string;
+  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'REVISION_REQUIRED' | 'PARTIALLY_PAID' | 'PAID';
   approvedAt?: Date;
   approvedBy?: string;
   reviewedAt?: Date;
@@ -239,14 +239,12 @@ export async function reviewPaymentApplication(
 ) {
   const now = new Date();
 
-  let status: string;
   let data: PaymentApplicationUpdateData;
 
   switch (action) {
     case 'approve':
-      status = 'APPROVED';
       data = {
-        status,
+        status: 'APPROVED',
         approvedAt: now,
         approvedBy: userId,
         reviewedAt: now,
@@ -254,18 +252,16 @@ export async function reviewPaymentApplication(
       };
       break;
     case 'reject':
-      status = 'REJECTED';
       data = {
-        status,
+        status: 'REJECTED',
         reviewedAt: now,
         reviewedBy: userId,
         rejectionReason: reason
       };
       break;
     case 'request_revision':
-      status = 'REVISION_REQUIRED';
       data = {
-        status,
+        status: 'REVISION_REQUIRED',
         reviewedAt: now,
         reviewedBy: userId,
         rejectionReason: reason

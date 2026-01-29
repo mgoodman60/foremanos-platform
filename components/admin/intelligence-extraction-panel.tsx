@@ -75,8 +75,9 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
         throw new Error(error.error || 'Extraction failed');
       }
     } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An error occurred';
       console.error('Extraction error:', error);
-      toast.error(`Extraction failed: ${error.message}`);
+      toast.error(`Extraction failed: ${message}`);
     } finally {
       setExtracting(false);
     }

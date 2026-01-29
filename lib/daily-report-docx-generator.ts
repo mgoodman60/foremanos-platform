@@ -446,7 +446,7 @@ export function formatDailyReportForExport(
     materials: Array.isArray(report.materialsReceived)
       ? report.materialsReceived.map((m) => ({
           description: m.description || 'Unknown',
-          quantity: m.quantity || '-',
+          quantity: String(m.quantity || '-'),
           supplier: m.supplier || undefined,
         }))
       : [],

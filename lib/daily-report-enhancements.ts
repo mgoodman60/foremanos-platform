@@ -9,10 +9,17 @@
 import { prisma } from '@/lib/db';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.ABACUSAI_API_KEY,
-  baseURL: 'https://api.abacus.ai/llm/v1',
-});
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    openaiInstance = new OpenAI({
+      apiKey: process.env.ABACUSAI_API_KEY || '',
+      baseURL: 'https://api.abacus.ai/llm/v1',
+    });
+  }
+  return openaiInstance;
+}
 
 // ============================================
 // CARRYOVER PRE-POPULATION
@@ -569,7 +576,7 @@ export async function transcribeVoiceToReport(
 }> {
   try {
     // First, transcribe the audio using Whisper
-    const transcriptionResponse = await openai.audio.transcriptions.create({
+    const transcriptionResponse = await getOpenAI().audio.transcriptions.create({
       file: Buffer.from(audioBase64, 'base64') as unknown as File,
       model: 'whisper-1',
     });
@@ -577,7 +584,7 @@ export async function transcribeVoiceToReport(
     const transcription = transcriptionResponse.text;
 
     // Then, structure the transcription into report fields
-    const structureResponse = await openai.chat.completions.create({
+    const structureResponse = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {

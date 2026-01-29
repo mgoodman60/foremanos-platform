@@ -153,7 +153,7 @@ export async function hasReportData(conversationId: string): Promise<boolean> {
   const reportData = conversation.reportData as ReportData | null;
   const hasReportData = !!reportData && Object.keys(reportData).length > 0;
   const hasWeather = !!conversation.weatherSnapshots;
-  const photos = conversation.photos as PhotoEntry[] | null;
+  const photos = conversation.photos as unknown as PhotoEntry[] | null;
   const hasPhotos = !!photos && photos.length > 0;
   const hasSchedule = !!conversation.scheduleUpdates;
   const hasCalculations = !!conversation.quantityCalculations;
@@ -218,7 +218,7 @@ async function generateReportPDF(conversationId: string): Promise<string> {
     : format(new Date(), 'yyyy-MM-dd');
 
   // Prepare photo URLs (convert S3 paths to signed URLs)
-  const photos = (conversation.photos as PhotoEntry[] | null) || [];
+  const photos = (conversation.photos as unknown as PhotoEntry[] | null) || [];
   const photoData = await Promise.all(
     photos.map(async (photo) => {
       const url = await getFileUrl(photo.cloud_storage_path, photo.isPublic || false);
@@ -253,7 +253,7 @@ async function generateReportPDF(conversationId: string): Promise<string> {
   const totalCrewSize = (reportData.crew || []).reduce((sum, c) => sum + (c.count || 0), 0);
 
   // Prepare weather snapshots
-  const weatherSnapshots = ((conversation.weatherSnapshots as WeatherSnapshot[] | null) || []).map((w) => ({
+  const weatherSnapshots = ((conversation.weatherSnapshots as unknown as WeatherSnapshot[] | null) || []).map((w) => ({
     time: w.time,
     temperature: w.temperature,
     conditions: w.conditions,
@@ -262,27 +262,27 @@ async function generateReportPDF(conversationId: string): Promise<string> {
   }));
 
   // Prepare material deliveries
-  const materialDeliveries = ((conversation.materialDeliveries as MaterialDelivery[] | null) || []).map((m) => ({
+  const materialDeliveries = ((conversation.materialDeliveries as unknown as MaterialDelivery[] | null) || []).map((m) => ({
     sub: m.sub,
     material: m.material,
-    quantity: m.quantity,
+    quantity: m.quantity !== undefined ? String(m.quantity) : undefined,
   }));
 
   // Prepare equipment
-  const equipment = ((conversation.equipmentData as EquipmentEntry[] | null) || []).map((e) => ({
+  const equipment = ((conversation.equipmentData as unknown as EquipmentEntry[] | null) || []).map((e) => ({
     name: e.name,
     type: e.type,
   }));
 
   // Prepare schedule updates
-  const scheduleUpdates = ((conversation.scheduleUpdates as ScheduleUpdateEntry[] | null) || []).map((s) => ({
+  const scheduleUpdates = ((conversation.scheduleUpdates as unknown as ScheduleUpdateEntry[] | null) || []).map((s) => ({
     activity: s.activity,
     plannedStatus: s.plannedStatus,
     actualStatus: s.actualStatus,
   }));
 
   // Prepare quantity calculations
-  const quantityCalculations = ((conversation.quantityCalculations as QuantityCalculation[] | null) || []).map((q) => ({
+  const quantityCalculations = ((conversation.quantityCalculations as unknown as QuantityCalculation[] | null) || []).map((q) => ({
     type: q.type,
     description: q.description,
     location: q.location,
@@ -479,7 +479,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 2. Weather data
     if (conversation.weatherSnapshots) {
-      const snapshots = conversation.weatherSnapshots as WeatherSnapshot[];
+      const snapshots = conversation.weatherSnapshots as unknown as WeatherSnapshot[];
       snapshots.forEach((w) => {
         chunks.push(
           `Weather at ${w.time}: ${w.temperature}°F, ${w.conditions}, Humidity: ${w.humidity}%, Wind: ${w.windSpeed} mph`
@@ -508,7 +508,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 4. Photo captions
     if (conversation.photos) {
-      const photos = conversation.photos as PhotoEntry[];
+      const photos = conversation.photos as unknown as PhotoEntry[];
       photos.forEach((p) => {
         if (p.caption) {
           chunks.push(`Photo: ${p.caption} (Location: ${p.location || 'unknown'})`);
@@ -518,7 +518,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 5. Schedule updates
     if (conversation.scheduleUpdates) {
-      const updates = conversation.scheduleUpdates as ScheduleUpdateEntry[];
+      const updates = conversation.scheduleUpdates as unknown as ScheduleUpdateEntry[];
       updates.forEach((u) => {
         chunks.push(
           `Schedule update: ${u.activity} - Planned: ${u.plannedStatus}, Actual: ${u.actualStatus}`
@@ -528,7 +528,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     // 6. Quantity calculations
     if (conversation.quantityCalculations) {
-      const calcs = conversation.quantityCalculations as QuantityCalculation[];
+      const calcs = conversation.quantityCalculations as unknown as QuantityCalculation[];
       calcs.forEach((c) => {
         chunks.push(
           `Quantity: ${c.description} at ${c.location} - ${c.actualQuantity} ${c.unit}`

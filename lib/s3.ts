@@ -67,8 +67,8 @@ export async function uploadFile(
       console.log(`[S3 UPLOAD] Successfully uploaded ${fileName} to ${cloud_storage_path}`);
       return cloud_storage_path;
     } catch (error: unknown) {
-      lastError = error;
-      console.error(`[S3 UPLOAD ERROR] Attempt ${attempt + 1} failed for ${fileName}:`, error.message);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.error(`[S3 UPLOAD ERROR] Attempt ${attempt + 1} failed for ${fileName}:`, lastError.message);
       
       // If this is not the last attempt, wait before retrying
       if (attempt < retries) {

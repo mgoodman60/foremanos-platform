@@ -18,7 +18,7 @@ interface PropertyGroup {
 interface ElementProperties {
   dbId: number;
   name: string;
-  externalId: string;
+  externalId?: string;
   properties: PropertyGroup[];
 }
 
@@ -167,14 +167,16 @@ export default function ElementPropertiesPanel({
                   </button>
                 </div>
                 <div className="text-gray-400">External ID</div>
-                <div className="text-white truncate flex items-center gap-1" title={properties.externalId}>
-                  <span className="truncate">{properties.externalId}</span>
-                  <button
-                    onClick={() => copyValue(properties.externalId)}
-                    className="p-0.5 hover:bg-gray-700 rounded flex-shrink-0"
-                  >
-                    <Copy className="w-3 h-3 text-gray-500" />
-                  </button>
+                <div className="text-white truncate flex items-center gap-1" title={properties.externalId || ''}>
+                  <span className="truncate">{properties.externalId || 'N/A'}</span>
+                  {properties.externalId && (
+                    <button
+                      onClick={() => copyValue(properties.externalId!)}
+                      className="p-0.5 hover:bg-gray-700 rounded flex-shrink-0"
+                    >
+                      <Copy className="w-3 h-3 text-gray-500" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

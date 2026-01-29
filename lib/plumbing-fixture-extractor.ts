@@ -6,10 +6,17 @@
 import { prisma } from './db';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.ABACUSAI_API_KEY,
-  baseURL: 'https://abacusai.app/api/llm/v1',
-});
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    openaiInstance = new OpenAI({
+      apiKey: process.env.ABACUSAI_API_KEY || '',
+      baseURL: 'https://abacusai.app/api/llm/v1',
+    });
+  }
+  return openaiInstance;
+}
 
 export interface PlumbingFixture {
   id: string;
@@ -96,7 +103,7 @@ For each fixture include:
 
 Return ONLY valid JSON array, no markdown.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,

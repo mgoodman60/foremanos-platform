@@ -21,6 +21,7 @@ interface Dimension {
   direction?: string;
   label?: string;
   confidence: number;
+  sheetNumber?: string;
 }
 
 interface DimensionConflict {

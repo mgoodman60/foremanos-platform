@@ -18,7 +18,8 @@ import {
   Brain,
   BarChart2,
   RefreshCw,
-  Globe
+  Globe,
+  Package
 } from 'lucide-react';
 import EarthworkCalculator from './earthwork-calculator';
 import TakeoffDataChecklist from './takeoff-data-checklist';
@@ -33,7 +34,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { toast } from 'sonner';
-import { CSI_DIVISIONS } from '@/lib/csi-divisions';
+import { CSI_DIVISIONS, type CSIDivision } from '@/lib/csi-divisions';
 import { QuickActionMenu, type ActionItem } from '@/components/ui/header-action-menu';
 
 // Import new infrastructure
@@ -726,7 +727,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       toast.success('Item added successfully');
     } catch (error: unknown) {
       console.error('Error adding item:', error);
-      toast.error(error.message || 'Failed to add item');
+      const message = error instanceof Error ? error.message : 'Failed to add item';
+      toast.error(message);
     } finally {
       setAddingItem(false);
     }
@@ -768,7 +770,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       toast.success('Item deleted');
     } catch (error: unknown) {
       console.error('Error deleting item:', error);
-      toast.error(error.message || 'Failed to delete item');
+      const message = error instanceof Error ? error.message : 'Failed to delete item';
+      toast.error(message);
     }
   };
 
@@ -842,7 +845,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       toast.success(`Verified ${count} items`);
     } catch (error: unknown) {
       console.error('Error bulk verifying:', error);
-      toast.error(error.message || 'Failed to verify items');
+      const message = error instanceof Error ? error.message : 'Failed to verify items';
+      toast.error(message);
     } finally {
       setBulkVerifying(false);
     }
@@ -1174,7 +1178,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       label: 'Import from Budget',
       icon: FileText,
       onClick: handleImportFromBudget,
-      disabled: importingBudget || getFilteredItems().length === 0,
+      disabled: importingBudget || filteredItems.length === 0,
       variant: 'success',
       description: 'Apply Walker Company budget pricing',
     },
@@ -1183,7 +1187,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       label: 'Auto-Calculate Prices',
       icon: Calculator,
       onClick: handleAutoCalculate,
-      disabled: calculating || getFilteredItems().length === 0,
+      disabled: calculating || filteredItems.length === 0,
       description: 'Apply unit prices from database',
     },
     {
@@ -1249,7 +1253,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       label: 'Export to CSV',
       icon: Download,
       onClick: exportToCSV,
-      disabled: !selectedTakeoff || getFilteredItems().length === 0,
+      disabled: !selectedTakeoff || filteredItems.length === 0,
     },
   ];
 

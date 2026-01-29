@@ -2,20 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import fs from 'fs';
-import path from 'path';
 
 // Load API secrets
 function getOpenAIKey(): string | null {
-  try {
-    const secretsPath = '/home/ubuntu/.config/abacusai_auth_secrets.json';
-    if (fs.existsSync(secretsPath)) {
-      const secrets = JSON.parse(fs.readFileSync(secretsPath, 'utf-8'));
-      return secrets.openai?.secrets?.api_key?.value || null;
-    }
-  } catch (error) {
-    console.error('[AIRender] Failed to load OpenAI key:', error);
-  }
   return process.env.OPENAI_API_KEY || null;
 }
 

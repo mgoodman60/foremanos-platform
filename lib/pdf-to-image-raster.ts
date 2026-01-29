@@ -1,17 +1,39 @@
 /**
  * PDF to Image Rasterization Service
- * 
+ *
  * Converts PDF pages to high-quality PNG images for vision AI processing.
  * This enables accurate analysis of construction drawings including:
  * - Symbol recognition
  * - Dimension extraction
  * - Spatial relationship understanding
  * - Legend cross-referencing
+ *
+ * NOTE: Uses dynamic imports for pdf-img-convert and sharp to support
+ * serverless environments where native modules may not be available at build time.
  */
 
-import * as pdfImgConvert from 'pdf-img-convert';
-import sharp from 'sharp';
 import { PDFDocument } from 'pdf-lib';
+
+// Dynamic imports for native modules (canvas-dependent)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pdfImgConvert: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let sharpFn: any = null;
+
+async function getPdfImgConvert() {
+  if (!pdfImgConvert) {
+    pdfImgConvert = await import('pdf-img-convert');
+  }
+  return pdfImgConvert;
+}
+
+async function getSharp() {
+  if (!sharpFn) {
+    const mod = await import('sharp');
+    sharpFn = mod.default;
+  }
+  return sharpFn;
+}
 
 export interface RasterizationOptions {
   /** DPI for rasterization (default: 150 for balance of quality/size) */
@@ -94,8 +116,9 @@ export async function rasterizePdfToImages(
     // Convert PDF to images using pdf-img-convert
     // Scale factor: 96 DPI is base, so scale = dpi / 96
     const scale = dpi / 96;
-    
-    const outputImages = await pdfImgConvert.convert(pdfBuffer, {
+
+    const pdfConvert = await getPdfImgConvert();
+    const outputImages = await pdfConvert.convert(pdfBuffer, {
       scale: scale,
       page_numbers: pagesToConvert,
     });
@@ -110,8 +133,9 @@ export async function rasterizePdfToImages(
       
       // Convert Uint8Array to Buffer
       const rawBuffer = Buffer.from(imageData);
-      
+
       // Process with sharp for optimization and format conversion
+      const sharp = await getSharp();
       let sharpInstance = sharp(rawBuffer);
       
       // Get image metadata
@@ -152,7 +176,7 @@ export async function rasterizePdfToImages(
         mimeType = 'image/png';
       }
 
-      // Get final dimensions
+      // Get final dimensions (sharp already loaded above)
       const finalMetadata = await sharp(finalBuffer).metadata();
 
       results.push({
@@ -231,6 +255,7 @@ export async function optimizeImageForVision(
     quality = 90,
   } = options;
 
+  const sharp = await getSharp();
   let sharpInstance = sharp(imageBuffer);
   const metadata = await sharpInstance.metadata();
 

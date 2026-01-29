@@ -7,10 +7,17 @@ import OpenAI from 'openai';
 import { readFileSync } from 'fs';
 import path from 'path';
 
-const openai = new OpenAI({
-  apiKey: process.env.ABACUSAI_API_KEY || '',
-  baseURL: 'https://llmapi.abacus.ai/v1'
-});
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    openaiInstance = new OpenAI({
+      apiKey: process.env.ABACUSAI_API_KEY || '',
+      baseURL: 'https://llmapi.abacus.ai/v1',
+    });
+  }
+  return openaiInstance;
+}
 
 export interface ParsedPayAppItem {
   lineNumber?: number;
@@ -141,7 +148,7 @@ Respond ONLY with valid JSON in this exact format:
       });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages,
       max_tokens: 8000,

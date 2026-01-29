@@ -39,6 +39,7 @@ interface Annotation {
   confidence: number;
   context?: string;
   leaderLines?: boolean;
+  sheetNumber?: string;
 }
 
 interface SheetAnnotations {

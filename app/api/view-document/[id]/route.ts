@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import fs from 'fs';
-import path from 'path';
+import { downloadFile } from '@/lib/s3';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,34 +40,27 @@ export async function GET(
       );
     }
 
-    // Build file path
-    const filePath = path.join(
-      process.cwd(),
-      'public',
-      document.filePath?.replace(/^\//, '') || ''
-    );
+    // Check for S3 storage (serverless compatible)
+    if (document.cloud_storage_path) {
+      const fileBuffer = await downloadFile(document.cloud_storage_path);
 
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
+      // Create response with proper headers for PDF viewing
+      const response = new NextResponse(fileBuffer);
+      response.headers.set('Content-Type', 'application/pdf');
+      response.headers.set('Content-Disposition', 'inline');
+      response.headers.set('Content-Length', fileBuffer.length.toString());
+      response.headers.set('Cache-Control', 'public, max-age=3600');
+      response.headers.set('X-Content-Type-Options', 'nosniff');
+      response.headers.set('Accept-Ranges', 'bytes');
+
+      return response;
+    } else {
+      // Legacy file without S3 - return error
       return NextResponse.json(
-        { error: 'File not found on disk' },
+        { error: 'Document not available - requires migration to cloud storage' },
         { status: 404 }
       );
     }
-
-    // Read the file
-    const fileBuffer = fs.readFileSync(filePath);
-
-    // Create response with proper headers for PDF viewing
-    const response = new NextResponse(fileBuffer);
-    response.headers.set('Content-Type', 'application/pdf');
-    response.headers.set('Content-Disposition', 'inline');
-    response.headers.set('Content-Length', fileBuffer.length.toString());
-    response.headers.set('Cache-Control', 'public, max-age=3600');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Accept-Ranges', 'bytes');
-    
-    return response;
   } catch (error) {
     console.error('Error serving document:', error);
     return NextResponse.json(
