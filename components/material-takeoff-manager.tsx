@@ -689,7 +689,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
 
     // Sort divisions by number
     return result.sort((a, b) => a.division.number - b.division.number);
-  };
+  }, [takeoffs, budgetItems, hasBudgetDoc, getAllTakeoffItems, getCSIDivisionForItem, budgetPhaseToCSI, budgetItemToTakeoffItem]);
 
   const toggleCategory = (category: string) => {
     const newExpanded = new Set(expandedCategories);
