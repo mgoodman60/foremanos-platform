@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { validatePassword } from '@/lib/password-validator';
-import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limiter';
+import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.success) {
       return NextResponse.json(
         { error: 'Too many attempts. Please try again later.' },
-        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) } }
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
       );
     }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
-import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limiter';
+import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (!rateLimitResult.success) {
       return NextResponse.json(
         { error: 'Too many attempts. Please try again later.' },
-        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) } }
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
       );
     }
 

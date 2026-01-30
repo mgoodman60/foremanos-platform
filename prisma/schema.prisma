@@ -530,7 +530,7 @@ model Document {
   processed             Boolean                 @default(false)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
-  projectId             String?
+  projectId             String? // TODO: Should be required - needs migration
   description           String?
   tags                  String[]
   updatedBy             String?
@@ -758,7 +758,7 @@ model MaterialTakeoff {
   projectId       String
   name            String
   description     String?
-  status          String            @default("draft")
+  status          String            @default("draft") // TODO: Consider enum - values: draft, submitted, approved, etc.
   documentId      String?
   extractedBy     String?
   extractedAt     DateTime?
@@ -881,7 +881,7 @@ model ProcessingCost {
 model ProcessingQueue {
   id             String   @id @default(cuid())
   documentId     String
-  status         String   @default("queued")
+  status         String   @default("queued") // TODO: Consider enum - values: queued, processing, completed, failed, etc.
   totalPages     Int
   pagesProcessed Int      @default(0)
   currentBatch   Int      @default(0)
@@ -1061,7 +1061,7 @@ model ProjectInvitation {
   inviteeId                              String?
   inviteeEmail                           String?
   role                                   String
-  status                                 String   @default("pending")
+  status                                 String   @default("pending") // TODO: Consider enum - values: pending, accepted, rejected, expired, etc.
   createdAt                              DateTime @default(now())
   expiresAt                              DateTime
   User_ProjectInvitation_inviteeIdToUser User?    @relation("ProjectInvitation_inviteeIdToUser", fields: [inviteeId], references: [id])
@@ -1699,7 +1699,7 @@ model UnitPrice {
 
 model User {
   id                                                  String                     @id @default(cuid())
-  email                                               String?                    @unique
+  email                                               String?                    @unique // TODO: Should be required - needs migration
   username                                            String                     @unique
   password                                            String?
   createdAt                                           DateTime                   @default(now())
@@ -1965,6 +1965,7 @@ model WeatherPreferences {
   Project                   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   User                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([projectId, userId])
   @@index([projectId])
   @@index([userId])
 }

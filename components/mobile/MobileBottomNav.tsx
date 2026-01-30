@@ -117,10 +117,14 @@ export function MobileBottomNav({
       {/* Quick Actions Overlay */}
       {showQuickMenu && (
         <div
+          id="quick-actions-menu"
+          role="menu"
+          aria-modal="true"
+          aria-label="Quick actions"
           className="fixed inset-0 bg-black/90 z-40 md:hidden"
           onClick={() => setShowQuickMenu(false)}
         >
-          <div 
+          <div
             className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-3 p-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -128,6 +132,8 @@ export function MobileBottomNav({
               <button
                 key={action.label}
                 onClick={action.onClick}
+                role="menuitem"
+                aria-label={action.label}
                 className={`${action.color} w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-lg transform transition-all animate-in zoom-in-50 slide-in-from-bottom-4`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
@@ -146,7 +152,8 @@ export function MobileBottomNav({
       )}
 
       {/* Bottom Navigation Bar */}
-      <nav 
+      <nav
+        aria-label="Mobile navigation"
         className={`fixed bottom-0 left-0 right-0 bg-dark-surface border-t border-gray-700 z-50 md:hidden transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -160,6 +167,9 @@ export function MobileBottomNav({
                 <button
                   key={item.id}
                   onClick={item.onClick}
+                  aria-label={showQuickMenu ? "Close quick actions menu" : "Open quick actions menu"}
+                  aria-expanded={showQuickMenu}
+                  aria-controls="quick-actions-menu"
                   className={`relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 ${showQuickMenu ? 'bg-red-500 rotate-45' : 'bg-[#F97316]'}`}
                 >
                   {showQuickMenu ? (
@@ -175,12 +185,16 @@ export function MobileBottomNav({
               <button
                 key={item.id}
                 onClick={item.onClick}
+                aria-current={isActive ? "page" : undefined}
                 className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-colors relative ${isActive ? 'text-[#F97316]' : 'text-gray-400'}`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs mt-1 font-medium">{item.label}</span>
                 {item.badge && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  <span
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                    aria-label={`${item.badge} notifications`}
+                  >
                     {item.badge > 9 ? '9+' : item.badge}
                   </span>
                 )}

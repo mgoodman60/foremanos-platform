@@ -11,7 +11,7 @@ import { classifyDocument } from '@/lib/document-classifier';
 import { getProcessingLimits, canProcessDocument, getRemainingPages, shouldResetQuota, getNextResetDate } from '@/lib/processing-limits';
 import { withDatabaseRetry } from '@/lib/retry-util';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
-import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limiter';
+import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     if (!rateLimitResult.success) {
       return NextResponse.json(
         { error: 'Too many upload attempts. Please try again later.' },
-        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) } }
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
       );
     }
 
