@@ -35,7 +35,7 @@ components/       # 277+ React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations
 __tests__/        # Vitest tests (smoke, integration, snapshots)
 e2e/              # Playwright E2E tests
-.claude/agents/   # 14 custom Claude Code agents
+.claude/agents/   # 23 custom Claude Code agents
 ```
 
 ### Key Service Modules
@@ -49,6 +49,9 @@ e2e/              # Playwright E2E tests
 | `lib/rate-limiter.ts` | Distributed rate limiting (Redis with memory fallback) |
 | `lib/document-processor.ts` | Document processing pipeline |
 | `lib/stripe.ts` | Lazy-loaded Stripe integration |
+| `lib/design-tokens.ts` | Centralized color palette and spacing |
+| `lib/llm-providers.ts` | Multi-provider LLM abstraction |
+| `lib/password-validator.ts` | Password strength validation |
 
 ### API Route Pattern
 
@@ -62,6 +65,18 @@ Main chat endpoint (`app/api/chat/route.ts`) includes:
 - Subscription limit enforcement
 - RAG context building
 - LLM streaming response
+
+### Chat Modular Pipeline (`lib/chat/`)
+
+10-step architecture in `app/api/chat/route.ts`:
+```
+Middleware: Maintenance → Auth → RateLimit → Validation → QueryLimit
+Processors: Conversation → RestrictedCheck → RAG → Cache → LLM Stream
+```
+
+- `lib/chat/middleware/` - Request validation and auth
+- `lib/chat/processors/` - Business logic and streaming
+- `lib/chat/utils/` - Helpers (restricted query check)
 
 ### Database Models (Prisma)
 
@@ -85,24 +100,54 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: Unit/integration tests in `__tests__/`
+- **Vitest**: 140+ tests in `__tests__/` (smoke, integration, snapshots)
 - **Playwright**: E2E tests in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 
+Key test suites:
+| File | Coverage |
+|------|----------|
+| `__tests__/lib/rag.test.ts` | RAG scoring, query classification (35 tests) |
+| `__tests__/lib/document-processor.test.ts` | PDF processing, extraction (20 tests) |
+| `__tests__/api/stripe/webhook.test.ts` | Stripe events, idempotency (15 tests) |
+| `__tests__/api/documents/upload.test.ts` | Auth, validation, S3 (20 tests) |
+
 Run specific test file:
 ```bash
-npm test -- __tests__/smoke/health.test.ts --run
+npm test -- __tests__/lib/rag.test.ts --run
+```
+
+### Mock Pattern
+Use `vi.hoisted()` for mocks needed before module imports:
+```typescript
+const mockPrisma = vi.hoisted(() => ({
+  document: { findUnique: vi.fn(), update: vi.fn() }
+}));
+vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 ```
 
 ## Custom Agents
 
-14 specialized agents in `.claude/agents/` for:
-- `qa-smoke-tester` - Run smoke tests
-- `build-validator` - Check build errors
-- `security-scanner` - Security analysis
-- `db-expert` - Prisma schema help
-- `e2e-tester` - Playwright tests
-- `integration-test-writer` - Create new tests
+23 specialized agents in `.claude/agents/`:
+
+| Agent | Purpose |
+|-------|---------|
+| `code-reviewer` | Reviews code for quality, patterns, security |
+| `docs-writer` | Updates project documentation |
+| `dependency-updater` | Updates npm packages, handles breaking changes |
+| `refactoring-agent` | Large-scale refactoring (renames, moves) |
+| `build-validator` | Check build errors |
+| `security-scanner` | Security analysis |
+| `security-hardener` | Security fixes implementation |
+| `db-expert` | Prisma schema help |
+| `integration-test-writer` | Create new tests |
+| `qa-smoke-tester` | Run smoke tests |
+| `e2e-tester` | Playwright tests |
+| `issue-fixer` | Systematic issue resolution |
+| `config-fixer` | Configuration and infrastructure fixes |
+| `ui-designer` | Component design and accessibility |
+| `api-documenter` | API documentation |
+| `perf-optimizer` | Performance optimization |
 
 ## Important Patterns
 
@@ -125,6 +170,13 @@ Defined in `lib/rate-limiter.ts`:
 
 ### Subscription Tiers
 Six tiers (Free → Enterprise) with query limits and model access configured in Stripe price IDs.
+
+### Design Tokens
+Use `lib/design-tokens.ts` for colors instead of hardcoded values:
+```typescript
+import { colors } from '@/lib/design-tokens';
+// Use colors.primary.DEFAULT instead of '#3B82F6'
+```
 
 ## Environment Variables
 
