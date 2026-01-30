@@ -58,6 +58,9 @@ export function createMockFormDataRequest(
 
 /**
  * Create a mock File object
+ *
+ * NOTE: File.size is a read-only getter. To test file size limits, use a Proxy
+ * on the FormData.get() result as shown in upload.test.ts "should return 413 when file exceeds 200MB"
  */
 export function createMockFile(
   content: string | Buffer = 'test content',

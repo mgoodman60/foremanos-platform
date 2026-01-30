@@ -157,10 +157,48 @@ describe('Document Upload Route', () => {
       expect(data.error).toBe('Project not found');
     });
 
-    it.todo('should return 413 when file exceeds 200MB - skipped due to test infrastructure limitation (cannot mock File.size)');
-    // NOTE: File.size is a read-only getter that returns actual content size.
-    // The actual route code at line 93 checks file.size > 209715200 (200MB).
-    // This is verified manually and in E2E tests with real large files.
+    it('should return 413 when file exceeds 200MB', async () => {
+      // Create a mock file with overridden size
+      const file = createMockFile('test', 'large.pdf', 'application/pdf');
+
+      // Create a custom request that returns a FormData with a file that has custom size
+      const mockFormData = new FormData();
+      mockFormData.append('file', file);
+      mockFormData.append('projectId', 'project-1');
+
+      // Override the get method to return a file with custom size for 'file' key
+      const originalGet = mockFormData.get.bind(mockFormData);
+      mockFormData.get = ((key: string) => {
+        if (key === 'file') {
+          const mockFile = originalGet('file') as File;
+          // Create a proxy that returns custom size
+          return new Proxy(mockFile, {
+            get(target, prop) {
+              if (prop === 'size') return 209715201; // > 200MB
+              const value = (target as Record<string | symbol, unknown>)[prop];
+              return typeof value === 'function' ? value.bind(target) : value;
+            },
+          });
+        }
+        return originalGet(key);
+      }) as typeof mockFormData.get;
+
+      // Create request with mock formData method
+      const request = new Request('http://localhost/api/documents/upload', {
+        method: 'POST',
+        body: new FormData(), // Dummy body
+      });
+
+      // Override formData() to return our mock
+      (request as unknown as { formData: () => Promise<FormData> }).formData = async () =>
+        mockFormData;
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(413);
+      const data = await response.json();
+      expect(data.error).toContain('File too large');
+    });
   });
 
   // ============================================
