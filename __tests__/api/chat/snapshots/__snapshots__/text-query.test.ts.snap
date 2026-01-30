@@ -4,6 +4,7 @@ exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for calc
 {
   "body": {
     "cached": true,
+    "conversationId": null,
     "response": "Cached response for: Calculate the total volume of concrete needed",
   },
   "headers": {
@@ -18,6 +19,7 @@ exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for coun
 {
   "body": {
     "cached": true,
+    "conversationId": null,
     "response": "Cached response for: How many windows are in the building?",
   },
   "headers": {
@@ -32,6 +34,7 @@ exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for gene
 {
   "body": {
     "cached": true,
+    "conversationId": null,
     "response": "Cached response for: What is the project schedule?",
   },
   "headers": {
@@ -46,6 +49,7 @@ exports[`Chat API Snapshot Tests - Text Queries > should match snapshot for meas
 {
   "body": {
     "cached": true,
+    "conversationId": null,
     "response": "Cached response for: What is the height of the building?",
   },
   "headers": {

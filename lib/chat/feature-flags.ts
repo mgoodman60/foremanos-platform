@@ -1,49 +1,39 @@
 /**
- * Feature flags for gradual rollout of refactored chat API
- * Set via environment variables: USE_NEW_CHAT_MIDDLEWARE, USE_NEW_CHAT_PROCESSORS, USE_NEW_CHAT_ROUTE
+ * Chat API Feature Flags
+ *
+ * Note: The legacy chat implementation was removed in Jan 2026.
+ * The modular pipeline (middleware + processors) is now the only implementation.
+ *
+ * These flags are kept for backwards compatibility with tests and potential
+ * future A/B testing. All flags default to true (new implementation).
  */
-export const CHAT_REFACTOR_FLAGS = {
-  USE_NEW_MIDDLEWARE: process.env.USE_NEW_CHAT_MIDDLEWARE === 'true',
-  USE_NEW_PROCESSORS: process.env.USE_NEW_CHAT_PROCESSORS === 'true',
-  USE_NEW_ROUTE: process.env.USE_NEW_CHAT_ROUTE === 'true',
-  PARALLEL_EXECUTION: process.env.CHAT_PARALLEL_EXECUTION === 'true',
-  PERCENTAGE_ROLLOUT: parseInt(process.env.CHAT_ROLLOUT_PERCENTAGE || '0'),
+
+export const CHAT_FEATURE_FLAGS = {
+  /** Always true - modular middleware is the standard implementation */
+  USE_MODULAR_MIDDLEWARE: true,
+
+  /** Always true - modular processors are the standard implementation */
+  USE_MODULAR_PROCESSORS: true,
 } as const;
 
 /**
- * Check if new route should be used based on rollout percentage
+ * @deprecated No longer used - legacy route was removed.
+ * Kept for backwards compatibility with tests.
  */
-export function shouldUseNewRoute(userId?: string | null): boolean {
-  if (!CHAT_REFACTOR_FLAGS.USE_NEW_ROUTE) return false;
-  if (CHAT_REFACTOR_FLAGS.PERCENTAGE_ROLLOUT >= 100) return true;
-  if (CHAT_REFACTOR_FLAGS.PERCENTAGE_ROLLOUT <= 0) return false;
-
-  // Simple hash-based percentage rollout
-  if (userId) {
-    const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return (hash % 100) < CHAT_REFACTOR_FLAGS.PERCENTAGE_ROLLOUT;
-  }
-
-  return false;
+export function shouldUseNewRoute(_userId?: string | null): boolean {
+  return true;
 }
 
 /**
- * Check if new middleware should be used
+ * @deprecated No longer used - middleware is always modular.
  */
 export function shouldUseNewMiddleware(): boolean {
-  return CHAT_REFACTOR_FLAGS.USE_NEW_MIDDLEWARE;
+  return true;
 }
 
 /**
- * Check if new processors should be used
+ * @deprecated No longer used - processors are always modular.
  */
 export function shouldUseNewProcessors(): boolean {
-  return CHAT_REFACTOR_FLAGS.USE_NEW_PROCESSORS;
-}
-
-/**
- * Check if parallel execution is enabled (for comparing old vs new)
- */
-export function isParallelExecutionEnabled(): boolean {
-  return CHAT_REFACTOR_FLAGS.PARALLEL_EXECUTION;
+  return true;
 }
