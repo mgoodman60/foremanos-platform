@@ -13,6 +13,7 @@
 import { prisma } from './db';
 import { getFileUrl, generatePresignedUploadUrl } from './s3';
 import { format, parseISO } from 'date-fns';
+import { ScheduleTaskStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
 // =============================================
@@ -768,7 +769,7 @@ async function processScheduleUpdatesAfterFinalization(
         await prisma.scheduleTask.update({
           where: { id: task.id },
           data: {
-            status: suggestion.suggestedStatus,
+            status: suggestion.suggestedStatus as ScheduleTaskStatus,
             percentComplete: suggestion.suggestedPercentComplete,
           },
         });

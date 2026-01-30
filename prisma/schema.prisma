@@ -758,7 +758,7 @@ model MaterialTakeoff {
   projectId       String
   name            String
   description     String?
-  status          String            @default("draft") // TODO: Consider enum - values: draft, submitted, approved, etc.
+  status          MaterialTakeoffStatus @default(draft)
   documentId      String?
   extractedBy     String?
   extractedAt     DateTime?
@@ -784,7 +784,7 @@ model TakeoffAggregation {
   projectId        String
   name             String
   description      String?
-  status           String    @default("draft")
+  status           MaterialTakeoffStatus @default(draft)
   sourceSheets     Json
   sourceTakeoffs   Json?
   totalItems       Int       @default(0)
@@ -881,7 +881,7 @@ model ProcessingCost {
 model ProcessingQueue {
   id             String   @id @default(cuid())
   documentId     String
-  status         String   @default("queued") // TODO: Consider enum - values: queued, processing, completed, failed, etc.
+  status         ProcessingQueueStatus @default(queued)
   totalPages     Int
   pagesProcessed Int      @default(0)
   currentBatch   Int      @default(0)
@@ -907,7 +907,7 @@ model Project {
   guestPassword                        String?
   createdAt                            DateTime                       @default(now())
   updatedAt                            DateTime                       @updatedAt
-  status                               String                         @default("active")
+  status                               ProjectStatus                  @default(active)
   lastSyncAt                           DateTime?
   oneDriveAccessToken                  String?
   oneDriveFolderId                     String?
@@ -1061,7 +1061,7 @@ model ProjectInvitation {
   inviteeId                              String?
   inviteeEmail                           String?
   role                                   String
-  status                                 String   @default("pending") // TODO: Consider enum - values: pending, accepted, rejected, expired, etc.
+  status                                 ProjectInvitationStatus @default(pending)
   createdAt                              DateTime @default(now())
   expiresAt                              DateTime
   User_ProjectInvitation_inviteeIdToUser User?    @relation("ProjectInvitation_inviteeIdToUser", fields: [inviteeId], references: [id])
@@ -1267,7 +1267,7 @@ model ScheduleTask {
   predecessors             String[]
   successors               String[]
   percentComplete          Float                @default(0.0)
-  status                   String               @default("not_started")
+  status                   ScheduleTaskStatus   @default(not_started)
   assignedTo               String?
   location                 String?
   tradeType                String?
@@ -3247,6 +3247,32 @@ enum LaborStatus {
   REJECTED
 }
 
+enum MaterialTakeoffStatus {
+  draft
+  in_progress
+  completed
+  submitted
+  approved
+  rejected
+  deleted
+}
+
+enum ProcessingQueueStatus {
+  queued
+  processing
+  completed
+  failed
+  skipped
+}
+
+enum ProjectInvitationStatus {
+  pending
+  accepted
+  rejected
+  expired
+  revoked
+}
+
 enum CostAlertType {
   CPI_LOW
   SPI_LOW
@@ -3369,6 +3395,23 @@ enum ProjectType {
   renovation
   site_work
   tenant_improvement
+}
+
+enum ProjectStatus {
+  active
+  on_hold
+  completed
+  archived
+  cancelled
+}
+
+enum ScheduleTaskStatus {
+  not_started
+  in_progress
+  completed
+  on_hold
+  cancelled
+  delayed
 }
 
 enum SubscriptionStatus {

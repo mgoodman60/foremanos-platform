@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { ProcessingQueueStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     const activeEntries = await prisma.processingQueue.findMany({
       where: {
         status: {
-          in: ['queued', 'processing'],
+          in: [ProcessingQueueStatus.queued, ProcessingQueueStatus.processing],
         },
       },
       include: {

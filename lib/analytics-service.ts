@@ -96,7 +96,7 @@ export async function calculateProjectKPIs(projectId: string): Promise<ProjectKP
     daysRemaining = Math.max(0, differenceInDays(schedule.endDate, now));
     
     const plannedProgress = totalDuration > 0 ? Math.min(100, (daysElapsed / totalDuration) * 100) : 0;
-    const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
+    const completedTasks = tasks.filter(t => t.status === 'completed').length;
     const totalTasks = tasks.length;
     percentComplete = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
     
@@ -104,9 +104,9 @@ export async function calculateProjectKPIs(projectId: string): Promise<ProjectKP
     scheduleVariance = percentComplete - plannedProgress;
     
     criticalPathTasks = tasks.filter(t => t.isCritical).length;
-    tasksOnTrack = tasks.filter(t => t.status === 'IN_PROGRESS' && t.endDate >= now).length;
-    tasksDelayed = tasks.filter(t => t.status !== 'COMPLETED' && t.endDate < now).length;
-    tasksCompletedThisWeek = tasks.filter(t => t.status === 'COMPLETED' && t.updatedAt >= weekStart).length;
+    tasksOnTrack = tasks.filter(t => t.status === 'in_progress' && t.endDate >= now).length;
+    tasksDelayed = tasks.filter(t => t.status !== 'completed' && t.endDate < now).length;
+    tasksCompletedThisWeek = tasks.filter(t => t.status === 'completed' && t.updatedAt >= weekStart).length;
   }
 
   // Budget KPIs
@@ -233,7 +233,7 @@ export async function getProgressTrends(
       : 0;
 
     const completedByDate = tasks.filter(t => 
-      t.status === 'COMPLETED' && t.updatedAt <= date
+      t.status === 'completed' && t.updatedAt <= date
     ).length;
     const actualProgress = (completedByDate / totalTasks) * 100;
 
@@ -368,10 +368,10 @@ export async function getScheduleAnalytics(projectId: string): Promise<ScheduleA
   const tasks = schedule?.ScheduleTask || [];
   const now = new Date();
 
-  const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
-  const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS').length;
-  const notStartedTasks = tasks.filter(t => t.status === 'NOT_STARTED').length;
-  const delayedTasks = tasks.filter(t => t.status !== 'COMPLETED' && t.endDate < now).length;
+  const completedTasks = tasks.filter(t => t.status === 'completed').length;
+  const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
+  const notStartedTasks = tasks.filter(t => t.status === 'not_started').length;
+  const delayedTasks = tasks.filter(t => t.status !== 'completed' && t.endDate < now).length;
   const criticalTasks = tasks.filter(t => t.isCritical).length;
 
   const totalDuration = tasks.reduce((sum, t) => sum + t.duration, 0);

@@ -169,7 +169,7 @@ export async function importBIMToTakeoff(
         projectId,
         name: `BIM Takeoff - ${model?.fileName || 'Unknown Model'}`,
         description: `Auto-extracted from BIM model (${modelId}) on ${new Date().toLocaleDateString()}. Elements: ${bimData.totalElements}`,
-        status: 'processing',
+        status: 'in_progress',
         createdBy,
         extractedAt: new Date(),
         extractedBy: 'autodesk_bim',

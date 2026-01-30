@@ -5,6 +5,7 @@
 
 import { prisma } from './db';
 import { processDocument } from './document-processor';
+import { ProcessingQueueStatus } from '@prisma/client';
 
 export interface OrphanedDocument {
   id: string;
@@ -61,7 +62,7 @@ export async function findOrphanedDocuments(): Promise<OrphanedDocument[]> {
     const queueEntries = await prisma.processingQueue.findMany({
       where: {
         documentId: { in: docsWithNoChunks.map((d: any) => d.id) },
-        status: { in: ['queued', 'processing'] },
+        status: { in: [ProcessingQueueStatus.queued, ProcessingQueueStatus.processing] },
       },
       select: { documentId: true },
     });
@@ -129,7 +130,7 @@ export async function recoverOrphanedDocument(documentId: string): Promise<boole
     await prisma.processingQueue.deleteMany({
       where: {
         documentId,
-        status: { in: ['failed', 'completed'] },
+        status: { in: [ProcessingQueueStatus.failed, ProcessingQueueStatus.completed] },
       },
     });
 

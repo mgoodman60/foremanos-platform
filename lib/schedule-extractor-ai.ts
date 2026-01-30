@@ -10,6 +10,7 @@ import { callAbacusLLM } from './abacus-llm';
 import { generateAbbreviationContext, expandAbbreviationsInText } from './construction-abbreviations';
 import { getFileUrl } from './s3';
 import { withLock, isLocked } from './extraction-lock-service';
+import { ScheduleTaskStatus } from '@prisma/client';
 
 interface ExtractedTask {
   taskId: string;
@@ -251,7 +252,7 @@ async function performScheduleExtraction(
         wbsCode: task.wbsCode,
         isCritical: task.isCritical || false,
         percentComplete: task.percentComplete || 0,
-        status: task.status || 'not_started'
+        status: (task.status || 'not_started') as ScheduleTaskStatus
       }
     });
   }

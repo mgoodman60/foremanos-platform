@@ -474,7 +474,7 @@ export async function recordWeatherDelay(
     include: {
       ScheduleTask: {
         where: {
-          status: 'IN_PROGRESS',
+          status: 'in_progress',
           percentComplete: { lt: 100 }
         }
       }

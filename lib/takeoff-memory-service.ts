@@ -10,6 +10,7 @@
  */
 
 import { prisma } from './db';
+import { MaterialTakeoffStatus } from '@prisma/client';
 import { TAKEOFF_CATEGORIES, TakeoffCategory, SubCategory } from './takeoff-categories';
 
 // Query detection keywords organized by intent
@@ -232,9 +233,9 @@ export async function getTakeoffContext(
     
     // Fetch takeoff line items
     const takeoffs = await prisma.materialTakeoff.findMany({
-      where: { 
+      where: {
         projectId: project.id,
-        status: { not: 'deleted' }
+        status: { not: MaterialTakeoffStatus.deleted }
       },
       include: {
         TakeoffLineItem: {
@@ -476,7 +477,7 @@ export async function getMaterialQuantity(
       where: {
         MaterialTakeoff: {
           projectId: project.id,
-          status: { not: 'deleted' }
+          status: { not: MaterialTakeoffStatus.deleted }
         },
         OR: [
           { category: { contains: materialType, mode: 'insensitive' } },
@@ -529,7 +530,7 @@ export async function getCategoryTotals(
       where: {
         MaterialTakeoff: {
           projectId: project.id,
-          status: { not: 'deleted' }
+          status: { not: MaterialTakeoffStatus.deleted }
         }
       },
       select: {

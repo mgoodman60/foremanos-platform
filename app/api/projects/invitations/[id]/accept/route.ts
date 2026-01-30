@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (invitation.expiresAt < new Date()) {
       await prisma.projectInvitation.update({
         where: { id },
-        data: { status: 'declined' },
+        data: { status: 'expired' },
       });
       return NextResponse.json({ error: 'Invitation has expired' }, { status: 400 });
     }

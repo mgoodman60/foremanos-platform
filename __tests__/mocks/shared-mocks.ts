@@ -65,12 +65,34 @@ export const mockDocument = {
   cloud_storage_path: 'projects/test-project/test.pdf',
 };
 
+// Password reset token mock
+export const mockPasswordResetToken = {
+  id: 'prt-1',
+  userId: 'user-1',
+  token: 'valid-reset-token-12345',
+  expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+  used: false,
+  createdAt: new Date(),
+  User: mockUser,
+};
+
+// User with verification token (for signup/verify-email tests)
+export const mockUserWithVerificationToken = {
+  ...mockUser,
+  emailVerified: false,
+  approved: false,
+  role: 'pending',
+  emailVerificationToken: 'valid-verification-token-12345',
+  emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+};
+
 export const prismaMock = {
   user: {
     findUnique: vi.fn().mockResolvedValue(mockUser),
     findFirst: vi.fn().mockResolvedValue(mockUser),
     update: vi.fn().mockResolvedValue(mockUser),
     create: vi.fn().mockResolvedValue(mockUser),
+    delete: vi.fn().mockResolvedValue(mockUser),
   },
   project: {
     findUnique: vi.fn().mockResolvedValue(mockProject),
@@ -90,6 +112,13 @@ export const prismaMock = {
   },
   maintenanceMode: {
     findUnique: vi.fn().mockResolvedValue(null),
+  },
+  passwordResetToken: {
+    create: vi.fn().mockResolvedValue(mockPasswordResetToken),
+    findUnique: vi.fn().mockResolvedValue(mockPasswordResetToken),
+    findFirst: vi.fn().mockResolvedValue(mockPasswordResetToken),
+    update: vi.fn().mockResolvedValue({ ...mockPasswordResetToken, used: true }),
+    updateMany: vi.fn().mockResolvedValue({ count: 1 }),
   },
 };
 
@@ -129,6 +158,11 @@ export const mockStripeEvent = (type: string, data: any) => ({
 export const constructEventMock = vi.fn();
 export const subscriptionsRetrieveMock = vi.fn().mockResolvedValue(mockStripeSubscription);
 
+export const checkoutSessionsCreateMock = vi.fn().mockResolvedValue({
+  id: 'cs_test123',
+  url: 'https://checkout.stripe.com/test',
+});
+
 vi.mock('@/lib/stripe', () => ({
   stripe: {
     webhooks: {
@@ -136,6 +170,11 @@ vi.mock('@/lib/stripe', () => ({
     },
     subscriptions: {
       retrieve: subscriptionsRetrieveMock,
+    },
+    checkout: {
+      sessions: {
+        create: checkoutSessionsCreateMock,
+      },
     },
   },
   SUBSCRIPTION_LIMITS: {
@@ -145,6 +184,15 @@ vi.mock('@/lib/stripe', () => ({
     team: { queriesPerMonth: 5000, projects: 25, pagesPerMonth: 10000 },
     business: { queriesPerMonth: -1, projects: -1, pagesPerMonth: -1 },
     enterprise: { queriesPerMonth: -1, projects: -1, pagesPerMonth: -1 },
+  },
+  STRIPE_PRICE_IDS: {
+    starter_monthly: 'price_starter_monthly',
+    starter_annual: 'price_starter_annual',
+    pro_monthly: 'price_pro_monthly',
+    pro_annual: 'price_pro_annual',
+    team_monthly: 'price_team_monthly',
+    business_monthly: 'price_business_monthly',
+    enterprise_monthly: 'price_enterprise_monthly',
   },
 }));
 
@@ -215,9 +263,16 @@ vi.mock('@/lib/project-permissions', () => ({
 // ============================================
 // Email Service Mocks
 // ============================================
+export const sendPasswordResetEmailMock = vi.fn().mockResolvedValue(undefined);
+export const sendEmailVerificationMock = vi.fn().mockResolvedValue(undefined);
+export const sendNewSignupNotificationMock = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('@/lib/email-service', () => ({
   sendDocumentUploadNotification: vi.fn().mockResolvedValue(undefined),
   sendEmail: vi.fn().mockResolvedValue(undefined),
+  sendPasswordResetEmail: sendPasswordResetEmailMock,
+  sendEmailVerification: sendEmailVerificationMock,
+  sendNewSignupNotification: sendNewSignupNotificationMock,
 }));
 
 // ============================================
@@ -247,9 +302,18 @@ export const checkRateLimitMock = vi.fn().mockResolvedValue({
 
 export const getClientIpMock = vi.fn().mockReturnValue('127.0.0.1');
 
+export const getRateLimitIdentifierMock = vi.fn().mockReturnValue('user-1:127.0.0.1');
+export const createRateLimitHeadersMock = vi.fn().mockReturnValue({
+  'X-RateLimit-Limit': '5',
+  'X-RateLimit-Remaining': '4',
+  'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + 300),
+});
+
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: checkRateLimitMock,
   getClientIp: getClientIpMock,
+  getRateLimitIdentifier: getRateLimitIdentifierMock,
+  createRateLimitHeaders: createRateLimitHeadersMock,
   RATE_LIMITS: {
     CHAT: { maxRequests: 20, windowSeconds: 60 },
     UPLOAD: { maxRequests: 10, windowSeconds: 60 },
@@ -270,4 +334,37 @@ export const headersMock = vi.fn().mockResolvedValue({
 
 vi.mock('next/headers', () => ({
   headers: headersMock,
+}));
+
+// ============================================
+// Audit Log Mocks
+// ============================================
+export const logActivityMock = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('@/lib/audit-log', () => ({
+  logActivity: logActivityMock,
+}));
+
+// ============================================
+// Password Validator Mocks
+// ============================================
+export const validatePasswordMock = vi.fn().mockReturnValue({ valid: true });
+
+vi.mock('@/lib/password-validator', () => ({
+  validatePassword: validatePasswordMock,
+}));
+
+// ============================================
+// Bcrypt Mock (for password hashing)
+// ============================================
+export const bcryptHashMock = vi.fn().mockResolvedValue('$2a$10$hashedpassword');
+export const bcryptCompareMock = vi.fn().mockResolvedValue(true);
+
+vi.mock('bcryptjs', () => ({
+  default: {
+    hash: bcryptHashMock,
+    compare: bcryptCompareMock,
+  },
+  hash: bcryptHashMock,
+  compare: bcryptCompareMock,
 }));

@@ -201,9 +201,9 @@ Only return the JSON object, no other text.`
         : null;
       
       // Map status
-      let status = 'NOT_STARTED';
-      if (task.status === 'completed') status = 'COMPLETED';
-      else if (task.status === 'in-progress') status = 'IN_PROGRESS';
+      let status: 'not_started' | 'in_progress' | 'completed' = 'not_started';
+      if (task.status === 'completed') status = 'completed';
+      else if (task.status === 'in-progress') status = 'in_progress';
       
       // Check if task already exists
       const existing = await prisma.scheduleTask.findFirst({
@@ -234,7 +234,7 @@ Only return the JSON object, no other text.`
             startDate,
             endDate,
             duration: Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))),
-            percentComplete: status === 'COMPLETED' ? 100 : status === 'IN_PROGRESS' ? 50 : 0,
+            percentComplete: status === 'completed' ? 100 : status === 'in_progress' ? 50 : 0,
             status,
             isCritical: false,
             predecessors: [],

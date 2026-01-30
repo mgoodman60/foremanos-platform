@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { ProcessingQueueStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate estimated completion time
     let estimatedCompletionTime: string | undefined;
-    if (queue.status === 'processing' && providerBreakdown.length > 0) {
+    if (queue.status === ProcessingQueueStatus.processing && providerBreakdown.length > 0) {
       // Calculate average time per page across all providers
       const totalTime = providerBreakdown.reduce(
         (sum: number, p: any) => sum + p.pagesProcessed * p.avgTimePerPage,

@@ -7,8 +7,9 @@ import { prisma } from './db';
 import { processDocumentBatch } from './document-processor-batch';
 import { triggerAutoTakeoffAfterProcessing } from './auto-takeoff-generator';
 import { triggerEnhancementAfterProcessing } from './project-data-enhancer';
+import { ProcessingQueueStatus } from '@prisma/client';
 
-export type ProcessingStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'paused';
+export type ProcessingStatus = ProcessingQueueStatus;
 
 export interface ProcessingQueueEntry {
   id: string;
@@ -38,7 +39,7 @@ export async function queueDocumentForProcessing(
   await prisma.processingQueue.create({
     data: {
       documentId,
-      status: 'queued',
+      status: ProcessingQueueStatus.queued,
       totalPages,
       pagesProcessed: 0,
       currentBatch: 0,
@@ -65,8 +66,8 @@ export async function processNextQueuedBatch(): Promise<boolean> {
   const entries = await prisma.processingQueue.findMany({
     where: {
       OR: [
-        { status: 'queued' },
-        { status: 'processing' },
+        { status: ProcessingQueueStatus.queued },
+        { status: ProcessingQueueStatus.processing },
       ],
     },
     orderBy: { createdAt: 'asc' },
@@ -86,7 +87,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
     await prisma.processingQueue.update({
       where: { id: entry.id },
       data: { 
-        status: 'processing',
+        status: ProcessingQueueStatus.processing,
         updatedAt: new Date(),
       },
     });
@@ -151,7 +152,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
         data: {
           pagesProcessed: newPagesProcessed,
           currentBatch: newCurrentBatch,
-          status: isComplete ? 'completed' : 'processing',
+          status: isComplete ? ProcessingQueueStatus.completed : ProcessingQueueStatus.processing,
           updatedAt: new Date(),
           metadata: {
             ...metadata,
@@ -247,7 +248,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
         await prisma.processingQueue.update({
           where: { id: entry.id },
           data: {
-            status: 'failed',
+            status: ProcessingQueueStatus.failed,
             lastError: result.error,
             retriesCount: newRetries,
             updatedAt: new Date(),
@@ -259,7 +260,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
         await prisma.processingQueue.update({
           where: { id: entry.id },
           data: {
-            status: 'queued',
+            status: ProcessingQueueStatus.queued,
             lastError: result.error,
             retriesCount: newRetries,
             updatedAt: new Date(),
@@ -276,7 +277,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
     await prisma.processingQueue.update({
       where: { id: entry.id },
       data: {
-        status: 'failed',
+        status: ProcessingQueueStatus.failed,
         lastError: error.message,
         updatedAt: new Date(),
       },
@@ -305,10 +306,10 @@ export async function resumeFailedProcessing(documentId: string): Promise<void> 
   await prisma.processingQueue.updateMany({
     where: {
       documentId,
-      status: 'failed',
+      status: ProcessingQueueStatus.failed,
     },
     data: {
-      status: 'queued',
+      status: ProcessingQueueStatus.queued,
       retriesCount: 0,
       lastError: null,
       updatedAt: new Date(),
@@ -359,7 +360,7 @@ export async function processQueuedDocument(documentId: string): Promise<void> {
     }
 
     // Check if complete or failed
-    if (currentEntry.status === 'completed' || currentEntry.status === 'failed') {
+    if (currentEntry.status === ProcessingQueueStatus.completed || currentEntry.status === ProcessingQueueStatus.failed) {
       hasMoreBatches = false;
       break;
     }
@@ -393,7 +394,7 @@ export async function processQueuedDocument(documentId: string): Promise<void> {
     orderBy: { createdAt: 'desc' },
   });
 
-  if (finalEntry?.status === 'completed') {
+  if (finalEntry?.status === ProcessingQueueStatus.completed) {
     console.log(`[QUEUE] ✅ Document ${documentId} fully processed`);
     await prisma.document.update({
       where: { id: documentId },
@@ -421,7 +422,7 @@ export async function processQueuedDocument(documentId: string): Promise<void> {
         console.error(`[QUEUE] Project enhancement failed:`, err);
       });
     }
-  } else if (consecutiveFailures >= maxConsecutiveFailures || finalEntry?.status === 'failed') {
+  } else if (consecutiveFailures >= maxConsecutiveFailures || finalEntry?.status === ProcessingQueueStatus.failed) {
     console.error(`[QUEUE] ❌ Document ${documentId} processing failed`);
     await prisma.document.update({
       where: { id: documentId },
@@ -451,7 +452,7 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
     await prisma.processingQueue.update({
       where: { id: entry.id },
       data: { 
-        status: 'processing',
+        status: ProcessingQueueStatus.processing,
         updatedAt: new Date(),
       },
     });
@@ -478,7 +479,7 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
         data: {
           pagesProcessed: newPagesProcessed,
           currentBatch: newCurrentBatch,
-          status: isComplete ? 'completed' : 'processing',
+          status: isComplete ? ProcessingQueueStatus.completed : ProcessingQueueStatus.processing,
           updatedAt: new Date(),
           metadata: {
             ...metadata,
@@ -578,7 +579,7 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
       await prisma.processingQueue.update({
         where: { id: entry.id },
         data: {
-          status: newRetries >= 3 ? 'failed' : 'queued',
+          status: newRetries >= 3 ? ProcessingQueueStatus.failed : ProcessingQueueStatus.queued,
           lastError: result.error,
           retriesCount: newRetries,
           updatedAt: new Date(),
@@ -592,7 +593,7 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
     await prisma.processingQueue.update({
       where: { id: entry.id },
       data: {
-        status: 'failed',
+        status: ProcessingQueueStatus.failed,
         lastError: error.message,
         updatedAt: new Date(),
       },
