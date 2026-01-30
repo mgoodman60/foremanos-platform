@@ -88,15 +88,20 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="batch-upload-modal-title"
+        className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
         <div className="sticky top-0 bg-[#003B71] text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Upload className="w-6 h-6" />
-              <h2 className="text-xl font-bold">Batch Document Upload</h2>
+              <h2 id="batch-upload-modal-title" className="text-xl font-bold">Batch Document Upload</h2>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg">
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Close">
               <X className="w-5 h-5" />
             </button>
           </div>

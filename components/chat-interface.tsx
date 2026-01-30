@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, User, Trash2, Copy, Check, RefreshCw, HelpCircle, Loader2, ImagePlus, X, ThumbsUp, ThumbsDown, Download, FileText, Lock, Target, ClipboardList } from 'lucide-react';
+import { Send, MessageSquare, User, Trash2, Copy, Check, RefreshCw, HelpCircle, Loader2, ImagePlus, X, ThumbsUp, ThumbsDown, Download, FileText, Lock, Target, ClipboardList, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import Image from 'next/image';
@@ -18,6 +18,7 @@ import { QuickActions } from './chat/quick-actions';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { SourceCitations, Citation } from './chat/source-citations';
 import { FollowUpSuggestions } from './chat/follow-up-suggestions';
+import { MessageSearch } from './chat/message-search';
 
 interface Message {
   id: string;
@@ -92,7 +93,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   const [showScheduleReview, setShowScheduleReview] = useState(false);
   const [showTemplateExportDialog, setShowTemplateExportDialog] = useState(false);
   const [analyzingSchedule, setAnalyzingSchedule] = useState(false);
-  
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchHighlight, setSearchHighlight] = useState<{ messageId: string; text: string } | null>(null);
+
   // Check if user has full access (admin or client/owner)
   const hasFullAccess = userRole === 'admin' || userRole === 'client';
   
@@ -338,7 +341,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       setIsOnline(true);
       toast.success('Back online');
     };
-    
+
     const handleOffline = () => {
       setIsOnline(false);
       toast.error('You are offline. Please check your internet connection.');
@@ -356,6 +359,38 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Keyboard shortcut for search (Cmd/Ctrl + F)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + F to open search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f' && activeConversationId) {
+        e.preventDefault();
+        setShowSearch(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeConversationId]);
+
+  // Handle search result selection
+  const handleSearchResultSelect = (messageId: string, highlightText: string) => {
+    // Find the message element in the DOM
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement && chatContainerRef.current) {
+      // Scroll to the message
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Set highlight
+      setSearchHighlight({ messageId, text: highlightText });
+
+      // Clear highlight after 3 seconds
+      setTimeout(() => {
+        setSearchHighlight(null);
+      }, 3000);
+    }
+  };
 
   const removeImage = () => {
     setUploadedImage(null);
@@ -952,6 +987,19 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* Search button - only show when conversation is active */}
+            {activeConversationId && messages.length > 0 && (
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className={`p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none ${
+                  showSearch ? 'bg-[#2d333b] text-[#F97316]' : ''
+                }`}
+                aria-label="Search messages"
+                title="Search messages (Ctrl/Cmd+F)"
+              >
+                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            )}
             <button
               onClick={() => setShowHelp(!showHelp)}
               className="p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none"
@@ -1086,6 +1134,14 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         )}
       </div>
 
+      {/* Message Search */}
+      <MessageSearch
+        conversationId={activeConversationId}
+        isOpen={showSearch}
+        onClose={() => setShowSearch(false)}
+        onResultSelect={handleSearchResultSelect}
+      />
+
       {/* Messages */}
       <div 
         ref={chatContainerRef}
@@ -1168,10 +1224,18 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           </div>
         )}
 
-        {messages.map((message, index) => (
+        {messages.map((message, index) => {
+          // Extract messageId from the message id (format: "messageId-role")
+          const messageId = message.id.includes('-') ? message.id.split('-')[0] : message.id;
+          const isHighlighted = searchHighlight?.messageId === messageId;
+
+          return (
           <div
             key={message.id}
-            className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom`}
+            data-message-id={messageId}
+            className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom ${
+              isHighlighted ? 'bg-yellow-500/10 rounded-lg p-2 -m-2' : ''
+            }`}
           >
             {message.role === 'assistant' && (
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#2d333b] flex items-center justify-center p-1 shadow-sm" aria-hidden="true">
@@ -1191,7 +1255,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                   message.role === 'user'
                     ? 'bg-[#F97316] text-white'
                     : 'bg-[#2d333b] text-[#F8FAFC] shadow-md border border-gray-700'
-                }`}
+                } ${isHighlighted ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-[#1F2328]' : ''}`}
               >
                 {message.image && (
                   <div className="mb-3">
@@ -1209,7 +1273,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                   </div>
                 )}
                 {message.content && (
-                  <MessageContent 
+                  <MessageContent
                     content={message.content}
                     onOpenRoom={() => setShowRoomBrowser(true)}
                     onOpenMaterials={() => setShowMaterialTakeoff(true)}
@@ -1295,7 +1359,8 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               </div>
             )}
           </div>
-        ))}
+        );
+        })}
 
         {/* Typing Indicator */}
         {loading && (

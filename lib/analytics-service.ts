@@ -465,44 +465,51 @@ export interface MEPAnalytics {
 
 export async function getMEPAnalytics(projectId: string): Promise<MEPAnalytics[]> {
   const systems = ['MECHANICAL', 'ELECTRICAL', 'PLUMBING', 'FIRE_PROTECTION', 'CONTROLS'];
-  const results: MEPAnalytics[] = [];
 
-  for (const system of systems) {
-    try {
-      const equipment = await prisma.mEPEquipment.count({
-        where: { projectId, equipmentType: system as any }
-      });
-      
-      // Use the unified status field with proper enum values
-      const installed = await prisma.mEPEquipment.count({
-        where: { projectId, equipmentType: system as any, status: { in: ['INSTALLED', 'CONNECTED', 'TESTED', 'OPERATIONAL'] } }
-      });
+  try {
+    // Fetch all equipment for the project in a single query
+    const allEquipment = await prisma.mEPEquipment.findMany({
+      where: { projectId },
+      select: { equipmentType: true, status: true }
+    });
 
-      const tested = await prisma.mEPEquipment.count({
-        where: { projectId, equipmentType: system as any, status: { in: ['TESTED', 'OPERATIONAL'] } }
-      });
+    // Group and calculate metrics in memory
+    const results: MEPAnalytics[] = [];
 
-      const commissioned = await prisma.mEPEquipment.count({
-        where: { projectId, equipmentType: system as any, status: 'OPERATIONAL' }
-      });
+    for (const system of systems) {
+      const systemEquipment = allEquipment.filter(e => e.equipmentType === system);
+      const totalItems = systemEquipment.length;
 
-      if (equipment > 0) {
+      if (totalItems > 0) {
+        const installed = systemEquipment.filter(e =>
+          ['INSTALLED', 'CONNECTED', 'TESTED', 'OPERATIONAL'].includes(e.status)
+        ).length;
+
+        const tested = systemEquipment.filter(e =>
+          ['TESTED', 'OPERATIONAL'].includes(e.status)
+        ).length;
+
+        const commissioned = systemEquipment.filter(e =>
+          e.status === 'OPERATIONAL'
+        ).length;
+
         results.push({
           systemType: system.replace('_', ' '),
-          totalItems: equipment,
+          totalItems,
           installed,
           tested,
           commissioned,
-          installationRate: Math.round((installed / equipment) * 100),
+          installationRate: Math.round((installed / totalItems) * 100),
           issuesCount: 0
         });
       }
-    } catch {
-      // Skip if model doesn't exist or query fails
     }
-  }
 
-  return results;
+    return results;
+  } catch {
+    // Return empty array if model doesn't exist or query fails
+    return [];
+  }
 }
 
 // =============================================
@@ -576,33 +583,45 @@ export interface ProjectComparison {
 }
 
 export async function compareProjects(projectIds: string[]): Promise<ProjectComparison[]> {
+  if (projectIds.length === 0) return [];
+
+  // Batch fetch all projects with their crews in a single query
+  const projects = await prisma.project.findMany({
+    where: { id: { in: projectIds } },
+    include: {
+      Crew: { select: { averageSize: true } },
+      _count: { select: { Document: true } }
+    }
+  });
+
+  // Calculate KPIs in parallel for all projects
+  const kpisPromises = projectIds.map(projectId =>
+    calculateProjectKPIs(projectId).catch(error => {
+      console.error(`Error calculating KPIs for project ${projectId}:`, error);
+      return null;
+    })
+  );
+  const kpisResults = await Promise.all(kpisPromises);
+
+  // Build comparison results
   const comparisons: ProjectComparison[] = [];
 
-  for (const projectId of projectIds) {
-    try {
-      const kpis = await calculateProjectKPIs(projectId);
-      const project = await prisma.project.findUnique({
-        where: { id: projectId }
-      });
+  for (let i = 0; i < projectIds.length; i++) {
+    const projectId = projectIds[i];
+    const project = projects.find(p => p.id === projectId);
+    const kpis = kpisResults[i];
 
-      const crews = await prisma.crew.findMany({
-        where: { projectId }
+    if (project && kpis) {
+      const teamSize = project.Crew.reduce((sum, c) => sum + (c.averageSize || 4), 0);
+      comparisons.push({
+        projectId,
+        projectName: project.name,
+        percentComplete: kpis.percentComplete,
+        budgetUtilization: kpis.budgetUtilization,
+        schedulePerformance: kpis.schedulePerformanceIndex * 100,
+        documentCount: kpis.totalDocuments,
+        teamSize
       });
-
-      if (project) {
-        const teamSize = crews.reduce((sum, c) => sum + (c.averageSize || 4), 0);
-        comparisons.push({
-          projectId,
-          projectName: project.name,
-          percentComplete: kpis.percentComplete,
-          budgetUtilization: kpis.budgetUtilization,
-          schedulePerformance: kpis.schedulePerformanceIndex * 100,
-          documentCount: kpis.totalDocuments,
-          teamSize
-        });
-      }
-    } catch (error) {
-      console.error(`Error comparing project ${projectId}:`, error);
     }
   }
 

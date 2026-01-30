@@ -79,8 +79,8 @@ export function MainApp({ session }: MainAppProps) {
 
       {/* Login Modal */}
       {showLogin && !isLoggedIn && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
           onClick={(e) => e.target === e.currentTarget && setShowLogin(false)}
           role="dialog"
           aria-modal="true"

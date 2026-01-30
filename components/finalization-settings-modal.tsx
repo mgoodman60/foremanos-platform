@@ -104,12 +104,17 @@ export function FinalizationSettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="finalization-settings-modal-title"
+        className="bg-[#1F2328] border border-gray-700 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
-            <h2 className="text-xl font-bold text-[#F8FAFC]">Daily Report Finalization Settings</h2>
+            <h2 id="finalization-settings-modal-title" className="text-xl font-bold text-[#F8FAFC]">Daily Report Finalization Settings</h2>
             <p className="text-sm text-gray-400 mt-1">
               Configure when and how daily reports are automatically finalized
             </p>
@@ -119,6 +124,7 @@ export function FinalizationSettingsModal({
             variant="ghost"
             size="sm"
             className="text-gray-400 hover:text-[#F8FAFC] hover:bg-[#2d333b]"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </Button>

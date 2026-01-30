@@ -148,21 +148,27 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guest-credential-modal-title"
+        className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="sticky top-0 bg-[#003B71] text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Shield className="w-6 h-6" />
               <div>
-                <h2 className="text-xl font-bold">Guest Credential Management</h2>
+                <h2 id="guest-credential-modal-title" className="text-xl font-bold">Guest Credential Management</h2>
                 <p className="text-blue-100 text-sm mt-1">{projectName}</p>
               </div>
             </div>
             <button
               onClick={onClose}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>

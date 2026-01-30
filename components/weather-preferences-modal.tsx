@@ -85,13 +85,18 @@ export default function WeatherPreferencesModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1F2328] border border-gray-700 rounded-xl shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="weather-preferences-modal-title"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1F2328] border border-gray-700 rounded-xl shadow-2xl"
+      >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#1F2328] border-b border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-[#F8FAFC]">
+              <h2 id="weather-preferences-modal-title" className="text-xl font-bold text-[#F8FAFC]">
                 🌤️ Weather Alert Preferences
               </h2>
               <p className="text-sm text-gray-400 mt-1">

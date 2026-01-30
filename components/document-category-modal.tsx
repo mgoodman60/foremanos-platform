@@ -31,8 +31,11 @@ export function DocumentCategoryModal({
   const categories = getAllCategories();
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && fileName) {
       getSuggestion();
+    } else if (isOpen && !fileName) {
+      // No file selected yet (category-first flow)
+      setLoading(false);
     }
   }, [isOpen, fileName]);
 
@@ -68,53 +71,73 @@ export function DocumentCategoryModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="document-category-modal-title"
+        className="bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="sticky top-0 bg-[#2d333b] border-b border-gray-700 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-[#F8FAFC]">Select Document Category</h2>
-            <p className="text-sm text-gray-400 mt-1">File: {fileName}</p>
+            <h2 id="document-category-modal-title" className="text-lg font-semibold text-[#F8FAFC]">
+              {fileName ? 'Select Document Category' : 'Step 1: Choose Document Category'}
+            </h2>
+            {fileName && (
+              <p className="text-sm text-gray-400 mt-1">File: {fileName}</p>
+            )}
+            {!fileName && (
+              <p className="text-sm text-gray-400 mt-1">First select the category, then choose your file</p>
+            )}
           </div>
           <button
             onClick={onCancel}
             className="text-gray-400 hover:text-[#F8FAFC] transition-colors"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* AI Suggestion Banner */}
-        {loading ? (
-          <div className="px-6 py-4 bg-[#1F2328] border-b border-gray-700">
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Analyzing document...</span>
-            </div>
-          </div>
-        ) : aiSuggestion && aiSuggestion.confidence >= 0.7 ? (
-          <div className="px-6 py-4 bg-[#1F2328] border-b border-gray-700">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[#F8FAFC]">
-                  AI Suggestion: {getCategoryLabel(aiSuggestion.category)}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {aiSuggestion.reasoning}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Confidence: {(aiSuggestion.confidence * 100).toFixed(0)}%
-                </p>
+        {/* AI Suggestion Banner - Only show if file is present */}
+        {fileName && (
+          <>
+            {loading ? (
+              <div className="px-6 py-4 bg-[#1F2328] border-b border-gray-700">
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Analyzing document...</span>
+                </div>
               </div>
-            </div>
-          </div>
-        ) : null}
+            ) : aiSuggestion && aiSuggestion.confidence >= 0.7 ? (
+              <div className="px-6 py-4 bg-[#1F2328] border-b border-gray-700">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-[#F8FAFC]">
+                      AI Suggestion: {getCategoryLabel(aiSuggestion.category)}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {aiSuggestion.reasoning}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Confidence: {(aiSuggestion.confidence * 100).toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </>
+        )}
 
         {/* Category Options */}
         <div className="px-6 py-4 space-y-3">
           <p className="text-sm text-gray-400 mb-3">
-            Select the category that best describes this document. This helps the AI assistant find relevant information faster.
+            {fileName
+              ? 'Select the category that best describes this document. This helps the AI assistant find relevant information faster.'
+              : 'Choose the type of document you want to upload. This helps organize your files and improves AI search accuracy.'
+            }
           </p>
 
           <div className="space-y-2">
@@ -154,7 +177,7 @@ export function DocumentCategoryModal({
             onClick={() => onConfirm(selectedCategory)}
             className="px-4 py-2 bg-[#F97316] text-white text-sm font-medium rounded-lg hover:bg-[#ea580c] transition-colors"
           >
-            Confirm & Upload
+            {fileName ? 'Confirm & Upload' : 'Next: Choose File'}
           </button>
         </div>
       </div>

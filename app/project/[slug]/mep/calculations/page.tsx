@@ -276,7 +276,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
 
       {/* Add Calculation Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-[#1F2328] border border-gray-700 rounded-xl p-6 w-full max-w-lg mx-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-white">New Load Calculation</h3>

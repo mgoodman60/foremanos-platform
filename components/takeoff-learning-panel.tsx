@@ -334,7 +334,7 @@ export default function TakeoffLearningPanel({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
       <div className="bg-[#1a1d21] rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-700">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">

@@ -80,22 +80,21 @@ export async function POST(
 
     // If recalculate is true, update revisedBudget on items to match contractAmount
     if (recalculate) {
-      await prisma.budgetItem.updateMany({
-        where: { budgetId: project.ProjectBudget.id },
-        data: {
-          // Note: Prisma doesn't support setting a field to another field's value in updateMany
-          // We'll need to do this in a loop if needed
-        },
-      });
+      // Filter items that need updating and batch the updates
+      const itemsToUpdate = budgetItems.filter(
+        item => item.contractAmount && !item.revisedBudget
+      );
 
-      // Update each item's revisedBudget to match contractAmount
-      for (const item of budgetItems) {
-        if (item.contractAmount && !item.revisedBudget) {
-          await prisma.budgetItem.update({
-            where: { id: item.id },
-            data: { revisedBudget: item.contractAmount },
-          });
-        }
+      if (itemsToUpdate.length > 0) {
+        // Use Promise.all for parallel updates instead of sequential loop
+        await Promise.all(
+          itemsToUpdate.map(item =>
+            prisma.budgetItem.update({
+              where: { id: item.id },
+              data: { revisedBudget: item.contractAmount },
+            })
+          )
+        );
       }
     }
 

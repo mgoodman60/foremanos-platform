@@ -980,10 +980,16 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         </div>
       )}
 
+      {/* Mobile Scroll Hint */}
+      <div className="md:hidden flex items-center justify-center gap-2 py-2 text-xs text-gray-400 bg-[#2d333b] rounded-t-lg border border-b-0 border-gray-700">
+        <Move className="w-3 h-3" />
+        <span>Scroll horizontally to view full chart</span>
+      </div>
+
       {/* Gantt Chart */}
-      <Card className="bg-[#2d333b] border-gray-700">
-        <div className="overflow-x-auto">
-          <div className="min-w-[1200px] relative">
+      <Card className="bg-[#2d333b] border-gray-700 md:rounded-t-lg rounded-t-none">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+          <div className="min-w-[800px] md:min-w-[1000px] lg:min-w-[1200px] relative">
             {/* Today Marker */}
             {todayPosition !== null && (
               <div 

@@ -11,15 +11,27 @@ import { classifyDocument } from '@/lib/document-classifier';
 import { getProcessingLimits, canProcessDocument, getRemainingPages, shouldResetQuota, getNextResetDate } from '@/lib/processing-limits';
 import { withDatabaseRetry } from '@/lib/retry-util';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max for upload
 
+const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/tiff', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+
 export async function POST(request: Request) {
   const startTime = Date.now();
   console.log('[UPLOAD START]', new Date().toISOString());
-  
+
   try {
+    const ip = getClientIp(request);
+    const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.UPLOAD);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many upload attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) } }
+      );
+    }
+
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -51,6 +63,11 @@ export async function POST(request: Request) {
         { error: 'File and project ID are required' },
         { status: 400 }
       );
+    }
+
+    // Validate MIME type
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: 'Invalid file type' }, { status: 415 });
     }
 
     // Verify project exists and get slug

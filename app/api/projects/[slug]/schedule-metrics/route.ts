@@ -334,37 +334,40 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       }
     });
 
-    // Get task names for recent updates
-    const recentUpdates: { date: string; taskName: string; status: string }[] = [];
-    
-    for (const update of recentScheduleUpdates) {
-      try {
-        // Find the task by taskId across all schedules
-        const task = await prisma.scheduleTask.findFirst({
-          where: {
-            taskId: update.taskId,
-            scheduleId: {
-              in: (project as any).Schedule.map((s: any) => s.id)
-            }
-          },
-          select: { name: true }
-        });
+    // Get task names for recent updates - batch fetch all tasks in a single query
+    const scheduleIds = (project as any).Schedule.map((s: any) => s.id);
+    const taskIds = recentScheduleUpdates.map(u => u.taskId).filter(Boolean);
 
-        if (task && update.appliedAt) {
-          const percentChange = update.newPercentComplete! - (update.previousPercentComplete || 0);
-          const statusText = update.status === 'auto_applied' 
-            ? `Auto-updated: ${percentChange > 0 ? '+' : ''}${percentChange}% progress`
-            : `Updated to ${update.newPercentComplete}%`;
-          
-          recentUpdates.push({
-            date: new Date(update.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            taskName: task.name,
-            status: statusText
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching task for update:', error);
-        continue;
+    // Batch fetch all tasks that match the taskIds
+    const tasksForUpdates = taskIds.length > 0 && scheduleIds.length > 0
+      ? await prisma.scheduleTask.findMany({
+          where: {
+            taskId: { in: taskIds },
+            scheduleId: { in: scheduleIds }
+          },
+          select: { taskId: true, name: true }
+        })
+      : [];
+
+    // Create a lookup map for O(1) access
+    const taskNameMap = new Map(tasksForUpdates.map(t => [t.taskId, t.name]));
+
+    const recentUpdates: { date: string; taskName: string; status: string }[] = [];
+
+    for (const update of recentScheduleUpdates) {
+      const taskName = taskNameMap.get(update.taskId);
+
+      if (taskName && update.appliedAt) {
+        const percentChange = update.newPercentComplete! - (update.previousPercentComplete || 0);
+        const statusText = update.status === 'auto_applied'
+          ? `Auto-updated: ${percentChange > 0 ? '+' : ''}${percentChange}% progress`
+          : `Updated to ${update.newPercentComplete}%`;
+
+        recentUpdates.push({
+          date: new Date(update.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          taskName: taskName,
+          status: statusText
+        });
       }
     }
 

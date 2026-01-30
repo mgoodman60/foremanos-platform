@@ -150,16 +150,22 @@ export function QuickCaptureModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg w-full max-w-lg">
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quick-capture-modal-title"
+        className="bg-[#1F2328] border border-gray-700 rounded-lg w-full max-w-lg"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h3 className="text-lg font-semibold text-[#F8FAFC]">Quick Capture</h3>
+          <h3 id="quick-capture-modal-title" className="text-lg font-semibold text-[#F8FAFC]">Quick Capture</h3>
           <Button
             onClick={onClose}
             variant="ghost"
             size="icon"
             className="text-gray-400 hover:text-white hover:bg-[#2d333b]"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </Button>

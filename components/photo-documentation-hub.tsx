@@ -640,7 +640,7 @@ function LinkPhotosModal({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
         <div className="p-4 border-b border-slate-700 flex items-center justify-between">
           <div>

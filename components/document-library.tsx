@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink } from 'lucide-react';
+import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -55,9 +55,11 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [projectSlug, setProjectSlug] = useState<string>('');
+  const [preSelectedCategory, setPreSelectedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cadFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -147,66 +149,100 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
-    
+
     // Check if it's a CAD file
     if (isCADFile(file.name)) {
       handleCADUpload(file);
       e.target.value = ''; // Reset input
       return;
     }
-    
+
     // Validate file type for documents (PDF, DOCX, XLSX, images)
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png'];
     const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.jpg', '.jpeg', '.png'];
-    
+
     if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(ext)) {
       toast.error('Supported files: PDF, DOCX, XLSX, images, or CAD files (.dwg, .rvt, .ifc, etc.)');
       return;
     }
-    
+
     // Validate file size (200MB limit)
     if (file.size > 200 * 1024 * 1024) {
       toast.error('File size must be less than 200MB');
       return;
     }
-    
-    // Open category modal
-    setPendingFile(file);
-    setShowCategoryModal(true);
+
+    // If category is already selected, upload immediately
+    if (preSelectedCategory) {
+      handleUpload(preSelectedCategory, file);
+      setPreSelectedCategory(null);
+    } else {
+      // Otherwise, open category modal for selection
+      setPendingFile(file);
+      setShowCategoryModal(true);
+    }
   };
 
-  const handleUpload = async (category: DocumentCategory) => {
-    if (!pendingFile) return;
-    
+  const handleUpload = async (category: DocumentCategory, file?: File) => {
+    const fileToUpload = file || pendingFile;
+    if (!fileToUpload) return;
+
     setUploading(true);
+    setUploadProgress(0);
     const formData = new FormData();
-    formData.append('file', pendingFile);
+    formData.append('file', fileToUpload);
     formData.append('projectId', projectId);
     formData.append('category', category);
 
     try {
-      const res = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      // Use XMLHttpRequest for progress tracking
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to upload document');
-      }
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            setUploadProgress(percent);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              reject(new Error(data.error || 'Failed to upload document'));
+            } catch {
+              reject(new Error('Failed to upload document'));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+
+        xhr.open('POST', '/api/documents/upload');
+        xhr.send(formData);
+      });
 
       toast.success('Document uploaded successfully');
       setShowCategoryModal(false);
       setPendingFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       fetchDocuments(); // Refresh the list
     } catch (error) {
       console.error('Upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to upload document');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -232,7 +268,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     if (userRole === 'guest') {
       toast.error('Guests cannot upload documents');
       return;
@@ -240,34 +276,60 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
     const files = e.dataTransfer.files;
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
-    
+
     // Check if it's a CAD file
     if (isCADFile(file.name)) {
       handleCADUpload(file);
       return;
     }
-    
+
     // Validate file type for documents
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png'];
     const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.jpg', '.jpeg', '.png'];
-    
+
     if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(ext)) {
       toast.error('Supported files: PDF, DOCX, XLSX, images, or CAD files (.dwg, .rvt, .ifc, etc.)');
       return;
     }
-    
+
     // Validate file size (200MB limit)
     if (file.size > 200 * 1024 * 1024) {
       toast.error('File size must be less than 200MB');
       return;
     }
-    
-    // Open category modal
-    setPendingFile(file);
+
+    // If category is already selected, upload immediately
+    if (preSelectedCategory) {
+      handleUpload(preSelectedCategory, file);
+      setPreSelectedCategory(null);
+    } else {
+      // Otherwise, open category modal for selection
+      setPendingFile(file);
+      setShowCategoryModal(true);
+    }
+  };
+
+  const handleCategoryFirstUpload = () => {
+    // Open category selection modal without a file
+    setPendingFile(null);
     setShowCategoryModal(true);
+  };
+
+  const handleCategorySelected = (category: DocumentCategory) => {
+    if (!pendingFile) {
+      // User selected category first, now prompt for file
+      setPreSelectedCategory(category);
+      setShowCategoryModal(false);
+      toast.success(`Category selected: ${getCategoryLabel(category)}. Now choose your file.`);
+      // Trigger file input
+      setTimeout(() => fileInputRef.current?.click(), 100);
+    } else {
+      // User dropped file first, category selected second (old flow)
+      handleUpload(category);
+    }
   };
 
   const formatFileSize = (bytes: number | null): string => {
@@ -686,6 +748,11 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           <div className="bg-[#2d333b] border-2 border-dashed border-[#F97316] rounded-lg p-8 text-center">
             <Upload className="w-16 h-16 text-[#F97316] mx-auto mb-4" />
             <p className="text-xl font-semibold text-[#F8FAFC] mb-2">Drop file here</p>
+            {preSelectedCategory && (
+              <p className="text-sm text-[#F97316] font-medium mb-2">
+                Category: {getCategoryLabel(preSelectedCategory as DocumentCategory)}
+              </p>
+            )}
             <p className="text-sm text-gray-400">PDF, DOCX, XLSX, images, or CAD files (.dwg, .rvt, .ifc)</p>
             <p className="text-xs text-gray-500 mt-1">Maximum file size: 200MB</p>
           </div>
@@ -808,6 +875,21 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               </div>
               
               <div className="flex items-center gap-2">
+                {/* Category Pre-Selection Badge */}
+                {preSelectedCategory && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-green-900/30 text-green-400 border border-green-700 rounded-lg text-sm">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">{getCategoryLabel(preSelectedCategory as DocumentCategory)}</span>
+                    <button
+                      onClick={() => setPreSelectedCategory(null)}
+                      className="ml-1 hover:text-green-300 transition-colors"
+                      aria-label="Clear category selection"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
                 {/* View CAD Models Button */}
                 {projectSlug && (
                   <button
@@ -818,26 +900,50 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                     <span className="hidden sm:inline">CAD Models</span>
                   </button>
                 )}
-                
+
                 {/* Upload Button - Non-guests only */}
                 {userRole !== 'guest' && (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-lg"
-                  >
-                    {uploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="hidden sm:inline">Uploading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        <span className="hidden sm:inline">Upload</span>
-                      </>
+                  <div className="relative">
+                    <button
+                      onClick={handleCategoryFirstUpload}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleCategoryFirstUpload();
+                        }
+                      }}
+                      disabled={uploading}
+                      aria-label="Upload document"
+                      className="flex items-center gap-2 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:ring-offset-[#1c2128]"
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="hidden sm:inline">Uploading {uploadProgress}%</span>
+                          <span className="sm:hidden">{uploadProgress}%</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          <span className="hidden sm:inline">Upload</span>
+                        </>
+                      )}
+                    </button>
+                    {/* Upload Progress Bar */}
+                    {uploading && uploadProgress > 0 && (
+                      <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-500 transition-all duration-200"
+                          style={{ width: `${uploadProgress}%` }}
+                          role="progressbar"
+                          aria-valuenow={uploadProgress}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label="Upload progress"
+                        />
+                      </div>
                     )}
-                  </button>
+                  </div>
                 )}
                 
                 {documents.length > 0 && canDeleteDocuments && (
@@ -1260,8 +1366,8 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
       {/* Rename Modal */}
       {renameModalOpen && (
-        <div 
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
           aria-labelledby="rename-dialog-title"
@@ -1336,15 +1442,16 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       />
       
       {/* Category Selection Modal */}
-      {showCategoryModal && pendingFile && (
+      {showCategoryModal && (
         <DocumentCategoryModal
           isOpen={showCategoryModal}
-          fileName={pendingFile.name}
-          fileType={pendingFile.type}
-          onConfirm={handleUpload}
+          fileName={pendingFile?.name || ''}
+          fileType={pendingFile?.type || ''}
+          onConfirm={handleCategorySelected}
           onCancel={() => {
             setShowCategoryModal(false);
             setPendingFile(null);
+            setPreSelectedCategory(null);
           }}
         />
       )}

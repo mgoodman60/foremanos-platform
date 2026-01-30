@@ -216,7 +216,7 @@ function AddSystemModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
       <div className="bg-[#1F2328] border border-gray-700 rounded-lg max-w-lg w-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 className="text-lg font-medium text-white">Add System</h3>

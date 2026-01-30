@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { sendPasswordResetEmail } from '@/lib/email-service';
 import crypto from 'crypto';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.AUTH);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) } }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {
@@ -72,6 +82,9 @@ export async function POST(request: NextRequest) {
     await sendPasswordResetEmail(user.email!, user.username, token, user.id);
 
     console.log(`Password reset email sent to: ${email}`);
+
+    // Add delay to prevent timing-based email enumeration
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     return NextResponse.json(
       { message: 'If the email exists, a password reset link has been sent.' },

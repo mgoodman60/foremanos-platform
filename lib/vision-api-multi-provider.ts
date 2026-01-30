@@ -1,24 +1,25 @@
 /**
  * Multi-Provider Vision API Wrapper
- * 
+ *
  * Provides resilient vision processing with automatic fallback across multiple providers:
  * 1. GPT-5.2 (Abacus AI) - Primary, highest quality
- * 2. Claude 3.5 Sonnet (Anthropic) - Equal/better quality, different infrastructure
- * 3. Gemini Vision Pro (Google) - Comparable quality
- * 4. GPT-4 Vision (OpenAI) - Proven reliability
- * 
+ * 2. Claude 4.5 Sonnet (Anthropic) - Equal/better quality, different infrastructure
+ * 3. GPT-4 Vision (OpenAI) - Proven reliability
+ *
  * Features:
  * - Automatic provider switching on Cloudflare blocks
  * - Quality validation with confidence scoring
  * - Provider performance tracking
  * - Per-provider rate limiting
+ *
+ * Note: Gemini removed (Jan 2026) - adds complexity without significant benefit
  */
 
 import fs from 'fs';
 import path from 'path';
 
-// Provider types
-export type VisionProvider = 'gpt-5.2' | 'claude-3.5-sonnet' | 'gemini-pro' | 'gpt-4-vision';
+// Provider types (Gemini removed - OpenAI + Anthropic provide complete coverage)
+export type VisionProvider = 'gpt-5.2' | 'claude-3.5-sonnet' | 'gpt-4-vision';
 
 interface ProviderConfig {
   name: VisionProvider;
@@ -44,7 +45,7 @@ interface QualityMetrics {
   score: number; // 0-100
 }
 
-// Provider configurations
+// Provider configurations (Gemini removed Jan 2026)
 const PROVIDERS: ProviderConfig[] = [
   {
     name: 'gpt-5.2',
@@ -59,12 +60,6 @@ const PROVIDERS: ProviderConfig[] = [
     baseDelay: 1000,
   },
   {
-    name: 'gemini-pro',
-    displayName: 'Gemini Vision Pro (Google)',
-    maxRetries: 3,
-    baseDelay: 1000,
-  },
-  {
     name: 'gpt-4-vision',
     displayName: 'GPT-4 Vision (OpenAI)',
     maxRetries: 2,
@@ -73,21 +68,20 @@ const PROVIDERS: ProviderConfig[] = [
 ];
 
 // Load API secrets - checks environment variables first, then falls back to secrets file
+// Note: Gemini removed (Jan 2026) - OpenAI + Anthropic provide complete coverage
 function getApiSecrets() {
   // Priority 1: Environment variables (works in production)
   const envAnthropicKey = process.env.ANTHROPIC_API_KEY;
   const envOpenaiKey = process.env.OPENAI_API_KEY;
-  const envGeminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
-  
-  if (envAnthropicKey || envOpenaiKey || envGeminiKey) {
+
+  if (envAnthropicKey || envOpenaiKey) {
     console.log('[API Secrets] Using environment variables');
     return {
       anthropic: envAnthropicKey || null,
       openai: envOpenaiKey || null,
-      gemini: envGeminiKey || null,
     };
   }
-  
+
   // Priority 2: Secrets file (works in development)
   try {
     const secretsPath = '/home/ubuntu/.config/abacusai_auth_secrets.json';
@@ -97,34 +91,18 @@ function getApiSecrets() {
     }
     console.log('[API Secrets] Using secrets file');
     const secretsData = JSON.parse(fs.readFileSync(secretsPath, 'utf-8'));
-    
-    // Handle API key mapping (check both slots for each provider)
+
     const anthropicKey = secretsData?.anthropic?.secrets?.api_key?.value;
-    const geminiKeySlot1 = secretsData?.['google gemini']?.secrets?.api_key?.value;
-    const geminiKeySlot2 = secretsData?.['Google Gemini']?.secrets?.api_key?.value;
     const openaiKey = secretsData?.openai?.secrets?.api_key?.value;
-    
-    // Detect which key is which based on prefix
+
+    // Detect Anthropic key by prefix (sk-ant-)
     let anthropicActual = null;
-    let geminiActual = null;
-    
-    // Check if anthropic slot has actual Anthropic key (sk-ant-) or Gemini key (AIzaSy)
-    if (anthropicKey) {
-      if (anthropicKey.startsWith('sk-ant-')) {
-        anthropicActual = anthropicKey;
-      } else if (anthropicKey.startsWith('AIzaSy')) {
-        geminiActual = anthropicKey; // Gemini key was stored in Anthropic slot
-      }
+    if (anthropicKey && anthropicKey.startsWith('sk-ant-')) {
+      anthropicActual = anthropicKey;
     }
-    
-    // Check Gemini slots
-    if (!geminiActual) {
-      geminiActual = geminiKeySlot1 || geminiKeySlot2;
-    }
-    
+
     return {
       anthropic: anthropicActual,
-      gemini: geminiActual,
       openai: openaiKey,
     };
   } catch (error) {
@@ -333,7 +311,7 @@ async function callAnthropic(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514', // Claude Sonnet 4.5 - Latest & Best
+        model: 'claude-sonnet-4-5-20251101', // Claude Sonnet 4.5 - Latest & Best
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
@@ -396,103 +374,13 @@ async function callAnthropic(
   }
 }
 
-// Call Google Gemini
-async function callGemini(
-  imageBase64: string,
-  prompt: string,
-  retryCount: number = 0
-): Promise<VisionResponse> {
-  const config = PROVIDERS[2];
-  const secrets = getApiSecrets();
-  const apiKey = secrets.gemini;
-  
-  if (!apiKey) {
-    return {
-      success: false,
-      content: '',
-      provider: 'gemini-pro',
-      attempts: retryCount + 1,
-      error: 'Google Gemini API key not configured',
-    };
-  }
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-                {
-                  inline_data: {
-                    mime_type: 'image/jpeg',
-                    data: imageBase64,
-                  },
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 4000,
-          },
-        }),
-      }
-    );
-
-    const responseText = await response.text();
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${responseText}`);
-    }
-
-    const data = JSON.parse(responseText);
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-    if (!content) {
-      throw new Error('Empty response from API');
-    }
-
-    return {
-      success: true,
-      content,
-      provider: 'gemini-pro',
-      attempts: retryCount + 1,
-    };
-  } catch (error: any) {
-    // Retry on errors
-    if (retryCount < config.maxRetries) {
-      const delay = config.baseDelay * Math.pow(2, retryCount);
-      console.log(`[${config.displayName}] Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return callGemini(imageBase64, prompt, retryCount + 1);
-    }
-
-    return {
-      success: false,
-      content: '',
-      provider: 'gemini-pro',
-      attempts: retryCount + 1,
-      error: error.message,
-    };
-  }
-}
-
-// Call OpenAI GPT-4 Vision
+// Call OpenAI GPT-4 Vision (Gemini removed Jan 2026)
 async function callOpenAI(
   imageBase64: string,
   prompt: string,
   retryCount: number = 0
 ): Promise<VisionResponse> {
-  const config = PROVIDERS[3];
+  const config = PROVIDERS[2]; // Updated index after Gemini removal
   const secrets = getApiSecrets();
   const apiKey = secrets.openai;
   
@@ -638,7 +526,6 @@ export async function analyzeWithLoadBalancing(
   const providerFunctions = [
     callAbacusAI,
     callAnthropic,
-    callGemini,
     callOpenAI,
   ];
 
@@ -692,7 +579,6 @@ export async function analyzeWithMultiProvider(
   const providerFunctions = [
     callAbacusAI,
     callAnthropic,
-    callGemini,
     callOpenAI,
   ];
 
@@ -843,7 +729,7 @@ export async function analyzeWithDirectPdf(
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5-20251101',
           max_tokens: 8000,
           temperature: 0.1,
           messages: [

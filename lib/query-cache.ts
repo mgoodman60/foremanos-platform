@@ -44,7 +44,7 @@ const HIGH_VALUE_CACHE_BOOST = 72; // High-value queries cached for 72 hours
 const MODEL_COSTS = {
   'gpt-4o-mini': 0.015,       // Simple queries (75% cheaper than GPT-3.5)
   'gpt-3.5-turbo': 0.03,      // Legacy simple queries (deprecated)
-  'claude-3-5-sonnet-20241022': 0.15, // Medium complexity queries
+  'claude-sonnet-4-5-20251101': 0.15, // Medium complexity queries (Claude 4.5)
   'gpt-4o': 0.30,             // Complex queries and images (legacy, deprecated)
   'gpt-5.2': 0.21,            // Complex queries (NEW - 30% cheaper input than GPT-4o)
   'gpt-5.2-2025-12-11': 0.21, // Alias for gpt-5.2
@@ -332,7 +332,7 @@ export function analyzeQueryComplexity(query: string): {
       return {
         complexity: 'medium',
         reason: 'Requires document synthesis, detailed analysis, or multi-step reasoning',
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-5-20251101',
       };
     }
   }
@@ -351,7 +351,7 @@ export function analyzeQueryComplexity(query: string): {
     return {
       complexity: 'medium',
       reason: 'Long query benefits from Claude 3.5\'s detailed analysis',
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20251101',
     };
   }
   

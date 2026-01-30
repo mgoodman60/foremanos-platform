@@ -1,0 +1,873 @@
+openapi: 3.1.0
+info:
+  title: ForemanOS API
+  version: 1.0.0
+  summary: AI-powered construction project management API
+  description: |
+    AI-powered construction project management platform API.
+
+    **Authentication:** Most endpoints require JWT authentication via NextAuth.
+
+    **Rate Limits:**
+    - Chat API: 20 requests/minute
+    - Upload API: 10 requests/minute
+    - Auth API: 5 requests/5 minutes
+    - General API: 60 requests/minute
+
+    **Subscription Tiers:** Free, Starter, Pro, Team, Business, Enterprise
+  contact:
+    name: ForemanOS Support
+    url: https://foremanos.site
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://foremanos.site
+    description: Production server
+
+tags:
+  - name: Chat
+    description: RAG-powered document Q&A endpoints
+  - name: Documents
+    description: Document upload and management
+  - name: Auth
+    description: Authentication and account management
+  - name: Stripe
+    description: Payment and subscription management
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/chat:
+    post:
+      tags:
+        - Chat
+      summary: Send a chat message
+      description: |
+        Main chat endpoint for RAG-powered document Q&A. Supports:
+        - Text queries with project context
+        - Image analysis with vision models
+        - Streaming responses
+        - Conversation management
+        - Cached responses for common queries
+
+        **Rate Limit:** 20 requests/minute per user
+      operationId: sendChatMessage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - projectSlug
+              properties:
+                message:
+                  type: string
+                  description: The user's query message
+                  example: "What is the clearance height for the HVAC duct in room 201?"
+                image:
+                  type: string
+                  format: uri
+                  description: Base64-encoded image or image URL for vision analysis
+                  example: "data:image/png;base64,iVBORw0KG..."
+                imageName:
+                  type: string
+                  description: Optional name for the uploaded image
+                  example: "floor-plan-level-2.png"
+                conversationId:
+                  type: string
+                  format: uuid
+                  description: Existing conversation ID to continue (optional)
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                projectSlug:
+                  type: string
+                  description: Project identifier for context
+                  example: "senior-care-facility-2024"
+      responses:
+        '200':
+          description: Streaming text response with metadata
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/event-stream
+            Cache-Control:
+              schema:
+                type: string
+                example: no-cache
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+          content:
+            text/event-stream:
+              schema:
+                type: object
+                properties:
+                  conversationId:
+                    type: string
+                    format: uuid
+                    description: The conversation ID (sent in first event)
+                  content:
+                    type: string
+                    description: Streamed text content chunks
+                  metadata:
+                    type: object
+                    description: Metadata sent at the end of stream
+                    properties:
+                      citations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            documentName:
+                              type: string
+                            documentId:
+                              type: string
+                              format: uuid
+                            pageNumber:
+                              type: integer
+                            sheetNumber:
+                              type: string
+                            excerpt:
+                              type: string
+                      followUpSuggestions:
+                        type: array
+                        items:
+                          type: string
+                      documentsUsed:
+                        type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /api/documents/upload:
+    post:
+      tags:
+        - Documents
+      summary: Upload a document
+      description: |
+        Upload construction documents (PDF, images, DOCX) for processing.
+
+        **Features:**
+        - Duplicate detection via file hash
+        - Automatic document classification
+        - Vision-based processing for PDFs and images
+        - Subscription quota enforcement
+        - Async processing with status tracking
+
+        **Rate Limit:** 10 uploads/minute per user
+        **Max File Size:** 200MB
+        **Allowed Types:** PDF, JPEG, PNG, TIFF, DOCX, TXT
+      operationId: uploadDocument
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - projectId
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The document file to upload
+                projectId:
+                  type: string
+                  format: uuid
+                  description: Project ID to associate document with
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                category:
+                  type: string
+                  enum:
+                    - architectural
+                    - structural
+                    - mep
+                    - civil
+                    - specifications
+                    - contracts
+                    - submittals
+                    - rfi
+                    - other
+                  default: other
+                  description: Document category for organization
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Document:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                      fileName:
+                        type: string
+                  message:
+                    type: string
+                    example: "Document uploaded successfully. Processing in background..."
+                  processingInfo:
+                    type: object
+                    properties:
+                      estimatedPages:
+                        type: integer
+                        description: Estimated number of pages
+                      processorType:
+                        type: string
+                        enum: [vision, text, hybrid]
+                        description: Processing method used
+                      remainingPages:
+                        type: integer
+                        description: Remaining pages in quota
+                      tier:
+                        type: string
+                        enum: [free, starter, pro, team, business, enterprise]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Permission denied or quota exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Processing quota exceeded"
+                  message:
+                    type: string
+                  remainingPages:
+                    type: integer
+                  tier:
+                    type: string
+                  classification:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Duplicate document detected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Duplicate document detected"
+                  message:
+                    type: string
+                    example: "A document with the same name and content already exists in this project."
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "File too large. Maximum size is 200MB."
+        '415':
+          description: Unsupported file type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid file type"
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Auth
+      summary: Request password reset
+      description: |
+        Send a password reset email to the user.
+
+        **Security:**
+        - Always returns success to prevent email enumeration
+        - Rate limited to 5 requests per 5 minutes
+        - 24-hour token expiration
+        - Invalidates previous reset tokens
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email address of the account
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: Success response (always returned to prevent enumeration)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "If the email exists, a password reset link has been sent."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Auth
+      summary: Reset password with token
+      description: |
+        Reset user password using a token from the forgot-password email.
+
+        **Password Requirements:**
+        - Minimum 8 characters
+        - At least one uppercase letter
+        - At least one lowercase letter
+        - At least one number
+        - At least one special character
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - password
+              properties:
+                token:
+                  type: string
+                  description: Reset token from email
+                  example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+                password:
+                  type: string
+                  format: password
+                  description: New password meeting requirements
+                  example: "NewP@ssw0rd123"
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset successful. You can now login with your new password."
+        '400':
+          description: Invalid request or token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid or expired reset token"
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/auth/verify-email:
+    get:
+      tags:
+        - Auth
+      summary: Verify email address
+      description: |
+        Verify a user's email address using a token from the verification email.
+
+        **Effects:**
+        - Marks email as verified
+        - Approves the account
+        - Activates client role
+      operationId: verifyEmail
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Verification token from email
+          example: "v1e2r3i4f5y6t7o8k9e0n"
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Email verified successfully! You can now login."
+                  User:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      username:
+                        type: string
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid or expired verification token"
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/stripe/webhook:
+    post:
+      tags:
+        - Stripe
+      summary: Stripe webhook handler
+      description: |
+        Webhook endpoint for Stripe events. Handles subscription lifecycle events.
+
+        **Handled Events:**
+        - checkout.session.completed
+        - customer.subscription.created
+        - customer.subscription.updated
+        - customer.subscription.deleted
+        - invoice.paid
+        - invoice.payment_failed
+
+        **Security:** Requires valid Stripe signature header
+      operationId: stripeWebhook
+      security: []
+      parameters:
+        - name: stripe-signature
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Stripe webhook signature for verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe event payload (varies by event type)
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+                  duplicate:
+                    type: boolean
+                    description: Whether this was a duplicate event
+        '400':
+          description: Invalid signature or payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Webhook Error: Invalid signature"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/stripe/create-checkout:
+    post:
+      tags:
+        - Stripe
+      summary: Create Stripe checkout session
+      description: |
+        Create a Stripe Checkout session for subscription payment.
+
+        **Returns:** Session ID and URL to redirect user to Stripe Checkout
+      operationId: createCheckoutSession
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - priceId
+              properties:
+                priceId:
+                  type: string
+                  description: Stripe Price ID for the subscription tier
+                  example: "price_1234567890abcdef"
+                tier:
+                  type: string
+                  enum: [starter, pro, team, business, enterprise]
+                  description: Subscription tier name (informational)
+      responses:
+        '200':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    description: Stripe Checkout Session ID
+                  url:
+                    type: string
+                    format: uri
+                    description: URL to redirect user to Stripe Checkout
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/stripe/create-portal:
+    post:
+      tags:
+        - Stripe
+      summary: Create Stripe customer portal session
+      description: |
+        Create a Stripe Customer Portal session for subscription management.
+
+        **Allows users to:**
+        - Update payment methods
+        - View invoices
+        - Cancel subscription
+        - Update billing information
+      operationId: createPortalSession
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Portal session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: URL to redirect user to Stripe Customer Portal
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No active subscription found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No active subscription found"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+webhooks:
+  stripeCheckoutCompleted:
+    post:
+      operationId: handleCheckoutCompleted
+      summary: Checkout session completed
+      description: Fired when a customer completes checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeEvent'
+      responses:
+        '200':
+          description: Event processed
+  stripeSubscriptionUpdated:
+    post:
+      operationId: handleSubscriptionUpdated
+      summary: Subscription updated
+      description: Fired when a subscription is created, updated, or deleted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeEvent'
+      responses:
+        '200':
+          description: Event processed
+  stripeInvoicePaid:
+    post:
+      operationId: handleInvoicePaid
+      summary: Invoice paid
+      description: Fired when an invoice payment succeeds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeEvent'
+      responses:
+        '200':
+          description: Event processed
+  stripePaymentFailed:
+    post:
+      operationId: handlePaymentFailed
+      summary: Payment failed
+      description: Fired when an invoice payment fails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeEvent'
+      responses:
+        '200':
+          description: Event processed
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: NextAuth JWT token from session
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid input parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Message or image is required"
+
+    Unauthorized:
+      description: Unauthorized - Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Unauthorized"
+
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "You do not have permission to access this resource"
+
+    NotFound:
+      description: Not found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Resource not found"
+
+    RateLimitExceeded:
+      description: Too many requests - Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per window
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until retry is allowed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Too many requests. Please slow down and try again in a moment."
+              retryAfter:
+                type: integer
+                description: Seconds until user can retry
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error"
+              details:
+                type: string
+                description: Additional error details (dev mode only)
+
+    ServiceUnavailable:
+      description: Service unavailable - Maintenance mode or system issue
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "System is currently under maintenance"
+
+  schemas:
+    SubscriptionTier:
+      type: string
+      enum:
+        - free
+        - starter
+        - pro
+        - team
+        - business
+        - enterprise
+      description: User subscription tier
+
+    DocumentCategory:
+      type: string
+      enum:
+        - architectural
+        - structural
+        - mep
+        - civil
+        - specifications
+        - contracts
+        - submittals
+        - rfi
+        - other
+      description: Document classification category
+
+    ProcessorType:
+      type: string
+      enum:
+        - vision
+        - text
+        - hybrid
+      description: Document processing method
+
+    UserRole:
+      type: string
+      enum:
+        - admin
+        - client
+        - guest
+        - pending
+      description: User access role
+
+    StripeEvent:
+      type: object
+      description: Stripe webhook event payload
+      properties:
+        id:
+          type: string
+          description: Unique event identifier
+          examples:
+            - evt_1234567890abcdef
+        object:
+          type: string
+          const: event
+        type:
+          type: string
+          description: Event type
+          examples:
+            - checkout.session.completed
+            - customer.subscription.updated
+            - invoice.paid
+        data:
+          type: object
+          properties:
+            object:
+              type: object
+              description: The Stripe object associated with the event
+        created:
+          type: integer
+          description: Unix timestamp of event creation
+        livemode:
+          type: boolean
+          description: Whether this is a live mode event

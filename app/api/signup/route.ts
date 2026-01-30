@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
-import { 
-  checkRateLimit, 
+import {
+  checkRateLimit,
   getRateLimitIdentifier,
   getClientIp,
   createRateLimitHeaders,
-  RATE_LIMITS 
+  RATE_LIMITS
 } from '@/lib/rate-limiter';
 import { logActivity } from '@/lib/audit-log';
 import { sendEmailVerification, sendNewSignupNotification } from '@/lib/email-service';
 import { stripe, STRIPE_PRICE_IDS } from '@/lib/stripe';
 import crypto from 'crypto';
+import { validatePassword } from '@/lib/password-validator';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,11 +56,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 3) {
-      return NextResponse.json(
-        { error: 'Password must be at least 3 characters long' },
-        { status: 400 }
-      );
+    const validation = validatePassword(password);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     // Check if user already exists (case-insensitive)

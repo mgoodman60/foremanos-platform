@@ -986,7 +986,7 @@ export default function ProjectPage() {
 
       {/* Document Library Modal */}
       {showDocumentLibrary && project && session?.user && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Project Documents</h2>
@@ -1010,7 +1010,7 @@ export default function ProjectPage() {
 
       {/* Company Logo Upload Modal */}
       {showLogoUpload && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-md border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Upload Company Logo</h2>
@@ -1082,7 +1082,7 @@ export default function ProjectPage() {
 
       {/* OneDrive Settings Modal */}
       {showOneDriveSettings && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">OneDrive Sync Settings</h2>
@@ -1130,7 +1130,7 @@ export default function ProjectPage() {
 
       {/* Weather Widget Modal */}
       {showWeatherWidget && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#1F2328] rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Weather Intelligence</h2>
@@ -1171,7 +1171,7 @@ export default function ProjectPage() {
 
       {/* 3-Week Look-Ahead Modal */}
       {showLookahead && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-white">3-Week Look-Ahead Schedule</h2>
@@ -1197,7 +1197,7 @@ export default function ProjectPage() {
 
       {/* Document Processing Monitor Modal */}
       {showProcessingMonitor && project && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Document Processing Status</h2>

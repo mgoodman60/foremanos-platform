@@ -312,7 +312,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
       <div className="bg-[#1F2328] border border-gray-700 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
@@ -477,7 +477,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
 
       {/* Bulk Tag Dialog */}
       {showBulkTagDialog && (
-        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
           <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
               Tag {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
@@ -534,7 +534,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
 
       {/* Bulk Caption Dialog */}
       {showBulkCaptionDialog && (
-        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
           <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
               Caption {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
+import DOMPurify from 'isomorphic-dompurify';
 import { DataVisualization } from './data-visualization';
 import { 
   RoomCard, 
@@ -302,7 +303,7 @@ export function MessageContent({ content, onOpenRoom, onOpenMaterials, onOpenMEP
         errorColor: '#cc0000',
         trust: false,
       });
-      return <span dangerouslySetInnerHTML={{ __html: html }} />;
+      return <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />;
     } catch (error) {
       console.error('KaTeX rendering error:', error);
       return (

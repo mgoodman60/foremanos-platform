@@ -715,14 +715,26 @@ async function getProjectScaleInfo(projectId: string): Promise<ScaleInfo> {
   };
 }
 
+/**
+ * Safely parse a fraction string like "1/4" or "3/8" without eval()
+ */
+function parseFraction(str: string): number {
+  const trimmed = str.trim();
+  if (trimmed.includes('/')) {
+    const [num, denom] = trimmed.split('/').map(s => parseFloat(s.trim()));
+    return denom !== 0 ? num / denom : 0;
+  }
+  return parseFloat(trimmed) || 0;
+}
+
 function parseScaleRatio(scale?: string): number | undefined {
   if (!scale) return undefined;
   // Parse scales like "1/4" = 1'-0"", "1" = 20'-0""
   const match = scale.match(/(\d+(?:\/\d+)?)["']?\s*=\s*(\d+)['-]/);
   if (match) {
-    const left = eval(match[1]); // e.g., 1/4 = 0.25
+    const left = parseFraction(match[1]); // e.g., 1/4 = 0.25 (safe parsing)
     const right = parseFloat(match[2]); // e.g., 1
-    return right / left; // feet per inch
+    return left > 0 ? right / left : undefined; // feet per inch
   }
   return undefined;
 }

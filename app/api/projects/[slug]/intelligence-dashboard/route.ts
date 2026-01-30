@@ -60,32 +60,33 @@ export async function GET(
       getAnnotationStats(slug)
     ]);
 
-    // Get sheet summary
-    const allChunks = project.Document.flatMap((d: any) => d.DocumentChunk);
+    // Get sheet summary - batch fetch all chunks for all documents in a single query
+    const documentIds = project.Document.map((d: any) => d.id);
+    const allDocChunks = documentIds.length > 0 ? await prisma.documentChunk.findMany({
+      where: { documentId: { in: documentIds } },
+      select: { metadata: true },
+      take: 1000 // Reasonable limit to avoid memory issues
+    }) : [];
+
     const sheetNumbers = new Set<string>();
     const drawingTypes = new Map<string, number>();
     const scaleInfo = new Map<string, string>();
 
-    for (const doc of project.Document) {
-      const docChunks = await prisma.documentChunk.findMany({
-        where: { documentId: doc.id },
-        take: 5
-      });
-
-      for (const chunk of docChunks) {
-        const metadata = chunk.metadata as any;
-        if (metadata?.sheet_number) {
-          sheetNumbers.add(metadata.sheet_number);
-        }
-        if (metadata?.drawing_type) {
-          const type = metadata.drawing_type;
-          drawingTypes.set(type, (drawingTypes.get(type) || 0) + 1);
-        }
-        if (metadata?.scaleData?.primaryScale && metadata?.sheet_number) {
-          scaleInfo.set(metadata.sheet_number, metadata.scaleData.primaryScale);
-        }
+    for (const chunk of allDocChunks) {
+      const metadata = chunk.metadata as any;
+      if (metadata?.sheet_number) {
+        sheetNumbers.add(metadata.sheet_number);
+      }
+      if (metadata?.drawing_type) {
+        const type = metadata.drawing_type;
+        drawingTypes.set(type, (drawingTypes.get(type) || 0) + 1);
+      }
+      if (metadata?.scaleData?.primaryScale && metadata?.sheet_number) {
+        scaleInfo.set(metadata.sheet_number, metadata.scaleData.primaryScale);
       }
     }
+
+    const allChunks = allDocChunks;
 
     // Calculate intelligence scores
     const intelligenceScores = {

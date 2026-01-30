@@ -1,23 +1,16 @@
 import { getCachedResponse, cacheResponse, analyzeQueryComplexity } from '@/lib/query-cache';
 import { prisma } from '@/lib/db';
+import { streamLLM, type LLMMessage } from '@/lib/llm-providers';
 import type { LLMHandlerOptions, LLMResponse, BuiltContext } from '@/types/chat';
 
 /**
  * Message content types for LLM API
+ * Updated Jan 2026: Now uses direct OpenAI/Anthropic APIs via llm-providers.ts
  */
 type TextContent = { type: 'text'; text: string };
 type ImageContent = { type: 'image_url'; image_url: { url: string } };
 type MessageContent = string | Array<TextContent | ImageContent>;
 type ChatMessage = { role: 'user' | 'system'; content: MessageContent };
-
-interface LLMRequestBody {
-  model: string;
-  messages: ChatMessage[];
-  stream: boolean;
-  max_tokens: number;
-  web_search: boolean;
-  reasoning_effort?: string;
-}
 
 interface CacheCheckResult {
   hit: boolean;
@@ -106,55 +99,38 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
     userMessage = { role: 'user', content: message || '' };
   }
 
-  // Build API request body
-  const requestBody: LLMRequestBody = {
-    model: selectedModel,
-    messages: [
-      { role: 'system', content: context.contextPrompt },
-      userMessage,
-    ],
-    stream: true,
-    max_tokens: 2000,
-    web_search: useWebSearch,
-  };
+  // Build messages array for LLM
+  const messages: LLMMessage[] = [
+    { role: 'system', content: context.contextPrompt },
+    userMessage as LLMMessage,
+  ];
 
-  // Add reasoning_effort for GPT-5.2 models
+  // Log reasoning effort for GPT-5.2 models
   if (selectedModel.includes('gpt-5.2') && complexityAnalysis.reasoning_effort) {
-    requestBody.reasoning_effort = complexityAnalysis.reasoning_effort;
     console.log(`⚡ [REASONING] Using ${complexityAnalysis.reasoning_effort} reasoning for GPT-5.2`);
   }
 
-  // Call LLM API
-  const apiKey = process.env.ABACUSAI_API_KEY;
-  if (!apiKey) {
-    throw new Error('LLM API key not configured');
+  // Call LLM API via provider abstraction (routes to OpenAI or Anthropic)
+  // Note: Abacus AI removed (Jan 2026) - using direct APIs now
+  try {
+    const stream = await streamLLM(messages, {
+      model: selectedModel,
+      max_tokens: 2000,
+      temperature: 0.3,
+      reasoning_effort: complexityAnalysis.reasoning_effort,
+    });
+
+    // Return the response body as a readable stream
+    return {
+      stream,
+      model: selectedModel,
+      cached: false,
+    };
+  } catch (error: unknown) {
+    const err = error as Error & { status?: number };
+    console.error('LLM API error:', err.message);
+    throw err;
   }
-
-  const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => 'No error details available');
-    console.error('LLM API error status:', response.status);
-    console.error('LLM API error response:', errorText);
-
-    const error = new Error(`LLM API request failed: ${errorText}`) as Error & { status?: number };
-    error.status = response.status;
-    throw error;
-  }
-
-  // Return the response body as a readable stream
-  return {
-    stream: response.body as ReadableStream,
-    model: selectedModel,
-    cached: false,
-  };
 }
 
 /**

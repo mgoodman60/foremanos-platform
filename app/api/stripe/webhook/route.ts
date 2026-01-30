@@ -36,6 +36,14 @@ export async function POST(request: NextRequest) {
 
     console.log('Received Stripe webhook event:', event.type);
 
+    // Check for duplicate event processing (idempotency)
+    const existingEvent = await prisma.paymentHistory.findFirst({
+      where: { stripeEventId: event.id }
+    });
+    if (existingEvent) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {

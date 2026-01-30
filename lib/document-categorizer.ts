@@ -76,7 +76,7 @@ export async function suggestDocumentCategory(
         'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini', // Updated from deprecated gpt-3.5-turbo (Jan 2026)
         messages: [
           {
             role: 'system',

@@ -167,3 +167,25 @@ vi.mock('@/lib/report-finalization', () => ({
 vi.mock('@/lib/onboarding-tracker', () => ({
   markFirstChatStarted: vi.fn().mockResolvedValue(undefined),
 }));
+
+vi.mock('@/lib/llm-providers', () => {
+  const encoder = new TextEncoder();
+  const mockStream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"Mock LLM response"}}]}\n\n'));
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      controller.close();
+    },
+  });
+
+  return {
+    streamLLM: vi.fn().mockResolvedValue(mockStream),
+    callLLM: vi.fn().mockResolvedValue({
+      content: 'Mock LLM response',
+      model: 'gpt-4o-mini',
+      usage: { prompt_tokens: 100, completion_tokens: 50, total_tokens: 150 }
+    }),
+    callOpenAI: vi.fn().mockResolvedValue({ content: 'Mock', model: 'gpt-4o-mini' }),
+    callAnthropic: vi.fn().mockResolvedValue({ content: 'Mock', model: 'claude-sonnet-4-5-20251101' }),
+  };
+});

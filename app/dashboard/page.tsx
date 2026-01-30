@@ -761,7 +761,7 @@ export default function DashboardPage() {
 
       {/* Create Project Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">Create New Project</h3>
             <form onSubmit={handleCreateProject} className="space-y-4">
@@ -828,7 +828,7 @@ export default function DashboardPage() {
 
       {/* Rename Project Modal */}
       {renameModalOpen && renameProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Project</h3>
             <div className="space-y-4">
@@ -870,7 +870,7 @@ export default function DashboardPage() {
 
       {/* Invite Member Modal */}
       {inviteModalOpen && inviteProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-2">Invite to {inviteProject.name}</h3>
             <p className="text-sm text-gray-300 mb-4">Invite team members to collaborate on this project</p>
@@ -930,7 +930,7 @@ export default function DashboardPage() {
 
       {/* Members Modal */}
       {membersModalOpen && membersProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
               Project Members - {membersProject.name}

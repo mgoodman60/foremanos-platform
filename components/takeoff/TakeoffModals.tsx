@@ -100,7 +100,7 @@ export function TakeoffModals({
 
       {/* Unit Price Manager Modal */}
       {showPriceManager && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
           <div className="w-full max-w-4xl mx-4">
             <UnitPriceManager
               projectSlug={projectSlug}

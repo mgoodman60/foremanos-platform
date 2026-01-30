@@ -448,14 +448,19 @@ export function WorkflowModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="workflow-modal-title"
+        className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="bg-[#1F2328] px-6 py-4 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Target className="w-6 h-6 text-[#F97316]" />
             <div>
-              <h2 className="text-xl font-bold text-white">
+              <h2 id="workflow-modal-title" className="text-xl font-bold text-white">
                 {selectedWorkflow ? selectedWorkflow.name : 'Daily Report Workflows'}
               </h2>
               {selectedWorkflow && (
@@ -468,7 +473,7 @@ export function WorkflowModal({
           <button
             onClick={handleClose}
             className="p-2 hover:bg-[#2d333b] rounded-lg transition-colors"
-            aria-label="Close"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5 text-gray-400" />
           </button>

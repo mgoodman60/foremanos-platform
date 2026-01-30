@@ -18,6 +18,23 @@ vi.mock('@/lib/email', () => ({
   sendVerificationEmail: vi.fn().mockResolvedValue(true),
 }));
 
+// Mock rate limiter to allow all requests in tests
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({
+    success: true,
+    limit: 10,
+    remaining: 9,
+    reset: Math.floor(Date.now() / 1000) + 60,
+  }),
+  getClientIp: vi.fn().mockReturnValue('127.0.0.1'),
+  RATE_LIMITS: {
+    CHAT: { maxRequests: 20, windowSeconds: 60 },
+    UPLOAD: { maxRequests: 10, windowSeconds: 60 },
+    API: { maxRequests: 60, windowSeconds: 60 },
+    AUTH: { maxRequests: 5, windowSeconds: 300 },
+  },
+}));
+
 describe('Auth Endpoints Smoke Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();

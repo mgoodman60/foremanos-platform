@@ -276,8 +276,8 @@ export function ConversationSidebar({
     return (
       <>
         {/* Backdrop */}
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 animate-in fade-in duration-200"
+        <div
+          className="fixed inset-0 bg-black/90 z-40 animate-in fade-in duration-200"
           onClick={handleMobileClose}
         />
         {/* Drawer */}

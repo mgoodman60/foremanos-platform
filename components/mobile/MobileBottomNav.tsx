@@ -116,8 +116,8 @@ export function MobileBottomNav({
     <>
       {/* Quick Actions Overlay */}
       {showQuickMenu && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+        <div
+          className="fixed inset-0 bg-black/90 z-40 md:hidden"
           onClick={() => setShowQuickMenu(false)}
         >
           <div 
