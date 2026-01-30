@@ -65,7 +65,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-[#2d333b] rounded-2xl shadow-2xl border border-gray-700 p-8 md:p-12 relative overflow-hidden" role="form" aria-labelledby="login-modal-title">
+    <div className="w-full max-w-2xl mx-auto bg-dark-card rounded-2xl shadow-2xl border border-gray-700 p-8 md:p-12 relative overflow-hidden" role="form" aria-labelledby="login-modal-title">
       {/* Eye-Catching Security Ribbon - Top Right Corner */}
       <div className="absolute -top-1 -right-1 w-72 h-72 overflow-hidden pointer-events-none z-50">
         {/* Main Ribbon */}
@@ -121,7 +121,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-600 bg-[#1F2328] rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation"
+              className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-600 bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation"
               placeholder="Enter your username"
               autoComplete="username"
               required
@@ -142,7 +142,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-14 py-4 text-lg border-2 border-gray-600 bg-[#1F2328] rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation"
+              className="w-full pl-12 pr-14 py-4 text-lg border-2 border-gray-600 bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation"
               placeholder="Enter your password"
               autoComplete="current-password"
               required
@@ -202,7 +202,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
 
       {/* Guest Sign-In Section */}
       <div className="mt-10 pt-8 border-t-2 border-gray-700">
-        <div className="bg-[#1F2328] rounded-xl p-6 md:p-8 border-2 border-gray-700 shadow-sm">
+        <div className="bg-dark-surface rounded-xl p-6 md:p-8 border-2 border-gray-700 shadow-sm">
           {/* Guest Access Header */}
           <div className="flex items-center justify-center gap-3 mb-4">
             <HardHat className="w-8 h-8 text-[#F97316]" />
@@ -249,7 +249,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
                   type="text"
                   value={guestUsername}
                   onChange={(e) => setGuestUsername(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 text-base border-2 border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 bg-[#2d333b] placeholder-gray-500 touch-manipulation"
+                  className="w-full pl-11 pr-4 py-3 text-base border-2 border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 bg-dark-card placeholder-gray-500 touch-manipulation"
                   placeholder="Enter your Job Pin"
                   autoComplete="off"
                   required

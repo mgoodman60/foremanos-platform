@@ -166,7 +166,7 @@ export default function ScheduleAnalysis() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#2d333b] border-gray-700">
+      <Card className="p-6 bg-dark-card border-gray-700">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-700 rounded w-1/3" />
           <div className="h-32 bg-gray-700 rounded" />
@@ -177,7 +177,7 @@ export default function ScheduleAnalysis() {
 
   if (!hasSchedule) {
     return (
-      <Card className="p-8 bg-[#2d333b] border-gray-700 text-center">
+      <Card className="p-8 bg-dark-card border-gray-700 text-center">
         <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-500" />
         <h3 className="text-lg font-semibold text-white mb-2">No Active Schedule</h3>
         <p className="text-gray-400">Create a schedule to enable analysis features</p>
@@ -188,7 +188,7 @@ export default function ScheduleAnalysis() {
   return (
     <div className="space-y-6">
       {/* Schedule Overview */}
-      <Card className="p-4 bg-[#2d333b] border-gray-700">
+      <Card className="p-4 bg-dark-card border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="bg-blue-600 p-3 rounded-lg">
@@ -220,26 +220,26 @@ export default function ScheduleAnalysis() {
 
       {/* CPM Analysis */}
       {cpm && (
-        <Card className="p-4 bg-[#2d333b] border-gray-700">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
             <GitBranch className="h-5 w-5 text-purple-400" />
             Critical Path Analysis
           </h3>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Project Duration</div>
               <div className="text-xl font-bold text-white">{cpm.projectDuration} days</div>
             </div>
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Critical Tasks</div>
               <div className="text-xl font-bold text-red-400">{cpm.criticalPath.length}</div>
             </div>
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Total Float</div>
               <div className="text-xl font-bold text-green-400">{cpm.totalFloat} days</div>
             </div>
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Total Tasks</div>
               <div className="text-xl font-bold text-blue-400">{cpm.tasks.length}</div>
             </div>
@@ -273,32 +273,32 @@ export default function ScheduleAnalysis() {
 
       {/* Forecast */}
       {forecast && (
-        <Card className="p-4 bg-[#2d333b] border-gray-700">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
             <Target className="h-5 w-5 text-yellow-400" />
             Schedule Forecast
           </h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Projected End</div>
               <div className="text-lg font-bold text-white">
                 {format(new Date(forecast.projectedEndDate), 'MMM d, yyyy')}
               </div>
             </div>
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Variance</div>
               <div className={`text-lg font-bold ${forecast.varianceDays > 0 ? 'text-red-400' : forecast.varianceDays < 0 ? 'text-green-400' : 'text-white'}`}>
                 {forecast.varianceDays > 0 ? '+' : ''}{forecast.varianceDays} days
               </div>
             </div>
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">SPI</div>
               <div className={`text-lg font-bold ${forecast.schedulePerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`}>
                 {forecast.schedulePerformanceIndex.toFixed(2)}
               </div>
             </div>
-            <div className="bg-[#1F2328] p-3 rounded-lg">
+            <div className="bg-dark-surface p-3 rounded-lg">
               <div className="text-sm text-gray-400">Confidence</div>
               <div className="text-lg font-bold text-blue-400">
                 {forecast.completionConfidence.toFixed(0)}%
@@ -344,7 +344,7 @@ export default function ScheduleAnalysis() {
 
       {/* Baseline Comparison */}
       {baselineComparison?.hasBaseline && (
-        <Card className="p-4 bg-[#2d333b] border-gray-700">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <h3 className="font-semibold text-white mb-4">Baseline Comparison</h3>
           
           <div className="flex items-center gap-4 mb-4">
@@ -358,31 +358,31 @@ export default function ScheduleAnalysis() {
 
           {baselineComparison.comparison && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="bg-[#1F2328] p-3 rounded-lg">
+              <div className="bg-dark-surface p-3 rounded-lg">
                 <div className="text-sm text-gray-400">Total Tasks</div>
                 <div className="text-lg font-bold text-white">
                   {baselineComparison.comparison.summary.totalTasks}
                 </div>
               </div>
-              <div className="bg-[#1F2328] p-3 rounded-lg">
+              <div className="bg-dark-surface p-3 rounded-lg">
                 <div className="text-sm text-gray-400">On Track</div>
                 <div className="text-lg font-bold text-green-400">
                   {baselineComparison.comparison.summary.tasksOnTrack}
                 </div>
               </div>
-              <div className="bg-[#1F2328] p-3 rounded-lg">
+              <div className="bg-dark-surface p-3 rounded-lg">
                 <div className="text-sm text-gray-400">Ahead</div>
                 <div className="text-lg font-bold text-blue-400">
                   {baselineComparison.comparison.summary.tasksAhead}
                 </div>
               </div>
-              <div className="bg-[#1F2328] p-3 rounded-lg">
+              <div className="bg-dark-surface p-3 rounded-lg">
                 <div className="text-sm text-gray-400">Behind</div>
                 <div className="text-lg font-bold text-red-400">
                   {baselineComparison.comparison.summary.tasksBehind}
                 </div>
               </div>
-              <div className="bg-[#1F2328] p-3 rounded-lg">
+              <div className="bg-dark-surface p-3 rounded-lg">
                 <div className="text-sm text-gray-400">Project Variance</div>
                 <div className={`text-lg font-bold ${baselineComparison.comparison.summary.projectEndVariance > 0 ? 'text-red-400' : 'text-green-400'}`}>
                   {baselineComparison.comparison.summary.projectEndVariance > 0 ? '+' : ''}
@@ -396,11 +396,11 @@ export default function ScheduleAnalysis() {
 
       {/* Baselines List */}
       {baselines.length > 0 && (
-        <Card className="p-4 bg-[#2d333b] border-gray-700">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <h3 className="font-semibold text-white mb-4">Saved Baselines</h3>
           <div className="space-y-2">
             {baselines.map(b => (
-              <div key={b.id} className="flex items-center justify-between p-3 bg-[#1F2328] rounded-lg">
+              <div key={b.id} className="flex items-center justify-between p-3 bg-dark-surface rounded-lg">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-white">{b.name}</span>
@@ -419,7 +419,7 @@ export default function ScheduleAnalysis() {
 
       {/* Resource Summary */}
       {resources.length > 0 && (
-        <Card className="p-4 bg-[#2d333b] border-gray-700">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white">Resource Utilization</h3>
             <Button size="sm" variant="outline" onClick={() => runAction('level_resources')} disabled={analyzing}>
@@ -430,7 +430,7 @@ export default function ScheduleAnalysis() {
           
           <div className="space-y-3">
             {resources.map((r, i) => (
-              <div key={i} className="p-3 bg-[#1F2328] rounded-lg">
+              <div key={i} className="p-3 bg-dark-surface rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-white font-medium">{r.resourceName}</span>
@@ -454,7 +454,7 @@ export default function ScheduleAnalysis() {
       )}
 
       {/* Schedule-Budget Link */}
-      <Card className="p-4 bg-[#2d333b] border-gray-700">
+      <Card className="p-4 bg-dark-card border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-white flex items-center gap-2">
             <Link className="h-5 w-5 text-blue-400" />
@@ -469,7 +469,7 @@ export default function ScheduleAnalysis() {
         {scheduleCosts && scheduleCosts.items.length > 0 && (
           <div className="space-y-2">
             {scheduleCosts.items.slice(0, 5).map((item: any) => (
-              <div key={item.budgetItemId} className="p-3 bg-[#1F2328] rounded-lg">
+              <div key={item.budgetItemId} className="p-3 bg-dark-surface rounded-lg">
                 <div className="flex justify-between items-center">
                   <div>
                     <div className="text-white font-medium">{item.name}</div>
@@ -491,7 +491,7 @@ export default function ScheduleAnalysis() {
 
       {/* Create Baseline Modal */}
       <Dialog open={showBaselineModal} onOpenChange={setShowBaselineModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Create Schedule Baseline</DialogTitle>
           </DialogHeader>
@@ -502,7 +502,7 @@ export default function ScheduleAnalysis() {
               <Input
                 value={baselineName}
                 onChange={(e) => setBaselineName(e.target.value)}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="e.g., Pre-Construction Baseline"
               />
             </div>
@@ -511,7 +511,7 @@ export default function ScheduleAnalysis() {
               <Textarea
                 value={baselineDesc}
                 onChange={(e) => setBaselineDesc(e.target.value)}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="Optional notes about this baseline"
               />
             </div>

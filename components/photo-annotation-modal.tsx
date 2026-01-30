@@ -129,7 +129,7 @@ export function PhotoAnnotationModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-2xl">
+      <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Photo Details</DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -147,7 +147,7 @@ export function PhotoAnnotationModal({
               onChange={(e) => setCaption(e.target.value)}
               placeholder="Describe what's shown in this photo..."
               rows={3}
-              className="bg-[#1F2328] border-gray-600 text-white"
+              className="bg-dark-surface border-gray-600 text-white"
             />
           </div>
 
@@ -159,7 +159,7 @@ export function PhotoAnnotationModal({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g., Building A - 2nd Floor, East Wing"
-              className="bg-[#1F2328] border-gray-600 text-white"
+              className="bg-dark-surface border-gray-600 text-white"
             />
           </div>
 
@@ -167,10 +167,10 @@ export function PhotoAnnotationModal({
           <div>
             <Label htmlFor="trade">Trade</Label>
             <Select value={trade} onValueChange={setTrade}>
-              <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+              <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                 <SelectValue placeholder="Select trade (optional)" />
               </SelectTrigger>
-              <SelectContent className="bg-[#2d333b] border-gray-700">
+              <SelectContent className="bg-dark-card border-gray-700">
                 <SelectItem value="none" className="text-white">
                   No trade
                 </SelectItem>
@@ -215,13 +215,13 @@ export function PhotoAnnotationModal({
                   }
                 }}
                 placeholder="Add custom tag..."
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
               <Button
                 type="button"
                 onClick={() => handleAddTag(newTag)}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+                className="border-gray-600 text-gray-300 hover:bg-dark-surface"
               >
                 Add
               </Button>
@@ -235,7 +235,7 @@ export function PhotoAnnotationModal({
                     key={tag}
                     onClick={() => handleAddTag(tag)}
                     disabled={tags.includes(tag)}
-                    className="px-2 py-1 text-xs rounded bg-[#1F2328] text-gray-300 hover:bg-[#F97316]/20 hover:text-[#F97316] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2 py-1 text-xs rounded bg-dark-surface text-gray-300 hover:bg-[#F97316]/20 hover:text-[#F97316] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {tag}
                   </button>
@@ -250,7 +250,7 @@ export function PhotoAnnotationModal({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={submitting}
-            className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+            className="border-gray-600 text-gray-300 hover:bg-dark-surface"
           >
             Cancel
           </Button>

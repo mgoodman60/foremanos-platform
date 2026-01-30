@@ -157,7 +157,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading symbol library...</span>
@@ -170,7 +170,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
     <div className="space-y-4">
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -182,7 +182,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -194,7 +194,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -206,7 +206,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -220,7 +220,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
       </div>
 
       {/* Main Content */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
             <Zap className="h-5 w-5" />
@@ -238,7 +238,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                   setSearchQuery(e.target.value);
                   handleSearch(e.target.value);
                 }}
-                className="pl-10 bg-[#1F2328] border-gray-600 text-gray-100 placeholder-gray-500"
+                className="pl-10 bg-dark-surface border-gray-600 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>
@@ -246,7 +246,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
 
         <CardContent>
           <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-            <TabsList className="bg-[#1F2328] border border-gray-700">
+            <TabsList className="bg-dark-surface border border-gray-700">
               <TabsTrigger value="symbols" className="data-[state=active]:bg-orange-500">
                 Symbols ({filteredSymbols.length})
               </TabsTrigger>
@@ -269,7 +269,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                       onClick={() => setSelectedTrade('all')}
                       variant={selectedTrade === 'all' ? 'default' : 'outline'}
                       size="sm"
-                      className={selectedTrade === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                      className={selectedTrade === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                     >
                       All Trades
                     </Button>
@@ -279,7 +279,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                         onClick={() => setSelectedTrade(trade)}
                         variant={selectedTrade === trade ? 'default' : 'outline'}
                         size="sm"
-                        className={selectedTrade === trade ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                        className={selectedTrade === trade ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                       >
                         {trade} ({stats.byTrade[trade]})
                       </Button>
@@ -295,7 +295,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                       onClick={() => setSelectedCategory('all')}
                       variant={selectedCategory === 'all' ? 'default' : 'outline'}
                       size="sm"
-                      className={selectedCategory === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                      className={selectedCategory === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                     >
                       All Categories
                     </Button>
@@ -305,7 +305,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                         onClick={() => setSelectedCategory(category)}
                         variant={selectedCategory === category ? 'default' : 'outline'}
                         size="sm"
-                        className={selectedCategory === category ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                        className={selectedCategory === category ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                       >
                         {category} ({stats.byCategory[category]})
                       </Button>
@@ -319,7 +319,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                   {filteredSymbols.map((symbol, idx) => (
                     <div
                       key={idx}
-                      className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
+                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -375,7 +375,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
               <ScrollArea className="h-[500px]">
                 <div className="space-y-4">
                   {Object.entries(symbolsByTrade).map(([trade, tradeSymbols]) => (
-                    <Card key={trade} className="bg-[#1F2328] border-gray-700">
+                    <Card key={trade} className="bg-dark-surface border-gray-700">
                       <CardHeader>
                         <CardTitle className="text-gray-100 flex items-center gap-2">
                           <Badge className={`${getTradeColor(trade)} text-white`}>
@@ -389,7 +389,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                           {tradeSymbols.map((symbol, idx) => (
                             <div
                               key={idx}
-                              className="p-3 bg-[#2d333b] border border-gray-600 rounded"
+                              className="p-3 bg-dark-card border border-gray-600 rounded"
                             >
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-mono text-sm font-bold text-gray-100">
@@ -415,7 +415,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
               <ScrollArea className="h-[500px]">
                 <div className="space-y-4">
                   {Object.entries(symbolsByStandard).map(([standard, standardSymbols]) => (
-                    <Card key={standard} className="bg-[#1F2328] border-gray-700">
+                    <Card key={standard} className="bg-dark-surface border-gray-700">
                       <CardHeader>
                         <CardTitle className="text-gray-100 flex items-center gap-2">
                           <BookOpen className="h-5 w-5 text-green-500" />
@@ -428,7 +428,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                           {standardSymbols.map((symbol, idx) => (
                             <div
                               key={idx}
-                              className="p-3 bg-[#2d333b] border border-gray-600 rounded"
+                              className="p-3 bg-dark-card border border-gray-600 rounded"
                             >
                               <div className="flex items-center gap-2 mb-1">
                                 <Badge className={`${getTradeColor(symbol.trade)} text-white text-xs`}>

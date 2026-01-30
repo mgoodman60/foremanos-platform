@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { toast } from 'sonner';
+import { neutralColors, chartColors } from '@/lib/design-tokens';
 
 interface KPICardProps {
   title: string;
@@ -183,8 +184,8 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
                 contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
                 labelStyle={{ color: '#F3F4F6' }}
               />
-              <Area type="monotone" dataKey="plannedProgress" name="Planned" stroke="#6B7280" fill="#374151" fillOpacity={0.3} />
-              <Area type="monotone" dataKey="actualProgress" name="Actual" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
+              <Area type="monotone" dataKey="plannedProgress" name="Planned" stroke={neutralColors.slate[500]} fill={neutralColors.slate[700]} fillOpacity={0.3} />
+              <Area type="monotone" dataKey="actualProgress" name="Actual" stroke={chartColors.neutral} fill={chartColors.neutral} fillOpacity={0.3} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -281,9 +282,9 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
               contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
               formatter={(value) => value !== undefined ? [`$${Number(value).toLocaleString()}`, ''] : ['', '']}
             />
-            <Bar dataKey="plannedCost" name="Planned Value (PV)" fill="#6B7280" />
-            <Bar dataKey="actualCost" name="Actual Cost (AC)" fill="#EF4444" />
-            <Bar dataKey="earnedValue" name="Earned Value (EV)" fill="#10B981" />
+            <Bar dataKey="plannedCost" name="Planned Value (PV)" fill={neutralColors.slate[500]} />
+            <Bar dataKey="actualCost" name="Actual Cost (AC)" fill={chartColors.negative} />
+            <Bar dataKey="earnedValue" name="Earned Value (EV)" fill={chartColors.positive} />
           </BarChart>
         </ResponsiveContainer>
         <div className="flex justify-center gap-8 mt-4 text-sm">

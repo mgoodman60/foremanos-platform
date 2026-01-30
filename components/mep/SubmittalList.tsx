@@ -171,23 +171,23 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
     <div className="p-6">
       {/* Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-3">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-3">
           <p className="text-2xl font-bold text-white">{stats.total}</p>
           <p className="text-sm text-gray-400">Total</p>
         </div>
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-3">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-3">
           <p className="text-2xl font-bold text-gray-300">{stats.pending}</p>
           <p className="text-sm text-gray-400">Pending</p>
         </div>
-        <div className="bg-[#1F2328] border border-yellow-700/50 rounded-lg p-3">
+        <div className="bg-dark-surface border border-yellow-700/50 rounded-lg p-3">
           <p className="text-2xl font-bold text-yellow-400">{stats.underReview}</p>
           <p className="text-sm text-gray-400">Under Review</p>
         </div>
-        <div className="bg-[#1F2328] border border-green-700/50 rounded-lg p-3">
+        <div className="bg-dark-surface border border-green-700/50 rounded-lg p-3">
           <p className="text-2xl font-bold text-green-400">{stats.approved}</p>
           <p className="text-sm text-gray-400">Approved</p>
         </div>
-        <div className="bg-[#1F2328] border border-red-700/50 rounded-lg p-3">
+        <div className="bg-dark-surface border border-red-700/50 rounded-lg p-3">
           <p className="text-2xl font-bold text-red-400">{stats.overdue}</p>
           <p className="text-sm text-gray-400">Overdue</p>
         </div>
@@ -215,14 +215,14 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search submittals..."
-            className="w-full pl-10 pr-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+            className="w-full pl-10 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
               text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+          className="px-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
             text-white focus:border-blue-500 focus:outline-none"
         >
           <option value="">All Statuses</option>
@@ -254,7 +254,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
             return (
               <div
                 key={sub.id}
-                className={`bg-[#1F2328] border rounded-lg p-4 transition-colors
+                className={`bg-dark-surface border rounded-lg p-4 transition-colors
                   ${overdue ? 'border-red-700' : 'border-gray-700 hover:border-gray-600'}`}
               >
                 <div className="flex items-start justify-between">
@@ -380,7 +380,7 @@ function AddSubmittalModal({ onClose, onSubmit }: { onClose: () => void; onSubmi
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg max-w-lg w-full">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 className="text-lg font-medium text-white">New Submittal</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -503,7 +503,7 @@ function ReviewSubmittalModal({
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg max-w-lg w-full">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
             <h3 className="text-lg font-medium text-white">Review Submittal</h3>

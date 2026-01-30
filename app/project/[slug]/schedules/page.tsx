@@ -621,7 +621,7 @@ export default function SchedulesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#1F2328]">
+      <div className="flex items-center justify-center min-h-screen bg-dark-surface">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
           <p className="text-gray-400">Loading schedules...</p>
@@ -631,7 +631,7 @@ export default function SchedulesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] p-6">
+    <div className="min-h-screen bg-dark-surface p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -651,7 +651,7 @@ export default function SchedulesPage() {
                     Parse Schedule
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-[#2d333b] border-gray-700 w-80">
+                <DropdownMenuContent align="end" className="bg-dark-card border-gray-700 w-80">
                   <div className="px-3 py-2 border-b border-gray-700">
                     <p className="text-sm font-medium text-gray-200">Schedule Documents</p>
                     <p className="text-xs text-gray-400 mt-1">Extract tasks from uploaded schedules</p>
@@ -661,7 +661,7 @@ export default function SchedulesPage() {
                       key={doc.id}
                       onClick={() => doc.processed && handleParseSchedule(doc.id, doc.name)}
                       disabled={!doc.processed || parsingDocumentId === doc.id}
-                      className="text-gray-200 hover:bg-[#1F2328] cursor-pointer flex items-center justify-between py-3"
+                      className="text-gray-200 hover:bg-dark-surface cursor-pointer flex items-center justify-between py-3"
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <FileText className="h-4 w-4 text-orange-500 flex-shrink-0" />
@@ -683,7 +683,7 @@ export default function SchedulesPage() {
                   <DropdownMenuSeparator className="bg-gray-700" />
                   <DropdownMenuItem 
                     onClick={() => router.push(`/project/${slug}`)}
-                    className="text-gray-400 hover:bg-[#1F2328] cursor-pointer"
+                    className="text-gray-400 hover:bg-dark-surface cursor-pointer"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Upload New Schedule...
@@ -722,7 +722,7 @@ export default function SchedulesPage() {
 
         {schedules.length === 0 ? (
           <div className="space-y-6">
-            <Card className="bg-[#2d333b] border-gray-700 p-8">
+            <Card className="bg-dark-card border-gray-700 p-8">
               <div className="text-center space-y-4">
                 <Calendar className="h-16 w-16 text-gray-400 mx-auto" />
                 <div>
@@ -742,7 +742,7 @@ export default function SchedulesPage() {
 
             {/* Schedule Documents Available for Parsing */}
             {scheduleDocuments.length > 0 && (
-              <Card className="bg-[#2d333b] border-gray-700 p-6">
+              <Card className="bg-dark-card border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-orange-500" />
                   Schedule Documents
@@ -751,7 +751,7 @@ export default function SchedulesPage() {
                   {scheduleDocuments.map((doc) => (
                     <div 
                       key={doc.id}
-                      className="flex items-center justify-between p-4 bg-[#1F2328] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                      className="flex items-center justify-between p-4 bg-dark-surface rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <FileText className="h-8 w-8 text-orange-500 flex-shrink-0" />
@@ -844,7 +844,7 @@ export default function SchedulesPage() {
         ) : (
           <>
             {/* Schedule Selector */}
-            <div className="flex items-center gap-3 flex-wrap p-3 bg-[#2d333b]/50 rounded-lg border border-gray-700">
+            <div className="flex items-center gap-3 flex-wrap p-3 bg-dark-card/50 rounded-lg border border-gray-700">
               <span className="text-sm text-gray-400 font-medium mr-2">Schedules:</span>
               {schedules.map((schedule) => (
                 <Button
@@ -869,7 +869,7 @@ export default function SchedulesPage() {
             {selectedSchedule && (
               <>
                 {/* Schedule Info */}
-                <Card className="bg-[#2d333b] border-gray-700 p-6">
+                <Card className="bg-dark-card border-gray-700 p-6">
                   <div className="grid md:grid-cols-3 gap-6">
                     <div>
                       <h3 className="text-sm font-medium text-gray-400 mb-2">Schedule Details</h3>
@@ -949,7 +949,7 @@ export default function SchedulesPage() {
                 {/* Tab Navigation */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <TabsList className="bg-[#2d333b] border border-gray-600 p-1 justify-start gap-1">
+                    <TabsList className="bg-dark-card border border-gray-600 p-1 justify-start gap-1">
                       <TabsTrigger 
                         value="gantt" 
                         className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
@@ -1018,10 +1018,10 @@ export default function SchedulesPage() {
                           Baseline & Actuals
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-[#2d333b] border-gray-700">
+                      <DropdownMenuContent align="end" className="bg-dark-card border-gray-700">
                         <DropdownMenuItem 
                           onClick={handleSetBaseline}
-                          className="text-gray-200 hover:bg-[#1F2328] cursor-pointer"
+                          className="text-gray-200 hover:bg-dark-surface cursor-pointer"
                         >
                           <Bookmark className="h-4 w-4 mr-2 text-blue-400" />
                           Set Baseline
@@ -1030,7 +1030,7 @@ export default function SchedulesPage() {
                         <DropdownMenuSeparator className="bg-gray-700" />
                         <DropdownMenuItem 
                           onClick={handleBackfillActuals}
-                          className="text-gray-200 hover:bg-[#1F2328] cursor-pointer"
+                          className="text-gray-200 hover:bg-dark-surface cursor-pointer"
                         >
                           <History className="h-4 w-4 mr-2 text-emerald-400" />
                           Backfill from Daily Reports
@@ -1074,7 +1074,7 @@ export default function SchedulesPage() {
                   <TabsContent value="analysis" className="mt-4 space-y-6">
                     {/* Resource Histogram - Labor and Equipment allocation */}
                     {resourceLoading ? (
-                      <Card className="bg-[#2d333b] border-gray-700 p-8 flex items-center justify-center">
+                      <Card className="bg-dark-card border-gray-700 p-8 flex items-center justify-center">
                         <div className="flex items-center gap-3 text-gray-400">
                           <RefreshCw className="h-5 w-5 animate-spin" />
                           <span>Loading resource data...</span>
@@ -1100,7 +1100,7 @@ export default function SchedulesPage() {
                         />
                       </>
                     ) : (
-                      <Card className="bg-[#2d333b] border-gray-700 p-8 text-center">
+                      <Card className="bg-dark-card border-gray-700 p-8 text-center">
                         <BarChart3 className="h-12 w-12 text-gray-600 mx-auto mb-4" />
                         <p className="text-gray-400">
                           No resource data available. Submit daily reports to track labor and equipment usage.
@@ -1115,29 +1115,29 @@ export default function SchedulesPage() {
                     />
                     
                     {/* Schedule Summary */}
-                    <Card className="bg-[#2d333b] border-gray-700 p-6">
+                    <Card className="bg-dark-card border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
                         <ListTodo className="h-5 w-5 text-orange-500" />
                         Task Summary
                       </h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+                        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
                           <p className="text-sm text-gray-400">Total Tasks</p>
                           <p className="text-2xl font-bold text-gray-200">{tasks.length}</p>
                         </div>
-                        <div className="bg-[#1F2328] rounded-lg p-4 border border-green-500/30">
+                        <div className="bg-dark-surface rounded-lg p-4 border border-green-500/30">
                           <p className="text-sm text-gray-400">Completed</p>
                           <p className="text-2xl font-bold text-green-400">
                             {tasks.filter(t => t.status === 'completed').length}
                           </p>
                         </div>
-                        <div className="bg-[#1F2328] rounded-lg p-4 border border-blue-500/30">
+                        <div className="bg-dark-surface rounded-lg p-4 border border-blue-500/30">
                           <p className="text-sm text-gray-400">In Progress</p>
                           <p className="text-2xl font-bold text-blue-400">
                             {tasks.filter(t => t.status === 'in_progress').length}
                           </p>
                         </div>
-                        <div className="bg-[#1F2328] rounded-lg p-4 border border-red-500/30">
+                        <div className="bg-dark-surface rounded-lg p-4 border border-red-500/30">
                           <p className="text-sm text-gray-400">Delayed</p>
                           <p className="text-2xl font-bold text-red-400">
                             {tasks.filter(t => t.status === 'delayed').length}
@@ -1331,7 +1331,7 @@ export default function SchedulesPage() {
         {/* Task Update Modal */}
         {selectedTask && (
           <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
-            <DialogContent className="bg-[#2d333b] border-gray-700 text-gray-100">
+            <DialogContent className="bg-dark-card border-gray-700 text-gray-100">
               <DialogHeader>
                 <DialogTitle>{selectedTask.taskId}: {selectedTask.name}</DialogTitle>
                 <DialogDescription className="text-gray-400">
@@ -1351,7 +1351,7 @@ export default function SchedulesPage() {
                     onChange={(e) => {
                       selectedTask.percentComplete = parseFloat(e.target.value);
                     }}
-                    className="bg-[#1F2328] border-gray-700 text-gray-100"
+                    className="bg-dark-surface border-gray-700 text-gray-100"
                   />
                 </div>
 
@@ -1364,10 +1364,10 @@ export default function SchedulesPage() {
                       selectedTask.status = value;
                     }}
                   >
-                    <SelectTrigger className="bg-[#1F2328] border-gray-700 text-gray-100">
+                    <SelectTrigger className="bg-dark-surface border-gray-700 text-gray-100">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#2d333b] border-gray-700">
+                    <SelectContent className="bg-dark-card border-gray-700">
                       <SelectItem value="not_started">Not Started</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
@@ -1385,7 +1385,7 @@ export default function SchedulesPage() {
                       selectedTask.location = e.target.value;
                     }}
                     placeholder="e.g., Building A - Floor 2"
-                    className="bg-[#1F2328] border-gray-700 text-gray-100"
+                    className="bg-dark-surface border-gray-700 text-gray-100"
                   />
                 </div>
 
@@ -1405,10 +1405,10 @@ export default function SchedulesPage() {
                       }
                     }}
                   >
-                    <SelectTrigger className="bg-[#1F2328] border-gray-700 text-gray-100">
+                    <SelectTrigger className="bg-dark-surface border-gray-700 text-gray-100">
                       <SelectValue placeholder="Select subcontractor..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#2d333b] border-gray-700 max-h-[300px]">
+                    <SelectContent className="bg-dark-card border-gray-700 max-h-[300px]">
                       <SelectItem value="none">
                         <span className="text-gray-400">No assignment</span>
                       </SelectItem>

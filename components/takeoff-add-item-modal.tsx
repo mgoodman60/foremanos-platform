@@ -150,7 +150,7 @@ export function TakeoffAddItemModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+      <DialogContent className="max-w-lg bg-dark-surface border-gray-700 text-[#F8FAFC]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-green-500" />
@@ -163,7 +163,7 @@ export function TakeoffAddItemModal({
           <div className="space-y-2">
             <Label className="text-sm text-gray-300">Category *</Label>
             <Select value={selectedCategory} onValueChange={handleCategorySelect}>
-              <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+              <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent className="max-h-60">
@@ -192,7 +192,7 @@ export function TakeoffAddItemModal({
               value={formData.itemName || ''}
               onChange={(e) => handleChange('itemName', e.target.value)}
               placeholder="e.g., 4 inch Concrete Slab on Grade"
-              className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+              className="bg-dark-card border-gray-600 text-[#F8FAFC]"
             />
           </div>
 
@@ -203,7 +203,7 @@ export function TakeoffAddItemModal({
               value={formData.description || ''}
               onChange={(e) => handleChange('description', e.target.value)}
               placeholder="Optional description..."
-              className="bg-[#2d333b] border-gray-600 text-[#F8FAFC] min-h-[60px]"
+              className="bg-dark-card border-gray-600 text-[#F8FAFC] min-h-[60px]"
             />
           </div>
 
@@ -221,7 +221,7 @@ export function TakeoffAddItemModal({
                 value={formData.quantity || ''}
                 onChange={(e) => handleChange('quantity', parseFloat(e.target.value) || 0)}
                 placeholder="0"
-                className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
               />
             </div>
             <div className="space-y-2">
@@ -230,7 +230,7 @@ export function TakeoffAddItemModal({
                 value={formData.unit || 'SF'}
                 onValueChange={(value) => handleChange('unit', value)}
               >
-                <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+                <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -258,12 +258,12 @@ export function TakeoffAddItemModal({
                 value={formData.unitCost || ''}
                 onChange={(e) => handleChange('unitCost', parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
-                className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-sm text-gray-300">Total Cost</Label>
-              <div className="h-10 flex items-center px-3 rounded-md bg-[#2d333b] border border-gray-600 text-green-400 font-medium">
+              <div className="h-10 flex items-center px-3 rounded-md bg-dark-card border border-gray-600 text-green-400 font-medium">
                 ${(formData.totalCost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
@@ -279,7 +279,7 @@ export function TakeoffAddItemModal({
               value={formData.location || ''}
               onChange={(e) => handleChange('location', e.target.value)}
               placeholder="e.g., Building A - First Floor"
-              className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+              className="bg-dark-card border-gray-600 text-[#F8FAFC]"
             />
           </div>
 
@@ -294,7 +294,7 @@ export function TakeoffAddItemModal({
                 value={formData.sheetNumber || ''}
                 onChange={(e) => handleChange('sheetNumber', e.target.value)}
                 placeholder="e.g., A-101"
-                className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
               />
             </div>
             <div className="space-y-2">
@@ -303,7 +303,7 @@ export function TakeoffAddItemModal({
                 value={formData.gridLocation || ''}
                 onChange={(e) => handleChange('gridLocation', e.target.value)}
                 placeholder="e.g., A-1 to C-3"
-                className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
               />
             </div>
           </div>
@@ -315,7 +315,7 @@ export function TakeoffAddItemModal({
               value={formData.notes || ''}
               onChange={(e) => handleChange('notes', e.target.value)}
               placeholder="Additional notes..."
-              className="bg-[#2d333b] border-gray-600 text-[#F8FAFC] min-h-[60px]"
+              className="bg-dark-card border-gray-600 text-[#F8FAFC] min-h-[60px]"
             />
           </div>
         </div>

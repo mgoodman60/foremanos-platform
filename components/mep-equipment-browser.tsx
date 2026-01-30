@@ -456,7 +456,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
   const filteredEquipment = getFilteredEquipment();
 
   return (
-    <div className="flex h-full max-h-[80vh] flex-col bg-[#1F2328] text-[#F8FAFC] overflow-hidden">
+    <div className="flex h-full max-h-[80vh] flex-col bg-dark-surface text-[#F8FAFC] overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -483,7 +483,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             size="sm"
             onClick={exportToCSV}
             disabled={filteredEquipment.length === 0}
-            className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+            className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
           >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
@@ -540,14 +540,14 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             placeholder="Search equipment tags, types, locations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-[#2d333b] border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+            className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
           />
         </div>
 
         {/* Trade & Status Filters */}
         <div className="flex gap-2">
           <Select value={selectedTrade} onValueChange={setSelectedTrade}>
-            <SelectTrigger className="flex-1 bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
               <SelectValue placeholder="All Trades" />
             </SelectTrigger>
             <SelectContent>
@@ -560,7 +560,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
           </Select>
 
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="flex-1 bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -595,7 +595,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
               setSelectedTrade('all');
               setSelectedStatus('all');
             }}
-            className="w-full text-orange-500 hover:text-orange-400 hover:bg-[#2d333b]"
+            className="w-full text-orange-500 hover:text-orange-400 hover:bg-dark-card"
           >
             <X className="mr-2 h-4 w-4" />
             Clear Filters
@@ -625,7 +625,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
               conflicts.map((conflict) => (
                 <div
                   key={conflict.id}
-                  className="rounded-lg border border-red-700 bg-[#2d333b] p-4"
+                  className="rounded-lg border border-red-700 bg-dark-card p-4"
                 >
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="mt-1 h-5 w-5 text-red-500 flex-shrink-0" />
@@ -706,7 +706,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                   {/* Trade Header */}
                   <button
                     onClick={() => toggleTrade(trade)}
-                    className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                    className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
                   >
                     {expandedTrades.has(trade) ? (
                       <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -729,12 +729,12 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                         return (
                           <div
                             key={eq.id}
-                            className="rounded-lg border border-gray-700 bg-[#1F2328] text-sm transition-all overflow-hidden"
+                            className="rounded-lg border border-gray-700 bg-dark-surface text-sm transition-all overflow-hidden"
                           >
                             {/* Collapsible Header */}
                             <button
                               onClick={() => toggleItem(eq.id)}
-                              className="flex w-full items-start gap-3 p-3 hover:bg-[#2d333b] transition-colors text-left"
+                              className="flex w-full items-start gap-3 p-3 hover:bg-dark-card transition-colors text-left"
                             >
                               {/* Expand/Collapse Icon */}
                               <div className="mt-1 flex-shrink-0">
@@ -841,7 +841,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                                       {eq.roomBreakdown!.map((rb, idx) => (
                                         <div 
                                           key={idx}
-                                          className="flex items-center justify-between text-xs px-2 py-1.5 rounded bg-[#1F2328]"
+                                          className="flex items-center justify-between text-xs px-2 py-1.5 rounded bg-dark-surface"
                                         >
                                           <span className="text-gray-300">
                                             {rb.room}
@@ -883,7 +883,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
 
       {/* Location Assignment Dialog */}
       <Dialog open={showLocationAssignment} onOpenChange={setShowLocationAssignment}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-dark-surface border-gray-700 text-[#F8FAFC]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MapPinned className="h-5 w-5 text-green-500" />
@@ -954,7 +954,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                             }));
                           }}
                         >
-                          <SelectTrigger className="w-48 bg-[#0d1117] border-gray-600">
+                          <SelectTrigger className="w-48 bg-dark-base border-gray-600">
                             <SelectValue placeholder="Select room..." />
                           </SelectTrigger>
                           <SelectContent className="bg-[#161b22] border-gray-700">

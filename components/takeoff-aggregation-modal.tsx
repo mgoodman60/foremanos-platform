@@ -264,7 +264,7 @@ export function TakeoffAggregationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-4xl bg-[#1F2328] rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-4xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -291,15 +291,15 @@ export function TakeoffAggregationModal({
             <div className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                <div className="bg-dark-card rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-cyan-400">{result.totalItems}</div>
                   <div className="text-sm text-gray-400">Total Items</div>
                 </div>
-                <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                <div className="bg-dark-card rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-green-400">{formatCurrency(result.totalCost)}</div>
                   <div className="text-sm text-gray-400">Total Cost</div>
                 </div>
-                <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                <div className="bg-dark-card rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-purple-400">{result.duplicatesMerged}</div>
                   <div className="text-sm text-gray-400">Duplicates Merged</div>
                 </div>
@@ -310,7 +310,7 @@ export function TakeoffAggregationModal({
                 <h3 className="text-sm font-medium text-gray-300">Category Summary</h3>
                 <div className="space-y-2">
                   {result.categorySummary?.map((cat) => (
-                    <div key={cat.category} className="bg-[#2d333b] rounded-lg overflow-hidden">
+                    <div key={cat.category} className="bg-dark-card rounded-lg overflow-hidden">
                       <button
                         onClick={() => toggleCategory(cat.category)}
                         className="w-full flex items-center justify-between p-3 hover:bg-[#373e47] transition-colors"
@@ -332,7 +332,7 @@ export function TakeoffAggregationModal({
                           {result.aggregatedItems
                             .filter(item => item.category === cat.category)
                             .map((item) => (
-                              <div key={item.id} className="flex items-center justify-between p-2 bg-[#1F2328] rounded text-sm">
+                              <div key={item.id} className="flex items-center justify-between p-2 bg-dark-surface rounded text-sm">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2">
                                     <span className="text-white">{item.itemName}</span>
@@ -374,7 +374,7 @@ export function TakeoffAggregationModal({
                   value={aggregationName}
                   onChange={(e) => setAggregationName(e.target.value)}
                   placeholder="Enter a name for this aggregation"
-                  className="bg-[#2d333b] border-gray-600 text-white"
+                  className="bg-dark-card border-gray-600 text-white"
                 />
               </div>
 
@@ -414,7 +414,7 @@ export function TakeoffAggregationModal({
               <div>
                 <label className="text-sm font-medium text-gray-300 mb-2 block">Merge Strategy</label>
                 <Select value={mergeStrategy} onValueChange={(v: 'smart' | 'sum_all' | 'keep_separate') => setMergeStrategy(v)}>
-                  <SelectTrigger className="bg-[#2d333b] border-gray-600 text-white">
+                  <SelectTrigger className="bg-dark-card border-gray-600 text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -476,7 +476,7 @@ export function TakeoffAggregationModal({
                           className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all text-left ${
                             selectedTakeoffs.has(takeoff.id)
                               ? 'border-cyan-500 bg-cyan-500/10'
-                              : 'border-gray-700 hover:border-gray-600 bg-[#2d333b]'
+                              : 'border-gray-700 hover:border-gray-600 bg-dark-card'
                           }`}
                         >
                           <div className="flex items-center gap-3">
@@ -514,7 +514,7 @@ export function TakeoffAggregationModal({
                           className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all text-left ${
                             selectedSheets.has(sheet.sheetNumber)
                               ? 'border-cyan-500 bg-cyan-500/10'
-                              : 'border-gray-700 hover:border-gray-600 bg-[#2d333b]'
+                              : 'border-gray-700 hover:border-gray-600 bg-dark-card'
                           }`}
                         >
                           <div className="flex items-center gap-3">

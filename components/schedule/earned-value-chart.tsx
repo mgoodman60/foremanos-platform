@@ -26,6 +26,7 @@ import {
   LineChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { chartColors } from '@/lib/design-tokens';
 
 // Types for earned value data
 export interface ScheduleTask {
@@ -262,7 +263,7 @@ export function EarnedValueChart({
 
   return (
     <TooltipProvider>
-      <Card className="bg-[#1a1f24] border-gray-700 p-4">
+      <Card className="bg-dark-surface border-gray-700 p-4">
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -320,7 +321,7 @@ export function EarnedValueChart({
           {/* KPI Cards */}
           <div className="grid grid-cols-6 gap-2">
             {/* CPI */}
-            <div className="bg-[#2d333b] rounded-lg p-2">
+            <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 <DollarSign className="h-3 w-3" />
                 CPI
@@ -338,7 +339,7 @@ export function EarnedValueChart({
             </div>
             
             {/* SPI */}
-            <div className="bg-[#2d333b] rounded-lg p-2">
+            <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 <Clock className="h-3 w-3" />
                 SPI
@@ -356,7 +357,7 @@ export function EarnedValueChart({
             </div>
             
             {/* Cost Variance */}
-            <div className="bg-[#2d333b] rounded-lg p-2">
+            <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 {metrics.cv >= 0 ? (
                   <TrendingDown className="h-3 w-3 text-green-400" />
@@ -377,7 +378,7 @@ export function EarnedValueChart({
             </div>
             
             {/* Schedule Variance */}
-            <div className="bg-[#2d333b] rounded-lg p-2">
+            <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 <Activity className="h-3 w-3" />
                 SV
@@ -394,7 +395,7 @@ export function EarnedValueChart({
             </div>
             
             {/* EAC */}
-            <div className="bg-[#2d333b] rounded-lg p-2">
+            <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 <Target className="h-3 w-3" />
                 EAC
@@ -411,7 +412,7 @@ export function EarnedValueChart({
             </div>
             
             {/* VAC */}
-            <div className="bg-[#2d333b] rounded-lg p-2">
+            <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 {metrics.vac >= 0 ? (
                   <CheckCircle2 className="h-3 w-3 text-green-400" />
@@ -458,7 +459,7 @@ export function EarnedValueChart({
                   className="absolute left-0 right-0 border-t-2 border-dashed border-purple-500/50 pointer-events-none"
                   style={{ top: `${100 - (projectBudget / maxValue) * 100}%` }}
                 >
-                  <span className="absolute right-0 -top-4 text-[10px] text-purple-400 bg-[#1a1f24] px-1">
+                  <span className="absolute right-0 -top-4 text-[10px] text-purple-400 bg-dark-surface px-1">
                     BAC: {formatCurrency(projectBudget)}
                   </span>
                 </div>
@@ -469,7 +470,7 @@ export function EarnedValueChart({
                     className="absolute top-0 bottom-0 w-0.5 bg-gray-500/50 pointer-events-none"
                     style={{ left: `${(currentWeekIndex / weeklyData.length) * 100}%` }}
                   >
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 bg-[#1a1f24] px-1 whitespace-nowrap">
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 bg-dark-surface px-1 whitespace-nowrap">
                       Today
                     </div>
                   </div>
@@ -481,7 +482,7 @@ export function EarnedValueChart({
                   {showPV && (
                     <polyline
                       fill="none"
-                      stroke="#3B82F6"
+                      stroke={chartColors.neutral}
                       strokeWidth="2"
                       strokeDasharray="4,2"
                       points={weeklyData.map((w, i) => {
@@ -491,12 +492,12 @@ export function EarnedValueChart({
                       }).join(' ')}
                     />
                   )}
-                  
+
                   {/* EV Line (Earned Value) */}
                   {showEV && currentWeekIndex >= 0 && (
                     <polyline
                       fill="none"
-                      stroke="#10B981"
+                      stroke={chartColors.positive}
                       strokeWidth="2.5"
                       points={weeklyData.slice(0, currentWeekIndex + 1).map((w, i) => {
                         const x = (i / (weeklyData.length - 1)) * 100;
@@ -505,12 +506,12 @@ export function EarnedValueChart({
                       }).join(' ')}
                     />
                   )}
-                  
+
                   {/* AC Line (Actual Cost) */}
                   {showAC && currentWeekIndex >= 0 && (
                     <polyline
                       fill="none"
-                      stroke="#F59E0B"
+                      stroke={chartColors.warning}
                       strokeWidth="2"
                       points={weeklyData.slice(0, currentWeekIndex + 1).map((w, i) => {
                         const x = (i / (weeklyData.length - 1)) * 100;
@@ -519,12 +520,12 @@ export function EarnedValueChart({
                       }).join(' ')}
                     />
                   )}
-                  
+
                   {/* EAC Forecast Line */}
                   {showForecasts && currentWeekIndex >= 0 && currentWeekIndex < weeklyData.length - 1 && (
                     <polyline
                       fill="none"
-                      stroke="#EF4444"
+                      stroke={chartColors.negative}
                       strokeWidth="1.5"
                       strokeDasharray="6,3"
                       opacity="0.6"
@@ -552,7 +553,7 @@ export function EarnedValueChart({
                             style={{ left: `calc(${x}% - 8px)` }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-[#1F2328] border-gray-700 p-3">
+                        <TooltipContent side="top" className="bg-dark-surface border-gray-700 p-3">
                           <div className="space-y-2">
                             <div className="font-medium text-gray-200">
                               {format(week.weekStart, 'MMM d')} - {format(week.weekEnd, 'MMM d')}

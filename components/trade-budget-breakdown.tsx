@@ -196,7 +196,7 @@ export default function TradeBudgetBreakdown() {
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="py-12">
           <div className="flex items-center justify-center text-gray-400">
             <RefreshCw className="h-5 w-5 animate-spin mr-2" />
@@ -209,7 +209,7 @@ export default function TradeBudgetBreakdown() {
 
   if (!data || !data.budget || data.budget.totalBudget === 0) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="py-12 text-center">
           <HardHat className="w-12 h-12 mx-auto text-gray-500 mb-4" />
           <p className="text-gray-400 mb-2">No trade breakdown available</p>
@@ -223,7 +223,7 @@ export default function TradeBudgetBreakdown() {
   const totalBudgeted = trades.reduce((sum, t) => sum + t.budgetedAmount, 0) + unassigned.budgetedAmount;
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700">
+    <Card className="bg-dark-card border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-semibold text-[#F8FAFC] flex items-center gap-2">
           <HardHat className="h-5 w-5 text-[#F97316]" />
@@ -298,7 +298,7 @@ export default function TradeBudgetBreakdown() {
             return (
               <div
                 key={trade.tradeType}
-                className="p-3 bg-[#1F2328] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                className="p-3 bg-dark-surface rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -346,7 +346,7 @@ export default function TradeBudgetBreakdown() {
 
           {/* Unassigned items */}
           {unassigned.itemCount > 0 && (
-            <div className="p-3 bg-[#1F2328] rounded-lg border border-dashed border-gray-600">
+            <div className="p-3 bg-dark-surface rounded-lg border border-dashed border-gray-600">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded bg-gray-600">

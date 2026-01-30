@@ -727,7 +727,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
   return (
     <div 
-      className={`flex flex-col h-full bg-[#1F2328] ${isDragging ? 'ring-2 ring-[#F97316] ring-inset' : ''}`}
+      className={`flex flex-col h-full bg-dark-surface ${isDragging ? 'ring-2 ring-[#F97316] ring-inset' : ''}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -745,7 +745,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       {/* Drag overlay */}
       {isDragging && userRole !== 'guest' && (
         <div className="absolute inset-0 z-50 bg-[#F97316]/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-          <div className="bg-[#2d333b] border-2 border-dashed border-[#F97316] rounded-lg p-8 text-center">
+          <div className="bg-dark-card border-2 border-dashed border-[#F97316] rounded-lg p-8 text-center">
             <Upload className="w-16 h-16 text-[#F97316] mx-auto mb-4" />
             <p className="text-xl font-semibold text-[#F8FAFC] mb-2">Drop file here</p>
             {preSelectedCategory && (
@@ -760,7 +760,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       )}
       
       {/* Header - Dark Theme with Bulk Actions */}
-      <div className="bg-[#2d333b] border-b border-gray-700 p-3 lg:p-6">
+      <div className="bg-dark-card border-b border-gray-700 p-3 lg:p-6">
         {selectedDocs.size > 0 ? (
           /* Bulk Actions Toolbar */
           <div className="flex items-center justify-between gap-4">
@@ -768,7 +768,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               <WithTooltip tooltip="Clear selection">
                 <button
                   onClick={() => setSelectedDocs(new Set())}
-                  className="p-2 hover:bg-[#1F2328] rounded-lg transition-colors"
+                  className="p-2 hover:bg-dark-surface rounded-lg transition-colors"
                   aria-label="Clear selection"
                 >
                   <X className="w-5 h-5 text-gray-400" />
@@ -806,20 +806,20 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                     <button
                       onClick={() => setShowBulkAccessMenu(!showBulkAccessMenu)}
                       disabled={bulkActionLoading}
-                      className="flex items-center gap-2 px-3 py-2 bg-[#2d333b] hover:bg-[#1F2328] border border-gray-600 text-gray-300 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                     >
                       <Lock className="w-4 h-4" />
                       <span className="hidden sm:inline">Access</span>
                     </button>
                     
                     {showBulkAccessMenu && (
-                      <div className="absolute right-0 top-full mt-2 bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[160px] animate-in fade-in zoom-in-95 duration-200">
+                      <div className="absolute right-0 top-full mt-2 bg-dark-card border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[160px] animate-in fade-in zoom-in-95 duration-200">
                         <button
                           onClick={() => {
                             bulkChangeAccess('admin');
                             setShowBulkAccessMenu(false);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#1F2328] transition-colors"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors"
                         >
                           Admin Only
                         </button>
@@ -828,7 +828,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             bulkChangeAccess('client');
                             setShowBulkAccessMenu(false);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#1F2328] transition-colors"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors"
                         >
                           Client Access
                         </button>
@@ -837,7 +837,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             bulkChangeAccess('guest');
                             setShowBulkAccessMenu(false);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#1F2328] transition-colors"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors"
                         >
                           Guest Access
                         </button>
@@ -964,14 +964,14 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 <div className="relative">
                   <button
                     onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-                    className="flex items-center gap-2 px-3 py-2 bg-[#1F2328] hover:bg-[#2d333b] border border-gray-600 text-gray-300 rounded-lg transition-all text-sm"
+                    className="flex items-center gap-2 px-3 py-2 bg-dark-surface hover:bg-dark-card border border-gray-600 text-gray-300 rounded-lg transition-all text-sm"
                   >
                     <Filter className="w-4 h-4" />
                     <span>Filter by Category</span>
                   </button>
                   
                   {showCategoryFilter && (
-                    <div className="absolute left-0 top-full mt-2 bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute left-0 top-full mt-2 bg-dark-card border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
                       <button
                         onClick={() => {
                           setSelectedCategory('all');
@@ -980,7 +980,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                           selectedCategory === 'all' 
                             ? 'bg-[#F97316] text-white' 
-                            : 'text-gray-300 hover:bg-[#1F2328]'
+                            : 'text-gray-300 hover:bg-dark-surface'
                         }`}
                       >
                         All Categories
@@ -995,7 +995,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                             selectedCategory === cat.value 
                               ? 'bg-[#F97316] text-white' 
-                              : 'text-gray-300 hover:bg-[#1F2328]'
+                              : 'text-gray-300 hover:bg-dark-surface'
                           }`}
                         >
                           {cat.label}
@@ -1020,12 +1020,12 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       </div>
 
       {/* Document List - Mobile & Tablet Optimized */}
-        <div className="flex-1 overflow-y-auto p-3 lg:p-6 bg-[#1F2328]">
+        <div className="flex-1 overflow-y-auto p-3 lg:p-6 bg-dark-surface">
           {loading ? (
             <div className="space-y-3">
               {/* Skeleton Loading States */}
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-[#2d333b] border border-gray-700 rounded-lg p-4 animate-pulse">
+                <div key={i} className="bg-dark-card border border-gray-700 rounded-lg p-4 animate-pulse">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gray-700 rounded-lg"></div>
                     <div className="flex-1 space-y-2">
@@ -1040,7 +1040,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           ) : documents.length === 0 ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center max-w-md px-4">
-                <div className="w-20 h-20 bg-[#2d333b] rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-gray-600">
+                <div className="w-20 h-20 bg-dark-card rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-gray-600">
                   <FileText className="w-10 h-10 text-gray-500" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#F8FAFC] mb-3">
@@ -1083,7 +1083,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-[#2d333b] border border-gray-700 rounded-lg p-3 lg:p-4 hover:border-[#F97316] transition-all"
+                  className="bg-dark-card border border-gray-700 rounded-lg p-3 lg:p-4 hover:border-[#F97316] transition-all"
                 >
                   {/* Mobile & Tablet Simple View (< 1024px) */}
                   <div className="lg:hidden">
@@ -1095,7 +1095,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             e.stopPropagation();
                             toggleDocSelection(doc.id);
                           }}
-                          className="flex-shrink-0 p-1 hover:bg-[#1F2328] rounded transition-colors"
+                          className="flex-shrink-0 p-1 hover:bg-dark-surface rounded transition-colors"
                           aria-label={`Select ${doc.name}`}
                         >
                           {selectedDocs.has(doc.id) ? (
@@ -1108,7 +1108,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       
                       {/* Small Icon */}
                       <div className="flex-shrink-0">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center border border-gray-600 bg-[#1F2328]`}>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center border border-gray-600 bg-dark-surface`}>
                           {doc.fileType.toLowerCase() === 'pdf' ? (
                             <FileText className="w-5 h-5 text-red-500" />
                           ) : doc.fileType.toLowerCase() === 'docx' || doc.fileType.toLowerCase() === 'doc' ? (
@@ -1137,7 +1137,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       {/* Preview Button */}
                       <button
                         type="button"
-                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-[#2d333b] hover:bg-[#1F2328] border border-gray-600 text-gray-300 hover:text-[#F97316] rounded-lg transition-all active:scale-95"
+                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-[#F97316] rounded-lg transition-all active:scale-95"
                         aria-label={`Preview ${doc.name}`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -1176,7 +1176,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                               e.stopPropagation();
                               toggleDocSelection(doc.id);
                             }}
-                            className="flex-shrink-0 p-2 hover:bg-[#1F2328] rounded transition-colors mt-1"
+                            className="flex-shrink-0 p-2 hover:bg-dark-surface rounded transition-colors mt-1"
                             aria-label={`Select ${doc.name}`}
                           >
                             {selectedDocs.has(doc.id) ? (
@@ -1189,7 +1189,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         
                         {/* Large Thumbnail */}
                         <div className="flex-shrink-0">
-                          <div className="w-20 h-20 rounded-xl flex items-center justify-center border-2 border-gray-600 bg-[#1F2328] transition-transform hover:scale-105">
+                          <div className="w-20 h-20 rounded-xl flex items-center justify-center border-2 border-gray-600 bg-dark-surface transition-transform hover:scale-105">
                             {getDocumentIcon(doc.fileType)}
                           </div>
                         </div>
@@ -1207,7 +1207,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             )}
                           </div>
                           <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
-                            <span className="px-3 py-1 bg-[#1F2328] border border-gray-600 rounded-full text-xs font-bold uppercase">
+                            <span className="px-3 py-1 bg-dark-surface border border-gray-600 rounded-full text-xs font-bold uppercase">
                               {doc.fileType}
                             </span>
                             <span className="text-gray-600">•</span>
@@ -1286,7 +1286,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           type="button"
-                          className="flex items-center gap-2 px-4 py-2 bg-[#2d333b] hover:bg-[#1F2328] border border-gray-600 text-gray-300 hover:text-[#F97316] rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:ring-offset-[#1F2328] focus:outline-none"
+                          className="flex items-center gap-2 px-4 py-2 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-[#F97316] rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:ring-offset-[#1F2328] focus:outline-none"
                           aria-label={`Preview ${doc.name}`}
                           title="Preview document"
                           onClick={(e) => {
@@ -1357,7 +1357,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
       {/* Footer */}
       {!loading && documents.length > 0 && (
-        <div className="border-t border-gray-700 p-4 bg-[#1F2328]">
+        <div className="border-t border-gray-700 p-4 bg-dark-surface">
           <p className="text-sm text-gray-400 text-center">
             Showing {documents.length} document{documents.length !== 1 ? 's' : ''}
           </p>
@@ -1372,7 +1372,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           aria-modal="true"
           aria-labelledby="rename-dialog-title"
         >
-          <div className="bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-dark-card border border-gray-700 rounded-lg shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <h3 id="rename-dialog-title" className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Document</h3>
             <p className="text-sm text-gray-400 mb-4">
               Enter a new name for "{renameDocument?.name}"
@@ -1392,7 +1392,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                     setNewDocumentName('');
                   }
                 }}
-                className="w-full px-4 py-2 bg-[#1F2328] border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent outline-none"
                 placeholder="Enter document name"
                 aria-label="New document name"
                 aria-describedby="name-requirements"
@@ -1415,7 +1415,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                   setRenameDocument(null);
                   setNewDocumentName('');
                 }}
-                className="flex-1 px-4 py-2 bg-[#1F2328] hover:bg-[#0d1117] text-gray-300 border border-gray-600 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
+                className="flex-1 px-4 py-2 bg-dark-surface hover:bg-dark-base text-gray-300 border border-gray-600 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 Cancel
               </button>

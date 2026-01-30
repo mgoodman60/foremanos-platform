@@ -211,7 +211,7 @@ export function TakeoffLineItemEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+      <DialogContent className="max-w-2xl bg-dark-surface border-gray-700 text-[#F8FAFC]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-orange-500" />

@@ -76,10 +76,10 @@ export function DocumentCategoryModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="document-category-modal-title"
-        className="bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-dark-card border border-gray-700 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
-        <div className="sticky top-0 bg-[#2d333b] border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-dark-card border-b border-gray-700 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 id="document-category-modal-title" className="text-lg font-semibold text-[#F8FAFC]">
               {fileName ? 'Select Document Category' : 'Step 1: Choose Document Category'}
@@ -104,14 +104,14 @@ export function DocumentCategoryModal({
         {fileName && (
           <>
             {loading ? (
-              <div className="px-6 py-4 bg-[#1F2328] border-b border-gray-700">
+              <div className="px-6 py-4 bg-dark-surface border-b border-gray-700">
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Analyzing document...</span>
                 </div>
               </div>
             ) : aiSuggestion && aiSuggestion.confidence >= 0.7 ? (
-              <div className="px-6 py-4 bg-[#1F2328] border-b border-gray-700">
+              <div className="px-6 py-4 bg-dark-surface border-b border-gray-700">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
@@ -148,7 +148,7 @@ export function DocumentCategoryModal({
                 className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                   selectedCategory === category.value
                     ? 'border-[#F97316] bg-[#F97316]/10 text-[#F8FAFC]'
-                    : 'border-gray-700 bg-[#1F2328] text-gray-300 hover:border-gray-600 hover:bg-[#1F2328]/80'
+                    : 'border-gray-700 bg-dark-surface text-gray-300 hover:border-gray-600 hover:bg-dark-surface/80'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -166,7 +166,7 @@ export function DocumentCategoryModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[#2d333b] border-t border-gray-700 px-6 py-4 flex items-center justify-end gap-3">
+        <div className="sticky bottom-0 bg-dark-card border-t border-gray-700 px-6 py-4 flex items-center justify-end gap-3">
           <button
             onClick={onCancel}
             className="px-4 py-2 text-sm text-gray-400 hover:text-[#F8FAFC] transition-colors"

@@ -159,8 +159,8 @@ export function MessageSearch({
   if (!isOpen) return null;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-[#2d333b] border-b border-gray-700 shadow-lg animate-in slide-in-from-top">
-      <div className="flex items-center flex-1 gap-2 bg-[#1F2328] border border-gray-600 rounded-lg px-3 py-2">
+    <div className="flex items-center gap-2 px-3 py-2 bg-dark-card border-b border-gray-700 shadow-lg animate-in slide-in-from-top">
+      <div className="flex items-center flex-1 gap-2 bg-dark-surface border border-gray-600 rounded-lg px-3 py-2">
         <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
         <input
           ref={inputRef}
@@ -185,7 +185,7 @@ export function MessageSearch({
               <button
                 onClick={navigatePrevious}
                 disabled={results.length === 0}
-                className="p-1.5 hover:bg-[#1F2328] rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                className="p-1.5 hover:bg-dark-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
                 aria-label="Previous match"
                 title="Previous match (↑)"
               >
@@ -194,7 +194,7 @@ export function MessageSearch({
               <button
                 onClick={navigateNext}
                 disabled={results.length === 0}
-                className="p-1.5 hover:bg-[#1F2328] rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                className="p-1.5 hover:bg-dark-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
                 aria-label="Next match"
                 title="Next match (↓)"
               >
@@ -210,7 +210,7 @@ export function MessageSearch({
 
         <button
           onClick={onClose}
-          className="p-1.5 hover:bg-[#1F2328] rounded transition-colors focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+          className="p-1.5 hover:bg-dark-surface rounded transition-colors focus:ring-2 focus:ring-[#F97316] focus:outline-none"
           aria-label="Close search"
           title="Close search (Esc)"
         >

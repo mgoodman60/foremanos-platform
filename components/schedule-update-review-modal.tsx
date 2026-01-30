@@ -169,7 +169,7 @@ export default function ScheduleUpdateReviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#F8FAFC] text-xl">
             AI-Detected Schedule Impacts
@@ -209,7 +209,7 @@ export default function ScheduleUpdateReviewModal({
           {analysis.suggestions.map((suggestion) => (
             <Card
               key={suggestion.taskId}
-              className={`bg-[#1F2328] border-2 transition-colors cursor-pointer ${
+              className={`bg-dark-surface border-2 transition-colors cursor-pointer ${
                 selectedSuggestions.has(suggestion.taskId)
                   ? 'border-blue-500'
                   : 'border-gray-700 hover:border-gray-600'
@@ -257,7 +257,7 @@ export default function ScheduleUpdateReviewModal({
                     </div>
 
                     {/* Changes */}
-                    <div className="grid grid-cols-2 gap-4 p-3 bg-[#2d333b] rounded-lg">
+                    <div className="grid grid-cols-2 gap-4 p-3 bg-dark-card rounded-lg">
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Current Status</p>
                         <p className="text-sm text-gray-300">
@@ -273,7 +273,7 @@ export default function ScheduleUpdateReviewModal({
                     </div>
 
                     {/* Reasoning */}
-                    <div className="p-3 bg-[#2d333b] rounded-lg">
+                    <div className="p-3 bg-dark-card rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">AI Reasoning</p>
                       <p className="text-sm text-gray-300">{suggestion.reasoning}</p>
                     </div>

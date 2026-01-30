@@ -63,7 +63,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[...Array(6)].map((_, i) => (
-          <Card key={i} className="bg-[#2d333b] border-gray-700 p-4 animate-pulse">
+          <Card key={i} className="bg-dark-card border-gray-700 p-4 animate-pulse">
             <div className="h-4 bg-gray-700 rounded w-1/2 mb-2" />
             <div className="h-8 bg-gray-700 rounded w-1/3" />
           </Card>
@@ -79,7 +79,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
       value: stats?.delayedTasks || 0,
       icon: AlertTriangle,
       color: 'red',
-      bgColor: 'bg-[#2d333b]',
+      bgColor: 'bg-dark-card',
       borderColor: 'border-red-500/60',
       textColor: 'text-red-400',
       iconColor: 'text-red-500',
@@ -92,7 +92,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
       value: stats?.dueThisWeek || 0,
       icon: CalendarClock,
       color: 'amber',
-      bgColor: 'bg-[#2d333b]',
+      bgColor: 'bg-dark-card',
       borderColor: 'border-amber-500/60',
       textColor: 'text-amber-400',
       iconColor: 'text-amber-500',
@@ -105,7 +105,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
       value: stats?.milestonesThisMonth || 0,
       icon: Flag,
       color: 'purple',
-      bgColor: 'bg-[#2d333b]',
+      bgColor: 'bg-dark-card',
       borderColor: 'border-purple-500/60',
       textColor: 'text-purple-400',
       iconColor: 'text-purple-500',
@@ -118,7 +118,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
       value: stats?.completedThisWeek || 0,
       icon: CheckCircle2,
       color: 'green',
-      bgColor: 'bg-[#2d333b]',
+      bgColor: 'bg-dark-card',
       borderColor: 'border-green-500/60',
       textColor: 'text-green-400',
       iconColor: 'text-green-500',
@@ -131,7 +131,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
       value: stats?.criticalPathItems || 0,
       icon: Zap,
       color: 'orange',
-      bgColor: 'bg-[#2d333b]',
+      bgColor: 'bg-dark-card',
       borderColor: 'border-orange-500/60',
       textColor: 'text-orange-400',
       iconColor: 'text-orange-500',
@@ -144,7 +144,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
       value: `${stats?.onTrackPercentage || 0}%`,
       icon: Target,
       color: 'blue',
-      bgColor: 'bg-[#2d333b]',
+      bgColor: 'bg-dark-card',
       borderColor: 'border-emerald-500/60',
       textColor: 'text-emerald-400',
       iconColor: 'text-emerald-500',

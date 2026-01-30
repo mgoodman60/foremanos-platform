@@ -25,6 +25,12 @@
     --bg-secondary: #F8FAFC;
     --bg-dark: var(--color-charcoal);
     --bg-accent: #FFF7ED;          /* Subtle orange tint */
+
+    /* Dark Background Variants */
+    --bg-dark-base: #0d1117;
+    --bg-dark-surface: #1F2328;
+    --bg-dark-card: #2d333b;
+    --bg-dark-hover: #3d444d;
     
     /* Border & UI */
     --border-light: #E2E8F0;

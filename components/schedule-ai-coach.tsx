@@ -433,7 +433,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
 
       {/* AI Thinking Stream */}
       {isThinking && streamingThoughts.length > 0 && (
-        <Card className="p-4 bg-[#1F2328] border-gray-700">
+        <Card className="p-4 bg-dark-surface border-gray-700">
           <div className="flex items-center gap-2 mb-3">
             <MessageSquare className="h-4 w-4 text-purple-400 animate-pulse" />
             <span className="text-sm font-medium text-purple-400">AI is thinking...</span>
@@ -457,7 +457,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
       {analysis && !isThinking && (
         <>
           {/* Health Score */}
-          <Card className="p-4 bg-[#1F2328] border-gray-700">
+          <Card className="p-4 bg-dark-surface border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Target className="h-5 w-5 text-blue-400" />
@@ -481,7 +481,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Critical Path Card */}
               {analysis.criticalPath && (
-                <Card className="p-4 bg-[#1F2328] border-gray-700">
+                <Card className="p-4 bg-dark-surface border-gray-700">
                   <div className="flex items-center gap-2 mb-3">
                     <Route className="h-5 w-5 text-red-400" />
                     <span className="font-medium">Critical Path</span>
@@ -514,7 +514,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
 
               {/* Trade Breakdown Summary */}
               {analysis.tradeBreakdowns && analysis.tradeBreakdowns.length > 0 && (
-                <Card className="p-4 bg-[#1F2328] border-gray-700">
+                <Card className="p-4 bg-dark-surface border-gray-700">
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="h-5 w-5 text-purple-400" />
                     <span className="font-medium">Trade Workload</span>
@@ -550,7 +550,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
             open={expandedSections.has('improvements')}
             onOpenChange={() => toggleSection('improvements')}
           >
-            <Card className="bg-[#1F2328] border-gray-700">
+            <Card className="bg-dark-surface border-gray-700">
               <CollapsibleTrigger asChild>
                 <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-800/50">
                   <div className="flex items-center gap-2">
@@ -671,7 +671,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
               open={expandedSections.has('milestones')}
               onOpenChange={() => toggleSection('milestones')}
             >
-              <Card className="bg-[#1F2328] border-gray-700">
+              <Card className="bg-dark-surface border-gray-700">
                 <CollapsibleTrigger asChild>
                   <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-800/50">
                     <div className="flex items-center gap-2">
@@ -744,7 +744,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
 
       {/* Empty State */}
       {!analysis && !analyzing && (
-        <Card className="p-8 bg-[#1F2328] border-gray-700 text-center">
+        <Card className="p-8 bg-dark-surface border-gray-700 text-center">
           <Brain className="h-12 w-12 mx-auto text-purple-400 opacity-50 mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">Schedule Intelligence</h3>
           <p className="text-gray-400 mb-4 max-w-md mx-auto">
@@ -772,7 +772,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
 
       {/* Apply Confirmation Dialog */}
       <Dialog open={showApplyDialog} onOpenChange={setShowApplyDialog}>
-        <DialogContent className="bg-[#1F2328] border-gray-700 text-white">
+        <DialogContent className="bg-dark-surface border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Apply Schedule Improvements</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -823,7 +823,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
 
       {/* What-If Scenario Dialog */}
       <Dialog open={showWhatIfDialog} onOpenChange={setShowWhatIfDialog}>
-        <DialogContent className="bg-[#1F2328] border-gray-700 text-white max-w-2xl">
+        <DialogContent className="bg-dark-surface border-gray-700 text-white max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <GitBranch className="h-5 w-5 text-amber-400" />

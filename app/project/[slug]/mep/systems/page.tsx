@@ -112,14 +112,14 @@ export default function SystemsPage({ params }: { params: { slug: string } }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search systems..."
-            className="w-full pl-10 pr-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+            className="w-full pl-10 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
               text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
           />
         </div>
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+          className="px-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
             text-white focus:border-blue-500 focus:outline-none"
         >
           <option value="">All Types</option>
@@ -217,7 +217,7 @@ function AddSystemModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg max-w-lg w-full">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 className="text-lg font-medium text-white">Add System</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">

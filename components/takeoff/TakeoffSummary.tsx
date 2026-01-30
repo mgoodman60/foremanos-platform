@@ -66,14 +66,14 @@ export function TakeoffSummary({
 
       {/* MEP Summary - if available */}
       {mepData && mepData.exists && (
-        <div className="mt-4 p-3 bg-[#1F2328] rounded-lg border border-gray-700">
+        <div className="mt-4 p-3 bg-dark-surface rounded-lg border border-gray-700">
           <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
             <Zap className="h-4 w-4 text-yellow-500" />
             MEP Systems Summary
           </h4>
           <div className="grid grid-cols-3 gap-2 text-xs">
             {mepData.electrical && mepData.electrical.itemCount > 0 && (
-              <div className="p-2 bg-[#2d333b] rounded">
+              <div className="p-2 bg-dark-card rounded">
                 <span className="text-yellow-400">⚡ Electrical</span>
                 <div className="text-[#F8FAFC]">{mepData.electrical.itemCount} items</div>
                 <div className="text-green-400">
@@ -82,7 +82,7 @@ export function TakeoffSummary({
               </div>
             )}
             {mepData.plumbing && mepData.plumbing.itemCount > 0 && (
-              <div className="p-2 bg-[#2d333b] rounded">
+              <div className="p-2 bg-dark-card rounded">
                 <span className="text-blue-400">💧 Plumbing</span>
                 <div className="text-[#F8FAFC]">{mepData.plumbing.itemCount} items</div>
                 <div className="text-green-400">
@@ -91,7 +91,7 @@ export function TakeoffSummary({
               </div>
             )}
             {mepData.hvac && mepData.hvac.itemCount > 0 && (
-              <div className="p-2 bg-[#2d333b] rounded">
+              <div className="p-2 bg-dark-card rounded">
                 <span className="text-cyan-400">🌬️ HVAC</span>
                 <div className="text-[#F8FAFC]">{mepData.hvac.itemCount} items</div>
                 <div className="text-green-400">

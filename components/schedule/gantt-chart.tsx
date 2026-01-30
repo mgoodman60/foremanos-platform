@@ -761,7 +761,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         
         <div className="flex flex-wrap items-center gap-4">
           {/* Baseline Toggle */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2d333b] rounded-lg border border-gray-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-card rounded-lg border border-gray-600">
             <Switch
               id="show-baseline"
               checked={showBaseline}
@@ -778,7 +778,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
           </div>
 
           {/* P6 Columns Toggle */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2d333b] rounded-lg border border-gray-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-card rounded-lg border border-gray-600">
             <Switch
               id="show-p6"
               checked={showP6Columns}
@@ -795,7 +795,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
           </div>
 
           {/* Dependency Lines Toggle */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2d333b] rounded-lg border border-gray-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-card rounded-lg border border-gray-600">
             <Switch
               id="show-dependencies"
               checked={showDependencyLines}
@@ -827,7 +827,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
           )}
 
           {/* View Mode Buttons */}
-          <div className="flex gap-1 p-1 bg-[#1F2328] rounded-lg border border-gray-600">
+          <div className="flex gap-1 p-1 bg-dark-surface rounded-lg border border-gray-600">
             <Button
               variant={viewMode === 'day' ? 'default' : 'ghost'}
               size="sm"
@@ -895,7 +895,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         </Button>
 
         {/* Snap to Week Toggle */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2d333b] rounded-lg border border-gray-600">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-card rounded-lg border border-gray-600">
           <Switch
             id="snap-week"
             checked={snapToWeek}
@@ -956,7 +956,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
       {isDragging && draggedTask && dragDaysDelta !== 0 && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
           <div className={cn(
-            "bg-[#1a1f24] rounded-lg px-4 py-2 shadow-xl border flex items-center gap-3",
+            "bg-dark-surface rounded-lg px-4 py-2 shadow-xl border flex items-center gap-3",
             isWhatIfMode ? "border-purple-500" : "border-orange-500"
           )}>
             <span className="text-sm text-gray-300 truncate max-w-[200px]">
@@ -981,13 +981,13 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
       )}
 
       {/* Mobile Scroll Hint */}
-      <div className="md:hidden flex items-center justify-center gap-2 py-2 text-xs text-gray-400 bg-[#2d333b] rounded-t-lg border border-b-0 border-gray-700">
+      <div className="md:hidden flex items-center justify-center gap-2 py-2 text-xs text-gray-400 bg-dark-card rounded-t-lg border border-b-0 border-gray-700">
         <Move className="w-3 h-3" />
         <span>Scroll horizontally to view full chart</span>
       </div>
 
       {/* Gantt Chart */}
-      <Card className="bg-[#2d333b] border-gray-700 md:rounded-t-lg rounded-t-none">
+      <Card className="bg-dark-card border-gray-700 md:rounded-t-lg rounded-t-none">
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
           <div className="min-w-[800px] md:min-w-[1000px] lg:min-w-[1200px] relative">
             {/* Today Marker */}
@@ -1030,24 +1030,24 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
             )}>
               {showP6Columns ? (
                 <>
-                  <div className="px-2 py-3 bg-[#1F2328] border-r border-gray-700 text-center">
+                  <div className="px-2 py-3 bg-dark-surface border-r border-gray-700 text-center">
                     <span className="text-xs font-semibold text-gray-400">ID</span>
                   </div>
-                  <div className="px-2 py-3 bg-[#1F2328] border-r border-gray-700 text-center">
+                  <div className="px-2 py-3 bg-dark-surface border-r border-gray-700 text-center">
                     <span className="text-xs font-semibold text-gray-400">WBS</span>
                   </div>
-                  <div className="px-2 py-3 bg-[#1F2328] border-r border-gray-700">
+                  <div className="px-2 py-3 bg-dark-surface border-r border-gray-700">
                     <span className="text-xs font-semibold text-gray-400">Task Name</span>
                   </div>
-                  <div className="px-2 py-3 bg-[#1F2328] border-r border-gray-700 text-center">
+                  <div className="px-2 py-3 bg-dark-surface border-r border-gray-700 text-center">
                     <span className="text-xs font-semibold text-gray-400">Dur</span>
                   </div>
-                  <div className="px-2 py-3 bg-[#1F2328] border-r border-gray-700 text-center">
+                  <div className="px-2 py-3 bg-dark-surface border-r border-gray-700 text-center">
                     <span className="text-xs font-semibold text-gray-400">Float</span>
                   </div>
                 </>
               ) : (
-                <div className="px-4 py-3 bg-[#1F2328] border-r border-gray-700">
+                <div className="px-4 py-3 bg-dark-surface border-r border-gray-700">
                   <span className="text-sm font-semibold text-gray-200">Task</span>
                 </div>
               )}
@@ -1055,7 +1055,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                 {timelineHeaders.map((date, idx) => (
                   <div
                     key={idx}
-                    className="flex-1 px-2 py-3 text-center border-r border-gray-700 bg-[#1F2328]"
+                    className="flex-1 px-2 py-3 text-center border-r border-gray-700 bg-dark-surface"
                   >
                     <span className="text-xs font-medium text-gray-300">
                       {viewMode === 'day' && format(date, 'MMM d')}
@@ -1068,7 +1068,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
             </div>
 
             {/* Legend for baseline vs actual and markers */}
-            <div className="flex items-center gap-4 px-4 py-2 bg-[#1F2328]/50 border-b border-gray-700 text-xs flex-wrap">
+            <div className="flex items-center gap-4 px-4 py-2 bg-dark-surface/50 border-b border-gray-700 text-xs flex-wrap">
               {showBaseline && (
                 <>
                   <div className="flex items-center gap-2">
@@ -1135,7 +1135,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                   <div key={task.id} className="border-b border-gray-700">
                     {/* Main Task Row */}
                     <div className={cn(
-                      "grid hover:bg-[#1F2328]/50 transition-colors",
+                      "grid hover:bg-dark-surface/50 transition-colors",
                       showP6Columns ? "grid-cols-[60px_80px_200px_50px_50px_1fr]" : "grid-cols-[300px_1fr]"
                     )}>
                       {/* P6 Style Columns */}
@@ -1193,7 +1193,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                                       )}
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent side="right" className="bg-[#1F2328] border-gray-700 max-w-xs">
+                                  <TooltipContent side="right" className="bg-dark-surface border-gray-700 max-w-xs">
                                     <p className="font-medium">{task.name}</p>
                                     {/* Category badge */}
                                     <div className={cn(
@@ -1421,7 +1421,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
 
                     {/* Expanded Details */}
                     {isExpanded && (
-                      <div className="px-4 py-3 bg-[#1F2328]/30 border-t border-gray-700">
+                      <div className="px-4 py-3 bg-dark-surface/30 border-t border-gray-700">
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           {task.predecessors.length > 0 && (
                             <div>
@@ -1517,7 +1517,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                             />
                             
                             {/* Tooltip */}
-                            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-2 bg-[#1F2328] rounded-lg shadow-xl border border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-2 bg-dark-surface rounded-lg shadow-xl border border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
                               <div className="text-sm font-semibold text-gray-100">{milestone.name}</div>
                               <div className="text-xs text-gray-400 mt-1">
                                 {format(milestoneDate, 'MMM d, yyyy')}
@@ -1547,7 +1547,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
       </Card>
 
       {/* Enhanced Legend with Task Categories */}
-      <div className="flex flex-wrap items-center gap-3 text-sm bg-[#2d333b]/50 p-3 rounded-lg border border-gray-700">
+      <div className="flex flex-wrap items-center gap-3 text-sm bg-dark-card/50 p-3 rounded-lg border border-gray-700">
         <span className="text-gray-400 text-xs font-medium mr-1">Task Status:</span>
         
         {/* Critical Path */}

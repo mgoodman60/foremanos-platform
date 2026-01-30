@@ -267,7 +267,7 @@ export default function EarthworkCalculator({
               <select
                 value={soilType}
                 onChange={(e) => setSoilType(e.target.value)}
-                className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 {SOIL_TYPES.map((soil) => (
                   <option key={soil.id} value={soil.id}>
@@ -289,7 +289,7 @@ export default function EarthworkCalculator({
                     value={areaSF}
                     onChange={(e) => setAreaSF(e.target.value)}
                     placeholder="e.g., 50000"
-                    className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -303,7 +303,7 @@ export default function EarthworkCalculator({
                       value={avgCutDepth}
                       onChange={(e) => setAvgCutDepth(e.target.value)}
                       placeholder="e.g., 2.5"
-                      className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
                   <div>
@@ -316,7 +316,7 @@ export default function EarthworkCalculator({
                       value={avgFillDepth}
                       onChange={(e) => setAvgFillDepth(e.target.value)}
                       placeholder="e.g., 1.0"
-                      className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export default function EarthworkCalculator({
                   Select Documents
                 </label>
                 {documents.length === 0 ? (
-                  <div className="text-center py-4 text-gray-400 text-sm bg-[#1F2328] rounded-lg">
+                  <div className="text-center py-4 text-gray-400 text-sm bg-dark-surface rounded-lg">
                     <Info className="w-5 h-5 mx-auto mb-2 text-gray-500" />
                     No grading/survey documents found.
                     Upload site survey or grading plans first.
@@ -343,14 +343,14 @@ export default function EarthworkCalculator({
                         className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                           selectedDocs.includes(doc.id)
                             ? 'bg-amber-900/30 border border-amber-600'
-                            : 'bg-[#1F2328] border border-transparent hover:bg-[#373E47]'
+                            : 'bg-dark-surface border border-transparent hover:bg-[#373E47]'
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={selectedDocs.includes(doc.id)}
                           onChange={() => toggleDocSelection(doc.id)}
-                          className="rounded border-gray-600 bg-[#1F2328] text-amber-600 focus:ring-amber-500"
+                          className="rounded border-gray-600 bg-dark-surface text-amber-600 focus:ring-amber-500"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-200 truncate">
@@ -372,7 +372,7 @@ export default function EarthworkCalculator({
                     value={areaSF}
                     onChange={(e) => setAreaSF(e.target.value)}
                     placeholder="SF - used if extraction insufficient"
-                    className="w-full px-3 py-2 text-sm bg-[#1F2328] border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3 py-2 text-sm bg-dark-surface border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
               </div>
@@ -478,7 +478,7 @@ export default function EarthworkCalculator({
               
               {/* Cost Estimate */}
               <div className="border border-gray-700 rounded-lg overflow-hidden">
-                <div className="bg-[#1F2328] px-4 py-2 border-b border-gray-700">
+                <div className="bg-dark-surface px-4 py-2 border-b border-gray-700">
                   <h5 className="font-medium text-[#F8FAFC]">Cost Estimate</h5>
                   <p className="text-xs text-gray-400">
                     Regional multiplier: {result.costEstimate.regionalMultiplier}x (KY-Morehead)

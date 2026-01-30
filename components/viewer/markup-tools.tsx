@@ -382,7 +382,7 @@ export default function MarkupTools({
       {/* Text Input Dialog */}
       {showTextDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#1F2328] border border-gray-700 rounded-xl p-4 w-96">
+          <div className="bg-dark-surface border border-gray-700 rounded-xl p-4 w-96">
             <h4 className="text-white font-medium mb-3">Add Text Annotation</h4>
             <textarea
               value={textInput}

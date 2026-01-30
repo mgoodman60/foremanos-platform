@@ -20,7 +20,7 @@ export function MEPEquipmentRibbon({ projectSlug, projectId }: MEPEquipmentRibbo
         <Button
           onClick={() => setIsOpen(true)}
           variant="outline"
-          className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white py-2"
+          className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
         >
           <Wrench className="h-4 w-4" />
           <span>MEP Equipment</span>
@@ -29,7 +29,7 @@ export function MEPEquipmentRibbon({ projectSlug, projectId }: MEPEquipmentRibbo
 
       {/* MEP Equipment Browser Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-6xl h-[85vh] p-0 bg-[#1F2328] border-gray-700">
+        <DialogContent className="max-w-6xl h-[85vh] p-0 bg-dark-surface border-gray-700">
           <MEPEquipmentBrowser
             projectSlug={projectSlug}
             onClose={() => setIsOpen(false)}

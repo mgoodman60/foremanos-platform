@@ -114,7 +114,7 @@ export default function EVMDashboard() {
 
   if (!data) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="py-12 text-center">
           <BarChart3 className="w-12 h-12 mx-auto text-gray-500 mb-4" />
           <p className="text-gray-400 mb-2">Project budget not configured</p>
@@ -147,7 +147,7 @@ export default function EVMDashboard() {
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Planned Value */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <Calendar className="w-4 h-4 mr-2" />
@@ -165,7 +165,7 @@ export default function EVMDashboard() {
         </Card>
 
         {/* Earned Value */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -183,7 +183,7 @@ export default function EVMDashboard() {
         </Card>
 
         {/* Actual Cost */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <DollarSign className="w-4 h-4 mr-2" />
@@ -201,7 +201,7 @@ export default function EVMDashboard() {
         </Card>
 
         {/* Budget at Completion */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <BarChart3 className="w-4 h-4 mr-2" />
@@ -222,7 +222,7 @@ export default function EVMDashboard() {
       {/* Performance Indices */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Cost Performance Index */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader>
             <CardTitle className="text-[#F8FAFC]">Cost Performance Index (CPI)</CardTitle>
           </CardHeader>
@@ -264,7 +264,7 @@ export default function EVMDashboard() {
         </Card>
 
         {/* Schedule Performance Index */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader>
             <CardTitle className="text-[#F8FAFC]">Schedule Performance Index (SPI)</CardTitle>
           </CardHeader>
@@ -309,7 +309,7 @@ export default function EVMDashboard() {
       {/* Forecast */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Estimate at Completion */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <Activity className="w-4 h-4 mr-2" />
@@ -327,7 +327,7 @@ export default function EVMDashboard() {
         </Card>
 
         {/* Estimate to Complete */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <TrendingUp className="w-4 h-4 mr-2" />
@@ -345,7 +345,7 @@ export default function EVMDashboard() {
         </Card>
 
         {/* Variance at Completion */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
               <AlertTriangle className="w-4 h-4 mr-2" />
@@ -367,7 +367,7 @@ export default function EVMDashboard() {
       </div>
 
       {/* Progress */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-[#F8FAFC]">Project Progress</CardTitle>
         </CardHeader>

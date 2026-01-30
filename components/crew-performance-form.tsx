@@ -110,7 +110,7 @@ export default function CrewPerformanceForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#F8FAFC]">
             Record Daily Performance - {crewName}
@@ -133,7 +133,7 @@ export default function CrewPerformanceForm({
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
                 required
               />
             </div>
@@ -149,14 +149,14 @@ export default function CrewPerformanceForm({
                 value={formData.crewSize}
                 onChange={(e) => setFormData({ ...formData, crewSize: e.target.value })}
                 placeholder="Number of workers"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
                 required
               />
             </div>
           </div>
 
           {/* Productivity Metrics */}
-          <div className="space-y-4 p-4 bg-[#1F2328] rounded-lg">
+          <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-400" />
               Productivity Metrics
@@ -175,7 +175,7 @@ export default function CrewPerformanceForm({
                   value={formData.hoursWorked}
                   onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
                   placeholder="8.0"
-                  className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                   required
                 />
               </div>
@@ -191,7 +191,7 @@ export default function CrewPerformanceForm({
                   value={formData.tasksCompleted}
                   onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })}
                   placeholder="0"
-                  className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                 />
               </div>
 
@@ -207,14 +207,14 @@ export default function CrewPerformanceForm({
                   value={formData.unitsProduced}
                   onChange={(e) => setFormData({ ...formData, unitsProduced: e.target.value })}
                   placeholder="SF, LF, etc"
-                  className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                 />
               </div>
             </div>
           </div>
 
           {/* Safety & Quality */}
-          <div className="space-y-4 p-4 bg-[#1F2328] rounded-lg">
+          <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <Shield className="w-4 h-4 text-blue-400" />
               Safety & Quality
@@ -231,7 +231,7 @@ export default function CrewPerformanceForm({
                   min="0"
                   value={formData.safetyIncidents}
                   onChange={(e) => setFormData({ ...formData, safetyIncidents: e.target.value })}
-                  className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                 />
               </div>
 
@@ -245,7 +245,7 @@ export default function CrewPerformanceForm({
                   min="0"
                   value={formData.qualityIssues}
                   onChange={(e) => setFormData({ ...formData, qualityIssues: e.target.value })}
-                  className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                 />
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function CrewPerformanceForm({
                 id="reworkRequired"
                 checked={formData.reworkRequired}
                 onChange={(e) => setFormData({ ...formData, reworkRequired: e.target.checked })}
-                className="rounded border-gray-700 bg-[#2d333b]"
+                className="rounded border-gray-700 bg-dark-card"
               />
               <Label htmlFor="reworkRequired" className="text-gray-300">
                 Rework Required
@@ -265,7 +265,7 @@ export default function CrewPerformanceForm({
           </div>
 
           {/* Weather Impact */}
-          <div className="space-y-4 p-4 bg-[#1F2328] rounded-lg">
+          <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-yellow-400" />
               Weather Impact
@@ -277,7 +277,7 @@ export default function CrewPerformanceForm({
                 id="weatherDelay"
                 checked={formData.weatherDelay}
                 onChange={(e) => setFormData({ ...formData, weatherDelay: e.target.checked })}
-                className="rounded border-gray-700 bg-[#2d333b]"
+                className="rounded border-gray-700 bg-dark-card"
               />
               <Label htmlFor="weatherDelay" className="text-gray-300">
                 Weather caused delays today
@@ -294,7 +294,7 @@ export default function CrewPerformanceForm({
                   value={formData.weatherNotes}
                   onChange={(e) => setFormData({ ...formData, weatherNotes: e.target.value })}
                   placeholder="Describe weather conditions and impact..."
-                  className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                   rows={2}
                 />
               </div>
@@ -311,7 +311,7 @@ export default function CrewPerformanceForm({
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Any additional observations or comments..."
-              className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+              className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
               rows={3}
             />
           </div>

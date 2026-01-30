@@ -471,21 +471,21 @@ export default function ContractsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] p-6">
+    <div className="min-h-screen bg-dark-surface p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => router.push(`/project/${projectSlug}/subcontractors`)}
-            className="mb-4 text-gray-300 hover:text-white hover:bg-[#2d333b]"
+            className="mb-4 text-gray-300 hover:text-white hover:bg-dark-card"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Subcontractors
@@ -511,7 +511,7 @@ export default function ContractsPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-[#2d333b] border-gray-700 p-4">
+            <Card className="bg-dark-card border-gray-700 p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-500/20">
                   <FileText className="w-5 h-5 text-blue-400" />
@@ -522,7 +522,7 @@ export default function ContractsPage() {
                 </div>
               </div>
             </Card>
-            <Card className="bg-[#2d333b] border-gray-700 p-4">
+            <Card className="bg-dark-card border-gray-700 p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-500/20">
                   <DollarSign className="w-5 h-5 text-green-400" />
@@ -533,7 +533,7 @@ export default function ContractsPage() {
                 </div>
               </div>
             </Card>
-            <Card className="bg-[#2d333b] border-gray-700 p-4">
+            <Card className="bg-dark-card border-gray-700 p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-500/20">
                   <TrendingUp className="w-5 h-5 text-purple-400" />
@@ -544,7 +544,7 @@ export default function ContractsPage() {
                 </div>
               </div>
             </Card>
-            <Card className="bg-[#2d333b] border-gray-700 p-4">
+            <Card className="bg-dark-card border-gray-700 p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-orange-500/20">
                   <Receipt className="w-5 h-5 text-orange-400" />
@@ -559,14 +559,14 @@ export default function ContractsPage() {
         )}
 
         {/* Filters */}
-        <Card className="bg-[#2d333b] border-gray-700 p-4 mb-6">
+        <Card className="bg-dark-card border-gray-700 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <Select value={filterSubcontractor} onValueChange={setFilterSubcontractor}>
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                   <SelectValue placeholder="Filter by subcontractor" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   <SelectItem value="all" className="text-white">All Subcontractors</SelectItem>
                   {subcontractors.map((sub) => (
                     <SelectItem key={sub.id} value={sub.id} className="text-white">
@@ -578,10 +578,10 @@ export default function ContractsPage() {
             </div>
             <div className="w-full sm:w-48">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   <SelectItem value="all" className="text-white">All Statuses</SelectItem>
                   <SelectItem value="DRAFT" className="text-white">Draft</SelectItem>
                   <SelectItem value="ACTIVE" className="text-white">Active</SelectItem>
@@ -596,7 +596,7 @@ export default function ContractsPage() {
         {/* Contracts List */}
         <div className="space-y-4">
           {contracts.length === 0 ? (
-            <Card className="bg-[#2d333b] border-gray-700 p-12 text-center">
+            <Card className="bg-dark-card border-gray-700 p-12 text-center">
               <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">No contracts yet</h3>
               <p className="text-gray-400 mb-6">Upload a contract PDF to get started with AI extraction</p>
@@ -610,7 +610,7 @@ export default function ContractsPage() {
             </Card>
           ) : (
             contracts.map((contract) => (
-              <Card key={contract.id} className="bg-[#2d333b] border-gray-700 p-6">
+              <Card key={contract.id} className="bg-dark-card border-gray-700 p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -667,7 +667,7 @@ export default function ContractsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleViewContract(contract.id)}
-                      className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+                      className="border-gray-600 text-gray-300 hover:bg-dark-surface"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       View
@@ -682,11 +682,11 @@ export default function ContractsPage() {
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-[#2d333b] border-gray-700">
+                      <DropdownMenuContent className="bg-dark-card border-gray-700">
                         {contract.status === 'DRAFT' && (
                           <DropdownMenuItem
                             onClick={() => handleStatusAction(contract.id, 'approve')}
-                            className="text-white hover:bg-[#1F2328]"
+                            className="text-white hover:bg-dark-surface"
                           >
                             <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                             Approve & Activate
@@ -696,14 +696,14 @@ export default function ContractsPage() {
                           <>
                             <DropdownMenuItem
                               onClick={() => handleStatusAction(contract.id, 'complete')}
-                              className="text-white hover:bg-[#1F2328]"
+                              className="text-white hover:bg-dark-surface"
                             >
                               <CheckCircle className="w-4 h-4 mr-2 text-blue-400" />
                               Mark Complete
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleStatusAction(contract.id, 'suspend')}
-                              className="text-white hover:bg-[#1F2328]"
+                              className="text-white hover:bg-dark-surface"
                             >
                               <Clock className="w-4 h-4 mr-2 text-yellow-400" />
                               Suspend
@@ -713,7 +713,7 @@ export default function ContractsPage() {
                         {contract.status === 'SUSPENDED' && (
                           <DropdownMenuItem
                             onClick={() => handleStatusAction(contract.id, 'approve')}
-                            className="text-white hover:bg-[#1F2328]"
+                            className="text-white hover:bg-dark-surface"
                           >
                             <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                             Reactivate
@@ -739,7 +739,7 @@ export default function ContractsPage() {
 
       {/* Upload/Create Contract Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileCheck className="w-5 h-5 text-[#F97316]" />
@@ -755,10 +755,10 @@ export default function ContractsPage() {
             <div>
               <Label className="text-gray-300">Select Subcontractor *</Label>
               <Select value={selectedSubcontractorId} onValueChange={setSelectedSubcontractorId}>
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white mt-1">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white mt-1">
                   <SelectValue placeholder="Choose subcontractor" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   {subcontractors.map((sub) => (
                     <SelectItem key={sub.id} value={sub.id} className="text-white">
                       {sub.companyName}
@@ -811,7 +811,7 @@ export default function ContractsPage() {
                     )}
                   </label>
                 </div>
-                <div className="bg-[#1F2328] rounded-lg p-4 mt-4 text-sm">
+                <div className="bg-dark-surface rounded-lg p-4 mt-4 text-sm">
                   <h4 className="text-gray-300 font-medium mb-2">AI will extract:</h4>
                   <ul className="text-gray-400 space-y-1 list-disc list-inside">
                     <li>Contract value, dates, and retainage terms</li>
@@ -831,7 +831,7 @@ export default function ContractsPage() {
                     value={manualData.title}
                     onChange={(e) => setManualData({ ...manualData, title: e.target.value })}
                     placeholder="e.g., Electrical Work - Phase 1"
-                    className="bg-[#1F2328] border-gray-600 text-white mt-1"
+                    className="bg-dark-surface border-gray-600 text-white mt-1"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -841,10 +841,10 @@ export default function ContractsPage() {
                       value={manualData.contractType}
                       onValueChange={(v) => setManualData({ ...manualData, contractType: v })}
                     >
-                      <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white mt-1">
+                      <SelectTrigger className="bg-dark-surface border-gray-600 text-white mt-1">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#2d333b] border-gray-700">
+                      <SelectContent className="bg-dark-card border-gray-700">
                         {CONTRACT_TYPES.map((type) => (
                           <SelectItem key={type.value} value={type.value} className="text-white">
                             {type.label}
@@ -861,7 +861,7 @@ export default function ContractsPage() {
                       value={manualData.originalValue}
                       onChange={(e) => setManualData({ ...manualData, originalValue: e.target.value })}
                       placeholder="500000"
-                      className="bg-[#1F2328] border-gray-600 text-white mt-1"
+                      className="bg-dark-surface border-gray-600 text-white mt-1"
                     />
                   </div>
                 </div>
@@ -873,7 +873,7 @@ export default function ContractsPage() {
                       type="date"
                       value={manualData.effectiveDate}
                       onChange={(e) => setManualData({ ...manualData, effectiveDate: e.target.value })}
-                      className="bg-[#1F2328] border-gray-600 text-white mt-1"
+                      className="bg-dark-surface border-gray-600 text-white mt-1"
                     />
                   </div>
                   <div>
@@ -883,7 +883,7 @@ export default function ContractsPage() {
                       type="date"
                       value={manualData.completionDate}
                       onChange={(e) => setManualData({ ...manualData, completionDate: e.target.value })}
-                      className="bg-[#1F2328] border-gray-600 text-white mt-1"
+                      className="bg-dark-surface border-gray-600 text-white mt-1"
                     />
                   </div>
                   <div>
@@ -894,7 +894,7 @@ export default function ContractsPage() {
                       value={manualData.retainagePercent}
                       onChange={(e) => setManualData({ ...manualData, retainagePercent: e.target.value })}
                       placeholder="10"
-                      className="bg-[#1F2328] border-gray-600 text-white mt-1"
+                      className="bg-dark-surface border-gray-600 text-white mt-1"
                     />
                   </div>
                 </div>
@@ -905,7 +905,7 @@ export default function ContractsPage() {
                     value={manualData.scopeOfWork}
                     onChange={(e) => setManualData({ ...manualData, scopeOfWork: e.target.value })}
                     placeholder="Describe the scope of work..."
-                    className="bg-[#1F2328] border-gray-600 text-white mt-1 min-h-[100px]"
+                    className="bg-dark-surface border-gray-600 text-white mt-1 min-h-[100px]"
                   />
                 </div>
               </div>
@@ -917,7 +917,7 @@ export default function ContractsPage() {
               variant="outline"
               onClick={() => setShowUploadDialog(false)}
               disabled={uploading}
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               Cancel
             </Button>
@@ -943,7 +943,7 @@ export default function ContractsPage() {
 
       {/* Contract Detail Dialog */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
           {detailLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
@@ -958,7 +958,7 @@ export default function ContractsPage() {
               </DialogHeader>
 
               <Tabs defaultValue="overview" className="mt-4">
-                <TabsList className="bg-[#1F2328]">
+                <TabsList className="bg-dark-surface">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="insurance">Insurance ({selectedContract.contract.insuranceCerts?.length || 0})</TabsTrigger>
                   <TabsTrigger value="changeOrders">Change Orders ({selectedContract.contract.changeOrders?.length || 0})</TabsTrigger>
@@ -968,19 +968,19 @@ export default function ContractsPage() {
                 <TabsContent value="overview" className="mt-4 space-y-4">
                   {/* Financials */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-[#1F2328] rounded-lg p-4">
+                    <div className="bg-dark-surface rounded-lg p-4">
                       <p className="text-gray-400 text-sm">Original Value</p>
                       <p className="text-white text-xl font-bold">{formatCurrency(selectedContract.financials.originalValue)}</p>
                     </div>
-                    <div className="bg-[#1F2328] rounded-lg p-4">
+                    <div className="bg-dark-surface rounded-lg p-4">
                       <p className="text-gray-400 text-sm">Approved COs</p>
                       <p className="text-purple-400 text-xl font-bold">+{formatCurrency(selectedContract.financials.approvedCOs)}</p>
                     </div>
-                    <div className="bg-[#1F2328] rounded-lg p-4">
+                    <div className="bg-dark-surface rounded-lg p-4">
                       <p className="text-gray-400 text-sm">Current Value</p>
                       <p className="text-white text-xl font-bold">{formatCurrency(selectedContract.financials.currentValue)}</p>
                     </div>
-                    <div className="bg-[#1F2328] rounded-lg p-4">
+                    <div className="bg-dark-surface rounded-lg p-4">
                       <p className="text-gray-400 text-sm">% Complete</p>
                       <p className="text-[#F97316] text-xl font-bold">{selectedContract.financials.percentComplete}%</p>
                     </div>
@@ -988,7 +988,7 @@ export default function ContractsPage() {
 
                   {/* Insurance Compliance */}
                   {selectedContract.insuranceCompliance && (
-                    <div className="bg-[#1F2328] rounded-lg p-4">
+                    <div className="bg-dark-surface rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Shield className="w-5 h-5 text-blue-400" />
                         <h4 className="text-white font-medium">Insurance Compliance</h4>
@@ -1023,7 +1023,7 @@ export default function ContractsPage() {
 
                   {/* Scope of Work */}
                   {selectedContract.contract.scopeOfWork && (
-                    <div className="bg-[#1F2328] rounded-lg p-4">
+                    <div className="bg-dark-surface rounded-lg p-4">
                       <h4 className="text-white font-medium mb-2">Scope of Work</h4>
                       <p className="text-gray-300 text-sm whitespace-pre-wrap">{selectedContract.contract.scopeOfWork}</p>
                     </div>
@@ -1034,7 +1034,7 @@ export default function ContractsPage() {
                     <Button
                       onClick={() => window.open(selectedContract.contract.fileUrl, '_blank')}
                       variant="outline"
-                      className="w-full border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+                      className="w-full border-gray-600 text-gray-300 hover:bg-dark-surface"
                     >
                       <FileText className="w-4 h-4 mr-2" />
                       View Contract PDF
@@ -1046,7 +1046,7 @@ export default function ContractsPage() {
                   {selectedContract.contract.insuranceCerts?.length > 0 ? (
                     <div className="space-y-3">
                       {selectedContract.contract.insuranceCerts.map((cert: any) => (
-                        <div key={cert.id} className="bg-[#1F2328] rounded-lg p-4">
+                        <div key={cert.id} className="bg-dark-surface rounded-lg p-4">
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="text-white font-medium">{cert.certType.replace('_', ' ')}</p>
@@ -1073,7 +1073,7 @@ export default function ContractsPage() {
                   {selectedContract.contract.changeOrders?.length > 0 ? (
                     <div className="space-y-3">
                       {selectedContract.contract.changeOrders.map((co: any) => (
-                        <div key={co.id} className="bg-[#1F2328] rounded-lg p-4">
+                        <div key={co.id} className="bg-dark-surface rounded-lg p-4">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
@@ -1099,11 +1099,11 @@ export default function ContractsPage() {
                                   <MoreHorizontal className="w-4 h-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-[#2d333b] border-gray-600">
+                              <DropdownMenuContent align="end" className="bg-dark-card border-gray-600">
                                 {co.status === 'DRAFT' && (
                                   <DropdownMenuItem 
                                     onClick={() => handleChangeOrderAction(co, 'submit')}
-                                    className="text-gray-200 hover:bg-[#1F2328]"
+                                    className="text-gray-200 hover:bg-dark-surface"
                                   >
                                     Submit for Review
                                   </DropdownMenuItem>
@@ -1111,7 +1111,7 @@ export default function ContractsPage() {
                                 {co.status === 'SUBMITTED' && (
                                   <DropdownMenuItem 
                                     onClick={() => handleChangeOrderAction(co, 'review')}
-                                    className="text-gray-200 hover:bg-[#1F2328]"
+                                    className="text-gray-200 hover:bg-dark-surface"
                                   >
                                     Mark Under Review
                                   </DropdownMenuItem>
@@ -1120,7 +1120,7 @@ export default function ContractsPage() {
                                   <>
                                     <DropdownMenuItem 
                                       onClick={() => handlePreviewBudgetImpact(co)}
-                                      className="text-green-400 hover:bg-[#1F2328]"
+                                      className="text-green-400 hover:bg-dark-surface"
                                     >
                                       <TrendingUp className="w-4 h-4 mr-2" />
                                       Preview Budget Impact & Approve
@@ -1128,7 +1128,7 @@ export default function ContractsPage() {
                                     <DropdownMenuSeparator className="bg-gray-600" />
                                     <DropdownMenuItem 
                                       onClick={() => handleChangeOrderAction(co, 'reject')}
-                                      className="text-red-400 hover:bg-[#1F2328]"
+                                      className="text-red-400 hover:bg-dark-surface"
                                     >
                                       Reject
                                     </DropdownMenuItem>
@@ -1137,7 +1137,7 @@ export default function ContractsPage() {
                                 {co.status === 'APPROVED' && (
                                   <DropdownMenuItem 
                                     onClick={() => handleChangeOrderAction(co, 'void')}
-                                    className="text-red-400 hover:bg-[#1F2328]"
+                                    className="text-red-400 hover:bg-dark-surface"
                                   >
                                     Void Change Order
                                   </DropdownMenuItem>
@@ -1159,7 +1159,7 @@ export default function ContractsPage() {
                   {selectedContract.contract.payments?.length > 0 ? (
                     <div className="space-y-3">
                       {selectedContract.contract.payments.map((payment: any) => (
-                        <div key={payment.id} className="bg-[#1F2328] rounded-lg p-4">
+                        <div key={payment.id} className="bg-dark-surface rounded-lg p-4">
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="text-white font-medium">Payment #{payment.paymentNumber}</p>
@@ -1191,7 +1191,7 @@ export default function ContractsPage() {
 
       {/* Budget Impact Preview Modal */}
       <Dialog open={showBudgetImpact} onOpenChange={setShowBudgetImpact}>
-        <DialogContent className="bg-[#2d333b] border-gray-600 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-dark-card border-gray-600 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-[#F97316]" />
@@ -1211,7 +1211,7 @@ export default function ContractsPage() {
           ) : budgetImpact ? (
             <div className="space-y-6">
               {/* Approved Amount Input */}
-              <div className="bg-[#1F2328] rounded-lg p-4">
+              <div className="bg-dark-surface rounded-lg p-4">
                 <Label className="text-gray-300 mb-2 block">Approved Amount</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400">$</span>
@@ -1219,7 +1219,7 @@ export default function ContractsPage() {
                     type="number"
                     value={approvedAmountInput}
                     onChange={(e) => setApprovedAmountInput(e.target.value)}
-                    className="bg-[#2d333b] border-gray-600 text-white flex-1"
+                    className="bg-dark-card border-gray-600 text-white flex-1"
                   />
                 </div>
                 <p className="text-gray-400 text-sm mt-1">
@@ -1228,7 +1228,7 @@ export default function ContractsPage() {
               </div>
 
               {/* Project Budget Impact */}
-              <div className="bg-[#1F2328] rounded-lg p-4">
+              <div className="bg-dark-surface rounded-lg p-4">
                 <h4 className="text-white font-medium mb-3">Project Budget Impact</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1263,7 +1263,7 @@ export default function ContractsPage() {
 
               {/* Budget Line Items */}
               {budgetImpact.budgetImpacts.length > 0 && (
-                <div className="bg-[#1F2328] rounded-lg p-4">
+                <div className="bg-dark-surface rounded-lg p-4">
                   <h4 className="text-white font-medium mb-3">Affected Budget Line Items</h4>
                   <div className="space-y-2">
                     {budgetImpact.budgetImpacts.map((impact: any) => (
@@ -1286,7 +1286,7 @@ export default function ContractsPage() {
 
               {/* Schedule Impact */}
               {budgetImpact.scheduleImpact.daysAdded > 0 && (
-                <div className="bg-[#1F2328] rounded-lg p-4">
+                <div className="bg-dark-surface rounded-lg p-4">
                   <h4 className="text-white font-medium mb-3 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-yellow-400" />
                     Schedule Impact
@@ -1307,7 +1307,7 @@ export default function ContractsPage() {
               )}
 
               {/* Cash Flow Impact */}
-              <div className="bg-[#1F2328] rounded-lg p-4">
+              <div className="bg-dark-surface rounded-lg p-4">
                 <h4 className="text-white font-medium mb-3">Cash Flow Impact</h4>
                 <p className="text-gray-300 text-sm">
                   Additional {formatCurrency(budgetImpact.cashFlowImpact.additionalPerMonth)}/month 
@@ -1315,12 +1315,12 @@ export default function ContractsPage() {
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   {budgetImpact.cashFlowImpact.monthsAffected.slice(0, 6).map((month: string) => (
-                    <span key={month} className="px-2 py-1 bg-[#2d333b] rounded text-xs text-gray-300">
+                    <span key={month} className="px-2 py-1 bg-dark-card rounded text-xs text-gray-300">
                       {month}
                     </span>
                   ))}
                   {budgetImpact.cashFlowImpact.monthsAffected.length > 6 && (
-                    <span className="px-2 py-1 bg-[#2d333b] rounded text-xs text-gray-300">
+                    <span className="px-2 py-1 bg-dark-card rounded text-xs text-gray-300">
                       +{budgetImpact.cashFlowImpact.monthsAffected.length - 6} more
                     </span>
                   )}
@@ -1348,7 +1348,7 @@ export default function ContractsPage() {
             <Button
               variant="outline"
               onClick={() => setShowBudgetImpact(false)}
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               Cancel
             </Button>

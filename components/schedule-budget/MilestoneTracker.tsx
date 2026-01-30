@@ -195,7 +195,7 @@ export default function MilestoneTracker() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#2d333b] border-gray-700">
+      <Card className="p-6 bg-dark-card border-gray-700">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-700 rounded w-1/3" />
           <div className="h-32 bg-gray-700 rounded" />
@@ -209,27 +209,27 @@ export default function MilestoneTracker() {
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-2xl font-bold text-white">{stats.total}</div>
             <div className="text-sm text-gray-400">Total</div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-2xl font-bold text-green-400">{stats.completed}</div>
             <div className="text-sm text-gray-400">Completed</div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-2xl font-bold text-blue-400">{stats.upcoming}</div>
             <div className="text-sm text-gray-400">Upcoming</div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-2xl font-bold text-yellow-400">{stats.inProgress}</div>
             <div className="text-sm text-gray-400">In Progress</div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-2xl font-bold text-orange-400">{stats.atRisk}</div>
             <div className="text-sm text-gray-400">At Risk</div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-2xl font-bold text-red-400">{stats.delayed}</div>
             <div className="text-sm text-gray-400">Delayed</div>
           </Card>
@@ -243,7 +243,7 @@ export default function MilestoneTracker() {
         </Button>
         
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-40 bg-[#2d333b] border-gray-700">
+          <SelectTrigger className="w-40 bg-dark-card border-gray-700">
             <SelectValue placeholder="Filter" />
           </SelectTrigger>
           <SelectContent>
@@ -261,7 +261,7 @@ export default function MilestoneTracker() {
       {/* Milestone List */}
       <div className="space-y-3">
         {filteredMilestones.length === 0 ? (
-          <Card className="p-8 bg-[#2d333b] border-gray-700 text-center text-gray-400">
+          <Card className="p-8 bg-dark-card border-gray-700 text-center text-gray-400">
             <Flag className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No milestones found</p>
           </Card>
@@ -272,7 +272,7 @@ export default function MilestoneTracker() {
             const variance = getVarianceDays(m);
 
             return (
-              <Card key={m.id} className="p-4 bg-[#2d333b] border-gray-700">
+              <Card key={m.id} className="p-4 bg-dark-card border-gray-700">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className={`p-2 rounded-lg ${config.color}`}>
@@ -354,7 +354,7 @@ export default function MilestoneTracker() {
 
       {/* Add/Edit Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-lg">
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {editingMilestone ? 'Edit Milestone' : 'Add Milestone'}
@@ -367,7 +367,7 @@ export default function MilestoneTracker() {
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="Milestone name"
               />
             </div>
@@ -377,7 +377,7 @@ export default function MilestoneTracker() {
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="Optional description"
               />
             </div>
@@ -389,14 +389,14 @@ export default function MilestoneTracker() {
                   type="date"
                   value={form.plannedDate}
                   onChange={(e) => setForm({ ...form, plannedDate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
 
               <div>
                 <Label>Category</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                  <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                  <SelectTrigger className="bg-dark-surface border-gray-600">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -433,7 +433,7 @@ export default function MilestoneTracker() {
                   type="number"
                   value={form.paymentAmount}
                   onChange={(e) => setForm({ ...form, paymentAmount: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   placeholder="0.00"
                 />
               </div>

@@ -55,7 +55,7 @@ export function TakeoffFilters({
           className={`px-3 py-1.5 text-xs font-medium transition-colors ${
             viewMode === 'category'
               ? 'bg-orange-500 text-white'
-              : 'bg-[#2d333b] text-gray-300 hover:bg-[#3d434b]'
+              : 'bg-dark-card text-gray-300 hover:bg-[#3d434b]'
           }`}
         >
           Category
@@ -65,7 +65,7 @@ export function TakeoffFilters({
           className={`px-3 py-1.5 text-xs font-medium transition-colors ${
             viewMode === 'csi'
               ? 'bg-orange-500 text-white'
-              : 'bg-[#2d333b] text-gray-300 hover:bg-[#3d434b]'
+              : 'bg-dark-card text-gray-300 hover:bg-[#3d434b]'
           }`}
         >
           CSI Division
@@ -79,13 +79,13 @@ export function TakeoffFilters({
           placeholder="Search materials..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-8 bg-[#2d333b] border-gray-600 pl-8 text-sm text-[#F8FAFC] placeholder:text-gray-500"
+          className="h-8 bg-dark-card border-gray-600 pl-8 text-sm text-[#F8FAFC] placeholder:text-gray-500"
         />
       </div>
 
       {/* Category Filter */}
       <Select value={filterCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="h-8 w-[140px] bg-[#2d333b] border-gray-600 text-sm text-[#F8FAFC]">
+        <SelectTrigger className="h-8 w-[140px] bg-dark-card border-gray-600 text-sm text-[#F8FAFC]">
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
@@ -100,7 +100,7 @@ export function TakeoffFilters({
 
       {/* Status Filter */}
       <Select value={filterVerified} onValueChange={onVerifiedChange}>
-        <SelectTrigger className="h-8 w-[110px] bg-[#2d333b] border-gray-600 text-sm text-[#F8FAFC]">
+        <SelectTrigger className="h-8 w-[110px] bg-dark-card border-gray-600 text-sm text-[#F8FAFC]">
           <SelectValue placeholder="All Status" />
         </SelectTrigger>
         <SelectContent>
@@ -117,7 +117,7 @@ export function TakeoffFilters({
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="h-8 text-xs text-orange-500 hover:text-orange-400 hover:bg-[#2d333b]"
+            className="h-8 text-xs text-orange-500 hover:text-orange-400 hover:bg-dark-card"
           >
             <X className="mr-1 h-3.5 w-3.5" />
             Clear

@@ -76,10 +76,10 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
 
   if (compact && !expanded) {
     return (
-      <Card className="my-2 bg-[#2d333b] border-gray-700">
+      <Card className="my-2 bg-dark-card border-gray-700">
         <button
           onClick={() => setExpanded(true)}
-          className="w-full p-3 text-left hover:bg-[#1F2328] transition-colors"
+          className="w-full p-3 text-left hover:bg-dark-surface transition-colors"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
   }
 
   return (
-    <Card className="my-3 bg-[#2d333b] border-gray-700">
+    <Card className="my-3 bg-dark-card border-gray-700">
       <div className="p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
@@ -125,17 +125,17 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
 
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <div className="bg-[#1F2328] rounded-lg p-2">
+          <div className="bg-dark-surface rounded-lg p-2">
             <div className="text-xs text-gray-400 mb-1">Equipment</div>
             <div className="text-lg font-semibold text-gray-200">{pathData.equipment.length}</div>
           </div>
-          <div className="bg-[#1F2328] rounded-lg p-2">
+          <div className="bg-dark-surface rounded-lg p-2">
             <div className="text-xs text-gray-400 mb-1">Total Distance</div>
             <div className="text-lg font-semibold text-gray-200">
               {pathData.totalDistance.toFixed(1)}'
             </div>
           </div>
-          <div className="bg-[#1F2328] rounded-lg p-2">
+          <div className="bg-dark-surface rounded-lg p-2">
             <div className="text-xs text-gray-400 mb-1">Conflicts</div>
             <div className={`text-lg font-semibold ${
               pathData.conflicts.length === 0 ? 'text-green-400' : 'text-orange-400'
@@ -143,7 +143,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
               {pathData.conflicts.length}
             </div>
           </div>
-          <div className="bg-[#1F2328] rounded-lg p-2">
+          <div className="bg-dark-surface rounded-lg p-2">
             <div className="text-xs text-gray-400 mb-1">Efficiency</div>
             <div className={`text-lg font-semibold ${getEfficiencyColor(pathData.efficiency)}`}>
               {pathData.efficiency}%
@@ -200,7 +200,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
             </div>
             <div className="space-y-1.5">
               {pathData.conflicts.slice(0, 3).map((conflict, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-xs bg-[#1F2328] rounded p-2">
+                <div key={idx} className="flex items-start gap-2 text-xs bg-dark-surface rounded p-2">
                   <span className={`font-medium ${getSeverityColor(conflict.severity)} uppercase`}>
                     {conflict.severity}
                   </span>

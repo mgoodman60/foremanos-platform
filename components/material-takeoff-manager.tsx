@@ -1258,7 +1258,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   ];
 
   return (
-    <div className="flex h-full flex-col bg-[#1F2328] text-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-dark-surface text-[#F8FAFC]">
       {/* Header - Streamlined with Dropdown Menus */}
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -1330,7 +1330,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
               setExpandedCategories(new Set());
             }}
           >
-            <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
               <SelectValue placeholder="Select takeoff" />
             </SelectTrigger>
             <SelectContent>

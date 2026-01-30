@@ -135,7 +135,7 @@ export function DocumentProcessingStatus({
   const config = statusConfig[queueStatus.status as keyof typeof statusConfig] || statusConfig.queued;
 
   return (
-    <div className="space-y-3 p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+    <div className="space-y-3 p-4 bg-dark-card border border-gray-700 rounded-lg">
       {/* Status Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">

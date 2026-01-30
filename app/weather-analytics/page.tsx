@@ -163,16 +163,16 @@ export default function WeatherAnalyticsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-gray-400">Loading weather analytics...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] text-gray-100">
+    <div className="min-h-screen bg-dark-surface text-gray-100">
       {/* Header */}
-      <div className="border-b border-gray-700 bg-[#1F2328]">
+      <div className="border-b border-gray-700 bg-dark-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -200,7 +200,7 @@ export default function WeatherAnalyticsPage() {
               <select
                 value={selectedProjectId || ''}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="px-3 py-2 bg-[#2d333b] border border-gray-700 rounded-md text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 bg-dark-card border border-gray-700 rounded-md text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {projects.map(project => (
                   <option key={project.id} value={project.id}>
@@ -209,7 +209,7 @@ export default function WeatherAnalyticsPage() {
                 ))}
               </select>
               
-              <div className="flex items-center space-x-2 bg-[#2d333b] rounded-md p-1">
+              <div className="flex items-center space-x-2 bg-dark-card rounded-md p-1">
                 <button
                   onClick={() => setTimeRange('7d')}
                   className={`px-3 py-1 rounded text-sm transition-colors ${
@@ -250,7 +250,7 @@ export default function WeatherAnalyticsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-[#2d333b] border-gray-700 p-6">
+          <Card className="bg-dark-card border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400 mb-1">Total Delays</p>
@@ -261,7 +261,7 @@ export default function WeatherAnalyticsPage() {
             </div>
           </Card>
 
-          <Card className="bg-[#2d333b] border-gray-700 p-6">
+          <Card className="bg-dark-card border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400 mb-1">Work Stoppages</p>
@@ -272,7 +272,7 @@ export default function WeatherAnalyticsPage() {
             </div>
           </Card>
 
-          <Card className="bg-[#2d333b] border-gray-700 p-6">
+          <Card className="bg-dark-card border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400 mb-1">Cost Impact</p>
@@ -285,7 +285,7 @@ export default function WeatherAnalyticsPage() {
             </div>
           </Card>
 
-          <Card className="bg-[#2d333b] border-gray-700 p-6">
+          <Card className="bg-dark-card border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400 mb-1">Avg Productivity</p>
@@ -305,7 +305,7 @@ export default function WeatherAnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Productivity Impact Timeline */}
-          <Card className="bg-[#2d333b] border-gray-700 p-6">
+          <Card className="bg-dark-card border-gray-700 p-6">
             <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
               <Calendar className="h-5 w-5 text-blue-400" />
               <span>Productivity Impact Timeline</span>
@@ -319,7 +319,7 @@ export default function WeatherAnalyticsPage() {
                 impacts.map(impact => (
                   <div
                     key={impact.id}
-                    className="bg-[#1F2328] border border-gray-700 rounded-lg p-4"
+                    className="bg-dark-surface border border-gray-700 rounded-lg p-4"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -384,7 +384,7 @@ export default function WeatherAnalyticsPage() {
           </Card>
 
           {/* Impact by Trade */}
-          <Card className="bg-[#2d333b] border-gray-700 p-6">
+          <Card className="bg-dark-card border-gray-700 p-6">
             <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
               <Users className="h-5 w-5 text-blue-400" />
               <span>Delays by Trade/Sub</span>
@@ -398,7 +398,7 @@ export default function WeatherAnalyticsPage() {
                 Object.entries(impactsByTrade)
                   .sort(([, a], [, b]) => b - a)
                   .map(([trade, days]) => (
-                    <div key={trade} className="bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+                    <div key={trade} className="bg-dark-surface border border-gray-700 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-gray-200">{trade}</span>
                         <span className="text-sm font-semibold text-orange-400">
@@ -420,7 +420,7 @@ export default function WeatherAnalyticsPage() {
             
             {/* Summary Box */}
             {Object.keys(impactsByTrade).length > 0 && (
-              <div className="mt-6 bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+              <div className="mt-6 bg-dark-surface border border-gray-700 rounded-lg p-4">
                 <h3 className="text-sm font-semibold text-gray-300 mb-2">Summary</h3>
                 <p className="text-xs text-gray-400">
                   Total weather delays: <strong className="text-orange-400">{totalDelayDays} days</strong>
@@ -437,7 +437,7 @@ export default function WeatherAnalyticsPage() {
         </div>
 
         {/* Recent Weather Alerts */}
-        <Card className="bg-[#2d333b] border-gray-700 p-6 mt-8">
+        <Card className="bg-dark-card border-gray-700 p-6 mt-8">
           <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
             <AlertTriangle className="h-5 w-5 text-yellow-400" />
             <span>Recent Weather Alerts</span>

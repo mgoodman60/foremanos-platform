@@ -21,6 +21,7 @@ import { TrendingUp, TrendingDown, Calendar, DollarSign, Target, AlertTriangle }
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/budget-phases';
 import { format, addMonths, startOfMonth, differenceInMonths } from 'date-fns';
+import { semanticColors, neutralColors, chartColors } from '@/lib/design-tokens';
 
 interface ForecastDataPoint {
   date: string;
@@ -150,7 +151,7 @@ export default function ForecastActualChart({
     if (!active || !payload) return null;
 
     return (
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-3 shadow-xl">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg p-3 shadow-xl">
         <p className="text-sm font-semibold text-white mb-2">{label}</p>
         {payload.map((entry, index: number) => (
           <div key={index} className="flex items-center justify-between gap-4 text-sm">
@@ -169,7 +170,7 @@ export default function ForecastActualChart({
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700 p-6">
+      <Card className="bg-dark-card border-gray-700 p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-700 rounded w-1/3" />
           <div className="h-64 bg-gray-700 rounded" />
@@ -186,7 +187,7 @@ export default function ForecastActualChart({
   });
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 overflow-hidden">
+    <Card className="bg-dark-card border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700">
         <div className="flex items-center justify-between mb-3">
@@ -269,44 +270,44 @@ export default function ForecastActualChart({
             
             {/* Reference line for today */}
             {currentMonthIndex >= 0 && (
-              <ReferenceLine 
-                x={data[currentMonthIndex]?.month} 
-                stroke="#EF4444" 
+              <ReferenceLine
+                x={data[currentMonthIndex]?.month}
+                stroke={semanticColors.error[500]}
                 strokeDasharray="5 5"
-                label={{ value: 'Today', fill: '#EF4444', fontSize: 12, position: 'top' }}
+                label={{ value: 'Today', fill: semanticColors.error[500], fontSize: 12, position: 'top' }}
               />
             )}
-            
+
             {/* Budget Line */}
             <Line
               type="monotone"
               dataKey={showCumulative ? 'cumBudget' : 'budget'}
               name="Budget"
-              stroke="#6B7280"
+              stroke={neutralColors.slate[500]}
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
             />
-            
+
             {/* Forecast Area */}
             <Area
               type="monotone"
               dataKey={showCumulative ? 'cumForecast' : 'forecast'}
               name="Forecast"
-              fill="#3B82F6"
+              fill={chartColors.neutral}
               fillOpacity={0.2}
-              stroke="#3B82F6"
+              stroke={chartColors.neutral}
               strokeWidth={2}
             />
-            
+
             {/* Actual Line */}
             <Line
               type="monotone"
               dataKey={showCumulative ? 'cumActual' : 'actual'}
               name="Actual"
-              stroke="#10B981"
+              stroke={chartColors.positive}
               strokeWidth={3}
-              dot={{ fill: '#10B981', strokeWidth: 0, r: 4 }}
+              dot={{ fill: chartColors.positive, strokeWidth: 0, r: 4 }}
               connectNulls={false}
             />
           </ComposedChart>
@@ -347,14 +348,14 @@ export function ForecastSparkline({ data, className }: { data: ForecastDataPoint
           <Line
             type="monotone"
             dataKey="cumBudget"
-            stroke="#6B7280"
+            stroke={neutralColors.slate[500]}
             strokeWidth={1}
             dot={false}
           />
           <Line
             type="monotone"
             dataKey="cumActual"
-            stroke="#10B981"
+            stroke={chartColors.positive}
             strokeWidth={2}
             dot={false}
             connectNulls={false}

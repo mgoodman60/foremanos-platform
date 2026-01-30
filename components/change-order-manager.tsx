@@ -163,25 +163,25 @@ export default function ChangeOrderManager() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-white">{summary.total}</div>
               <div className="text-sm text-gray-400">Total COs</div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-yellow-400">{summary.pending}</div>
               <div className="text-sm text-gray-400">Pending</div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-green-400">{formatCurrency(summary.totalApprovedValue)}</div>
               <div className="text-sm text-gray-400">Approved Value</div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-blue-400">{formatCurrency(summary.totalPendingValue)}</div>
               <div className="text-sm text-gray-400">Pending Value</div>
@@ -204,14 +204,14 @@ export default function ChangeOrderManager() {
       {/* Change Order List */}
       <div className="space-y-2">
         {changeOrders.length === 0 ? (
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-8 text-center text-gray-400">
               No change orders yet
             </CardContent>
           </Card>
         ) : (
           changeOrders.map((co) => (
-            <Card key={co.id} className="bg-[#2d333b] border-gray-700">
+            <Card key={co.id} className="bg-dark-card border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -290,7 +290,7 @@ export default function ChangeOrderManager() {
 
       {/* Add Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>New Change Order</DialogTitle>
           </DialogHeader>
@@ -300,7 +300,7 @@ export default function ChangeOrderManager() {
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 required
               />
             </div>
@@ -309,7 +309,7 @@ export default function ChangeOrderManager() {
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 rows={3}
               />
             </div>
@@ -320,7 +320,7 @@ export default function ChangeOrderManager() {
                   type="number"
                   value={formData.proposedAmount}
                   onChange={(e) => setFormData({ ...formData, proposedAmount: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -330,7 +330,7 @@ export default function ChangeOrderManager() {
                   type="number"
                   value={formData.scheduleImpactDays}
                   onChange={(e) => setFormData({ ...formData, scheduleImpactDays: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
             </div>
@@ -339,7 +339,7 @@ export default function ChangeOrderManager() {
               <Input
                 value={formData.requestedBy}
                 onChange={(e) => setFormData({ ...formData, requestedBy: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
               />
             </div>
             <DialogFooter>

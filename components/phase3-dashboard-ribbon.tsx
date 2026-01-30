@@ -40,7 +40,7 @@ export function Phase3DashboardRibbon({
 
       {/* Dashboard Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-[95vw] w-full h-[90vh] p-0 bg-[#1F2328] border-gray-700 overflow-hidden">
+        <DialogContent className="max-w-[95vw] w-full h-[90vh] p-0 bg-dark-surface border-gray-700 overflow-hidden">
           <div className="h-full overflow-auto">
             <Phase3Dashboard
               projectSlug={projectSlug}

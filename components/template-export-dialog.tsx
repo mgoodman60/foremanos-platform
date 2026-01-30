@@ -140,7 +140,7 @@ export default function TemplateExportDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-md">
+      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-[#F97316]" />
@@ -178,10 +178,10 @@ export default function TemplateExportDialog({
               <div className="space-y-2">
                 <Label htmlFor="template">Select Template</Label>
                 <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-                  <SelectTrigger className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
                     <SelectValue placeholder="Choose a template" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2d333b] border-gray-700">
+                  <SelectContent className="bg-dark-card border-gray-700">
                     {templates.map(template => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name} (.{template.fileFormat})
@@ -193,7 +193,7 @@ export default function TemplateExportDialog({
 
               {/* Template Preview Card */}
               {selectedTemplate && (
-                <Card className="bg-[#1F2328] border-gray-700">
+                <Card className="bg-dark-surface border-gray-700">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <FileText className="h-5 w-5 text-[#F97316] mt-0.5" />

@@ -248,16 +248,16 @@ export default function IsometricViewPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <RefreshCw className="h-8 w-8 text-cyan-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] text-gray-100">
+    <div className="min-h-screen bg-dark-surface text-gray-100">
       {/* Header */}
-      <div className="bg-[#2d333b] border-b border-gray-700 sticky top-0 z-10">
+      <div className="bg-dark-card border-b border-gray-700 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -289,7 +289,7 @@ export default function IsometricViewPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Input Panel */}
           <div className="lg:col-span-1">
-            <Card className="p-6 bg-[#2d333b] border-gray-700">
+            <Card className="p-6 bg-dark-card border-gray-700">
               <h2 className="text-lg font-semibold mb-4 flex items-center">
                 <Layers className="h-5 w-5 mr-2 text-cyan-400" />
                 Select Sheet
@@ -314,13 +314,13 @@ export default function IsometricViewPage() {
                     </div>
                   ) : (
                     <Select value={selectedSheet} onValueChange={setSelectedSheet}>
-                      <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                      <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                         <SelectValue placeholder="Select a sheet..." />
                       </SelectTrigger>
                       <SelectContent className="max-h-[400px]">
                         {Object.entries(sheetsByDiscipline).map(([discipline, disciplineSheets]) => (
                           <div key={discipline}>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-400 flex items-center gap-2 bg-[#1F2328] sticky top-0">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-400 flex items-center gap-2 bg-dark-surface sticky top-0">
                               {getDisciplineIcon(discipline)}
                               {getDisciplineLabel(discipline)} ({disciplineSheets.length})
                             </div>
@@ -355,7 +355,7 @@ export default function IsometricViewPage() {
 
                 {/* Selected Sheet Info */}
                 {selectedSheet && (
-                  <div className="p-3 bg-[#1F2328] rounded-lg border border-gray-700">
+                  <div className="p-3 bg-dark-surface rounded-lg border border-gray-700">
                     {(() => {
                       const sheet = sheets.find(s => s.id === selectedSheet);
                       if (!sheet) return null;
@@ -433,7 +433,7 @@ export default function IsometricViewPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Visualization */}
             {visualization && (
-              <Card className="p-6 bg-[#2d333b] border-gray-700">
+              <Card className="p-6 bg-dark-card border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold flex items-center">
                     <Eye className="h-5 w-5 mr-2 text-cyan-400" />
@@ -452,7 +452,7 @@ export default function IsometricViewPage() {
 
                 {/* SVG Viewer */}
                 <div 
-                  className="bg-[#1F2328] rounded-lg border border-gray-700 overflow-hidden"
+                  className="bg-dark-surface rounded-lg border border-gray-700 overflow-hidden"
                   dangerouslySetInnerHTML={{ __html: visualization.svgData }}
                 />
 
@@ -484,7 +484,7 @@ export default function IsometricViewPage() {
 
             {/* Analysis Results */}
             {analysis && (
-              <Card className="p-6 bg-[#2d333b] border-gray-700">
+              <Card className="p-6 bg-dark-card border-gray-700">
                 <h2 className="text-lg font-semibold mb-4 flex items-center">
                   <CheckCircle2 className="h-5 w-5 mr-2 text-green-400" />
                   Analysis Results
@@ -547,32 +547,32 @@ export default function IsometricViewPage() {
 
             {/* 3D Model Results */}
             {model3D && (
-              <Card className="p-6 bg-[#2d333b] border-gray-700">
+              <Card className="p-6 bg-dark-card border-gray-700">
                 <h2 className="text-lg font-semibold mb-4 flex items-center">
                   <Box className="h-5 w-5 mr-2 text-cyan-400" />
                   3D Model Data
                 </h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <Card className="p-3 bg-[#1F2328] border-gray-700">
+                  <Card className="p-3 bg-dark-surface border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Elements</div>
                     <div className="text-xl font-bold text-white">
                       {model3D.elements.length}
                     </div>
                   </Card>
-                  <Card className="p-3 bg-[#1F2328] border-gray-700">
+                  <Card className="p-3 bg-dark-surface border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Paths</div>
                     <div className="text-xl font-bold text-cyan-400">
                       {model3D.paths.length}
                     </div>
                   </Card>
-                  <Card className="p-3 bg-[#1F2328] border-gray-700">
+                  <Card className="p-3 bg-dark-surface border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">X Range</div>
                     <div className="text-sm font-medium text-white">
                       {model3D.bounds.minX.toFixed(1)} → {model3D.bounds.maxX.toFixed(1)}
                     </div>
                   </Card>
-                  <Card className="p-3 bg-[#1F2328] border-gray-700">
+                  <Card className="p-3 bg-dark-surface border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Z Range (Elevation)</div>
                     <div className="text-sm font-medium text-white">
                       {model3D.bounds.minZ.toFixed(1)}' → {model3D.bounds.maxZ.toFixed(1)}'
@@ -590,7 +590,7 @@ export default function IsometricViewPage() {
                         {model3D.paths.map((path, idx) => (
                           <div
                             key={idx}
-                            className="p-3 bg-[#1F2328] border border-gray-700 rounded-lg"
+                            className="p-3 bg-dark-surface border border-gray-700 rounded-lg"
                           >
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-medium text-white">{path.id}</span>
@@ -623,7 +623,7 @@ export default function IsometricViewPage() {
 
             {/* Empty State */}
             {!analysis && !model3D && !visualization && (
-              <Card className="p-12 bg-[#2d333b] border-gray-700 text-center">
+              <Card className="p-12 bg-dark-card border-gray-700 text-center">
                 <Box className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                 <p className="text-gray-400 mb-2">
                   Select a sheet and click "Generate Isometric View" to create a 3D visualization

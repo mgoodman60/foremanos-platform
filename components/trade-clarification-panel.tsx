@@ -215,7 +215,7 @@ export default function TradeClarificationPanel({
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center justify-between bg-[#1F2328] rounded-lg p-3 border border-yellow-600/30"
+                className="flex items-center justify-between bg-dark-surface rounded-lg p-3 border border-yellow-600/30"
               >
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-white truncate">{task.name}</div>
@@ -255,7 +255,7 @@ export default function TradeClarificationPanel({
 
       {/* Edit Dialog */}
       <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <HardHat className="h-5 w-5 text-[#F97316]" />
@@ -274,12 +274,12 @@ export default function TradeClarificationPanel({
                 setSelectedTrade(val);
                 setSelectedSub(''); // Reset sub when trade changes
               }}>
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                   <SelectValue placeholder="Select a trade" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-600">
+                <SelectContent className="bg-dark-card border-gray-600">
                   {tradeTypes.map((trade) => (
-                    <SelectItem key={trade.value} value={trade.value} className="text-white hover:bg-[#1F2328]">
+                    <SelectItem key={trade.value} value={trade.value} className="text-white hover:bg-dark-surface">
                       {trade.label}
                     </SelectItem>
                   ))}
@@ -294,15 +294,15 @@ export default function TradeClarificationPanel({
                   Subcontractor (Optional)
                 </label>
                 <Select value={selectedSub} onValueChange={setSelectedSub}>
-                  <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                  <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                     <SelectValue placeholder="Select a subcontractor" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2d333b] border-gray-600">
-                    <SelectItem value="" className="text-gray-400 hover:bg-[#1F2328]">
+                  <SelectContent className="bg-dark-card border-gray-600">
+                    <SelectItem value="" className="text-gray-400 hover:bg-dark-surface">
                       No specific subcontractor
                     </SelectItem>
                     {filteredSubs.map((sub) => (
-                      <SelectItem key={sub.id} value={sub.id} className="text-white hover:bg-[#1F2328]">
+                      <SelectItem key={sub.id} value={sub.id} className="text-white hover:bg-dark-surface">
                         <span className="flex items-center gap-2">
                           <Building2 className="h-3 w-3" />
                           {sub.companyName}
@@ -316,7 +316,7 @@ export default function TradeClarificationPanel({
 
             {/* Info about current inference */}
             {editingTask?.inferredTradeType && (
-              <div className="bg-[#1F2328] rounded-lg p-3 text-sm">
+              <div className="bg-dark-surface rounded-lg p-3 text-sm">
                 <div className="text-gray-400 mb-1">AI Suggested:</div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="border-blue-500 text-blue-400">

@@ -203,7 +203,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
           ))}
         </div>
       ) : calculations.length === 0 ? (
-        <div className="text-center py-12 bg-[#1F2328] border border-gray-700 rounded-lg">
+        <div className="text-center py-12 bg-dark-surface border border-gray-700 rounded-lg">
           <Calculator className="w-12 h-12 mx-auto mb-4 text-gray-500" />
           <p className="text-gray-400">No load calculations yet</p>
           <p className="text-sm text-gray-500 mt-1">
@@ -219,7 +219,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
             return (
               <div
                 key={calc.id}
-                className="bg-[#1F2328] border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors"
+                className="bg-dark-surface border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
@@ -277,7 +277,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
       {/* Add Calculation Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-          <div className="bg-[#1F2328] border border-gray-700 rounded-xl p-6 w-full max-w-lg mx-4">
+          <div className="bg-dark-surface border border-gray-700 rounded-xl p-6 w-full max-w-lg mx-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-white">New Load Calculation</h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-white">
@@ -291,7 +291,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                 <select
                   value={formData.calcType}
                   onChange={(e) => setFormData(prev => ({ ...prev, calcType: e.target.value }))}
-                  className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white"
                 >
                   <option value="">Select type...</option>
                   {Object.entries(CALC_TYPE_CONFIG).map(([type, config]) => (
@@ -307,7 +307,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., Main Panel A Load Schedule"
-                  className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white"
                 />
               </div>
 
@@ -321,7 +321,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                     value={formData.connectedLoad}
                     onChange={(e) => setFormData(prev => ({ ...prev, connectedLoad: e.target.value }))}
                     placeholder="0"
-                    className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white"
                   />
                 </div>
                 <div>
@@ -331,7 +331,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                     step="0.1"
                     value={formData.demandFactor}
                     onChange={(e) => setFormData(prev => ({ ...prev, demandFactor: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white"
                   />
                 </div>
               </div>
@@ -344,7 +344,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                     step="0.1"
                     value={formData.diversityFactor}
                     onChange={(e) => setFormData(prev => ({ ...prev, diversityFactor: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white"
                   />
                 </div>
                 <div>
@@ -354,7 +354,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                     step="0.05"
                     value={formData.safetyFactor}
                     onChange={(e) => setFormData(prev => ({ ...prev, safetyFactor: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white"
                   />
                 </div>
               </div>
@@ -366,12 +366,12 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
                   onChange={(e) => setFormData(prev => ({ ...prev, assumptions: e.target.value }))}
                   placeholder="Design assumptions and notes..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-white resize-none"
+                  className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-white resize-none"
                 />
               </div>
 
               {formData.connectedLoad && (
-                <div className="bg-[#2d333b] rounded-lg p-4 border border-gray-600">
+                <div className="bg-dark-card rounded-lg p-4 border border-gray-600">
                   <p className="text-sm text-gray-400">Calculated Design Load:</p>
                   <p className="text-2xl font-bold text-orange-400">
                     {(

@@ -243,7 +243,7 @@ export function PriceUpdateModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] bg-[#1F2328] text-white border-gray-700">
+      <DialogContent className="max-w-4xl max-h-[90vh] bg-dark-surface text-white border-gray-700">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-blue-400" />

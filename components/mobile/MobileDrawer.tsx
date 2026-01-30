@@ -106,7 +106,7 @@ export function MobileDrawer({
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className={`absolute bg-[#1F2328] shadow-2xl transition-transform duration-300 ease-out flex flex-col ${positionClasses[position]} ${className}`}
+        className={`absolute bg-dark-surface shadow-2xl transition-transform duration-300 ease-out flex flex-col ${positionClasses[position]} ${className}`}
         style={{ transform: getTransform() || undefined }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

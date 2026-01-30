@@ -147,7 +147,7 @@ export function MobileBottomNav({
 
       {/* Bottom Navigation Bar */}
       <nav 
-        className={`fixed bottom-0 left-0 right-0 bg-[#1F2328] border-t border-gray-700 z-50 md:hidden transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
+        className={`fixed bottom-0 left-0 right-0 bg-dark-surface border-t border-gray-700 z-50 md:hidden transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex items-center justify-around h-16 px-2">

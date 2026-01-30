@@ -54,7 +54,7 @@ export function DimensionCard({ data }: { data: DimensionData }) {
   };
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 my-2">
+    <Card className="bg-dark-card border-gray-700 my-2">
       <CardContent className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <Ruler className="h-4 w-4 text-orange-500" />
@@ -62,7 +62,7 @@ export function DimensionCard({ data }: { data: DimensionData }) {
         </div>
         <div className="space-y-2">
           {data.dimensions.slice(0, 5).map((dim, idx) => (
-            <div key={idx} className="flex items-center justify-between text-sm bg-[#1F2328] p-2 rounded">
+            <div key={idx} className="flex items-center justify-between text-sm bg-dark-surface p-2 rounded">
               <div className="flex items-center gap-2 flex-1">
                 <Badge className={`${getTypeColor(dim.type)} text-white text-xs`}>
                   {dim.type}
@@ -138,7 +138,7 @@ export function AnnotationCard({ data }: { data: AnnotationData }) {
   const informational = data.annotations.filter(a => a.priority === 'informational');
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 my-2">
+    <Card className="bg-dark-card border-gray-700 my-2">
       <CardContent className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <AlertTriangle className="h-4 w-4 text-orange-500" />
@@ -179,7 +179,7 @@ export function AnnotationCard({ data }: { data: AnnotationData }) {
 
           {/* Important annotations */}
           {important.slice(0, 2).map((ann, idx) => (
-            <div key={`important-${idx}`} className="bg-[#1F2328] border border-gray-700 p-2 rounded">
+            <div key={`important-${idx}`} className="bg-dark-surface border border-gray-700 p-2 rounded">
               <div className="flex items-start gap-2">
                 <div className={`${getPriorityColor(ann.priority)} p-1 rounded`}>
                   {getPriorityIcon(ann.priority)}
@@ -201,7 +201,7 @@ export function AnnotationCard({ data }: { data: AnnotationData }) {
 
           {/* Informational (only if no critical/important) */}
           {critical.length === 0 && important.length === 0 && informational.slice(0, 3).map((ann, idx) => (
-            <div key={`info-${idx}`} className="bg-[#1F2328] border border-gray-700 p-2 rounded">
+            <div key={`info-${idx}`} className="bg-dark-surface border border-gray-700 p-2 rounded">
               <div className="flex items-start gap-2">
                 <div className={`${getPriorityColor(ann.priority)} p-1 rounded`}>
                   {getPriorityIcon(ann.priority)}
@@ -274,7 +274,7 @@ export function DetailCalloutCard({ data }: { data: CalloutData }) {
   };
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 my-2">
+    <Card className="bg-dark-card border-gray-700 my-2">
       <CardContent className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <Navigation className="h-4 w-4 text-orange-500" />
@@ -282,7 +282,7 @@ export function DetailCalloutCard({ data }: { data: CalloutData }) {
         </div>
         <div className="space-y-2">
           {data.callouts.slice(0, 5).map((callout, idx) => (
-            <div key={idx} className="bg-[#1F2328] border border-gray-700 p-2 rounded">
+            <div key={idx} className="bg-dark-surface border border-gray-700 p-2 rounded">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1">
                   <Badge className={`${getTypeColor(callout.type)} text-white text-xs`}>
@@ -351,13 +351,13 @@ export function SymbolCard({ data }: { data: SymbolData }) {
   };
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 my-2">
+    <Card className="bg-dark-card border-gray-700 my-2">
       <CardContent className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <Zap className="h-4 w-4 text-orange-500" />
           <span className="font-semibold text-gray-100 text-sm">Symbol Definition</span>
         </div>
-        <div className="bg-[#1F2328] border border-gray-700 p-3 rounded">
+        <div className="bg-dark-surface border border-gray-700 p-3 rounded">
           <div className="flex items-center gap-2 mb-2">
             <Badge className={`${getTradeColor(data.trade)} text-white`}>
               {data.trade}

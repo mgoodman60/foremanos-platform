@@ -119,7 +119,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
 
   // Otherwise, show the document selector
   return (
-    <div className="flex h-full flex-col bg-[#1F2328] text-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-dark-surface text-[#F8FAFC]">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
             placeholder="Search plan documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-[#2d333b] border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+            className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
           />
         </div>
 
@@ -150,7 +150,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
             variant="ghost"
             size="sm"
             onClick={() => setSearchQuery('')}
-            className="mt-2 w-full text-blue-500 hover:text-blue-400 hover:bg-[#2d333b]"
+            className="mt-2 w-full text-blue-500 hover:text-blue-400 hover:bg-dark-card"
           >
             <X className="mr-2 h-4 w-4" />
             Clear Search
@@ -189,7 +189,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
               <button
                 key={doc.id}
                 onClick={() => handleViewPlan(doc)}
-                className="flex w-full items-start gap-3 rounded-lg border border-gray-700 bg-[#2d333b] p-4 text-left hover:border-blue-500 hover:bg-[#383e47] transition-all"
+                className="flex w-full items-start gap-3 rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-blue-500 hover:bg-[#383e47] transition-all"
               >
                 {/* Icon */}
                 <div className="mt-1">

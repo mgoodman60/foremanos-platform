@@ -344,23 +344,23 @@ export default function TakeoffAggregation() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Total Aggregations</p>
           <p className="text-2xl font-bold text-white">{aggregations.length}</p>
         </div>
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Approved</p>
           <p className="text-2xl font-bold text-green-400">
             {aggregations.filter(a => a.status === 'approved').length}
           </p>
         </div>
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Total Items</p>
           <p className="text-2xl font-bold text-blue-400">
             {aggregations.reduce((sum, a) => sum + a.totalItems, 0)}
           </p>
         </div>
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Total Value</p>
           <p className="text-2xl font-bold text-emerald-400">
             {formatCurrency(aggregations.reduce((sum, a) => sum + (a.totalCost || 0), 0))}
@@ -378,7 +378,7 @@ export default function TakeoffAggregation() {
               <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
             </div>
           ) : aggregations.length === 0 ? (
-            <div className="bg-[#1F2328] rounded-lg p-6 border border-gray-700 text-center">
+            <div className="bg-dark-surface rounded-lg p-6 border border-gray-700 text-center">
               <FileSpreadsheet className="w-12 h-12 text-gray-500 mx-auto mb-3" />
               <p className="text-gray-400">No aggregations yet</p>
               <p className="text-sm text-gray-500 mt-1">Create one to consolidate takeoffs</p>
@@ -389,7 +389,7 @@ export default function TakeoffAggregation() {
                 <div
                   key={agg.id}
                   onClick={() => fetchAggregationDetails(agg.id)}
-                  className={`bg-[#1F2328] rounded-lg p-4 border cursor-pointer transition-colors ${
+                  className={`bg-dark-surface rounded-lg p-4 border cursor-pointer transition-colors ${
                     selectedAggregation?.id === agg.id
                       ? 'border-blue-500 bg-blue-900/10'
                       : 'border-gray-700 hover:border-gray-600'
@@ -444,7 +444,7 @@ export default function TakeoffAggregation() {
           {selectedAggregation ? (
             <div className="space-y-4">
               {/* Header */}
-              <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+              <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-white">{selectedAggregation.name}</h3>
@@ -482,7 +482,7 @@ export default function TakeoffAggregation() {
 
               {/* Category Summary */}
               {selectedAggregation.categorySummary && selectedAggregation.categorySummary.length > 0 && (
-                <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+                <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
                   <h4 className="text-sm font-medium text-gray-300 mb-3">By Category</h4>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {selectedAggregation.categorySummary.slice(0, 6).map(cat => (
@@ -505,13 +505,13 @@ export default function TakeoffAggregation() {
                     placeholder="Search items..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full pl-9 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
-                  className="px-3 py-2 bg-[#1F2328] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="px-3 py-2 bg-dark-surface border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 >
                   <option value="">All Categories</option>
                   {uniqueCategories.map(cat => (
@@ -521,7 +521,7 @@ export default function TakeoffAggregation() {
                 <select
                   value={filterTrade}
                   onChange={(e) => setFilterTrade(e.target.value)}
-                  className="px-3 py-2 bg-[#1F2328] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="px-3 py-2 bg-dark-surface border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 >
                   <option value="">All Trades</option>
                   {uniqueTrades.map(trade => (
@@ -531,7 +531,7 @@ export default function TakeoffAggregation() {
               </div>
 
               {/* Items Table */}
-              <div className="bg-[#1F2328] rounded-lg border border-gray-700 overflow-hidden">
+              <div className="bg-dark-surface rounded-lg border border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-800/50">
@@ -588,7 +588,7 @@ export default function TakeoffAggregation() {
               </div>
             </div>
           ) : (
-            <div className="bg-[#1F2328] rounded-lg p-8 border border-gray-700 text-center">
+            <div className="bg-dark-surface rounded-lg p-8 border border-gray-700 text-center">
               <Layers className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <p className="text-gray-400">Select an aggregation to view details</p>
               <p className="text-sm text-gray-500 mt-1">
@@ -602,7 +602,7 @@ export default function TakeoffAggregation() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-          <div className="bg-[#1F2328] rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 border border-gray-700">
+          <div className="bg-dark-surface rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 border border-gray-700">
             <div className="p-6 border-b border-gray-700">
               <h3 className="text-lg font-semibold text-white">Create New Aggregation</h3>
               <p className="text-sm text-gray-400 mt-1">Consolidate takeoffs from multiple sheets into a unified list</p>

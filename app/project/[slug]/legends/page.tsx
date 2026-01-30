@@ -57,7 +57,7 @@ export default function LegendsPage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F97316] mx-auto"></div>
           <p className="mt-4 text-gray-400">Loading project...</p>
@@ -68,7 +68,7 @@ export default function LegendsPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-400">Project not found</p>
         </div>

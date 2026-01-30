@@ -77,7 +77,7 @@ export function ProcessingProgressCard({
 
   if (loading) {
     return (
-      <div className={`bg-[#2d333b] border border-gray-700 rounded-lg p-6 ${className}`}>
+      <div className={`bg-dark-card border border-gray-700 rounded-lg p-6 ${className}`}>
         <div className="flex items-center justify-center space-x-2">
           <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
           <span className="text-gray-300">Loading processing status...</span>
@@ -88,7 +88,7 @@ export function ProcessingProgressCard({
 
   if (error || !stats) {
     return (
-      <div className={`bg-[#2d333b] border border-red-500 rounded-lg p-6 ${className}`}>
+      <div className={`bg-dark-card border border-red-500 rounded-lg p-6 ${className}`}>
         <div className="flex items-center space-x-2 text-red-400">
           <XCircle className="h-5 w-5" />
           <span>{error || 'Failed to load processing stats'}</span>
@@ -115,11 +115,11 @@ export function ProcessingProgressCard({
   const StatusIcon = config.icon;
 
   return (
-    <div className={`bg-[#2d333b] border border-gray-700 rounded-lg p-6 ${className}`}>
+    <div className={`bg-dark-card border border-gray-700 rounded-lg p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-[#1F2328] rounded-lg">
+          <div className="p-2 bg-dark-surface rounded-lg">
             <FileText className="h-6 w-6 text-blue-400" />
           </div>
           <div>
@@ -145,7 +145,7 @@ export function ProcessingProgressCard({
           <span className="text-gray-300">Progress</span>
           <span className="text-gray-400">{progressPercentage}%</span>
         </div>
-        <div className="w-full h-2.5 bg-[#1F2328] rounded-full overflow-hidden">
+        <div className="w-full h-2.5 bg-dark-surface rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-500 ${
               isComplete
@@ -186,7 +186,7 @@ export function ProcessingProgressCard({
                       <span className="text-gray-400">{provider.avgTimePerPage.toFixed(1)}s/page</span>
                     </div>
                   </div>
-                  <div className="w-full h-1.5 bg-[#1F2328] rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-dark-surface rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-300"
                       style={{ width: `${providerPercentage}%` }}

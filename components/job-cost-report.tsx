@@ -260,7 +260,7 @@ export default function JobCostReport() {
 
   if (loading) {
     return (
-      <div className="bg-[#2d333b] rounded-lg p-8 text-center">
+      <div className="bg-dark-card rounded-lg p-8 text-center">
         <RefreshCw className="h-8 w-8 animate-spin mx-auto text-blue-400" />
         <p className="mt-2 text-gray-400">Loading job cost data...</p>
       </div>
@@ -270,7 +270,7 @@ export default function JobCostReport() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="bg-[#2d333b] rounded-lg p-4 border border-gray-700">
+      <div className="bg-dark-card rounded-lg p-4 border border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5 text-blue-400" />
@@ -286,7 +286,7 @@ export default function JobCostReport() {
                   <Upload className="h-4 w-4 mr-1" /> Import
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+              <DialogContent className="bg-dark-card border-gray-700 text-white">
                 <DialogHeader>
                   <DialogTitle>Import Budget from PDF</DialogTitle>
                 </DialogHeader>
@@ -297,7 +297,7 @@ export default function JobCostReport() {
                   <Input
                     type="file"
                     accept=".pdf"
-                    className="bg-[#1F2328] border-gray-600"
+                    className="bg-dark-surface border-gray-600"
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
@@ -334,7 +334,7 @@ export default function JobCostReport() {
                   <Plus className="h-4 w-4 mr-1" /> Add Item
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-lg">
+              <DialogContent className="bg-dark-card border-gray-700 text-white max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Add Budget Item</DialogTitle>
                 </DialogHeader>
@@ -345,10 +345,10 @@ export default function JobCostReport() {
                       value={newItem.phaseCode.toString()}
                       onValueChange={(v) => setNewItem({...newItem, phaseCode: parseInt(v)})}
                     >
-                      <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                      <SelectTrigger className="bg-dark-surface border-gray-600">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#2d333b] border-gray-700">
+                      <SelectContent className="bg-dark-card border-gray-700">
                         {BUDGET_PHASES.map(phase => (
                           <SelectItem key={phase.code} value={phase.code.toString()}>
                             {phase.code} - {phase.name}
@@ -364,7 +364,7 @@ export default function JobCostReport() {
                       value={newItem.name}
                       onChange={(e) => setNewItem({...newItem, name: e.target.value})}
                       placeholder="e.g., Site Superintendent"
-                      className="bg-[#1F2328] border-gray-600"
+                      className="bg-dark-surface border-gray-600"
                     />
                   </div>
                   
@@ -375,7 +375,7 @@ export default function JobCostReport() {
                         type="number"
                         value={newItem.categoryNumber}
                         onChange={(e) => setNewItem({...newItem, categoryNumber: parseInt(e.target.value) || 1})}
-                        className="bg-[#1F2328] border-gray-600"
+                        className="bg-dark-surface border-gray-600"
                       />
                     </div>
                     <div>
@@ -384,7 +384,7 @@ export default function JobCostReport() {
                         type="number"
                         value={newItem.budgetedAmount}
                         onChange={(e) => setNewItem({...newItem, budgetedAmount: parseFloat(e.target.value) || 0})}
-                        className="bg-[#1F2328] border-gray-600"
+                        className="bg-dark-surface border-gray-600"
                       />
                     </div>
                   </div>
@@ -396,7 +396,7 @@ export default function JobCostReport() {
                         type="number"
                         value={newItem.contractAmount}
                         onChange={(e) => setNewItem({...newItem, contractAmount: parseFloat(e.target.value) || 0})}
-                        className="bg-[#1F2328] border-gray-600"
+                        className="bg-dark-surface border-gray-600"
                       />
                     </div>
                     <div>
@@ -405,7 +405,7 @@ export default function JobCostReport() {
                         type="number"
                         value={newItem.budgetedHours}
                         onChange={(e) => setNewItem({...newItem, budgetedHours: parseFloat(e.target.value) || 0})}
-                        className="bg-[#1F2328] border-gray-600"
+                        className="bg-dark-surface border-gray-600"
                       />
                     </div>
                   </div>
@@ -420,7 +420,7 @@ export default function JobCostReport() {
         </div>
         
         {/* Project Summary Header - Walker Company Style */}
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
             <div>
               <span className="text-gray-400">Contract:</span>
@@ -447,21 +447,21 @@ export default function JobCostReport() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4 bg-[#2d333b] rounded-lg p-3 border border-gray-700">
+      <div className="flex items-center gap-4 bg-dark-card rounded-lg p-3 border border-gray-700">
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64 bg-[#1F2328] border-gray-600 h-8"
+            className="w-64 bg-dark-surface border-gray-600 h-8"
           />
         </div>
         <Select value={selectedPhase} onValueChange={setSelectedPhase}>
-          <SelectTrigger className="w-48 bg-[#1F2328] border-gray-600 h-8">
+          <SelectTrigger className="w-48 bg-dark-surface border-gray-600 h-8">
             <SelectValue placeholder="All Phases" />
           </SelectTrigger>
-          <SelectContent className="bg-[#2d333b] border-gray-700">
+          <SelectContent className="bg-dark-card border-gray-700">
             <SelectItem value="all">All Phases</SelectItem>
             {BUDGET_PHASES.map(phase => (
               <SelectItem key={phase.code} value={phase.code.toString()}>
@@ -481,10 +481,10 @@ export default function JobCostReport() {
       </div>
 
       {/* Table Header */}
-      <div className="bg-[#2d333b] rounded-lg border border-gray-700 overflow-hidden">
+      <div className="bg-dark-card rounded-lg border border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-[#1F2328] text-gray-300">
+            <thead className="bg-dark-surface text-gray-300">
               <tr>
                 <th className="text-left px-3 py-2 w-8">Cat.</th>
                 <th className="text-left px-3 py-2">Description</th>
@@ -515,7 +515,7 @@ export default function JobCostReport() {
                 <React.Fragment key={group.phaseCode}>
                   {/* Phase Header Row */}
                   <tr
-                    className="bg-[#262c34] cursor-pointer hover:bg-[#2d333b] border-t border-gray-700"
+                    className="bg-[#262c34] cursor-pointer hover:bg-dark-card border-t border-gray-700"
                     onClick={() => togglePhase(group.phaseCode)}
                   >
                     <td colSpan={2} className="px-3 py-2 font-semibold text-blue-400">
@@ -578,7 +578,7 @@ export default function JobCostReport() {
                   
                   {/* Phase Totals Row */}
                   {expandedPhases.has(group.phaseCode) && (
-                    <tr className="bg-[#1F2328] font-semibold border-t border-gray-600">
+                    <tr className="bg-dark-surface font-semibold border-t border-gray-600">
                       <td colSpan={2} className="px-3 py-2 text-right text-gray-300">
                         Phase {group.phaseCode} Totals
                       </td>
@@ -670,7 +670,7 @@ export default function JobCostReport() {
 
       {/* Empty State */}
       {filteredGroups.length === 0 && (
-        <div className="bg-[#2d333b] rounded-lg p-8 text-center border border-gray-700">
+        <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
           <FileSpreadsheet className="h-12 w-12 mx-auto text-gray-500 mb-3" />
           <p className="text-gray-400">No budget items found.</p>
           <p className="text-sm text-gray-500 mt-1">

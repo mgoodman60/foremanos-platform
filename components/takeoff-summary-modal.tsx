@@ -115,7 +115,7 @@ export function TakeoffSummaryModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+      <DialogContent className="max-w-4xl h-[80vh] bg-dark-surface border-gray-700 text-[#F8FAFC]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">

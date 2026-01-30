@@ -251,7 +251,7 @@ export default function SubcontractorQuotes() {
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'quotes'
                 ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-[#2d333b]'
+                : 'text-gray-400 hover:text-white hover:bg-dark-card'
             }`}
           >
             <FileText className="h-4 w-4" />
@@ -262,7 +262,7 @@ export default function SubcontractorQuotes() {
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               viewMode === 'gap-analysis'
                 ? 'bg-amber-600 text-white'
-                : 'text-gray-400 hover:text-white hover:bg-[#2d333b]'
+                : 'text-gray-400 hover:text-white hover:bg-dark-card'
             }`}
           >
             <FileSearch className="h-4 w-4" />
@@ -281,7 +281,7 @@ export default function SubcontractorQuotes() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-[#2d333b] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-card rounded-lg p-4 border border-gray-700">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/20 rounded-lg">
                   <FileText className="h-5 w-5 text-blue-400" />
@@ -292,7 +292,7 @@ export default function SubcontractorQuotes() {
                 </div>
               </div>
             </div>
-            <div className="bg-[#2d333b] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-card rounded-lg p-4 border border-gray-700">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-yellow-500/20 rounded-lg">
                   <Clock className="h-5 w-5 text-yellow-400" />
@@ -303,7 +303,7 @@ export default function SubcontractorQuotes() {
                 </div>
               </div>
             </div>
-            <div className="bg-[#2d333b] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-card rounded-lg p-4 border border-gray-700">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/20 rounded-lg">
                   <Check className="h-5 w-5 text-green-400" />
@@ -314,7 +314,7 @@ export default function SubcontractorQuotes() {
                 </div>
               </div>
             </div>
-            <div className="bg-[#2d333b] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-card rounded-lg p-4 border border-gray-700">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/20 rounded-lg">
                   <DollarSign className="h-5 w-5 text-emerald-400" />
@@ -334,7 +334,7 @@ export default function SubcontractorQuotes() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-[#2d333b] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white"
+            className="bg-dark-card border border-gray-700 rounded-lg px-3 py-2 text-sm text-white"
           >
             <option value="all">All Status</option>
             <option value="PENDING">Pending</option>
@@ -347,7 +347,7 @@ export default function SubcontractorQuotes() {
           <select
             value={filterTrade}
             onChange={(e) => setFilterTrade(e.target.value)}
-            className="bg-[#2d333b] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white"
+            className="bg-dark-card border border-gray-700 rounded-lg px-3 py-2 text-sm text-white"
           >
             <option value="all">All Trades</option>
             {Object.entries(TRADE_LABELS).map(([value, label]) => (
@@ -379,7 +379,7 @@ export default function SubcontractorQuotes() {
       {/* Quotes List */}
       <div className="space-y-3">
         {quotes.length === 0 ? (
-          <div className="bg-[#2d333b] rounded-lg p-8 text-center border border-gray-700">
+          <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
             <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
             <p className="text-gray-400">No quotes uploaded yet</p>
             <p className="text-sm text-gray-500 mt-1">Upload a subcontractor quote to get started</p>
@@ -388,7 +388,7 @@ export default function SubcontractorQuotes() {
           quotes.map((quote) => (
             <div
               key={quote.id}
-              className="bg-[#2d333b] rounded-lg border border-gray-700 overflow-hidden"
+              className="bg-dark-card rounded-lg border border-gray-700 overflow-hidden"
             >
               {/* Quote Header */}
               <div

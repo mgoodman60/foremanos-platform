@@ -705,7 +705,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
   const disciplineOrder = ['General', 'Architectural', 'Structural', 'Civil', 'Electrical', 'Plumbing', 'Mechanical', 'Fire Protection', 'Other'];
 
   return (
-    <div className="flex flex-col bg-[#1F2328] text-[#F8FAFC]" style={{ height: '80vh', maxHeight: '800px' }}>
+    <div className="flex flex-col bg-dark-surface text-[#F8FAFC]" style={{ height: '80vh', maxHeight: '800px' }}>
       {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -731,7 +731,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                   size="sm"
                   onClick={exportToCSV}
                   disabled={filteredRefs.length === 0}
-                  className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+                  className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Export CSV
@@ -758,7 +758,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'sheets'
                   ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-[#2d333b]'
+                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-dark-card'
               }`}
             >
               <FileStack className="h-4 w-4" />
@@ -772,7 +772,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'references'
                   ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-[#2d333b]'
+                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-dark-card'
               }`}
             >
               <Link2 className="h-4 w-4" />
@@ -792,7 +792,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               placeholder="Search by sheet number (A101), name, or discipline..."
               value={sheetSearch}
               onChange={(e) => setSheetSearch(e.target.value)}
-              className="bg-[#2d333b] border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
             />
           </div>
           {/* Quick Stats */}
@@ -839,7 +839,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'bg-blue-500 hover:bg-blue-600' : 'border-gray-600 text-gray-300 hover:bg-[#2d333b]'}
+              className={viewMode === 'list' ? 'bg-blue-500 hover:bg-blue-600' : 'border-gray-600 text-gray-300 hover:bg-dark-card'}
             >
               List View
             </Button>
@@ -847,7 +847,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               variant={viewMode === 'network' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('network')}
-              className={viewMode === 'network' ? 'bg-blue-500 hover:bg-blue-600' : 'border-gray-600 text-gray-300 hover:bg-[#2d333b]'}
+              className={viewMode === 'network' ? 'bg-blue-500 hover:bg-blue-600' : 'border-gray-600 text-gray-300 hover:bg-dark-card'}
             >
               Network View
             </Button>
@@ -860,14 +860,14 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               placeholder="Search references, documents, locations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-[#2d333b] border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
             />
           </div>
 
           {/* Filters */}
           <div className="flex gap-2">
             <Select value={selectedDoc} onValueChange={setSelectedDoc}>
-              <SelectTrigger className="flex-1 bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+              <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
                 <SelectValue placeholder="All Documents" />
               </SelectTrigger>
               <SelectContent>
@@ -881,7 +881,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
             </Select>
 
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="flex-1 bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+              <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
@@ -904,7 +904,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                   setSelectedDoc('all');
                   setFilterType('all');
                 }}
-                className="w-full text-blue-500 hover:text-blue-400 hover:bg-[#2d333b]"
+                className="w-full text-blue-500 hover:text-blue-400 hover:bg-dark-card"
               >
                 <X className="mr-2 h-4 w-4" />
                 Clear Filters
@@ -949,7 +949,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                       {/* Discipline Header */}
                       <button
                         onClick={() => toggleDiscipline(discipline)}
-                        className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                        className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
                       >
                         {expandedDisciplines.has(discipline) ? (
                           <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -970,7 +970,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                             <button
                               key={doc.id}
                               onClick={() => handleJumpToDocument(doc.id, doc.name)}
-                              className="flex w-full items-center gap-3 rounded-lg border border-gray-700 bg-[#1F2328] p-3 text-left hover:border-blue-500 hover:bg-[#2d333b] transition-all group"
+                              className="flex w-full items-center gap-3 rounded-lg border border-gray-700 bg-dark-surface p-3 text-left hover:border-blue-500 hover:bg-dark-card transition-all group"
                             >
                               {/* Sheet Number */}
                               {doc.sheetNumber ? (
@@ -1005,7 +1005,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               <div>
                 <button
                   onClick={() => toggleDiscipline('Other')}
-                  className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
                 >
                   {expandedDisciplines.has('Other') ? (
                     <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -1024,7 +1024,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                       <button
                         key={doc.id}
                         onClick={() => handleJumpToDocument(doc.id, doc.name)}
-                        className="flex w-full items-center gap-3 rounded-lg border border-gray-700 bg-[#1F2328] p-3 text-left hover:border-blue-500 hover:bg-[#2d333b] transition-all group"
+                        className="flex w-full items-center gap-3 rounded-lg border border-gray-700 bg-dark-surface p-3 text-left hover:border-blue-500 hover:bg-dark-card transition-all group"
                       >
                         <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -1090,7 +1090,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                     {/* Document Header */}
                     <button
                       onClick={() => toggleDoc(node.id)}
-                      className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                      className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
                     >
                       {expandedDocs.has(node.id) ? (
                         <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -1117,7 +1117,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                           return (
                             <div
                               key={`${ref.sourceDocumentId}-${ref.targetDocumentId}-${idx}`}
-                              className="flex items-start gap-3 rounded-lg border border-gray-700 bg-[#1F2328] p-3 text-sm hover:border-blue-500 transition-all"
+                              className="flex items-start gap-3 rounded-lg border border-gray-700 bg-dark-surface p-3 text-sm hover:border-blue-500 transition-all"
                             >
                               {/* Reference Icon */}
                               <div className="mt-1">
@@ -1166,12 +1166,12 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               return (
                 <div
                   key={refKey}
-                  className="rounded-lg border border-gray-700 bg-[#2d333b] overflow-hidden hover:border-blue-500 transition-all"
+                  className="rounded-lg border border-gray-700 bg-dark-card overflow-hidden hover:border-blue-500 transition-all"
                 >
                   {/* Reference Header - Clickable to expand */}
                   <button
                     onClick={() => toggleRefExpansion(refKey, ref.sourceDocumentId, ref.targetDocumentId)}
-                    className="flex items-center justify-between w-full px-4 py-3 bg-[#1F2328] border-b border-gray-700 hover:bg-[#262b31] transition-colors text-left"
+                    className="flex items-center justify-between w-full px-4 py-3 bg-dark-surface border-b border-gray-700 hover:bg-[#262b31] transition-colors text-left"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {isExpanded ? (
@@ -1236,7 +1236,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {/* Source Sheet Preview */}
-                          <div className="border border-gray-600 rounded-lg overflow-hidden bg-[#1F2328]">
+                          <div className="border border-gray-600 rounded-lg overflow-hidden bg-dark-surface">
                             <div className="px-3 py-2 bg-blue-500/10 border-b border-gray-600">
                               <span className="text-xs font-medium text-blue-400">Source: {ref.sourceDoc?.name || 'Unknown'}</span>
                             </div>
@@ -1265,7 +1265,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                           </div>
                           
                           {/* Target Sheet Preview */}
-                          <div className="border border-gray-600 rounded-lg overflow-hidden bg-[#1F2328]">
+                          <div className="border border-gray-600 rounded-lg overflow-hidden bg-dark-surface">
                             <div className="px-3 py-2 bg-green-500/10 border-b border-gray-600">
                               <span className="text-xs font-medium text-green-400">Target: {ref.targetDoc?.name || 'Unknown'}</span>
                             </div>

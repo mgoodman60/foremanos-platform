@@ -98,7 +98,7 @@ export default function CostAlertsPanel() {
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-4 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
         </CardContent>
@@ -107,7 +107,7 @@ export default function CostAlertsPanel() {
   }
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700">
+    <Card className="bg-dark-card border-gray-700">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">

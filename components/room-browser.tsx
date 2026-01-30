@@ -801,9 +801,9 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
   };
 
   return (
-    <div className="flex flex-col bg-[#1F2328] text-[#F8FAFC] overflow-auto w-full" style={{ maxHeight: 'calc(100vh - 80px)', minHeight: '600px' }}>
+    <div className="flex flex-col bg-dark-surface text-[#F8FAFC] overflow-auto w-full" style={{ maxHeight: 'calc(100vh - 80px)', minHeight: '600px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-700 p-4 sticky top-0 z-10 bg-[#1F2328]">
+      <div className="flex items-center justify-between border-b border-gray-700 p-4 sticky top-0 z-10 bg-dark-surface">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-orange-500" />
           <h2 className="text-lg font-semibold">Room Browser</h2>
@@ -1020,14 +1020,14 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
             placeholder="Search rooms..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-[#2d333b] border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+            className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
           />
         </div>
 
         {/* Filters */}
         <div className="flex gap-2">
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
@@ -1041,7 +1041,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
           </Select>
 
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -1053,7 +1053,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
           </Select>
 
           <Select value={filterFloor} onValueChange={setFilterFloor}>
-            <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
               <SelectValue placeholder="Floor" />
             </SelectTrigger>
             <SelectContent>
@@ -1081,7 +1081,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                   clearSelection();
                 }
               }}
-              className="h-4 w-4 rounded border-gray-600 bg-[#2d333b] text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
+              className="h-4 w-4 rounded border-gray-600 bg-dark-card text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
             />
             <label htmlFor="select-all" className="text-sm text-gray-400 cursor-pointer">
               Select all visible ({sortedRooms.length})
@@ -1093,7 +1093,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">Sort by:</span>
           <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="bg-[#2d333b] border-gray-600 text-[#F8FAFC] w-[140px]">
+            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC] w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -1109,7 +1109,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
             variant="ghost"
             size="sm"
             onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-[#2d333b] px-2"
+            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card px-2"
             title={`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
           >
             {sortDirection === 'asc' ? (
@@ -1132,7 +1132,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                 setFilterStatus('all');
                 setFilterFloor('all');
               }}
-              className="w-full text-orange-500 hover:text-orange-400 hover:bg-[#2d333b]"
+              className="w-full text-orange-500 hover:text-orange-400 hover:bg-dark-card"
             >
               <X className="mr-2 h-4 w-4" />
               Clear Filters
@@ -1192,7 +1192,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                 {/* Floor Header */}
                 <button
                   onClick={() => toggleFloor(floor)}
-                  className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
                 >
                   {expandedFloors.has(floor) ? (
                     <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -1213,7 +1213,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                       <div
                         key={room.id}
                         id={`room-${room.id}`}
-                        className="rounded-lg border border-gray-700 bg-[#1F2328] overflow-hidden transition-all duration-300"
+                        className="rounded-lg border border-gray-700 bg-dark-surface overflow-hidden transition-all duration-300"
                       >
                         {/* Room Header - Always Visible */}
                         <div className="flex items-start gap-3 p-3">
@@ -1227,7 +1227,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                 toggleRoomSelection(room.id);
                               }}
                               onClick={(e) => e.stopPropagation()}
-                              className="h-4 w-4 rounded border-gray-600 bg-[#2d333b] text-orange-500 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer"
+                              className="h-4 w-4 rounded border-gray-600 bg-dark-card text-orange-500 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer"
                               title="Select room"
                             />
                           </div>
@@ -1322,7 +1322,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                           {/* Expand/Collapse Button */}
                           <button
                             onClick={() => toggleRoomDetails(room.id)}
-                            className="p-2 hover:bg-[#2d333b] rounded transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
+                            className="p-2 hover:bg-dark-card rounded transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
                             title={expandedRooms.has(room.id) ? 'Hide details' : 'Show details'}
                           >
                             {expandedRooms.has(room.id) ? (
@@ -1335,7 +1335,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
                         {/* Collapsible Room Details */}
                         {expandedRooms.has(room.id) && (
-                          <div className="border-t border-gray-700 bg-[#2d333b] p-4 space-y-4">
+                          <div className="border-t border-gray-700 bg-dark-card p-4 space-y-4">
                             {/* Export Buttons */}
                             <div className="flex justify-end gap-2">
                               <Button
@@ -1448,7 +1448,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                 </h4>
                                 <div className="space-y-2">
                                   {room.FinishScheduleItem.map((item) => (
-                                    <div key={item.id} className="bg-[#1F2328] rounded p-3 text-xs overflow-hidden">
+                                    <div key={item.id} className="bg-dark-surface rounded p-3 text-xs overflow-hidden">
                                       <div className="flex items-start gap-2 mb-2">
                                         <span className="capitalize text-orange-400 font-medium min-w-[60px] shrink-0">
                                           {item.category}:
@@ -1537,7 +1537,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                         </div>
                                         <div className="space-y-1.5">
                                           {tradeItems.map((item) => (
-                                            <div key={item.id} className="flex items-center justify-between text-xs bg-[#1F2328] rounded px-2 py-1.5">
+                                            <div key={item.id} className="flex items-center justify-between text-xs bg-dark-surface rounded px-2 py-1.5">
                                               <div className="flex items-center gap-2 flex-1 min-w-0">
                                                 <span className="font-mono text-gray-500 flex-shrink-0">{item.tag}</span>
                                                 <span className="text-[#F8FAFC] truncate">{item.name}</span>

@@ -527,7 +527,7 @@ export default function ProjectPage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F97316] mx-auto"></div>
           <p className="mt-4 text-gray-400">Loading project...</p>
@@ -538,7 +538,7 @@ export default function ProjectPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-400">Project not found</p>
         </div>
@@ -547,9 +547,9 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] flex flex-col">
+    <div className="min-h-screen bg-dark-surface flex flex-col">
       {/* Header with Breadcrumbs - Compact */}
-      <header className="bg-[#2d333b] border-b border-gray-700 shadow-sm sticky top-0 z-40">
+      <header className="bg-dark-card border-b border-gray-700 shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-1.5 sm:py-2">
           {/* Single Row Layout - Logo, Breadcrumbs, Actions */}
           <div className="flex items-center justify-between gap-2 sm:gap-4">
@@ -595,12 +595,12 @@ export default function ProjectPage() {
                     />
                     
                     {/* Dropdown Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-[#2d333b] border border-gray-700 rounded-lg shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-dark-card border border-gray-700 rounded-lg shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
                       {/* Common Tools */}
                       <div className="border-b border-gray-700">
                         <button
                           onClick={() => toggleSection('common')}
-                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#1F2328] transition-colors"
+                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-dark-surface transition-colors"
                         >
                           <p className="text-xs font-semibold text-gray-400 tracking-wider">COMMON</p>
                           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expandedSections.common ? '' : '-rotate-90'}`} />
@@ -609,28 +609,28 @@ export default function ProjectPage() {
                           <div className="p-2">
                             <button
                               onClick={() => { setShowDocumentLibrary(true); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <FileText className="w-4 h-4 text-gray-400" />
                               <span>Documents</span>
                             </button>
                             <button
                               onClick={() => { setShowProcessingMonitor(true); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Settings className="w-4 h-4 text-blue-400" />
                               <span>Processing Status</span>
                             </button>
                             <button
                               onClick={() => { setShowReportHistory(true); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <History className="w-4 h-4 text-gray-400" />
                               <span>Daily Report History</span>
                             </button>
                             <button
                               onClick={() => { setShowWeatherWidget(true); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <CloudRain className="w-4 h-4 text-cyan-400" />
                               <span>Weather Intelligence</span>
@@ -643,7 +643,7 @@ export default function ProjectPage() {
                       <div className="border-b border-gray-700">
                         <button
                           onClick={() => toggleSection('analysis')}
-                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#1F2328] transition-colors"
+                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-dark-surface transition-colors"
                         >
                           <p className="text-xs font-semibold text-gray-400 tracking-wider">ANALYSIS</p>
                           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expandedSections.analysis ? '' : '-rotate-90'}`} />
@@ -652,21 +652,21 @@ export default function ProjectPage() {
                           <div className="p-2">
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/takeoffs`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Ruler className="w-4 h-4 text-yellow-400" />
                               <span>Material Takeoffs</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/schedules`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Calendar className="w-4 h-4 text-cyan-400" />
                               <span>Project Schedule</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/intelligence`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -675,14 +675,14 @@ export default function ProjectPage() {
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/spatial`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Layers className="w-4 h-4 text-cyan-400" />
                               <span>Spatial Correlation</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/isometric`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -697,7 +697,7 @@ export default function ProjectPage() {
                       <div className="border-b border-gray-700">
                         <button
                           onClick={() => toggleSection('browsing')}
-                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#1F2328] transition-colors"
+                          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-dark-surface transition-colors"
                         >
                           <p className="text-xs font-semibold text-gray-400 tracking-wider">BROWSING</p>
                           <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expandedSections.browsing ? '' : '-rotate-90'}`} />
@@ -706,42 +706,42 @@ export default function ProjectPage() {
                           <div className="p-2">
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/mep`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Wrench className="w-4 h-4 text-blue-400" />
                               <span>MEP Equipment</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/rooms`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <DoorOpen className="w-4 h-4 text-green-400" />
                               <span>Room Browser</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/legends`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <BookOpen className="w-4 h-4 text-purple-400" />
                               <span>Legend & Symbols</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/scales`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Ruler className="w-4 h-4 text-cyan-400" />
                               <span>Scale Validation</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/annotations`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Pin className="w-4 h-4 text-pink-400" />
                               <span>Visual Annotations</span>
                             </button>
                             <button
                               onClick={() => { router.push(`/project/${project.slug}/drawing-types`); setShowToolsMenu(false); }}
-                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                             >
                               <Layers className="w-4 h-4 text-blue-400" />
                               <span>Drawing Classification</span>
@@ -755,7 +755,7 @@ export default function ProjectPage() {
                         <div>
                           <button
                             onClick={() => toggleSection('admin')}
-                            className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#1F2328] transition-colors"
+                            className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-dark-surface transition-colors"
                           >
                             <p className="text-xs font-semibold text-gray-400 tracking-wider">ADMIN</p>
                             <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${expandedSections.admin ? '' : '-rotate-90'}`} />
@@ -764,91 +764,91 @@ export default function ProjectPage() {
                             <div className="p-2">
                               <button
                                 onClick={() => { setShowPhotoLibrary(true); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <ImageIcon className="w-4 h-4 text-green-400" />
                                 <span>Photo Library</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/subcontractors`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Users className="w-4 h-4 text-purple-400" />
                                 <span>Subcontractors</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/crews`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Users className="w-4 h-4 text-indigo-400" />
                                 <span>Crew Management</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/budget`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <DollarSign className="w-4 h-4 text-amber-400" />
                                 <span>Budget Management</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/models`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Box className="w-4 h-4 text-blue-400" />
                                 <span>3D Model Viewer</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/field-ops`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <ClipboardList className="w-4 h-4 text-orange-400" />
                                 <span>Field Operations</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/mep`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Cpu className="w-4 h-4 text-purple-400" />
                                 <span>MEP Tracking</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/schedule-budget`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <TrendingUp className="w-4 h-4 text-cyan-400" />
                                 <span>Schedule & Budget Hub</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/reports`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <BarChart2 className="w-4 h-4 text-orange-400" />
                                 <span>Reports & Analytics</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/integrations`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Plug className="w-4 h-4 text-purple-400" />
                                 <span>Integrations</span>
                               </button>
                               <button
                                 onClick={() => { setShowLogoUpload(true); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <ImageIcon className="w-4 h-4 text-emerald-400" />
                                 <span>Company Logo</span>
                               </button>
                               <button
                                 onClick={() => { setShowOneDriveSettings(true); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Cloud className="w-4 h-4 text-[#F97316]" />
                                 <span>OneDrive Settings</span>
                               </button>
                               <button
                                 onClick={() => { setShowFinalizationSettings(true); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Settings className="w-4 h-4 text-blue-400" />
                                 <span>Report Settings</span>
@@ -856,21 +856,21 @@ export default function ProjectPage() {
                               <div className="border-t border-gray-700 my-2" />
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/settings`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <Settings className="w-4 h-4 text-orange-400" />
                                 <span>Project Settings</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/templates`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <FileText className="w-4 h-4 text-cyan-400" />
                                 <span>Document Templates</span>
                               </button>
                               <button
                                 onClick={() => { router.push(`/project/${project.slug}/schedule-updates`); setShowToolsMenu(false); }}
-                                className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-[#1F2328] rounded transition-colors"
+                                className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
                                 <div className="flex items-center gap-3">
                                   <Calendar className="w-4 h-4 text-orange-400" />
@@ -894,7 +894,7 @@ export default function ProjectPage() {
               {/* User Settings Button */}
               <button
                 onClick={() => router.push('/profile')}
-                className="p-1.5 sm:p-2 bg-[#1F2328] hover:bg-[#0d1117] text-gray-300 border border-gray-600 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 bg-dark-surface hover:bg-dark-base text-gray-300 border border-gray-600 rounded-lg transition-colors"
                 title="User Settings"
               >
                 <User className="w-4 h-4" />
@@ -918,7 +918,7 @@ export default function ProjectPage() {
               
               <button
                 onClick={() => router.push('/api/auth/signout')}
-                className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-[#1F2328] rounded-lg transition-colors ml-1"
+                className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-dark-surface rounded-lg transition-colors ml-1"
                 title="Sign Out"
               >
                 <span className="text-xs sm:text-sm font-medium">Sign Out</span>
@@ -929,7 +929,7 @@ export default function ProjectPage() {
       </header>
 
       {/* Onboarding Checklist */}
-      <div className="bg-[#1F2328] px-3 sm:px-6 py-2">
+      <div className="bg-dark-surface px-3 sm:px-6 py-2">
         <OnboardingChecklist 
           projectSlug={slug}
           onRefresh={() => fetchProject()}
@@ -938,7 +938,7 @@ export default function ProjectPage() {
       </div>
 
       {/* Schedule Progress Ribbon (with integrated Health Score) */}
-      <div className="bg-[#1F2328] px-3 sm:px-6 py-2 overflow-hidden">
+      <div className="bg-dark-surface px-3 sm:px-6 py-2 overflow-hidden">
         <ScheduleProgressRibbon 
           projectSlug={slug} 
           compact={false}
@@ -947,7 +947,7 @@ export default function ProjectPage() {
       </div>
 
       {/* Submittal Metrics Widget (compact) */}
-      <div className="bg-[#1F2328] px-3 sm:px-6 pb-2 overflow-hidden">
+      <div className="bg-dark-surface px-3 sm:px-6 pb-2 overflow-hidden">
         <SubmittalMetricsWidget projectSlug={slug} compact={true} />
       </div>
 
@@ -987,12 +987,12 @@ export default function ProjectPage() {
       {/* Document Library Modal */}
       {showDocumentLibrary && project && session?.user && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Project Documents</h2>
               <button
                 onClick={() => setShowDocumentLibrary(false)}
-                className="p-2 hover:bg-[#1F2328] text-gray-400 hover:text-white rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1011,7 +1011,7 @@ export default function ProjectPage() {
       {/* Company Logo Upload Modal */}
       {showLogoUpload && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-md border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-md border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Upload Company Logo</h2>
               <button
@@ -1020,7 +1020,7 @@ export default function ProjectPage() {
                   setLogoFile(null);
                   setLogoPreview(null);
                 }}
-                className="p-2 hover:bg-[#1F2328] text-gray-400 hover:text-white rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1061,7 +1061,7 @@ export default function ProjectPage() {
                         setLogoFile(null);
                         setLogoPreview(null);
                       }}
-                      className="flex-1 px-4 py-2 bg-[#1F2328] hover:bg-[#0d1117] text-gray-300 rounded-lg transition-colors"
+                      className="flex-1 px-4 py-2 bg-dark-surface hover:bg-dark-base text-gray-300 rounded-lg transition-colors"
                     >
                       Change File
                     </button>
@@ -1083,12 +1083,12 @@ export default function ProjectPage() {
       {/* OneDrive Settings Modal */}
       {showOneDriveSettings && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">OneDrive Sync Settings</h2>
               <button
                 onClick={() => setShowOneDriveSettings(false)}
-                className="p-2 hover:bg-[#1F2328] text-gray-400 hover:text-white rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1131,12 +1131,12 @@ export default function ProjectPage() {
       {/* Weather Widget Modal */}
       {showWeatherWidget && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1F2328] rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-dark-surface rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Weather Intelligence</h2>
               <button
                 onClick={() => setShowWeatherWidget(false)}
-                className="p-2 hover:bg-[#2d333b] text-gray-400 hover:text-white rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-card text-gray-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1172,12 +1172,12 @@ export default function ProjectPage() {
       {/* 3-Week Look-Ahead Modal */}
       {showLookahead && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-white">3-Week Look-Ahead Schedule</h2>
               <button
                 onClick={() => setShowLookahead(false)}
-                className="p-2 hover:bg-[#1F2328] text-gray-400 hover:text-white rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1198,12 +1198,12 @@ export default function ProjectPage() {
       {/* Document Processing Monitor Modal */}
       {showProcessingMonitor && project && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-[#F8FAFC]">Document Processing Status</h2>
               <button
                 onClick={() => setShowProcessingMonitor(false)}
-                className="p-2 hover:bg-[#1F2328] text-gray-400 hover:text-white rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

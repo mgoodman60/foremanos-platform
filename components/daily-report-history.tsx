@@ -114,7 +114,7 @@ export function DailyReportHistory({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
@@ -127,7 +127,7 @@ export function DailyReportHistory({
             onClick={onClose}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-[#2d333b]"
+            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -143,7 +143,7 @@ export function DailyReportHistory({
             <>
               {/* Statistics Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="bg-[#2d333b] border border-gray-600 rounded-lg p-4">
+                <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-900/30 rounded-lg">
                       <FileText className="h-5 w-5 text-blue-400" />
@@ -155,7 +155,7 @@ export function DailyReportHistory({
                   </div>
                 </div>
 
-                <div className="bg-[#2d333b] border border-gray-600 rounded-lg p-4">
+                <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-900/30 rounded-lg">
                       <CheckCircle className="h-5 w-5 text-green-400" />
@@ -167,7 +167,7 @@ export function DailyReportHistory({
                   </div>
                 </div>
 
-                <div className="bg-[#2d333b] border border-gray-600 rounded-lg p-4">
+                <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-orange-900/30 rounded-lg">
                       <Clock className="h-5 w-5 text-orange-400" />
@@ -183,7 +183,7 @@ export function DailyReportHistory({
               {/* Grouped Reports */}
               {groupedReports.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-[#2d333b] rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-gray-600">
+                  <div className="w-16 h-16 bg-dark-card rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-gray-600">
                     <Calendar className="w-8 h-8 text-gray-500" />
                   </div>
                   <h3 className="text-lg font-semibold text-[#F8FAFC] mb-2">
@@ -209,7 +209,7 @@ export function DailyReportHistory({
                         {group.reports.map((report) => (
                           <div
                             key={report.id}
-                            className="bg-[#2d333b] border border-gray-600 rounded-lg p-4 hover:border-gray-500 transition-colors"
+                            className="bg-dark-card border border-gray-600 rounded-lg p-4 hover:border-gray-500 transition-colors"
                           >
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
@@ -281,7 +281,7 @@ export function DailyReportHistory({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-700 bg-[#1F2328]">
+        <div className="flex items-center justify-between p-6 border-t border-gray-700 bg-dark-surface">
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <TrendingUp className="h-4 w-4" />
             <span>Showing {stats.total} reports</span>

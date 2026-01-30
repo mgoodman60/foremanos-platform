@@ -170,14 +170,14 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search equipment..."
-            className="w-full pl-10 pr-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+            className="w-full pl-10 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
               text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
           />
         </div>
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+          className="px-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
             text-white focus:border-blue-500 focus:outline-none"
         >
           {EQUIPMENT_TYPES.map(type => (
@@ -187,7 +187,7 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg
+          className="px-4 py-2 bg-dark-surface border border-gray-700 rounded-lg
             text-white focus:border-blue-500 focus:outline-none"
         >
           <option value="">All Statuses</option>
@@ -219,7 +219,7 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
           {filteredEquipment.map((eq) => (
             <div
               key={eq.id}
-              className="bg-[#1F2328] border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors"
+              className="bg-dark-surface border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
@@ -323,7 +323,7 @@ function AddEquipmentModal({
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 className="text-lg font-medium text-white">Add Equipment</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">

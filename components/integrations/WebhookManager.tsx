@@ -156,11 +156,11 @@ export default function WebhookManager({ projectSlug }: WebhookManagerProps) {
   };
 
   if (loading) {
-    return <div className="bg-[#1F2328] rounded-lg p-6 animate-pulse"><div className="h-40 bg-gray-700 rounded" /></div>;
+    return <div className="bg-dark-surface rounded-lg p-6 animate-pulse"><div className="h-40 bg-gray-700 rounded" /></div>;
   }
 
   return (
-    <div className="bg-[#1F2328] rounded-lg p-6">
+    <div className="bg-dark-surface rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Webhook className="h-5 w-5 text-green-400" />

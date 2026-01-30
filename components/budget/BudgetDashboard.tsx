@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 import { format, subDays } from 'date-fns';
+import { chartColors, semanticColors } from '@/lib/design-tokens';
 
 // Types
 interface EVMMetrics {
@@ -65,19 +66,19 @@ interface DashboardData {
 }
 
 // CPI/SPI Gauge Component
-function PerformanceGauge({ 
-  value, 
-  label, 
-  description 
-}: { 
-  value: number; 
-  label: string; 
+function PerformanceGauge({
+  value,
+  label,
+  description
+}: {
+  value: number;
+  label: string;
   description: string;
 }) {
   const getColor = (val: number) => {
-    if (val >= 1.0) return { main: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' };
-    if (val >= 0.9) return { main: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)' };
-    return { main: '#EF4444', bg: 'rgba(239, 68, 68, 0.1)' };
+    if (val >= 1.0) return { main: semanticColors.success[500], bg: 'rgba(16, 185, 129, 0.1)' };
+    if (val >= 0.9) return { main: semanticColors.warning[500], bg: 'rgba(245, 158, 11, 0.1)' };
+    return { main: semanticColors.error[500], bg: 'rgba(239, 68, 68, 0.1)' };
   };
 
   const colors = getColor(value);
@@ -151,7 +152,7 @@ function KPICard({
   color: string;
 }) {
   return (
-    <Card className="bg-[#2d333b] border-gray-700">
+    <Card className="bg-dark-card border-gray-700">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div>
@@ -182,16 +183,7 @@ function KPICard({
   );
 }
 
-const TRADE_COLORS = [
-  '#3B82F6', // Blue
-  '#10B981', // Green
-  '#F59E0B', // Yellow
-  '#EF4444', // Red
-  '#8B5CF6', // Purple
-  '#EC4899', // Pink
-  '#06B6D4', // Cyan
-  '#F97316', // Orange
-];
+const TRADE_COLORS = chartColors.palette;
 
 export default function BudgetDashboard() {
   const params = useParams();
@@ -247,7 +239,7 @@ export default function BudgetDashboard() {
 
   if (!data) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-8 text-center">
           <PieChartIcon className="h-12 w-12 text-gray-500 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No Budget Data</h3>
@@ -278,7 +270,7 @@ export default function BudgetDashboard() {
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
-            className="bg-[#2d333b] border border-gray-600 rounded px-3 py-1 text-sm text-gray-300"
+            className="bg-dark-card border border-gray-600 rounded px-3 py-1 text-sm text-gray-300"
           >
             <option value={7}>Last 7 days</option>
             <option value={14}>Last 14 days</option>
@@ -331,7 +323,7 @@ export default function BudgetDashboard() {
       </div>
 
       {/* CPI/SPI Gauges */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-white text-lg">Performance Indices</CardTitle>
         </CardHeader>
@@ -350,7 +342,7 @@ export default function BudgetDashboard() {
           </div>
           
           {/* Performance Summary */}
-          <div className="mt-6 p-4 bg-[#1F2328] rounded-lg">
+          <div className="mt-6 p-4 bg-dark-surface rounded-lg">
             <h4 className="text-sm font-medium text-gray-300 mb-2">Performance Summary</h4>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
@@ -375,7 +367,7 @@ export default function BudgetDashboard() {
       {/* Daily Cost Trend & Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Daily Cost Trend Chart */}
-        <Card className="bg-[#2d333b] border-gray-700 lg:col-span-2">
+        <Card className="bg-dark-card border-gray-700 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-white text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-blue-400" />
@@ -403,17 +395,17 @@ export default function BudgetDashboard() {
                   formatter={(value: number) => [formatCurrencyFull(value), '']}
                 />
                 <Legend />
-                <Area type="monotone" dataKey="labor" stackId="1" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.6} name="Labor" />
-                <Area type="monotone" dataKey="material" stackId="1" stroke="#10B981" fill="#10B981" fillOpacity={0.6} name="Materials" />
-                <Area type="monotone" dataKey="equipment" stackId="1" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.6} name="Equipment" />
-                <Area type="monotone" dataKey="subcontractor" stackId="1" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.6} name="Subcontractors" />
+                <Area type="monotone" dataKey="labor" stackId="1" stroke={chartColors.palette[1]} fill={chartColors.palette[1]} fillOpacity={0.6} name="Labor" />
+                <Area type="monotone" dataKey="material" stackId="1" stroke={chartColors.palette[0]} fill={chartColors.palette[0]} fillOpacity={0.6} name="Materials" />
+                <Area type="monotone" dataKey="equipment" stackId="1" stroke={chartColors.palette[2]} fill={chartColors.palette[2]} fillOpacity={0.6} name="Equipment" />
+                <Area type="monotone" dataKey="subcontractor" stackId="1" stroke={chartColors.palette[4]} fill={chartColors.palette[4]} fillOpacity={0.6} name="Subcontractors" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Cost Breakdown Pie Chart */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader>
             <CardTitle className="text-white text-lg flex items-center gap-2">
               <PieChartIcon className="h-5 w-5 text-green-400" />
@@ -469,7 +461,7 @@ export default function BudgetDashboard() {
       </div>
 
       {/* Budget vs Actual by Category */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-white text-lg">Budget vs Actual by Category</CardTitle>
         </CardHeader>
@@ -490,8 +482,8 @@ export default function BudgetDashboard() {
                 formatter={(value: number) => formatCurrencyFull(value)}
               />
               <Legend />
-              <Bar dataKey="budgeted" fill="#3B82F6" name="Budgeted" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="actual" fill="#10B981" name="Actual" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="budgeted" fill={chartColors.palette[1]} name="Budgeted" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="actual" fill={chartColors.palette[0]} name="Actual" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

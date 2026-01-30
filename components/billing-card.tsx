@@ -92,7 +92,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
   };
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700">
+    <Card className="bg-dark-card border-gray-700">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -109,7 +109,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
         {/* Current Plan */}
         <div>
           <h3 className="text-sm font-medium mb-2 text-[#F8FAFC]">Current Plan</h3>
-          <div className="flex items-center justify-between p-4 bg-[#1F2328] border border-gray-600 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-dark-surface border border-gray-600 rounded-lg">
             <div>
               <p className="font-semibold text-lg text-[#F8FAFC]">{getTierDisplay()} Plan</p>
               {subscription.billing.cancelAtPeriodEnd && (
@@ -124,7 +124,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
                 onClick={handleManageBilling}
                 disabled={loading || !subscription.billing.customerId}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-[#1F2328] hover:text-white"
+                className="border-gray-600 text-gray-300 hover:bg-dark-surface hover:text-white"
               >
                 {loading ? 'Loading...' : 'Manage Billing'}
               </Button>

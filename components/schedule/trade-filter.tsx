@@ -120,7 +120,7 @@ export function TradeFilter({
       </PopoverTrigger>
       
       <PopoverContent 
-        className="w-80 p-0 bg-[#2d333b] border-gray-700"
+        className="w-80 p-0 bg-dark-card border-gray-700"
         align="start"
       >
         {/* Header */}

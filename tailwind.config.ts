@@ -66,6 +66,10 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        'dark-base': 'var(--bg-dark-base)',
+        'dark-surface': 'var(--bg-dark-surface)',
+        'dark-card': 'var(--bg-dark-card)',
+        'dark-hover': 'var(--bg-dark-hover)',
       },
       keyframes: {
         'accordion-down': {

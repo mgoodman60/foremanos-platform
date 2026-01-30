@@ -176,7 +176,7 @@ export function WeatherScheduleOverlay({
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700 p-6">
+      <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex items-center justify-center gap-3 py-8 text-gray-400">
           <RefreshCw className="h-5 w-5 animate-spin" />
           <span>Loading weather data from project location...</span>
@@ -187,7 +187,7 @@ export function WeatherScheduleOverlay({
 
   if (locationNotSet) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700 p-6">
+      <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex flex-col items-center justify-center gap-4 py-8">
           <MapPin className="h-12 w-12 text-yellow-500" />
           <div className="text-center">
@@ -209,7 +209,7 @@ export function WeatherScheduleOverlay({
 
   if (error) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700 p-6">
+      <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex flex-col items-center justify-center gap-4 py-8">
           <AlertTriangle className="h-12 w-12 text-red-500" />
           <p className="text-red-400">{error}</p>
@@ -223,7 +223,7 @@ export function WeatherScheduleOverlay({
   }
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 p-6">
+    <Card className="bg-dark-card border-gray-700 p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -243,7 +243,7 @@ export function WeatherScheduleOverlay({
         
         <div className="flex items-center gap-3">
           <Select value={viewMode} onValueChange={(v: 'week' | 'twoweek') => setViewMode(v)}>
-            <SelectTrigger className="w-[140px] bg-[#1F2328] border-gray-600">
+            <SelectTrigger className="w-[140px] bg-dark-surface border-gray-600">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -342,7 +342,7 @@ export function WeatherScheduleOverlay({
                       </div>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="bg-[#1F2328] border-gray-700 p-3 max-w-[200px]">
+                  <TooltipContent side="bottom" className="bg-dark-surface border-gray-700 p-3 max-w-[200px]">
                     <div className="space-y-2">
                       <p className="font-semibold text-gray-200">{format(dayDate, 'EEEE, MMM d')}</p>
                       <p className="text-sm text-gray-400 capitalize">{day.description}</p>

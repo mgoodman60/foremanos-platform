@@ -115,11 +115,11 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
 
   return (
     <>
-      <div className="border-b border-gray-700 bg-[#1F2328]">
+      <div className="border-b border-gray-700 bg-dark-surface">
         {/* Header */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between p-3 hover:bg-[#2d333b] transition-colors"
+          className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors"
         >
           <div className="flex items-center gap-2">
             {isExpanded ? (
@@ -151,7 +151,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                 {documents.map((doc) => (
                   <div
                     key={doc.id}
-                    className="p-2 hover:bg-[#2d333b] transition-colors group"
+                    className="p-2 hover:bg-dark-card transition-colors group"
                   >
                     <div className="flex items-start gap-2">
                       <div className="mt-0.5 text-gray-400">
@@ -175,7 +175,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                           onClick={() => handlePreview(doc)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-[#F97316] hover:bg-[#1F2328]"
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-[#F97316] hover:bg-dark-surface"
                           title="Preview"
                         >
                           <Eye className="h-3 w-3" />
@@ -184,7 +184,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                           onClick={() => handleDownload(doc)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-[#F97316] hover:bg-[#1F2328]"
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-[#F97316] hover:bg-dark-surface"
                           title="Download"
                         >
                           <Download className="h-3 w-3" />

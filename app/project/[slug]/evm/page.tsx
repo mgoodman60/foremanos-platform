@@ -156,16 +156,16 @@ export default function EVMPage() {
 
   if (loading || !project) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-gray-400">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328]">
+    <div className="min-h-screen bg-dark-surface">
       {/* Header */}
-      <header className="bg-[#1F2328] border-b border-gray-700 sticky top-0 z-50">
+      <header className="bg-dark-surface border-b border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Breadcrumb */}
@@ -247,22 +247,22 @@ export default function EVMPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {budgetId ? (
           <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="bg-[#1F2328] border border-gray-700 p-1">
+            <TabsList className="bg-dark-surface border border-gray-700 p-1">
               <TabsTrigger 
                 value="dashboard" 
-                className="text-gray-300 data-[state=active]:bg-[#2d333b] data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
+                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
               >
                 EVM Dashboard
               </TabsTrigger>
               <TabsTrigger 
                 value="trades"
-                className="text-gray-300 data-[state=active]:bg-[#2d333b] data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
+                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
               >
                 Cost by Trade
               </TabsTrigger>
               <TabsTrigger 
                 value="items"
-                className="text-gray-300 data-[state=active]:bg-[#2d333b] data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
+                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
               >
                 Budget Items
               </TabsTrigger>
@@ -301,7 +301,7 @@ export default function EVMPage() {
 
       {/* Budget Edit Dialog */}
       <Dialog open={showBudgetEdit} onOpenChange={setShowBudgetEdit}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC]">
+        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC]">
           <DialogHeader>
             <DialogTitle className="text-[#F8FAFC]">Update Budget Total</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -320,7 +320,7 @@ export default function EVMPage() {
                   placeholder="2,985,000"
                   value={newBudgetTotal}
                   onChange={(e) => setNewBudgetTotal(e.target.value)}
-                  className="pl-9 bg-[#1F2328] border-gray-600 text-[#F8FAFC] placeholder-gray-500"
+                  className="pl-9 bg-dark-surface border-gray-600 text-[#F8FAFC] placeholder-gray-500"
                 />
               </div>
               <p className="text-xs text-gray-500">

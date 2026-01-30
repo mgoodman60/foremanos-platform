@@ -174,25 +174,25 @@ export default function InvoiceManager() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-white">{summary.total}</div>
               <div className="text-sm text-gray-400">Total Invoices</div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-yellow-400">{summary.pending}</div>
               <div className="text-sm text-gray-400">Pending</div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-green-400">{formatCurrency(summary.totalPaid)}</div>
               <div className="text-sm text-gray-400">Paid</div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-blue-400">{formatCurrency(summary.totalPending)}</div>
               <div className="text-sm text-gray-400">Outstanding</div>
@@ -215,14 +215,14 @@ export default function InvoiceManager() {
       {/* Invoice List */}
       <div className="space-y-2">
         {invoices.length === 0 ? (
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-8 text-center text-gray-400">
               No invoices yet
             </CardContent>
           </Card>
         ) : (
           invoices.map((inv) => (
-            <Card key={inv.id} className="bg-[#2d333b] border-gray-700">
+            <Card key={inv.id} className="bg-dark-card border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -320,7 +320,7 @@ export default function InvoiceManager() {
 
       {/* Add Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Add Invoice</DialogTitle>
           </DialogHeader>
@@ -331,7 +331,7 @@ export default function InvoiceManager() {
                 <Input
                   value={formData.invoiceNumber}
                   onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -341,7 +341,7 @@ export default function InvoiceManager() {
                   type="number"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -351,7 +351,7 @@ export default function InvoiceManager() {
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -361,7 +361,7 @@ export default function InvoiceManager() {
                   type="number"
                   value={formData.laborAmount}
                   onChange={(e) => setFormData({ ...formData, laborAmount: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
               <div>
@@ -370,7 +370,7 @@ export default function InvoiceManager() {
                   type="number"
                   value={formData.materialsAmount}
                   onChange={(e) => setFormData({ ...formData, materialsAmount: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
             </div>
@@ -381,7 +381,7 @@ export default function InvoiceManager() {
                   type="date"
                   value={formData.invoiceDate}
                   onChange={(e) => setFormData({ ...formData, invoiceDate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -391,7 +391,7 @@ export default function InvoiceManager() {
                   type="date"
                   value={formData.dueDate}
                   onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
             </div>

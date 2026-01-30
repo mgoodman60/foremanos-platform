@@ -178,7 +178,7 @@ export function DelayImpactAnalyzer({
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700 p-6">
+      <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex items-center justify-center gap-3 py-8 text-gray-400">
           <RefreshCw className="h-5 w-5 animate-spin" />
           <span>Analyzing schedule delays...</span>
@@ -188,7 +188,7 @@ export function DelayImpactAnalyzer({
   }
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 p-6">
+    <Card className="bg-dark-card border-gray-700 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -221,7 +221,7 @@ export function DelayImpactAnalyzer({
           </p>
         </div>
         
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="h-4 w-4 text-orange-400" />
             <span className="text-xs text-gray-400">Delayed Tasks</span>
@@ -232,7 +232,7 @@ export function DelayImpactAnalyzer({
           </p>
         </div>
         
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-2 mb-2">
             <Activity className="h-4 w-4 text-red-400" />
             <span className="text-xs text-gray-400">Critical Delayed</span>
@@ -240,7 +240,7 @@ export function DelayImpactAnalyzer({
           <p className="text-2xl font-bold text-red-400">{metrics.criticalDelayed}</p>
         </div>
         
-        <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+        <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="h-4 w-4 text-blue-400" />
             <span className="text-xs text-gray-400">Avg Float</span>
@@ -250,7 +250,7 @@ export function DelayImpactAnalyzer({
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-[#1F2328] border border-gray-700">
+        <TabsList className="bg-dark-surface border border-gray-700">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="causes">Delay Causes</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
@@ -288,7 +288,7 @@ export function DelayImpactAnalyzer({
           </div>
           
           {/* Schedule Health Indicator */}
-          <div className="mt-6 p-4 bg-[#1F2328] rounded-lg border border-gray-700">
+          <div className="mt-6 p-4 bg-dark-surface rounded-lg border border-gray-700">
             <h4 className="text-sm font-medium text-gray-300 mb-3">Schedule Health</h4>
             <div className="flex items-center gap-4">
               <div className="flex-1">

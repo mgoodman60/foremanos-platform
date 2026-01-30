@@ -68,7 +68,7 @@ export default function IntelligenceDashboard() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <RefreshCw className="h-8 w-8 text-cyan-400 animate-spin" />
           <p className="text-gray-300">Loading Intelligence Dashboard...</p>
@@ -79,7 +79,7 @@ export default function IntelligenceDashboard() {
 
   if (error || !dashboard) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
           <p className="text-gray-300 mb-4">{error || 'Failed to load dashboard'}</p>
@@ -95,9 +95,9 @@ export default function IntelligenceDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] text-gray-100">
+    <div className="min-h-screen bg-dark-surface text-gray-100">
       {/* Header */}
-      <div className="bg-[#2d333b] border-b border-gray-700">
+      <div className="bg-dark-card border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -128,7 +128,7 @@ export default function IntelligenceDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Health Overview */}
-        <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-6">
+        <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
               <Activity className="h-6 w-6 text-cyan-400" />
@@ -146,19 +146,19 @@ export default function IntelligenceDashboard() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
               <p className="text-sm text-gray-400 mb-1">Overall Score</p>
               <p className="text-3xl font-bold text-cyan-400">{dashboard.health.overall}%</p>
             </div>
-            <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
               <p className="text-sm text-gray-400 mb-1">Data Quality</p>
               <p className="text-lg font-semibold text-white capitalize">{dashboard.health.indicators.dataQuality}</p>
             </div>
-            <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
               <p className="text-sm text-gray-400 mb-1">System Integration</p>
               <p className="text-lg font-semibold text-white capitalize">{dashboard.health.indicators.systemIntegration}</p>
             </div>
-            <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+            <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
               <p className="text-sm text-gray-400 mb-1">Collaboration</p>
               <p className="text-lg font-semibold text-white capitalize">{dashboard.health.indicators.collaboration}</p>
             </div>
@@ -199,7 +199,7 @@ export default function IntelligenceDashboard() {
         </div>
 
         {/* Phase C Feature Details */}
-        <div className="bg-[#2d333b] rounded-xl border border-cyan-700 p-6">
+        <div className="bg-dark-card rounded-xl border border-cyan-700 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
@@ -218,7 +218,7 @@ export default function IntelligenceDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* C.1: Multi-Sheet Spatial Correlation */}
-            <div className="bg-[#1F2328] rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
+            <div className="bg-dark-surface rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
                  onClick={() => router.push(`/project/${slug}/spatial`)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3">
@@ -248,7 +248,7 @@ export default function IntelligenceDashboard() {
             </div>
 
             {/* C.2: Advanced MEP Path Tracing */}
-            <div className="bg-[#1F2328] rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
+            <div className="bg-dark-surface rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
                  onClick={() => router.push(`/project/${slug}/mep`)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3">
@@ -294,7 +294,7 @@ export default function IntelligenceDashboard() {
             </div>
 
             {/* C.3: Adaptive Symbol Learning */}
-            <div className="bg-[#1F2328] rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
+            <div className="bg-dark-surface rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
                  onClick={() => router.push(`/project/${slug}/legends`)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3">
@@ -332,7 +332,7 @@ export default function IntelligenceDashboard() {
             </div>
 
             {/* C.4: Isometric View Interpretation */}
-            <div className="bg-[#1F2328] rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
+            <div className="bg-dark-surface rounded-lg border border-gray-700 p-5 hover:border-cyan-600 transition-colors cursor-pointer"
                  onClick={() => router.push(`/project/${slug}/isometric`)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3">
@@ -364,7 +364,7 @@ export default function IntelligenceDashboard() {
         {/* Insights & Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Insights */}
-          <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-6">
+          <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
             <h2 className="text-xl font-semibold text-white flex items-center space-x-2 mb-4">
               <TrendingUp className="h-6 w-6 text-green-400" />
               <span>Key Insights</span>
@@ -380,7 +380,7 @@ export default function IntelligenceDashboard() {
           </div>
 
           {/* Recommendations */}
-          <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-6">
+          <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
             <h2 className="text-xl font-semibold text-white flex items-center space-x-2 mb-4">
               <MessageSquare className="h-6 w-6 text-yellow-400" />
               <span>Recommendations</span>
@@ -397,7 +397,7 @@ export default function IntelligenceDashboard() {
         </div>
 
         {/* Project Stats */}
-        <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-6">
+        <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
           <h2 className="text-xl font-semibold text-white mb-4">Project Statistics</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard label="Documents" value={dashboard.project.documentsCount} />
@@ -464,7 +464,7 @@ function PhaseCard({ title, phase, score, features, icon, color }: PhaseCardProp
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-[#1F2328] rounded-lg p-4 border border-gray-700">
+    <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
       <p className="text-sm text-gray-400 mb-1">{label}</p>
       <p className="text-2xl font-bold text-white">{value.toLocaleString()}</p>
     </div>

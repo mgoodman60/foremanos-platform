@@ -489,7 +489,7 @@ export default function TakeoffsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#1F2328]">
+      <div className="flex items-center justify-center min-h-screen bg-dark-surface">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
           <p className="text-gray-400">Loading material takeoffs...</p>
@@ -499,7 +499,7 @@ export default function TakeoffsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] p-6">
+    <div className="min-h-screen bg-dark-surface p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -548,7 +548,7 @@ export default function TakeoffsPage() {
         </div>
 
         {takeoffs.length === 0 ? (
-          <Card className="bg-[#2d333b] border-gray-700 p-12">
+          <Card className="bg-dark-card border-gray-700 p-12">
             <div className="text-center space-y-4">
               <Ruler className="h-16 w-16 text-gray-400 mx-auto" />
               <div>
@@ -585,7 +585,7 @@ export default function TakeoffsPage() {
             </div>
           </Card>
         ) : (
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <Table>
               <TableHeader>
                 <TableRow className="border-gray-700">
@@ -600,7 +600,7 @@ export default function TakeoffsPage() {
               </TableHeader>
               <TableBody>
                 {takeoffs.map((takeoff) => (
-                  <TableRow key={takeoff.id} className="border-gray-700 hover:bg-[#1F2328]/50">
+                  <TableRow key={takeoff.id} className="border-gray-700 hover:bg-dark-surface/50">
                     <TableCell className="font-medium text-gray-200">
                       {takeoff.name}
                       {takeoff.description && (
@@ -662,7 +662,7 @@ export default function TakeoffsPage() {
         {/* Detail Modal */}
         {selectedTakeoff && (
           <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
-            <DialogContent className="bg-[#2d333b] border-gray-700 text-gray-100 max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="bg-dark-card border-gray-700 text-gray-100 max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-2xl">{selectedTakeoff.name}</DialogTitle>
                 <DialogDescription className="text-gray-400">
@@ -673,13 +673,13 @@ export default function TakeoffsPage() {
               <div className="space-y-6">
                 {/* Summary */}
                 <div className="grid grid-cols-3 gap-4">
-                  <Card className="bg-[#1F2328] border-gray-700 p-4">
+                  <Card className="bg-dark-surface border-gray-700 p-4">
                     <div className="text-sm text-gray-400">Total Items</div>
                     <div className="text-2xl font-bold text-gray-100 mt-1">
                       {selectedTakeoff._count.lineItems}
                     </div>
                   </Card>
-                  <Card className="bg-[#1F2328] border-gray-700 p-4">
+                  <Card className="bg-dark-surface border-gray-700 p-4">
                     <div className="text-sm text-gray-400">Total Cost</div>
                     <div className="text-2xl font-bold text-gray-100 mt-1">
                       {selectedTakeoff.totalCost
@@ -687,7 +687,7 @@ export default function TakeoffsPage() {
                         : 'TBD'}
                     </div>
                   </Card>
-                  <Card className="bg-[#1F2328] border-gray-700 p-4">
+                  <Card className="bg-dark-surface border-gray-700 p-4">
                     <div className="text-sm text-gray-400">Status</div>
                     <div className="mt-2">
                       {getStatusBadge(selectedTakeoff.status)}
@@ -733,7 +733,7 @@ export default function TakeoffsPage() {
                   ) : (
                     <div className="space-y-2">
                       {lineItems.map((item) => (
-                        <Card key={item.id} className="bg-[#1F2328] border-gray-700 p-4">
+                        <Card key={item.id} className="bg-dark-surface border-gray-700 p-4">
                           {editingLineItem?.id === item.id ? (
                             // Edit mode
                             <div className="space-y-4">
@@ -743,7 +743,7 @@ export default function TakeoffsPage() {
                                   <Input
                                     value={editingLineItem.description}
                                     onChange={(e) => setEditingLineItem({ ...editingLineItem, description: e.target.value })}
-                                    className="bg-[#2d333b] border-gray-700"
+                                    className="bg-dark-card border-gray-700"
                                   />
                                 </div>
                                 <div>
@@ -751,7 +751,7 @@ export default function TakeoffsPage() {
                                   <Input
                                     value={editingLineItem.category}
                                     onChange={(e) => setEditingLineItem({ ...editingLineItem, category: e.target.value })}
-                                    className="bg-[#2d333b] border-gray-700"
+                                    className="bg-dark-card border-gray-700"
                                   />
                                 </div>
                                 <div>
@@ -760,7 +760,7 @@ export default function TakeoffsPage() {
                                     type="number"
                                     value={editingLineItem.quantity}
                                     onChange={(e) => setEditingLineItem({ ...editingLineItem, quantity: parseFloat(e.target.value) })}
-                                    className="bg-[#2d333b] border-gray-700"
+                                    className="bg-dark-card border-gray-700"
                                   />
                                 </div>
                                 <div>
@@ -768,7 +768,7 @@ export default function TakeoffsPage() {
                                   <Input
                                     value={editingLineItem.unit}
                                     onChange={(e) => setEditingLineItem({ ...editingLineItem, unit: e.target.value })}
-                                    className="bg-[#2d333b] border-gray-700"
+                                    className="bg-dark-card border-gray-700"
                                   />
                                 </div>
                                 <div>
@@ -777,7 +777,7 @@ export default function TakeoffsPage() {
                                     type="number"
                                     value={editingLineItem.unitCost || 0}
                                     onChange={(e) => setEditingLineItem({ ...editingLineItem, unitCost: parseFloat(e.target.value) })}
-                                    className="bg-[#2d333b] border-gray-700"
+                                    className="bg-dark-card border-gray-700"
                                   />
                                 </div>
                                 <div>
@@ -785,7 +785,7 @@ export default function TakeoffsPage() {
                                   <Input
                                     value={editingLineItem.location || ''}
                                     onChange={(e) => setEditingLineItem({ ...editingLineItem, location: e.target.value })}
-                                    className="bg-[#2d333b] border-gray-700"
+                                    className="bg-dark-card border-gray-700"
                                   />
                                 </div>
                               </div>
@@ -877,7 +877,7 @@ export default function TakeoffsPage() {
 
         {/* Create Takeoff Modal */}
         <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-          <DialogContent className="bg-[#2d333b] border-gray-700 text-gray-100">
+          <DialogContent className="bg-dark-card border-gray-700 text-gray-100">
             <DialogHeader>
               <DialogTitle>Create New Takeoff</DialogTitle>
               <DialogDescription className="text-gray-400">
@@ -892,7 +892,7 @@ export default function TakeoffsPage() {
                   value={newTakeoff.name}
                   onChange={(e) => setNewTakeoff({ ...newTakeoff, name: e.target.value })}
                   placeholder="e.g., Phase 1 Concrete Takeoff"
-                  className="bg-[#1F2328] border-gray-700 mt-1"
+                  className="bg-dark-surface border-gray-700 mt-1"
                 />
               </div>
               <div>
@@ -902,7 +902,7 @@ export default function TakeoffsPage() {
                   onChange={(e) => setNewTakeoff({ ...newTakeoff, description: e.target.value })}
                   placeholder="Optional description..."
                   rows={3}
-                  className="bg-[#1F2328] border-gray-700 mt-1"
+                  className="bg-dark-surface border-gray-700 mt-1"
                 />
               </div>
               <div>
@@ -911,10 +911,10 @@ export default function TakeoffsPage() {
                   value={newTakeoff.status}
                   onValueChange={(value) => setNewTakeoff({ ...newTakeoff, status: value })}
                 >
-                  <SelectTrigger className="bg-[#1F2328] border-gray-700 mt-1">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 mt-1">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2d333b] border-gray-700">
+                  <SelectContent className="bg-dark-card border-gray-700">
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
@@ -945,7 +945,7 @@ export default function TakeoffsPage() {
 
         {/* Add Line Item Modal */}
         <Dialog open={showLineItemModal} onOpenChange={setShowLineItemModal}>
-          <DialogContent className="bg-[#2d333b] border-gray-700 text-gray-100 max-w-2xl">
+          <DialogContent className="bg-dark-card border-gray-700 text-gray-100 max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add Line Item</DialogTitle>
               <DialogDescription className="text-gray-400">
@@ -961,7 +961,7 @@ export default function TakeoffsPage() {
                     value={newLineItem.category}
                     onChange={(e) => setNewLineItem({ ...newLineItem, category: e.target.value })}
                     placeholder="e.g., Concrete, Rebar, Formwork"
-                    className="bg-[#1F2328] border-gray-700 mt-1"
+                    className="bg-dark-surface border-gray-700 mt-1"
                   />
                 </div>
                 <div>
@@ -970,7 +970,7 @@ export default function TakeoffsPage() {
                     value={newLineItem.location}
                     onChange={(e) => setNewLineItem({ ...newLineItem, location: e.target.value })}
                     placeholder="e.g., Building A, Floor 2"
-                    className="bg-[#1F2328] border-gray-700 mt-1"
+                    className="bg-dark-surface border-gray-700 mt-1"
                   />
                 </div>
               </div>
@@ -982,7 +982,7 @@ export default function TakeoffsPage() {
                   onChange={(e) => setNewLineItem({ ...newLineItem, description: e.target.value })}
                   placeholder="Detailed description of the item..."
                   rows={2}
-                  className="bg-[#1F2328] border-gray-700 mt-1"
+                  className="bg-dark-surface border-gray-700 mt-1"
                 />
               </div>
 
@@ -994,7 +994,7 @@ export default function TakeoffsPage() {
                     step="0.01"
                     value={newLineItem.quantity}
                     onChange={(e) => setNewLineItem({ ...newLineItem, quantity: parseFloat(e.target.value) || 0 })}
-                    className="bg-[#1F2328] border-gray-700 mt-1"
+                    className="bg-dark-surface border-gray-700 mt-1"
                   />
                 </div>
                 <div>
@@ -1003,10 +1003,10 @@ export default function TakeoffsPage() {
                     value={newLineItem.unit}
                     onValueChange={(value) => setNewLineItem({ ...newLineItem, unit: value })}
                   >
-                    <SelectTrigger className="bg-[#1F2328] border-gray-700 mt-1">
+                    <SelectTrigger className="bg-dark-surface border-gray-700 mt-1">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#2d333b] border-gray-700">
+                    <SelectContent className="bg-dark-card border-gray-700">
                       <SelectItem value="EA">EA (Each)</SelectItem>
                       <SelectItem value="SF">SF (Square Feet)</SelectItem>
                       <SelectItem value="LF">LF (Linear Feet)</SelectItem>
@@ -1024,13 +1024,13 @@ export default function TakeoffsPage() {
                     step="0.01"
                     value={newLineItem.unitCost}
                     onChange={(e) => setNewLineItem({ ...newLineItem, unitCost: parseFloat(e.target.value) || 0 })}
-                    className="bg-[#1F2328] border-gray-700 mt-1"
+                    className="bg-dark-surface border-gray-700 mt-1"
                   />
                 </div>
               </div>
 
               {newLineItem.quantity > 0 && newLineItem.unitCost > 0 && (
-                <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-3">
+                <div className="bg-dark-surface border border-gray-700 rounded-lg p-3">
                   <div className="text-sm text-gray-400">Total Cost</div>
                   <div className="text-2xl font-bold text-[#F97316]">
                     ${(newLineItem.quantity * newLineItem.unitCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -1070,7 +1070,7 @@ export default function TakeoffsPage() {
 
         {/* Enhanced Vision Extraction Modal */}
         <Dialog open={showEnhancedModal} onOpenChange={setShowEnhancedModal}>
-          <DialogContent className="bg-[#2d333b] border-gray-700 text-gray-100 max-w-lg">
+          <DialogContent className="bg-dark-card border-gray-700 text-gray-100 max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-blue-400" />
@@ -1102,10 +1102,10 @@ export default function TakeoffsPage() {
                   value={selectedDocumentId}
                   onValueChange={setSelectedDocumentId}
                 >
-                  <SelectTrigger className="bg-[#1F2328] border-gray-700 mt-1">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 mt-1">
                     <SelectValue placeholder="Choose a PDF document..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2d333b] border-gray-700">
+                  <SelectContent className="bg-dark-card border-gray-700">
                     {documents.map((doc) => (
                       <SelectItem key={doc.id} value={doc.id}>
                         {doc.name}
@@ -1122,7 +1122,7 @@ export default function TakeoffsPage() {
               </div>
 
               {enhancedStats && (
-                <Card className="bg-[#1F2328] border-gray-700 p-4">
+                <Card className="bg-dark-surface border-gray-700 p-4">
                   <h4 className="text-sm font-semibold text-gray-300 mb-3">Last Extraction Results</h4>
                   <div className="grid grid-cols-2 gap-3 text-center">
                     <div>

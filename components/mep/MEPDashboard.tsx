@@ -168,7 +168,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
 
       {/* BIM Import Section */}
       {models.length > 0 && (
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
           <h3 className="text-lg font-medium text-white mb-3 flex items-center gap-2">
             <Download className="w-5 h-5 text-blue-400" />
             Import from BIM Models
@@ -199,7 +199,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Systems by Type */}
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
           <h3 className="text-lg font-medium text-white mb-4">Systems by Type</h3>
           <div className="space-y-3">
             {Object.entries(stats.systemsByType).map(([type, count]) => {
@@ -226,7 +226,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
         </div>
 
         {/* Equipment Status */}
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
           <h3 className="text-lg font-medium text-white mb-4">Equipment Status</h3>
           <div className="space-y-2">
             {Object.entries(stats.equipmentByStatus).map(([status, count]) => (
@@ -254,7 +254,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
 
       {/* Alerts Section */}
       {(stats.overdueMaintenance > 0 || stats.pendingSubmittals > 0) && (
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
           <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-yellow-500" />
             Attention Required

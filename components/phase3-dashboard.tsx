@@ -190,7 +190,7 @@ export function Phase3Dashboard({
           onClick={fetchAnalytics}
           variant="outline"
           size="sm"
-          className="border-gray-600 text-gray-300 hover:bg-[#2d333b]"
+          className="border-gray-600 text-gray-300 hover:bg-dark-card"
         >
           <Activity className="mr-2 h-4 w-4" />
           Refresh
@@ -200,7 +200,7 @@ export function Phase3Dashboard({
       {/* Overview KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Documents */}
-        <Card className="bg-[#2d333b] border-gray-700 p-4">
+        <Card className="bg-dark-card border-gray-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-blue-500/20">
@@ -223,7 +223,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Rooms */}
-        <Card className="bg-[#2d333b] border-gray-700 p-4">
+        <Card className="bg-dark-card border-gray-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-green-500/20">
@@ -248,7 +248,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* MEP Equipment */}
-        <Card className="bg-[#2d333b] border-gray-700 p-4">
+        <Card className="bg-dark-card border-gray-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-orange-500/20">
@@ -271,7 +271,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Materials */}
-        <Card className="bg-[#2d333b] border-gray-700 p-4">
+        <Card className="bg-dark-card border-gray-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-purple-500/20">
@@ -304,7 +304,7 @@ export function Phase3Dashboard({
           {/* Room Browser */}
           <button
             onClick={onOpenRoom}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-[#2d333b] p-4 text-left hover:border-green-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-green-500 hover:bg-[#383e47] transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-all"></div>
             <div className="relative">
@@ -318,7 +318,7 @@ export function Phase3Dashboard({
           {/* Material Takeoff */}
           <button
             onClick={onOpenMaterials}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-[#2d333b] p-4 text-left hover:border-purple-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-purple-500 hover:bg-[#383e47] transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
             <div className="relative">
@@ -332,7 +332,7 @@ export function Phase3Dashboard({
           {/* MEP Equipment */}
           <button
             onClick={onOpenMEP}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-[#2d333b] p-4 text-left hover:border-orange-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-orange-500 hover:bg-[#383e47] transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all"></div>
             <div className="relative">
@@ -346,7 +346,7 @@ export function Phase3Dashboard({
           {/* Document Viewer */}
           <button
             onClick={onOpenPlans}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-[#2d333b] p-4 text-left hover:border-blue-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-blue-500 hover:bg-[#383e47] transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
             <div className="relative">
@@ -363,7 +363,7 @@ export function Phase3Dashboard({
       {/* Detailed Analytics Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* MEP Distribution */}
-        <Card className="bg-[#2d333b] border-gray-700 p-5">
+        <Card className="bg-dark-card border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <PieChart className="h-4 w-4 text-orange-500" />
@@ -393,7 +393,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Material Categories */}
-        <Card className="bg-[#2d333b] border-gray-700 p-5">
+        <Card className="bg-dark-card border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-purple-500" />
@@ -408,7 +408,7 @@ export function Phase3Dashboard({
               {analytics.materials.categoryBreakdown.slice(0, 5).map((category) => (
                 <div
                   key={category.name}
-                  className="flex items-center justify-between p-2 rounded-lg bg-[#1F2328] hover:bg-[#383e47] transition-colors"
+                  className="flex items-center justify-between p-2 rounded-lg bg-dark-surface hover:bg-[#383e47] transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-[#F8FAFC] truncate">
@@ -433,7 +433,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Health Metrics */}
-        <Card className="bg-[#2d333b] border-gray-700 p-5">
+        <Card className="bg-dark-card border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-500" />
@@ -492,7 +492,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-[#2d333b] border-gray-700 p-5">
+        <Card className="bg-dark-card border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
               <Activity className="h-4 w-4 text-blue-500" />
@@ -501,7 +501,7 @@ export function Phase3Dashboard({
             <span className="text-xs text-gray-500">Last 7 days</span>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#1F2328]">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface">
               <div className="p-2 rounded-lg bg-blue-500/20">
                 <FileText className="h-4 w-4 text-blue-400" />
               </div>
@@ -519,7 +519,7 @@ export function Phase3Dashboard({
               )}
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#1F2328]">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface">
               <div className="p-2 rounded-lg bg-green-500/20">
                 <Home className="h-4 w-4 text-green-400" />
               </div>
@@ -537,7 +537,7 @@ export function Phase3Dashboard({
               )}
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#1F2328] text-xs text-gray-400">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-dark-surface text-xs text-gray-400">
               <span>Last updated</span>
               <span>{new Date(analytics.activity.lastUpdate).toLocaleString()}</span>
             </div>

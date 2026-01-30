@@ -79,7 +79,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
       aria-modal="true"
       aria-labelledby="preview-dialog-title"
     >
-      <div className="bg-[#2d333b] border border-gray-700 rounded-lg shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="bg-dark-card border border-gray-700 rounded-lg shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex-1 min-w-0">
@@ -98,7 +98,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
               <div className="flex items-center gap-1 border-r border-gray-700 pr-3">
                 <button
                   onClick={zoomOut}
-                  className="p-2 hover:bg-[#1F2328] rounded-lg transition-colors"
+                  className="p-2 hover:bg-dark-surface rounded-lg transition-colors"
                   aria-label="Zoom out"
                   title="Zoom out"
                 >
@@ -109,7 +109,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
                 </span>
                 <button
                   onClick={zoomIn}
-                  className="p-2 hover:bg-[#1F2328] rounded-lg transition-colors"
+                  className="p-2 hover:bg-dark-surface rounded-lg transition-colors"
                   aria-label="Zoom in"
                   title="Zoom in"
                 >
@@ -141,7 +141,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
         </div>
 
         {/* Preview Content */}
-        <div className="flex-1 overflow-hidden bg-[#1F2328] flex items-center justify-center">
+        <div className="flex-1 overflow-hidden bg-dark-surface flex items-center justify-center">
           {loading && !error && (
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
@@ -151,7 +151,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
           
           {error && (
             <div className="flex flex-col items-center gap-3 max-w-md text-center px-4">
-              <div className="w-16 h-16 bg-[#2d333b] rounded-full flex items-center justify-center border-2 border-gray-700">
+              <div className="w-16 h-16 bg-dark-card rounded-full flex items-center justify-center border-2 border-gray-700">
                 <X className="w-8 h-8 text-red-500" />
               </div>
               <h4 className="text-lg font-semibold text-[#F8FAFC]">Preview Unavailable</h4>
@@ -186,9 +186,9 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-gray-700 bg-[#2d333b]">
+        <div className="p-3 border-t border-gray-700 bg-dark-card">
           <p className="text-xs text-gray-500 text-center">
-            Press <kbd className="px-2 py-1 bg-[#1F2328] border border-gray-600 rounded text-gray-400">ESC</kbd> to close preview
+            Press <kbd className="px-2 py-1 bg-dark-surface border border-gray-600 rounded text-gray-400">ESC</kbd> to close preview
           </p>
         </div>
       </div>

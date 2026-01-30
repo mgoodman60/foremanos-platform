@@ -126,7 +126,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
@@ -140,7 +140,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
               onClick={expandAll}
               variant="outline"
               size="sm"
-              className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+              className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
             >
               <ChevronDown className="h-4 w-4 mr-1" />
               Expand All
@@ -149,7 +149,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
               onClick={collapseAll}
               variant="outline"
               size="sm"
-              className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+              className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
             >
               <ChevronUp className="h-4 w-4 mr-1" />
               Collapse All
@@ -158,7 +158,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
               onClick={onClose}
               variant="ghost"
               size="icon"
-              className="text-gray-400 hover:text-white hover:bg-[#2d333b]"
+              className="text-gray-400 hover:text-white hover:bg-dark-card"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -190,7 +190,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
                   <div className="ml-10">
                     <button
                       onClick={() => toggleDay(group.date)}
-                      className="flex items-center justify-between w-full p-4 bg-[#2d333b] border border-gray-700 rounded-lg hover:bg-[#3d434b] transition-colors group"
+                      className="flex items-center justify-between w-full p-4 bg-dark-card border border-gray-700 rounded-lg hover:bg-[#3d434b] transition-colors group"
                     >
                       <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-orange-500" />
@@ -252,9 +252,9 @@ function TimelinePhotoCard({ photo }: TimelinePhotoCardProps) {
   }, [photo.cloud_storage_path]);
 
   return (
-    <Card className="bg-[#2d333b] border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors">
+    <Card className="bg-dark-card border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors">
       {/* Image */}
-      <div className="aspect-square relative bg-[#1F2328]">
+      <div className="aspect-square relative bg-dark-surface">
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>

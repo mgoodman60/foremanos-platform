@@ -157,7 +157,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Total Sheets */}
-          <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+          <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <FileText className="h-5 w-5 text-blue-500" />
               <span className="text-2xl font-bold text-gray-100">
@@ -168,7 +168,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           </div>
 
           {/* Drawing Types */}
-          <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+          <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <Layers className="h-5 w-5 text-green-500" />
               <span className="text-2xl font-bold text-gray-100">
@@ -179,7 +179,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           </div>
 
           {/* Average Confidence */}
-          <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+          <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               <span className="text-2xl font-bold text-gray-100">
@@ -190,7 +190,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           </div>
 
           {/* Composite Sheets */}
-          <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+          <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               <span className="text-2xl font-bold text-gray-100">
@@ -204,7 +204,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
 
       {/* Type Distribution */}
       {stats && Object.keys(stats.byTypeFormatted).length > 0 && (
-        <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-6">
+        <div className="bg-dark-card border border-gray-700 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-blue-500" />
             Drawing Type Distribution
@@ -230,12 +230,12 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           placeholder="Search sheets..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 px-4 py-2 bg-[#2d333b] border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <select
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
-          className="px-4 py-2 bg-[#2d333b] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+          className="px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
         >
           <option value="all">All Types</option>
           {drawingTypes
@@ -253,7 +253,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
 
       {/* Drawings List */}
       {filteredDrawings.length === 0 ? (
-        <div className="text-center py-12 bg-[#2d333b] border border-gray-700 rounded-lg">
+        <div className="text-center py-12 bg-dark-card border border-gray-700 rounded-lg">
           <Grid3x3 className="h-12 w-12 text-gray-600 mx-auto mb-3" />
           <p className="text-gray-400 mb-2">No classified drawings found</p>
           <p className="text-sm text-gray-500 mb-4">
@@ -279,7 +279,7 @@ function DrawingCard({ drawing }: { drawing: DrawingInfo }) {
   const confidenceColor = getConfidenceColor(drawing.confidence);
 
   return (
-    <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4 hover:border-blue-500 transition-colors">
+    <div className="bg-dark-card border border-gray-700 rounded-lg p-4 hover:border-blue-500 transition-colors">
       {/* Sheet Number */}
       <div className="flex items-center justify-between mb-3">
         <div>

@@ -214,7 +214,7 @@ export function MobilePhotoUpload({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-[#2d333b] hover:bg-[#3d434b] text-[#F8FAFC] border border-gray-600 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-dark-card hover:bg-[#3d434b] text-[#F8FAFC] border border-gray-600 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
           <ImageIcon className="h-6 w-6" />
           <span>Choose Photos</span>
@@ -244,7 +244,7 @@ export function MobilePhotoUpload({
             {photos.map((photo) => (
               <div
                 key={photo.id}
-                className="relative bg-[#2d333b] border border-gray-600 rounded-lg overflow-hidden aspect-square"
+                className="relative bg-dark-card border border-gray-600 rounded-lg overflow-hidden aspect-square"
               >
                 {/* Photo Image */}
                 <div className="relative w-full h-full">

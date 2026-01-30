@@ -218,14 +218,14 @@ export default function RoomsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-base flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-dark-base">
       {/* Header */}
       <div className="bg-[#161b22] border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -291,13 +291,13 @@ export default function RoomsPage() {
                   placeholder="Search rooms..."
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="pl-10 bg-[#0d1117] border-gray-700 text-white"
+                  className="pl-10 bg-dark-base border-gray-700 text-white"
                 />
               </div>
             </div>
             
             <Select value={filters.type} onValueChange={(v) => setFilters({ ...filters, type: v })}>
-              <SelectTrigger className="w-[150px] bg-[#0d1117] border-gray-700 text-white">
+              <SelectTrigger className="w-[150px] bg-dark-base border-gray-700 text-white">
                 <SelectValue placeholder="Room Type" />
               </SelectTrigger>
               <SelectContent>
@@ -311,7 +311,7 @@ export default function RoomsPage() {
             </Select>
             
             <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v })}>
-              <SelectTrigger className="w-[150px] bg-[#0d1117] border-gray-700 text-white">
+              <SelectTrigger className="w-[150px] bg-dark-base border-gray-700 text-white">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -323,7 +323,7 @@ export default function RoomsPage() {
             </Select>
             
             <Select value={filters.floor} onValueChange={(v) => setFilters({ ...filters, floor: v })}>
-              <SelectTrigger className="w-[150px] bg-[#0d1117] border-gray-700 text-white">
+              <SelectTrigger className="w-[150px] bg-dark-base border-gray-700 text-white">
                 <SelectValue placeholder="Floor" />
               </SelectTrigger>
               <SelectContent>
@@ -413,7 +413,7 @@ export default function RoomsPage() {
                   </div>
                 </div>
                 
-                <div className="px-4 py-2 bg-[#0d1117] border-t border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-2 bg-dark-base border-t border-gray-700 flex items-center justify-between">
                   <span className="text-xs text-gray-500">
                     {room.floor || `Floor ${room.floorNumber}`}
                   </span>
@@ -426,7 +426,7 @@ export default function RoomsPage() {
           <div className="bg-[#161b22] rounded-lg border border-gray-800 overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-700 bg-[#0d1117]">
+                <tr className="border-b border-gray-700 bg-dark-base">
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Room</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Type</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Floor</th>
@@ -504,7 +504,7 @@ export default function RoomsPage() {
               {/* Basic Info */}
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">Details</h3>
-                <div className="bg-[#0d1117] rounded-lg p-4 space-y-2">
+                <div className="bg-dark-base rounded-lg p-4 space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Name</span>
                     <span className="text-white">{selectedRoom.name || '-'}</span>
@@ -536,7 +536,7 @@ export default function RoomsPage() {
                   <h3 className="text-sm font-medium text-gray-400 mb-2">
                     Finish Schedule ({selectedRoom.FinishScheduleItem.length})
                   </h3>
-                  <div className="bg-[#0d1117] rounded-lg divide-y divide-gray-800">
+                  <div className="bg-dark-base rounded-lg divide-y divide-gray-800">
                     {selectedRoom.FinishScheduleItem.map((item: any, idx: number) => (
                       <div key={idx} className="p-3">
                         <div className="font-medium text-white text-sm">{item.finishType}</div>
@@ -556,7 +556,7 @@ export default function RoomsPage() {
                   <h3 className="text-sm font-medium text-gray-400 mb-2">
                     MEP Equipment ({selectedRoom.mepEquipment.length})
                   </h3>
-                  <div className="bg-[#0d1117] rounded-lg divide-y divide-gray-800">
+                  <div className="bg-dark-base rounded-lg divide-y divide-gray-800">
                     {selectedRoom.mepEquipment.map((equip: any, idx: number) => (
                       <div key={idx} className="p-3 flex items-start gap-3">
                         {equip.scheduleType?.includes('HVAC') || equip.scheduleType?.includes('Fan') ? (

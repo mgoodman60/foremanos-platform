@@ -198,7 +198,7 @@ export function TakeoffLaborPlanning({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-5xl bg-[#1F2328] rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-5xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -247,22 +247,22 @@ export function TakeoffLaborPlanning({
                 <div className="space-y-6">
                   {/* Summary Cards */}
                   <div className="grid grid-cols-4 gap-4">
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <Clock className="h-6 w-6 text-orange-400 mx-auto mb-2" />
                       <div className="text-2xl font-bold text-white">{formatHours(summary.totalLaborHours)}</div>
                       <div className="text-sm text-gray-400">Total Labor Hours</div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <Users className="h-6 w-6 text-blue-400 mx-auto mb-2" />
                       <div className="text-2xl font-bold text-white">{summary.peakCrewSize}</div>
                       <div className="text-sm text-gray-400">Peak Crew Size</div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <Calendar className="h-6 w-6 text-green-400 mx-auto mb-2" />
                       <div className="text-2xl font-bold text-white">{summary.estimatedDuration}</div>
                       <div className="text-sm text-gray-400">Est. Days</div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <Wrench className="h-6 w-6 text-purple-400 mx-auto mb-2" />
                       <div className="text-2xl font-bold text-white">{summary.byTrade.length}</div>
                       <div className="text-sm text-gray-400">Trades</div>
@@ -270,7 +270,7 @@ export function TakeoffLaborPlanning({
                   </div>
 
                   {/* Trade Breakdown */}
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
                       <BarChart3 className="h-4 w-4" />
                       Labor Hours by Trade
@@ -301,11 +301,11 @@ export function TakeoffLaborPlanning({
                   </div>
 
                   {/* Category Summary */}
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-300 mb-3">By Category</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {summary.byCategory.slice(0, 9).map((cat) => (
-                        <div key={cat.category} className="flex items-center justify-between p-2 bg-[#1F2328] rounded">
+                        <div key={cat.category} className="flex items-center justify-between p-2 bg-dark-surface rounded">
                           <span className="text-sm text-gray-300 truncate">{cat.category}</span>
                           <span className="text-sm text-orange-400 font-medium">{formatHours(cat.laborHours)}h</span>
                         </div>
@@ -324,7 +324,7 @@ export function TakeoffLaborPlanning({
                     const totalHours = tradeItems.reduce((sum, r) => sum + r.totalLaborHours, 0);
 
                     return (
-                      <div key={trade} className="bg-[#2d333b] rounded-lg overflow-hidden">
+                      <div key={trade} className="bg-dark-card rounded-lg overflow-hidden">
                         <button
                           onClick={() => toggleTrade(trade)}
                           className="w-full flex items-center justify-between p-3 hover:bg-[#373e47] transition-colors"
@@ -345,7 +345,7 @@ export function TakeoffLaborPlanning({
                         {expandedTrades.has(trade) && (
                           <div className="border-t border-gray-700">
                             <table className="w-full text-sm">
-                              <thead className="bg-[#1F2328]">
+                              <thead className="bg-dark-surface">
                                 <tr className="text-gray-400">
                                   <th className="text-left p-2 pl-10">Item</th>
                                   <th className="text-right p-2">Qty</th>
@@ -407,7 +407,7 @@ export function TakeoffLaborPlanning({
                         {links.map((link) => (
                           <div
                             key={`${link.takeoffItemId}-${link.scheduleTaskId}`}
-                            className="bg-[#2d333b] rounded-lg p-3 flex items-center justify-between"
+                            className="bg-dark-card rounded-lg p-3 flex items-center justify-between"
                           >
                             <div className="flex items-center gap-3">
                               <Link2 className="h-4 w-4 text-gray-400" />
@@ -467,7 +467,7 @@ export function TakeoffLaborPlanning({
                         {suggestions.map((sug) => (
                           <div
                             key={sug.taskId}
-                            className={`bg-[#2d333b] rounded-lg p-4 border-l-4 ${
+                            className={`bg-dark-card rounded-lg p-4 border-l-4 ${
                               sug.laborDelta > 0 ? 'border-red-500' : 'border-green-500'
                             }`}
                           >

@@ -144,7 +144,7 @@ export function CustomizableWidget({
     <Card
       ref={widgetRef}
       className={cn(
-        'bg-[#2d333b] border-gray-700 overflow-hidden transition-shadow',
+        'bg-dark-card border-gray-700 overflow-hidden transition-shadow',
         isEditing && 'ring-2 ring-blue-500/50',
         isDragging && 'shadow-xl cursor-grabbing',
         className
@@ -161,7 +161,7 @@ export function CustomizableWidget({
       {/* Widget Header */}
       <div
         className={cn(
-          'flex items-center justify-between px-3 py-2 border-b border-gray-700 bg-[#1F2328]',
+          'flex items-center justify-between px-3 py-2 border-b border-gray-700 bg-dark-surface',
           isEditing && 'cursor-grab'
         )}
         onMouseDown={handleDragStart}

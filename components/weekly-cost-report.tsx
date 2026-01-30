@@ -105,7 +105,7 @@ export default function WeeklyCostReport() {
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-8 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </CardContent>
@@ -138,7 +138,7 @@ export default function WeeklyCostReport() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Report List */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-gray-400">Recent Reports</CardTitle>
           </CardHeader>
@@ -154,7 +154,7 @@ export default function WeeklyCostReport() {
                     className={`w-full p-3 rounded-lg text-left transition-colors ${
                       selectedReport?.id === report.id
                         ? 'bg-blue-600/20 border border-blue-500/30'
-                        : 'bg-[#1F2328] hover:bg-[#1F2328]/80'
+                        : 'bg-dark-surface hover:bg-dark-surface/80'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -177,7 +177,7 @@ export default function WeeklyCostReport() {
 
         {/* Report Detail */}
         {selectedReport ? (
-          <Card className="bg-[#2d333b] border-gray-700 lg:col-span-2">
+          <Card className="bg-dark-card border-gray-700 lg:col-span-2">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex items-center gap-2">
@@ -189,25 +189,25 @@ export default function WeeklyCostReport() {
             <CardContent className="pt-2">
               {/* Key Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                <div className="p-3 bg-[#1F2328] rounded-lg">
+                <div className="p-3 bg-dark-surface rounded-lg">
                   <div className="text-xs text-gray-400 mb-1">CPI</div>
                   <div className={`text-xl font-bold ${getPerformanceColor(selectedReport.cpi)}`}>
                     {selectedReport.cpi?.toFixed(2) || 'N/A'}
                   </div>
                 </div>
-                <div className="p-3 bg-[#1F2328] rounded-lg">
+                <div className="p-3 bg-dark-surface rounded-lg">
                   <div className="text-xs text-gray-400 mb-1">SPI</div>
                   <div className={`text-xl font-bold ${getPerformanceColor(selectedReport.spi)}`}>
                     {selectedReport.spi?.toFixed(2) || 'N/A'}
                   </div>
                 </div>
-                <div className="p-3 bg-[#1F2328] rounded-lg">
+                <div className="p-3 bg-dark-surface rounded-lg">
                   <div className="text-xs text-gray-400 mb-1">EAC</div>
                   <div className="text-xl font-bold text-white">
                     {selectedReport.eac ? formatCurrency(selectedReport.eac) : 'N/A'}
                   </div>
                 </div>
-                <div className="p-3 bg-[#1F2328] rounded-lg">
+                <div className="p-3 bg-dark-surface rounded-lg">
                   <div className="text-xs text-gray-400 mb-1">Actual Cost</div>
                   <div className="text-xl font-bold text-white">
                     {formatCurrency(selectedReport.actualCost)}
@@ -217,7 +217,7 @@ export default function WeeklyCostReport() {
 
               {/* Cost Breakdown */}
               <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="p-4 bg-[#1F2328] rounded-lg">
+                <div className="p-4 bg-dark-surface rounded-lg">
                   <h4 className="text-sm font-medium text-gray-400 mb-3">Cost Breakdown</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -237,7 +237,7 @@ export default function WeeklyCostReport() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#1F2328] rounded-lg">
+                <div className="p-4 bg-dark-surface rounded-lg">
                   <h4 className="text-sm font-medium text-gray-400 mb-3">Change Orders</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -253,7 +253,7 @@ export default function WeeklyCostReport() {
               </div>
 
               {/* Contingency */}
-              <div className="p-4 bg-[#1F2328] rounded-lg mb-4">
+              <div className="p-4 bg-dark-surface rounded-lg mb-4">
                 <h4 className="text-sm font-medium text-gray-400 mb-3">Contingency Status</h4>
                 <div className="flex items-center justify-between">
                   <div>
@@ -287,7 +287,7 @@ export default function WeeklyCostReport() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="bg-[#2d333b] border-gray-700 lg:col-span-2">
+          <Card className="bg-dark-card border-gray-700 lg:col-span-2">
             <CardContent className="p-8 text-center text-gray-400">
               <FileText className="h-12 w-12 mx-auto mb-3 text-gray-600" />
               <p>Select a report to view details or generate a new one</p>

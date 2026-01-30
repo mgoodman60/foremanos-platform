@@ -157,7 +157,7 @@ export default function CrossReferenceBrowser({
     <div className="space-y-4">
       {/* Header with Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Total Callouts</p>
@@ -169,7 +169,7 @@ export default function CrossReferenceBrowser({
           </div>
         </div>
 
-        <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Sheets Referenced</p>
@@ -181,7 +181,7 @@ export default function CrossReferenceBrowser({
           </div>
         </div>
 
-        <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Cross-References</p>
@@ -193,7 +193,7 @@ export default function CrossReferenceBrowser({
           </div>
         </div>
 
-        <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+        <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Health Score</p>
@@ -220,7 +220,7 @@ export default function CrossReferenceBrowser({
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               view === 'list'
                 ? 'bg-cyan-500 text-white'
-                : 'bg-[#2d333b] text-gray-300 hover:bg-gray-700'
+                : 'bg-dark-card text-gray-300 hover:bg-gray-700'
             }`}
           >
             <BarChart3 className="w-4 h-4 inline mr-2" />
@@ -231,7 +231,7 @@ export default function CrossReferenceBrowser({
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               view === 'graph'
                 ? 'bg-cyan-500 text-white'
-                : 'bg-[#2d333b] text-gray-300 hover:bg-gray-700'
+                : 'bg-dark-card text-gray-300 hover:bg-gray-700'
             }`}
           >
             <Network className="w-4 h-4 inline mr-2" />
@@ -242,7 +242,7 @@ export default function CrossReferenceBrowser({
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               view === 'validation'
                 ? 'bg-cyan-500 text-white'
-                : 'bg-[#2d333b] text-gray-300 hover:bg-gray-700'
+                : 'bg-dark-card text-gray-300 hover:bg-gray-700'
             }`}
           >
             <AlertCircle className="w-4 h-4 inline mr-2" />
@@ -252,7 +252,7 @@ export default function CrossReferenceBrowser({
 
         <button
           onClick={loadData}
-          className="px-4 py-2 bg-[#2d333b] text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+          className="px-4 py-2 bg-dark-card text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
         >
           <RefreshCw className="w-4 h-4 inline mr-2" />
           Refresh
@@ -269,14 +269,14 @@ export default function CrossReferenceBrowser({
               placeholder="Search sheets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#2d333b] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full pl-10 pr-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
 
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 bg-[#2d333b] border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            className="px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
             <option value="all">All Types</option>
             <option value="detail">Details</option>
@@ -335,7 +335,7 @@ function ListView({
         return (
           <div
             key={node.sheetNumber}
-            className={`bg-[#2d333b] border rounded-lg p-4 cursor-pointer transition-all ${
+            className={`bg-dark-card border rounded-lg p-4 cursor-pointer transition-all ${
               isSelected
                 ? 'border-cyan-500 ring-2 ring-cyan-500/50'
                 : 'border-gray-700 hover:border-gray-600'
@@ -456,7 +456,7 @@ function GraphView({
   );
 
   return (
-    <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-6">
+    <div className="bg-dark-card border border-gray-700 rounded-lg p-6">
       <h3 className="text-lg font-semibold text-white mb-4">
         Most Connected Sheets
       </h3>
@@ -501,7 +501,7 @@ function ValidationView({ validation }: { validation: any }) {
   return (
     <div className="space-y-4">
       {/* Health Overview */}
-      <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-6">
+      <div className="bg-dark-card border border-gray-700 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-white">
             Cross-Reference Health
@@ -539,7 +539,7 @@ function ValidationView({ validation }: { validation: any }) {
 
       {/* Broken References */}
       {validation.broken.length > 0 && (
-        <div className="bg-[#2d333b] border border-red-500/50 rounded-lg p-6">
+        <div className="bg-dark-card border border-red-500/50 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-red-400 mb-4">
             ⚠️ Broken References ({validation.broken.length})
           </h3>
@@ -570,7 +570,7 @@ function ValidationView({ validation }: { validation: any }) {
 
       {/* Orphaned Sheets */}
       {validation.orphaned.length > 0 && (
-        <div className="bg-[#2d333b] border border-yellow-500/50 rounded-lg p-6">
+        <div className="bg-dark-card border border-yellow-500/50 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-yellow-400 mb-4">
             📄 Orphaned Sheets ({validation.orphaned.length})
           </h3>

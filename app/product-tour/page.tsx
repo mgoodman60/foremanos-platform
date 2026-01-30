@@ -583,7 +583,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Video Tour */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#1F2328]">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F97316] rounded-xl mb-6">
@@ -633,7 +633,7 @@ export default function FeaturesPage() {
             </Link>
             <Link
               href="/demo"
-              className="inline-flex items-center justify-center px-8 py-4 bg-[#1F2328] text-white rounded-lg font-semibold hover:bg-black transition-all text-lg border-2 border-white/20 min-h-[56px]"
+              className="inline-flex items-center justify-center px-8 py-4 bg-dark-surface text-white rounded-lg font-semibold hover:bg-black transition-all text-lg border-2 border-white/20 min-h-[56px]"
             >
               See Plan Intelligence in Action
               <ArrowRight className="ml-2 w-5 h-5" />

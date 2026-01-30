@@ -221,7 +221,7 @@ export function WhatIfScenarios({
 
       {/* Active Mode Panel */}
       {isActive && (
-        <Card className="bg-[#1a1f24] border-purple-500/30 p-4">
+        <Card className="bg-dark-surface border-purple-500/30 p-4">
           <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -242,7 +242,7 @@ export function WhatIfScenarios({
                   {pendingChanges.map((change, idx) => (
                     <div
                       key={`${change.taskId}-${idx}`}
-                      className="flex items-center gap-2 text-xs bg-[#2d333b] rounded px-2 py-1.5"
+                      className="flex items-center gap-2 text-xs bg-dark-card rounded px-2 py-1.5"
                     >
                       <GitBranch className="h-3 w-3 text-purple-400 flex-shrink-0" />
                       <span className="text-gray-300 truncate flex-1">{change.taskName}</span>
@@ -264,7 +264,7 @@ export function WhatIfScenarios({
             {/* Impact Summary */}
             {impactSummary && (
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#2d333b] rounded-lg p-3">
+                <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                     <Layers className="h-3 w-3" />
                     Tasks Affected
@@ -273,7 +273,7 @@ export function WhatIfScenarios({
                     {impactSummary.tasksAffected}
                   </div>
                 </div>
-                <div className="bg-[#2d333b] rounded-lg p-3">
+                <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                     {impactSummary.criticalPathImpact > 0 ? (
                       <TrendingUp className="h-3 w-3 text-red-400" />
@@ -292,7 +292,7 @@ export function WhatIfScenarios({
                     {impactSummary.criticalPathImpact}d
                   </div>
                 </div>
-                <div className="bg-[#2d333b] rounded-lg p-3">
+                <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                     <Clock className="h-3 w-3" />
                     Total Days Shifted
@@ -301,7 +301,7 @@ export function WhatIfScenarios({
                     {impactSummary.totalDaysShifted}d
                   </div>
                 </div>
-                <div className="bg-[#2d333b] rounded-lg p-3">
+                <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                     <CalendarDays className="h-3 w-3" />
                     New End Date
@@ -358,7 +358,7 @@ export function WhatIfScenarios({
 
       {/* Saved Scenarios */}
       {savedScenarios.length > 0 && (
-        <Card className="bg-[#1a1f24] border-gray-700 p-4">
+        <Card className="bg-dark-surface border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-3">
             <History className="h-4 w-4 text-gray-400" />
             <span className="text-sm font-medium text-gray-300">Saved Scenarios</span>
@@ -367,7 +367,7 @@ export function WhatIfScenarios({
             {savedScenarios.map((scenario) => (
               <div
                 key={scenario.id}
-                className="flex items-center justify-between bg-[#2d333b] rounded-lg px-3 py-2"
+                className="flex items-center justify-between bg-dark-card rounded-lg px-3 py-2"
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-200 truncate">
@@ -410,7 +410,7 @@ export function WhatIfScenarios({
 
       {/* Save Scenario Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent className="bg-[#1a1f24] border-gray-700">
+        <DialogContent className="bg-dark-surface border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-gray-100">Save Scenario</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -425,7 +425,7 @@ export function WhatIfScenarios({
                 value={scenarioName}
                 onChange={(e) => setScenarioName(e.target.value)}
                 placeholder="e.g., Weather delay scenario"
-                className="bg-[#2d333b] border-gray-600"
+                className="bg-dark-card border-gray-600"
               />
             </div>
             <div className="space-y-2">
@@ -435,7 +435,7 @@ export function WhatIfScenarios({
                 value={scenarioDescription}
                 onChange={(e) => setScenarioDescription(e.target.value)}
                 placeholder="Brief description of the scenario"
-                className="bg-[#2d333b] border-gray-600"
+                className="bg-dark-card border-gray-600"
               />
             </div>
           </div>
@@ -452,7 +452,7 @@ export function WhatIfScenarios({
 
       {/* Discard Confirmation Dialog */}
       <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
-        <AlertDialogContent className="bg-[#1a1f24] border-gray-700">
+        <AlertDialogContent className="bg-dark-surface border-gray-700">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-gray-100">Discard Changes?</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">

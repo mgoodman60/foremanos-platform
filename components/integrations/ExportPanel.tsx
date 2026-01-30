@@ -58,7 +58,7 @@ export default function ExportPanel({ projectSlug }: ExportPanelProps) {
   };
 
   return (
-    <div className="bg-[#1F2328] rounded-lg p-6">
+    <div className="bg-dark-surface rounded-lg p-6">
       <div className="flex items-center gap-2 mb-6">
         <Download className="h-5 w-5 text-blue-400" />
         <h3 className="text-lg font-semibold text-white">Export Data</h3>

@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { chartColors } from '@/lib/design-tokens';
 
 interface DataVisualizationProps {
   type: 'bar' | 'line' | 'pie' | 'area' | 'table';
@@ -32,16 +33,7 @@ interface DataVisualizationProps {
   };
 }
 
-const DEFAULT_COLORS = [
-  '#F97316', // Orange (brand color)
-  '#3B82F6', // Blue
-  '#10B981', // Green
-  '#F59E0B', // Amber
-  '#8B5CF6', // Purple
-  '#EC4899', // Pink
-  '#06B6D4', // Cyan
-  '#EF4444', // Red
-];
+const DEFAULT_COLORS = chartColors.palette;
 
 export function DataVisualization({ type, data, config = {} }: DataVisualizationProps) {
   const {
@@ -76,13 +68,13 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
     return (
       <div className="my-4 overflow-x-auto rounded-lg border border-gray-700">
         {title && (
-          <div className="bg-[#2d333b] px-4 py-3 border-b border-gray-700">
+          <div className="bg-dark-card px-4 py-3 border-b border-gray-700">
             <h3 className="font-semibold text-lg text-[#F8FAFC]">{title}</h3>
           </div>
         )}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-[#2d333b]">
+            <thead className="bg-dark-card">
               <tr>
                 {headers.map((header) => (
                   <th
@@ -94,9 +86,9 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-[#1F2328] divide-y divide-gray-700">
+            <tbody className="bg-dark-surface divide-y divide-gray-700">
               {validData.map((row, rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-[#2d333b] transition-colors">
+                <tr key={rowIndex} className="hover:bg-dark-card transition-colors">
                   {headers.map((header) => (
                     <td
                       key={`${rowIndex}-${header}`}
@@ -237,7 +229,7 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
   const chart = renderChart();
   
   return (
-    <div className="my-6 p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+    <div className="my-6 p-4 bg-dark-card border border-gray-700 rounded-lg">
       {title && (
         <h3 className="font-semibold text-lg mb-4 text-[#F8FAFC]">{title}</h3>
       )}

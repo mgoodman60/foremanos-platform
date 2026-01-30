@@ -227,7 +227,7 @@ export default function ProcurementTracker() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#2d333b] border-gray-700">
+      <Card className="p-6 bg-dark-card border-gray-700">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-700 rounded w-1/3" />
           <div className="h-32 bg-gray-700 rounded" />
@@ -241,23 +241,23 @@ export default function ProcurementTracker() {
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Total Items</div>
             <div className="text-2xl font-bold text-white">{stats.total}</div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Budgeted</div>
             <div className="text-2xl font-bold text-blue-400">
               {formatCurrency(stats.totalBudgeted)}
             </div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Committed</div>
             <div className="text-2xl font-bold text-yellow-400">
               {formatCurrency(stats.totalCommitted)}
             </div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Actual Spent</div>
             <div className="text-2xl font-bold text-green-400">
               {formatCurrency(stats.totalActual)}
@@ -296,11 +296,11 @@ export default function ProcurementTracker() {
           placeholder="Search items..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-64 bg-[#2d333b] border-gray-700"
+          className="w-64 bg-dark-card border-gray-700"
         />
 
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-40 bg-[#2d333b] border-gray-700">
+          <SelectTrigger className="w-40 bg-dark-card border-gray-700">
             <SelectValue placeholder="Filter" />
           </SelectTrigger>
           <SelectContent>
@@ -315,7 +315,7 @@ export default function ProcurementTracker() {
       {/* Items List */}
       <div className="space-y-3">
         {filteredItems.length === 0 ? (
-          <Card className="p-8 bg-[#2d333b] border-gray-700 text-center text-gray-400">
+          <Card className="p-8 bg-dark-card border-gray-700 text-center text-gray-400">
             <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No procurement items found</p>
           </Card>
@@ -327,7 +327,7 @@ export default function ProcurementTracker() {
             const isUrgent = daysUntilRequired !== null && daysUntilRequired <= (item.leadTime || 14);
 
             return (
-              <Card key={item.id} className="p-4 bg-[#2d333b] border-gray-700">
+              <Card key={item.id} className="p-4 bg-dark-card border-gray-700">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className={`p-2 rounded-lg ${config.color}`}>
@@ -388,7 +388,7 @@ export default function ProcurementTracker() {
                       value={item.status}
                       onValueChange={(v) => handleStatusChange(item.id, v)}
                     >
-                      <SelectTrigger className="w-32 bg-[#1F2328] border-gray-600">
+                      <SelectTrigger className="w-32 bg-dark-surface border-gray-600">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -423,7 +423,7 @@ export default function ProcurementTracker() {
 
       {/* Add/Edit Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-lg">
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {editingItem ? 'Edit Procurement Item' : 'Add Procurement Item'}
@@ -436,7 +436,7 @@ export default function ProcurementTracker() {
               <Input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="Item description"
               />
             </div>
@@ -445,7 +445,7 @@ export default function ProcurementTracker() {
               <div>
                 <Label>Item Type</Label>
                 <Select value={form.itemType} onValueChange={(v) => setForm({ ...form, itemType: v })}>
-                  <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                  <SelectTrigger className="bg-dark-surface border-gray-600">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -461,7 +461,7 @@ export default function ProcurementTracker() {
                 <Input
                   value={form.vendorName}
                   onChange={(e) => setForm({ ...form, vendorName: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   placeholder="Vendor name"
                 />
               </div>
@@ -474,7 +474,7 @@ export default function ProcurementTracker() {
                   type="number"
                   value={form.quantity}
                   onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
               <div>
@@ -482,7 +482,7 @@ export default function ProcurementTracker() {
                 <Input
                   value={form.unit}
                   onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   placeholder="EA, LF, SF"
                 />
               </div>
@@ -492,7 +492,7 @@ export default function ProcurementTracker() {
                   type="number"
                   value={form.budgetedCost}
                   onChange={(e) => setForm({ ...form, budgetedCost: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   placeholder="0.00"
                 />
               </div>
@@ -505,7 +505,7 @@ export default function ProcurementTracker() {
                   type="date"
                   value={form.requiredDate}
                   onChange={(e) => setForm({ ...form, requiredDate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
               <div>
@@ -514,7 +514,7 @@ export default function ProcurementTracker() {
                   type="number"
                   value={form.leadTime}
                   onChange={(e) => setForm({ ...form, leadTime: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   placeholder="14"
                 />
               </div>
@@ -525,7 +525,7 @@ export default function ProcurementTracker() {
               <Textarea
                 value={form.specifications}
                 onChange={(e) => setForm({ ...form, specifications: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="Technical specifications"
               />
             </div>

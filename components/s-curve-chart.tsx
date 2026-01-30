@@ -64,7 +64,7 @@ export default function SCurveChart() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-3 shadow-xl">
+        <div className="bg-dark-surface border border-gray-700 rounded-lg p-3 shadow-xl">
           <p className="text-gray-400 text-sm mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
@@ -79,7 +79,7 @@ export default function SCurveChart() {
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-8 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </CardContent>
@@ -89,7 +89,7 @@ export default function SCurveChart() {
 
   if (!data) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-8 text-center text-gray-400">
           Budget not configured. Set up your budget to see the S-Curve.
         </CardContent>
@@ -98,7 +98,7 @@ export default function SCurveChart() {
   }
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700">
+    <Card className="bg-dark-card border-gray-700">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">

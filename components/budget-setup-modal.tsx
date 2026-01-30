@@ -73,7 +73,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-lg">
+      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-[#F8FAFC] flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-amber-400" />
@@ -101,7 +101,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 value={formData.totalBudget}
                 onChange={(e) => setFormData({ ...formData, totalBudget: e.target.value })}
                 placeholder="0.00"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] pl-7"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 value={formData.contingency}
                 onChange={(e) => setFormData({ ...formData, contingency: e.target.value })}
                 placeholder="0.00"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] pl-7"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -145,7 +145,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 type="date"
                 value={formData.baselineDate}
                 onChange={(e) => setFormData({ ...formData, baselineDate: e.target.value })}
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] pl-10"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-10"
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -162,7 +162,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
               type="text"
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+              className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
               disabled
             />
             <p className="text-xs text-gray-500 mt-1">

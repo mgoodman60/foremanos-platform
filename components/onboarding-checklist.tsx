@@ -174,8 +174,8 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
 
   if (loading) {
     return (
-      <Card className="p-4 bg-[#2d333b] border-gray-700 animate-pulse">
-        <div className="h-20 bg-[#1F2328] rounded"></div>
+      <Card className="p-4 bg-dark-card border-gray-700 animate-pulse">
+        <div className="h-20 bg-dark-surface rounded"></div>
       </Card>
     );
   }
@@ -219,7 +219,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
               variant="ghost"
               size="sm"
               onClick={() => setCollapsed(!collapsed)}
-              className="text-gray-400 hover:text-orange-500 hover:bg-[#1F2328] h-7 w-7 p-0"
+              className="text-gray-400 hover:text-orange-500 hover:bg-dark-surface h-7 w-7 p-0"
             >
               {collapsed ? (
                 <ChevronDown className="h-4 w-4" />
@@ -231,7 +231,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
               variant="ghost"
               size="sm"
               onClick={handleDismiss}
-              className="text-gray-400 hover:text-red-500 hover:bg-[#1F2328] h-7 w-7 p-0"
+              className="text-gray-400 hover:text-red-500 hover:bg-dark-surface h-7 w-7 p-0"
               title="Dismiss guide"
             >
               <X className="h-4 w-4" />
@@ -248,7 +248,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
                 className={`p-2 rounded-lg border transition-all ${
                   step.completed
                     ? 'bg-green-900/20 border-green-500/30'
-                    : 'bg-[#1F2328] border-gray-700 hover:border-orange-500/50'
+                    : 'bg-dark-surface border-gray-700 hover:border-orange-500/50'
                 }`}
               >
                 <div className="flex items-start gap-2">

@@ -207,7 +207,7 @@ export function TakeoffBudgetSyncModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-3xl bg-[#1F2328] rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-3xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -267,19 +267,19 @@ export function TakeoffBudgetSyncModal({
               {/* Summary Cards */}
               {summary && (
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <div className="text-sm text-gray-400">Material Cost</div>
                     <div className="text-xl font-bold text-green-400">
                       {formatCurrency(summary.totals.material)}
                     </div>
                   </div>
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <div className="text-sm text-gray-400">Labor Cost</div>
                     <div className="text-xl font-bold text-blue-400">
                       {formatCurrency(summary.totals.labor)}
                     </div>
                   </div>
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <div className="text-sm text-gray-400">Total Estimate</div>
                     <div className="text-xl font-bold text-purple-400">
                       {formatCurrency(summary.totals.total)}
@@ -335,7 +335,7 @@ export function TakeoffBudgetSyncModal({
                       value={newBudgetName}
                       onChange={(e) => setNewBudgetName(e.target.value)}
                       placeholder="e.g., Material Takeoff Budget - Phase 1"
-                      className="bg-[#2d333b] border-gray-600 text-white"
+                      className="bg-dark-card border-gray-600 text-white"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -349,7 +349,7 @@ export function TakeoffBudgetSyncModal({
                         onChange={(e) => setContingencyPercent(Number(e.target.value))}
                         min={0}
                         max={50}
-                        className="bg-[#2d333b] border-gray-600 text-white"
+                        className="bg-dark-card border-gray-600 text-white"
                       />
                     </div>
                     <div>
@@ -357,7 +357,7 @@ export function TakeoffBudgetSyncModal({
                         Region
                       </label>
                       <Select value={region} onValueChange={setRegion}>
-                        <SelectTrigger className="bg-[#2d333b] border-gray-600 text-white">
+                        <SelectTrigger className="bg-dark-card border-gray-600 text-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -382,7 +382,7 @@ export function TakeoffBudgetSyncModal({
                       Select Budget
                     </label>
                     <Select value={selectedBudget} onValueChange={setSelectedBudget}>
-                      <SelectTrigger className="bg-[#2d333b] border-gray-600 text-white">
+                      <SelectTrigger className="bg-dark-card border-gray-600 text-white">
                         <SelectValue placeholder="Select a budget" />
                       </SelectTrigger>
                       <SelectContent>
@@ -422,7 +422,7 @@ export function TakeoffBudgetSyncModal({
                     {Object.entries(summary.byTrade).map(([trade, data]) => (
                       <div
                         key={trade}
-                        className="flex items-center justify-between p-3 bg-[#2d333b] rounded-lg"
+                        className="flex items-center justify-between p-3 bg-dark-card rounded-lg"
                       >
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
@@ -462,7 +462,7 @@ export function TakeoffBudgetSyncModal({
                       fetchVarianceReport(value);
                     }}
                   >
-                    <SelectTrigger className="flex-1 bg-[#2d333b] border-gray-600 text-white">
+                    <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-white">
                       <SelectValue placeholder="Select a budget" />
                     </SelectTrigger>
                     <SelectContent>
@@ -488,19 +488,19 @@ export function TakeoffBudgetSyncModal({
                 <>
                   {/* Variance Summary */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-[#2d333b] rounded-lg p-4">
+                    <div className="bg-dark-card rounded-lg p-4">
                       <div className="text-sm text-gray-400">Takeoff Estimate</div>
                       <div className="text-xl font-bold text-purple-400">
                         {formatCurrency(varianceReport.totalTakeoffEstimate)}
                       </div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4">
+                    <div className="bg-dark-card rounded-lg p-4">
                       <div className="text-sm text-gray-400">Budgeted Amount</div>
                       <div className="text-xl font-bold text-blue-400">
                         {formatCurrency(varianceReport.totalBudgetedAmount)}
                       </div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4">
+                    <div className="bg-dark-card rounded-lg p-4">
                       <div className="text-sm text-gray-400">Variance</div>
                       <div
                         className={`text-xl font-bold flex items-center gap-1 ${
@@ -535,7 +535,7 @@ export function TakeoffBudgetSyncModal({
                           ([category, data]: [string, any]) => (
                             <div
                               key={category}
-                              className="flex items-center justify-between p-3 bg-[#2d333b] rounded-lg"
+                              className="flex items-center justify-between p-3 bg-dark-card rounded-lg"
                             >
                               <span className="font-medium text-white">{category}</span>
                               <div className="flex items-center gap-4">
@@ -584,7 +584,7 @@ export function TakeoffBudgetSyncModal({
                           .map((item: VarianceItem, idx: number) => (
                             <div
                               key={idx}
-                              className="flex items-center justify-between p-2 bg-[#2d333b] rounded text-sm"
+                              className="flex items-center justify-between p-2 bg-dark-card rounded text-sm"
                             >
                               <div className="flex items-center gap-2">
                                 {item.status === 'over' ? (

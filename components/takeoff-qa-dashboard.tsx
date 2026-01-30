@@ -211,7 +211,7 @@ export function TakeoffQADashboard({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-4xl bg-[#1F2328] rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-4xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -259,28 +259,28 @@ export function TakeoffQADashboard({
                 <div className="space-y-6">
                   {/* Main Metrics */}
                   <div className="grid grid-cols-4 gap-4">
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <div className="text-3xl font-bold text-white">{metrics.totalItems}</div>
                       <div className="text-sm text-gray-400">Total Items</div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <div className={`text-3xl font-bold ${getConfidenceColor(metrics.averageConfidence)}`}>
                         {metrics.averageConfidence}%
                       </div>
                       <div className="text-sm text-gray-400">Avg Confidence</div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <div className="text-3xl font-bold text-green-400">{metrics.verifiedCount}</div>
                       <div className="text-sm text-gray-400">Verified</div>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4 text-center">
+                    <div className="bg-dark-card rounded-lg p-4 text-center">
                       <div className="text-3xl font-bold text-yellow-400">{metrics.pendingCount}</div>
                       <div className="text-sm text-gray-400">Pending Review</div>
                     </div>
                   </div>
 
                   {/* Status Breakdown */}
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-300 mb-4">Verification Status</h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -348,7 +348,7 @@ export function TakeoffQADashboard({
 
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#2d333b] rounded-lg p-4">
+                    <div className="bg-dark-card rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Target className="h-4 w-4 text-emerald-400" />
                         <span className="text-sm font-medium text-gray-300">Accuracy Rate</span>
@@ -356,7 +356,7 @@ export function TakeoffQADashboard({
                       <div className="text-2xl font-bold text-emerald-400">{metrics.accuracyRate}%</div>
                       <p className="text-xs text-gray-500 mt-1">Items verified as correct</p>
                     </div>
-                    <div className="bg-[#2d333b] rounded-lg p-4">
+                    <div className="bg-dark-card rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <BarChart3 className="h-4 w-4 text-blue-400" />
                         <span className="text-sm font-medium text-gray-300">Verification Rate</span>
@@ -397,7 +397,7 @@ export function TakeoffQADashboard({
                         {issues.map((issue) => (
                           <div 
                             key={`${issue.itemId}-${issue.issueType}`}
-                            className="bg-[#2d333b] rounded-lg overflow-hidden"
+                            className="bg-dark-card rounded-lg overflow-hidden"
                           >
                             <button
                               onClick={() => toggleIssue(issue.itemId)}
@@ -472,7 +472,7 @@ export function TakeoffQADashboard({
               {activeTab === 'verification' && (
                 <div className="space-y-6">
                   {/* Bulk Auto-Approve */}
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-5 w-5 text-purple-400" />
                       <h3 className="font-medium text-white">Bulk Auto-Approve</h3>
@@ -482,7 +482,7 @@ export function TakeoffQADashboard({
                     </p>
                     <div className="flex items-center gap-3">
                       <Select value={bulkThreshold} onValueChange={setBulkThreshold}>
-                        <SelectTrigger className="w-40 bg-[#1F2328] border-gray-600">
+                        <SelectTrigger className="w-40 bg-dark-surface border-gray-600">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -509,7 +509,7 @@ export function TakeoffQADashboard({
                   </div>
 
                   {/* Recalculate Confidence */}
-                  <div className="bg-[#2d333b] rounded-lg p-4">
+                  <div className="bg-dark-card rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <RefreshCw className="h-5 w-5 text-blue-400" />
                       <h3 className="font-medium text-white">Recalculate Confidence</h3>

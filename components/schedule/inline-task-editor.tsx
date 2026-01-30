@@ -73,7 +73,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
   };
 
   return (
-    <div className="bg-[#1F2328] border border-gray-600 rounded-lg p-4 shadow-xl space-y-4 min-w-[300px]">
+    <div className="bg-dark-surface border border-gray-600 rounded-lg p-4 shadow-xl space-y-4 min-w-[300px]">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-700 pb-3">
         <span className="text-sm font-medium text-gray-200 flex items-center gap-2">
@@ -91,7 +91,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="bg-[#2d333b] border-gray-600 text-sm"
+          className="bg-dark-card border-gray-600 text-sm"
           placeholder="Enter task name"
         />
       </div>
@@ -108,7 +108,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="bg-[#2d333b] border-gray-600 text-sm"
+            className="bg-dark-card border-gray-600 text-sm"
           />
         </div>
         <div>
@@ -122,13 +122,13 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
             value={duration}
             onChange={(e) => setDuration(Math.max(1, parseInt(e.target.value) || 1))}
             onKeyDown={handleKeyDown}
-            className="bg-[#2d333b] border-gray-600 text-sm"
+            className="bg-dark-card border-gray-600 text-sm"
           />
         </div>
       </div>
 
       {/* End Date Display */}
-      <div className="text-xs text-gray-400 flex items-center justify-between bg-[#2d333b]/50 px-2 py-1.5 rounded">
+      <div className="text-xs text-gray-400 flex items-center justify-between bg-dark-card/50 px-2 py-1.5 rounded">
         <span>End Date:</span>
         <span className="text-gray-200 font-medium">{format(calculatedEndDate, 'MMM d, yyyy')}</span>
       </div>
@@ -166,7 +166,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
                 "flex-1 text-xs py-1 rounded border transition-colors",
                 percentComplete === val
                   ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
-                  : 'bg-[#2d333b] border-gray-600 text-gray-400 hover:bg-[#3d444d]'
+                  : 'bg-dark-card border-gray-600 text-gray-400 hover:bg-[#3d444d]'
               )}
             >
               {val}%

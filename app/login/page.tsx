@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading...</p>
@@ -27,7 +27,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] flex items-center justify-center p-4 md:p-6">
+    <div className="min-h-screen bg-dark-surface flex items-center justify-center p-4 md:p-6">
       <div className="w-full">
         <LoginForm onClose={() => router.push('/dashboard')} />
       </div>

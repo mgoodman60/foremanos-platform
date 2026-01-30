@@ -337,7 +337,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
 
   if (loading) {
     return (
-      <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+      <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
         <div className="flex items-center gap-2 text-gray-400">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span>Checking data availability...</span>
@@ -347,7 +347,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
   }
 
   return (
-    <div className="bg-[#2d333b] border border-gray-700 rounded-lg overflow-hidden">
+    <div className="bg-dark-card border border-gray-700 rounded-lg overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
@@ -410,7 +410,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
                   {items.map((req) => (
                     <div
                       key={req.id}
-                      className="flex items-center justify-between p-3 bg-[#1F2328] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                      className="flex items-center justify-between p-3 bg-dark-surface rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         {getStatusIcon(req.status)}

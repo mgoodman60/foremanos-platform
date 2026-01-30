@@ -182,7 +182,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading callouts...</span>
@@ -193,7 +193,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
 
   if (!stats || stats.totalCallouts === 0) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
             <Navigation className="h-5 w-5" />
@@ -231,7 +231,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
     <div className="space-y-4">
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -243,7 +243,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -255,7 +255,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -267,7 +267,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -283,7 +283,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
       </div>
 
       {/* Main Content */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-gray-100 flex items-center gap-2">
@@ -295,7 +295,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
               disabled={extracting}
               variant="outline"
               size="sm"
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               {extracting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -313,7 +313,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                 placeholder="Search callouts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-[#1F2328] border-gray-600 text-gray-100 placeholder-gray-500"
+                className="pl-10 bg-dark-surface border-gray-600 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
 
         <CardContent>
           <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-            <TabsList className="bg-[#1F2328] border border-gray-700">
+            <TabsList className="bg-dark-surface border border-gray-700">
               <TabsTrigger value="callouts" className="data-[state=active]:bg-orange-500">
                 Callouts ({filteredCallouts.length})
               </TabsTrigger>
@@ -341,7 +341,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                     onClick={() => setSelectedType('all')}
                     variant={selectedType === 'all' ? 'default' : 'outline'}
                     size="sm"
-                    className={selectedType === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                    className={selectedType === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                   >
                     All Types
                   </Button>
@@ -351,7 +351,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                       onClick={() => setSelectedType(type)}
                       variant={selectedType === type ? 'default' : 'outline'}
                       size="sm"
-                      className={selectedType === type ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                      className={selectedType === type ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                     >
                       {getTypeName(type)} ({stats.byType[type]})
                     </Button>
@@ -364,7 +364,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                   {filteredCallouts.map((callout: any, idx) => (
                     <div
                       key={`${callout.id}-${idx}`}
-                      className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
+                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -407,7 +407,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+                            className="border-gray-600 text-gray-300 hover:bg-dark-surface"
                           >
                             <ExternalLink className="h-4 w-4" />
                           </Button>
@@ -426,7 +426,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                   {crossRefs.map((crossRef, idx) => (
                     <div
                       key={idx}
-                      className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg"
+                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg"
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <Badge className="bg-blue-500 text-white">
@@ -460,7 +460,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
             <TabsContent value="stats">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(stats.byType || {}).map(([type, count]) => (
-                  <Card key={type} className="bg-[#1F2328] border-gray-700">
+                  <Card key={type} className="bg-dark-surface border-gray-700">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>

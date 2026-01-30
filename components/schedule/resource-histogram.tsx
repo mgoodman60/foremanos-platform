@@ -286,7 +286,7 @@ export function ResourceHistogram({
 
   return (
     <TooltipProvider>
-      <Card className="bg-[#1a1f24] border-gray-700 p-4">
+      <Card className="bg-dark-surface border-gray-700 p-4">
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -301,10 +301,10 @@ export function ResourceHistogram({
             {/* Controls */}
             <div className="flex items-center gap-3">
               <Select value={selectedTrade} onValueChange={setSelectedTrade}>
-                <SelectTrigger className="w-[150px] h-8 bg-[#2d333b] border-gray-600 text-sm">
+                <SelectTrigger className="w-[150px] h-8 bg-dark-card border-gray-600 text-sm">
                   <SelectValue placeholder="All Trades" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-600">
+                <SelectContent className="bg-dark-card border-gray-600">
                   <SelectItem value="all">All Trades</SelectItem>
                   {uniqueTrades.map(trade => (
                     <SelectItem key={trade} value={trade}>
@@ -344,7 +344,7 @@ export function ResourceHistogram({
 
           {/* Summary Stats */}
           <div className="grid grid-cols-4 gap-3">
-            <div className="bg-[#2d333b] rounded-lg p-3">
+            <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                 <Users className="h-3 w-3" />
                 Peak Staffing
@@ -357,7 +357,7 @@ export function ResourceHistogram({
               </div>
             </div>
             
-            <div className="bg-[#2d333b] rounded-lg p-3">
+            <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                 {summaryStats.variance >= 0 ? (
                   <TrendingUp className="h-3 w-3 text-amber-400" />
@@ -377,7 +377,7 @@ export function ResourceHistogram({
               </div>
             </div>
             
-            <div className="bg-[#2d333b] rounded-lg p-3">
+            <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                 <AlertTriangle className="h-3 w-3 text-orange-400" />
                 Overtime
@@ -390,7 +390,7 @@ export function ResourceHistogram({
               </div>
             </div>
             
-            <div className="bg-[#2d333b] rounded-lg p-3">
+            <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                 <HardHat className="h-3 w-3" />
                 Labor Cost
@@ -430,7 +430,7 @@ export function ResourceHistogram({
                       <TooltipTrigger asChild>
                         <div 
                           className={cn(
-                            "flex-1 min-w-[40px] max-w-[60px] flex gap-0.5 items-end h-full border-b border-gray-700 cursor-pointer hover:bg-[#2d333b]/50 transition-colors",
+                            "flex-1 min-w-[40px] max-w-[60px] flex gap-0.5 items-end h-full border-b border-gray-700 cursor-pointer hover:bg-dark-card/50 transition-colors",
                             isCurrentWeek && "bg-blue-500/10 border-b-blue-500"
                           )}
                         >
@@ -448,7 +448,7 @@ export function ResourceHistogram({
                           )}
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="bg-[#1F2328] border-gray-700 p-3">
+                      <TooltipContent side="top" className="bg-dark-surface border-gray-700 p-3">
                         <div className="space-y-2">
                           <div className="font-medium text-gray-200">
                             {format(week.weekStart, 'MMM d')} - {format(week.weekEnd, 'MMM d')}

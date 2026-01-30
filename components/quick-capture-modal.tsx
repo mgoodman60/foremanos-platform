@@ -155,7 +155,7 @@ export function QuickCaptureModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-capture-modal-title"
-        className="bg-[#1F2328] border border-gray-700 rounded-lg w-full max-w-lg"
+        className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-lg"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
@@ -164,7 +164,7 @@ export function QuickCaptureModal({
             onClick={onClose}
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-white hover:bg-[#2d333b]"
+            className="text-gray-400 hover:text-white hover:bg-dark-card"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -175,7 +175,7 @@ export function QuickCaptureModal({
         <div className="p-4 space-y-4">
           {/* Photo preview or upload buttons */}
           {preview ? (
-            <div className="relative aspect-video bg-[#2d333b] rounded-lg overflow-hidden">
+            <div className="relative aspect-video bg-dark-card rounded-lg overflow-hidden">
               <Image src={preview} alt="Preview" fill className="object-contain" />
               <Button
                 onClick={() => {
@@ -212,7 +212,7 @@ export function QuickCaptureModal({
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="w-full border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white h-12"
+                className="w-full border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white h-12"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Choose from Gallery
@@ -238,7 +238,7 @@ export function QuickCaptureModal({
               placeholder="e.g., 2nd Floor, Room 201"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="bg-[#2d333b] border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
             />
           </div>
 
@@ -251,7 +251,7 @@ export function QuickCaptureModal({
             <select
               value={trade}
               onChange={(e) => setTrade(e.target.value)}
-              className="w-full px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-[#F8FAFC]"
+              className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC]"
             >
               <option value="">Select trade...</option>
               {commonTrades.map((t) => (
@@ -272,7 +272,7 @@ export function QuickCaptureModal({
               placeholder="Brief description..."
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              className="bg-[#2d333b] border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
             />
           </div>
 

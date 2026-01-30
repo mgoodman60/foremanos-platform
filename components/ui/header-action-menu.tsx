@@ -36,9 +36,9 @@ interface HeaderActionMenuProps {
 }
 
 const variantStyles = {
-  default: 'bg-[#2d333b] border-gray-600 text-gray-200 hover:bg-[#3d434b] hover:text-white',
+  default: 'bg-dark-card border-gray-600 text-gray-200 hover:bg-[#3d434b] hover:text-white',
   primary: 'bg-[#F97316] border-orange-600 text-white hover:bg-[#ea6a0a]',
-  outline: 'bg-transparent border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white',
+  outline: 'bg-transparent border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white',
 };
 
 const itemVariantStyles = {
@@ -69,7 +69,7 @@ export function HeaderActionMenu({ groups, className }: HeaderActionMenuProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-56 bg-[#2d333b] border-gray-700"
+            className="w-56 bg-dark-card border-gray-700"
           >
             {group.items.map((item, index) => (
               <React.Fragment key={item.id}>
@@ -139,7 +139,7 @@ export function QuickActionMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align={align} 
-        className="w-56 bg-[#2d333b] border-gray-700"
+        className="w-56 bg-dark-card border-gray-700"
       >
         {items.map((item, index) => (
           <React.Fragment key={item.id}>

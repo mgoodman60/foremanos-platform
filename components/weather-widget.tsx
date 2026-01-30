@@ -158,7 +158,7 @@ export default function WeatherWidget({
 
   if (loading) {
     return (
-      <div className="bg-[#2d333b] border border-gray-700 rounded-xl p-6">
+      <div className="bg-dark-card border border-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-center h-48">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
         </div>
@@ -168,7 +168,7 @@ export default function WeatherWidget({
 
   if (!currentWeather) {
     return (
-      <div className="bg-[#2d333b] border border-gray-700 rounded-xl p-6">
+      <div className="bg-dark-card border border-gray-700 rounded-xl p-6">
         <p className="text-gray-400 text-center">
           No weather data available. Make sure project location is set.
         </p>
@@ -179,7 +179,7 @@ export default function WeatherWidget({
   const WeatherIcon = getWeatherIcon(currentWeather.conditions);
 
   return (
-    <div className="bg-[#2d333b] border border-gray-700 rounded-xl overflow-hidden">
+    <div className="bg-dark-card border border-gray-700 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -199,7 +199,7 @@ export default function WeatherWidget({
           {onOpenPreferences && (
             <button
               onClick={onOpenPreferences}
-              className="p-2 hover:bg-[#1F2328] rounded-lg transition-colors"
+              className="p-2 hover:bg-dark-surface rounded-lg transition-colors"
               aria-label="Weather preferences"
             >
               <Settings className="w-4 h-4 text-gray-400" />
@@ -264,7 +264,7 @@ export default function WeatherWidget({
 
         {/* Weather Details Grid */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="p-3 bg-[#1F2328] rounded-lg">
+          <div className="p-3 bg-dark-surface rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <Wind className="w-4 h-4 text-cyan-400" />
               <span className="text-xs text-gray-400">Wind</span>
@@ -274,7 +274,7 @@ export default function WeatherWidget({
             </p>
           </div>
 
-          <div className="p-3 bg-[#1F2328] rounded-lg">
+          <div className="p-3 bg-dark-surface rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <Droplets className="w-4 h-4 text-blue-400" />
               <span className="text-xs text-gray-400">Humidity</span>
@@ -284,7 +284,7 @@ export default function WeatherWidget({
             </p>
           </div>
 
-          <div className="p-3 bg-[#1F2328] rounded-lg">
+          <div className="p-3 bg-dark-surface rounded-lg">
             <div className="flex items-center gap-2 mb-1">
               <CloudRain className="w-4 h-4 text-indigo-400" />
               <span className="text-xs text-gray-400">Precip</span>
@@ -314,7 +314,7 @@ export default function WeatherWidget({
               return (
                 <div
                   key={snapshot.id}
-                  className="text-center p-3 bg-[#1F2328] rounded-lg hover:bg-[#252a31] transition-colors"
+                  className="text-center p-3 bg-dark-surface rounded-lg hover:bg-[#252a31] transition-colors"
                 >
                   <p className="text-xs text-gray-400 mb-2">
                     {getDayName(snapshot.snapshotTime)}

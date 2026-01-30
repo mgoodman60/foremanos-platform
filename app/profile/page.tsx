@@ -173,7 +173,7 @@ export default function ProfilePage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     );
@@ -184,7 +184,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] py-8">
+    <div className="min-h-screen bg-dark-surface py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
@@ -193,7 +193,7 @@ export default function ProfilePage() {
         </div>
 
         {/* User Info Card */}
-        <Card className="bg-[#2d333b] border-gray-700 mb-6">
+        <Card className="bg-dark-card border-gray-700 mb-6">
           <CardHeader>
             <CardTitle className="text-[#F8FAFC] flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -213,7 +213,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Company Logo Card */}
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader>
             <CardTitle className="text-[#F8FAFC]">Company Logo</CardTitle>
             <CardDescription className="text-gray-400">
@@ -237,7 +237,7 @@ export default function ProfilePage() {
                     />
                   </div>
                 ) : (
-                  <div className="w-64 h-32 bg-[#1F2328] rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center">
+                  <div className="w-64 h-32 bg-dark-surface rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center">
                     <div className="text-center">
                       <Upload className="h-8 w-8 text-gray-500 mx-auto mb-2" />
                       <p className="text-sm text-gray-400">No logo uploaded</p>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                   variant="outline"
                   onClick={handleRemoveLogo}
                   disabled={uploading}
-                  className="border-gray-600 text-gray-300 hover:bg-[#1F2328] hover:text-white"
+                  className="border-gray-600 text-gray-300 hover:bg-dark-surface hover:text-white"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Remove
@@ -302,7 +302,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Info Text */}
-            <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-4">
+            <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
               <p className="text-sm text-gray-400">
                 <strong className="text-[#F8FAFC]">Note:</strong> Your company logo will appear in the header of all daily report PDFs generated for your projects. If no logo is uploaded, the ForemanOS logo will be used as default.
               </p>

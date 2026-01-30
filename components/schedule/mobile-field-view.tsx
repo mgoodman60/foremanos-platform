@@ -224,7 +224,7 @@ export function MobileFieldView({
   return (
     <div className="space-y-4">
       {/* Header with Search and Filters */}
-      <div className="sticky top-0 z-10 bg-[#1F2328] pb-4 space-y-3">
+      <div className="sticky top-0 z-10 bg-dark-surface pb-4 space-y-3">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -232,7 +232,7 @@ export function MobileFieldView({
             placeholder="Search tasks, locations, subs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-[#2d333b] border-gray-700 h-12 text-base"
+            className="pl-10 bg-dark-card border-gray-700 h-12 text-base"
           />
         </div>
         
@@ -248,7 +248,7 @@ export function MobileFieldView({
                 'whitespace-nowrap flex-shrink-0',
                 filterPeriod === period 
                   ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                  : 'bg-[#2d333b] border-gray-700'
+                  : 'bg-dark-card border-gray-700'
               )}
             >
               {period === 'today' && <Calendar className="h-3 w-3 mr-1" />}
@@ -262,7 +262,7 @@ export function MobileFieldView({
         {/* Status Filter */}
         <div className="flex items-center justify-between">
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[160px] bg-[#2d333b] border-gray-700 h-10">
+            <SelectTrigger className="w-[160px] bg-dark-card border-gray-700 h-10">
               <Filter className="h-4 w-4 mr-2 text-gray-400" />
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -291,7 +291,7 @@ export function MobileFieldView({
       {/* Task Cards */}
       <div className="space-y-3">
         {sortedTasks.length === 0 ? (
-          <Card className="bg-[#2d333b] border-gray-700 p-8 text-center">
+          <Card className="bg-dark-card border-gray-700 p-8 text-center">
             <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
             <p className="text-gray-300">No tasks match your filters</p>
             <p className="text-sm text-gray-500 mt-1">Try adjusting your search or filters</p>
@@ -307,7 +307,7 @@ export function MobileFieldView({
               <Card
                 key={task.id}
                 className={cn(
-                  'bg-[#2d333b] border-gray-700 p-4 transition-all',
+                  'bg-dark-card border-gray-700 p-4 transition-all',
                   task.isCritical && 'border-l-4 border-l-red-500',
                   urgency === 'overdue' && 'border-l-4 border-l-orange-500',
                   urgency === 'due-today' && 'border-l-4 border-l-yellow-500'
@@ -381,7 +381,7 @@ export function MobileFieldView({
                           'flex-1 text-xs h-9',
                           task.percentComplete === progress 
                             ? 'bg-orange-500 hover:bg-orange-600' 
-                            : 'bg-[#1F2328] border-gray-600 hover:bg-[#2d333b]'
+                            : 'bg-dark-surface border-gray-600 hover:bg-dark-card'
                         )}
                       >
                         {progress}%
@@ -420,7 +420,7 @@ export function MobileFieldView({
                       size="sm"
                       disabled={isUpdating}
                       onClick={() => openUpdateModal(task)}
-                      className="bg-[#1F2328] border-gray-600 hover:bg-[#2d333b] h-10"
+                      className="bg-dark-surface border-gray-600 hover:bg-dark-card h-10"
                     >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -448,7 +448,7 @@ export function MobileFieldView({
 
       {/* Detailed Update Modal */}
       <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 max-w-md">
+        <DialogContent className="bg-dark-card border-gray-700 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-gray-200">Update Task</DialogTitle>
           </DialogHeader>
@@ -464,7 +464,7 @@ export function MobileFieldView({
               <div>
                 <label className="text-sm text-gray-400 mb-2 block">Status</label>
                 <Select value={newStatus} onValueChange={setNewStatus}>
-                  <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                  <SelectTrigger className="bg-dark-surface border-gray-600">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -503,7 +503,7 @@ export function MobileFieldView({
                   placeholder="Add notes about this update..."
                   value={updateNotes}
                   onChange={(e) => setUpdateNotes(e.target.value)}
-                  className="bg-[#1F2328] border-gray-600 min-h-[80px]"
+                  className="bg-dark-surface border-gray-600 min-h-[80px]"
                 />
               </div>
             </div>

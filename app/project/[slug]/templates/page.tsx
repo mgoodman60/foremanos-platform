@@ -269,15 +269,15 @@ export default function TemplatesPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (
-            <Card key={i} className="bg-[#2d333b] border-gray-700 animate-pulse">
+            <Card key={i} className="bg-dark-card border-gray-700 animate-pulse">
               <CardContent className="p-6">
-                <div className="h-24 bg-[#1F2328] rounded"></div>
+                <div className="h-24 bg-dark-surface rounded"></div>
               </CardContent>
             </Card>
           ))}
         </div>
       ) : templates.length === 0 ? (
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-12 text-center">
             <FileText className="h-16 w-16 text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-[#F8FAFC] mb-2">
@@ -298,7 +298,7 @@ export default function TemplatesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.map(template => (
-            <Card key={template.id} className="bg-[#2d333b] border-gray-700 hover:shadow-lg transition-shadow">
+            <Card key={template.id} className="bg-dark-card border-gray-700 hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -348,7 +348,7 @@ export default function TemplatesPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+                    className="flex-1 border-gray-600 text-gray-300 hover:bg-dark-surface"
                     onClick={() => {
                       // Download template
                       window.open(`/api/templates/${template.id}`, '_blank');
@@ -374,7 +374,7 @@ export default function TemplatesPage() {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-md">
+        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-md">
           <DialogHeader>
             <DialogTitle>Upload New Template</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -392,7 +392,7 @@ export default function TemplatesPage() {
                   type="file"
                   accept=".docx,.xlsx,.pdf"
                   onChange={handleFileSelect}
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
                 />
                 {selectedFile && (
                   <Button
@@ -420,7 +420,7 @@ export default function TemplatesPage() {
                 value={uploadForm.name}
                 onChange={e => setUploadForm({ ...uploadForm, name: e.target.value })}
                 placeholder="e.g., Daily Report Template"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
               />
             </div>
 
@@ -432,7 +432,7 @@ export default function TemplatesPage() {
                 value={uploadForm.description}
                 onChange={e => setUploadForm({ ...uploadForm, description: e.target.value })}
                 placeholder="Brief description of this template"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
                 rows={3}
               />
             </div>
@@ -444,10 +444,10 @@ export default function TemplatesPage() {
                 value={uploadForm.templateType}
                 onValueChange={value => setUploadForm({ ...uploadForm, templateType: value })}
               >
-                <SelectTrigger className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+                <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   <SelectItem value="daily_report">Daily Report</SelectItem>
                   <SelectItem value="schedule">Schedule</SelectItem>
                   <SelectItem value="budget">Budget</SelectItem>

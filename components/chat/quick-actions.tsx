@@ -303,7 +303,7 @@ export function QuickActions({
         </PopoverTrigger>
         
         <PopoverContent
-          className="w-64 p-2 bg-[#2d333b] border-gray-700"
+          className="w-64 p-2 bg-dark-card border-gray-700"
           align="end"
         >
           <div className="space-y-1">
@@ -329,7 +329,7 @@ export function QuickActions({
 
       {/* Action Dialog */}
       <Dialog open={!!activeAction} onOpenChange={(open) => !open && setActiveAction(null)}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white sm:max-w-md">
+        <DialogContent className="bg-dark-card border-gray-700 text-white sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {activeAction?.icon}

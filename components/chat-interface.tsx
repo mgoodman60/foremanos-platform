@@ -950,7 +950,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   };
 
   return (
-    <div className="flex h-[600px] md:h-[700px] bg-[#1F2328] rounded-lg shadow-xl overflow-hidden border border-gray-700">
+    <div className="flex h-[600px] md:h-[700px] bg-dark-surface rounded-lg shadow-xl overflow-hidden border border-gray-700">
       {/* Conversation Sidebar */}
       {isLoggedIn && projectSlug && projectId && (
         <ConversationSidebar
@@ -967,7 +967,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       {/* Main Chat Interface */}
       <div className="flex flex-col flex-1 min-w-0">
       {/* Header - Mobile Optimized */}
-      <div className="bg-[#1F2328] text-white p-2 sm:p-3 lg:p-4 border-b border-gray-700">
+      <div className="bg-dark-surface text-white p-2 sm:p-3 lg:p-4 border-b border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" aria-hidden="true" />
@@ -991,8 +991,8 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             {activeConversationId && messages.length > 0 && (
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className={`p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none ${
-                  showSearch ? 'bg-[#2d333b] text-[#F97316]' : ''
+                className={`p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none ${
+                  showSearch ? 'bg-dark-card text-[#F97316]' : ''
                 }`}
                 aria-label="Search messages"
                 title="Search messages (Ctrl/Cmd+F)"
@@ -1002,7 +1002,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             )}
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+              className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none"
               aria-label="Toggle help"
               title="Quick help"
             >
@@ -1012,7 +1012,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               <>
                 <button
                   onClick={() => setShowDailyReportTemplate(true)}
-                  className="p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   aria-label="Daily Report Template"
                   title="Fill structured daily report"
                 >
@@ -1021,7 +1021,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 <button
                   onClick={() => setShowWorkflowModal(true)}
                   disabled={!activeConversationId}
-                  className="p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                  className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
                   aria-label="Daily Report"
                   title="Start daily report"
                 >
@@ -1077,20 +1077,20 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
                 disabled={messages.length === 0}
-                className="p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
                 aria-label="Export chat"
                 title="Download chat transcript"
               >
                 <Download className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               {showExportMenu && messages.length > 0 && (
-                <div className="absolute right-0 top-full mt-2 bg-[#2d333b] border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[140px] animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute right-0 top-full mt-2 bg-dark-card border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[140px] animate-in fade-in zoom-in-95 duration-200">
                   <button
                     onClick={() => {
                       exportChat('txt');
                       setShowExportMenu(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#1F2328] transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors flex items-center gap-2"
                   >
                     <FileText className="w-4 h-4" />
                     Export as TXT
@@ -1100,7 +1100,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                       exportChat('json');
                       setShowExportMenu(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-[#1F2328] transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors flex items-center gap-2"
                   >
                     <FileText className="w-4 h-4" />
                     Export as JSON
@@ -1111,7 +1111,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             <button
               onClick={clearChat}
               disabled={messages.length === 0}
-              className="p-1.5 sm:p-2 hover:bg-[#2d333b] rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+              className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
               aria-label="Clear chat"
               title="Clear chat history"
             >
@@ -1122,7 +1122,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
 
         {/* Help Panel - Compact on Mobile */}
         {showHelp && (
-          <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-[#2d333b] rounded-lg text-xs sm:text-sm animate-in slide-in-from-top border border-gray-700">
+          <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-dark-card rounded-lg text-xs sm:text-sm animate-in slide-in-from-top border border-gray-700">
             <p className="font-semibold mb-1 sm:mb-2 text-[#F8FAFC]">Tips for effective queries:</p>
             <ul className="space-y-0.5 sm:space-y-1 text-gray-300">
               <li>• Be specific about what you need</li>
@@ -1145,7 +1145,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       {/* Messages */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#1F2328] relative" 
+        className="flex-1 overflow-y-auto p-4 space-y-4 bg-dark-surface relative" 
         role="log" 
         aria-live="polite" 
         aria-label="Chat messages"
@@ -1166,7 +1166,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         )}
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <div className="w-16 h-16 mx-auto mb-4 relative bg-[#2d333b] rounded-lg p-2 shadow-sm" aria-hidden="true">
+            <div className="w-16 h-16 mx-auto mb-4 relative bg-dark-card rounded-lg p-2 shadow-sm" aria-hidden="true">
               <Image 
                 src="/foremanos-logo.png" 
                 alt="ForemanOS Logo" 
@@ -1211,7 +1211,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                       <button
                         key={index}
                         onClick={() => handleSampleQuestion(question)}
-                        className="p-3 text-left text-sm bg-[#2d333b] border-2 border-gray-600 rounded-lg hover:border-[#F97316] hover:shadow-md transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:outline-none group"
+                        className="p-3 text-left text-sm bg-dark-card border-2 border-gray-600 rounded-lg hover:border-[#F97316] hover:shadow-md transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:outline-none group"
                         aria-label={`Use sample question: ${question}`}
                       >
                         <span className="text-gray-200 group-hover:text-[#F97316] font-medium">{question}</span>
@@ -1238,7 +1238,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             }`}
           >
             {message.role === 'assistant' && (
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#2d333b] flex items-center justify-center p-1 shadow-sm" aria-hidden="true">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-dark-card flex items-center justify-center p-1 shadow-sm" aria-hidden="true">
                 <div className="relative w-full h-full">
                   <Image 
                     src="/foremanos-logo.png" 
@@ -1254,7 +1254,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 className={`rounded-lg p-3 ${
                   message.role === 'user'
                     ? 'bg-[#F97316] text-white'
-                    : 'bg-[#2d333b] text-[#F8FAFC] shadow-md border border-gray-700'
+                    : 'bg-dark-card text-[#F8FAFC] shadow-md border border-gray-700'
                 } ${isHighlighted ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-[#1F2328]' : ''}`}
               >
                 {message.image && (
@@ -1365,7 +1365,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         {/* Typing Indicator */}
         {loading && (
           <div className="flex gap-3 justify-start animate-in slide-in-from-bottom">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#2d333b] flex items-center justify-center p-1 shadow-sm">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-dark-card flex items-center justify-center p-1 shadow-sm">
               <div className="relative w-full h-full">
                 <Image 
                   src="/foremanos-logo.png" 
@@ -1375,7 +1375,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 />
               </div>
             </div>
-            <div className="bg-[#2d333b] text-[#F8FAFC] shadow-md rounded-lg p-3 border border-gray-700">
+            <div className="bg-dark-card text-[#F8FAFC] shadow-md rounded-lg p-3 border border-gray-700">
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-[#F97316]" />
                 <span className="text-sm text-gray-300">AI is thinking...</span>
@@ -1388,7 +1388,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       </div>
 
       {/* Input - Mobile Optimized */}
-      <form onSubmit={sendMessage} className="p-2 sm:p-3 lg:p-4 bg-[#1F2328] border-t border-gray-700">
+      <form onSubmit={sendMessage} className="p-2 sm:p-3 lg:p-4 bg-dark-surface border-t border-gray-700">
         {retryMessage && (
           <div className="mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
             <span className="text-xs sm:text-sm text-yellow-800">Message failed to send</span>
@@ -1416,9 +1416,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
 
         {/* Image Preview */}
         {uploadedImage && !isReadOnly && (
-          <div className="mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-[#2d333b] border border-gray-700 rounded-lg">
+          <div className="mb-1.5 sm:mb-2 p-1.5 sm:p-2 bg-dark-card border border-gray-700 rounded-lg">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-[#1F2328] rounded overflow-hidden flex-shrink-0">
+              <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-dark-surface rounded overflow-hidden flex-shrink-0">
                 <Image 
                   src={uploadedImage} 
                   alt="Preview" 
@@ -1451,7 +1451,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={isReadOnly ? "This conversation is read-only" : (uploadedImage ? "Add a message..." : "Ask about your project...")}
-            className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-sm sm:text-base border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#2d333b] text-[#F8FAFC] placeholder-gray-400 transition-all touch-manipulation"
+            className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-sm sm:text-base border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-card text-[#F8FAFC] placeholder-gray-400 transition-all touch-manipulation"
             disabled={loading || isReadOnly}
             aria-label="Message input"
           />
@@ -1473,7 +1473,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || isReadOnly}
-              className="bg-[#2d333b] hover:bg-[#3d434b] text-gray-300 p-1.5 sm:p-2 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none touch-manipulation border border-gray-600"
+              className="bg-dark-card hover:bg-[#3d434b] text-gray-300 p-1.5 sm:p-2 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none touch-manipulation border border-gray-600"
               aria-label="Upload image"
             >
               <ImagePlus className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -1559,7 +1559,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
 
       {/* Analyzing indicator */}
       {analyzingSchedule && (
-        <div className="fixed bottom-24 right-6 bg-[#2d333b] border border-blue-500 rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
+        <div className="fixed bottom-24 right-6 bg-dark-card border border-blue-500 rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
           <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
           <span className="text-sm text-gray-300">Analyzing schedule impacts...</span>
         </div>

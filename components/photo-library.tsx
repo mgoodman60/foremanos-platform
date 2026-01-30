@@ -313,7 +313,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="bg-[#1F2328] border border-gray-700 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col">
+      <div className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
@@ -330,7 +330,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   onClick={() => setShowBulkTagDialog(true)}
                   disabled={bulkProcessing}
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+                  className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
                 >
                   <Tag className="h-4 w-4 mr-2" />
                   Tag
@@ -339,7 +339,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   onClick={() => setShowBulkCaptionDialog(true)}
                   disabled={bulkProcessing}
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+                  className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Caption
@@ -367,7 +367,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               onClick={onClose}
               variant="ghost"
               size="icon"
-              className="text-gray-400 hover:text-white hover:bg-[#2d333b]"
+              className="text-gray-400 hover:text-white hover:bg-dark-card"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -384,7 +384,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               placeholder="Search by caption, description, or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-[#2d333b] border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
+              className="pl-10 bg-dark-card border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
             />
           </div>
 
@@ -394,7 +394,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
+              className="px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
             >
               <option value="date-desc">📅 Newest First</option>
               <option value="date-asc">📅 Oldest First</option>
@@ -406,7 +406,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               <select
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                className="px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
+                className="px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
               >
                 <option value="all">🔨 All Trades</option>
                 {trades.map(trade => (
@@ -420,7 +420,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               <select
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
-                className="px-3 py-2 bg-[#2d333b] border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
+                className="px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
               >
                 <option value="all">📍 All Locations</option>
                 {locations.map(loc => (
@@ -435,7 +435,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                 onClick={toggleSelectAll}
                 variant="outline"
                 size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+                className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
               >
                 {selectedPhotos.size === filteredPhotos.length ? (
                   <CheckSquare className="h-4 w-4 mr-2" />
@@ -478,7 +478,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
       {/* Bulk Tag Dialog */}
       {showBulkTagDialog && (
         <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
-          <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-6 w-full max-w-md">
+          <div className="bg-dark-surface border border-gray-700 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
               Tag {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
             </h3>
@@ -492,7 +492,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   placeholder="e.g., Electrical, Plumbing"
                   value={bulkTrade}
                   onChange={(e) => setBulkTrade(e.target.value)}
-                  className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                  className="bg-dark-card border-gray-600 text-[#F8FAFC]"
                 />
               </div>
               <div>
@@ -504,7 +504,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   placeholder="e.g., Basement, 2nd Floor"
                   value={bulkLocation}
                   onChange={(e) => setBulkLocation(e.target.value)}
-                  className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                  className="bg-dark-card border-gray-600 text-[#F8FAFC]"
                 />
               </div>
               <div className="flex gap-2 justify-end pt-4">
@@ -535,7 +535,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
       {/* Bulk Caption Dialog */}
       {showBulkCaptionDialog && (
         <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
-          <div className="bg-[#1F2328] border border-gray-700 rounded-lg p-6 w-full max-w-md">
+          <div className="bg-dark-surface border border-gray-700 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
               Caption {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
             </h3>
@@ -549,7 +549,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   placeholder="Enter caption for all selected photos"
                   value={bulkCaption}
                   onChange={(e) => setBulkCaption(e.target.value)}
-                  className="bg-[#2d333b] border-gray-600 text-[#F8FAFC]"
+                  className="bg-dark-card border-gray-600 text-[#F8FAFC]"
                 />
               </div>
               <div className="flex gap-2 justify-end pt-4">
@@ -605,13 +605,13 @@ function PhotoCard({ photo, selected, onToggleSelect }: PhotoCardProps) {
 
   return (
     <Card
-      className={`bg-[#2d333b] border-2 transition-all cursor-pointer group ${
+      className={`bg-dark-card border-2 transition-all cursor-pointer group ${
         selected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-gray-700 hover:border-gray-600'
       }`}
       onClick={onToggleSelect}
     >
       {/* Image */}
-      <div className="aspect-square relative bg-[#1F2328] rounded-t-lg overflow-hidden">
+      <div className="aspect-square relative bg-dark-surface rounded-t-lg overflow-hidden">
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>

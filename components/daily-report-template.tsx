@@ -290,7 +290,7 @@ export default function DailyReportTemplate({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#2d333b] border-gray-700 text-gray-100">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-dark-card border-gray-700 text-gray-100">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-[#F8FAFC] flex items-center gap-2">
             <Calendar className="h-6 w-6 text-blue-400" />
@@ -331,7 +331,7 @@ export default function DailyReportTemplate({
                 type="date"
                 value={reportDate}
                 onChange={(e) => setReportDate(e.target.value)}
-                className="bg-[#1F2328] border-gray-700 text-gray-100 mt-1"
+                className="bg-dark-surface border-gray-700 text-gray-100 mt-1"
               />
             </div>
             <div>
@@ -345,7 +345,7 @@ export default function DailyReportTemplate({
                 value={crewSize || ''}
                 onChange={(e) => setCrewSize(parseInt(e.target.value) || 0)}
                 placeholder="Enter number of workers"
-                className="bg-[#1F2328] border-gray-700 text-gray-100 mt-1"
+                className="bg-dark-surface border-gray-700 text-gray-100 mt-1"
               />
             </div>
           </div>
@@ -362,10 +362,10 @@ export default function DailyReportTemplate({
               </div>
             )}
             <Select value={weatherCondition} onValueChange={setWeatherCondition}>
-              <SelectTrigger className="bg-[#1F2328] border-gray-700 text-gray-100">
+              <SelectTrigger className="bg-dark-surface border-gray-700 text-gray-100">
                 <SelectValue placeholder="Select weather condition" />
               </SelectTrigger>
-              <SelectContent className="bg-[#2d333b] border-gray-700">
+              <SelectContent className="bg-dark-card border-gray-700">
                 {WEATHER_CONDITIONS.map((condition) => (
                   <SelectItem key={condition} value={condition} className="text-gray-100">
                     {condition}
@@ -388,7 +388,7 @@ export default function DailyReportTemplate({
                 value={weatherDelayReason}
                 onChange={(e) => setWeatherDelayReason(e.target.value)}
                 placeholder="Describe weather delay impact..."
-                className="bg-[#1F2328] border-gray-700 text-gray-100 mt-2"
+                className="bg-dark-surface border-gray-700 text-gray-100 mt-2"
                 rows={2}
               />
             )}
@@ -402,9 +402,9 @@ export default function DailyReportTemplate({
                 No tasks scheduled for today
               </div>
             ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-700 rounded p-3 bg-[#1F2328]">
+              <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-700 rounded p-3 bg-dark-surface">
                 {todayTasks.map((task) => (
-                  <div key={task.id} className="flex items-center gap-3 p-2 hover:bg-[#2d333b] rounded">
+                  <div key={task.id} className="flex items-center gap-3 p-2 hover:bg-dark-card rounded">
                     <div className="flex items-center gap-2 flex-1">
                       <Checkbox
                         checked={completedTasks.has(task.id)}
@@ -442,7 +442,7 @@ export default function DailyReportTemplate({
               value={workPerformed}
               onChange={(e) => setWorkPerformed(e.target.value)}
               placeholder="Describe work completed today... (or use voice recorder above)"
-              className="bg-[#1F2328] border-gray-700 text-gray-100"
+              className="bg-dark-surface border-gray-700 text-gray-100"
               rows={3}
             />
           </div>
@@ -459,23 +459,23 @@ export default function DailyReportTemplate({
                 variant="outline"
                 size="sm"
                 onClick={addDelay}
-                className="border-gray-700 text-gray-300 hover:bg-[#1F2328]"
+                className="border-gray-700 text-gray-300 hover:bg-dark-surface"
               >
                 Add Delay
               </Button>
             </div>
 
             {delays.map((delay, index) => (
-              <div key={index} className="border border-gray-700 rounded p-3 space-y-2 bg-[#1F2328]">
+              <div key={index} className="border border-gray-700 rounded p-3 space-y-2 bg-dark-surface">
                 <div className="flex items-center gap-2">
                   <Select
                     value={delay.reason}
                     onValueChange={(value) => updateDelay(index, 'reason', value)}
                   >
-                    <SelectTrigger className="bg-[#2d333b] border-gray-700 text-gray-100">
+                    <SelectTrigger className="bg-dark-card border-gray-700 text-gray-100">
                       <SelectValue placeholder="Select reason" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#2d333b] border-gray-700">
+                    <SelectContent className="bg-dark-card border-gray-700">
                       {DELAY_REASONS.map((reason) => (
                         <SelectItem key={reason} value={reason} className="text-gray-100">
                           {reason}
@@ -497,7 +497,7 @@ export default function DailyReportTemplate({
                   value={delay.description}
                   onChange={(e) => updateDelay(index, 'description', e.target.value)}
                   placeholder="Describe the delay or issue..."
-                  className="bg-[#2d333b] border-gray-700 text-gray-100"
+                  className="bg-dark-card border-gray-700 text-gray-100"
                   rows={2}
                 />
               </div>
@@ -511,7 +511,7 @@ export default function DailyReportTemplate({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any other observations, safety issues, or important notes..."
-              className="bg-[#1F2328] border-gray-700 text-gray-100 mt-1"
+              className="bg-dark-surface border-gray-700 text-gray-100 mt-1"
               rows={3}
             />
           </div>
@@ -523,7 +523,7 @@ export default function DailyReportTemplate({
               value={tomorrowPlan}
               onChange={(e) => setTomorrowPlan(e.target.value)}
               placeholder="What tasks are planned for tomorrow?..."
-              className="bg-[#1F2328] border-gray-700 text-gray-100 mt-1"
+              className="bg-dark-surface border-gray-700 text-gray-100 mt-1"
               rows={3}
             />
           </div>
@@ -534,7 +534,7 @@ export default function DailyReportTemplate({
           <Button
             variant="outline"
             onClick={onClose}
-            className="border-gray-700 text-gray-300 hover:bg-[#1F2328]"
+            className="border-gray-700 text-gray-300 hover:bg-dark-surface"
           >
             Cancel
           </Button>

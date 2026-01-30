@@ -518,7 +518,7 @@ export function FloorPlanViewer({
     <div className={`relative bg-[#1a1d21] border border-gray-700 rounded-lg overflow-hidden ${className}`}>
       {/* Header - Clickable to collapse/expand */}
       <div 
-        className="flex items-center justify-between border-b border-gray-700 px-4 py-2 bg-[#2d333b] cursor-pointer hover:bg-[#363d47] transition-colors"
+        className="flex items-center justify-between border-b border-gray-700 px-4 py-2 bg-dark-card cursor-pointer hover:bg-[#363d47] transition-colors"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <div className="flex items-center gap-2">
@@ -965,7 +965,7 @@ export function FloorPlanViewer({
                   >
                     {/* Room Label (shown on hover) */}
                     {hoveredRoom === room.id && (
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1F2328] border border-gray-600 px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-dark-surface border border-gray-600 px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
                         <span className="text-xs text-white font-medium">
                           {room.roomNumber || room.name}
                         </span>
@@ -978,7 +978,7 @@ export function FloorPlanViewer({
             
             {/* Room Count Legend (for uploaded floor plans with hotspots) */}
             {imageUrl && roomsWithHotspots.length > 0 && (
-              <div className="absolute bottom-2 left-2 bg-[#1F2328]/90 border border-gray-700 rounded px-2 py-1">
+              <div className="absolute bottom-2 left-2 bg-dark-surface/90 border border-gray-700 rounded px-2 py-1">
                 <div className="flex items-center gap-3 text-xs">
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded border-2 border-green-500 bg-green-500/30" />
@@ -1001,7 +1001,7 @@ export function FloorPlanViewer({
 
       {/* Room Detail Modal */}
       <Dialog open={showRoomModal} onOpenChange={setShowRoomModal}>
-        <DialogContent className="max-w-2xl bg-[#1F2328] border-gray-700 text-white">
+        <DialogContent className="max-w-2xl bg-dark-surface border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1063,7 +1063,7 @@ export function FloorPlanViewer({
                     <Input
                       value={editedRoom.name || ''}
                       onChange={(e) => setEditedRoom({ ...editedRoom, name: e.target.value })}
-                      className="bg-[#2d333b] border-gray-600 text-white"
+                      className="bg-dark-card border-gray-600 text-white"
                     />
                   ) : (
                     <p className="text-white">{selectedRoom.name}</p>
@@ -1075,7 +1075,7 @@ export function FloorPlanViewer({
                     <Input
                       value={editedRoom.roomNumber || ''}
                       onChange={(e) => setEditedRoom({ ...editedRoom, roomNumber: e.target.value })}
-                      className="bg-[#2d333b] border-gray-600 text-white"
+                      className="bg-dark-card border-gray-600 text-white"
                     />
                   ) : (
                     <p className="text-white">{selectedRoom.roomNumber || '-'}</p>
@@ -1088,7 +1088,7 @@ export function FloorPlanViewer({
                       value={editedRoom.type || selectedRoom.type}
                       onValueChange={(value) => setEditedRoom({ ...editedRoom, type: value })}
                     >
-                      <SelectTrigger className="bg-[#2d333b] border-gray-600 text-white">
+                      <SelectTrigger className="bg-dark-card border-gray-600 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1115,7 +1115,7 @@ export function FloorPlanViewer({
                       value={editedRoom.status || selectedRoom.status}
                       onValueChange={(value) => setEditedRoom({ ...editedRoom, status: value })}
                     >
-                      <SelectTrigger className="bg-[#2d333b] border-gray-600 text-white">
+                      <SelectTrigger className="bg-dark-card border-gray-600 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1140,7 +1140,7 @@ export function FloorPlanViewer({
                       type="number"
                       value={editedRoom.area || ''}
                       onChange={(e) => setEditedRoom({ ...editedRoom, area: parseFloat(e.target.value) || undefined })}
-                      className="bg-[#2d333b] border-gray-600 text-white"
+                      className="bg-dark-card border-gray-600 text-white"
                       placeholder="sq ft"
                     />
                   ) : (
@@ -1159,7 +1159,7 @@ export function FloorPlanViewer({
                       value={String(editedRoom.floorNumber ?? selectedRoom.floorNumber ?? -1)}
                       onValueChange={(value) => setEditedRoom({ ...editedRoom, floorNumber: parseInt(value) })}
                     >
-                      <SelectTrigger className="bg-[#2d333b] border-gray-600 text-white">
+                      <SelectTrigger className="bg-dark-card border-gray-600 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1191,7 +1191,7 @@ export function FloorPlanViewer({
                     <Home className="h-4 w-4" />
                     Finish Schedule ({selectedRoom.FinishScheduleItem.length} items)
                   </h4>
-                  <div className="bg-[#2d333b] rounded-lg p-3 max-h-40 overflow-y-auto">
+                  <div className="bg-dark-card rounded-lg p-3 max-h-40 overflow-y-auto">
                     <div className="space-y-2">
                       {selectedRoom.FinishScheduleItem.map((finish: any, idx: number) => (
                         <div key={finish.id || idx} className="flex items-center justify-between text-sm border-b border-gray-700 pb-2 last:border-0">
@@ -1211,7 +1211,7 @@ export function FloorPlanViewer({
                     <Eye className="h-4 w-4" />
                     MEP Equipment ({selectedRoom.mepEquipment.length} items)
                   </h4>
-                  <div className="bg-[#2d333b] rounded-lg p-3 max-h-40 overflow-y-auto">
+                  <div className="bg-dark-card rounded-lg p-3 max-h-40 overflow-y-auto">
                     <div className="space-y-2">
                       {selectedRoom.mepEquipment.map((equip: any, idx: number) => (
                         <div key={equip.id || idx} className="flex items-center justify-between text-sm border-b border-gray-700 pb-2 last:border-0">
@@ -1238,11 +1238,11 @@ export function FloorPlanViewer({
                   <textarea
                     value={editedRoom.notes || ''}
                     onChange={(e) => setEditedRoom({ ...editedRoom, notes: e.target.value })}
-                    className="w-full bg-[#2d333b] border border-gray-600 text-white rounded-md p-2 text-sm min-h-[80px]"
+                    className="w-full bg-dark-card border border-gray-600 text-white rounded-md p-2 text-sm min-h-[80px]"
                     placeholder="Add notes..."
                   />
                 ) : (
-                  <p className="text-gray-300 text-sm bg-[#2d333b] rounded-md p-2 min-h-[40px]">
+                  <p className="text-gray-300 text-sm bg-dark-card rounded-md p-2 min-h-[40px]">
                     {selectedRoom.notes || 'No notes'}
                   </p>
                 )}

@@ -309,7 +309,7 @@ export default function CostCodeDrilldown({
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700 p-6">
+      <Card className="bg-dark-card border-gray-700 p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-700 rounded w-1/3" />
           <div className="h-64 bg-gray-700 rounded" />
@@ -319,7 +319,7 @@ export default function CostCodeDrilldown({
   }
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 overflow-hidden">
+    <Card className="bg-dark-card border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -364,7 +364,7 @@ export default function CostCodeDrilldown({
       </div>
 
       {/* Column Headers */}
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-4 py-2 px-4 bg-[#1F2328] border-b border-gray-700 text-xs font-semibold text-gray-400 uppercase">
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-4 py-2 px-4 bg-dark-surface border-b border-gray-700 text-xs font-semibold text-gray-400 uppercase">
         <div>Cost Code / Description</div>
         <div className="text-right">Budget</div>
         <div className="text-right">Actual</div>
@@ -379,7 +379,7 @@ export default function CostCodeDrilldown({
       </div>
 
       {/* Totals Row */}
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-4 py-3 px-4 bg-[#1F2328] border-t border-gray-700 font-semibold">
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-4 py-3 px-4 bg-dark-surface border-t border-gray-700 font-semibold">
         <div className="text-gray-200">TOTAL</div>
         <div className="text-right text-gray-200">{formatCurrency(totals.budget)}</div>
         <div className="text-right text-gray-200">{formatCurrency(totals.actual)}</div>

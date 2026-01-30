@@ -20,7 +20,7 @@ export function MaterialTakeoffRibbon({ projectSlug, projectId }: MaterialTakeof
         <Button
           onClick={() => setIsOpen(true)}
           variant="outline"
-          className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white py-2"
+          className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
         >
           <Calculator className="h-4 w-4" />
           <span>Material Takeoff</span>
@@ -29,7 +29,7 @@ export function MaterialTakeoffRibbon({ projectSlug, projectId }: MaterialTakeof
 
       {/* Material Takeoff Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-7xl h-[92vh] p-0 bg-[#1F2328] border-gray-700 flex flex-col overflow-hidden">
+        <DialogContent className="max-w-7xl h-[92vh] p-0 bg-dark-surface border-gray-700 flex flex-col overflow-hidden">
           <MaterialTakeoffManager
             projectSlug={projectSlug}
             onClose={() => setIsOpen(false)}

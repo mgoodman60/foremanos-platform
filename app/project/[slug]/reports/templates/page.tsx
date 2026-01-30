@@ -19,7 +19,7 @@ export default function ReportTemplatesPage() {
   }, [slug]);
 
   return (
-    <div className="min-h-screen bg-[#0d1117]">
+    <div className="min-h-screen bg-dark-base">
       {/* Header */}
       <div className="border-b border-gray-800 bg-[#161b22]">
         <div className="max-w-7xl mx-auto px-4 py-4">

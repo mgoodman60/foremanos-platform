@@ -90,10 +90,10 @@ export default function WeatherPreferencesModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="weather-preferences-modal-title"
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1F2328] border border-gray-700 rounded-xl shadow-2xl"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-dark-surface border border-gray-700 rounded-xl shadow-2xl"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#1F2328] border-b border-gray-700 px-6 py-4">
+        <div className="sticky top-0 z-10 bg-dark-surface border-b border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 id="weather-preferences-modal-title" className="text-xl font-bold text-[#F8FAFC]">
@@ -105,7 +105,7 @@ export default function WeatherPreferencesModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-[#2d333b] rounded-lg transition-colors"
+              className="p-2 hover:bg-dark-card rounded-lg transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5 text-gray-400" />
@@ -132,7 +132,7 @@ export default function WeatherPreferencesModal({
                 </p>
 
                 {/* Temperature Alerts */}
-                <div className="flex items-center justify-between p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-card border border-gray-700 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Thermometer className="w-5 h-5 text-red-400" />
                     <div>
@@ -154,7 +154,7 @@ export default function WeatherPreferencesModal({
                 </div>
 
                 {/* Precipitation Alerts */}
-                <div className="flex items-center justify-between p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-card border border-gray-700 rounded-lg">
                   <div className="flex items-center gap-3">
                     <CloudRain className="w-5 h-5 text-blue-400" />
                     <div>
@@ -176,7 +176,7 @@ export default function WeatherPreferencesModal({
                 </div>
 
                 {/* Wind Alerts */}
-                <div className="flex items-center justify-between p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-card border border-gray-700 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Wind className="w-5 h-5 text-cyan-400" />
                     <div>
@@ -198,7 +198,7 @@ export default function WeatherPreferencesModal({
                 </div>
 
                 {/* Visibility Alerts */}
-                <div className="flex items-center justify-between p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-card border border-gray-700 rounded-lg">
                   <div className="flex items-center gap-3">
                     <Eye className="w-5 h-5 text-gray-400" />
                     <div>
@@ -230,7 +230,7 @@ export default function WeatherPreferencesModal({
                   Receive a weather summary when your daily report chat starts
                 </p>
 
-                <div className="flex items-center justify-between p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-card border border-gray-700 rounded-lg">
                   <div>
                     <p className="font-medium text-[#F8FAFC]">Enable Morning Briefing</p>
                     <p className="text-sm text-gray-400">Auto-start daily report with weather summary</p>
@@ -249,7 +249,7 @@ export default function WeatherPreferencesModal({
                 </div>
 
                 {preferences.enableMorningBriefing && (
-                  <div className="p-4 bg-[#2d333b] border border-gray-700 rounded-lg">
+                  <div className="p-4 bg-dark-card border border-gray-700 rounded-lg">
                     <label className="block text-sm font-medium text-[#F8FAFC] mb-2">
                       Briefing Time
                     </label>
@@ -259,7 +259,7 @@ export default function WeatherPreferencesModal({
                       onChange={(e) =>
                         setPreferences({ ...preferences, morningBriefingTime: e.target.value })
                       }
-                      className="w-full px-4 py-2 bg-[#1F2328] border border-gray-600 text-[#F8FAFC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                      className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-[#F8FAFC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F97316]"
                     />
                   </div>
                 )}
@@ -273,7 +273,7 @@ export default function WeatherPreferencesModal({
                 </p>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-4 bg-[#2d333b] border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors">
+                  <label className="flex items-center gap-3 p-4 bg-dark-card border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors">
                     <input
                       type="radio"
                       name="notificationMethod"
@@ -290,7 +290,7 @@ export default function WeatherPreferencesModal({
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-4 bg-[#2d333b] border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors opacity-50">
+                  <label className="flex items-center gap-3 p-4 bg-dark-card border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors opacity-50">
                     <input
                       type="radio"
                       name="notificationMethod"
@@ -310,10 +310,10 @@ export default function WeatherPreferencesModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[#1F2328] border-t border-gray-700 px-6 py-4 flex justify-end gap-3">
+        <div className="sticky bottom-0 bg-dark-surface border-t border-gray-700 px-6 py-4 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-[#2d333b] hover:bg-[#353b43] text-[#F8FAFC] rounded-lg transition-colors"
+            className="px-4 py-2 bg-dark-card hover:bg-[#353b43] text-[#F8FAFC] rounded-lg transition-colors"
             disabled={saving}
           >
             Cancel

@@ -240,7 +240,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#1F2328] border-b border-gray-700 shadow-lg">
+      <header className="sticky top-0 z-50 bg-dark-surface border-b border-gray-700 shadow-lg">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
@@ -460,7 +460,7 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
-            className="mt-24 text-center bg-[#1F2328] rounded-3xl p-12 text-white"
+            className="mt-24 text-center bg-dark-surface rounded-3xl p-12 text-white"
           >
             <Users className="h-16 w-16 mx-auto mb-6 text-[#F97316]" />
             <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Workflow?</h2>

@@ -181,7 +181,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5 text-[#F97316]" />
@@ -223,7 +223,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                     className={`w-full p-3 rounded-lg border text-left transition-colors ${
                       selectedDoc === doc.id
                         ? 'border-[#F97316] bg-[#F97316]/10'
-                        : 'border-gray-600 hover:border-gray-500 bg-[#1F2328]'
+                        : 'border-gray-600 hover:border-gray-500 bg-dark-surface'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
           {/* Extraction Result Preview */}
           {extractionResult && (
             <div className="space-y-3">
-              <div className="p-4 bg-[#1F2328] rounded-lg border border-gray-700">
+              <div className="p-4 bg-dark-surface rounded-lg border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm text-gray-400">Extraction Result</span>
                   <span className={`text-xs px-2 py-0.5 rounded ${
@@ -305,7 +305,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                 {extractionResult.items.slice(0, 10).map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-2 bg-[#1F2328] rounded text-sm"
+                    className="flex items-center justify-between p-2 bg-dark-surface rounded text-sm"
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       {item.costCode && (

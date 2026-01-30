@@ -46,7 +46,7 @@ export default function TitleBlockMetadataCard({
   };
 
   return (
-    <Card className={`bg-[#2d333b] border-gray-700 ${className}`}>
+    <Card className={`bg-dark-card border-gray-700 ${className}`}>
       <CardHeader>
         <CardTitle className="text-gray-100 flex items-center gap-2 text-lg">
           <Info className="h-5 w-5 text-orange-500" />

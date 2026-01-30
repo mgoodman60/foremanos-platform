@@ -476,7 +476,7 @@ export default function DashboardPage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F97316] mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading dashboard...</p>
@@ -513,7 +513,7 @@ export default function DashboardPage() {
   const renderProjectCard = (project: Project, showSharedBy = false) => (
     <div
       key={project.id}
-      className="border-2 border-gray-600 rounded-xl p-5 hover:shadow-xl hover:border-[#F97316] transition-all duration-200 bg-[#2d333b]"
+      className="border-2 border-gray-600 rounded-xl p-5 hover:shadow-xl hover:border-[#F97316] transition-all duration-200 bg-dark-card"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
@@ -529,7 +529,7 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      <div className="space-y-2.5 text-sm text-gray-300 mb-4 bg-[#1F2328] rounded-lg p-3">
+      <div className="space-y-2.5 text-sm text-gray-300 mb-4 bg-dark-surface rounded-lg p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-[#F97316]" />
@@ -577,9 +577,9 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#1F2328]">
+    <div className="min-h-screen bg-dark-surface">
       {/* Header */}
-      <header className="bg-[#2d333b] border-b border-gray-700 shadow-sm sticky top-0 z-40">
+      <header className="bg-dark-card border-b border-gray-700 shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -613,7 +613,7 @@ export default function DashboardPage() {
 
       {/* Share Login Link Ribbon - Only for Clients */}
       {session?.user.role === 'client' && (
-        <div className="bg-[#1F2328] text-white py-4 px-4 shadow-lg border-b-4 border-[#F97316]">
+        <div className="bg-dark-surface text-white py-4 px-4 shadow-lg border-b-4 border-[#F97316]">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -685,10 +685,10 @@ export default function DashboardPage() {
 
             <button
               onClick={() => setShowGuestLoginModal(true)}
-              className="bg-[#2d333b] hover:bg-[#3d434b] text-[#F8FAFC] border-2 border-gray-600 rounded-lg shadow-md p-6 text-left transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none"
+              className="bg-dark-card hover:bg-[#3d434b] text-[#F8FAFC] border-2 border-gray-600 rounded-lg shadow-md p-6 text-left transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none"
             >
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#1F2328] rounded-lg">
+                <div className="p-3 bg-dark-surface rounded-lg">
                   <Users className="w-8 h-8 text-gray-300" />
                 </div>
                 <div>
@@ -720,7 +720,7 @@ export default function DashboardPage() {
           </div>
           
           {ownedProjects.length === 0 ? (
-            <div className="bg-[#2d333b] rounded-lg shadow-md p-12 text-center border border-gray-700">
+            <div className="bg-dark-card rounded-lg shadow-md p-12 text-center border border-gray-700">
               <FolderOpen className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <p className="text-gray-300 text-lg mb-2">No projects yet</p>
               <p className="text-gray-400 text-sm mb-6">Create your first project to get started</p>
@@ -762,7 +762,7 @@ export default function DashboardPage() {
       {/* Create Project Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">Create New Project</h3>
             <form onSubmit={handleCreateProject} className="space-y-4">
               <div>
@@ -773,7 +773,7 @@ export default function DashboardPage() {
                   type="text"
                   value={newProjectData.name}
                   onChange={(e) => setNewProjectData({ ...newProjectData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#1F2328] text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
                   placeholder="e.g., Downtown Office Building"
                   required
                 />
@@ -786,7 +786,7 @@ export default function DashboardPage() {
                   type="text"
                   value={newProjectData.guestUsername}
                   onChange={(e) => setNewProjectData({ ...newProjectData, guestUsername: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#1F2328] text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
                   placeholder="e.g., downtown-2024"
                   required
                 />
@@ -799,7 +799,7 @@ export default function DashboardPage() {
                   type="password"
                   value={newProjectData.guestPassword}
                   onChange={(e) => setNewProjectData({ ...newProjectData, guestPassword: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#1F2328] text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
                   placeholder="Leave blank for no password"
                 />
               </div>
@@ -810,7 +810,7 @@ export default function DashboardPage() {
                     setShowCreateModal(false);
                     setNewProjectData({ name: '', guestUsername: '', guestPassword: '' });
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-[#1F2328] transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
                 >
                   Cancel
                 </button>
@@ -829,7 +829,7 @@ export default function DashboardPage() {
       {/* Rename Project Modal */}
       {renameModalOpen && renameProject && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Project</h3>
             <div className="space-y-4">
               <div>
@@ -840,7 +840,7 @@ export default function DashboardPage() {
                   type="text"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#1F2328] text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
                   placeholder="Enter new name"
                 />
               </div>
@@ -852,7 +852,7 @@ export default function DashboardPage() {
                     setRenameProject(null);
                     setNewProjectName('');
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-[#1F2328] transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
                 >
                   Cancel
                 </button>
@@ -871,7 +871,7 @@ export default function DashboardPage() {
       {/* Invite Member Modal */}
       {inviteModalOpen && inviteProject && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-2">Invite to {inviteProject.name}</h3>
             <p className="text-sm text-gray-300 mb-4">Invite team members to collaborate on this project</p>
             <form onSubmit={handleSendInvite} className="space-y-4">
@@ -883,7 +883,7 @@ export default function DashboardPage() {
                   type="text"
                   value={inviteData.emailOrUsername}
                   onChange={(e) => setInviteData({ ...inviteData, emailOrUsername: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#1F2328] text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
                   placeholder="e.g., john@example.com or john123"
                   required
                   disabled={sendingInvite}
@@ -896,7 +896,7 @@ export default function DashboardPage() {
                 <select
                   value={inviteData.role}
                   onChange={(e) => setInviteData({ ...inviteData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-[#1F2328] text-[#F8FAFC]"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC]"
                   disabled={sendingInvite}
                 >
                   <option value="viewer">Viewer - Can view and chat</option>
@@ -910,7 +910,7 @@ export default function DashboardPage() {
                     setInviteModalOpen(false);
                     setInviteData({ emailOrUsername: '', role: 'viewer' });
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-[#1F2328] transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
                   disabled={sendingInvite}
                 >
                   Cancel
@@ -931,7 +931,7 @@ export default function DashboardPage() {
       {/* Members Modal */}
       {membersModalOpen && membersProject && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#2d333b] rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto border border-gray-700">
+          <div className="bg-dark-card rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto border border-gray-700">
             <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
               Project Members - {membersProject.name}
             </h3>
@@ -948,7 +948,7 @@ export default function DashboardPage() {
                 {projectMembers.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-4 border border-gray-600 rounded-lg hover:border-[#F97316] transition-colors bg-[#1F2328]"
+                    className="flex items-center justify-between p-4 border border-gray-600 rounded-lg hover:border-[#F97316] transition-colors bg-dark-surface"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -983,7 +983,7 @@ export default function DashboardPage() {
                   setMembersProject(null);
                   setProjectMembers([]);
                 }}
-                className="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-[#1F2328] transition-colors"
+                className="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
               >
                 Close
               </button>

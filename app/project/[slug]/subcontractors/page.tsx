@@ -347,21 +347,21 @@ export default function SubcontractorsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-gray-300">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] p-6">
+    <div className="min-h-screen bg-dark-surface p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => router.push(`/project/${projectSlug}`)}
-            className="mb-4 text-gray-300 hover:text-white hover:bg-[#2d333b]"
+            className="mb-4 text-gray-300 hover:text-white hover:bg-dark-card"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Project
@@ -378,7 +378,7 @@ export default function SubcontractorsPage() {
               <Button
                 onClick={handleImport}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white"
+                className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Import from Document
@@ -395,7 +395,7 @@ export default function SubcontractorsPage() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-[#2d333b] border-gray-700 p-4 mb-6">
+        <Card className="bg-dark-card border-gray-700 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -404,16 +404,16 @@ export default function SubcontractorsPage() {
                   placeholder="Search by company, contact name, or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-[#1F2328] border-gray-600 text-white placeholder:text-gray-500"
+                  className="pl-10 bg-dark-surface border-gray-600 text-white placeholder:text-gray-500"
                 />
               </div>
             </div>
             <div className="w-full sm:w-64">
               <Select value={filterTrade} onValueChange={setFilterTrade}>
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                   <SelectValue placeholder="Filter by trade" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   <SelectItem value="all" className="text-white">All Trades</SelectItem>
                   {TRADE_TYPES.map((trade) => (
                     <SelectItem key={trade.value} value={trade.value} className="text-white">
@@ -429,7 +429,7 @@ export default function SubcontractorsPage() {
         {/* Subcontractor List */}
         <div className="grid gap-4">
           {filteredSubcontractors.length === 0 ? (
-            <Card className="bg-[#2d333b] border-gray-700 p-12 text-center">
+            <Card className="bg-dark-card border-gray-700 p-12 text-center">
               <Users className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">
                 {searchTerm || filterTrade !== 'all'
@@ -453,7 +453,7 @@ export default function SubcontractorsPage() {
             </Card>
           ) : (
             filteredSubcontractors.map((sub) => (
-              <Card key={sub.id} className="bg-[#2d333b] border-gray-700 p-6">
+              <Card key={sub.id} className="bg-dark-card border-gray-700 p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -488,7 +488,7 @@ export default function SubcontractorsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => router.push(`/project/${projectSlug}/contracts?subcontractorId=${sub.id}`)}
-                      className="border-gray-600 text-gray-300 hover:bg-[#1F2328] hover:text-white"
+                      className="border-gray-600 text-gray-300 hover:bg-dark-surface hover:text-white"
                     >
                       <FileCheck className="w-4 h-4 mr-1" />
                       Contracts
@@ -497,7 +497,7 @@ export default function SubcontractorsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEdit(sub)}
-                      className="text-gray-400 hover:text-white hover:bg-[#1F2328]"
+                      className="text-gray-400 hover:text-white hover:bg-dark-surface"
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
@@ -519,7 +519,7 @@ export default function SubcontractorsPage() {
 
       {/* Add Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Add Subcontractor</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -534,7 +534,7 @@ export default function SubcontractorsPage() {
                 value={formData.companyName}
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 placeholder="ABC Construction"
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
             <div>
@@ -543,10 +543,10 @@ export default function SubcontractorsPage() {
                 value={formData.tradeType}
                 onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
               >
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                   <SelectValue placeholder="Select trade type" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   {TRADE_TYPES.map((trade) => (
                     <SelectItem key={trade.value} value={trade.value} className="text-white">
                       {trade.label}
@@ -562,7 +562,7 @@ export default function SubcontractorsPage() {
                 value={formData.contactName}
                 onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                 placeholder="John Smith"
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
             <div>
@@ -572,7 +572,7 @@ export default function SubcontractorsPage() {
                 value={formData.contactPhone}
                 onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                 placeholder="(555) 123-4567"
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
             <div>
@@ -583,7 +583,7 @@ export default function SubcontractorsPage() {
                 value={formData.contactEmail}
                 onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                 placeholder="contact@abcconstruction.com"
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
           </div>
@@ -592,7 +592,7 @@ export default function SubcontractorsPage() {
               variant="outline"
               onClick={() => setShowAddDialog(false)}
               disabled={submitting}
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               Cancel
             </Button>
@@ -609,7 +609,7 @@ export default function SubcontractorsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Edit Subcontractor</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -623,7 +623,7 @@ export default function SubcontractorsPage() {
                 id="edit-companyName"
                 value={formData.companyName}
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
             <div>
@@ -632,10 +632,10 @@ export default function SubcontractorsPage() {
                 value={formData.tradeType}
                 onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
               >
-                <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+                <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   {TRADE_TYPES.map((trade) => (
                     <SelectItem key={trade.value} value={trade.value} className="text-white">
                       {trade.label}
@@ -650,7 +650,7 @@ export default function SubcontractorsPage() {
                 id="edit-contactName"
                 value={formData.contactName}
                 onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
             <div>
@@ -659,7 +659,7 @@ export default function SubcontractorsPage() {
                 id="edit-contactPhone"
                 value={formData.contactPhone}
                 onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
             <div>
@@ -669,7 +669,7 @@ export default function SubcontractorsPage() {
                 type="email"
                 value={formData.contactEmail}
                 onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                className="bg-[#1F2328] border-gray-600 text-white"
+                className="bg-dark-surface border-gray-600 text-white"
               />
             </div>
           </div>
@@ -678,7 +678,7 @@ export default function SubcontractorsPage() {
               variant="outline"
               onClick={() => setShowEditDialog(false)}
               disabled={submitting}
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               Cancel
             </Button>
@@ -695,7 +695,7 @@ export default function SubcontractorsPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <AlertDialogContent className="bg-dark-card border-gray-700 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Subcontractor</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
@@ -706,7 +706,7 @@ export default function SubcontractorsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={submitting}
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               Cancel
             </AlertDialogCancel>
@@ -723,7 +723,7 @@ export default function SubcontractorsPage() {
 
       {/* Import Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-2xl">
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#F97316]" />
@@ -777,11 +777,11 @@ export default function SubcontractorsPage() {
                   if (e.target.value) setImportFile(null);
                 }}
                 placeholder="Paste your subcontractor list here...&#10;&#10;Example:&#10;ABC Electrical - Contact: John Smith (555) 123-4567&#10;XYZ Plumbing Co - Contact: Jane Doe jane@xyzplumbing.com"
-                className="bg-[#1F2328] border-gray-600 text-white min-h-[150px] placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-white min-h-[150px] placeholder:text-gray-500"
               />
             </div>
 
-            <div className="bg-[#1F2328] rounded-lg p-4 text-sm">
+            <div className="bg-dark-surface rounded-lg p-4 text-sm">
               <h4 className="text-gray-300 font-medium mb-2">Tips for best results:</h4>
               <ul className="text-gray-400 space-y-1 list-disc list-inside">
                 <li>Include company names, trade types, and contact details</li>
@@ -795,7 +795,7 @@ export default function SubcontractorsPage() {
               variant="outline"
               onClick={() => setShowImportDialog(false)}
               disabled={importing}
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               Cancel
             </Button>

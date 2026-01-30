@@ -109,7 +109,7 @@ export function ScheduleFilters({
           placeholder="Search tasks, IDs, descriptions..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="pl-9 bg-[#1F2328] border-gray-700 text-gray-100 placeholder:text-gray-500"
+          className="pl-9 bg-dark-surface border-gray-700 text-gray-100 placeholder:text-gray-500"
         />
         {searchInput && (
           <button
@@ -141,7 +141,7 @@ export function ScheduleFilters({
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="bg-[#2d333b] border-gray-700 w-48">
+        <DropdownMenuContent className="bg-dark-card border-gray-700 w-48">
           <DropdownMenuLabel className="text-gray-400">Task Status</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-gray-700" />
           {STATUS_OPTIONS.map((status) => (
@@ -180,7 +180,7 @@ export function ScheduleFilters({
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-[#2d333b] border-gray-700 w-56 max-h-64 overflow-y-auto">
+          <DropdownMenuContent className="bg-dark-card border-gray-700 w-56 max-h-64 overflow-y-auto">
             <DropdownMenuLabel className="text-gray-400">Trade/Division</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-700" />
             {availableTrades.map((trade) => (
@@ -217,7 +217,7 @@ export function ScheduleFilters({
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-[#2d333b] border-gray-700 w-56 max-h-64 overflow-y-auto">
+          <DropdownMenuContent className="bg-dark-card border-gray-700 w-56 max-h-64 overflow-y-auto">
             <DropdownMenuLabel className="text-gray-400">Assigned Company</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-700" />
             {availableAssignees.map((assignee) => (

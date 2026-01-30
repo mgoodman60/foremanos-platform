@@ -190,7 +190,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
   };
 
   return (
-    <div className="min-h-screen bg-[#1F2328] text-gray-100 p-6">
+    <div className="min-h-screen bg-dark-surface text-gray-100 p-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -222,23 +222,23 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+            <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
               <div className="text-gray-400 text-sm mb-1">Total Drawings</div>
               <div className="text-3xl font-bold text-[#F8FAFC]">{stats.total}</div>
             </div>
-            <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+            <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
               <div className="text-gray-400 text-sm mb-1">Avg Confidence</div>
               <div className={`text-3xl font-bold ${getConfidenceColor(stats.averageConfidence)}`}>
                 {(stats.averageConfidence * 100).toFixed(0)}%
               </div>
             </div>
-            <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+            <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
               <div className="text-gray-400 text-sm mb-1">Drawing Types</div>
               <div className="text-3xl font-bold text-blue-400">
                 {Object.keys(stats.byType).length}
               </div>
             </div>
-            <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4">
+            <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
               <div className="text-gray-400 text-sm mb-1">Disciplines</div>
               <div className="text-3xl font-bold text-purple-400">
                 {Object.keys(stats.bySubtype).length}
@@ -248,7 +248,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
         )}
 
         {/* Filters */}
-        <div className="bg-[#2d333b] border border-gray-700 rounded-lg p-4 space-y-4">
+        <div className="bg-dark-card border border-gray-700 rounded-lg p-4 space-y-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -257,7 +257,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
               placeholder="Search by sheet number or title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#1F2328] border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -268,7 +268,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
               className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                 selectedType === null
                   ? 'bg-blue-600 text-white'
-                  : 'bg-[#1F2328] text-gray-400 hover:text-gray-200'
+                  : 'bg-dark-surface text-gray-400 hover:text-gray-200'
               }`}
             >
               All Types
@@ -280,7 +280,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
                 className={`px-3 py-1 rounded-lg text-sm transition-colors flex items-center gap-2 ${
                   selectedType === type
                     ? 'bg-blue-600 text-white'
-                    : 'bg-[#1F2328] text-gray-400 hover:text-gray-200'
+                    : 'bg-dark-surface text-gray-400 hover:text-gray-200'
                 }`}
               >
                 <div className={`w-2 h-2 rounded-full ${DRAWING_TYPE_COLORS[type] || 'bg-gray-400'}`} />
@@ -297,7 +297,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
               className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                 selectedSubtype === null
                   ? 'bg-purple-600 text-white'
-                  : 'bg-[#1F2328] text-gray-400 hover:text-gray-200'
+                  : 'bg-dark-surface text-gray-400 hover:text-gray-200'
               }`}
             >
               All Disciplines
@@ -309,7 +309,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
                 className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                   selectedSubtype === subtype
                     ? 'bg-purple-600 text-white'
-                    : 'bg-[#1F2328] text-gray-400 hover:text-gray-200'
+                    : 'bg-dark-surface text-gray-400 hover:text-gray-200'
                 }`}
               >
                 {SUBTYPE_LABELS[subtype] || subtype}
@@ -344,7 +344,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
             return (
               <div
                 key={index}
-                className={`bg-[#2d333b] border rounded-lg p-4 hover:border-blue-500 transition-all ${
+                className={`bg-dark-card border rounded-lg p-4 hover:border-blue-500 transition-all ${
                   getConfidenceBg(classification.confidence)
                 }`}
               >
@@ -389,7 +389,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
                         {classification.features.slice(0, 3).map((feature, i) => (
                           <span
                             key={i}
-                            className="text-xs px-2 py-1 bg-[#1F2328] text-gray-400 rounded"
+                            className="text-xs px-2 py-1 bg-dark-surface text-gray-400 rounded"
                           >
                             {feature.length > 20 ? feature.substring(0, 20) + '...' : feature}
                           </span>

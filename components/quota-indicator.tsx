@@ -67,7 +67,7 @@ export function QuotaIndicator() {
   const isAtLimit = quota.remainingPages === 0;
 
   return (
-    <Card className={`bg-[#2d333b] ${isAtLimit ? 'border-red-500' : isNearLimit ? 'border-yellow-500' : 'border-gray-700'}`}>
+    <Card className={`bg-dark-card ${isAtLimit ? 'border-red-500' : isNearLimit ? 'border-yellow-500' : 'border-gray-700'}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

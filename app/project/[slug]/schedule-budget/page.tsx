@@ -22,9 +22,9 @@ export default function ScheduleBudgetPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <div className="min-h-screen bg-[#1F2328] text-white">
+    <div className="min-h-screen bg-dark-surface text-white">
       {/* Header */}
-      <div className="border-b border-gray-700 bg-[#2d333b]">
+      <div className="border-b border-gray-700 bg-dark-card">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -48,7 +48,7 @@ export default function ScheduleBudgetPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-[#2d333b] border border-gray-700 mb-6 flex-wrap">
+          <TabsList className="bg-dark-card border border-gray-700 mb-6 flex-wrap">
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600">
               <TrendingUp className="h-4 w-4 mr-2" />
               Analysis

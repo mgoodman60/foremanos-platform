@@ -98,7 +98,7 @@ export default function WeatherWidget({ projectSlug, compact = false }: WeatherW
 
   if (loading) {
     return (
-      <div className="bg-[#1F2328] rounded-lg p-4 animate-pulse">
+      <div className="bg-dark-surface rounded-lg p-4 animate-pulse">
         <div className="h-20 bg-gray-700 rounded" />
       </div>
     );
@@ -106,7 +106,7 @@ export default function WeatherWidget({ projectSlug, compact = false }: WeatherW
 
   if (error || !weather?.current) {
     return (
-      <div className="bg-[#1F2328] rounded-lg p-4 text-center">
+      <div className="bg-dark-surface rounded-lg p-4 text-center">
         <Cloud className="h-8 w-8 text-gray-500 mx-auto mb-2" />
         <p className="text-gray-400 text-sm">{error || 'Weather unavailable'}</p>
         <button
@@ -123,7 +123,7 @@ export default function WeatherWidget({ projectSlug, compact = false }: WeatherW
 
   if (compact) {
     return (
-      <div className="bg-[#1F2328] rounded-lg p-3 flex items-center justify-between">
+      <div className="bg-dark-surface rounded-lg p-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {getWeatherIcon(current.conditions)}
           <div>
@@ -141,7 +141,7 @@ export default function WeatherWidget({ projectSlug, compact = false }: WeatherW
   }
 
   return (
-    <div className="bg-[#1F2328] rounded-lg overflow-hidden">
+    <div className="bg-dark-surface rounded-lg overflow-hidden">
       {/* Current Weather */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center justify-between mb-4">

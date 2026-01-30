@@ -133,7 +133,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading sheet index...</span>
@@ -144,7 +144,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
 
   if (!sheets.length) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
             <Layers className="h-5 w-5" />
@@ -182,7 +182,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
     <div className="space-y-4">
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -194,7 +194,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -206,7 +206,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -218,7 +218,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -234,7 +234,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
       </div>
 
       {/* Main Sheet Index */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-gray-100 flex items-center gap-2">
@@ -246,7 +246,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
               disabled={extracting}
               variant="outline"
               size="sm"
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               {extracting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -264,7 +264,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
                 placeholder="Search sheets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-[#1F2328] border-gray-600 text-gray-100 placeholder-gray-500"
+                className="pl-10 bg-dark-surface border-gray-600 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>
@@ -272,7 +272,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
 
         <CardContent>
           <Tabs value={selectedDiscipline} onValueChange={setSelectedDiscipline}>
-            <TabsList className="bg-[#1F2328] border border-gray-700">
+            <TabsList className="bg-dark-surface border border-gray-700">
               <TabsTrigger value="all" className="data-[state=active]:bg-orange-500">
                 All ({sheets.length})
               </TabsTrigger>
@@ -292,7 +292,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
                 {filteredSheets.map((sheet) => (
                   <div
                     key={`${sheet.documentId}-${sheet.sheetNumber}`}
-                    className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors cursor-pointer"
+                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors cursor-pointer"
                     onClick={() => onSheetSelect?.(sheet)}
                   >
                     <div className="flex items-start justify-between">

@@ -261,7 +261,7 @@ export function ConversationSidebar({
           onClick={() => setIsCollapsed(false)}
           variant="outline"
           size="sm"
-          className="m-2 bg-[#2d333b] border-gray-700 text-gray-300 shadow-lg"
+          className="m-2 bg-dark-card border-gray-700 text-gray-300 shadow-lg"
         >
           <Menu className="h-4 w-4" />
         </Button>
@@ -282,7 +282,7 @@ export function ConversationSidebar({
         />
         {/* Drawer */}
         <div
-          className="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] flex flex-col bg-[#1F2328] border-r border-gray-700 shadow-2xl animate-in slide-in-from-left duration-300"
+          className="fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] flex flex-col bg-dark-surface border-r border-gray-700 shadow-2xl animate-in slide-in-from-left duration-300"
         >
           {renderSidebarContent()}
         </div>
@@ -292,7 +292,7 @@ export function ConversationSidebar({
 
   // Desktop sidebar
   return (
-    <div className="relative flex flex-col bg-[#1F2328] border-r border-gray-700 w-80">
+    <div className="relative flex flex-col bg-dark-surface border-r border-gray-700 w-80">
       {renderSidebarContent()}
     </div>
   );
@@ -309,7 +309,7 @@ export function ConversationSidebar({
               onClick={handleMobileClose}
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-[#2d333b]"
+              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-dark-card"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -323,7 +323,7 @@ export function ConversationSidebar({
         <div className="border-b border-gray-700">
           <button
             onClick={() => setDashboardExpanded(!dashboardExpanded)}
-            className="w-full flex items-center justify-between p-3 hover:bg-[#2d333b] transition-colors"
+            className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors"
           >
             <div className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4 text-[#F97316]" />
@@ -366,7 +366,7 @@ export function ConversationSidebar({
                     <Button
                       onClick={() => setShowPhotoLibrary(true)}
                       variant="outline"
-                      className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white py-2"
+                      className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
                     >
                       <ImageIcon className="h-4 w-4" />
                       <span>Photo Library</span>
@@ -384,7 +384,7 @@ export function ConversationSidebar({
                   <Button
                     onClick={() => setShowPhotoTimeline(true)}
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white py-2"
+                    className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
                   >
                     <Calendar className="h-4 w-4" />
                     <span>Photo Timeline</span>
@@ -399,7 +399,7 @@ export function ConversationSidebar({
         <div className="border-b border-gray-700">
           <button
             onClick={() => setHistoryExpanded(!historyExpanded)}
-            className="w-full flex items-center justify-between p-3 hover:bg-[#2d333b] transition-colors"
+            className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors"
           >
             <div className="flex items-center gap-2">
               <History className="h-4 w-4 text-[#F97316]" />
@@ -413,7 +413,7 @@ export function ConversationSidebar({
               <Button
                 onClick={onNewConversation}
                 variant="outline"
-                className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white py-2"
+                className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
               >
                 <Plus className="h-4 w-4" />
                 <span>New Conversation</span>
@@ -422,7 +422,7 @@ export function ConversationSidebar({
 
             {/* Today's Daily Report Button - Only show if user has Pro+ tier */}
             {hasDailyReportAccess && (
-              <div className="p-2 border-b border-gray-700 bg-[#1F2328]">
+              <div className="p-2 border-b border-gray-700 bg-dark-surface">
                 <Button
                   onClick={handleOpenDailyReport}
                   disabled={loadingDailyReport}
@@ -442,7 +442,7 @@ export function ConversationSidebar({
                 <div className="space-y-2">
                   {/* Skeleton Loading States */}
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-[#2d333b] border border-gray-700 rounded-lg p-3 animate-pulse">
+                    <div key={i} className="bg-dark-card border border-gray-700 rounded-lg p-3 animate-pulse">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-4 h-4 bg-gray-700 rounded"></div>
                         <div className="h-3 bg-gray-700 rounded flex-1"></div>
@@ -454,7 +454,7 @@ export function ConversationSidebar({
               ) : conversations.length === 0 ? (
                 <div className="flex items-center justify-center min-h-[200px] px-4">
                   <div className="text-center max-w-xs">
-                    <div className="w-12 h-12 bg-[#2d333b] rounded-full flex items-center justify-center mx-auto mb-3 border-2 border-dashed border-gray-600">
+                    <div className="w-12 h-12 bg-dark-card rounded-full flex items-center justify-center mx-auto mb-3 border-2 border-dashed border-gray-600">
                       <MessageSquare className="w-6 h-6 text-gray-500" />
                     </div>
                     <h3 className="text-sm font-semibold text-[#F8FAFC] mb-2">
@@ -476,7 +476,7 @@ export function ConversationSidebar({
               className={`group relative rounded-lg p-3 cursor-pointer transition-colors ${
                 activeConversationId === conv.id
                   ? 'bg-[#F97316]/20 border border-[#F97316]'
-                  : 'hover:bg-[#2d333b] border border-transparent'
+                  : 'hover:bg-dark-card border border-transparent'
               }`}
               onClick={() => {
                 if (editingId !== conv.id) {
@@ -502,7 +502,7 @@ export function ConversationSidebar({
                       if (e.key === 'Enter') handleRename(conv.id);
                       if (e.key === 'Escape') cancelEditing();
                     }}
-                    className="flex-1 px-2 py-1 text-sm bg-[#1F2328] border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                    className="flex-1 px-2 py-1 text-sm bg-dark-surface border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#F97316]"
                     autoFocus
                   />
                   <Button
@@ -517,7 +517,7 @@ export function ConversationSidebar({
                     onClick={cancelEditing}
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0 text-gray-400 hover:bg-[#2d333b]"
+                    className="h-6 w-6 p-0 text-gray-400 hover:bg-dark-card"
                   >
                     <X className="h-3 w-3" />
                   </Button>
@@ -596,7 +596,7 @@ export function ConversationSidebar({
                           onClick={() => startEditing(conv)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:bg-[#1F2328] hover:text-[#F97316]"
+                          className="h-6 w-6 p-0 text-gray-400 hover:bg-dark-surface hover:text-[#F97316]"
                         >
                           <Edit2 className="h-3 w-3" />
                         </Button>
@@ -624,7 +624,7 @@ export function ConversationSidebar({
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-gray-700 bg-[#1F2328]">
+      <div className="p-3 border-t border-gray-700 bg-dark-surface">
         <p className="text-xs text-gray-500 text-center">
           {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
         </p>

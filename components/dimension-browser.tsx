@@ -193,7 +193,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading dimensions...</span>
@@ -204,7 +204,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
 
   if (!stats || stats.totalDimensions === 0) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
             <Ruler className="h-5 w-5" />
@@ -242,7 +242,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
     <div className="space-y-4">
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -254,7 +254,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -266,7 +266,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -278,7 +278,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
           </CardContent>
         </Card>
 
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -302,7 +302,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
       </div>
 
       {/* Main Content */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-gray-100 flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
               disabled={extracting}
               variant="outline"
               size="sm"
-              className="border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
             >
               {extracting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -332,7 +332,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                 placeholder="Search dimensions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-[#1F2328] border-gray-600 text-gray-100 placeholder-gray-500"
+                className="pl-10 bg-dark-surface border-gray-600 text-gray-100 placeholder-gray-500"
               />
             </div>
           </div>
@@ -340,7 +340,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
 
         <CardContent>
           <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-            <TabsList className="bg-[#1F2328] border border-gray-700">
+            <TabsList className="bg-dark-surface border border-gray-700">
               <TabsTrigger value="dimensions" className="data-[state=active]:bg-orange-500">
                 Dimensions ({filteredDimensions.length})
               </TabsTrigger>
@@ -360,7 +360,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                     onClick={() => setSelectedUnit('all')}
                     variant={selectedUnit === 'all' ? 'default' : 'outline'}
                     size="sm"
-                    className={selectedUnit === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                    className={selectedUnit === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                   >
                     All Units
                   </Button>
@@ -370,7 +370,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                       onClick={() => setSelectedUnit(unit)}
                       variant={selectedUnit === unit ? 'default' : 'outline'}
                       size="sm"
-                      className={selectedUnit === unit ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-[#1F2328]'}
+                      className={selectedUnit === unit ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
                     >
                       {unit} ({stats.byUnit[unit]})
                     </Button>
@@ -383,7 +383,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                   {filteredDimensions.map((dim: Dimension, idx) => (
                     <div
                       key={`${dim.id}-${idx}`}
-                      className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
+                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -435,7 +435,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                       key={idx}
                       className={`p-4 border rounded-lg ${
                         chain.valid 
-                          ? 'bg-[#1F2328] border-gray-700' 
+                          ? 'bg-dark-surface border-gray-700' 
                           : 'bg-red-950/30 border-red-900'
                       }`}
                     >

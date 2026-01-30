@@ -27,9 +27,9 @@ export default function SignOutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1F2328] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-dark-surface flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-[#2d333b] rounded-2xl shadow-2xl border border-gray-700 p-8 md:p-10">
+        <div className="bg-dark-card rounded-2xl shadow-2xl border border-gray-700 p-8 md:p-10">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <img 
@@ -41,7 +41,7 @@ export default function SignOutPage() {
 
           {/* Icon */}
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-[#1F2328] rounded-full flex items-center justify-center border-2 border-gray-700">
+            <div className="w-20 h-20 bg-dark-surface rounded-full flex items-center justify-center border-2 border-gray-700">
               <LogOut className="w-10 h-10 text-[#F97316]" />
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function SignOutPage() {
             <button
               onClick={handleCancel}
               disabled={isSigningOut}
-              className="w-full bg-[#1F2328] hover:bg-[#374151] text-gray-300 font-semibold py-4 px-6 rounded-xl transition-all border-2 border-gray-700 hover:border-gray-600 focus:ring-4 focus:ring-gray-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed text-base"
+              className="w-full bg-dark-surface hover:bg-[#374151] text-gray-300 font-semibold py-4 px-6 rounded-xl transition-all border-2 border-gray-700 hover:border-gray-600 focus:ring-4 focus:ring-gray-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed text-base"
             >
               Cancel
             </button>

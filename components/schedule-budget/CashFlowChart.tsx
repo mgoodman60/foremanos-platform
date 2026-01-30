@@ -12,9 +12,10 @@ import {
   AlertTriangle, CheckCircle, Target, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import {
-  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine
 } from 'recharts';
+import { chartColors, semanticColors } from '@/lib/design-tokens';
 
 interface CashFlowData {
   period: string;
@@ -125,7 +126,7 @@ export default function CashFlowChart() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#2d333b] border-gray-700">
+      <Card className="p-6 bg-dark-card border-gray-700">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-700 rounded w-1/3" />
           <div className="h-64 bg-gray-700 rounded" />
@@ -139,14 +140,14 @@ export default function CashFlowChart() {
       {/* Cost Forecast Summary */}
       {costForecast && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Budget (BAC)</div>
             <div className="text-xl font-bold text-white">
               {formatCurrency(costForecast.bac)}
             </div>
           </Card>
 
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Actual Cost (AC)</div>
             <div className="text-xl font-bold text-blue-400">
               {formatCurrency(costForecast.ac)}
@@ -156,7 +157,7 @@ export default function CashFlowChart() {
             </div>
           </Card>
 
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Est. at Completion (EAC)</div>
             <div className="text-xl font-bold text-purple-400">
               {formatCurrency(costForecast.eac)}
@@ -167,14 +168,14 @@ export default function CashFlowChart() {
             </div>
           </Card>
 
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">To Complete (ETC)</div>
             <div className="text-xl font-bold text-yellow-400">
               {formatCurrency(costForecast.etc)}
             </div>
           </Card>
 
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Cost Performance (CPI)</div>
             <div className={`text-xl font-bold ${getIndexColor(costForecast.cpi)}`}>
               {costForecast.cpi.toFixed(2)}
@@ -188,7 +189,7 @@ export default function CashFlowChart() {
             </div>
           </Card>
 
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Schedule Performance (SPI)</div>
             <div className={`text-xl font-bold ${getIndexColor(costForecast.spi)}`}>
               {costForecast.spi.toFixed(2)}
@@ -240,7 +241,7 @@ export default function CashFlowChart() {
         <h3 className="text-lg font-semibold text-white">Cash Flow Projection</h3>
         <div className="flex items-center gap-4">
           <Select value={periodType} onValueChange={(v) => setPeriodType(v as any)}>
-            <SelectTrigger className="w-32 bg-[#2d333b] border-gray-700">
+            <SelectTrigger className="w-32 bg-dark-card border-gray-700">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -256,7 +257,7 @@ export default function CashFlowChart() {
       </div>
 
       {/* Cash Flow Chart */}
-      <Card className="p-4 bg-[#2d333b] border-gray-700">
+      <Card className="p-4 bg-dark-card border-gray-700">
         {cashFlowData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-gray-400">
             <div className="text-center">
@@ -295,33 +296,33 @@ export default function CashFlowChart() {
                 type="monotone"
                 dataKey="forecastInflow"
                 name="Forecast Inflow"
-                stroke="#10B981"
-                fill="#10B98133"
+                stroke={chartColors.positive}
+                fill={`${chartColors.positive}33`}
                 strokeWidth={2}
               />
               <Area
                 type="monotone"
                 dataKey="forecastOutflow"
                 name="Forecast Outflow"
-                stroke="#EF4444"
-                fill="#EF444433"
+                stroke={chartColors.negative}
+                fill={`${chartColors.negative}33`}
                 strokeWidth={2}
               />
               <Line
                 type="monotone"
                 dataKey="actualInflow"
                 name="Actual Inflow"
-                stroke="#34D399"
+                stroke={semanticColors.success[400]}
                 strokeWidth={3}
-                dot={{ fill: '#34D399', strokeWidth: 2 }}
+                dot={{ fill: semanticColors.success[400], strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
                 dataKey="actualOutflow"
                 name="Actual Outflow"
-                stroke="#F87171"
+                stroke={semanticColors.error[400]}
                 strokeWidth={3}
-                dot={{ fill: '#F87171', strokeWidth: 2 }}
+                dot={{ fill: semanticColors.error[400], strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -330,7 +331,7 @@ export default function CashFlowChart() {
 
       {/* Cumulative Cash Flow */}
       {cashFlowData.length > 0 && (
-        <Card className="p-4 bg-[#2d333b] border-gray-700">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <h4 className="font-medium text-white mb-4">Cumulative Cash Position</h4>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={cashFlowData}>
@@ -359,7 +360,7 @@ export default function CashFlowChart() {
                 type="monotone"
                 dataKey="cumulativePlanned"
                 name="Planned"
-                stroke="#6B7280"
+                stroke={chartColors.neutral}
                 strokeWidth={2}
                 strokeDasharray="5 5"
               />
@@ -367,15 +368,15 @@ export default function CashFlowChart() {
                 type="monotone"
                 dataKey="cumulativeActual"
                 name="Actual"
-                stroke="#3B82F6"
+                stroke={chartColors.palette[1]}
                 strokeWidth={3}
-                dot={{ fill: '#3B82F6', strokeWidth: 2 }}
+                dot={{ fill: chartColors.palette[1], strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
                 dataKey="cumulativeForecast"
                 name="Forecast"
-                stroke="#8B5CF6"
+                stroke={chartColors.palette[4]}
                 strokeWidth={2}
               />
             </LineChart>

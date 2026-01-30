@@ -168,7 +168,7 @@ export function MobilePhotoCapture({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-4xl">
+      <DialogContent className="bg-dark-card border-gray-700 text-white max-w-4xl">
         <DialogHeader>
           <DialogTitle>Capture Photo</DialogTitle>
         </DialogHeader>
@@ -188,7 +188,7 @@ export function MobilePhotoCapture({
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-[#1F2328] h-16 text-lg"
+                className="border-gray-600 text-gray-300 hover:bg-dark-surface h-16 text-lg"
               >
                 <Upload className="w-6 h-6 mr-3" />
                 Choose from Gallery
@@ -262,7 +262,7 @@ export function MobilePhotoCapture({
                   onClick={retakePhoto}
                   variant="outline"
                   disabled={uploading}
-                  className="flex-1 border-gray-600 text-gray-300 hover:bg-[#1F2328]"
+                  className="flex-1 border-gray-600 text-gray-300 hover:bg-dark-surface"
                 >
                   Retake
                 </Button>

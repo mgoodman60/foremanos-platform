@@ -245,7 +245,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
 
   if (!data) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-8 text-center text-gray-400">
           No data available for review.
         </CardContent>
@@ -282,7 +282,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -293,7 +293,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -304,7 +304,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -315,7 +315,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -329,10 +329,10 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
       </div>
 
       {/* Main Review Tabs */}
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedItems(new Set()); }}>
           <CardHeader className="pb-0">
-            <TabsList className="bg-[#1F2328] border border-gray-600">
+            <TabsList className="bg-dark-surface border border-gray-600">
               <TabsTrigger value="labor-pending" className="data-[state=active]:bg-yellow-600">
                 <Users className="h-4 w-4 mr-2" />
                 Labor Pending {pendingLaborCount > 0 && <Badge className="ml-2 bg-yellow-600">{pendingLaborCount}</Badge>}
@@ -403,7 +403,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                     {data.laborPending.map((entry) => (
                       <div
                         key={entry.id}
-                        className={`p-4 rounded-lg border ${selectedItems.has(entry.id) ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-[#1F2328]'}`}
+                        className={`p-4 rounded-lg border ${selectedItems.has(entry.id) ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-dark-surface'}`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
@@ -475,7 +475,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
               ) : (
                 <div className="space-y-2">
                   {data.laborApproved.slice(0, 20).map((entry) => (
-                    <div key={entry.id} className="p-4 rounded-lg border border-gray-700 bg-[#1F2328]">
+                    <div key={entry.id} className="p-4 rounded-lg border border-gray-700 bg-dark-surface">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-400" />
@@ -542,7 +542,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                     {data.materialsPending.map((entry) => (
                       <div
                         key={entry.id}
-                        className={`p-4 rounded-lg border ${selectedItems.has(entry.id) ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-[#1F2328]'}`}
+                        className={`p-4 rounded-lg border ${selectedItems.has(entry.id) ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-dark-surface'}`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
@@ -617,7 +617,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
               ) : (
                 <div className="space-y-2">
                   {data.materialsReceived.slice(0, 20).map((entry) => (
-                    <div key={entry.id} className="p-4 rounded-lg border border-gray-700 bg-[#1F2328]">
+                    <div key={entry.id} className="p-4 rounded-lg border border-gray-700 bg-dark-surface">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-400" />
@@ -743,7 +743,7 @@ function EditEntryModal({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="bg-[#2d333b] border-gray-700">
+      <DialogContent className="bg-dark-card border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white">
             Edit {type === 'labor' ? 'Labor' : 'Material'} Entry
@@ -758,7 +758,7 @@ function EditEntryModal({
                 <Input
                   value={laborFormData.workerName}
                   onChange={(e) => setLaborFormData({ ...laborFormData, workerName: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600 text-white"
+                  className="bg-dark-surface border-gray-600 text-white"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -769,7 +769,7 @@ function EditEntryModal({
                     step="0.5"
                     value={laborFormData.hoursWorked}
                     onChange={(e) => setLaborFormData({ ...laborFormData, hoursWorked: e.target.value })}
-                    className="bg-[#1F2328] border-gray-600 text-white"
+                    className="bg-dark-surface border-gray-600 text-white"
                   />
                 </div>
                 <div>
@@ -779,7 +779,7 @@ function EditEntryModal({
                     step="0.01"
                     value={laborFormData.hourlyRate}
                     onChange={(e) => setLaborFormData({ ...laborFormData, hourlyRate: e.target.value })}
-                    className="bg-[#1F2328] border-gray-600 text-white"
+                    className="bg-dark-surface border-gray-600 text-white"
                   />
                 </div>
               </div>
@@ -788,7 +788,7 @@ function EditEntryModal({
                 <Textarea
                   value={laborFormData.description || ''}
                   onChange={(e) => setLaborFormData({ ...laborFormData, description: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600 text-white"
+                  className="bg-dark-surface border-gray-600 text-white"
                 />
               </div>
             </>
@@ -799,7 +799,7 @@ function EditEntryModal({
                 <Input
                   value={materialFormData.description}
                   onChange={(e) => setMaterialFormData({ ...materialFormData, description: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600 text-white"
+                  className="bg-dark-surface border-gray-600 text-white"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -809,7 +809,7 @@ function EditEntryModal({
                     type="number"
                     value={materialFormData.quantity}
                     onChange={(e) => setMaterialFormData({ ...materialFormData, quantity: e.target.value })}
-                    className="bg-[#1F2328] border-gray-600 text-white"
+                    className="bg-dark-surface border-gray-600 text-white"
                   />
                 </div>
                 <div>
@@ -817,7 +817,7 @@ function EditEntryModal({
                   <Input
                     value={materialFormData.unit || ''}
                     onChange={(e) => setMaterialFormData({ ...materialFormData, unit: e.target.value })}
-                    className="bg-[#1F2328] border-gray-600 text-white"
+                    className="bg-dark-surface border-gray-600 text-white"
                   />
                 </div>
               </div>
@@ -828,7 +828,7 @@ function EditEntryModal({
                   step="0.01"
                   value={materialFormData.actualCost}
                   onChange={(e) => setMaterialFormData({ ...materialFormData, actualCost: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600 text-white"
+                  className="bg-dark-surface border-gray-600 text-white"
                 />
               </div>
             </>
@@ -846,10 +846,10 @@ function EditEntryModal({
                 }
               }}
             >
-              <SelectTrigger className="bg-[#1F2328] border-gray-600 text-white">
+              <SelectTrigger className="bg-dark-surface border-gray-600 text-white">
                 <SelectValue placeholder="Select budget item..." />
               </SelectTrigger>
-              <SelectContent className="bg-[#2d333b] border-gray-600">
+              <SelectContent className="bg-dark-card border-gray-600">
                 <SelectItem value="" className="text-gray-400">None</SelectItem>
                 {budgetItems.map((bi) => (
                   <SelectItem key={bi.id} value={bi.id} className="text-white">

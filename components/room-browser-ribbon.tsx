@@ -24,7 +24,7 @@ export function RoomBrowserRibbon({ projectSlug, projectId }: RoomBrowserRibbonP
           <Button
             onClick={() => setIsOpen(true)}
             variant="outline"
-            className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-[#2d333b] hover:text-white py-2"
+            className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
           >
             <Building2 className="h-4 w-4" />
             <span>Room Browser</span>
@@ -33,7 +33,7 @@ export function RoomBrowserRibbon({ projectSlug, projectId }: RoomBrowserRibbonP
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 border-gray-600 text-gray-400 hover:bg-[#2d333b] hover:text-white"
+              className="h-9 w-9 border-gray-600 text-gray-400 hover:bg-dark-card hover:text-white"
               title="Open full page"
             >
               <ExternalLink className="h-4 w-4" />
@@ -44,7 +44,7 @@ export function RoomBrowserRibbon({ projectSlug, projectId }: RoomBrowserRibbonP
 
       {/* Room Browser Modal - Full screen for better usability */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-0 bg-[#1F2328] border-gray-700">
+        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-0 bg-dark-surface border-gray-700">
           <RoomBrowser
             projectSlug={projectSlug}
             onClose={() => setIsOpen(false)}

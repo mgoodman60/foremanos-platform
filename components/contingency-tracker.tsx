@@ -121,7 +121,7 @@ export default function ContingencyTracker() {
 
   if (loading) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-4 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
         </CardContent>
@@ -131,7 +131,7 @@ export default function ContingencyTracker() {
 
   if (!data) {
     return (
-      <Card className="bg-[#2d333b] border-gray-700">
+      <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 text-center text-gray-400">
           <Shield className="h-8 w-8 mx-auto mb-2 text-gray-500" />
           <p>Budget not configured</p>
@@ -141,7 +141,7 @@ export default function ContingencyTracker() {
   }
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700">
+    <Card className="bg-dark-card border-gray-700">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function ContingencyTracker() {
             <h4 className="text-sm font-medium text-gray-400 mb-2">Recent Usage</h4>
             <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {data.usages.slice(0, 5).map((usage) => (
-                <div key={usage.id} className="p-2 bg-[#1F2328] rounded-lg">
+                <div key={usage.id} className="p-2 bg-dark-surface rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-white text-sm font-medium">{usage.reason}</span>
                     <span className="text-red-400 text-sm font-mono">
@@ -225,7 +225,7 @@ export default function ContingencyTracker() {
 
       {/* Add Usage Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Record Contingency Usage</DialogTitle>
           </DialogHeader>
@@ -236,7 +236,7 @@ export default function ContingencyTracker() {
                 type="number"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="0.00"
                 required
               />
@@ -246,7 +246,7 @@ export default function ContingencyTracker() {
               <Input
                 value={formData.reason}
                 onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="e.g., Unforeseen site conditions"
                 required
               />
@@ -256,7 +256,7 @@ export default function ContingencyTracker() {
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 rows={3}
               />
             </div>

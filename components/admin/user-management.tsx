@@ -420,7 +420,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
           setActionType(null);
         }
       }}>
-        <DialogContent className="sm:max-w-md bg-[#2d333b] border-gray-700">
+        <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[#F8FAFC]">
               <Crown className="h-5 w-5 text-purple-400" />
@@ -438,7 +438,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
               <select
                 value={editTierValue}
                 onChange={(e) => setEditTierValue(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#1F2328] text-gray-300"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-dark-surface text-gray-300"
                 disabled={loading}
               >
                 <option value="free">Free (50 pages/month)</option>
@@ -449,7 +449,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 <option value="enterprise">Enterprise (25,000 pages/month - $1,499)</option>
               </select>
             </div>
-            <div className="bg-[#1F2328] border border-yellow-600 p-3 rounded-md">
+            <div className="bg-dark-surface border border-yellow-600 p-3 rounded-md">
               <p className="text-xs text-yellow-400">
                 ⚠️ Changing the tier will immediately update the user&apos;s processing quota and access level.
               </p>
@@ -484,7 +484,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
       {/* Create User Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="sm:max-w-md bg-[#2d333b] border-gray-700">
+        <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-[#F8FAFC]">Create New User</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -502,7 +502,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 placeholder="user@example.com"
                 required
-                className="bg-[#1F2328] border-gray-600 text-gray-300 placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-500"
               />
             </div>
 
@@ -515,7 +515,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 value={newUserUsername}
                 onChange={(e) => setNewUserUsername(e.target.value)}
                 placeholder="Auto-generated from email"
-                className="bg-[#1F2328] border-gray-600 text-gray-300 placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-500"
               />
             </div>
 
@@ -528,7 +528,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 value={newUserPassword}
                 onChange={(e) => setNewUserPassword(e.target.value)}
                 placeholder="Auto-generated if empty"
-                className="bg-[#1F2328] border-gray-600 text-gray-300 placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-500"
               />
             </div>
 
@@ -540,7 +540,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 <select
                   value={newUserRole}
                   onChange={(e) => setNewUserRole(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-[#1F2328] text-gray-300 focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-dark-surface text-gray-300 focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
                 >
                   <option value="client">Client</option>
                   <option value="guest">Guest</option>
@@ -555,7 +555,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 <select
                   value={newUserTier}
                   onChange={(e) => setNewUserTier(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-[#1F2328] text-gray-300 focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-dark-surface text-gray-300 focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
                 >
                   <option value="free">Free</option>
                   <option value="starter">Starter</option>
@@ -590,7 +590,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
       {/* Credentials Display Dialog */}
       <Dialog open={showCredentials} onOpenChange={setShowCredentials}>
-        <DialogContent className="sm:max-w-md bg-[#2d333b] border-gray-700">
+        <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[#F8FAFC]">
               <UserCheck className="h-5 w-5 text-green-400" />
@@ -602,7 +602,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
           </DialogHeader>
           {createdCredentials && (
             <div className="space-y-3 mt-4">
-              <div className="bg-[#1F2328] border border-gray-600 p-3 rounded-md">
+              <div className="bg-dark-surface border border-gray-600 p-3 rounded-md">
                 <label className="block text-xs font-medium text-gray-400 mb-1">
                   Email
                 </label>
@@ -612,14 +612,14 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                     size="sm"
                     variant="ghost"
                     onClick={() => copyToClipboard(createdCredentials.email)}
-                    className="hover:bg-[#2d333b] text-gray-400 hover:text-gray-300"
+                    className="hover:bg-dark-card text-gray-400 hover:text-gray-300"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="bg-[#1F2328] border border-gray-600 p-3 rounded-md">
+              <div className="bg-dark-surface border border-gray-600 p-3 rounded-md">
                 <label className="block text-xs font-medium text-gray-400 mb-1">
                   Username
                 </label>
@@ -629,7 +629,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                     size="sm"
                     variant="ghost"
                     onClick={() => copyToClipboard(createdCredentials.username)}
-                    className="hover:bg-[#2d333b] text-gray-400 hover:text-gray-300"
+                    className="hover:bg-dark-card text-gray-400 hover:text-gray-300"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -637,7 +637,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
               </div>
 
               {createdCredentials.password !== '(custom password set)' && (
-                <div className="bg-[#1F2328] border border-yellow-600 p-3 rounded-md">
+                <div className="bg-dark-surface border border-yellow-600 p-3 rounded-md">
                   <label className="block text-xs font-medium text-yellow-400 mb-1">
                     Generated Password
                   </label>
@@ -649,7 +649,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                       size="sm"
                       variant="ghost"
                       onClick={() => copyToClipboard(createdCredentials.password)}
-                      className="hover:bg-[#2d333b] text-yellow-400 hover:text-yellow-300"
+                      className="hover:bg-dark-card text-yellow-400 hover:text-yellow-300"
                     >
                       <Copy className="h-4 w-4" />
                     </Button>

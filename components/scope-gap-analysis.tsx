@@ -222,7 +222,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
 
       {/* No Analysis Yet */}
       {!analysis && !loading && (
-        <div className="bg-[#2d333b] rounded-lg p-8 text-center border border-gray-700">
+        <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
           <FileSearch className="h-12 w-12 text-gray-500 mx-auto mb-4" />
           <p className="text-gray-400">No analysis run yet</p>
           <p className="text-sm text-gray-500 mt-1">
@@ -233,7 +233,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
 
       {/* Loading */}
       {loading && (
-        <div className="bg-[#2d333b] rounded-lg p-8 text-center border border-gray-700">
+        <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
           <RefreshCw className="h-12 w-12 text-amber-400 mx-auto mb-4 animate-spin" />
           <p className="text-gray-400">Analyzing scope coverage...</p>
           <p className="text-sm text-gray-500 mt-1">
@@ -246,7 +246,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
       {analysis && !loading && (
         <>
           {/* Coverage Score Card */}
-          <div className="bg-[#2d333b] rounded-lg border border-gray-700 overflow-hidden">
+          <div className="bg-dark-card rounded-lg border border-gray-700 overflow-hidden">
             <div className={`bg-gradient-to-r ${getCoverageScoreBackground(analysis.overallCoverageScore)} p-6`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -334,7 +334,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
                 return (
                   <div
                     key={gap.id}
-                    className={`bg-[#2d333b] rounded-lg border ${categoryConfig.color} overflow-hidden`}
+                    className={`bg-dark-card rounded-lg border ${categoryConfig.color} overflow-hidden`}
                   >
                     {/* Gap Header */}
                     <button
@@ -399,7 +399,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
 
           {/* Covered Items (Collapsible) */}
           {analysis.coveredItems.length > 0 && (
-            <div className="bg-[#2d333b] rounded-lg border border-gray-700">
+            <div className="bg-dark-card rounded-lg border border-gray-700">
               <button
                 onClick={() => setShowCovered(!showCovered)}
                 className="w-full p-4 flex items-center justify-between text-left hover:bg-[#22272e] transition-colors"
@@ -432,7 +432,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
 
           {/* Overall Recommendations */}
           {analysis.recommendations.length > 0 && (
-            <div className="bg-[#2d333b] rounded-lg p-4 border border-blue-500/30">
+            <div className="bg-dark-card rounded-lg p-4 border border-blue-500/30">
               <h3 className="text-blue-400 font-medium flex items-center gap-2 mb-3">
                 <Lightbulb className="h-5 w-5" />
                 Overall Recommendations

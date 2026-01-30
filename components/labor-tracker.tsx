@@ -170,7 +170,7 @@ export default function LaborTracker() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-blue-400" />
@@ -181,7 +181,7 @@ export default function LaborTracker() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-400" />
@@ -192,7 +192,7 @@ export default function LaborTracker() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-yellow-400" />
@@ -203,7 +203,7 @@ export default function LaborTracker() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-purple-400" />
@@ -219,7 +219,7 @@ export default function LaborTracker() {
 
       {/* Trade Breakdown */}
       {summary && Object.keys(summary.byTrade).length > 0 && (
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-white text-sm flex items-center gap-2">
               <Wrench className="h-4 w-4 text-blue-400" />
@@ -229,7 +229,7 @@ export default function LaborTracker() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {Object.entries(summary.byTrade).map(([trade, data]) => (
-                <div key={trade} className="p-3 bg-[#1F2328] rounded-lg">
+                <div key={trade} className="p-3 bg-dark-surface rounded-lg">
                   <div className="text-xs text-gray-400 capitalize mb-1">
                     {trade.replace(/_/g, ' ')}
                   </div>
@@ -250,10 +250,10 @@ export default function LaborTracker() {
         </h3>
         <div className="flex items-center gap-2">
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[120px] bg-[#1F2328] border-gray-600">
+            <SelectTrigger className="w-[120px] bg-dark-surface border-gray-600">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#2d333b] border-gray-700">
+            <SelectContent className="bg-dark-card border-gray-700">
               <SelectItem value="week">This Week</SelectItem>
               <SelectItem value="month">Last 4 Weeks</SelectItem>
               <SelectItem value="all">All Time</SelectItem>
@@ -268,14 +268,14 @@ export default function LaborTracker() {
       {/* Entry List */}
       <div className="space-y-2">
         {entries.length === 0 ? (
-          <Card className="bg-[#2d333b] border-gray-700">
+          <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-8 text-center text-gray-400">
               No labor entries for this period
             </CardContent>
           </Card>
         ) : (
           entries.map((entry) => (
-            <Card key={entry.id} className="bg-[#2d333b] border-gray-700">
+            <Card key={entry.id} className="bg-dark-card border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -318,7 +318,7 @@ export default function LaborTracker() {
 
       {/* Add Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Add Labor Entry</DialogTitle>
           </DialogHeader>
@@ -329,7 +329,7 @@ export default function LaborTracker() {
                 <Input
                   value={formData.workerName}
                   onChange={(e) => setFormData({ ...formData, workerName: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -339,10 +339,10 @@ export default function LaborTracker() {
                   value={formData.tradeType}
                   onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
                 >
-                  <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                  <SelectTrigger className="bg-dark-surface border-gray-600">
                     <SelectValue placeholder="Select trade" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2d333b] border-gray-700">
+                  <SelectContent className="bg-dark-card border-gray-700">
                     {TRADE_TYPES.map((trade) => (
                       <SelectItem key={trade.value} value={trade.value}>
                         {trade.label}
@@ -359,7 +359,7 @@ export default function LaborTracker() {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -370,7 +370,7 @@ export default function LaborTracker() {
                   step="0.5"
                   value={formData.hoursWorked}
                   onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -381,7 +381,7 @@ export default function LaborTracker() {
                   step="0.01"
                   value={formData.hourlyRate}
                   onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   required
                 />
               </div>
@@ -394,7 +394,7 @@ export default function LaborTracker() {
                   step="0.5"
                   value={formData.overtimeHours}
                   onChange={(e) => setFormData({ ...formData, overtimeHours: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
               <div>
@@ -404,7 +404,7 @@ export default function LaborTracker() {
                   step="0.01"
                   value={formData.overtimeRate}
                   onChange={(e) => setFormData({ ...formData, overtimeRate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                   placeholder="Auto: 1.5x base"
                 />
               </div>
@@ -414,7 +414,7 @@ export default function LaborTracker() {
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
                 placeholder="Work performed..."
               />
             </div>

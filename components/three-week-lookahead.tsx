@@ -462,7 +462,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#1F2328] border-gray-700">
+      <Card className="p-6 bg-dark-surface border-gray-700">
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-blue-400" />
           <span className="ml-2 text-gray-400">Loading 3-week lookahead...</span>
@@ -477,7 +477,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
   const week3Dates = getWeekDates(2);
 
   return (
-    <Card className="bg-[#1F2328] border-gray-700 overflow-hidden">
+    <Card className="bg-dark-surface border-gray-700 overflow-hidden">
       {/* Header Controls (not printed) */}
       <div className="p-4 border-b border-gray-700 flex flex-wrap items-center justify-between gap-2 print:hidden">
         <div className="flex items-center gap-2">
@@ -628,7 +628,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
           <table className="w-full border-collapse text-xs print:text-[10px]">
             <thead>
               {/* Week Headers Row */}
-              <tr className="bg-[#2d333b] print:bg-gray-100">
+              <tr className="bg-dark-card print:bg-gray-100">
                 <th className="border border-gray-600 print:border-gray-400 p-2 text-left w-48 text-white print:text-black">
                   Description of Work
                 </th>
@@ -646,7 +646,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                 </th>
               </tr>
               {/* Day Headers Row */}
-              <tr className="bg-[#1F2328] print:bg-white">
+              <tr className="bg-dark-surface print:bg-white">
                 <th className="border border-gray-600 print:border-gray-400 p-1"></th>
                 {DAY_HEADERS.map((day, i) => (
                   <th key={`w1-${i}`} className="border border-gray-600 print:border-gray-400 p-1 text-center text-gray-300 print:text-black w-8">
@@ -665,7 +665,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                 ))}
               </tr>
               {/* Date Numbers Row */}
-              <tr className="bg-[#2d333b] print:bg-gray-50">
+              <tr className="bg-dark-card print:bg-gray-50">
                 <th className="border border-gray-600 print:border-gray-400 p-1"></th>
                 {week1Dates.map((date, i) => (
                   <th key={`d1-${i}`} className="border border-gray-600 print:border-gray-400 p-1 text-center text-gray-400 print:text-gray-600 text-[10px]">
@@ -685,7 +685,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
               </tr>
               {/* Weather Row */}
               {showWeather && weatherData.length > 0 && (
-                <tr className="bg-[#1F2328] print:bg-gray-100">
+                <tr className="bg-dark-surface print:bg-gray-100">
                   <th className="border border-gray-600 print:border-gray-400 p-1 text-xs text-gray-400">
                     <CloudRain className="h-3 w-3 inline mr-1" />
                     Weather
@@ -739,7 +739,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                   </tr>
                   {/* Tasks - Only show if not collapsed */}
                   {!isCollapsed && group.tasks.map((task) => (
-                    <tr key={task.id} className="hover:bg-[#2d333b] print:hover:bg-transparent group">
+                    <tr key={task.id} className="hover:bg-dark-card print:hover:bg-transparent group">
                       <td className="border border-gray-600 print:border-gray-400 p-2 text-white print:text-black">
                         <div className="flex items-center justify-between gap-2">
                           <span className="truncate">{task.name}</span>
@@ -846,7 +846,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="General notes for the 3-week lookahead..."
-              className="bg-[#2d333b] border-gray-600 text-white print:bg-white print:text-black print:border-gray-400 min-h-[100px]"
+              className="bg-dark-card border-gray-600 text-white print:bg-white print:text-black print:border-gray-400 min-h-[100px]"
             />
           </div>
           <div>
@@ -855,7 +855,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
               value={onDeckNotes}
               onChange={(e) => setOnDeckNotes(e.target.value)}
               placeholder="Upcoming work and subcontractors on-deck..."
-              className="bg-[#2d333b] border-gray-600 text-white print:bg-white print:text-black print:border-gray-400 min-h-[100px]"
+              className="bg-dark-card border-gray-600 text-white print:bg-white print:text-black print:border-gray-400 min-h-[100px]"
             />
           </div>
         </div>
@@ -863,7 +863,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
 
       {/* Cost Summary Section */}
       {showCosts && (
-        <div className="mt-4 p-4 bg-[#2d333b] rounded-lg print:bg-gray-100 print:border print:border-gray-300">
+        <div className="mt-4 p-4 bg-dark-card rounded-lg print:bg-gray-100 print:border print:border-gray-300">
           <h4 className="font-bold text-white print:text-black mb-3 flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-green-400 print:text-green-600" />
             3-Week Cost Forecast
@@ -878,28 +878,28 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
               
               return (
                 <>
-                  <div className="bg-[#1F2328] rounded p-3 print:bg-white print:border print:border-gray-200">
+                  <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Budgeted Cost</p>
                     <p className="text-xl font-bold text-blue-400 print:text-blue-600">
                       ${totalBudgeted.toLocaleString()}
                     </p>
                     <p className="text-[10px] text-gray-500">{tasksWithCosts} tasks with budget</p>
                   </div>
-                  <div className="bg-[#1F2328] rounded p-3 print:bg-white print:border print:border-gray-200">
+                  <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Actual Cost</p>
                     <p className="text-xl font-bold text-green-400 print:text-green-600">
                       ${totalActual.toLocaleString()}
                     </p>
                     <p className="text-[10px] text-gray-500">Incurred to date</p>
                   </div>
-                  <div className="bg-[#1F2328] rounded p-3 print:bg-white print:border print:border-gray-200">
+                  <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Variance</p>
                     <p className={`text-xl font-bold ${variance >= 0 ? 'text-green-400 print:text-green-600' : 'text-red-400 print:text-red-600'}`}>
                       {variance >= 0 ? '+' : ''} ${variance.toLocaleString()}
                     </p>
                     <p className="text-[10px] text-gray-500">{variance >= 0 ? 'Under budget' : 'Over budget'}</p>
                   </div>
-                  <div className="bg-[#1F2328] rounded p-3 print:bg-white print:border print:border-gray-200">
+                  <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Cost % Complete</p>
                     <p className="text-xl font-bold text-yellow-400 print:text-yellow-600">
                       {totalBudgeted > 0 ? Math.round((totalActual / totalBudgeted) * 100) : 0}%
@@ -921,7 +921,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                   const groupActual = group.tasks.reduce((sum, t) => sum + (t.actualCost || 0), 0);
                   if (groupBudget === 0 && groupActual === 0) return null;
                   return (
-                    <div key={group.id} className="bg-[#1F2328] rounded p-2 print:bg-white print:border print:border-gray-200">
+                    <div key={group.id} className="bg-dark-surface rounded p-2 print:bg-white print:border print:border-gray-200">
                       <p className="text-xs text-gray-400 print:text-gray-600 truncate">{group.name}</p>
                       <div className="flex justify-between items-baseline">
                         <span className="text-sm font-medium text-white print:text-black">${groupActual.toLocaleString()}</span>
@@ -938,7 +938,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
 
       {/* Add Task Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Add Task to 3-Week Lookahead</DialogTitle>
           </DialogHeader>
@@ -949,7 +949,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                 value={newTask.name}
                 onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
                 placeholder="e.g., Form/Pour remaining stem walls"
-                className="bg-[#1F2328] border-gray-600"
+                className="bg-dark-surface border-gray-600"
               />
             </div>
             <div>
@@ -958,10 +958,10 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                 value={newTask.subcontractorId}
                 onValueChange={(v) => setNewTask({ ...newTask, subcontractorId: v })}
               >
-                <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                <SelectTrigger className="bg-dark-surface border-gray-600">
                   <SelectValue placeholder="Select subcontractor" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   <SelectItem value="">General Contractor</SelectItem>
                   {subcontractors.map(sub => (
                     <SelectItem key={sub.id} value={sub.id}>
@@ -978,7 +978,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                   type="date"
                   value={newTask.startDate}
                   onChange={(e) => setNewTask({ ...newTask, startDate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
               <div>
@@ -987,7 +987,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                   type="date"
                   value={newTask.endDate}
                   onChange={(e) => setNewTask({ ...newTask, endDate: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
             </div>
@@ -997,10 +997,10 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                 value={newTask.status}
                 onValueChange={(v) => setNewTask({ ...newTask, status: v as TaskStatus })}
               >
-                <SelectTrigger className="bg-[#1F2328] border-gray-600">
+                <SelectTrigger className="bg-dark-surface border-gray-600">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#2d333b] border-gray-700">
+                <SelectContent className="bg-dark-card border-gray-700">
                   <SelectItem value="not-started">Not Started</SelectItem>
                   <SelectItem value="in-progress">In Progress (Projected not Completed)</SelectItem>
                   <SelectItem value="completed">Completed (Projected and Completed)</SelectItem>
@@ -1018,7 +1018,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
 
       {/* Import Modal */}
       <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Import 3-Week Lookahead</DialogTitle>
           </DialogHeader>
@@ -1029,7 +1029,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
             <Input
               type="file"
               accept=".xlsx,.xls,.csv"
-              className="bg-[#1F2328] border-gray-600"
+              className="bg-dark-surface border-gray-600"
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;

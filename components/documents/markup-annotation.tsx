@@ -463,7 +463,7 @@ export default function MarkupAnnotation({
   ];
 
   return (
-    <Card className="bg-[#2d333b] border-gray-700 overflow-hidden h-full flex flex-col">
+    <Card className="bg-dark-card border-gray-700 overflow-hidden h-full flex flex-col">
       {/* Toolbar */}
       <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-1">
@@ -624,7 +624,7 @@ export default function MarkupAnnotation({
         {/* Text Input Overlay */}
         {textInputPosition && (
           <div
-            className="absolute bg-[#2d333b] border border-gray-600 rounded p-2 shadow-xl"
+            className="absolute bg-dark-card border border-gray-600 rounded p-2 shadow-xl"
             style={{
               left: textInputPosition.x * zoom + pan.x,
               top: textInputPosition.y * zoom + pan.y
@@ -651,7 +651,7 @@ export default function MarkupAnnotation({
         {/* Comment Input Overlay */}
         {showCommentInput && (
           <div
-            className="absolute bg-[#2d333b] border border-gray-600 rounded p-3 shadow-xl w-64"
+            className="absolute bg-dark-card border border-gray-600 rounded p-3 shadow-xl w-64"
             style={{
               left: commentPosition.x * zoom + pan.x + 20,
               top: commentPosition.y * zoom + pan.y

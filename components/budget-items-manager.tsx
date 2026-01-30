@@ -170,7 +170,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
       </div>
 
       {items.length === 0 ? (
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="py-12 text-center">
             <DollarSign className="w-12 h-12 mx-auto text-gray-500 mb-4" />
             <p className="text-gray-400 mb-4">No budget items yet</p>
@@ -191,7 +191,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
             const variancePercentage = ((variance / (item.revisedBudget || item.budgetedAmount)) * 100).toFixed(1);
             
             return (
-              <Card key={item.id} className="bg-[#2d333b] border-gray-700">
+              <Card key={item.id} className="bg-dark-card border-gray-700">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
@@ -251,7 +251,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
 
       {/* Create Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-lg">
+        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-[#F8FAFC]">Create Budget Item</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -269,7 +269,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., Foundation Work"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
               />
             </div>
 
@@ -282,7 +282,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Optional description"
-                className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
                 rows={2}
               />
             </div>
@@ -297,7 +297,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   value={formData.costCode}
                   onChange={(e) => setFormData({ ...formData, costCode: e.target.value })}
                   placeholder="e.g., 03-100"
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
                 />
               </div>
 
@@ -309,7 +309,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   value={formData.tradeType}
                   onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
                 >
-                  <SelectTrigger className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] mt-1">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1">
                     <SelectValue placeholder="Select trade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -339,7 +339,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   value={formData.budgetedAmount}
                   onChange={(e) => setFormData({ ...formData, budgetedAmount: e.target.value })}
                   placeholder="0.00"
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC] pl-7"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
                 />
               </div>
             </div>

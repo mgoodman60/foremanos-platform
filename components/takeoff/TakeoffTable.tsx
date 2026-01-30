@@ -48,7 +48,7 @@ export function TakeoffTable({
   const renderItem = (item: TakeoffLineItem) => (
     <div
       key={item.id}
-      className={`flex items-start gap-3 rounded-lg border bg-[#1F2328] p-3 text-sm transition-all cursor-pointer group ${
+      className={`flex items-start gap-3 rounded-lg border bg-dark-surface p-3 text-sm transition-all cursor-pointer group ${
         selectedItems.has(item.id)
           ? 'border-orange-500 bg-orange-500/10'
           : 'border-gray-700 hover:border-orange-500'
@@ -160,7 +160,7 @@ export function TakeoffTable({
         {csiGroups.map(({ division, categories: divCategories }) => (
           <div key={division.number} className="space-y-1">
             {/* Division Header */}
-            <div className="rounded-lg px-3 py-2 bg-[#2d333b]">
+            <div className="rounded-lg px-3 py-2 bg-dark-card">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-orange-500" />
                 <span className="font-medium text-[#F8FAFC]">
@@ -181,7 +181,7 @@ export function TakeoffTable({
                 <div key={catSummary.category}>
                   <button
                     onClick={() => onToggleCategory(catSummary.category)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-[#2d333b] transition-colors border bg-[#1F2328] border-gray-700"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-dark-card transition-colors border bg-dark-surface border-gray-700"
                   >
                     {expandedCategories.has(catSummary.category) ? (
                       <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -221,7 +221,7 @@ export function TakeoffTable({
           {/* Category Header */}
           <button
             onClick={() => onToggleCategory(catSummary.category)}
-            className="flex w-full items-center gap-2 rounded-lg bg-[#2d333b] px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+            className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
           >
             {expandedCategories.has(catSummary.category) ? (
               <ChevronDown className="h-4 w-4 text-gray-400" />

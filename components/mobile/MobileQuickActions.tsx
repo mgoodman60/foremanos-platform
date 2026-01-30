@@ -51,7 +51,7 @@ export function MobileQuickActions({ actions, className = '' }: MobileQuickActio
   };
 
   const variantClasses = {
-    default: 'bg-[#2d333b] border-gray-600 text-gray-200 active:bg-[#3d434b]',
+    default: 'bg-dark-card border-gray-600 text-gray-200 active:bg-[#3d434b]',
     primary: 'bg-[#F97316] border-orange-600 text-white active:bg-orange-600',
     success: 'bg-green-600 border-green-700 text-white active:bg-green-700',
     warning: 'bg-yellow-600 border-yellow-700 text-white active:bg-yellow-700',
@@ -63,7 +63,7 @@ export function MobileQuickActions({ actions, className = '' }: MobileQuickActio
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-[#1F2328]/90 rounded-full shadow-lg flex items-center justify-center text-gray-300 hover:text-white hidden sm:flex"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-dark-surface/90 rounded-full shadow-lg flex items-center justify-center text-gray-300 hover:text-white hidden sm:flex"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -71,7 +71,7 @@ export function MobileQuickActions({ actions, className = '' }: MobileQuickActio
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-[#1F2328]/90 rounded-full shadow-lg flex items-center justify-center text-gray-300 hover:text-white hidden sm:flex"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-dark-surface/90 rounded-full shadow-lg flex items-center justify-center text-gray-300 hover:text-white hidden sm:flex"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

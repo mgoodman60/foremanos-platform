@@ -223,14 +223,14 @@ export default function AnnotationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] p-6">
+    <div className="min-h-screen bg-dark-surface p-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-6">
         <button
@@ -263,7 +263,7 @@ export default function AnnotationsPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Drawing Canvas */}
-        <div className="lg:col-span-2 bg-[#2d333b] rounded-xl border border-gray-700 p-6">
+        <div className="lg:col-span-2 bg-dark-card rounded-xl border border-gray-700 p-6">
           {/* Document Selector */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -275,7 +275,7 @@ export default function AnnotationsPage() {
                 const doc = documents.find(d => d.id === e.target.value);
                 setSelectedDoc(doc || null);
               }}
-              className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               {documents.map(doc => (
                 <option key={doc.id} value={doc.id}>
@@ -288,7 +288,7 @@ export default function AnnotationsPage() {
           {/* Canvas */}
           <div
             ref={canvasRef}
-            className="relative w-full aspect-[11/8.5] bg-[#1F2328] rounded-lg cursor-crosshair overflow-hidden border-2 border-dashed border-gray-600 hover:border-blue-500 transition-colors"
+            className="relative w-full aspect-[11/8.5] bg-dark-surface rounded-lg cursor-crosshair overflow-hidden border-2 border-dashed border-gray-600 hover:border-blue-500 transition-colors"
             onClick={handleCanvasClick}
           >
             {selectedDoc && (
@@ -327,7 +327,7 @@ export default function AnnotationsPage() {
         {/* Right: Annotations List & Details */}
         <div className="space-y-6">
           {/* Filters */}
-          <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-4">
+          <div className="bg-dark-card rounded-xl border border-gray-700 p-4">
             <h3 className="text-sm font-medium text-white mb-3">Filters</h3>
             <div className="space-y-3">
               <div>
@@ -335,7 +335,7 @@ export default function AnnotationsPage() {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-2 py-1 bg-[#1F2328] border border-gray-600 rounded text-sm text-white"
+                  className="w-full px-2 py-1 bg-dark-surface border border-gray-600 rounded text-sm text-white"
                 >
                   <option value="all">All Types</option>
                   <option value="note">Note</option>
@@ -350,7 +350,7 @@ export default function AnnotationsPage() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full px-2 py-1 bg-[#1F2328] border border-gray-600 rounded text-sm text-white"
+                  className="w-full px-2 py-1 bg-dark-surface border border-gray-600 rounded text-sm text-white"
                 >
                   <option value="all">All Status</option>
                   <option value="open">Open</option>
@@ -363,7 +363,7 @@ export default function AnnotationsPage() {
           </div>
 
           {/* Annotations List */}
-          <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-4 max-h-[600px] overflow-y-auto">
+          <div className="bg-dark-card rounded-xl border border-gray-700 p-4 max-h-[600px] overflow-y-auto">
             <h3 className="text-sm font-medium text-white mb-3">Annotations</h3>
             {filteredAnnotations.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">
@@ -377,8 +377,8 @@ export default function AnnotationsPage() {
                     onClick={() => setSelectedAnnotation(annotation)}
                     className={`w-full text-left p-3 rounded-lg border transition-colors ${
                       selectedAnnotation?.id === annotation.id
-                        ? 'bg-[#1F2328] border-blue-500'
-                        : 'bg-[#1F2328] border-gray-600 hover:border-gray-500'
+                        ? 'bg-dark-surface border-blue-500'
+                        : 'bg-dark-surface border-gray-600 hover:border-gray-500'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-1">
@@ -417,7 +417,7 @@ export default function AnnotationsPage() {
       {/* Create Annotation Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-6 max-w-lg w-full">
+          <div className="bg-dark-card rounded-xl border border-gray-700 p-6 max-w-lg w-full">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-white">New Annotation</h2>
               <button
@@ -440,7 +440,7 @@ export default function AnnotationsPage() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                   placeholder="Brief title for this annotation"
                 />
@@ -453,7 +453,7 @@ export default function AnnotationsPage() {
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   rows={4}
                   required
                   placeholder="Detailed description..."
@@ -468,7 +468,7 @@ export default function AnnotationsPage() {
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="general">General</option>
                     <option value="note">Note</option>
@@ -486,7 +486,7 @@ export default function AnnotationsPage() {
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -505,7 +505,7 @@ export default function AnnotationsPage() {
                     type="text"
                     value={formData.sheetNumber}
                     onChange={(e) => setFormData({ ...formData, sheetNumber: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     placeholder="e.g., A-101"
                   />
                 </div>
@@ -518,7 +518,7 @@ export default function AnnotationsPage() {
                     type="text"
                     value={formData.gridCoordinate}
                     onChange={(e) => setFormData({ ...formData, gridCoordinate: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     placeholder="e.g., A-3"
                   />
                 </div>
@@ -532,7 +532,7 @@ export default function AnnotationsPage() {
                   type="text"
                   value={formData.tags}
                   onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  className="w-full px-3 py-2 bg-[#1F2328] border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   placeholder="e.g., plumbing, urgent, review"
                 />
               </div>
@@ -563,7 +563,7 @@ export default function AnnotationsPage() {
       {/* Annotation Detail Modal */}
       {selectedAnnotation && !showForm && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#2d333b] rounded-xl border border-gray-700 p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-dark-card rounded-xl border border-gray-700 p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className={`${getTypeColor(selectedAnnotation.type)} w-3 h-3 rounded-full`} />
@@ -589,7 +589,7 @@ export default function AnnotationsPage() {
                   <select
                     value={selectedAnnotation.status}
                     onChange={(e) => handleUpdateStatus(selectedAnnotation.id, e.target.value)}
-                    className="w-full px-3 py-1 bg-[#1F2328] border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-1 bg-dark-surface border border-gray-600 rounded text-white text-sm"
                   >
                     <option value="open">Open</option>
                     <option value="in_progress">In Progress</option>
@@ -624,7 +624,7 @@ export default function AnnotationsPage() {
                   <h3 className="text-sm font-medium text-gray-400 mb-2">Replies</h3>
                   <div className="space-y-2">
                     {selectedAnnotation.replies.map((reply) => (
-                      <div key={reply.id} className="bg-[#1F2328] p-3 rounded-lg">
+                      <div key={reply.id} className="bg-dark-surface p-3 rounded-lg">
                         <p className="text-white text-sm mb-1">{reply.content}</p>
                         <p className="text-xs text-gray-500">
                           {reply.createdBy.username} · {new Date(reply.createdAt).toLocaleString()}

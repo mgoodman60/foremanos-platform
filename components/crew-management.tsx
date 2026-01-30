@@ -272,11 +272,11 @@ export default function CrewManagement() {
             placeholder="Search crews..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-[#2d333b] border-gray-700 text-[#F8FAFC]"
+            className="bg-dark-card border-gray-700 text-[#F8FAFC]"
           />
         </div>
         <Select value={filterTrade} onValueChange={setFilterTrade}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-[#2d333b] border-gray-700 text-[#F8FAFC]">
+          <SelectTrigger className="w-full sm:w-[200px] bg-dark-card border-gray-700 text-[#F8FAFC]">
             <SelectValue placeholder="Filter by trade" />
           </SelectTrigger>
           <SelectContent>
@@ -292,7 +292,7 @@ export default function CrewManagement() {
 
       {/* Crews Grid */}
       {filteredCrews.length === 0 ? (
-        <Card className="bg-[#2d333b] border-gray-700">
+        <Card className="bg-dark-card border-gray-700">
           <CardContent className="py-12 text-center">
             <Users className="w-12 h-12 mx-auto text-gray-500 mb-4" />
             <p className="text-gray-400">No crews found</p>
@@ -309,7 +309,7 @@ export default function CrewManagement() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCrews.map(crew => (
-            <Card key={crew.id} className="bg-[#2d333b] border-gray-700">
+            <Card key={crew.id} className="bg-dark-card border-gray-700">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -424,7 +424,7 @@ export default function CrewManagement() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-[#F8FAFC] max-w-2xl">
+        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-[#F8FAFC]">
               {selectedCrew ? 'Edit Crew' : 'Create New Crew'}
@@ -448,7 +448,7 @@ export default function CrewManagement() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Concrete Crew A"
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
                 />
               </div>
 
@@ -460,7 +460,7 @@ export default function CrewManagement() {
                   value={formData.tradeType}
                   onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
                 >
-                  <SelectTrigger className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
                     <SelectValue placeholder="Select trade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -481,7 +481,7 @@ export default function CrewManagement() {
                   value={formData.subcontractorId}
                   onValueChange={(value) => setFormData({ ...formData, subcontractorId: value })}
                 >
-                  <SelectTrigger className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
                     <SelectValue placeholder="Select subcontractor" />
                   </SelectTrigger>
                   <SelectContent>
@@ -506,7 +506,7 @@ export default function CrewManagement() {
                   value={formData.foremanName}
                   onChange={(e) => setFormData({ ...formData, foremanName: e.target.value })}
                   placeholder="e.g., John Smith"
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
                 />
               </div>
 
@@ -519,7 +519,7 @@ export default function CrewManagement() {
                   value={formData.foremanPhone}
                   onChange={(e) => setFormData({ ...formData, foremanPhone: e.target.value })}
                   placeholder="e.g., (555) 123-4567"
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
                 />
               </div>
 
@@ -533,7 +533,7 @@ export default function CrewManagement() {
                   min="1"
                   value={formData.averageSize}
                   onChange={(e) => setFormData({ ...formData, averageSize: parseInt(e.target.value) || 1 })}
-                  className="bg-[#1F2328] border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
                 />
               </div>
 
@@ -543,7 +543,7 @@ export default function CrewManagement() {
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="rounded border-gray-700 bg-[#1F2328]"
+                  className="rounded border-gray-700 bg-dark-surface"
                 />
                 <Label htmlFor="isActive" className="text-gray-300">
                   Active

@@ -134,16 +134,16 @@ export default function SpatialCorrelationPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-[#1F2328] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <RefreshCw className="h-8 w-8 text-cyan-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2328] text-gray-100">
+    <div className="min-h-screen bg-dark-surface text-gray-100">
       {/* Header */}
-      <div className="bg-[#2d333b] border-b border-gray-700 sticky top-0 z-10">
+      <div className="bg-dark-card border-b border-gray-700 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -175,7 +175,7 @@ export default function SpatialCorrelationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Search Panel */}
           <div className="lg:col-span-1">
-            <Card className="p-6 bg-[#2d333b] border-gray-700">
+            <Card className="p-6 bg-dark-card border-gray-700">
               <h2 className="text-lg font-semibold mb-4 flex items-center">
                 <Search className="h-5 w-5 mr-2 text-cyan-400" />
                 Search Location
@@ -192,7 +192,7 @@ export default function SpatialCorrelationPage() {
                     onChange={(e) => setSearchLocation(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && performSpatialQuery()}
                     placeholder="e.g., Grid A-3, Room 101"
-                    className="bg-[#1F2328] border-gray-600 text-white"
+                    className="bg-dark-surface border-gray-600 text-white"
                   />
                   <p className="text-xs text-gray-400 mt-1">
                     Examples: "Grid A-3", "Room 101", "Northeast corner"
@@ -212,7 +212,7 @@ export default function SpatialCorrelationPage() {
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                           selectedDisciplines.includes(d.id)
                             ? 'bg-cyan-600 text-white'
-                            : 'bg-[#1F2328] text-gray-300 hover:bg-gray-700'
+                            : 'bg-dark-surface text-gray-300 hover:bg-gray-700'
                         }`}
                       >
                         {d.icon} {d.label}
@@ -228,7 +228,7 @@ export default function SpatialCorrelationPage() {
                     id="includeRelated"
                     checked={includeRelated}
                     onChange={(e) => setIncludeRelated(e.target.checked)}
-                    className="rounded border-gray-600 bg-[#1F2328] text-cyan-600"
+                    className="rounded border-gray-600 bg-dark-surface text-cyan-600"
                   />
                   <label htmlFor="includeRelated" className="text-sm text-gray-300">
                     Include adjacent locations
@@ -274,7 +274,7 @@ export default function SpatialCorrelationPage() {
 
           {/* Results Panel */}
           <div className="lg:col-span-2">
-            <Card className="p-6 bg-[#2d333b] border-gray-700">
+            <Card className="p-6 bg-dark-card border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold flex items-center">
                   <MapPin className="h-5 w-5 mr-2 text-cyan-400" />
@@ -302,7 +302,7 @@ export default function SpatialCorrelationPage() {
                       .map((match, idx) => (
                         <div
                           key={idx}
-                          className="p-4 bg-[#1F2328] border border-gray-700 rounded-lg hover:border-cyan-600 transition-colors"
+                          className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:border-cyan-600 transition-colors"
                         >
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center space-x-2">
@@ -350,23 +350,23 @@ export default function SpatialCorrelationPage() {
         {/* Summary Statistics */}
         {matches.length > 0 && (
           <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="p-4 bg-[#2d333b] border-gray-700">
+            <Card className="p-4 bg-dark-card border-gray-700">
               <div className="text-sm text-gray-400 mb-1">Total Matches</div>
               <div className="text-2xl font-bold text-white">{matches.length}</div>
             </Card>
-            <Card className="p-4 bg-[#2d333b] border-gray-700">
+            <Card className="p-4 bg-dark-card border-gray-700">
               <div className="text-sm text-gray-400 mb-1">High Confidence</div>
               <div className="text-2xl font-bold text-green-400">
                 {matches.filter(m => m.confidence >= 0.8).length}
               </div>
             </Card>
-            <Card className="p-4 bg-[#2d333b] border-gray-700">
+            <Card className="p-4 bg-dark-card border-gray-700">
               <div className="text-sm text-gray-400 mb-1">Grid Matches</div>
               <div className="text-2xl font-bold text-cyan-400">
                 {matches.filter(m => m.matchType === 'grid').length}
               </div>
             </Card>
-            <Card className="p-4 bg-[#2d333b] border-gray-700">
+            <Card className="p-4 bg-dark-card border-gray-700">
               <div className="text-sm text-gray-400 mb-1">Room Matches</div>
               <div className="text-2xl font-bold text-purple-400">
                 {matches.filter(m => m.matchType === 'room').length}

@@ -109,7 +109,7 @@ export function FinalizationSettingsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="finalization-settings-modal-title"
-        className="bg-[#1F2328] border border-gray-700 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-dark-surface border border-gray-700 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
@@ -123,7 +123,7 @@ export function FinalizationSettingsModal({
             onClick={onClose}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-[#2d333b]"
+            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -163,7 +163,7 @@ export function FinalizationSettingsModal({
                     setTimezone(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full px-4 py-3 bg-[#2d333b] border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
                 >
                   {COMMON_TIMEZONES.map((tz) => (
                     <option key={tz.value} value={tz.value}>
@@ -188,7 +188,7 @@ export function FinalizationSettingsModal({
                     setFinalizationTime(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full px-4 py-3 bg-[#2d333b] border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
                 >
                   {TIME_OPTIONS.map((time) => (
                     <option key={time.value} value={time.value}>
@@ -215,7 +215,7 @@ export function FinalizationSettingsModal({
                     setHasChanges(true);
                   }}
                   placeholder="Leave blank to auto-create 'Daily Reports' folder"
-                  className="w-full px-4 py-3 bg-[#2d333b] border border-gray-600 rounded-lg text-[#F8FAFC] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500">
                   Folder ID where finalized PDFs will be saved. Leave blank to auto-create.
@@ -223,7 +223,7 @@ export function FinalizationSettingsModal({
               </div>
 
               {/* Preview */}
-              <div className="bg-[#2d333b] border border-gray-600 rounded-lg p-4">
+              <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-[#F8FAFC] mb-3">Preview</h3>
                 <div className="space-y-2 text-sm text-gray-300">
                   <p>
@@ -251,11 +251,11 @@ export function FinalizationSettingsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-700 bg-[#1F2328]">
+        <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-700 bg-dark-surface">
           <Button
             onClick={onClose}
             variant="ghost"
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-[#2d333b]"
+            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
             disabled={saving}
           >
             Cancel

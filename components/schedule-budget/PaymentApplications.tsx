@@ -245,7 +245,7 @@ export default function PaymentApplications() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#2d333b] border-gray-700">
+      <Card className="p-6 bg-dark-card border-gray-700">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-700 rounded w-1/3" />
           <div className="h-32 bg-gray-700 rounded" />
@@ -259,27 +259,27 @@ export default function PaymentApplications() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Contract Value</div>
             <div className="text-2xl font-bold text-white">
               {formatCurrency(summary.totalContractValue)}
             </div>
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Total Billed</div>
             <div className="text-2xl font-bold text-blue-400">
               {formatCurrency(summary.totalBilled)}
             </div>
             <Progress value={summary.percentBilled} className="h-1 mt-2" />
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Total Paid</div>
             <div className="text-2xl font-bold text-green-400">
               {formatCurrency(summary.totalPaid)}
             </div>
             <Progress value={summary.percentPaid} className="h-1 mt-2" />
           </Card>
-          <Card className="p-4 bg-[#2d333b] border-gray-700">
+          <Card className="p-4 bg-dark-card border-gray-700">
             <div className="text-sm text-gray-400">Retainage Held</div>
             <div className="text-2xl font-bold text-yellow-400">
               {formatCurrency(summary.totalRetainage)}
@@ -380,7 +380,7 @@ export default function PaymentApplications() {
       {/* Pay Apps List */}
       <div className="space-y-3">
         {payApps.length === 0 ? (
-          <Card className="p-8 bg-[#2d333b] border-gray-700 text-center text-gray-400">
+          <Card className="p-8 bg-dark-card border-gray-700 text-center text-gray-400">
             <FileUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No payment applications yet</p>
             <p className="text-sm mt-1">
@@ -408,7 +408,7 @@ export default function PaymentApplications() {
               : 0;
 
             return (
-              <Card key={pa.id} className="p-4 bg-[#2d333b] border-gray-700">
+              <Card key={pa.id} className="p-4 bg-dark-card border-gray-700">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className="bg-blue-600 p-3 rounded-lg">
@@ -518,7 +518,7 @@ export default function PaymentApplications() {
 
       {/* Generate Modal */}
       <Dialog open={showGenerateModal} onOpenChange={setShowGenerateModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white">
+        <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Generate Payment Application</DialogTitle>
           </DialogHeader>
@@ -531,7 +531,7 @@ export default function PaymentApplications() {
                   type="date"
                   value={periodDates.start}
                   onChange={(e) => setPeriodDates({ ...periodDates, start: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
               <div>
@@ -540,7 +540,7 @@ export default function PaymentApplications() {
                   type="date"
                   value={periodDates.end}
                   onChange={(e) => setPeriodDates({ ...periodDates, end: e.target.value })}
-                  className="bg-[#1F2328] border-gray-600"
+                  className="bg-dark-surface border-gray-600"
                 />
               </div>
             </div>
@@ -564,7 +564,7 @@ export default function PaymentApplications() {
 
       {/* Detail Modal */}
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
-        <DialogContent className="bg-[#2d333b] border-gray-700 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-dark-card border-gray-700 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               Payment Application #{selectedPayApp?.applicationNumber}
