@@ -135,7 +135,7 @@
 |-------|----------|---------|
 | ~~Missing composite indexes~~ | ~~P2~~ | ~~30+ queries lack optimal indexes~~ ✅ FIXED (6 critical indexes added) |
 | ~~Cascade delete gaps~~ | ~~P2~~ | ~~8 relations risk orphaned records~~ ✅ FIXED (6 relations updated) |
-| N+1 query patterns | P2 | 15+ models at risk |
+| ~~N+1 query patterns~~ | ~~P2~~ | ~~15+ models at risk~~ ✅ FIXED |
 | Nullable fields that shouldn't be | P3 | Document.projectId, User.email |
 | Inconsistent status fields | P3 | Mix of enums and strings |
 | Missing unique constraints | P3 | WeatherPreferences, VerificationToleranceSettings |
@@ -162,18 +162,18 @@
 | Issue | Severity | Route |
 |-------|----------|-------|
 | ~~No OpenAPI spec for 385+ routes~~ | ~~P2~~ | ~~All routes~~ ✅ FIXED (`openapi.yaml`)|
-| Chat dual implementation (feature flag) | P2 | /api/chat |
-| No virus scanning on uploads | P2 | /api/documents/upload |
+| ~~Chat dual implementation (feature flag)~~ | ~~P2~~ | ~~/api/chat~~ ✅ FIXED |
+| ~~No virus scanning on uploads~~ | ~~P2~~ | ~~/api/documents/upload~~ ✅ FIXED |
 | ~~Stripe webhook lacks idempotency~~ | ~~P2~~ | ~~/api/stripe/webhook~~ ✅ FIXED |
-| No rate limit headers in responses | P3 | All routes except chat |
+| ~~No rate limit headers in responses~~ | ~~P3~~ | ~~All routes except chat~~ ✅ FIXED |
 | Inconsistent error response format | P3 | Multiple routes |
 | No document processing status endpoint | P3 | /api/documents |
 
 **Critical Route Analysis**:
-- **Chat** (987 lines): Dual legacy/new implementation, 10-step middleware chain
-- **Upload**: 200MB max, SHA-256 duplicate detection, missing MIME validation
-- **Stripe webhook**: Signature verified, but no idempotency/deduplication
-- **Auth**: NextAuth JWT, 30-day sessions, weak password policy (6 chars)
+- **Chat** (~175 lines): ✅ Clean modular implementation, 10-step middleware chain
+- **Upload**: 200MB max, SHA-256 duplicate detection, ✅ MIME validation, ✅ virus scanning
+- **Stripe webhook**: Signature verified, ✅ idempotency with stripeEventId
+- **Auth**: NextAuth JWT, 30-day sessions, ✅ strong password policy (12+ chars)
 
 ---
 
@@ -225,11 +225,11 @@
 |----------|-------|-----------|
 | ~~P0~~ | ~~Gantt chart unusable below 1200px~~ | ~~schedule/gantt-chart.tsx~~ ✅ FIXED |
 | ~~P0~~ | ~~Missing keyboard alternative for drag-drop~~ | ~~document-library.tsx~~ ✅ FIXED |
-| P1 | Upload flow shows category AFTER file selection | document-library.tsx |
+| ~~P1~~ | ~~Upload flow shows category AFTER file selection~~ | ~~document-library.tsx~~ ✅ FIXED |
 | ~~P1~~ | ~~No upload progress percentage~~ | ~~document-library.tsx~~ ✅ FIXED |
-| P2 | Inconsistent color palette | Multiple files |
-| P2 | Button sizes not standardized | components/ui/button.tsx |
-| P3 | Missing message search | chat-interface.tsx |
+| ~~P2~~ | ~~Inconsistent color palette~~ | ~~Multiple files~~ ✅ FIXED |
+| ~~P2~~ | ~~Button sizes not standardized~~ | ~~components/ui/button.tsx~~ ✅ FIXED |
+| ~~P3~~ | ~~Missing message search~~ | ~~chat-interface.tsx~~ ✅ EXISTS |
 
 **Accessibility Findings**:
 - **Login form**: Excellent ARIA implementation (model to follow)
@@ -295,16 +295,16 @@
 
 | # | Issue | File | Effort |
 |---|-------|------|--------|
-| 1 | Gantt chart unusable on mobile (<1200px) | components/schedule/gantt-chart.tsx | 2-3 days |
-| 2 | No keyboard alternative for drag-drop upload | components/document-library.tsx | 1 day |
+| ~~1~~ | ~~Gantt chart unusable on mobile (<1200px)~~ | ~~components/schedule/gantt-chart.tsx~~ | ✅ FIXED |
+| ~~2~~ | ~~No keyboard alternative for drag-drop upload~~ | ~~components/document-library.tsx~~ | ✅ FIXED |
 
 ### P1 - High Priority (Fix This Week)
 
 | # | Issue | File | Effort |
 |---|-------|------|--------|
-| 3 | Unsafe `eval()` in scale parsing | lib/enhanced-takeoff-service.ts:723 | 2 hours |
+| ~~3~~ | ~~Unsafe `eval()` in scale parsing~~ | ~~lib/enhanced-takeoff-service.ts:723~~ | ✅ FIXED |
 | ~~4~~ | ~~Document upload shows category AFTER file selection~~ | ~~components/document-library.tsx~~ | ✅ FIXED |
-| 5 | No upload progress percentage | components/document-library.tsx | 2 hours |
+| ~~5~~ | ~~No upload progress percentage~~ | ~~components/document-library.tsx~~ | ✅ FIXED |
 
 ### P2 - Medium Priority (Fix This Sprint)
 
