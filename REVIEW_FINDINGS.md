@@ -17,6 +17,7 @@
 | **Total** | **32** | **32** | **0** |
 
 ### Latest Fixes (2026-01-30)
+- ✅ **P2**: OpenAPI spec - comprehensive API documentation (`openapi.yaml` - 874 lines)
 - ✅ **P1**: Upload category UX - category-first flow with step indicator (`a34ce20`)
 - ✅ **P2**: Chat legacy cleanup - removed 750+ lines of dead code (`b8ba927`)
 - ✅ **P2**: Virus scanning with VirusTotal API (`a34ce20`)
@@ -156,11 +157,11 @@
 
 ### Findings
 
-**Documentation Status**: No formal API docs exist (no OpenAPI/Swagger)
+**Documentation Status**: ✅ OpenAPI spec exists (`openapi.yaml` - 874 lines)
 
 | Issue | Severity | Route |
 |-------|----------|-------|
-| No OpenAPI spec for 385+ routes | P2 | All routes |
+| ~~No OpenAPI spec for 385+ routes~~ | ~~P2~~ | ~~All routes~~ ✅ FIXED (`openapi.yaml`)|
 | Chat dual implementation (feature flag) | P2 | /api/chat |
 | No virus scanning on uploads | P2 | /api/documents/upload |
 | ~~Stripe webhook lacks idempotency~~ | ~~P2~~ | ~~/api/stripe/webhook~~ ✅ FIXED |
@@ -312,7 +313,7 @@
 | ~~6~~ | ~~Missing ESLint config~~ | ~~Root directory~~ | ✅ FIXED |
 | ~~7~~ | ~~Missing rate limiting on state-changing routes~~ | ~~Multiple API routes~~ | ✅ FIXED |
 | ~~8~~ | ~~Weak password policy (6 char min)~~ | ~~app/api/auth/reset-password/route.ts~~ | ✅ FIXED |
-| 9 | No OpenAPI spec for 385+ routes | All API routes | 3-5 days |
+| ~~9~~ | ~~No OpenAPI spec for 385+ routes~~ | ~~All API routes~~ | ✅ FIXED (`openapi.yaml`) |
 | ~~10~~ | ~~Chat dual implementation (feature flag)~~ | ~~app/api/chat/route.ts~~ | ✅ FIXED |
 | ~~11~~ | ~~No virus scanning on uploads~~ | ~~app/api/documents/upload/route.ts~~ | ✅ FIXED |
 | ~~12~~ | ~~Stripe webhook lacks idempotency~~ | ~~app/api/stripe/webhook/route.ts~~ | ✅ FIXED |
