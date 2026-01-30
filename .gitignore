@@ -31,7 +31,8 @@ logs/
 .idea/
 *.swp
 *.swo
-.claude/
+.claude/*
+!.claude/agents/
 
 # OS
 .DS_Store
@@ -43,6 +44,9 @@ prisma/migrations/*_migration_lock.toml
 # Testing
 coverage/
 .nyc_output
+playwright-report/
+test-results/
+.playwright/
 
 # Misc
 *.tsbuildinfo
