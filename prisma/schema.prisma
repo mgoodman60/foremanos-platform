@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  output        = "./node_modules/.prisma/client"
+  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
@@ -551,6 +551,9 @@ model Document {
   queuedAt              DateTime?
   lastProcessingError   String?
   processingRetries     Int                     @default(0)
+  virusStatus           String?                 // "clean" | "infected" | "skipped" | "error"
+  virusScanAt           DateTime?
+  virusScanProvider     String?                 // "virustotal"
   DetailCallout         DetailCallout[]
   DimensionAnnotation   DimensionAnnotation[]
   Project               Project?                @relation(fields: [projectId], references: [id], onDelete: Cascade)

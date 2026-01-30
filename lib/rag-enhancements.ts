@@ -548,11 +548,15 @@ export async function twoPassRetrieval(
     },
   });
   
+  // Build Set of existing chunk IDs for O(1) duplicate checking
+  const existingChunkIds = new Set<string>();
+  precisionChunks.forEach(c => existingChunkIds.add(c.id));
+  contextChunks.forEach(c => existingChunkIds.add(c.id));
+
   for (const doc of contextQuery) {
     for (const chunk of doc.DocumentChunk) {
-      // Avoid duplicates
-      const isDuplicate = [...precisionChunks, ...contextChunks].some(c => c.id === chunk.id);
-      if (!isDuplicate) {
+      // Avoid duplicates using Set lookup (O(1) instead of O(N))
+      if (!existingChunkIds.has(chunk.id)) {
         contextChunks.push({
           ...chunk,
           metadata: {
@@ -561,6 +565,7 @@ export async function twoPassRetrieval(
           },
           retrievalMethod: 'context',
         });
+        existingChunkIds.add(chunk.id);
       }
     }
   }
@@ -723,11 +728,13 @@ export async function bundleCrossReferences(
       },
     });
     
+    // Build Set of existing chunk IDs for O(1) duplicate checking
+    const enrichedChunkIds = new Set(enrichedChunks.map(c => c.id));
+
     for (const doc of crossRefChunks) {
       for (const chunk of doc.DocumentChunk) {
-        // Avoid duplicates
-        const isDuplicate = enrichedChunks.some(c => c.id === chunk.id);
-        if (!isDuplicate) {
+        // Avoid duplicates using Set lookup (O(1) instead of O(N))
+        if (!enrichedChunkIds.has(chunk.id)) {
           enrichedChunks.push({
             ...chunk,
             metadata: {
@@ -736,6 +743,7 @@ export async function bundleCrossReferences(
             },
             retrievalMethod: 'cross_reference',
           });
+          enrichedChunkIds.add(chunk.id);
         }
       }
     }

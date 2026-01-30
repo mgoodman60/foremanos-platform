@@ -12,6 +12,7 @@ import { getProcessingLimits, canProcessDocument, getRemainingPages, shouldReset
 import { withDatabaseRetry } from '@/lib/retry-util';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limiter';
+import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max for upload
@@ -125,6 +126,49 @@ export async function POST(request: Request) {
       throw new Error(`Failed to read file: ${error.message}`);
     }
 
+    // Virus scan (before expensive operations like S3 upload)
+    console.log('[UPLOAD] Scanning for viruses...');
+    const scanStartTime = Date.now();
+    let virusStatus = 'skipped';
+    let virusScanProvider = null;
+    try {
+      const scanResult = await scanFileBuffer(buffer, fileName, {
+        timeout: 30000,
+        skipIfMissingKey: true, // Graceful degradation
+      });
+
+      const scanTime = Date.now() - scanStartTime;
+      console.log(`[UPLOAD] Virus scan completed in ${scanTime}ms: ${scanResult.clean ? 'CLEAN' : 'THREAT DETECTED'}`);
+
+      if (!scanResult.clean) {
+        virusStatus = 'infected';
+        virusScanProvider = scanResult.engine;
+
+        await logSecurityEvent('VIRUS_DETECTED', {
+          fileName,
+          threat: scanResult.threat,
+          projectId,
+          userId,
+        });
+
+        return NextResponse.json(
+          {
+            error: 'File rejected: security threat detected',
+            threat: scanResult.threat,
+            message: 'The uploaded file was flagged as potentially malicious and has been blocked.',
+          },
+          { status: 451 } // Unavailable For Legal Reasons
+        );
+      }
+
+      virusStatus = 'clean';
+      virusScanProvider = scanResult.engine;
+    } catch (scanError: any) {
+      console.error('[UPLOAD] Virus scan error (non-blocking):', scanError.message);
+      virusStatus = 'error';
+      // Continue with upload - graceful degradation
+    }
+
     // Calculate file hash for duplicate detection
     console.log('[UPLOAD] Calculating file hash...');
     const fileHash = calculateFileHash(buffer);
@@ -132,10 +176,10 @@ export async function POST(request: Request) {
     // Check for duplicates
     console.log('[UPLOAD] Checking for duplicates...');
     const hasDuplicate = await isDuplicate(projectId, fileName, buffer.length, fileHash);
-    
+
     if (hasDuplicate) {
       return NextResponse.json(
-        { 
+        {
           error: 'Duplicate document detected',
           message: 'A document with the same name and content already exists in this project.',
         },
@@ -244,6 +288,9 @@ export async function POST(request: Request) {
           processorType: classification.processorType, // Store processor type
           pagesProcessed: 0, // Will be updated after processing
           processingCost: 0, // Will be updated after processing
+          virusStatus: virusStatus, // Virus scan result
+          virusScanAt: new Date(),
+          virusScanProvider: virusScanProvider,
         },
       }),
       'Create document record'

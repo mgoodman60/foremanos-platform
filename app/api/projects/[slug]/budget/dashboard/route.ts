@@ -23,6 +23,8 @@ export async function GET(
     const { slug } = params;
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get('days') || '30');
+    const startDate = subDays(new Date(), days);
+    const endDate = new Date();
 
     // Get project
     const project = await prisma.project.findFirst({
@@ -33,15 +35,60 @@ export async function GET(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Get budget
-    const budget = await prisma.projectBudget.findUnique({
-      where: { projectId: project.id },
-      include: {
-        BudgetItem: {
-          where: { isActive: true },
+    // Fetch all data in parallel to minimize database round trips
+    const [budget, schedule, snapshots, laborByDate, materialsByDate, invoicesByDate] = await Promise.all([
+      prisma.projectBudget.findUnique({
+        where: { projectId: project.id },
+        include: {
+          BudgetItem: {
+            where: { isActive: true },
+          },
         },
-      },
-    });
+      }),
+      prisma.schedule.findFirst({
+        where: { projectId: project.id },
+        include: {
+          ScheduleTask: true,
+        },
+      }),
+      prisma.budgetSnapshot.findMany({
+        where: {
+          projectId: project.id,
+          snapshotDate: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        orderBy: { snapshotDate: 'asc' },
+      }),
+      prisma.laborEntry.groupBy({
+        by: ['date'],
+        where: {
+          projectId: project.id,
+          status: 'APPROVED',
+          date: { gte: startDate, lte: endDate },
+        },
+        _sum: { totalCost: true },
+      }),
+      prisma.procurement.groupBy({
+        by: ['actualDelivery'],
+        where: {
+          projectId: project.id,
+          status: 'RECEIVED',
+          actualDelivery: { gte: startDate, lte: endDate },
+        },
+        _sum: { actualCost: true },
+      }),
+      prisma.invoice.groupBy({
+        by: ['invoiceDate'],
+        where: {
+          projectId: project.id,
+          status: 'APPROVED',
+          invoiceDate: { gte: startDate, lte: endDate },
+        },
+        _sum: { amount: true },
+      }),
+    ]);
 
     if (!budget) {
       return NextResponse.json({ error: 'Budget not configured' }, { status: 404 });
@@ -50,24 +97,18 @@ export async function GET(
     // Calculate EVM metrics
     const totalBudget = budget.totalBudget;
     const contingency = budget.contingency || 0;
-    
+
     // Get total actual costs from budget items
     const actualCost = budget.BudgetItem.reduce((sum, item) => sum + item.actualCost, 0);
     const committedCost = budget.BudgetItem.reduce((sum, item) => sum + (item.contractAmount || item.budgetedAmount), 0);
-    
+
     // Get schedule tasks for percent complete
-    const schedule = await prisma.schedule.findFirst({
-      where: { projectId: project.id },
-      include: {
-        ScheduleTask: true,
-      },
-    });
     const tasks = schedule?.ScheduleTask || [];
-    
+
     const totalTaskWeight = tasks.reduce((sum, t) => sum + 1, 0);
     const completedWeight = tasks.reduce((sum, t) => sum + ((t.percentComplete || 0) / 100), 0);
     const percentComplete = totalTaskWeight > 0 ? (completedWeight / totalTaskWeight) * 100 : 0;
-    
+
     // EVM Calculations
     const plannedValue = totalBudget * (percentComplete / 100);
     const earnedValue = totalBudget * (percentComplete / 100);
@@ -98,55 +139,6 @@ export async function GET(
       variance: data.budgeted - data.actual,
       percentUsed: data.budgeted > 0 ? (data.actual / data.budgeted) * 100 : 0,
     })).sort((a, b) => b.budgeted - a.budgeted);
-
-    // Get daily costs for the trend chart
-    const startDate = subDays(new Date(), days);
-    const endDate = new Date();
-    
-    // Get budget snapshots for historical data
-    const snapshots = await prisma.budgetSnapshot.findMany({
-      where: {
-        projectId: project.id,
-        snapshotDate: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
-      orderBy: { snapshotDate: 'asc' },
-    });
-
-    // Get labor entries grouped by date
-    const laborByDate = await prisma.laborEntry.groupBy({
-      by: ['date'],
-      where: {
-        projectId: project.id,
-        status: 'APPROVED',
-        date: { gte: startDate, lte: endDate },
-      },
-      _sum: { totalCost: true },
-    });
-
-    // Get procurement/materials by delivery date
-    const materialsByDate = await prisma.procurement.groupBy({
-      by: ['actualDelivery'],
-      where: {
-        projectId: project.id,
-        status: 'RECEIVED',
-        actualDelivery: { gte: startDate, lte: endDate },
-      },
-      _sum: { actualCost: true },
-    });
-
-    // Get invoices by date
-    const invoicesByDate = await prisma.invoice.groupBy({
-      by: ['invoiceDate'],
-      where: {
-        projectId: project.id,
-        status: 'APPROVED',
-        invoiceDate: { gte: startDate, lte: endDate },
-      },
-      _sum: { amount: true },
-    });
 
     // Build daily cost array
     const dailyCostsMap = new Map<string, {

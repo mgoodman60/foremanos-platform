@@ -165,25 +165,32 @@ async function updateProjectBudgetTotals(projectId: string): Promise<number> {
   // Get the project budget
   const budget = await prisma.projectBudget.findUnique({
     where: { projectId },
-    include: { BudgetItem: { where: { isActive: true } } },
   });
 
   if (!budget) return 0;
 
-  // Calculate total actual costs from budget items
-  const totalActualCost = budget.BudgetItem.reduce(
-    (sum, item) => sum + item.actualCost,
-    0
-  );
+  // Use Prisma aggregate to compute sums in database (single query)
+  const budgetItemStats = await prisma.budgetItem.aggregate({
+    where: {
+      budgetId: budget.id,
+      isActive: true,
+    },
+    _sum: {
+      actualCost: true,
+      actualHours: true,
+    },
+    _count: {
+      id: true,
+    },
+  });
 
-  const totalActualHours = budget.BudgetItem.reduce(
-    (sum, item) => sum + item.actualHours,
-    0
-  );
+  const totalActualCost = budgetItemStats._sum.actualCost || 0;
+  const totalActualHours = budgetItemStats._sum.actualHours || 0;
+  const itemCount = budgetItemStats._count.id;
 
-  console.log(`[CostRollup] Budget totals: $${totalActualCost.toFixed(2)} spent across ${budget.BudgetItem.length} items, ${totalActualHours.toFixed(1)} total hours`);
+  console.log(`[CostRollup] Budget totals: $${totalActualCost.toFixed(2)} spent across ${itemCount} items, ${totalActualHours.toFixed(1)} total hours`);
 
-  return budget.BudgetItem.length;
+  return itemCount;
 }
 
 /**

@@ -323,7 +323,16 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       // User selected category first, now prompt for file
       setPreSelectedCategory(category);
       setShowCategoryModal(false);
-      toast.success(`Category selected: ${getCategoryLabel(category)}. Now choose your file.`);
+      toast.success(
+        <div className="flex flex-col gap-1">
+          <div className="font-semibold">Category Selected!</div>
+          <div className="text-sm">{getCategoryLabel(category)} - Now choose your file to upload</div>
+        </div>,
+        {
+          duration: 4000,
+          icon: '📁',
+        }
+      );
       // Trigger file input
       setTimeout(() => fileInputRef.current?.click(), 100);
     } else {
@@ -745,13 +754,17 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       {/* Drag overlay */}
       {isDragging && userRole !== 'guest' && (
         <div className="absolute inset-0 z-50 bg-[#F97316]/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-          <div className="bg-dark-card border-2 border-dashed border-[#F97316] rounded-lg p-8 text-center">
-            <Upload className="w-16 h-16 text-[#F97316] mx-auto mb-4" />
-            <p className="text-xl font-semibold text-[#F8FAFC] mb-2">Drop file here</p>
+          <div className="bg-dark-card border-2 border-dashed border-[#F97316] rounded-lg p-8 text-center max-w-md">
+            <Upload className="w-16 h-16 text-[#F97316] mx-auto mb-4 animate-bounce" />
+            <p className="text-xl font-semibold text-[#F8FAFC] mb-2">Drop file here to upload</p>
             {preSelectedCategory && (
-              <p className="text-sm text-[#F97316] font-medium mb-2">
-                Category: {getCategoryLabel(preSelectedCategory as DocumentCategory)}
-              </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F97316] text-white rounded-lg font-semibold mb-3">
+                <CheckCircle2 className="w-5 h-5" />
+                <span>{getCategoryLabel(preSelectedCategory as DocumentCategory)}</span>
+              </div>
+            )}
+            {!preSelectedCategory && (
+              <p className="text-sm text-gray-300 mb-2">File will be categorized after drop</p>
             )}
             <p className="text-sm text-gray-400">PDF, DOCX, XLSX, images, or CAD files (.dwg, .rvt, .ifc)</p>
             <p className="text-xs text-gray-500 mt-1">Maximum file size: 200MB</p>
@@ -877,12 +890,15 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               <div className="flex items-center gap-2">
                 {/* Category Pre-Selection Badge */}
                 {preSelectedCategory && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-900/30 text-green-400 border border-green-700 rounded-lg text-sm">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">{getCategoryLabel(preSelectedCategory as DocumentCategory)}</span>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F97316] text-white border-2 border-[#F97316] rounded-lg text-sm font-semibold shadow-lg animate-in fade-in zoom-in-95 duration-200">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                      <span className="text-xs sm:text-sm">Selected:</span>
+                      <span className="font-bold">{getCategoryLabel(preSelectedCategory as DocumentCategory)}</span>
+                    </div>
                     <button
                       onClick={() => setPreSelectedCategory(null)}
-                      className="ml-1 hover:text-green-300 transition-colors"
+                      className="ml-2 hover:bg-white/20 rounded p-1 transition-colors"
                       aria-label="Clear category selection"
                     >
                       <X className="w-4 h-4" />

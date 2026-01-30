@@ -54,32 +54,29 @@ export async function calculateProjectKPIs(projectId: string): Promise<ProjectKP
   const now = new Date();
   const weekStart = startOfWeek(now);
 
-  // Fetch related data
-  const schedule = await prisma.schedule.findFirst({
-    where: { projectId },
-    include: { ScheduleTask: true }
-  });
-
-  const budget = await prisma.projectBudget.findFirst({
-    where: { projectId },
-    include: { BudgetItem: true }
-  });
-
-  const documents = await prisma.document.findMany({
-    where: { projectId, deletedAt: null }
-  });
-
-  const dailyReports = await prisma.dailyReport.findMany({
-    where: { projectId, createdAt: { gte: subDays(now, 30) } }
-  });
-
-  const changeOrders = await prisma.changeOrder.findMany({
-    where: { projectId }
-  });
-
-  const crews = await prisma.crew.findMany({
-    where: { projectId }
-  });
+  // Fetch all related data in parallel with a single combined query structure
+  const [schedule, budget, documents, dailyReports, changeOrders, crews] = await Promise.all([
+    prisma.schedule.findFirst({
+      where: { projectId },
+      include: { ScheduleTask: true },
+    }),
+    prisma.projectBudget.findFirst({
+      where: { projectId },
+      include: { BudgetItem: true },
+    }),
+    prisma.document.findMany({
+      where: { projectId, deletedAt: null },
+    }),
+    prisma.dailyReport.findMany({
+      where: { projectId, createdAt: { gte: subDays(now, 30) } },
+    }),
+    prisma.changeOrder.findMany({
+      where: { projectId },
+    }),
+    prisma.crew.findMany({
+      where: { projectId },
+    }),
+  ]);
 
   // Schedule KPIs
   let schedulePerformanceIndex = 1.0;
