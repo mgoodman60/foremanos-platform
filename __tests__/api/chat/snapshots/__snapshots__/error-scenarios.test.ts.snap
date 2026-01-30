@@ -25,3 +25,32 @@ exports[`Chat API Snapshot Tests - Error Scenarios > should match snapshot for m
   "statusText": "",
 }
 `;
+
+exports[`Chat API Snapshot Tests - Error Scenarios > should match snapshot for query limit exceeded > query-limit-exceeded 1`] = `
+{
+  "body": {
+    "cached": true,
+    "conversationId": null,
+    "response": "Cached response for: What is the schedule?",
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 200,
+  "statusText": "",
+}
+`;
+
+exports[`Chat API Snapshot Tests - Error Scenarios > should match snapshot for rate limit exceeded > rate-limit-exceeded 1`] = `
+{
+  "body": {
+    "error": "Too many requests. Please slow down and try again in a moment.",
+    "retryAfter": 45,
+  },
+  "headers": {
+    "content-type": "application/json",
+  },
+  "status": 429,
+  "statusText": "",
+}
+`;

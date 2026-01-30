@@ -125,8 +125,8 @@ vi.mock('@/lib/schedule-extractor-ai', () => ({
 }));
 
 vi.mock('@/lib/document-processing-queue', () => ({
-  queueDocumentForProcessing: vi.fn(),
-  processQueuedDocument: vi.fn(),
+  queueDocumentForProcessing: vi.fn().mockResolvedValue(undefined),
+  processQueuedDocument: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Import functions after mocks
@@ -240,7 +240,7 @@ describe('Document Processor - PDF Processing', () => {
     );
   });
 
-  it.todo('should queue large PDFs (>10 pages) for batch processing', async () => {
+  it('should queue large PDFs (>10 pages) for batch processing', async () => {
     const pdfBuffer = await createSimplePDF(25);
     const mockDoc = createMockDocument({ fileName: 'specifications.pdf' });
 
@@ -310,7 +310,7 @@ describe('Document Processor - PDF Processing', () => {
     );
   });
 
-  it.todo('should handle corrupt PDF files', async () => {
+  it.todo('should handle corrupt PDF files - needs implementation refactoring', async () => {
     const corruptBuffer = Buffer.from('This is not a valid PDF file');
     const mockDoc = createMockDocument();
 
@@ -683,7 +683,7 @@ describe('Document Processor - Batch Processing', () => {
     vi.clearAllMocks();
   });
 
-  it.todo('should process unprocessed documents in a project', async () => {
+  it.todo('should process unprocessed documents in a project - needs mock setup', async () => {
     const mockDocs = [
       createMockDocument({ id: 'doc-1', processed: false }),
       createMockDocument({ id: 'doc-2', processed: false }),
@@ -719,7 +719,7 @@ describe('Document Processor - Batch Processing', () => {
     expect(result.failed).toBe(0);
   });
 
-  it.todo('should handle mixed success/failure in batch processing', async () => {
+  it.todo('should handle mixed success/failure in batch processing - needs mock setup', async () => {
     const mockDocs = [
       createMockDocument({ id: 'doc-1', processed: false }),
       createMockDocument({ id: 'doc-2', processed: false }),

@@ -17,12 +17,31 @@ vi.mock('@/lib/db', () => ({
     },
     adminCorrection: {
       findMany: vi.fn(),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     room: {
       findMany: vi.fn(),
     },
     material: {
       findMany: vi.fn(),
+    },
+    materialTakeoff: {
+      findMany: vi.fn(),
+    },
+    enhancedAnnotation: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    mEPEquipment: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    submittalRequirement: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    inspectionRequirement: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    materialEquipmentSpec: {
+      findMany: vi.fn().mockResolvedValue([]),
     },
   },
 }));
@@ -1106,7 +1125,7 @@ describe('RAG Service - Admin Corrections', () => {
     vi.clearAllMocks();
   });
 
-  it.todo('should retrieve relevant corrections for queries', async () => {
+  it('should retrieve relevant corrections for queries', async () => {
     vi.mocked(prisma.project.findUnique).mockResolvedValue({
       id: 'proj-1',
       name: 'Test Project',
@@ -1421,7 +1440,7 @@ describe('RAG Service - Phase 3 Context Integration', () => {
     expect(context).toContain('101');
   });
 
-  it.todo('should integrate Phase 3 material data into context', async () => {
+  it('should integrate Phase 3 material data into context', async () => {
     const chunks = [
       {
         id: 'chunk-1',
@@ -1438,12 +1457,12 @@ describe('RAG Service - Phase 3 Context Integration', () => {
       slug: 'test-project',
     } as any);
 
-    vi.mocked(prisma.material.findMany).mockResolvedValue([
+    vi.mocked(prisma.materialTakeoff.findMany).mockResolvedValue([
       {
         id: 'mat-1',
         name: 'Concrete',
         description: '4000 PSI concrete mix',
-        MaterialLineItem: [
+        TakeoffLineItem: [
           {
             description: 'Foundation concrete',
             quantity: 100,
@@ -1465,7 +1484,7 @@ describe('RAG Service - Phase 3 Context Integration', () => {
       'test-project'
     );
 
-    expect(context).toContain('MATERIALS');
+    expect(context).toContain('MATERIAL TAKEOFF DATA');
     expect(context).toContain('Concrete');
   });
 });
