@@ -35,7 +35,7 @@ components/       # 277+ React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations
 __tests__/        # Vitest tests (smoke, integration, snapshots)
 e2e/              # Playwright E2E tests
-.claude/agents/   # 23 custom Claude Code agents
+.claude/agents/   # 28 custom Claude Code agents
 ```
 
 ### Key Service Modules
@@ -128,7 +128,7 @@ vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 
 ## Custom Agents
 
-23 specialized agents in `.claude/agents/`:
+28 specialized agents in `.claude/agents/`:
 
 | Agent | Purpose |
 |-------|---------|
@@ -148,6 +148,59 @@ vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 | `ui-designer` | Component design and accessibility |
 | `api-documenter` | API documentation |
 | `perf-optimizer` | Performance optimization |
+| `project-controls` | Schedule, budget, EVM, forecasting |
+| `quantity-surveyor` | Material takeoffs, pricing |
+| `document-intelligence` | OCR, RAG, document extraction |
+| `field-operations` | Daily reports, progress tracking |
+| `data-sync` | Cross-system data synchronization |
+
+## Construction Agent Auto-Selection
+
+When a user query matches these patterns, automatically use the corresponding agent:
+
+### Routing Table
+
+| Agent | Trigger Keywords | File Context |
+|-------|-----------------|--------------|
+| `data-sync` | sync, integration, data mismatch, EVM refresh, rollup | `lib/*-sync-service.ts` |
+| `project-controls` | EVM, budget sync, schedule, critical path, CPI, SPI, forecast | `lib/schedule-*.ts`, `lib/budget-*.ts` |
+| `quantity-surveyor` | takeoff, quantity, extraction, pricing, waste factor, material | `lib/takeoff-*.ts` |
+| `document-intelligence` | OCR, document processing, RAG, semantic search, PDF | `lib/document-processor.ts`, `lib/rag.ts` |
+| `field-operations` | daily report, weather delay, labor, equipment, progress photo | `lib/daily-report-*.ts` |
+
+### Priority Order (when multiple match)
+1. **data-sync** - Explicit sync/integration requests
+2. **project-controls** - EVM, schedules, budgets
+3. **quantity-surveyor** - Quantities, takeoffs, pricing
+4. **document-intelligence** - Document processing, search
+5. **field-operations** - Daily reports, field data
+
+### Agent Chaining
+
+| Workflow | Chain | Trigger Example |
+|----------|-------|-----------------|
+| Document → Budget | `document-intelligence` → `quantity-surveyor` → `project-controls` | "Extract quantities and update budget" |
+| Daily Report Sync | `field-operations` → `data-sync` → `project-controls` | "Sync daily report and show EVM" |
+| Full Refresh | `document-intelligence` → `data-sync` | "Reprocess documents and sync all" |
+
+### Auto-Invocation Rules
+- "Calculate EVM" → `project-controls`
+- "Extract quantities from drawings" → `document-intelligence` then `quantity-surveyor`
+- "Sync daily report" → `field-operations` then `data-sync`
+- "Takeoff pricing issue" → `quantity-surveyor`
+- "OCR not working" → `document-intelligence`
+
+### Data Flow
+
+```
+document-intelligence
+    ↓ extracts data
+quantity-surveyor ←→ project-controls
+    ↓ quantities        ↓ budgets
+field-operations ←←←
+    ↓ daily reports
+data-sync (orchestrates all)
+```
 
 ## Important Patterns
 
