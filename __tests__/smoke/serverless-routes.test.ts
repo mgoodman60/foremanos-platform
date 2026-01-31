@@ -60,7 +60,7 @@ describe('Serverless Routes Smoke Tests', () => {
         method: 'GET',
       });
 
-      const response = await GET(request, { params: Promise.resolve({ id: 'test-id' }) });
+      const response = await GET(request, { params: { id: 'test-id' } });
 
       // Should return 401 (unauthorized) or 404 (not found - which is also acceptable for smoke test)
       expect([401, 404]).toContain(response.status);
@@ -77,7 +77,7 @@ describe('Serverless Routes Smoke Tests', () => {
       );
 
       const response = await GET(request, {
-        params: Promise.resolve({ slug: 'test-project', documentId: 'test-doc' })
+        params: { slug: 'test-project', documentId: 'test-doc' }
       });
 
       // Should return 401, 403, or 404 for invalid/unauthorized requests
@@ -99,7 +99,7 @@ describe('Serverless Routes Smoke Tests', () => {
       );
 
       const response = await POST(request, {
-        params: Promise.resolve({ slug: 'test-project' })
+        params: { slug: 'test-project' }
       });
 
       // Should return 401, 403, or 404 for invalid/unauthorized requests

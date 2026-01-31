@@ -9,7 +9,7 @@ export interface PaginationOptions {
   pageSize: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface PaginatedResponse<T> {
@@ -34,7 +34,7 @@ export interface InfiniteScrollOptions {
  */
 export function createPaginationParams(
   options: PaginationOptions
-): { skip: number; take: number; orderBy?: any } {
+): { skip: number; take: number; orderBy?: Record<string, 'asc' | 'desc'> } {
   const skip = (options.page - 1) * options.pageSize;
   const take = options.pageSize;
 
@@ -313,7 +313,7 @@ export class ProgressiveImageLoader {
 /**
  * Debounce helper for search/filter inputs
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -333,7 +333,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle helper for scroll events
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {

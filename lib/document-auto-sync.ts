@@ -5,12 +5,12 @@
 
 import { prisma } from '@/lib/db';
 import {
-  routeDocumentToProcessors,
   getExtractableFeatures,
   determineSourceType,
   shouldOverrideExisting,
   DATA_SOURCE_PRIORITY,
   FeatureType,
+  DataSourceType,
 } from './document-intelligence-router';
 import {
   syncScaleData,
@@ -24,6 +24,13 @@ import {
 } from './feature-sync-services';
 import { processUploadedBudgetDocument } from './budget-auto-sync';
 
+export interface FeatureSyncResult {
+  extracted?: boolean;
+  skipped?: boolean;
+  reason?: string;
+  [key: string]: unknown;
+}
+
 export interface SyncResult {
   documentId: string;
   fileName: string;
@@ -31,7 +38,7 @@ export interface SyncResult {
   confidence: number;
   featuresProcessed: string[];
   featuresSkipped: string[];
-  results: Record<string, any>;
+  results: Record<string, FeatureSyncResult>;
   errors: string[];
 }
 
@@ -89,9 +96,10 @@ export async function processDocumentForSync(
       result.featuresProcessed.push(feature);
       
       console.log(`[Auto-Sync] ${feature} complete:`, syncResult);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[Auto-Sync] Error processing ${feature}:`, error);
-      result.errors.push(`${feature}: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      result.errors.push(`${feature}: ${message}`);
     }
   }
 
@@ -105,52 +113,50 @@ async function syncFeature(
   feature: FeatureType,
   projectId: string,
   documentId: string,
-  sourceType: string
-): Promise<any> {
-  const src = sourceType as any;
-  
+  sourceType: DataSourceType
+): Promise<FeatureSyncResult> {
   switch (feature) {
     case 'scale':
-      return syncScaleData(projectId, documentId, src);
-    
+      return syncScaleData(projectId, documentId, sourceType);
+
     case 'rooms':
-      return syncRoomData(projectId, documentId, src);
-    
+      return syncRoomData(projectId, documentId, sourceType);
+
     case 'doors':
-      return syncDoorData(projectId, documentId, src);
-    
+      return syncDoorData(projectId, documentId, sourceType);
+
     case 'windows':
       // Windows use same extraction as doors
-      return syncDoorData(projectId, documentId, src);
-    
+      return syncDoorData(projectId, documentId, sourceType);
+
     case 'mep_electrical':
-      return syncMEPData(projectId, documentId, src, 'mep_electrical');
-    
+      return syncMEPData(projectId, documentId, sourceType, 'mep_electrical');
+
     case 'mep_plumbing':
-      return syncMEPData(projectId, documentId, src, 'mep_plumbing');
-    
+      return syncMEPData(projectId, documentId, sourceType, 'mep_plumbing');
+
     case 'mep_hvac':
-      return syncMEPData(projectId, documentId, src, 'mep_hvac');
-    
+      return syncMEPData(projectId, documentId, sourceType, 'mep_hvac');
+
     case 'budget':
       return processUploadedBudgetDocument(documentId, projectId);
-    
+
     case 'schedule':
-      return syncScheduleData(projectId, documentId, src);
-    
+      return syncScheduleData(projectId, documentId, sourceType);
+
     case 'dimensions':
-      return syncDimensionData(projectId, documentId, src);
-    
+      return syncDimensionData(projectId, documentId, sourceType);
+
     case 'legends':
-      return syncLegendData(projectId, documentId, src);
-    
+      return syncLegendData(projectId, documentId, sourceType);
+
     case 'title_blocks':
       // Title blocks are extracted during document processing
       return { extracted: true };
-    
+
     case 'materials':
-      return syncMaterialsData(projectId, documentId, src);
-    
+      return syncMaterialsData(projectId, documentId, sourceType);
+
     default:
       console.warn(`[Auto-Sync] No sync handler for feature: ${feature}`);
       return { skipped: true, reason: 'No handler' };
@@ -178,8 +184,9 @@ export async function syncAllProjectDocuments(
     try {
       const result = await processDocumentForSync(doc.id, projectId);
       results.push(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[Auto-Sync] Error processing ${doc.fileName}:`, error);
+      const message = error instanceof Error ? error.message : String(error);
       results.push({
         documentId: doc.id,
         fileName: doc.fileName,
@@ -188,7 +195,7 @@ export async function syncAllProjectDocuments(
         featuresProcessed: [],
         featuresSkipped: [],
         results: {},
-        errors: [error.message],
+        errors: [message],
       });
     }
   }
@@ -281,16 +288,18 @@ export async function handleDocumentDeletion(
           await clearFeatureData(projectId, feature);
           result.featuresCleared.push(feature);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`[Auto-Sync] Error re-syncing ${feature}:`, error);
-        result.errors.push(`${feature}: ${error.message}`);
+        const message = error instanceof Error ? error.message : String(error);
+        result.errors.push(`${feature}: ${message}`);
       }
     }
 
     console.log(`[Auto-Sync] Document deletion complete: resynced ${result.featuresResynced.length}, cleared ${result.featuresCleared.length}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[Auto-Sync] Error handling document deletion:`, error);
-    result.errors.push(error.message);
+    const message = error instanceof Error ? error.message : String(error);
+    result.errors.push(message);
   }
 
   return result;
@@ -374,7 +383,13 @@ export async function getProjectSyncStatus(projectId: string): Promise<{
     'budget', 'schedule', 'legends', 'title_blocks', 'materials'
   ];
 
-  const features: Record<string, any> = {};
+  const features: Record<string, {
+    hasData: boolean;
+    sourceType: string | null;
+    confidence: number;
+    documentName: string | null;
+    extractedAt: Date | null;
+  }> = {};
   for (const ft of featureTypes) {
     const source = dataSources.find(ds => ds.featureType === ft);
     features[ft] = {

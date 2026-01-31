@@ -289,6 +289,21 @@ export function calculatePercentage(actual: number, budget: number): number {
   return Math.round((actual / budget) * 100);
 }
 
+// Input interface for budget items to be grouped by phase
+export interface BudgetItemInput {
+  id: string;
+  name: string;
+  categoryNumber?: number;
+  phaseCode?: number;
+  phaseName?: string;
+  contractAmount?: number;
+  billedToDate?: number;
+  actualCost?: number;
+  budgetedAmount?: number;
+  actualHours?: number;
+  budgetedHours?: number;
+}
+
 // Group budget items by phase
 export interface PhaseGroup {
   phaseCode: number;
@@ -322,7 +337,7 @@ export interface PhaseGroup {
   };
 }
 
-export function groupBudgetItemsByPhase(items: any[]): PhaseGroup[] {
+export function groupBudgetItemsByPhase(items: BudgetItemInput[]): PhaseGroup[] {
   const groups: Map<number, PhaseGroup> = new Map();
   
   // Sort items by phase code, then category number

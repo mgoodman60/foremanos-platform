@@ -34,6 +34,7 @@ describe('Chat API Snapshot Tests - Error Scenarios', () => {
       success: false,
       remaining: 0,
       limit: 20,
+      reset: Date.now() + 45000,
       retryAfter: 45,
     });
 

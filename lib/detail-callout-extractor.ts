@@ -40,6 +40,22 @@ export interface CrossReference {
   confidence: number;
 }
 
+// Raw callout from LLM extraction response
+interface RawLLMCallout {
+  type?: string;
+  number?: string;
+  sheetReference?: string;
+  sourceLocation?: string;
+  description?: string;
+  boundingBox?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  confidence?: number;
+}
+
 export interface CalloutGraph {
   nodes: Map<string, {
     sheetNumber: string;
@@ -187,7 +203,7 @@ Return as JSON array:
 
     const result = JSON.parse(contentToParse);
     
-    return (result.callouts || []).map((c: any) => ({
+    return (result.callouts || []).map((c: RawLLMCallout) => ({
       type: c.type || 'detail',
       number: c.number || '',
       sheetReference: normalizeSheetNumber(c.sheetReference || ''),
@@ -331,7 +347,7 @@ export async function validateCrossReferences(
   });
 
   const validSheets = new Set(
-    sheets.map((s: any) => normalizeSheetNumber(s.sheetNumber || '')).filter(Boolean)
+    sheets.map((s) => normalizeSheetNumber(s.sheetNumber || '')).filter(Boolean)
   );
 
   const broken: Array<{ callout: DetailCallout; reason: string }> = [];
@@ -353,12 +369,12 @@ export async function validateCrossReferences(
 
   // Find orphaned sheets (no references in or out)
   const referencedSheets = new Set<string>();
-  callouts.forEach((c: any) => {
+  callouts.forEach((c) => {
     referencedSheets.add(normalizeSheetNumber(c.sourceSheet));
     referencedSheets.add(normalizeSheetNumber(c.sheetReference));
   });
 
-  const orphaned = (Array.from(validSheets) as string[]).filter((s: any) => !referencedSheets.has(s as string));
+  const orphaned = Array.from(validSheets).filter((s) => !referencedSheets.has(s));
 
   return { valid, broken, orphaned };
 }
@@ -437,7 +453,7 @@ export async function getCalloutStats(projectId: string) {
   return {
     totalCallouts,
     sheetsWithCallouts: uniqueSheets.length,
-    byType: byType.map((t: any) => ({ type: t.type, count: t._count })),
+    byType: byType.map((t) => ({ type: t.type, count: t._count })),
   };
 }
 
@@ -448,7 +464,7 @@ export async function getProjectCallouts(projectId: string, filters?: {
   type?: string;
   validOnly?: boolean;
 }) {
-  const where: any = { projectId };
+  const where: Prisma.DetailCalloutWhereInput = { projectId };
   
   if (filters?.type) {
     where.type = filters.type;
@@ -500,7 +516,7 @@ export async function searchCallouts(
     query?: string;
   }
 ) {
-  const where: any = { projectId };
+  const where: Prisma.DetailCalloutWhereInput = { projectId };
   
   if (filters.type) {
     where.type = filters.type;

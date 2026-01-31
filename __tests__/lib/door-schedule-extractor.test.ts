@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock LLM with hoisted response
 const mockLLMResponse = vi.hoisted(() => ({
+  model: 'gpt-4o',
   content: JSON.stringify({
     doors: [
       {
@@ -148,6 +149,7 @@ describe('extractDoorScheduleFromText', () => {
     const { callAbacusLLM } = await import('@/lib/abacus-llm');
     vi.mocked(callAbacusLLM).mockResolvedValueOnce({
       content: 'No door schedule found in document',
+      model: 'gpt-4o',
     });
 
     const result = await extractDoorScheduleFromText(sampleText);

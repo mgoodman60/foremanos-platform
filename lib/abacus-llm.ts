@@ -60,7 +60,14 @@ export async function callAbacusLLM(
     response_format,
   } = options;
 
-  const requestBody: any = {
+  const requestBody: {
+    model: string;
+    messages: LLMMessage[];
+    temperature: number;
+    max_tokens: number;
+    web_search: boolean;
+    response_format?: { type: string };
+  } = {
     model,
     messages,
     temperature,

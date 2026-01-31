@@ -2978,8 +2978,8 @@ export async function getDimensionContext(query: string, projectSlug: string): P
     if (dimSample.length > 0) {
       context += 'DIMENSIONS:\n';
       for (const dim of dimSample) {
-        context += `  • ${dim.dimension || 'Unknown'} (${dim.type || 'linear'})`;
-        if (dim.context) context += ` - ${dim.context}`;
+        context += `  • ${dim.label || 'Unknown'} (${dim.type || 'linear'})`;
+        if (dim.location) context += ` - ${dim.location}`;
         if (dim.sheetNumber) context += ` [Sheet ${dim.sheetNumber}]`;
         context += '\n';
       }

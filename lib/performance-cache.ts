@@ -26,7 +26,7 @@ interface CacheStats {
   evictions: number;
 }
 
-export class PerformanceCache<T = any> {
+export class PerformanceCache<T = unknown> {
   private cache: Map<string, CacheEntry<T>>;
   private accessOrder: string[]; // For LRU eviction
   private maxSize: number; // Maximum cache size in bytes
@@ -52,7 +52,7 @@ export class PerformanceCache<T = any> {
   /**
    * Estimate size of data in bytes
    */
-  private estimateSize(data: any): number {
+  private estimateSize(data: T): number {
     const json = JSON.stringify(data);
     return new Blob([json]).size;
   }
@@ -240,7 +240,7 @@ export class PerformanceCache<T = any> {
 /**
  * Hybrid Cache - Uses Redis when available, falls back to in-memory
  */
-export class HybridCache<T = any> {
+export class HybridCache<T = unknown> {
   private memoryCache: PerformanceCache<T>;
   private redisCache: RedisCacheAdapter | null = null;
   private useRedis: boolean = false;

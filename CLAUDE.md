@@ -100,7 +100,7 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: 140+ tests in `__tests__/` (smoke, integration, snapshots)
+- **Vitest**: 470+ tests in `__tests__/` (smoke, integration, snapshots)
 - **Playwright**: E2E tests in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 
@@ -125,6 +125,8 @@ const mockPrisma = vi.hoisted(() => ({
 }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 ```
+
+Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse across test files.
 
 ## Custom Agents
 
@@ -243,3 +245,8 @@ Optional:
 - `STRIPE_SECRET_KEY` - Payments
 - `AWS_REGION`, `AWS_BUCKET_NAME` - S3 storage
 - `REDIS_URL` - Caching (falls back to memory)
+
+## Known Quirks
+
+### Windows Webpack Path Warnings
+On Windows, webpack may show spurious warnings about exports not found (e.g., `downloadFile` from `@/lib/s3`). This is caused by path case sensitivity differences (`C:\Users` vs `c:\Users`) in webpack's static analysis. These warnings are cosmetic - the exports exist and TypeScript validates correctly. Routes work at runtime.

@@ -6,9 +6,10 @@ const RETRY_CONFIG = {
   backoffMultiplier: 2,
 };
 
-function isRetryableError(error: any): boolean {
-  const errorMessage = error?.message?.toLowerCase() || '';
-  const errorCode = error?.code || '';
+function isRetryableError(error: unknown): boolean {
+  const err = error as { message?: string; code?: string } | null;
+  const errorMessage = err?.message?.toLowerCase() || '';
+  const errorCode = err?.code || '';
   
   return (
     errorMessage.includes('connection') ||

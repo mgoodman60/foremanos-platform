@@ -68,6 +68,15 @@ export interface ModelMetadata {
   viewableId?: string;
 }
 
+// Raw item from Autodesk Model Derivative API
+interface RawAutodeskItem {
+  objectid: number;
+  externalId?: string;
+  name?: string;
+  category?: string;
+  properties?: Record<string, Record<string, unknown>>;
+}
+
 export interface ElementProperty {
   dbId: number;
   externalId?: string;
@@ -173,19 +182,19 @@ export async function getAllProperties(
   const collection = data.data?.collection || [];
 
   // Parse and normalize properties
-  return collection.map((item: any) => parseElementProperties(item));
+  return collection.map((item: RawAutodeskItem) => parseElementProperties(item));
 }
 
 /**
  * Parse raw Autodesk properties into our format
  */
-function parseElementProperties(item: any): ElementProperty {
+function parseElementProperties(item: RawAutodeskItem): ElementProperty {
   const props: Record<string, string | number | boolean> = {};
   const dimensions: ElementProperty['dimensions'] = {};
 
   // Flatten property groups
   if (item.properties) {
-    for (const group of Object.values(item.properties) as any[]) {
+    for (const group of Object.values(item.properties)) {
       if (typeof group === 'object' && group !== null) {
         for (const [key, value] of Object.entries(group)) {
           if (value !== null && value !== undefined && value !== '') {
@@ -208,11 +217,15 @@ function parseElementProperties(item: any): ElementProperty {
   const material = props['Material'] || props['material'] || props['Structural Material'] || '';
   const materialQuantity = props['Material Quantity'] || props['Quantity'] || undefined;
 
+  // Extract category from nested properties if available
+  const categoryGroup = item.properties?.['__category__'] as Record<string, unknown> | undefined;
+  const categoryValue = categoryGroup?.['Category'];
+
   return {
     dbId: item.objectid,
     externalId: item.externalId,
     name: item.name || 'Unknown',
-    category: item.properties?.['__category__']?.['Category'] || item.category || 'Unknown',
+    category: (typeof categoryValue === 'string' ? categoryValue : item.category) || 'Unknown',
     properties: props,
     dimensions: Object.keys(dimensions).length > 0 ? dimensions : undefined,
     material: material ? String(material) : undefined,

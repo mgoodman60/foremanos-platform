@@ -828,12 +828,21 @@ describe('Document Processor - Title Block Extraction', () => {
     const { extractTitleBlock } = await import('@/lib/title-block-extractor');
     vi.mocked(extractTitleBlock).mockResolvedValue({
       success: true,
+      confidence: 0.95,
+      extractionMethod: 'vision',
       data: {
         sheetNumber: 'A-101',
         sheetTitle: 'First Floor Plan',
         projectName: 'Test Building',
-        revisionNumber: '1',
+        projectNumber: 'P-001',
+        dateIssued: '2024-01-01',
+        revision: '1',
         revisionDate: '2024-01-15',
+        drawnBy: 'JD',
+        checkedBy: 'SM',
+        scale: '1/4" = 1\'-0"',
+        discipline: 'A' as never, // DisciplineCode.ARCHITECTURAL
+        confidence: 0.95,
       },
     });
 

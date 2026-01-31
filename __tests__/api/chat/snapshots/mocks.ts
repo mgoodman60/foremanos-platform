@@ -45,6 +45,7 @@ vi.mock('@/lib/rate-limiter', () => ({
     success: true,
     remaining: 99,
     limit: 100,
+    reset: Date.now() + 60000,
     retryAfter: 0,
   }),
   getRateLimitIdentifier: vi.fn().mockReturnValue('rate-limit-id'),

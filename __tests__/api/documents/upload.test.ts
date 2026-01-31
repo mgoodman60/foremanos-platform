@@ -173,9 +173,9 @@ describe('Document Upload Route', () => {
           const mockFile = originalGet('file') as File;
           // Create a proxy that returns custom size
           return new Proxy(mockFile, {
-            get(target, prop) {
+            get(target, prop, receiver) {
               if (prop === 'size') return 209715201; // > 200MB
-              const value = (target as Record<string | symbol, unknown>)[prop];
+              const value = Reflect.get(target, prop, receiver);
               return typeof value === 'function' ? value.bind(target) : value;
             },
           });

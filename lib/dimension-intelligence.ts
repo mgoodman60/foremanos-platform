@@ -8,6 +8,7 @@
  */
 
 import { prisma } from './db';
+import { Prisma } from '@prisma/client';
 import { callAbacusLLM } from './abacus-llm';
 
 // ============================================================================
@@ -46,6 +47,42 @@ export interface DimensionValidation {
   }[];
   isolatedDimensions: Dimension[];
   overallHealth: number;       // 0-1 health score
+}
+
+// Scale data for dimension extraction
+export interface ScaleData {
+  format: string;
+  ratio: number;
+}
+
+// Raw dimension from LLM extraction
+interface RawLLMDimension {
+  value: number;
+  unit?: string;
+  label: string;
+  type?: string;
+  direction?: string;
+  chainReference?: string;
+  location?: string;
+  confidence?: number;
+  boundingBox?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
+// Stored dimension with sheet context
+interface StoredDimension extends Dimension {
+  sheetNumber?: string;
+  annotationId?: string;
+  critical?: boolean;
+}
+
+// Validation error from stored JSON
+interface StoredValidationError {
+  errors: string[];
 }
 
 // ============================================================================
@@ -208,7 +245,7 @@ export function extractDimensionsFromText(
 export async function extractDimensionsWithVision(
   imageBase64: string,
   sheetNumber: string,
-  scaleData?: any
+  scaleData?: ScaleData
 ): Promise<Dimension[]> {
   const prompt = `Analyze this construction drawing and extract ALL labeled dimensions.
 
@@ -281,7 +318,7 @@ Return as JSON array:
 
     const result = JSON.parse(contentToParse);
     
-    return (result.dimensions || []).map((d: any) => ({
+    return (result.dimensions || []).map((d: RawLLMDimension) => ({
       value: d.value,
       unit: d.unit || 'in',
       label: d.label,
@@ -323,7 +360,7 @@ export function validateDimensionChains(
     }
   }
 
-  const chainValidations: any[] = [];
+  const chainValidations: DimensionValidation['chainValidations'] = [];
   let totalValid = 0;
   let totalChecked = 0;
 
@@ -440,13 +477,13 @@ export async function getDimensionStats(projectId: string) {
   let validChains = 0;
 
   for (const annotation of annotations) {
-    const dims = annotation.dimensions as any;
+    const dims = annotation.dimensions as unknown as Dimension[] | null;
     totalDimensions += Array.isArray(dims) ? dims.length : 0;
 
-    const errors = annotation.validationErrors as any;
+    const errors = annotation.validationErrors as unknown as StoredValidationError[] | null;
     if (Array.isArray(errors)) {
       totalChains += errors.length;
-      validChains += errors.filter((e: any) => e.errors.length === 0).length;
+      validChains += errors.filter((e) => e.errors.length === 0).length;
     }
   }
 
@@ -466,23 +503,23 @@ export async function getProjectDimensions(projectId: string, filters?: {
   type?: string;
   critical?: boolean;
 }) {
-  const where: any = { projectId };
-  
+  const where: Prisma.DimensionAnnotationWhereInput = { projectId };
+
   const annotations = await prisma.dimensionAnnotation.findMany({
     where,
     orderBy: { sheetNumber: 'asc' },
   });
-  
+
   // Extract dimensions from annotations
-  const allDimensions: any[] = [];
-  
+  const allDimensions: StoredDimension[] = [];
+
   for (const annotation of annotations) {
-    const dims = annotation.dimensions as any;
+    const dims = annotation.dimensions as unknown as StoredDimension[] | null;
     if (Array.isArray(dims)) {
-      dims.forEach((dim: any) => {
+      dims.forEach((dim) => {
         if (filters?.type && dim.type !== filters.type) return;
         if (filters?.critical && !dim.critical) return;
-        
+
         allDimensions.push({
           ...dim,
           sheetNumber: annotation.sheetNumber,
@@ -491,7 +528,7 @@ export async function getProjectDimensions(projectId: string, filters?: {
       });
     }
   }
-  
+
   return allDimensions;
 }
 
@@ -510,7 +547,7 @@ export async function getSheetDimensions(projectId: string, sheetNumber: string)
     return [];
   }
   
-  const dims = annotation.dimensions as any;
+  const dims = annotation.dimensions as unknown as Dimension[] | null;
   return Array.isArray(dims) ? dims : [];
 }
 
@@ -530,8 +567,8 @@ export async function searchDimensions(
     where: { projectId },
     orderBy: { sheetNumber: 'asc' },
   });
-  
-  const results: any[] = [];
+
+  const results: StoredDimension[] = [];
   
   for (const annotation of annotations) {
     const dims = annotation.dimensions as any;

@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
 
 /**
@@ -197,16 +198,15 @@ export async function isDuplicate(
   fileSize: number,
   fileHash?: string
 ): Promise<boolean> {
-  const whereClause: any = {
-    projectId,
-    deletedAt: null,
-  };
-
   // Check by hash first (most reliable)
   if (fileHash) {
-    whereClause.oneDriveHash = fileHash;
+    const hashWhere: Prisma.DocumentWhereInput = {
+      projectId,
+      deletedAt: null,
+      oneDriveHash: fileHash,
+    };
     const existing = await prisma.document.findFirst({
-      where: whereClause,
+      where: hashWhere,
     });
     if (existing) return true;
   }

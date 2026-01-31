@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import { Prisma } from '@prisma/client';
 
 // Mock Prisma before imports
@@ -1486,5 +1486,717 @@ describe('RAG Service - Phase 3 Context Integration', () => {
 
     expect(context).toContain('MATERIAL TAKEOFF DATA');
     expect(context).toContain('Concrete');
+  });
+});
+
+describe('RAG Service - Query Classification Functions', () => {
+  // Import the query classification functions
+  let isSymbolQuery: (query: string) => boolean;
+  let isScaleQuery: (query: string) => boolean;
+  let isDrawingTypeQuery: (query: string) => boolean;
+  let isCalloutQuery: (query: string) => boolean;
+  let isDimensionQuery: (query: string) => boolean;
+  let isAnnotationQuery: (query: string) => boolean;
+  let getPhaseARAGInstructions: () => string;
+  let getPhaseBRAGInstructions: () => string;
+  let enhanceSymbolContextWithStandardLibrary: (context: string) => string;
+
+  beforeAll(async () => {
+    const ragModule = await import('@/lib/rag');
+    isSymbolQuery = ragModule.isSymbolQuery;
+    isScaleQuery = ragModule.isScaleQuery;
+    isDrawingTypeQuery = ragModule.isDrawingTypeQuery;
+    isCalloutQuery = ragModule.isCalloutQuery;
+    isDimensionQuery = ragModule.isDimensionQuery;
+    isAnnotationQuery = ragModule.isAnnotationQuery;
+    getPhaseARAGInstructions = ragModule.getPhaseARAGInstructions;
+    getPhaseBRAGInstructions = ragModule.getPhaseBRAGInstructions;
+    enhanceSymbolContextWithStandardLibrary = ragModule.enhanceSymbolContextWithStandardLibrary;
+  });
+
+  describe('isSymbolQuery', () => {
+    it('should detect symbol-related queries', () => {
+      expect(isSymbolQuery('What does the symbol mean?')).toBe(true);
+      expect(isSymbolQuery('Show me the legend')).toBe(true);
+      expect(isSymbolQuery('What is the abbreviation for HVAC?')).toBe(true);
+      expect(isSymbolQuery('What does E-1 represent?')).toBe(true);
+      expect(isSymbolQuery('Definition of this code')).toBe(true);
+    });
+
+    it('should not detect non-symbol queries', () => {
+      // Note: isSymbolQuery includes "what is" as a keyword, so we use queries without it
+      expect(isSymbolQuery('Show me the foundation depth')).toBe(false);
+      expect(isSymbolQuery('Show me the budget')).toBe(false);
+      expect(isSymbolQuery('When is the deadline?')).toBe(false);
+      expect(isSymbolQuery('List all contractors')).toBe(false);
+    });
+  });
+
+  describe('isScaleQuery', () => {
+    it('should detect scale and dimension queries', () => {
+      expect(isScaleQuery('What is the scale of this drawing?')).toBe(true);
+      expect(isScaleQuery('What are the dimensions?')).toBe(true);
+      expect(isScaleQuery('How big is the room?')).toBe(true);
+      expect(isScaleQuery('Calculate the area')).toBe(true);
+      expect(isScaleQuery('What is the square footage?')).toBe(true);
+      expect(isScaleQuery('How long is the wall?')).toBe(true);
+      expect(isScaleQuery('How wide is the door?')).toBe(true);
+    });
+
+    it('should not detect non-scale queries', () => {
+      expect(isScaleQuery('Who is the contractor?')).toBe(false);
+      expect(isScaleQuery('What is the budget?')).toBe(false);
+      expect(isScaleQuery('Show me the schedule')).toBe(false);
+    });
+  });
+
+  describe('isDrawingTypeQuery', () => {
+    it('should detect drawing type queries', () => {
+      expect(isDrawingTypeQuery('Show me the floor plan')).toBe(true);
+      expect(isDrawingTypeQuery('What sheet shows the elevation?')).toBe(true);
+      expect(isDrawingTypeQuery('Find the section drawing')).toBe(true);
+      expect(isDrawingTypeQuery('Where is the mechanical drawing?')).toBe(true);
+      expect(isDrawingTypeQuery('Show the electrical layout')).toBe(true);
+      expect(isDrawingTypeQuery('What type of drawing is this?')).toBe(true);
+      expect(isDrawingTypeQuery('HVAC ductwork location')).toBe(true);
+    });
+
+    it('should not detect non-drawing type queries', () => {
+      expect(isDrawingTypeQuery('What is the budget?')).toBe(false);
+      expect(isDrawingTypeQuery('Who is the project manager?')).toBe(false);
+    });
+  });
+
+  describe('isCalloutQuery', () => {
+    it('should detect callout-related queries', () => {
+      expect(isCalloutQuery('What does callout 3 mean?')).toBe(true);
+      expect(isCalloutQuery('Reference to detail A')).toBe(true);
+      expect(isCalloutQuery('Section callout interpretation')).toBe(true);
+    });
+
+    it('should not detect non-callout queries', () => {
+      expect(isCalloutQuery('What is the budget?')).toBe(false);
+      expect(isCalloutQuery('Show me the schedule')).toBe(false);
+    });
+  });
+
+  describe('isDimensionQuery', () => {
+    it('should detect dimension-related queries', () => {
+      expect(isDimensionQuery('What is the dimension?')).toBe(true);
+      expect(isDimensionQuery('Wall measurement needed')).toBe(true);
+      expect(isDimensionQuery('What is the distance between?')).toBe(true);
+      expect(isDimensionQuery('What is the spacing?')).toBe(true);
+    });
+
+    it('should not detect non-dimension queries', () => {
+      expect(isDimensionQuery('Who is the architect?')).toBe(false);
+      expect(isDimensionQuery('What is the project name?')).toBe(false);
+    });
+  });
+
+  describe('isAnnotationQuery', () => {
+    it('should detect annotation-related queries', () => {
+      expect(isAnnotationQuery('What does the annotation say?')).toBe(true);
+      expect(isAnnotationQuery('Show me the notes')).toBe(true);
+      expect(isAnnotationQuery('What is the specification?')).toBe(true);
+      expect(isAnnotationQuery('What are the requirements?')).toBe(true);
+    });
+
+    it('should not detect non-annotation queries', () => {
+      expect(isAnnotationQuery('What is the cost?')).toBe(false);
+      expect(isAnnotationQuery('When is the deadline?')).toBe(false);
+    });
+  });
+
+  describe('getPhaseARAGInstructions', () => {
+    it('should return non-empty instructions string', () => {
+      const instructions = getPhaseARAGInstructions();
+      expect(instructions).toBeTruthy();
+      expect(typeof instructions).toBe('string');
+      expect(instructions.length).toBeGreaterThan(50);
+    });
+
+    it('should contain relevant construction terms', () => {
+      const instructions = getPhaseARAGInstructions();
+      // Should mention key concepts related to Phase A (legend, scale, drawing types)
+      expect(instructions.toLowerCase()).toMatch(/legend|symbol|scale|drawing|title|block/i);
+    });
+  });
+
+  describe('getPhaseBRAGInstructions', () => {
+    it('should return non-empty instructions string', () => {
+      const instructions = getPhaseBRAGInstructions();
+      expect(instructions).toBeTruthy();
+      expect(typeof instructions).toBe('string');
+      expect(instructions.length).toBeGreaterThan(50);
+    });
+
+    it('should contain relevant Phase B terms', () => {
+      const instructions = getPhaseBRAGInstructions();
+      // Should mention key concepts related to Phase B (callouts, dimensions, annotations)
+      expect(instructions.toLowerCase()).toMatch(/callout|dimension|annotation|detail|note/i);
+    });
+  });
+
+  describe('enhanceSymbolContextWithStandardLibrary', () => {
+    it('should enhance context with standard library info', () => {
+      const baseContext = 'Symbol E-1 found in project.';
+      const enhanced = enhanceSymbolContextWithStandardLibrary(baseContext);
+
+      // Should return the context (may be enhanced or unchanged)
+      expect(enhanced).toContain(baseContext);
+    });
+
+    it('should handle empty context', () => {
+      const enhanced = enhanceSymbolContextWithStandardLibrary('');
+      expect(typeof enhanced).toBe('string');
+    });
+
+    it('should not throw on various inputs', () => {
+      expect(() => enhanceSymbolContextWithStandardLibrary('test')).not.toThrow();
+      expect(() => enhanceSymbolContextWithStandardLibrary('HVAC symbol')).not.toThrow();
+      expect(() => enhanceSymbolContextWithStandardLibrary('E-1, M-2, P-3')).not.toThrow();
+    });
+  });
+});
+
+describe('RAG Service - Regulatory Document Retrieval', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should retrieve regulatory chunks for compliance queries', async () => {
+    const { retrieveRegulatoryChunks } = await import('@/lib/rag');
+
+    vi.mocked(prisma.project.findUnique).mockResolvedValue({
+      id: 'proj-1',
+      slug: 'test-project',
+    } as any);
+
+    vi.mocked(prisma.documentChunk.findMany).mockResolvedValue([
+      {
+        id: 'reg-chunk-1',
+        content: 'ADA 2010 Standards require minimum 32 inch clear door width.',
+        documentId: null,
+        regulatoryDocumentId: 'reg-1',
+        pageNumber: 15,
+        metadata: {},
+        RegulatoryDocument: {
+          type: 'ada',
+          standard: 'ADA 2010',
+          jurisdiction: 'Federal',
+        },
+      } as any,
+    ]);
+
+    // Mock regulatoryDocument.findMany
+    (prisma as any).regulatoryDocument = {
+      findMany: vi.fn().mockResolvedValue([
+        { id: 'reg-1', type: 'ada', standard: 'ADA 2010' },
+      ]),
+    };
+
+    const result = await retrieveRegulatoryChunks(
+      'ADA door width requirements',
+      'test-project',
+      5
+    );
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it('should return empty array for non-existent project', async () => {
+    const { retrieveRegulatoryChunks } = await import('@/lib/rag');
+
+    vi.mocked(prisma.project.findUnique).mockResolvedValue(null);
+
+    const result = await retrieveRegulatoryChunks(
+      'ADA requirements',
+      'nonexistent-project',
+      5
+    );
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe('RAG Service - Error Handling', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should handle database errors gracefully in retrieveRelevantDocuments', async () => {
+    vi.mocked(prisma.project.findMany).mockRejectedValue(new Error('Database connection failed'));
+
+    const result = await retrieveRelevantDocuments(
+      'test query',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    // Should return empty results, not throw
+    expect(result.chunks).toEqual([]);
+    expect(result.documentNames).toEqual([]);
+  });
+
+  it('should handle database errors gracefully in retrieveRelevantCorrections', async () => {
+    vi.mocked(prisma.project.findUnique).mockRejectedValue(new Error('Database error'));
+
+    const result = await retrieveRelevantCorrections(
+      'test query',
+      'test-project',
+      3
+    );
+
+    // Should return empty results, not throw
+    expect(result).toEqual([]);
+  });
+
+  it('should handle malformed metadata gracefully', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-1',
+            content: 'Test content',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: 'invalid-metadata-string', // Malformed metadata
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    // Should not throw
+    const result = await retrieveRelevantDocuments(
+      'test query',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks).toBeDefined();
+  });
+});
+
+describe('RAG Service - Counting Query Detection', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should boost schedule/legend content for counting queries', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-schedule',
+            content: 'DOOR SCHEDULE: D-1, D-2, D-3, D-4, D-5. Total: 5 doors. Legend shows door types.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+          {
+            id: 'chunk-generic',
+            content: 'Generic building information without counts.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 2,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    const result = await retrieveRelevantDocuments(
+      'how many doors are there?',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    // Schedule chunk should be ranked first for counting queries
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks[0].content).toContain('DOOR SCHEDULE');
+  });
+
+  it('should detect tabular data patterns for counting', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-table',
+            content: '1 Window Type A\n2 Window Type B\n3 Window Type C\n4 Window Type D\n5 Window Type E',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    const result = await retrieveRelevantDocuments(
+      'count windows',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks.length).toBeGreaterThan(0);
+  });
+});
+
+describe('RAG Service - Sheet Number and Discipline Detection', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should detect and boost sheet numbers', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-1',
+            content: 'Sheet S-001: Structural foundation plan. See S-002 for details.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf', sheetNumber: 'S-001' },
+            sheetNumber: 'S-001',
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: 'structural',
+          },
+        ],
+      } as any,
+    ]);
+
+    const result = await retrieveRelevantDocuments(
+      'structural foundation',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks[0].content).toContain('S-001');
+  });
+
+  it('should apply discipline-specific boosts', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-structural',
+            content: 'S-001: Foundation layout with structural steel.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: 'S-001',
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: 'structural',
+          },
+          {
+            id: 'chunk-landscape',
+            content: 'L-001: Landscape foundation planting.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 2,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: 'L-001',
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: 'landscape',
+          },
+        ],
+      } as any,
+    ]);
+
+    const result = await retrieveRelevantDocuments(
+      'foundation structural',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    // Structural sheet should rank higher than landscape for structural queries
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks[0].content).toContain('S-001');
+  });
+});
+
+describe('RAG Service - Keyword Proximity Scoring', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should boost content with closely placed keywords', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-close',
+            content: 'The foundation depth is 4 feet below grade.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+          {
+            id: 'chunk-far',
+            content: 'Foundation requirements. Many other details here. Grade specifications elsewhere.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 2,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    const result = await retrieveRelevantDocuments(
+      'foundation depth below grade',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks.length).toBeGreaterThan(0);
+    // Chunk with keywords closer together should rank higher
+    expect(result.chunks[0].content).toContain('foundation depth');
+  });
+});
+
+describe('RAG Service - Synonym Expansion', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should expand synonyms for construction terms', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-1',
+            content: 'Footing depth minimum 36 inches below exterior grade.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    // Query uses "footer" which should match "footing" through synonym expansion
+    const result = await retrieveRelevantDocuments(
+      'footer depth requirements',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks[0].content.toLowerCase()).toContain('footing');
+  });
+
+  it('should expand MEP-related synonyms', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-1',
+            content: 'HVAC mechanical ventilation system with heating and cooling.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    // Query for "heating" should match content with "HVAC"
+    const result = await retrieveRelevantDocuments(
+      'heating system',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks[0].content.toLowerCase()).toContain('hvac');
+  });
+
+  it('should expand counting/quantity synonyms', async () => {
+    vi.mocked(prisma.project.findMany).mockResolvedValue([
+      { id: 'proj-1', name: 'Test Project', slug: 'test-project' } as any,
+    ]);
+
+    vi.mocked(prisma.document.findMany).mockResolvedValue([
+      {
+        id: 'doc-1',
+        name: 'Plans.pdf',
+        accessLevel: 'guest',
+        category: 'PLANS_DRAWINGS',
+        processed: true,
+        projectId: 'proj-1',
+        DocumentChunk: [
+          {
+            id: 'chunk-1',
+            content: 'Receptacle schedule: Total quantity of 50 outlets.',
+            documentId: 'doc-1',
+            regulatoryDocumentId: null,
+            pageNumber: 1,
+            metadata: { documentName: 'Plans.pdf' },
+            sheetNumber: null,
+            titleBlockData: null,
+            revision: null,
+            dateIssued: null,
+            discipline: null,
+          },
+        ],
+      } as any,
+    ]);
+
+    // Query uses "outlets" which should match "receptacle" through synonym expansion
+    const result = await retrieveRelevantDocuments(
+      'how many outlets',
+      'admin',
+      5,
+      'test-project'
+    );
+
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks[0].content.toLowerCase()).toContain('receptacle');
   });
 });
