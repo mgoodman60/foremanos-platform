@@ -11,11 +11,14 @@ npm run lint             # Run ESLint
 npm test                 # Run Vitest tests
 npm test -- --run        # Run tests once without watch mode
 npm test -- __tests__/smoke --run   # Run smoke tests only
+npm run test:integration     # Run chat integration tests
+npm run test:snapshot        # Run snapshot tests
 npx playwright test      # Run E2E tests
 npx playwright test e2e/smoke.spec.ts --project=chromium  # Single browser E2E
 npx prisma studio        # Open database GUI
 npx prisma db push       # Sync schema to database
 npx prisma generate      # Regenerate Prisma client
+npm run seed:test-user   # Seed test user for development
 ```
 
 ## Architecture Overview
@@ -100,17 +103,22 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: 470+ tests in `__tests__/` (smoke, integration, snapshots)
+- **Vitest**: 690 tests in `__tests__/` (smoke, integration, snapshots)
 - **Playwright**: E2E tests in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 
 Key test suites:
 | File | Coverage |
 |------|----------|
-| `__tests__/lib/rag.test.ts` | RAG scoring, query classification (35 tests) |
+| `__tests__/lib/rag.test.ts` | RAG scoring, query classification (67 tests) |
+| `__tests__/lib/rate-limiter.test.ts` | Redis + in-memory fallback (32 tests) |
+| `__tests__/lib/auth-options.test.ts` | NextAuth callbacks (30 tests) |
+| `__tests__/lib/stripe.test.ts` | Subscriptions, checkout, limits (31 tests) |
+| `__tests__/lib/takeoff-formatters.test.ts` | Quantity formatting (28 tests) |
+| `__tests__/lib/db-helpers.test.ts` | Retry logic, error handling (23 tests) |
+| `__tests__/lib/s3.test.ts` | Path generation, utilities (21 tests) |
+| `__tests__/lib/takeoff-calculations.test.ts` | Quantity calculations (21 tests) |
 | `__tests__/lib/document-processor.test.ts` | PDF processing, extraction (20 tests) |
-| `__tests__/api/stripe/webhook.test.ts` | Stripe events, idempotency (15 tests) |
-| `__tests__/api/documents/upload.test.ts` | Auth, validation, S3 (20 tests) |
 
 Run specific test file:
 ```bash
