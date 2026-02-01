@@ -131,7 +131,7 @@ Key model groups in `prisma/schema.prisma`:
 ## Testing
 
 - **Vitest**: 6,391 tests in `__tests__/` (146 lib test files + API/smoke/integration)
-- **Playwright**: 82 E2E tests in `e2e/`
+- **Playwright**: 137 E2E tests in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 - **100% lib coverage**: All 149 lib modules have dedicated test files
 
@@ -229,6 +229,9 @@ All lib modules in `lib/` have comprehensive test coverage in `__tests__/lib/`. 
 | File | Coverage |
 |------|----------|
 | `e2e/role-access-control.spec.ts` | Admin/client route access (13 tests) |
+| `e2e/upload-progress.spec.ts` | Upload progress UI & ARIA (17 tests) |
+| `e2e/accessibility.spec.ts` | Skip links, focus trap, ARIA (16 tests) |
+| `e2e/forms-validation.spec.ts` | Form validation & accessibility (22 tests) |
 | `e2e/project-access.spec.ts` | Project-level permissions (11 tests) |
 | `e2e/auth.spec.ts` | Authentication flows (9 tests) |
 | `e2e/ui-design-system.spec.ts` | UI/accessibility (9 tests) |
