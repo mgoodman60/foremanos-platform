@@ -15,6 +15,8 @@ import {
   ArrowLeft,
   RefreshCw
 } from 'lucide-react';
+import { SkeletonIntelligenceDashboard } from '@/components/ui/skeleton-card';
+import { FeatureTip } from '@/components/feature-tip';
 
 interface DashboardData {
   project: any;
@@ -68,11 +70,8 @@ export default function IntelligenceDashboard() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <RefreshCw className="h-8 w-8 text-cyan-400 animate-spin" />
-          <p className="text-gray-300">Loading Intelligence Dashboard...</p>
-        </div>
+      <div className="min-h-screen bg-dark-surface p-8">
+        <SkeletonIntelligenceDashboard />
       </div>
     );
   }
@@ -127,6 +126,15 @@ export default function IntelligenceDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Feature Tip */}
+        <FeatureTip
+          id="intelligence-spatial-correlation"
+          title="Spatial Correlation Analysis"
+          description="Analyze how different building systems interact across your project sheets. Click Multi-Sheet Spatial Correlation to explore."
+          variant="highlight"
+          position="top"
+        />
+
         {/* Health Overview */}
         <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
           <div className="flex items-center justify-between mb-6">

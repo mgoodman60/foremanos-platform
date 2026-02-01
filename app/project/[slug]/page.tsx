@@ -23,6 +23,8 @@ import OnboardingChecklist from '@/components/onboarding-checklist';
 import { MobileBottomNav } from '@/components/mobile';
 import SubmittalMetricsWidget from '@/components/submittals/SubmittalMetricsWidget';
 import { SkeletonProjectWorkspace } from '@/components/ui/skeleton-card';
+import { CommandPalette } from '@/components/command-palette';
+import { FeatureTip } from '@/components/feature-tip';
 
 interface Project {
   id: string;
@@ -910,6 +912,16 @@ export default function ProjectPage() {
                 )}
               </div>
 
+              {/* Command Palette */}
+              <CommandPalette
+                projectSlug={slug}
+                isAdmin={session?.user?.role === 'admin'}
+                onOpenDocumentLibrary={() => setShowDocumentLibrary(true)}
+                onOpenWeather={() => setShowWeatherWidget(true)}
+                onOpenPhotoLibrary={() => setShowPhotoLibrary(true)}
+                onOpenReportHistory={() => setShowReportHistory(true)}
+              />
+
               {/* User Settings Button */}
               <button
                 onClick={() => router.push('/profile')}
@@ -950,10 +962,21 @@ export default function ProjectPage() {
 
       {/* Onboarding Checklist */}
       <div className="bg-dark-surface px-3 sm:px-6 py-2">
-        <OnboardingChecklist 
+        <OnboardingChecklist
           projectSlug={slug}
           onRefresh={() => fetchProject()}
           onOpenDocumentLibrary={() => setShowDocumentLibrary(true)}
+        />
+      </div>
+
+      {/* Command Palette Feature Tip */}
+      <div className="bg-dark-surface px-3 sm:px-6">
+        <FeatureTip
+          id="command-palette-intro"
+          title="Quick Navigation"
+          description="Press Cmd+K (Ctrl+K on Windows) anytime for quick access to documents, tools, and navigation."
+          variant="minimal"
+          position="inline"
         />
       </div>
 

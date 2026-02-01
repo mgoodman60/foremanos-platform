@@ -29,6 +29,7 @@ import BudgetDashboard from '@/components/budget/BudgetDashboard';
 import LaborMaterialReview from '@/components/budget/LaborMaterialReview';
 import BudgetVarianceWidget from '@/components/budget/BudgetVarianceWidget';
 import CostForecastWidget from '@/components/budget/CostForecastWidget';
+import { FeatureTip } from '@/components/feature-tip';
 
 export default function BudgetPage() {
   const params = useParams();
@@ -61,6 +62,15 @@ export default function BudgetPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Feature Tip */}
+        <FeatureTip
+          id="budget-variance-tracking"
+          title="Track Variance Across Cost Codes"
+          description="Monitor budget performance in real-time. Use Dashboard for visual insights or drill into Job Cost for details."
+          variant="default"
+          position="top"
+        />
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-dark-card border border-gray-700 mb-6 flex-wrap">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600">

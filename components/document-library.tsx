@@ -11,6 +11,7 @@ type DocumentCategory = string;
 import { getAllCategories, getCategoryLabel } from '@/lib/document-categorizer';
 import DocumentPreviewModal from './document-preview-modal';
 import { DocumentCategoryModal } from './document-category-modal';
+import { useOptimisticDocuments } from '@/hooks/useOptimisticDocuments';
 
 // CAD file extensions supported by Autodesk
 const CAD_EXTENSIONS = ['.dwg', '.dxf', '.dwf', '.dwfx', '.rvt', '.rfa', '.ifc', '.nwd', '.nwc', '.3ds', '.fbx', '.obj', '.stl', '.stp', '.step', '.iges', '.igs', '.f3d', '.skp'];
@@ -65,11 +66,6 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
   const categories = getAllCategories();
 
-  useEffect(() => {
-    fetchDocuments();
-    fetchProjectSlug();
-  }, [projectId]);
-
   const fetchProjectSlug = async () => {
     try {
       const response = await fetch(`/api/projects/by-id/${projectId}`);
@@ -87,17 +83,17 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     try {
       const response = await fetch(`/api/documents?projectId=${projectId}`);
       if (!response.ok) throw new Error('Failed to fetch documents');
-      
+
       const data = await response.json();
-      
+
       // Admins and clients can see all documents (they need to manage visibility)
       // Guests only see documents with accessLevel 'guest'
-      const accessible = (userRole === 'admin' || userRole === 'client') 
+      const accessible = (userRole === 'admin' || userRole === 'client')
         ? data.documents
-        : data.documents.filter((doc: Document) => 
+        : data.documents.filter((doc: Document) =>
             doc.accessLevel === 'guest'
           );
-      
+
       setDocuments(accessible);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -106,6 +102,19 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       setLoading(false);
     }
   };
+
+  // Initialize optimistic update hook (after fetchDocuments is defined)
+  const { optimisticDelete, optimisticChangeAccess } = useOptimisticDocuments({
+    documents,
+    setDocuments,
+    fetchDocuments,
+    onDocumentsChange,
+  });
+
+  useEffect(() => {
+    fetchDocuments();
+    fetchProjectSlug();
+  }, [projectId]);
 
   // Handle CAD file upload to Autodesk
   const handleCADUpload = async (file: File) => {
@@ -495,58 +504,36 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
   const bulkDelete = async () => {
     if (selectedDocs.size === 0) return;
-    
+
     const confirmMsg = `Delete ${selectedDocs.size} selected document${selectedDocs.size > 1 ? 's' : ''}? This action cannot be undone.`;
     if (!confirm(confirmMsg)) return;
-    
+
     setBulkActionLoading(true);
-    let successCount = 0;
-    
-    for (const docId of selectedDocs) {
-      const doc = documents.find(d => d.id === docId);
-      if (doc) {
-        try {
-          const response = await fetch(`/api/documents/${doc.id}`, {
-            method: 'DELETE',
-          });
-          if (response.ok) successCount++;
-        } catch (error) {
-          console.error(`Failed to delete ${doc.name}:`, error);
-        }
-      }
-    }
-    
+    const docCount = selectedDocs.size;
+    const success = await optimisticDelete(Array.from(selectedDocs));
     setBulkActionLoading(false);
     setSelectedDocs(new Set());
-    toast.success(`✓ Deleted ${successCount} of ${selectedDocs.size} documents`);
-    fetchDocuments();
-    // Notify parent of changes
-    onDocumentsChange?.();
+
+    if (success) {
+      toast.success(`Deleted ${docCount} document(s)`);
+    }
   };
 
   const bulkChangeAccess = async (newAccessLevel: 'admin' | 'client' | 'guest') => {
     if (selectedDocs.size === 0) return;
-    
+
     setBulkActionLoading(true);
-    let successCount = 0;
-    
-    for (const docId of selectedDocs) {
-      try {
-        const response = await fetch(`/api/documents/${docId}/access`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessLevel: newAccessLevel }),
-        });
-        if (response.ok) successCount++;
-      } catch (error) {
-        console.error(`Failed to change access for document ${docId}:`, error);
-      }
-    }
-    
+    const docCount = selectedDocs.size;
+    const success = await optimisticChangeAccess(
+      Array.from(selectedDocs),
+      newAccessLevel
+    );
     setBulkActionLoading(false);
     setSelectedDocs(new Set());
-    toast.success(`✓ Updated access for ${successCount} of ${selectedDocs.size} documents`);
-    fetchDocuments();
+
+    if (success) {
+      toast.success(`Updated access for ${docCount} document(s)`);
+    }
   };
 
   const handleDelete = async (doc: Document) => {

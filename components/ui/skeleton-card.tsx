@@ -288,3 +288,199 @@ export function SkeletonProjectWorkspace({ className }: SkeletonProjectWorkspace
     </div>
   );
 }
+
+interface SkeletonPhaseCardProps {
+  className?: string;
+}
+
+/**
+ * SkeletonPhaseCard - Phase card skeleton for intelligence dashboard
+ */
+export function SkeletonPhaseCard({ className }: SkeletonPhaseCardProps) {
+  return (
+    <div
+      className={cn(
+        'bg-gradient-to-br from-gray-700/20 to-gray-800/20 rounded-xl border border-gray-700 p-6',
+        className
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-10 bg-gray-700 rounded-lg" />
+          <div>
+            <Skeleton className="h-5 w-20 bg-gray-700 mb-1" />
+            <Skeleton className="h-4 w-32 bg-gray-700" />
+          </div>
+        </div>
+        <div className="text-right">
+          <Skeleton className="h-8 w-12 bg-gray-700 mb-1" />
+          <Skeleton className="h-3 w-8 bg-gray-700" />
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="space-y-2 mt-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex justify-between">
+            <Skeleton className="h-4 w-24 bg-gray-700" />
+            <Skeleton className="h-4 w-8 bg-gray-700" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface SkeletonListCardProps {
+  /** Number of rows to display */
+  rows?: number;
+  className?: string;
+}
+
+/**
+ * SkeletonListCard - List card skeleton for insights/recommendations sections
+ */
+export function SkeletonListCard({ rows = 5, className }: SkeletonListCardProps) {
+  return (
+    <div
+      className={cn(
+        'bg-dark-card rounded-xl border border-gray-700 p-6',
+        className
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4">
+        <Skeleton className="h-6 w-6 bg-gray-700 rounded" />
+        <Skeleton className="h-6 w-32 bg-gray-700" />
+      </div>
+
+      {/* List items */}
+      <div className="space-y-3">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <Skeleton className="h-4 w-4 bg-gray-700 rounded-full flex-shrink-0 mt-0.5" />
+            <Skeleton
+              className="h-4 bg-gray-700"
+              style={{ width: `${70 + Math.random() * 25}%` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface SkeletonIntelligenceDashboardProps {
+  className?: string;
+}
+
+/**
+ * SkeletonIntelligenceDashboard - Full intelligence dashboard skeleton
+ *
+ * Matches the structure of the Intelligence Dashboard page for smooth loading.
+ */
+export function SkeletonIntelligenceDashboard({ className }: SkeletonIntelligenceDashboardProps) {
+  return (
+    <div className={cn('space-y-6', className)}>
+      {/* Health Overview - 4 stat cards */}
+      <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-6 bg-gray-700 rounded" />
+            <Skeleton className="h-6 w-32 bg-gray-700" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-3 w-3 bg-gray-700 rounded-full" />
+            <Skeleton className="h-4 w-16 bg-gray-700" />
+          </div>
+        </div>
+        <SkeletonStats count={4} />
+      </div>
+
+      {/* Phase Cards - 3 cards */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <SkeletonPhaseCard key={i} />
+        ))}
+      </div>
+
+      {/* Feature Details - 2x2 grid */}
+      <div className="bg-dark-card rounded-xl border border-cyan-700 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Skeleton className="h-6 w-6 bg-gray-700 rounded" />
+              <Skeleton className="h-6 w-64 bg-gray-700" />
+            </div>
+            <Skeleton className="h-4 w-48 bg-gray-700" />
+          </div>
+          <Skeleton className="h-4 w-24 bg-gray-700" />
+        </div>
+        <SkeletonCardGrid count={4} columns={2} />
+      </div>
+
+      {/* Insights & Recommendations - 2 columns */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SkeletonListCard rows={5} />
+        <SkeletonListCard rows={5} />
+      </div>
+
+      {/* Project Statistics */}
+      <div className="bg-dark-card rounded-xl border border-gray-700 p-6">
+        <Skeleton className="h-6 w-40 bg-gray-700 mb-4" />
+        <SkeletonStats count={4} />
+      </div>
+    </div>
+  );
+}
+
+interface SkeletonBudgetDashboardProps {
+  className?: string;
+}
+
+/**
+ * SkeletonBudgetDashboard - Full budget dashboard skeleton
+ *
+ * Matches the structure of the Budget Dashboard page for smooth loading.
+ */
+export function SkeletonBudgetDashboard({ className }: SkeletonBudgetDashboardProps) {
+  return (
+    <div className={cn('space-y-6', className)}>
+      {/* Header with date selector */}
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-8 w-48 bg-gray-700" />
+        <Skeleton className="h-10 w-32 bg-gray-700 rounded-lg" />
+      </div>
+
+      {/* KPI Cards - 4 cards */}
+      <SkeletonStats count={4} />
+
+      {/* Performance Indices */}
+      <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-6 w-40 bg-gray-700" />
+          <Skeleton className="h-5 w-24 bg-gray-700" />
+        </div>
+        <Skeleton className="h-48 w-full bg-gray-700 rounded" />
+      </div>
+
+      {/* Charts - 2 columns */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SkeletonChart />
+        <SkeletonChart />
+      </div>
+
+      {/* Additional sections */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <SkeletonChart height={250} />
+        </div>
+        <div className="space-y-4">
+          <SkeletonListCard rows={3} />
+          <SkeletonListCard rows={3} />
+        </div>
+      </div>
+    </div>
+  );
+}
