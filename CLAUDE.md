@@ -71,6 +71,9 @@ e2e/              # Playwright E2E tests
 | `lib/budget-sync-service.ts` | Budget synchronization and AI extraction |
 | `lib/workflow-service.ts` | Workflow orchestration and state transitions |
 | `lib/report-finalization.ts` | Report generation finalization and export |
+| `lib/logger.ts` | Structured logging utility with context and metadata |
+| `lib/intelligence-orchestrator.ts` | Phase A/B/C intelligence extraction orchestration |
+| `lib/schedule-extractor-ai.ts` | AI-powered schedule/Gantt chart extraction |
 
 ### Type Helper Files
 
@@ -102,7 +105,8 @@ Processors: Conversation → RestrictedCheck → RAG → Cache → LLM Stream
 
 - `lib/chat/middleware/` - Request validation and auth
 - `lib/chat/processors/` - Business logic and streaming
-- `lib/chat/utils/` - Helpers (restricted query check)
+  - `context-builder.ts` - RAG retrieval, Phase A/3A/3C enrichment, web search
+- `lib/chat/utils/` - Helpers (restricted query check, query classifier)
 
 ### Database Models (Prisma)
 
@@ -380,6 +384,29 @@ import { colors } from '@/lib/design-tokens';
 // Use colors.primary.DEFAULT instead of '#3B82F6'
 ```
 
+### Structured Logging
+Use `lib/logger.ts` instead of `console.log/error/warn` for production observability:
+```typescript
+import { logger } from '@/lib/logger';
+
+// Info level - general information
+logger.info('CONTEXT', 'Message describing action', { key: value });
+
+// Warning level - potential issues
+logger.warn('CONTEXT', 'Warning message', { details });
+
+// Error level - errors with optional error object
+logger.error('CONTEXT', 'Error message', error, { additionalMeta });
+
+// Scoped logger for a specific context
+import { createScopedLogger } from '@/lib/logger';
+const log = createScopedLogger('DOCUMENT_PROCESSOR');
+log.info('Processing started');
+log.error('Failed', error);
+```
+
+Context prefixes should be SCREAMING_SNAKE_CASE (e.g., `VISION_API`, `DOCUMENT_PROCESSOR`, `PHASE_A`).
+
 ## Environment Variables
 
 Required:
@@ -474,8 +501,27 @@ Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
 - **Virus scanning**: Implemented `lib/virus-scanner.ts` for file upload security
 - **Vercel compatibility**: Serverless function fixes and build optimizations
 
+### Logging & Observability (Phase 6 - February 2026)
+Replaced ~215 `console.log/error/warn` calls with structured `logger` from `@/lib/logger` in 5 high-volume modules:
+
+| File | Calls Replaced |
+|------|----------------|
+| `lib/vision-api-multi-provider.ts` | 63 |
+| `lib/document-processor.ts` | 69 |
+| `lib/chat/processors/context-builder.ts` | 30 |
+| `lib/intelligence-orchestrator.ts` | 23 |
+| `lib/schedule-extractor-ai.ts` | 30 |
+
+Benefits:
+- Structured JSON output for log aggregation services
+- Consistent context prefixes (e.g., `VISION_API`, `PROCESS`, `PHASE_A`)
+- Metadata objects instead of string interpolation
+- Error objects properly serialized with stack traces
+- Debug level only logs in development
+
 ### New Service Modules
 - **Vision API**: Multi-provider vision with fallback (`lib/vision-api-multi-provider.ts`)
 - **Query caching**: Redis-backed LLM response caching (`lib/query-cache.ts`)
 - **Analytics**: Project KPI and metrics service (`lib/analytics-service.ts`)
 - **Workflow**: State machine for document processing (`lib/workflow-service.ts`)
+- **Logger**: Centralized structured logging utility (`lib/logger.ts`)
