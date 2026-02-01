@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import {
   twoPassRetrieval,
   bundleCrossReferences,
@@ -48,7 +49,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   const retrievalLimit = options.retrievalLimit || queryClassification.retrievalLimit;
 
   // ENHANCED RETRIEVAL: Use two-pass retrieval with cross-reference bundling
-  console.log(`🔍 [ENHANCED RETRIEVAL] Starting two-pass retrieval for query type detection...`);
+  logger.info('ENHANCED_RETRIEVAL', 'Starting two-pass retrieval for query type detection');
   const { chunks: enhancedChunks, retrievalLog } = await twoPassRetrieval(
     message || '',
     projectSlug,
@@ -57,25 +58,25 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   );
 
   // Log retrieval strategy
-  retrievalLog.forEach((log) => console.log(`   📋 ${log}`));
+  retrievalLog.forEach((log) => logger.info('ENHANCED_RETRIEVAL', log));
 
   // CROSS-REFERENCE BUNDLING: Add related chunks
-  console.log(`🔗 [CROSS-REFERENCE] Bundling related content...`);
+  logger.info('CROSS_REFERENCE', 'Bundling related content');
   const { enrichedChunks: crossRefEnrichedChunks, crossRefLog } = await bundleCrossReferences(
     enhancedChunks,
     projectSlug
   );
-  crossRefLog.forEach((log) => console.log(`   🔗 ${log}`));
+  crossRefLog.forEach((log) => logger.info('CROSS_REFERENCE', log));
 
   // PHASE A ENRICHMENT: Add title block and legend intelligence
-  console.log(`📋 [PHASE A] Enriching with title block and legend metadata...`);
+  logger.info('PHASE_A', 'Enriching with title block and legend metadata');
   const enrichedChunks = await enrichWithPhaseAMetadata(crossRefEnrichedChunks, projectSlug);
-  console.log(`   ✅ Enriched ${enrichedChunks.length} chunks with Phase A intelligence`);
+  logger.info('PHASE_A', `Enriched chunks with Phase A intelligence`, { chunkCount: enrichedChunks.length });
 
   // ========================================
   // PHASE 3A: ENHANCED VISION PROCESSING
   // ========================================
-  console.log(`🔬 [PHASE 3A] Applying enhanced vision analysis...`);
+  logger.info('PHASE_3A', 'Applying enhanced vision analysis');
 
   // 1. Multi-Scale Detection
   const scaleAnalysis = enrichedChunks
@@ -86,10 +87,10 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
     .filter((s) => s.scales.additionalScales.length > 0 || s.scales.scaleWarnings.length > 0);
 
   if (scaleAnalysis.length > 0) {
-    console.log(`   📏 [SCALES] Detected ${scaleAnalysis.length} chunks with scale information`);
+    logger.info('SCALES', `Detected chunks with scale information`, { chunkCount: scaleAnalysis.length });
     scaleAnalysis.forEach((s) => {
       if (s.scales.scaleWarnings.length > 0) {
-        console.log(`      ⚠️  ${s.scales.scaleWarnings.join(', ')}`);
+        logger.warn('SCALES', s.scales.scaleWarnings.join(', '));
       }
     });
   }
@@ -100,7 +101,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
     return scaleBar.detected;
   });
   if (scaleBarChunks.length > 0) {
-    console.log(`   📐 [SCALE BARS] Found ${scaleBarChunks.length} scale bars`);
+    logger.info('SCALE_BARS', `Found scale bars`, { count: scaleBarChunks.length });
   }
 
   // 3. Abbreviation Expansion
@@ -110,7 +111,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
       chunk.content = expandedContent;
     }
   });
-  console.log(`   📝 [ABBREVIATIONS] Expanded construction abbreviations in ${enrichedChunks.length} chunks`);
+  logger.info('ABBREVIATIONS', `Expanded construction abbreviations`, { chunkCount: enrichedChunks.length });
 
   // 4. Grid-Based Spatial Referencing
   const chunksWithGrids = enrichedChunks
@@ -130,20 +131,20 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
     .filter(Boolean);
 
   if (chunksWithGrids.length > 0) {
-    console.log(`   🗺️  [GRID REFS] Extracted grid references from ${chunksWithGrids.length} chunks`);
+    logger.info('GRID_REFS', `Extracted grid references`, { chunkCount: chunksWithGrids.length });
     chunksWithGrids.slice(0, 3).forEach((c) => {
       if (c) {
-        console.log(`      📍 ${c.spatialContext}`);
+        logger.info('GRID_REFS', c.spatialContext);
       }
     });
   }
 
-  console.log(`✅ [PHASE 3A] Enhanced vision analysis complete`);
+  logger.info('PHASE_3A', 'Enhanced vision analysis complete');
 
   // ========================================
   // PHASE 3C: ADVANCED FEATURES
   // ========================================
-  console.log(`🚀 [PHASE 3C] Applying advanced analysis...`);
+  logger.info('PHASE_3C', 'Applying advanced analysis');
 
   // 1. System Topology Reconstruction (for MEP system queries)
   const queryIntent = classifyQueryIntent(message || '');
@@ -157,14 +158,12 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
 
     const systemType = systemTypeMap[queryIntent.mepTrade];
     if (systemType) {
-      console.log(`   🔧 [TOPOLOGY] Reconstructing ${systemType} system topology...`);
+      logger.info('TOPOLOGY', `Reconstructing system topology`, { systemType });
       const topology = await reconstructSystemTopology(projectSlug, systemType);
 
       if (topology.nodes.length > 0) {
-        console.log(`      ✓ Found ${topology.nodes.length} nodes, ${topology.connections.length} connections`);
-        console.log(
-          `      ✓ Flow sequence: ${topology.flow.slice(0, 5).join(' → ')}${topology.flow.length > 5 ? '...' : ''}`
-        );
+        logger.info('TOPOLOGY', `Found nodes and connections`, { nodes: topology.nodes.length, connections: topology.connections.length });
+        logger.info('TOPOLOGY', `Flow sequence: ${topology.flow.slice(0, 5).join(' → ')}${topology.flow.length > 5 ? '...' : ''}`);
 
         if (enrichedChunks.length > 0) {
           enrichedChunks[0].metadata = {
@@ -177,7 +176,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
           };
         }
       } else if (topology.warnings.length > 0) {
-        console.log(`      ⚠️  ${topology.warnings.join(', ')}`);
+        logger.warn('TOPOLOGY', topology.warnings.join(', '));
       }
     }
   }
@@ -185,14 +184,12 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   // 2. Isometric View Interpretation
   const isIsometricQuery = /isometric|iso\s+view|3d|vertical|elevation|riser/i.test(message || '');
   if (isIsometricQuery) {
-    console.log(`   📐 [ISOMETRIC] Detecting 3D/isometric views...`);
+    logger.info('ISOMETRIC', 'Detecting 3D/isometric views');
 
     enrichedChunks.forEach((chunk) => {
       const isoView = interpretIsometricView(chunk);
       if (isoView.elements.length > 0) {
-        console.log(
-          `      ✓ Found ${isoView.elements.length} elements in ${isoView.discipline} isometric view`
-        );
+        logger.info('ISOMETRIC', `Found elements in isometric view`, { elements: isoView.elements.length, discipline: isoView.discipline });
         chunk.metadata = {
           ...chunk.metadata,
           isometric_view: {
@@ -208,7 +205,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   // 3. Advanced Conflict Detection
   const isConflictQuery = /conflict|clash|coordination|clearance|interfere|overlap/i.test(message || '');
   if (isConflictQuery) {
-    console.log(`   ⚠️  [CONFLICTS] Running advanced conflict detection...`);
+    logger.info('CONFLICTS', 'Running advanced conflict detection');
 
     const conflicts = await detectAdvancedConflicts(projectSlug);
 
@@ -216,7 +213,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
       const criticalCount = conflicts.filter((c) => c.severity === 'critical').length;
       const majorCount = conflicts.filter((c) => c.severity === 'major').length;
 
-      console.log(`      ⚠️  Found ${conflicts.length} conflicts (${criticalCount} critical, ${majorCount} major)`);
+      logger.warn('CONFLICTS', `Found conflicts`, { total: conflicts.length, critical: criticalCount, major: majorCount });
 
       if (enrichedChunks.length > 0) {
         enrichedChunks[0].metadata = {
@@ -230,21 +227,19 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
         };
       }
     } else {
-      console.log(`      ✓ No conflicts detected`);
+      logger.info('CONFLICTS', 'No conflicts detected');
     }
   }
 
   // 4. Adaptive Symbol Learning
   const isSymbolQuery = /symbol|legend|key|notation|mark|icon/i.test(message || '');
   if (isSymbolQuery) {
-    console.log(`   📚 [SYMBOLS] Applying learned symbol library...`);
+    logger.info('SYMBOLS', 'Applying learned symbol library');
 
     const symbolLibrary = await learnProjectSymbols(projectSlug);
 
     if (symbolLibrary.symbols.length > 0) {
-      console.log(
-        `      ✓ Learned ${symbolLibrary.symbols.length} symbols (${symbolLibrary.totalAppearances} appearances)`
-      );
+      logger.info('SYMBOLS', `Learned symbols`, { count: symbolLibrary.symbols.length, appearances: symbolLibrary.totalAppearances });
 
       enrichedChunks.forEach((chunk, idx) => {
         const enhanced = applyLearnedSymbols(chunk, symbolLibrary);
@@ -253,7 +248,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
     }
   }
 
-  console.log(`✅ [PHASE 3C] Advanced analysis complete`);
+  logger.info('PHASE_3C', 'Advanced analysis complete');
 
   // Convert enhanced chunks to standard format
   const chunks = enrichedChunks
@@ -274,7 +269,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   const adminCorrections = await retrieveRelevantCorrections(message || '', projectSlug, 3);
 
   // Generate enhanced context
-  console.log(`📝 [CONTEXT GENERATION] Generating enhanced context with validation markers...`);
+  logger.info('CONTEXT_GENERATION', 'Generating enhanced context with validation markers');
   const enhancedContext = generateEnhancedContext(enrichedChunks, message || '');
 
   // Generate Phase 3-enhanced context with corrections
@@ -300,14 +295,14 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   let webSearchResults: WebSearchResult[] = [];
 
   if (useWebSearch) {
-    console.log('🌐 Hybrid search: Performing web search to supplement document information...');
+    logger.info('WEB_SEARCH', 'Performing web search to supplement document information');
     const searchQuery =
       image && message ? `${message} building code requirements compliance` : message || '';
     const webSearch = await performWebSearch(searchQuery);
     if (webSearch.hasResults) {
       webSearchContext = formatWebResultsForContext(webSearch.results);
       webSearchResults = webSearch.results;
-      console.log(`✅ Added ${webSearch.results.length} web sources as supplementary context`);
+      logger.info('WEB_SEARCH', `Added web sources as supplementary context`, { sourceCount: webSearch.results.length });
     }
   }
 

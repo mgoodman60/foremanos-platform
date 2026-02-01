@@ -17,6 +17,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@/lib/logger';
 
 // Provider types (Gemini removed - OpenAI + Anthropic provide complete coverage)
 export type VisionProvider = 'gpt-5.2' | 'claude-3.5-sonnet' | 'gpt-4-vision';
@@ -75,7 +76,7 @@ function getApiSecrets() {
   const envOpenaiKey = process.env.OPENAI_API_KEY;
 
   if (envAnthropicKey || envOpenaiKey) {
-    console.log('[API Secrets] Using environment variables');
+    logger.info('API_SECRETS', 'Using environment variables');
     return {
       anthropic: envAnthropicKey || null,
       openai: envOpenaiKey || null,
@@ -86,10 +87,10 @@ function getApiSecrets() {
   try {
     const secretsPath = '/home/ubuntu/.config/abacusai_auth_secrets.json';
     if (!fs.existsSync(secretsPath)) {
-      console.warn('[API Secrets] No env vars and secrets file not found');
+      logger.warn('API_SECRETS', 'No env vars and secrets file not found');
       return {};
     }
-    console.log('[API Secrets] Using secrets file');
+    logger.info('API_SECRETS', 'Using secrets file');
     const secretsData = JSON.parse(fs.readFileSync(secretsPath, 'utf-8'));
 
     const anthropicKey = secretsData?.anthropic?.secrets?.api_key?.value;
@@ -106,7 +107,7 @@ function getApiSecrets() {
       openai: openaiKey,
     };
   } catch (error) {
-    console.error('Error loading API secrets:', error);
+    logger.error('API_SECRETS', 'Error loading API secrets', error);
     return {};
   }
 }
@@ -241,7 +242,7 @@ async function callAbacusAI(
     
     // Don't retry on Cloudflare blocks - immediately switch provider
     if (isCloudflare) {
-      console.log(`[${config.displayName}] Cloudflare block detected, switching provider`);
+      logger.info('VISION_API', `${config.displayName}: Cloudflare block detected, switching provider`);
       return {
         success: false,
         content: '',
@@ -254,7 +255,7 @@ async function callAbacusAI(
     // Don't retry on network errors/timeouts in dev - immediately switch to fallback
     if (isTimeout || isNetworkError) {
       const errorType = isTimeout ? 'timeout' : 'network error';
-      console.log(`[${config.displayName}] ${errorType} detected (expected in dev), switching provider`);
+      logger.info('VISION_API', `${config.displayName}: ${errorType} detected (expected in dev), switching provider`);
       return {
         success: false,
         content: '',
@@ -267,7 +268,7 @@ async function callAbacusAI(
     // Retry on other errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
-      console.log(`[${config.displayName}] Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
+      logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return callAbacusAI(imageBase64, prompt, retryCount + 1);
     }
@@ -359,7 +360,7 @@ async function callAnthropic(
     // Retry on errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
-      console.log(`[${config.displayName}] Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
+      logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return callAnthropic(imageBase64, prompt, retryCount + 1);
     }
@@ -443,7 +444,7 @@ async function callOpenAI(
     // Retry on errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
-      console.log(`[${config.displayName}] Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
+      logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return callOpenAI(imageBase64, prompt, retryCount + 1);
     }
@@ -520,9 +521,8 @@ export async function analyzeWithLoadBalancing(
   pageNumber?: number,
   minQualityScore: number = 50
 ): Promise<VisionResponse> {
-  console.log(`
-=== Load-Balanced Vision Analysis Started (Page ${pageNumber || 'N/A'}) ===`);
-  
+  logger.info('VISION_API', `Load-Balanced Vision Analysis Started`, { pageNumber: pageNumber || 'N/A' });
+
   const providerFunctions = [
     callAbacusAI,
     callAnthropic,
@@ -533,8 +533,8 @@ export async function analyzeWithLoadBalancing(
   const primaryIndex = getNextProviderIndex();
   const primaryConfig = PROVIDERS[primaryIndex];
   const primaryFn = providerFunctions[primaryIndex];
-  
-  console.log(`Primary provider: ${primaryConfig.displayName} (index ${primaryIndex})`);
+
+  logger.info('VISION_API', `Primary provider selected`, { provider: primaryConfig.displayName, index: primaryIndex });
   
   // Try primary provider first
   try {
@@ -543,25 +543,24 @@ export async function analyzeWithLoadBalancing(
     if (result.success && result.content) {
       const quality = validateQuality(result.content);
       result.confidenceScore = quality.score;
-      
-      console.log(`✓ ${primaryConfig.displayName} succeeded (confidence: ${quality.score}/100)`);
-      
+
+      logger.info('VISION_API', `${primaryConfig.displayName} succeeded`, { confidence: quality.score });
+
       if (quality.score >= minQualityScore) {
-        console.log(`✓ Quality check passed`);
-        console.log('=== Load-Balanced Analysis Complete ===\n');
+        logger.info('VISION_API', 'Quality check passed - Load-Balanced Analysis Complete');
         return result;
       } else {
-        console.log(`⚠ Quality score ${quality.score} below threshold ${minQualityScore}`);
+        logger.warn('VISION_API', `Quality score ${quality.score} below threshold ${minQualityScore}`);
       }
     } else {
-      console.log(`✗ ${primaryConfig.displayName} failed: ${result.error}`);
+      logger.warn('VISION_API', `${primaryConfig.displayName} failed`, { error: result.error });
     }
   } catch (error: any) {
-    console.error(`✗ ${primaryConfig.displayName} error:`, error.message);
+    logger.error('VISION_API', `${primaryConfig.displayName} error`, error);
   }
 
   // Primary failed - fall back to sequential failover
-  console.log(`Primary provider failed, falling back to sequential failover...`);
+  logger.info('VISION_API', 'Primary provider failed, falling back to sequential failover');
   return analyzeWithMultiProvider(imageBase64, prompt, minQualityScore);
 }
 
@@ -574,8 +573,8 @@ export async function analyzeWithMultiProvider(
   prompt: string,
   minQualityScore: number = 50
 ): Promise<VisionResponse> {
-  console.log('\n=== Multi-Provider Vision Analysis Started ===');
-  
+  logger.info('VISION_API', 'Multi-Provider Vision Analysis Started');
+
   const providerFunctions = [
     callAbacusAI,
     callAnthropic,
@@ -588,9 +587,8 @@ export async function analyzeWithMultiProvider(
   for (let i = 0; i < providerFunctions.length; i++) {
     const providerFn = providerFunctions[i];
     const config = PROVIDERS[i];
-    
-    console.log(`
-Trying provider ${i + 1}/${providerFunctions.length}: ${config.displayName}`);
+
+    logger.info('VISION_API', `Trying provider ${i + 1}/${providerFunctions.length}`, { provider: config.displayName });
     
     try {
       const result = await providerFn(imageBase64, prompt);
@@ -600,46 +598,47 @@ Trying provider ${i + 1}/${providerFunctions.length}: ${config.displayName}`);
         // Validate quality
         const quality = validateQuality(result.content);
         result.confidenceScore = quality.score;
-        
-        console.log(`✓ ${config.displayName} succeeded (confidence: ${quality.score}/100)`);
-        console.log(`  - Has sheet number: ${quality.hasSheetNumber}`);
-        console.log(`  - Has content: ${quality.hasContent} (${quality.contentLength} chars)`);
-        console.log(`  - Has structured data: ${quality.hasStructuredData}`);
+
+        logger.info('VISION_API', `${config.displayName} succeeded`, {
+          confidence: quality.score,
+          hasSheetNumber: quality.hasSheetNumber,
+          hasContent: quality.hasContent,
+          contentLength: quality.contentLength,
+          hasStructuredData: quality.hasStructuredData,
+        });
 
         // Check if quality meets threshold
         if (quality.score >= minQualityScore) {
-          console.log(`✓ Quality check passed, using ${config.displayName} response`);
-          console.log('=== Multi-Provider Vision Analysis Complete ===\n');
+          logger.info('VISION_API', `Quality check passed, using ${config.displayName} response - Analysis Complete`);
           return result;
         } else {
-          console.log(`⚠ Quality score ${quality.score} below threshold ${minQualityScore}, trying next provider`);
+          logger.warn('VISION_API', `Quality score ${quality.score} below threshold ${minQualityScore}, trying next provider`);
           lastError = `Low quality response (score: ${quality.score})`;
         }
       } else {
-        console.log(`✗ ${config.displayName} failed: ${result.error}`);
+        logger.warn('VISION_API', `${config.displayName} failed`, { error: result.error });
         lastError = result.error || 'Unknown error';
-        
+
         // If Cloudflare block, immediately try next provider
         if (result.error === 'CLOUDFLARE_BLOCK') {
           continue;
         }
       }
     } catch (error: any) {
-      console.error(`✗ ${config.displayName} threw error:`, error.message);
+      logger.error('VISION_API', `${config.displayName} threw error`, error);
       lastError = error.message;
     }
 
     // Add delay between provider switches (except on Cloudflare block)
     if (i < providerFunctions.length - 1 && lastError !== 'CLOUDFLARE_BLOCK') {
       const switchDelay = 2000;
-      console.log(`Waiting ${switchDelay}ms before trying next provider...`);
+      logger.info('VISION_API', `Waiting ${switchDelay}ms before trying next provider`);
       await new Promise(resolve => setTimeout(resolve, switchDelay));
     }
   }
 
   // All providers failed
-  console.error('✗ All providers failed');
-  console.log('=== Multi-Provider Vision Analysis Failed ===\n');
+  logger.error('VISION_API', 'All providers failed - Multi-Provider Vision Analysis Failed');
   
   return {
     success: false,
@@ -671,13 +670,13 @@ export async function analyzeWithDirectPdf(
   startPage?: number,
   endPage?: number
 ): Promise<VisionResponse> {
-  console.log(`\n=== Direct PDF Analysis Started (Pages ${startPage || 1}-${endPage || 'all'}) ===`);
-  
+  logger.info('VISION_API', 'Direct PDF Analysis Started', { startPage: startPage || 1, endPage: endPage || 'all' });
+
   const secrets = getApiSecrets();
   const apiKey = secrets.anthropic;
-  
+
   if (!apiKey) {
-    console.log('Anthropic API key not configured, falling back to image-based processing');
+    logger.warn('VISION_API', 'Anthropic API key not configured, falling back to image-based processing');
     return {
       success: false,
       content: '',
@@ -705,15 +704,15 @@ export async function analyzeWithDirectPdf(
       
       const { base64: singlePageBase64, pageCount } = await extractPageAsPdf(pdfBuffer, startPage);
       pdfBase64 = singlePageBase64;
-      console.log(`[Direct PDF] Extracted page ${startPage}/${pageCount} for focused processing`);
+      logger.info('DIRECT_PDF', `Extracted page ${startPage}/${pageCount} for focused processing`);
     } catch (extractError: any) {
-      console.log(`[Direct PDF] Could not extract single page: ${extractError.message}, using full PDF`);
+      logger.warn('DIRECT_PDF', `Could not extract single page, using full PDF`, { error: extractError.message });
     }
   }
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      console.log(`[Direct PDF] Attempt ${attempt + 1}/${maxRetries} using Claude Sonnet 4`);
+      logger.info('DIRECT_PDF', `Attempt ${attempt + 1}/${maxRetries} using Claude Sonnet 4`);
       
       // Enhanced page instruction
       let pageInstruction = '';
@@ -775,9 +774,8 @@ export async function analyzeWithDirectPdf(
 
       // Validate quality
       const quality = validateQuality(content);
-      
-      console.log(`✓ Direct PDF analysis succeeded (confidence: ${quality.score}/100)`);
-      console.log('=== Direct PDF Analysis Complete ===\n');
+
+      logger.info('DIRECT_PDF', `Analysis succeeded - Direct PDF Analysis Complete`, { confidence: quality.score });
 
       return {
         success: true,
@@ -788,29 +786,29 @@ export async function analyzeWithDirectPdf(
       };
     } catch (error: any) {
       lastError = error.message;
-      console.error(`✗ Direct PDF attempt ${attempt + 1} failed:`, error.message);
-      
+      logger.error('DIRECT_PDF', `Attempt ${attempt + 1} failed`, error);
+
       // Check if this is an unrecoverable error
-      const isUnrecoverable = 
+      const isUnrecoverable =
         error.message.includes('invalid_request') ||
         error.message.includes('document') ||
         error.message.includes('too large') ||
         error.message.includes('413');
-      
+
       if (isUnrecoverable) {
-        console.log('PDF processing error - document may be too large or in unsupported format');
+        logger.warn('DIRECT_PDF', 'PDF processing error - document may be too large or in unsupported format');
         break; // Don't retry for format/size issues
       }
-      
+
       if (attempt < maxRetries - 1) {
         const delay = 2000 * Math.pow(2, attempt);
-        console.log(`Waiting ${delay}ms before retry...`);
+        logger.info('DIRECT_PDF', `Waiting ${delay}ms before retry`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
 
-  console.log('=== Direct PDF Analysis Failed ===\n');
+  logger.error('DIRECT_PDF', 'Direct PDF Analysis Failed');
   return {
     success: false,
     content: '',
@@ -852,20 +850,20 @@ export async function analyzeDocumentSmart(
   minQualityScore: number = 50
 ): Promise<VisionResponse> {
   const pdfBase64 = pdfBuffer.toString('base64');
-  
+
   // For single-page or small documents, try direct PDF first
   // Claude's document type works best for PDFs under 100 pages
-  console.log(`[Smart Analysis] Attempting direct PDF processing first...`);
+  logger.info('SMART_ANALYSIS', 'Attempting direct PDF processing first');
   
   const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
   
   if (directResult.success && (directResult.confidenceScore || 0) >= minQualityScore) {
-    console.log(`[Smart Analysis] Direct PDF succeeded with quality ${directResult.confidenceScore}`);
+    logger.info('SMART_ANALYSIS', `Direct PDF succeeded`, { quality: directResult.confidenceScore });
     return directResult;
   }
-  
+
   // If direct PDF failed or low quality, fall back to true image rasterization
-  console.log(`[Smart Analysis] Direct PDF failed or low quality, falling back to image rasterization...`);
+  logger.info('SMART_ANALYSIS', 'Direct PDF failed or low quality, falling back to image rasterization');
   
   // Use true image rasterization for better vision AI compatibility
   try {
@@ -875,7 +873,7 @@ export async function analyzeDocumentSmart(
     return analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
   } catch (rasterError: any) {
     // Canvas/native module not available - return direct result
-    console.log(`⚠ Rasterization unavailable (${rasterError.message?.substring(0, 50)}...), returning direct result`);
+    logger.warn('SMART_ANALYSIS', 'Rasterization unavailable, returning direct result', { error: rasterError.message?.substring(0, 50) });
     return directResult;
   }
 }
@@ -899,90 +897,88 @@ export async function analyzeWithSmartRouting(
 ): Promise<VisionResponse> {
   const processingType = getProcessingType(processorType);
   const pdfBase64 = pdfBuffer.toString('base64');
-  
-  console.log(`\n=== Smart Routing Analysis ===`);
-  console.log(`Document type: ${processorType} → Processing mode: ${processingType}`);
-  console.log(`Page: ${pageNumber || 'all'}`);
+
+  logger.info('SMART_ROUTING', 'Smart Routing Analysis Started', { documentType: processorType, processingMode: processingType, page: pageNumber || 'all' });
   
   if (processingType === 'text-heavy') {
     // TEXT-HEAVY DOCUMENTS: Direct PDF first (better for schedules, specs, regulatory)
-    console.log(`[Smart Routing] Text-heavy document → Direct PDF processing`);
-    
+    logger.info('SMART_ROUTING', 'Text-heavy document - Direct PDF processing');
+
     const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
-    
+
     if (directResult.success && (directResult.confidenceScore || 0) >= minQualityScore) {
-      console.log(`✓ Direct PDF succeeded (quality: ${directResult.confidenceScore})`);
+      logger.info('SMART_ROUTING', 'Direct PDF succeeded', { quality: directResult.confidenceScore });
       return directResult;
     }
-    
+
     // Fallback to image if direct PDF fails - use true image rasterization
-    console.log(`⚠ Direct PDF failed/low quality, falling back to image rasterization...`);
+    logger.warn('SMART_ROUTING', 'Direct PDF failed/low quality, falling back to image rasterization');
     try {
       const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
       const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
       return analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
     } catch (rasterError: any) {
       // Canvas/native module not available - return direct result or empty
-      console.log(`⚠ Rasterization unavailable (${rasterError.message?.substring(0, 50)}...), returning direct result`);
+      logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterError.message?.substring(0, 50) });
       return directResult;
     }
-    
+
   } else if (processingType === 'visual') {
     // VISUAL DOCUMENTS: Image processing first (better for drawings, plans, photos)
-    console.log(`[Smart Routing] Visual document → Image-based processing`);
-    
+    logger.info('SMART_ROUTING', 'Visual document - Image-based processing');
+
     // Try true image rasterization for construction drawings (requires canvas native module)
     try {
       const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
       const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
-      
+
       const imageResult = await analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
-      
+
       if (imageResult.success && (imageResult.confidenceScore || 0) >= minQualityScore) {
-        console.log(`✓ Image processing succeeded (quality: ${imageResult.confidenceScore})`);
+        logger.info('SMART_ROUTING', 'Image processing succeeded', { quality: imageResult.confidenceScore });
         return imageResult;
       }
-      
+
       // Fallback to direct PDF if image processing fails
-      console.log(`⚠ Image processing failed/low quality, trying direct PDF...`);
+      logger.warn('SMART_ROUTING', 'Image processing failed/low quality, trying direct PDF');
       return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
     } catch (rasterError: any) {
       // Canvas/native module not available (common in production/serverless)
-      console.log(`⚠ Rasterization unavailable (${rasterError.message?.substring(0, 50)}...), using direct PDF`);
+      logger.warn('SMART_ROUTING', 'Rasterization unavailable, using direct PDF', { error: rasterError.message?.substring(0, 50) });
       return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
     }
-    
+
   } else {
     // MIXED/UNKNOWN: Try both methods, use best result
-    console.log(`[Smart Routing] Mixed document → Trying both methods`);
-    
+    logger.info('SMART_ROUTING', 'Mixed document - Trying both methods');
+
     // Try direct PDF first (faster, lower cost)
     const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
-    
+
     if (directResult.success && (directResult.confidenceScore || 0) >= minQualityScore) {
-      console.log(`✓ Direct PDF succeeded (quality: ${directResult.confidenceScore})`);
+      logger.info('SMART_ROUTING', 'Direct PDF succeeded', { quality: directResult.confidenceScore });
       return directResult;
     }
-    
+
     // Try image-based processing with true rasterization
-    console.log(`⚠ Direct PDF insufficient, trying image rasterization...`);
+    logger.warn('SMART_ROUTING', 'Direct PDF insufficient, trying image rasterization');
     try {
       const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
       const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
-      
+
       const imageResult = await analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
-      
+
       // Return best result
       if (imageResult.success && (imageResult.confidenceScore || 0) > (directResult.confidenceScore || 0)) {
-        console.log(`✓ Image processing better (quality: ${imageResult.confidenceScore} vs ${directResult.confidenceScore})`);
+        logger.info('SMART_ROUTING', 'Image processing better', { imageQuality: imageResult.confidenceScore, directQuality: directResult.confidenceScore });
         return imageResult;
       }
-      
+
       // Return direct result if image didn't improve
       return directResult.success ? directResult : imageResult;
     } catch (rasterError: any) {
       // Canvas/native module not available - return direct result
-      console.log(`⚠ Rasterization unavailable (${rasterError.message?.substring(0, 50)}...), returning direct result`);
+      logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterError.message?.substring(0, 50) });
       return directResult;
     }
   }

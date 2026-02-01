@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import { getFileUrl } from './s3';
+import { logger } from '@/lib/logger';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -27,7 +28,7 @@ export async function processDocument(
   const startTime = Date.now();
   
   try {
-    console.log(`Starting processing for document ${documentId}...`);
+    logger.info('DOCUMENT_PROCESSOR', `Starting processing for document ${documentId}`);
 
     // Get document with project info
     const document = await prisma.document.findUnique({
@@ -46,7 +47,7 @@ export async function processDocument(
     }
 
     if (document.processed) {
-      console.log(`Document ${documentId} already processed, skipping`);
+      logger.info('DOCUMENT_PROCESSOR', `Document ${documentId} already processed, skipping`);
       return;
     }
 
@@ -87,12 +88,12 @@ export async function processDocument(
       actualPages = result.pages;
       actualCost = result.cost;
     } else if (fileExtension === 'docx' || fileExtension === 'doc') {
-      console.log(`Processing DOCX document ${documentId} for RAG system`);
+      logger.info('DOCUMENT_PROCESSOR', `Processing DOCX document ${documentId} for RAG system`);
       const result = await processDocxFile(documentId, buffer);
       actualPages = result.pages;
       actualCost = 0; // No AI cost for DOCX text extraction
     } else {
-      console.log(`Document ${documentId} is not a supported format (${fileExtension}), marking as processed without analysis`);
+      logger.info('DOCUMENT_PROCESSOR', `Document ${documentId} is not a supported format (${fileExtension}), marking as processed without analysis`);
       actualPages = 1; // Count as 1 page for tracking
       actualCost = 0;
     }
@@ -102,7 +103,7 @@ export async function processDocument(
     // If document was queued (actualPages = 0), don't mark as processed yet
     // The queue processor will handle the final status update
     if (actualPages === 0) {
-      console.log(`[PROCESS] Document ${documentId} queued for batch processing`);
+      logger.info('PROCESS', `Document ${documentId} queued for batch processing`);
       return; // Exit early - queue will handle the rest
     }
 
@@ -169,10 +170,10 @@ export async function processDocument(
       }
     } catch (error) {
       // Silently fail - don't block processing
-      console.error('Failed to track onboarding progress:', error);
+      logger.error('PROCESS', 'Failed to track onboarding progress', error);
     }
 
-    console.log(`Document ${documentId} processed successfully with ${classification.processorType}: ${actualPages} pages, $${actualCost.toFixed(4)}`);
+    logger.info('DOCUMENT_PROCESSOR', `Document ${documentId} processed successfully`, { processorType: classification.processorType, pages: actualPages, cost: actualCost.toFixed(4) });
 
     // Trigger intelligence extraction and room extraction in background
     const doc = await prisma.document.findUnique({
@@ -184,7 +185,7 @@ export async function processDocument(
       const projectSlug = doc.Project.slug;
       
       // Run intelligence extraction then room extraction
-      console.log(`[PROCESS] 🧠 Starting intelligence extraction for ${documentId}...`);
+      logger.info('PROCESS', `Starting intelligence extraction for ${documentId}`);
       import('./intelligence-orchestrator').then(({ runIntelligenceExtraction }) => {
         runIntelligenceExtraction({
           documentId,
@@ -192,21 +193,21 @@ export async function processDocument(
           phases: ['A', 'B', 'C'],
         })
           .then(async () => {
-            console.log(`[PROCESS] ✅ Intelligence extraction completed`);
-            
+            logger.info('PROCESS', 'Intelligence extraction completed');
+
             // Room extraction after intelligence is done
-            console.log(`[PROCESS] 🏠 Starting room extraction for project ${projectSlug}...`);
+            logger.info('PROCESS', `Starting room extraction for project ${projectSlug}`);
             import('./room-extractor').then(({ extractRoomsFromDocuments, saveExtractedRooms }) => {
               extractRoomsFromDocuments(projectSlug)
                 .then(async (result) => {
                   if (result.rooms.length > 0) {
                     const saveResult = await saveExtractedRooms(projectSlug, result.rooms);
-                    console.log(`[PROCESS] 🏠 Room extraction complete: ${saveResult.created} created, ${saveResult.updated} updated`);
+                    logger.info('PROCESS', `Room extraction complete`, { created: saveResult.created, updated: saveResult.updated });
                   } else {
-                    console.log(`[PROCESS] 🏠 No rooms found in documents`);
+                    logger.info('PROCESS', 'No rooms found in documents');
                   }
                 })
-                .catch(err => console.error('[PROCESS] Room extraction error:', err));
+                .catch(err => logger.error('PROCESS', 'Room extraction error', err));
             });
             
             // Auto-sync all features from this document
@@ -216,22 +217,22 @@ export async function processDocument(
             });
             
             if (docForSync?.projectId) {
-              console.log(`[PROCESS] 🔄 Starting feature auto-sync for ${docForSync.fileName}...`);
+              logger.info('PROCESS', `Starting feature auto-sync for ${docForSync.fileName}`);
               import('./document-auto-sync').then(({ processDocumentForSync }) => {
                 processDocumentForSync(documentId, docForSync.projectId!)
                   .then((result) => {
-                    console.log(`[PROCESS] 🔄 Auto-sync complete: ${result.featuresProcessed.length} features processed`);
+                    logger.info('PROCESS', `Auto-sync complete`, { featuresProcessed: result.featuresProcessed.length });
                     if (result.featuresProcessed.length > 0) {
-                      console.log(`[PROCESS]    ✓ ${result.featuresProcessed.join(', ')}`);
+                      logger.info('PROCESS', `Features processed: ${result.featuresProcessed.join(', ')}`);
                     }
                     if (result.featuresSkipped.length > 0) {
-                      console.log(`[PROCESS]    ⏭ Skipped (higher confidence exists): ${result.featuresSkipped.join(', ')}`);
+                      logger.info('PROCESS', `Skipped (higher confidence exists): ${result.featuresSkipped.join(', ')}`);
                     }
                     if (result.errors.length > 0) {
-                      console.log(`[PROCESS]    ❌ Errors: ${result.errors.join(', ')}`);
+                      logger.warn('PROCESS', `Errors: ${result.errors.join(', ')}`);
                     }
                   })
-                  .catch(err => console.error('[PROCESS] Auto-sync error:', err));
+                  .catch(err => logger.error('PROCESS', 'Auto-sync error', err));
               });
               
               // Auto-extract schedule if this is a schedule document
@@ -247,7 +248,7 @@ export async function processDocument(
                 fileName.endsWith('.mpp');
               
               if (isScheduleDoc) {
-                console.log(`[PROCESS] 📅 Detected schedule document, starting automatic schedule extraction...`);
+                logger.info('PROCESS', 'Detected schedule document, starting automatic schedule extraction');
                 import('./schedule-extractor-ai').then(({ extractScheduleWithAI }) => {
                   // Get user ID for schedule creation
                   prisma.project.findUnique({
@@ -257,26 +258,26 @@ export async function processDocument(
                     if (project?.ownerId) {
                       extractScheduleWithAI(documentId, docForSync.projectId!, project.ownerId)
                         .then((result) => {
-                          console.log(`[PROCESS] 📅 Schedule extraction complete: ${result.totalTasks} tasks extracted`);
+                          logger.info('PROCESS', `Schedule extraction complete`, { totalTasks: result.totalTasks });
                           if (result.criticalPathTasks > 0) {
-                            console.log(`[PROCESS]    ⚠️ ${result.criticalPathTasks} critical path tasks identified`);
+                            logger.info('PROCESS', `Critical path tasks identified`, { count: result.criticalPathTasks });
                           }
                         })
                         .catch(err => {
-                          console.error('[PROCESS] Schedule extraction error:', err);
+                          logger.error('PROCESS', 'Schedule extraction error', err);
                           // Don't fail the overall process - schedule extraction is supplementary
                         });
                     }
-                  }).catch(err => console.error('[PROCESS] Failed to get project owner for schedule extraction:', err));
+                  }).catch(err => logger.error('PROCESS', 'Failed to get project owner for schedule extraction', err));
                 });
               }
             }
           })
-          .catch(err => console.error('[PROCESS] Intelligence extraction error:', err));
+          .catch(err => logger.error('PROCESS', 'Intelligence extraction error', err));
       });
     }
   } catch (error: any) {
-    console.error(`Error processing document ${documentId}:`, error);
+    logger.error('DOCUMENT_PROCESSOR', `Error processing document ${documentId}`, error);
     
     // Update document with error information
     await prisma.document.update({
@@ -287,7 +288,7 @@ export async function processDocument(
         lastProcessingError: error?.message || String(error),
       },
     }).catch((updateError: any) => {
-      console.error(`Failed to update document error status:`, updateError);
+      logger.error('DOCUMENT_PROCESSOR', 'Failed to update document error status', updateError);
     });
     
     throw error;
@@ -313,12 +314,11 @@ async function processWithVision(
     // Get PDF page count
     const pages = await getPdfPageCountFromFile(tempFilePath);
 
-    console.log(`[PROCESS] Document has ${pages} pages`);
+    logger.info('PROCESS', `Document has ${pages} pages`);
 
     // For large documents (>10 pages), use queue system
     if (pages > 10) {
-      console.log(`[PROCESS] Large document detected (${pages} pages), using queue system`);
-      console.log(`[PROCESS] Document classification: ${processorType}`);
+      logger.info('PROCESS', `Large document detected, using queue system`, { pages, classification: processorType });
       
       // Import queue functions dynamically to avoid circular dependencies
       const { queueDocumentForProcessing, processQueuedDocument } = await import('./document-processing-queue');
@@ -336,9 +336,9 @@ async function processWithVision(
       });
       
       // Start processing the queue in background (don't await - let it run async)
-      console.log(`[PROCESS] Starting async queue processing for document ${documentId}`);
+      logger.info('PROCESS', `Starting async queue processing for document ${documentId}`);
       processQueuedDocument(documentId).catch(err => {
-        console.error(`[PROCESS] Queue processing failed for ${documentId}:`, err);
+        logger.error('PROCESS', `Queue processing failed for ${documentId}`, err);
       });
       
       // Return 0 - actual values will be updated as queue processes
@@ -346,8 +346,7 @@ async function processWithVision(
     }
 
     // For small documents (<= 10 pages), process immediately with retry logic
-    console.log(`[PROCESS] Small document (${pages} pages), processing immediately`);
-    console.log(`[PROCESS] Document classification: ${processorType}`);
+    logger.info('PROCESS', `Small document, processing immediately`, { pages, classification: processorType });
     
     // Import batch processor to use new retry logic
     const { processDocumentBatch } = await import('./document-processor-batch');
@@ -368,7 +367,7 @@ async function processWithVision(
     // Clean up temporary file
     if (fs.existsSync(tempFilePath)) {
       fs.unlinkSync(tempFilePath);
-      console.log(`Cleaned up temporary file: ${tempFilePath}`);
+      logger.info('PROCESS', `Cleaned up temporary file`, { path: tempFilePath });
     }
   }
 }
@@ -383,7 +382,7 @@ async function getPdfPageCountFromFile(filePath: string): Promise<number> {
     const buffer = fs.readFileSync(filePath);
     return await getPdfPageCount(buffer);
   } catch (error) {
-    console.error('Error getting PDF page count:', error);
+    logger.error('PROCESS', 'Error getting PDF page count', error);
     // Fallback: estimate from file size (rough estimate: 100KB per page)
     const stats = fs.statSync(filePath);
     return Math.max(1, Math.ceil(stats.size / (100 * 1024)));
@@ -446,8 +445,8 @@ export async function processUnprocessedDocuments(projectId: string): Promise<{
       }
     });
 
-    console.log(`[PROCESSING] Found ${unprocessedDocs.length} unprocessed documents for project ${projectId}`);
-    console.log(`[PROCESSING] Daily usage: ${stats.dailyPages}/${limits.dailyPageLimit} pages (${stats.dailyRemaining} remaining)`);
+    logger.info('PROCESSING', `Found ${unprocessedDocs.length} unprocessed documents for project ${projectId}`);
+    logger.info('PROCESSING', `Daily usage`, { daily: stats.dailyPages, limit: limits.dailyPageLimit, remaining: stats.dailyRemaining });
 
     // Process each document (or queue if limits reached)
     for (const doc of unprocessedDocs) {
@@ -463,7 +462,7 @@ export async function processUnprocessedDocuments(projectId: string): Promise<{
           if (doc.Project?.queueEnabled) {
             await queueDocumentForProcessing(doc.id);
             result.queued++;
-            console.log(`[PROCESSING] Queued ${doc.name} (${pageEstimate} pages est.) - ${canProcess.reason}`);
+            logger.info('PROCESSING', `Queued document`, { name: doc.name, pageEstimate, reason: canProcess.reason });
             
             // Send limit notification
             if (canProcess.reason === 'daily_limit_exceeded') {
@@ -473,7 +472,7 @@ export async function processUnprocessedDocuments(projectId: string): Promise<{
             }
           } else {
             result.skipped++;
-            console.log(`[PROCESSING] Skipped ${doc.name} - ${canProcess.reason} (queueing disabled)`);
+            logger.info('PROCESSING', `Skipped document (queueing disabled)`, { name: doc.name, reason: canProcess.reason });
           }
           continue;
         }
@@ -481,19 +480,19 @@ export async function processUnprocessedDocuments(projectId: string): Promise<{
         // Process document
         await processDocument(doc.id);
         result.processed++;
-        console.log(`[PROCESSING] Processed ${doc.name}`);
+        logger.info('PROCESSING', `Processed ${doc.name}`);
       } catch (error) {
         result.failed++;
         const errorMsg = `Failed to process ${doc.name}: ${error instanceof Error ? error.message : 'Unknown error'}`;
-        console.error(`[PROCESSING] ${errorMsg}`);
+        logger.error('PROCESSING', errorMsg);
         result.errors.push(errorMsg);
       }
     }
 
-    console.log(`[PROCESSING] Complete for project ${projectId}: ${result.processed} processed, ${result.queued} queued, ${result.skipped} skipped, ${result.failed} failed`);
+    logger.info('PROCESSING', `Complete for project ${projectId}`, { processed: result.processed, queued: result.queued, skipped: result.skipped, failed: result.failed });
   } catch (error) {
     const errorMsg = `Error processing documents for project ${projectId}: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    console.error(`[PROCESSING] ${errorMsg}`);
+    logger.error('PROCESSING', errorMsg);
     result.errors.push(errorMsg);
   }
 
@@ -506,7 +505,7 @@ export async function processUnprocessedDocuments(projectId: string): Promise<{
  */
 export async function extractTitleBlocksFromDocument(documentId: string): Promise<void> {
   try {
-    console.log(`Extracting title blocks for document ${documentId}...`);
+    logger.info('TITLE_BLOCK', `Extracting title blocks for document ${documentId}`);
 
     const document = await prisma.document.findUnique({
       where: { id: documentId },
@@ -550,15 +549,15 @@ export async function extractTitleBlocksFromDocument(documentId: string): Promis
 
       if (result.success && result.data) {
         await storeTitleBlockData(documentId, chunk.id, result.data);
-        console.log(`✅ Title block extracted: Sheet ${result.data.sheetNumber}`);
+        logger.info('TITLE_BLOCK', `Title block extracted`, { sheetNumber: result.data.sheetNumber });
       } else {
-        console.log(`⚠️  Title block extraction failed: ${result.error}`);
+        logger.warn('TITLE_BLOCK', `Title block extraction failed`, { error: result.error });
       }
     }
 
-    console.log(`✅ Title block extraction complete for document ${documentId}`);
+    logger.info('TITLE_BLOCK', `Title block extraction complete for document ${documentId}`);
   } catch (error) {
-    console.error('Title block extraction error:', error);
+    logger.error('TITLE_BLOCK', 'Title block extraction error', error);
     throw error;
   }
 }
@@ -569,7 +568,7 @@ export async function extractTitleBlocksFromDocument(documentId: string): Promis
  */
 export async function extractScalesFromDocument(documentId: string): Promise<void> {
   try {
-    console.log(`\ud83d\udccf Starting scale extraction for document ${documentId}...`);
+    logger.info('SCALE_EXTRACTION', `Starting scale extraction for document ${documentId}`);
 
     const document = await prisma.document.findUnique({
       where: { id: documentId },
@@ -629,9 +628,9 @@ export async function extractScalesFromDocument(documentId: string): Promise<voi
           }
         });
 
-        console.log(`✅ Scale extraction complete: ${primaryScale.normalized} (${allScales.length} scales found)`);
+        logger.info('SCALE_EXTRACTION', `Scale extraction complete`, { primaryScale: primaryScale.normalized, scaleCount: allScales.length });
       } else {
-        console.log(`⚠️  No scales detected in document`);
+        logger.info('SCALE_EXTRACTION', 'No scales detected in document');
       }
 
     } finally {
@@ -642,7 +641,7 @@ export async function extractScalesFromDocument(documentId: string): Promise<voi
     }
 
   } catch (error) {
-    console.error('Scale extraction error:', error);
+    logger.error('SCALE_EXTRACTION', 'Scale extraction error', error);
     // Non-fatal error, don't throw
   }
 }
@@ -661,7 +660,7 @@ export async function extractScalesFromDocument(documentId: string): Promise<voi
  */
 export async function extractLegendsFromDocument(documentId: string): Promise<void> {
   try {
-    console.log(`🔑 Starting legend extraction for document ${documentId}...`);
+    logger.info('LEGEND_EXTRACTION', `Starting legend extraction for document ${documentId}`);
 
     const { detectLegendRegion, extractLegendEntries } = await import('./legend-extractor');
 
@@ -739,15 +738,15 @@ export async function extractLegendsFromDocument(documentId: string): Promise<vo
           });
 
           extractedCount++;
-          console.log(`  ✓ Extracted ${extractionResult.legend.legendEntries.length} legend entries from page ${pageNumber}`);
+          logger.info('LEGEND_EXTRACTION', `Extracted legend entries`, { count: extractionResult.legend.legendEntries.length, pageNumber });
         }
       }
     }
 
-    console.log(`✅ Legend extraction complete: ${extractedCount} legends found`);
+    logger.info('LEGEND_EXTRACTION', `Legend extraction complete`, { legendsFound: extractedCount });
 
   } catch (error) {
-    console.error('Legend extraction error:', error);
+    logger.error('LEGEND_EXTRACTION', 'Legend extraction error', error);
     // Non-fatal error, don't throw
   }
 }
@@ -758,7 +757,7 @@ export async function extractLegendsFromDocument(documentId: string): Promise<vo
  */
 export async function classifyDrawingsFromDocument(documentId: string): Promise<void> {
   try {
-    console.log(`📋 Starting drawing classification for document ${documentId}...`);
+    logger.info('DRAWING_CLASSIFICATION', `Starting drawing classification for document ${documentId}`);
 
     const document = await prisma.document.findUnique({
       where: { id: documentId },
@@ -784,11 +783,11 @@ export async function classifyDrawingsFromDocument(documentId: string): Promise<
     }
 
     if (document.DocumentChunk.length === 0) {
-      console.log('⚠️  No sheets with title blocks found. Run title block extraction first.');
+      logger.warn('DRAWING_CLASSIFICATION', 'No sheets with title blocks found. Run title block extraction first.');
       return;
     }
 
-    console.log(`Found ${document.DocumentChunk.length} sheets to classify`);
+    logger.info('DRAWING_CLASSIFICATION', `Found ${document.DocumentChunk.length} sheets to classify`);
 
     let classifiedCount = 0;
 
@@ -809,15 +808,13 @@ export async function classifyDrawingsFromDocument(documentId: string): Promise<
       );
 
       classifiedCount++;
-      console.log(
-        `  ✓ ${sheetNumber}: ${classification.type} (${(classification.confidence * 100).toFixed(0)}% confidence)`
-      );
+      logger.info('DRAWING_CLASSIFICATION', `Classified sheet`, { sheetNumber, type: classification.type, confidence: Math.round(classification.confidence * 100) });
     }
 
-    console.log(`✅ Drawing classification complete: ${classifiedCount} sheets classified`);
+    logger.info('DRAWING_CLASSIFICATION', `Drawing classification complete`, { sheetsClassified: classifiedCount });
 
   } catch (error) {
-    console.error('Drawing classification error:', error);
+    logger.error('DRAWING_CLASSIFICATION', 'Drawing classification error', error);
     // Non-fatal error, don't throw
   }
 }
@@ -830,18 +827,18 @@ export async function classifyDrawingsFromDocument(documentId: string): Promise<
  */
 async function processDocxFile(documentId: string, buffer: Buffer): Promise<{ pages: number; cost: number }> {
   try {
-    console.log(`[DOCX] Extracting text from document ${documentId}...`);
+    logger.info('DOCX', `Extracting text from document ${documentId}`);
     
     // Extract text from DOCX using mammoth
     const result = await mammoth.extractRawText({ buffer });
     const text = result.value;
     
     if (!text || text.trim().length === 0) {
-      console.log(`[DOCX] No text content found in document ${documentId}`);
+      logger.info('DOCX', `No text content found in document ${documentId}`);
       return { pages: 1, cost: 0 };
     }
-    
-    console.log(`[DOCX] Extracted ${text.length} characters of text`);
+
+    logger.info('DOCX', `Extracted text`, { characterCount: text.length });
     
     // Split text into chunks for RAG system (approximately 1000 chars per chunk)
     const CHUNK_SIZE = 1000;
@@ -864,8 +861,8 @@ async function processDocxFile(documentId: string, buffer: Buffer): Promise<{ pa
     if (currentChunk.trim().length > 0) {
       chunks.push(currentChunk.trim());
     }
-    
-    console.log(`[DOCX] Created ${chunks.length} text chunks`);
+
+    logger.info('DOCX', `Created text chunks`, { chunkCount: chunks.length });
     
     // Store chunks in database for RAG retrieval
     const chunkPromises = chunks.map((chunkText, index) => {
@@ -886,14 +883,14 @@ async function processDocxFile(documentId: string, buffer: Buffer): Promise<{ pa
     });
     
     await Promise.all(chunkPromises);
-    
-    console.log(`[DOCX] Successfully stored ${chunks.length} chunks for document ${documentId}`);
-    
+
+    logger.info('DOCX', `Successfully stored chunks for document ${documentId}`, { chunkCount: chunks.length });
+
     // Return number of chunks as "pages"
     return { pages: chunks.length, cost: 0 };
-    
+
   } catch (error) {
-    console.error(`[DOCX] Error processing document ${documentId}:`, error);
+    logger.error('DOCX', `Error processing document ${documentId}`, error);
     throw error;
   }
 }

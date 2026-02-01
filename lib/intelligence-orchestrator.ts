@@ -21,6 +21,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 
 export interface IntelligenceExtractionOptions {
   documentId: string;
@@ -281,12 +282,7 @@ export async function runIntelligenceExtraction(
     warnings: [],
   };
 
-  console.log(`\n╔═══════════════════════════════════════════════════╗`);
-  console.log(`║   INTELLIGENCE EXTRACTION ORCHESTRATOR           ║`);
-  console.log(`╚═══════════════════════════════════════════════════╝\n`);
-  console.log(`Document ID: ${documentId}`);
-  console.log(`Project: ${projectSlug}`);
-  console.log(`Phases: ${phases.join(', ')}`);
+  logger.info('INTELLIGENCE_ORCHESTRATOR', 'Starting intelligence extraction', { documentId, projectSlug, phases: phases.join(', ') });
 
   try {
     // Get document and verify it exists
@@ -326,13 +322,12 @@ export async function runIntelligenceExtraction(
       return result;
     }
 
-    console.log(`\n📄 Found ${chunks.length} chunks to process\n`);
+    logger.info('INTELLIGENCE_ORCHESTRATOR', `Found chunks to process`, { chunkCount: chunks.length });
     result.pagesProcessed = chunks.length;
 
     // PHASE A - Foundation Intelligence
     if (phases.includes('A')) {
-      console.log(`\n🔵 PHASE A - Foundation Intelligence`);
-      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+      logger.info('PHASE_A', 'Starting Foundation Intelligence phase');
       result.phasesRun.push('A');
       
       const phaseAResult: PhaseAResult = {
@@ -371,14 +366,12 @@ export async function runIntelligenceExtraction(
       }
       
       result.phaseResults.phaseA = phaseAResult;
-      console.log(`✓ Title blocks: ${phaseAResult.titleBlocksExtracted}`);
-      console.log(`✓ Scales detected: ${phaseAResult.scalesDetected}`);
+      logger.info('PHASE_A', 'Phase A complete', { titleBlocks: phaseAResult.titleBlocksExtracted, scales: phaseAResult.scalesDetected });
     }
 
     // PHASE B - Advanced Features
     if (phases.includes('B')) {
-      console.log(`\n🟡 PHASE B - Advanced Features`);
-      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+      logger.info('PHASE_B', 'Starting Advanced Features phase');
       result.phasesRun.push('B');
       
       const phaseBResult: PhaseBResult = {
@@ -419,15 +412,12 @@ export async function runIntelligenceExtraction(
       }
       
       result.phaseResults.phaseB = phaseBResult;
-      console.log(`✓ Dimensions extracted: ${phaseBResult.dimensionsExtracted}`);
-      console.log(`✓ Annotations found: ${phaseBResult.annotationsFound}`);
-      console.log(`✓ Callouts extracted: ${phaseBResult.calloutsExtracted}`);
+      logger.info('PHASE_B', 'Phase B complete', { dimensions: phaseBResult.dimensionsExtracted, annotations: phaseBResult.annotationsFound, callouts: phaseBResult.calloutsExtracted });
     }
 
     // PHASE C - Advanced Intelligence
     if (phases.includes('C')) {
-      console.log(`\n🟢 PHASE C - Advanced Intelligence`);
-      console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+      logger.info('PHASE_C', 'Starting Advanced Intelligence phase');
       result.phasesRun.push('C');
       
       const phaseCResult: PhaseCResult = {
@@ -485,17 +475,15 @@ export async function runIntelligenceExtraction(
       }
       
       result.phaseResults.phaseC = phaseCResult;
-      console.log(`✓ Spatial correlations: ${phaseCResult.spatialCorrelationsBuilt}`);
-      console.log(`✓ MEP elements mapped: ${phaseCResult.mepElementsMapped}`);
-      console.log(`✓ Symbols learned: ${phaseCResult.symbolsLearned}`);
+      logger.info('PHASE_C', 'Phase C complete', { spatialCorrelations: phaseCResult.spatialCorrelationsBuilt, mepElements: phaseCResult.mepElementsMapped, symbols: phaseCResult.symbolsLearned });
     }
 
     result.success = true;
-    console.log(`\n✅ Intelligence extraction completed\n`);
+    logger.info('INTELLIGENCE_ORCHESTRATOR', 'Intelligence extraction completed');
 
   } catch (error: any) {
     result.errors.push(error.message);
-    console.error(`\n❌ Intelligence extraction failed: ${error.message}\n`);
+    logger.error('INTELLIGENCE_ORCHESTRATOR', 'Intelligence extraction failed', error);
   }
 
   return result;

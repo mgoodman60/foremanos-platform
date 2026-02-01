@@ -7,6 +7,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from '@/lib/logger';
 import { generateAbbreviationContext, expandAbbreviationsInText } from './construction-abbreviations';
 import { getFileUrl } from './s3';
 import { withLock, isLocked } from './extraction-lock-service';
@@ -60,7 +61,7 @@ export async function extractScheduleWithAI(
   );
 
   if (lockResult.skipped || !lockResult.success) {
-    console.log(`[AI_SCHEDULE_EXTRACTOR] ⏳ Schedule extraction already in progress for document ${documentId}, returning existing...`);
+    logger.info('AI_SCHEDULE_EXTRACTOR', `Schedule extraction already in progress for document ${documentId}, returning existing`);
     
     // Return existing schedule if available
     const existingSchedule = await prisma.schedule.findFirst({
@@ -109,14 +110,14 @@ async function performScheduleExtraction(
   userId: string,
   scheduleName?: string
 ): Promise<ScheduleExtractionResult> {
-  console.log('[AI_SCHEDULE_EXTRACTOR] Starting AI-powered schedule extraction');
+  logger.info('AI_SCHEDULE_EXTRACTOR', 'Starting AI-powered schedule extraction');
 
   // Delete any existing schedules for this document to prevent duplicates
   const deletedSchedules = await prisma.schedule.deleteMany({
     where: { documentId }
   });
   if (deletedSchedules.count > 0) {
-    console.log(`[AI_SCHEDULE_EXTRACTOR] Deleted ${deletedSchedules.count} existing schedule(s) for document ${documentId}`);
+    logger.info('AI_SCHEDULE_EXTRACTOR', `Deleted existing schedule(s) for document ${documentId}`, { count: deletedSchedules.count });
   }
 
   // Get document
@@ -133,7 +134,7 @@ async function performScheduleExtraction(
   }
 
   // Try to extract directly from PDF images first (better for Gantt charts)
-  console.log(`[AI_SCHEDULE_EXTRACTOR] Attempting direct PDF vision extraction for ${document.name}`);
+  logger.info('AI_SCHEDULE_EXTRACTOR', `Attempting direct PDF vision extraction for ${document.name}`);
   
   let allTasks: ExtractedTask[] = [];
   
@@ -141,10 +142,10 @@ async function performScheduleExtraction(
     const tasksFromPdf = await extractTasksFromPdfImages(documentId, document.cloud_storage_path, document.isPublic, document.name);
     if (tasksFromPdf.length > 0) {
       allTasks = tasksFromPdf;
-      console.log(`[AI_SCHEDULE_EXTRACTOR] Direct PDF extraction found ${allTasks.length} tasks`);
+      logger.info('AI_SCHEDULE_EXTRACTOR', `Direct PDF extraction found tasks`, { taskCount: allTasks.length });
     }
   } catch (pdfError) {
-    console.log(`[AI_SCHEDULE_EXTRACTOR] Direct PDF extraction failed, falling back to chunks:`, pdfError);
+    logger.warn('AI_SCHEDULE_EXTRACTOR', 'Direct PDF extraction failed, falling back to chunks', { error: pdfError instanceof Error ? pdfError.message : String(pdfError) });
   }
 
   // Fallback to document chunks if direct extraction failed
@@ -158,14 +159,14 @@ async function performScheduleExtraction(
       throw new Error('Document has not been processed for OCR yet. Please wait for processing to complete.');
     }
 
-    console.log(`[AI_SCHEDULE_EXTRACTOR] Processing ${chunks.length} text chunks`);
+    logger.info('AI_SCHEDULE_EXTRACTOR', `Processing text chunks`, { chunkCount: chunks.length });
 
     const BATCH_SIZE = 10;
     for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
       const batch = chunks.slice(i, i + BATCH_SIZE);
       const batchTasks = await extractTasksFromChunkBatch(batch, document.name);
       allTasks.push(...batchTasks);
-      console.log(`[AI_SCHEDULE_EXTRACTOR] Processed pages ${i + 1}-${Math.min(i + BATCH_SIZE, chunks.length)}, found ${batchTasks.length} tasks`);
+      logger.info('AI_SCHEDULE_EXTRACTOR', `Processed pages`, { startPage: i + 1, endPage: Math.min(i + BATCH_SIZE, chunks.length), tasksFound: batchTasks.length });
     }
   }
 
@@ -179,7 +180,7 @@ async function performScheduleExtraction(
 
   // Deduplicate tasks by taskId
   const uniqueTasks = deduplicateTasks(allTasks);
-  console.log(`[AI_SCHEDULE_EXTRACTOR] Found ${uniqueTasks.length} unique tasks (${allTasks.length - uniqueTasks.length} duplicates removed)`);
+  logger.info('AI_SCHEDULE_EXTRACTOR', `Found unique tasks`, { uniqueTasks: uniqueTasks.length, duplicatesRemoved: allTasks.length - uniqueTasks.length });
 
   // Parse and validate dates
   const tasksWithDates = uniqueTasks.map(task => ({
@@ -229,7 +230,7 @@ async function performScheduleExtraction(
     }
   });
 
-  console.log(`[AI_SCHEDULE_EXTRACTOR] Created schedule ${schedule.id} (deactivated previous schedules)`);
+  logger.info('AI_SCHEDULE_EXTRACTOR', `Created schedule (deactivated previous schedules)`, { scheduleId: schedule.id });
 
   // Create tasks in database
   for (const task of validTasks) {
@@ -257,7 +258,7 @@ async function performScheduleExtraction(
     });
   }
 
-  console.log(`[AI_SCHEDULE_EXTRACTOR] Successfully created ${validTasks.length} tasks`);
+  logger.info('AI_SCHEDULE_EXTRACTOR', `Successfully created tasks`, { taskCount: validTasks.length });
 
   // Create or update ProjectDataSource for schedule feature
   // This is required for schedule-metrics API to work correctly
@@ -292,17 +293,17 @@ async function performScheduleExtraction(
     }
   });
 
-  console.log(`[AI_SCHEDULE_EXTRACTOR] Created/updated ProjectDataSource for schedule feature`);
+  logger.info('AI_SCHEDULE_EXTRACTOR', 'Created/updated ProjectDataSource for schedule feature');
 
   // Run trade inference on the new schedule (in background)
-  console.log(`[AI_SCHEDULE_EXTRACTOR] 🏗️ Triggering trade inference for schedule ${schedule.id}...`);
+  logger.info('AI_SCHEDULE_EXTRACTOR', `Triggering trade inference for schedule ${schedule.id}`);
   import('./trade-inference').then(({ inferTradesForSchedule }) => {
     inferTradesForSchedule(schedule.id, projectId)
       .then(result => {
-        console.log(`[AI_SCHEDULE_EXTRACTOR] 🏗️ Trade inference complete: ${result.updated} tasks updated, ${result.needsClarification} need clarification`);
+        logger.info('AI_SCHEDULE_EXTRACTOR', `Trade inference complete`, { updated: result.updated, needsClarification: result.needsClarification });
       })
       .catch(err => {
-        console.error('[AI_SCHEDULE_EXTRACTOR] Trade inference error:', err);
+        logger.error('AI_SCHEDULE_EXTRACTOR', 'Trade inference error', err);
       });
   });
 
@@ -338,7 +339,7 @@ async function extractTasksFromChunkBatch(
   const prompt = `You are analyzing construction schedule pages from the document "${documentName}".\n\nYour task is to extract ALL construction tasks/activities with their schedule information.${abbreviationGlossary}\n\n**CRITICAL INSTRUCTIONS:**\n1. Extract EVERY task, activity, or work item mentioned\n2. Include task IDs (e.g., A1010, T-001, 1.1.1) if present\n3. Extract dates in any format found (MM/DD/YY, DD-MMM-YY, etc.)\n4. Identify predecessors/dependencies if mentioned\n5. Note if tasks are marked as critical or on critical path\n6. Include location/area information if specified\n7. Extract WBS codes or activity codes if present\n\n**EXPECTED OUTPUT FORMAT (JSON array):**\n[\n  {\n    "taskId": "A1010",\n    "name": "Install Foundation Forms",\n    "description": "Set up formwork for foundation footings",\n    "startDate": "01/15/2024",\n    "endDate": "01/22/2024",\n    "duration": 5,\n    "predecessors": ["A1000", "A1005"],\n    "assignedTo": "ABC Concrete",\n    "location": "Area A",\n    "wbsCode": "1.1.1",\n    "isCritical": true,\n    "percentComplete": 0,\n    "status": "not_started"\n  }\n]\n\n**DATE HANDLING:**\n- If you see a date range like "01/15-01/22", split into startDate and endDate\n- If only one date is given, use it for both start and end\n- Always include the year. If year is missing, assume 2024\n- Format as MM/DD/YYYY in output\n\n**TASK ID RULES:**\n- If document doesn't have task IDs, generate sequential IDs: TASK-001, TASK-002, etc.\n- Maintain any existing numbering system from the document\n\n**STATUS MAPPING:**\n- Use "not_started", "in_progress", "completed", "delayed"\n- If status unclear, use "not_started"\n\nNow extract all tasks from these schedule pages:\n\n${combinedContent}\n\n**OUTPUT (JSON array only, no markdown):**`;
 
   try {
-    console.log('[AI_SCHEDULE_EXTRACTOR] Calling LLM API for schedule extraction...');
+    logger.info('AI_SCHEDULE_EXTRACTOR', 'Calling LLM API for schedule extraction');
     
     const llmResponse = await callAbacusLLM([
       {
@@ -356,10 +357,10 @@ async function extractTasksFromChunkBatch(
     });
 
     const content = llmResponse.content;
-    console.log('[AI_SCHEDULE_EXTRACTOR] LLM API call successful');
+    logger.info('AI_SCHEDULE_EXTRACTOR', 'LLM API call successful');
 
     if (!content) {
-      console.error('[AI_SCHEDULE_EXTRACTOR] No content in LLM response');
+      logger.error('AI_SCHEDULE_EXTRACTOR', 'No content in LLM response');
       return [];
     }
 
@@ -389,8 +390,7 @@ async function extractTasksFromChunkBatch(
         tasks = JSON.parse(jsonContent);
       }
     } catch (parseError) {
-      console.error('[AI_SCHEDULE_EXTRACTOR] Failed to parse AI response as JSON:', parseError);
-      console.log('[AI_SCHEDULE_EXTRACTOR] Raw response:', content.substring(0, 500));
+      logger.error('AI_SCHEDULE_EXTRACTOR', 'Failed to parse AI response as JSON', parseError, { rawResponse: content.substring(0, 500) });
       // Return empty array instead of throwing
       return [];
     }
@@ -399,14 +399,14 @@ async function extractTasksFromChunkBatch(
     const validTasks = tasks.filter(task => {
       const hasRequiredFields = task.taskId && task.name && task.startDate && task.endDate;
       if (!hasRequiredFields) {
-        console.warn(`[AI_SCHEDULE_EXTRACTOR] Skipping invalid task:`, task);
+        logger.warn('AI_SCHEDULE_EXTRACTOR', 'Skipping invalid task', { task });
       }
       return hasRequiredFields;
     });
 
     return validTasks;
   } catch (error) {
-    console.error('[AI_SCHEDULE_EXTRACTOR] Error calling vision API:', error);
+    logger.error('AI_SCHEDULE_EXTRACTOR', 'Error calling vision API', error);
     return [];
   }
 }
@@ -421,7 +421,7 @@ async function extractTasksFromPdfImages(
   isPublic: boolean,
   documentName: string
 ): Promise<ExtractedTask[]> {
-  console.log('[AI_SCHEDULE_EXTRACTOR] Starting direct PDF image extraction');
+  logger.info('AI_SCHEDULE_EXTRACTOR', 'Starting direct PDF image extraction');
   
   // Download PDF from S3
   const fileUrl = await getFileUrl(cloudStoragePath, isPublic);
@@ -433,8 +433,8 @@ async function extractTasksFromPdfImages(
   
   const buffer = Buffer.from(await response.arrayBuffer());
   const pdfBase64 = buffer.toString('base64');
-  
-  console.log(`[AI_SCHEDULE_EXTRACTOR] Sending PDF to vision API (${Math.round(buffer.length / 1024)}KB)`);
+
+  logger.info('AI_SCHEDULE_EXTRACTOR', `Sending PDF to vision API`, { sizeKB: Math.round(buffer.length / 1024) });
   
   const allTasks: ExtractedTask[] = [];
   
@@ -513,12 +513,12 @@ Extract all tasks now:`;
       const jsonMatch = jsonContent.match(/\[\s*[\s\S]*\]/);
       if (jsonMatch) {
         const tasks = JSON.parse(jsonMatch[0]);
-        console.log(`[AI_SCHEDULE_EXTRACTOR] Vision extraction found ${tasks.length} tasks`);
+        logger.info('AI_SCHEDULE_EXTRACTOR', `Vision extraction found tasks`, { taskCount: tasks.length });
         allTasks.push(...tasks);
       }
     }
   } catch (error: any) {
-    console.error(`[AI_SCHEDULE_EXTRACTOR] Vision API error:`, error.message);
+    logger.error('AI_SCHEDULE_EXTRACTOR', 'Vision API error', error);
     throw error;
   }
   
@@ -608,10 +608,10 @@ function parseFlexibleDate(dateStr: string): string {
     }
 
     // If all parsing fails, return original
-    console.warn(`[AI_SCHEDULE_EXTRACTOR] Could not parse date: ${dateStr}`);
+    logger.warn('AI_SCHEDULE_EXTRACTOR', `Could not parse date`, { dateStr });
     return cleaned;
   } catch (error) {
-    console.error(`[AI_SCHEDULE_EXTRACTOR] Error parsing date "${dateStr}":`, error);
+    logger.error('AI_SCHEDULE_EXTRACTOR', `Error parsing date`, error, { dateStr });
     return dateStr;
   }
 }
@@ -638,9 +638,9 @@ export async function deleteScheduleForDocument(documentId: string): Promise<voi
       });
     }
 
-    console.log(`[AI_SCHEDULE_EXTRACTOR] Deleted ${existingSchedules.length} existing schedule(s) for document ${documentId}`);
+    logger.info('AI_SCHEDULE_EXTRACTOR', `Deleted existing schedule(s)`, { documentId, count: existingSchedules.length });
   } catch (error) {
-    console.error('[AI_SCHEDULE_EXTRACTOR] Error deleting existing schedules:', error);
+    logger.error('AI_SCHEDULE_EXTRACTOR', 'Error deleting existing schedules', error);
     throw error;
   }
 }
