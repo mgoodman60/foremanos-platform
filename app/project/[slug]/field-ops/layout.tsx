@@ -10,12 +10,12 @@ export default function FieldOpsLayout({
 }) {
   return (
     <div className="min-h-screen bg-[#0D1117]">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="mb-6">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 py-6">
+        <nav aria-label="Field operations navigation" className="mb-6">
           <FieldOpsNavigation projectSlug={params.slug} />
-        </div>
+        </nav>
         {children}
-      </div>
+      </main>
     </div>
   );
 }

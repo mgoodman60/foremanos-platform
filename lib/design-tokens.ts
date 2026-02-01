@@ -380,6 +380,34 @@ export const zIndex = {
 } as const;
 
 /**
+ * Opacity Tokens
+ *
+ * Standardized opacity values for consistent transparency patterns.
+ * Use these tokens instead of hardcoded opacity values.
+ *
+ * Tailwind usage: bg-black/{token} or bg-white/{token}
+ * Example: bg-black/90 for modal overlay
+ */
+export const opacity = {
+  overlay: {
+    modal: '90',      // bg-black/90 - Modal backdrop overlay
+    loading: '80',    // bg-gray-900/80 - Loading state overlay
+    hover: '10',      // hover:bg-white/10 - Subtle hover states
+  },
+  surface: {
+    card: '50',       // bg-gray-800/50 - Card backgrounds
+    badge: '30',      // bg-[color]-900/30 - Status badge backgrounds
+    subtle: '20',     // Decorative backgrounds
+    highlight: '10',  // Very subtle highlights
+  },
+  backdrop: {
+    blur: 'sm',       // backdrop-blur-sm - Standard blur amount
+  },
+  disabled: '50',     // opacity-50 - Disabled elements
+  hidden: '0',        // opacity-0 - Fully transparent
+} as const;
+
+/**
  * Type-safe color helper functions
  */
 export const helpers = {
@@ -438,6 +466,7 @@ export const designTokens = {
   spacing,
   layout,
   zIndex,
+  opacity,
   helpers,
 } as const;
 

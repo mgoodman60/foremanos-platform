@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +36,8 @@ import {
   MapPin
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { takeoffLineItemEditSchema, type TakeoffLineItemEditFormData } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
 
 interface TakeoffLineItem {
   id: string;
@@ -66,41 +70,41 @@ const MATERIAL_PRICE_SUGGESTIONS: Record<string, { low: number; mid: number; hig
   'porcelain tile': { low: 5.00, mid: 10.00, high: 20.00, unit: 'SF' },
   'epoxy': { low: 3.00, mid: 6.00, high: 12.00, unit: 'SF' },
   'concrete polish': { low: 2.50, mid: 5.00, high: 10.00, unit: 'SF' },
-  
+
   // Walls
   'drywall': { low: 1.50, mid: 2.50, high: 4.00, unit: 'SF' },
   'gypsum board': { low: 1.50, mid: 2.50, high: 4.00, unit: 'SF' },
   'paint': { low: 1.00, mid: 2.00, high: 4.00, unit: 'SF' },
   'wallpaper': { low: 3.00, mid: 6.00, high: 15.00, unit: 'SF' },
   'frp panel': { low: 4.00, mid: 7.00, high: 12.00, unit: 'SF' },
-  
+
   // Ceiling
   'acoustic tile': { low: 2.00, mid: 4.00, high: 8.00, unit: 'SF' },
   'act': { low: 2.00, mid: 4.00, high: 8.00, unit: 'SF' },
   'suspended ceiling': { low: 3.00, mid: 5.00, high: 10.00, unit: 'SF' },
   'drywall ceiling': { low: 2.50, mid: 4.00, high: 6.00, unit: 'SF' },
-  
+
   // Base/Trim
   'base': { low: 1.50, mid: 3.00, high: 6.00, unit: 'LF' },
   'rubber base': { low: 1.50, mid: 2.50, high: 4.00, unit: 'LF' },
   'wood base': { low: 2.00, mid: 4.00, high: 8.00, unit: 'LF' },
   'vinyl base': { low: 1.00, mid: 2.00, high: 3.50, unit: 'LF' },
   'crown molding': { low: 3.00, mid: 6.00, high: 12.00, unit: 'LF' },
-  
+
   // Default
   'default': { low: 1.00, mid: 5.00, high: 15.00, unit: 'SF' }
 };
 
 function getSuggestedPrices(itemName: string, category: string): { low: number; mid: number; high: number; unit: string } {
   const searchTerms = [itemName, category].join(' ').toLowerCase();
-  
+
   for (const [key, prices] of Object.entries(MATERIAL_PRICE_SUGGESTIONS)) {
     if (key === 'default') continue;
     if (searchTerms.includes(key)) {
       return prices;
     }
   }
-  
+
   return MATERIAL_PRICE_SUGGESTIONS.default;
 }
 
@@ -133,46 +137,60 @@ export function TakeoffLineItemEditModal({
   takeoffId,
   onSave
 }: TakeoffLineItemEditModalProps) {
-  const [formData, setFormData] = useState<Partial<TakeoffLineItem>>({});
-  const [saving, setSaving] = useState(false);
-  const [suggestedPrices, setSuggestedPrices] = useState<{ low: number; mid: number; high: number; unit: string } | null>(null);
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<TakeoffLineItemEditFormData>({
+    resolver: zodResolver(takeoffLineItemEditSchema),
+    mode: 'onBlur',
+  });
 
+  // Watch for quantity and unitCost changes to calculate total
+  const quantity = watch('quantity');
+  const unitCost = watch('unitCost');
+  const verified = watch('verified');
+  const confidence = watch('confidence') ?? item?.confidence ?? 0;
+  const totalCost = (quantity || 0) * (unitCost || 0);
+
+  // Get suggested prices based on item name and category
+  const suggestedPrices = item ? getSuggestedPrices(item.itemName, item.category) : null;
+
+  // Reset form with item data when item changes
   useEffect(() => {
     if (item) {
-      setFormData({
-        ...item
+      reset({
+        category: item.category,
+        itemName: item.itemName,
+        description: item.description || '',
+        quantity: item.quantity,
+        unit: item.unit as any,
+        unitCost: item.unitCost || 0,
+        location: item.location || '',
+        sheetNumber: item.sheetNumber || '',
+        gridLocation: item.gridLocation || '',
+        notes: item.notes || '',
+        verified: item.verified,
+        confidence: item.confidence,
       });
-      setSuggestedPrices(getSuggestedPrices(item.itemName, item.category));
     }
-  }, [item]);
+  }, [item, reset]);
 
-  const handleChange = (field: keyof TakeoffLineItem, value: any) => {
-    setFormData((prev) => {
-      const updated = { ...prev, [field]: value };
-      
-      // Auto-calculate total cost when quantity or unit cost changes
-      if (field === 'quantity' || field === 'unitCost') {
-        const quantity = field === 'quantity' ? value : prev.quantity;
-        const unitCost = field === 'unitCost' ? value : prev.unitCost;
-        if (quantity && unitCost) {
-          updated.totalCost = quantity * unitCost;
-        }
-      }
-      
-      return updated;
-    });
-  };
-
-  const handleSave = async () => {
+  const onSubmit = async (data: TakeoffLineItemEditFormData) => {
     if (!item) return;
-    
+
     try {
-      setSaving(true);
-      
       const response = await fetch(`/api/takeoff/${takeoffId}/line-items/${item.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...data,
+          totalCost,
+        })
       });
 
       if (!response.ok) {
@@ -181,33 +199,28 @@ export function TakeoffLineItemEditModal({
       }
 
       const { lineItem: updatedItem } = await response.json();
-      
+
       toast.success('Item updated successfully');
       onSave(updatedItem);
       onClose();
     } catch (error: any) {
       console.error('Error updating line item:', error);
       toast.error(error.message || 'Failed to update item');
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleVerify = async () => {
-    handleChange('verified', true);
-    // Also increase confidence when manually verified
-    handleChange('confidence', 1.0);
+  const handleVerify = () => {
+    setValue('verified', true);
+    setValue('confidence', 1.0);
   };
 
   const applySuggestedPrice = (priceType: 'low' | 'mid' | 'high') => {
     if (suggestedPrices) {
-      handleChange('unitCost', suggestedPrices[priceType]);
+      setValue('unitCost', suggestedPrices[priceType]);
     }
   };
 
   if (!item) return null;
-
-  const confidence = formData.confidence ?? item.confidence ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -219,7 +232,7 @@ export function TakeoffLineItemEditModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
           {/* Confidence & Verification Status */}
           <div className="flex items-center justify-between p-3 bg-[#2D333B] rounded-lg border border-gray-700">
             <div className="flex items-center gap-4">
@@ -243,18 +256,24 @@ export function TakeoffLineItemEditModal({
 
             {/* Verification Toggle */}
             <div className="flex items-center gap-2">
-              {formData.verified ? (
+              {verified ? (
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
               ) : (
                 <AlertCircle className="h-5 w-5 text-orange-400" />
               )}
               <Label htmlFor="verified" className="text-sm">
-                {formData.verified ? 'Verified' : 'Unverified'}
+                {verified ? 'Verified' : 'Unverified'}
               </Label>
-              <Switch
-                id="verified"
-                checked={formData.verified || false}
-                onCheckedChange={(checked) => handleChange('verified', checked)}
+              <Controller
+                name="verified"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="verified"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
               />
             </div>
           </div>
@@ -265,20 +284,24 @@ export function TakeoffLineItemEditModal({
               <Label htmlFor="itemName">Item Name</Label>
               <Input
                 id="itemName"
-                value={formData.itemName || ''}
-                onChange={(e) => handleChange('itemName', e.target.value)}
+                {...register('itemName')}
                 className="bg-[#2D333B] border-gray-600"
+                aria-invalid={!!errors.itemName}
+                aria-describedby={errors.itemName ? 'itemName-error' : undefined}
               />
+              <FormError error={errors.itemName} fieldName="itemName" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Input
                 id="category"
-                value={formData.category || ''}
-                onChange={(e) => handleChange('category', e.target.value)}
+                {...register('category')}
                 className="bg-[#2D333B] border-gray-600"
+                aria-invalid={!!errors.category}
+                aria-describedby={errors.category ? 'category-error' : undefined}
               />
+              <FormError error={errors.category} fieldName="category" />
             </div>
           </div>
 
@@ -286,11 +309,12 @@ export function TakeoffLineItemEditModal({
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={formData.description || ''}
-              onChange={(e) => handleChange('description', e.target.value)}
+              {...register('description')}
               className="bg-[#2D333B] border-gray-600 min-h-[60px]"
               placeholder="Material specifications, finish, etc."
+              aria-describedby={errors.description ? 'description-error' : undefined}
             />
+            <FormError error={errors.description} fieldName="description" />
           </div>
 
           <Separator className="bg-gray-700" />
@@ -309,30 +333,36 @@ export function TakeoffLineItemEditModal({
                   id="quantity"
                   type="number"
                   step="0.01"
-                  value={formData.quantity || ''}
-                  onChange={(e) => handleChange('quantity', parseFloat(e.target.value) || 0)}
+                  {...register('quantity', { valueAsNumber: true })}
                   className="bg-[#2D333B] border-gray-600"
+                  aria-invalid={!!errors.quantity}
+                  aria-describedby={errors.quantity ? 'quantity-error' : undefined}
                 />
+                <FormError error={errors.quantity} fieldName="quantity" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="unit">Unit</Label>
-                <Select
-                  value={formData.unit || ''}
-                  onValueChange={(value) => handleChange('unit', value)}
-                >
-                  <SelectTrigger className="bg-[#2D333B] border-gray-600">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SF">SF (Sq Ft)</SelectItem>
-                    <SelectItem value="LF">LF (Linear Ft)</SelectItem>
-                    <SelectItem value="SY">SY (Sq Yd)</SelectItem>
-                    <SelectItem value="EA">EA (Each)</SelectItem>
-                    <SelectItem value="CY">CY (Cubic Yd)</SelectItem>
-                    <SelectItem value="TON">TON</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="unit"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="unit" className="bg-[#2D333B] border-gray-600">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SF">SF (Sq Ft)</SelectItem>
+                        <SelectItem value="LF">LF (Linear Ft)</SelectItem>
+                        <SelectItem value="SY">SY (Sq Yd)</SelectItem>
+                        <SelectItem value="EA">EA (Each)</SelectItem>
+                        <SelectItem value="CY">CY (Cubic Yd)</SelectItem>
+                        <SelectItem value="TON">TON</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <FormError error={errors.unit} fieldName="unit" />
               </div>
 
               <div className="space-y-2">
@@ -341,11 +371,12 @@ export function TakeoffLineItemEditModal({
                   id="unitCost"
                   type="number"
                   step="0.01"
-                  value={formData.unitCost || ''}
-                  onChange={(e) => handleChange('unitCost', parseFloat(e.target.value) || 0)}
+                  {...register('unitCost', { valueAsNumber: true })}
                   className="bg-[#2D333B] border-gray-600"
                   placeholder="0.00"
+                  aria-describedby={errors.unitCost ? 'unitCost-error' : undefined}
                 />
+                <FormError error={errors.unitCost} fieldName="unitCost" />
               </div>
 
               <div className="space-y-2">
@@ -353,7 +384,7 @@ export function TakeoffLineItemEditModal({
                 <div className="flex items-center h-10 px-3 rounded-md bg-[#2D333B] border border-gray-600">
                   <DollarSign className="h-4 w-4 text-green-400 mr-1" />
                   <span className="text-green-400 font-medium">
-                    {(formData.totalCost || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    {totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
@@ -368,6 +399,7 @@ export function TakeoffLineItemEditModal({
                 </div>
                 <div className="flex gap-2">
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => applySuggestedPrice('low')}
@@ -376,6 +408,7 @@ export function TakeoffLineItemEditModal({
                     Budget: ${suggestedPrices.low.toFixed(2)}
                   </Button>
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => applySuggestedPrice('mid')}
@@ -384,6 +417,7 @@ export function TakeoffLineItemEditModal({
                     Standard: ${suggestedPrices.mid.toFixed(2)}
                   </Button>
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => applySuggestedPrice('high')}
@@ -410,33 +444,36 @@ export function TakeoffLineItemEditModal({
                 <Label htmlFor="location">Room/Location</Label>
                 <Input
                   id="location"
-                  value={formData.location || ''}
-                  onChange={(e) => handleChange('location', e.target.value)}
+                  {...register('location')}
                   className="bg-[#2D333B] border-gray-600"
                   placeholder="e.g., Conference Room A"
+                  aria-describedby={errors.location ? 'location-error' : undefined}
                 />
+                <FormError error={errors.location} fieldName="location" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="sheetNumber">Sheet Number</Label>
                 <Input
                   id="sheetNumber"
-                  value={formData.sheetNumber || ''}
-                  onChange={(e) => handleChange('sheetNumber', e.target.value)}
+                  {...register('sheetNumber')}
                   className="bg-[#2D333B] border-gray-600"
                   placeholder="e.g., A-101"
+                  aria-describedby={errors.sheetNumber ? 'sheetNumber-error' : undefined}
                 />
+                <FormError error={errors.sheetNumber} fieldName="sheetNumber" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="gridLocation">Grid Location</Label>
                 <Input
                   id="gridLocation"
-                  value={formData.gridLocation || ''}
-                  onChange={(e) => handleChange('gridLocation', e.target.value)}
+                  {...register('gridLocation')}
                   className="bg-[#2D333B] border-gray-600"
                   placeholder="e.g., C-4"
+                  aria-describedby={errors.gridLocation ? 'gridLocation-error' : undefined}
                 />
+                <FormError error={errors.gridLocation} fieldName="gridLocation" />
               </div>
             </div>
           </div>
@@ -446,40 +483,42 @@ export function TakeoffLineItemEditModal({
             <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
-              value={formData.notes || ''}
-              onChange={(e) => handleChange('notes', e.target.value)}
+              {...register('notes')}
               className="bg-[#2D333B] border-gray-600 min-h-[60px]"
               placeholder="Additional notes, review comments, etc."
+              aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
+            <FormError error={errors.notes} fieldName="notes" />
           </div>
-        </div>
 
-        <DialogFooter className="flex items-center justify-between">
-          <div>
-            {!formData.verified && (
-              <Button
-                variant="outline"
-                onClick={handleVerify}
-                className="border-green-600 text-green-400 hover:bg-green-900/30"
-              >
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Mark as Verified
+          <DialogFooter className="flex items-center justify-between">
+            <div>
+              {!verified && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleVerify}
+                  className="border-green-600 text-green-400 hover:bg-green-900/30"
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Mark as Verified
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={onClose} className="border-gray-600">
+                Cancel
               </Button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="border-gray-600">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-orange-500 hover:bg-orange-600"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </DialogFooter>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

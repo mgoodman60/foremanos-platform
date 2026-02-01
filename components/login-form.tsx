@@ -6,20 +6,43 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { HardHat, Lock, User, Loader2, Shield, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, guestLoginSchema, type LoginFormData, type GuestLoginFormData } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
+import { useAnnounceOptional } from '@/components/ui/announcer';
 
 interface LoginFormProps {
   onClose?: () => void;
 }
 
 export function LoginForm({ onClose }: LoginFormProps) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [guestUsername, setGuestUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const usernameInputRef = useRef<HTMLInputElement>(null);
+  const announcer = useAnnounceOptional();
+
+  // Main login form with React Hook Form + Zod
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur', // Validate on blur for better UX
+  });
+
+  // Guest login form
+  const {
+    register: registerGuest,
+    handleSubmit: handleSubmitGuest,
+    formState: { errors: guestErrors },
+  } = useForm<GuestLoginFormData>({
+    resolver: zodResolver(guestLoginSchema),
+    mode: 'onBlur',
+  });
 
   // Auto-focus username field on mount
   useEffect(() => {
@@ -37,28 +60,59 @@ export function LoginForm({ onClose }: LoginFormProps) {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const onSubmit = async (data: LoginFormData) => {
+    setFormError('');
     setLoading(true);
+    announcer?.announce('Signing in...');
 
     try {
       // Use NextAuth's built-in redirect to properly handle auth flow
       const result = await signIn('credentials', {
-        username,
-        password,
+        username: data.username,
+        password: data.password,
         redirect: true,
         callbackUrl: '/dashboard',
       });
 
       // This code will only execute if redirect is somehow prevented
       if (result?.error) {
-        setError('Invalid credentials. Please check your username and password.');
+        setFormError('Invalid credentials. Please check your username and password.');
+        announcer?.announce('Login failed. Please check your credentials.', 'assertive');
         toast.error('Login failed');
         setLoading(false);
       }
     } catch (err) {
-      setError('An error occurred while signing in. Please try again.');
+      setFormError('An error occurred while signing in. Please try again.');
+      announcer?.announce('Connection error. Please try again.', 'assertive');
+      toast.error('Connection error');
+      setLoading(false);
+    }
+  };
+
+  const onGuestSubmit = async (data: GuestLoginFormData) => {
+    setFormError('');
+    setLoading(true);
+    announcer?.announce('Signing in as guest...');
+
+    try {
+      // Use NextAuth's built-in redirect for proper auth flow
+      const result = await signIn('credentials', {
+        username: data.jobPin,
+        password: '', // Empty password for guest login
+        redirect: true,
+        callbackUrl: '/dashboard',
+      });
+
+      // This code will only execute if redirect is somehow prevented
+      if (result?.error) {
+        setFormError('Guest login failed. Please check your Job Pin.');
+        announcer?.announce('Guest login failed. Please check your Job Pin.', 'assertive');
+        toast.error('Login failed');
+        setLoading(false);
+      }
+    } catch (err) {
+      setFormError('An error occurred. Please try again.');
+      announcer?.announce('Connection error. Please try again.', 'assertive');
       toast.error('Connection error');
       setLoading(false);
     }
@@ -108,7 +162,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <div>
           <label htmlFor="username" className="block text-base font-semibold text-gray-300 mb-2">
             Username
@@ -116,19 +170,24 @@ export function LoginForm({ onClose }: LoginFormProps) {
           <div className="relative">
             <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 pointer-events-none" aria-hidden="true" />
             <input
-              ref={usernameInputRef}
+              {...register('username')}
+              ref={(e) => {
+                register('username').ref(e);
+                usernameInputRef.current = e;
+              }}
               id="username"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-600 bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation"
+              className={`w-full pl-12 pr-4 py-4 text-lg border-2 ${
+                errors.username ? 'border-red-500' : 'border-gray-600'
+              } bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation`}
               placeholder="Enter your username"
               autoComplete="username"
-              required
               aria-required="true"
-              aria-describedby={error ? 'login-error' : undefined}
+              aria-invalid={!!errors.username}
+              aria-describedby={errors.username ? 'username-error' : undefined}
             />
           </div>
+          <FormError error={errors.username} fieldName="username" />
         </div>
 
         <div>
@@ -138,16 +197,17 @@ export function LoginForm({ onClose }: LoginFormProps) {
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 pointer-events-none" aria-hidden="true" />
             <input
+              {...register('password')}
               id="password"
               type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-14 py-4 text-lg border-2 border-gray-600 bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation"
+              className={`w-full pl-12 pr-14 py-4 text-lg border-2 ${
+                errors.password ? 'border-red-500' : 'border-gray-600'
+              } bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation`}
               placeholder="Enter your password"
               autoComplete="current-password"
-              required
               aria-required="true"
-              aria-describedby={error ? 'login-error' : undefined}
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'password-error' : undefined}
             />
             <button
               type="button"
@@ -159,9 +219,10 @@ export function LoginForm({ onClose }: LoginFormProps) {
               {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
             </button>
           </div>
+          <FormError error={errors.password} fieldName="password" />
           <div className="text-right mt-2">
-            <Link 
-              href="/forgot-password" 
+            <Link
+              href="/forgot-password"
               className="text-[#F97316] hover:text-[#ea580c] text-sm font-medium transition-colors underline"
             >
               Forgot Password?
@@ -169,14 +230,14 @@ export function LoginForm({ onClose }: LoginFormProps) {
           </div>
         </div>
 
-        {error && (
-          <div 
+        {formError && (
+          <div
             id="login-error"
             className="bg-red-50 border-2 border-red-200 text-red-700 px-5 py-4 rounded-xl text-base animate-in slide-in-from-top font-medium"
             role="alert"
             aria-live="assertive"
           >
-            {error}
+            {formError}
           </div>
         )}
 
@@ -214,48 +275,28 @@ export function LoginForm({ onClose }: LoginFormProps) {
           </p>
 
           {/* Guest Login Form */}
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            setError('');
-            setLoading(true);
-
-            // Use NextAuth's built-in redirect for proper auth flow
-            signIn('credentials', {
-              username: guestUsername,
-              password: '', // Empty password for guest login
-              redirect: true,
-              callbackUrl: '/dashboard',
-            }).then((result) => {
-              // This code will only execute if redirect is somehow prevented
-              if (result?.error) {
-                setError('Guest login failed. Please check your Job Pin.');
-                toast.error('Login failed');
-                setLoading(false);
-              }
-            }).catch(() => {
-              setError('An error occurred. Please try again.');
-              toast.error('Connection error');
-              setLoading(false);
-            });
-          }} className="space-y-4">
+          <form onSubmit={handleSubmitGuest(onGuestSubmit)} className="space-y-4">
             <div>
-              <label htmlFor="guest-username" className="block text-sm font-semibold text-gray-300 mb-2">
+              <label htmlFor="guest-jobPin" className="block text-sm font-semibold text-gray-300 mb-2">
                 Job Pin
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none" aria-hidden="true" />
                 <input
-                  id="guest-username"
+                  {...registerGuest('jobPin')}
+                  id="guest-jobPin"
                   type="text"
-                  value={guestUsername}
-                  onChange={(e) => setGuestUsername(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 text-base border-2 border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 bg-dark-card placeholder-gray-500 touch-manipulation"
+                  className={`w-full pl-11 pr-4 py-3 text-base border-2 ${
+                    guestErrors.jobPin ? 'border-red-500' : 'border-gray-600'
+                  } rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 bg-dark-card placeholder-gray-500 touch-manipulation`}
                   placeholder="Enter your Job Pin"
                   autoComplete="off"
-                  required
                   aria-required="true"
+                  aria-invalid={!!guestErrors.jobPin}
+                  aria-describedby={guestErrors.jobPin ? 'guest-jobPin-error' : undefined}
                 />
               </div>
+              <FormError error={guestErrors.jobPin} fieldName="guest-jobPin" />
             </div>
 
             <button

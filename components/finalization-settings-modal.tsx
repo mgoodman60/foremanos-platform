@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Clock, Globe, Folder, Save, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'react-hot-toast';
+import { finalizationSettingsSchema, type FinalizationSettingsFormData, COMMON_TIMEZONES } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
 
 interface FinalizationSettingsModalProps {
   projectSlug: string;
@@ -11,16 +15,16 @@ interface FinalizationSettingsModalProps {
   onClose: () => void;
 }
 
-// Common US timezones
-const COMMON_TIMEZONES = [
-  { value: 'America/New_York', label: 'Eastern Time (ET)' },
-  { value: 'America/Chicago', label: 'Central Time (CT)' },
-  { value: 'America/Denver', label: 'Mountain Time (MT)' },
-  { value: 'America/Phoenix', label: 'Arizona Time (MST)' },
-  { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-  { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
-  { value: 'Pacific/Honolulu', label: 'Hawaii Time (HST)' },
-];
+// Common US timezones display labels
+const TIMEZONE_LABELS: Record<string, string> = {
+  'America/New_York': 'Eastern Time (ET)',
+  'America/Chicago': 'Central Time (CT)',
+  'America/Denver': 'Mountain Time (MT)',
+  'America/Phoenix': 'Arizona Time (MST)',
+  'America/Los_Angeles': 'Pacific Time (PT)',
+  'America/Anchorage': 'Alaska Time (AKT)',
+  'Pacific/Honolulu': 'Hawaii Time (HST)',
+};
 
 // Generate time options (00:00 to 23:00 in 30-minute intervals)
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
@@ -40,10 +44,28 @@ export function FinalizationSettingsModal({
 }: FinalizationSettingsModalProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [timezone, setTimezone] = useState('America/New_York');
-  const [finalizationTime, setFinalizationTime] = useState('18:00');
-  const [dailyReportsFolderId, setDailyReportsFolderId] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isDirty },
+  } = useForm<FinalizationSettingsFormData>({
+    resolver: zodResolver(finalizationSettingsSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      timezone: 'America/New_York',
+      finalizationTime: '18:00',
+      dailyReportsFolderId: '',
+    },
+  });
+
+  const timezone = watch('timezone');
+  const finalizationTime = watch('finalizationTime');
+  const dailyReportsFolderId = watch('dailyReportsFolderId');
 
   useEffect(() => {
     if (isOpen) {
@@ -51,15 +73,21 @@ export function FinalizationSettingsModal({
     }
   }, [isOpen, projectSlug]);
 
+  useEffect(() => {
+    setHasChanges(isDirty);
+  }, [isDirty]);
+
   const fetchSettings = async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/projects/${projectSlug}/finalization-settings`);
       if (response.ok) {
         const data = await response.json();
-        setTimezone(data.timezone || 'America/New_York');
-        setFinalizationTime(data.finalizationTime || '18:00');
-        setDailyReportsFolderId(data.dailyReportsFolderId || '');
+        reset({
+          timezone: data.timezone || 'America/New_York',
+          finalizationTime: data.finalizationTime || '18:00',
+          dailyReportsFolderId: data.dailyReportsFolderId || '',
+        });
         setHasChanges(false);
       } else {
         toast.error('Failed to load finalization settings');
@@ -72,16 +100,16 @@ export function FinalizationSettingsModal({
     }
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (data: FinalizationSettingsFormData) => {
     try {
       setSaving(true);
       const response = await fetch(`/api/projects/${projectSlug}/finalization-settings`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          timezone,
-          finalizationTime,
-          dailyReportsFolderId: dailyReportsFolderId || null,
+          timezone: data.timezone,
+          finalizationTime: data.finalizationTime,
+          dailyReportsFolderId: data.dailyReportsFolderId || null,
         }),
       });
 
@@ -90,8 +118,8 @@ export function FinalizationSettingsModal({
         setHasChanges(false);
         onClose();
       } else {
-        const data = await response.json();
-        toast.error(data.error || 'Failed to update settings');
+        const responseData = await response.json();
+        toast.error(responseData.error || 'Failed to update settings');
       }
     } catch (error) {
       console.error('Error updating finalization settings:', error);
@@ -120,6 +148,7 @@ export function FinalizationSettingsModal({
             </p>
           </div>
           <Button
+            type="button"
             onClick={onClose}
             variant="ghost"
             size="sm"
@@ -131,7 +160,7 @@ export function FinalizationSettingsModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-6 space-y-6" noValidate>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
@@ -144,8 +173,8 @@ export function FinalizationSettingsModal({
                   <AlertCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm text-blue-200 leading-relaxed">
-                      Daily reports are automatically finalized based on the time you set below. 
-                      Finalization only occurs if there's no user activity for 5 minutes.
+                      Daily reports are automatically finalized based on the time you set below.
+                      Finalization only occurs if theres no user activity for 5 minutes.
                     </p>
                   </div>
                 </div>
@@ -153,73 +182,101 @@ export function FinalizationSettingsModal({
 
               {/* Timezone Setting */}
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
+                <label htmlFor="timezone" className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
                   <Globe className="h-4 w-4 text-[#F97316]" />
                   Project Timezone
                 </label>
-                <select
-                  value={timezone}
-                  onChange={(e) => {
-                    setTimezone(e.target.value);
-                    setHasChanges(true);
-                  }}
-                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
-                >
-                  {COMMON_TIMEZONES.map((tz) => (
-                    <option key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500">
-                  All daily reports for this project will use this timezone for finalization
-                </p>
+                <Controller
+                  name="timezone"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      id="timezone"
+                      value={field.value}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setHasChanges(true);
+                      }}
+                      className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                      aria-invalid={!!errors.timezone}
+                      aria-describedby={errors.timezone ? 'timezone-error' : 'timezone-help'}
+                    >
+                      {COMMON_TIMEZONES.map((tz) => (
+                        <option key={tz} value={tz}>
+                          {TIMEZONE_LABELS[tz] || tz}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                />
+                <FormError error={errors.timezone} fieldName="timezone" />
+                {!errors.timezone && (
+                  <p id="timezone-help" className="text-xs text-gray-500">
+                    All daily reports for this project will use this timezone for finalization
+                  </p>
+                )}
               </div>
 
               {/* Finalization Time Setting */}
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
+                <label htmlFor="finalizationTime" className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
                   <Clock className="h-4 w-4 text-[#F97316]" />
                   Auto-Finalize Time
                 </label>
-                <select
-                  value={finalizationTime}
-                  onChange={(e) => {
-                    setFinalizationTime(e.target.value);
-                    setHasChanges(true);
-                  }}
-                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
-                >
-                  {TIME_OPTIONS.map((time) => (
-                    <option key={time.value} value={time.value}>
-                      {time.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500">
-                  Daily reports will be finalized at this time if no user activity for 5 minutes
-                </p>
+                <Controller
+                  name="finalizationTime"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      id="finalizationTime"
+                      value={field.value}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setHasChanges(true);
+                      }}
+                      className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                      aria-invalid={!!errors.finalizationTime}
+                      aria-describedby={errors.finalizationTime ? 'finalizationTime-error' : 'finalizationTime-help'}
+                    >
+                      {TIME_OPTIONS.map((time) => (
+                        <option key={time.value} value={time.value}>
+                          {time.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                />
+                <FormError error={errors.finalizationTime} fieldName="finalizationTime" />
+                {!errors.finalizationTime && (
+                  <p id="finalizationTime-help" className="text-xs text-gray-500">
+                    Daily reports will be finalized at this time if no user activity for 5 minutes
+                  </p>
+                )}
               </div>
 
               {/* Daily Reports Folder ID Setting */}
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
+                <label htmlFor="dailyReportsFolderId" className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
                   <Folder className="h-4 w-4 text-[#F97316]" />
                   Document Library Folder (Optional)
                 </label>
                 <input
+                  id="dailyReportsFolderId"
                   type="text"
-                  value={dailyReportsFolderId}
-                  onChange={(e) => {
-                    setDailyReportsFolderId(e.target.value);
-                    setHasChanges(true);
-                  }}
+                  {...register('dailyReportsFolderId', {
+                    onChange: () => setHasChanges(true),
+                  })}
                   placeholder="Leave blank to auto-create 'Daily Reports' folder"
                   className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  aria-invalid={!!errors.dailyReportsFolderId}
+                  aria-describedby={errors.dailyReportsFolderId ? 'dailyReportsFolderId-error' : 'dailyReportsFolderId-help'}
                 />
-                <p className="text-xs text-gray-500">
-                  Folder ID where finalized PDFs will be saved. Leave blank to auto-create.
-                </p>
+                <FormError error={errors.dailyReportsFolderId} fieldName="dailyReportsFolderId" />
+                {!errors.dailyReportsFolderId && (
+                  <p id="dailyReportsFolderId-help" className="text-xs text-gray-500">
+                    Folder ID where finalized PDFs will be saved. Leave blank to auto-create.
+                  </p>
+                )}
               </div>
 
               {/* Preview */}
@@ -229,7 +286,7 @@ export function FinalizationSettingsModal({
                   <p>
                     <span className="text-gray-500">Timezone:</span>{' '}
                     <span className="font-medium">
-                      {COMMON_TIMEZONES.find((tz) => tz.value === timezone)?.label || timezone}
+                      {TIMEZONE_LABELS[timezone] || timezone}
                     </span>
                   </p>
                   <p>
@@ -248,36 +305,37 @@ export function FinalizationSettingsModal({
               </div>
             </>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-700 bg-dark-surface">
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanges || saving}
-            className="bg-[#F97316] hover:bg-[#ea580c] text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Settings
-              </>
-            )}
-          </Button>
-        </div>
+          {/* Footer */}
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-700">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="ghost"
+              className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!hasChanges || saving}
+              className="bg-[#F97316] hover:bg-[#ea580c] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

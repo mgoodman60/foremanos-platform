@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { DollarSign, X, Calendar } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { DollarSign, Calendar } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { budgetCreateSchema, type BudgetCreateFormData } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
 
 interface BudgetSetupModalProps {
   isOpen: boolean;
@@ -26,32 +30,44 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
   const params = useParams();
   const slug = params?.slug as string;
 
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    totalBudget: '',
-    contingency: '',
-    currency: 'USD',
-    baselineDate: new Date().toISOString().split('T')[0],
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<BudgetCreateFormData>({
+    resolver: zodResolver(budgetCreateSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      totalBudget: undefined,
+      contingency: 0,
+      currency: 'USD',
+      baselineDate: new Date().toISOString().split('T')[0],
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.totalBudget || parseFloat(formData.totalBudget) <= 0) {
-      toast.error('Total budget must be greater than 0');
-      return;
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      reset({
+        totalBudget: undefined,
+        contingency: 0,
+        currency: 'USD',
+        baselineDate: new Date().toISOString().split('T')[0],
+      });
     }
+  }, [isOpen, reset]);
 
-    setLoading(true);
+  const onSubmit = async (data: BudgetCreateFormData) => {
     try {
       const response = await fetch(`/api/projects/${slug}/budget`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          totalBudget: parseFloat(formData.totalBudget),
-          contingency: parseFloat(formData.contingency) || 0,
-          currency: formData.currency,
-          baselineDate: formData.baselineDate,
+          totalBudget: data.totalBudget,
+          contingency: data.contingency || 0,
+          currency: data.currency,
+          baselineDate: data.baselineDate,
         }),
       });
 
@@ -66,8 +82,6 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
     } catch (error) {
       console.error('Error creating budget:', error);
       toast.error('Failed to create budget');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -84,7 +98,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4" noValidate>
           <div>
             <Label htmlFor="totalBudget" className="text-gray-300">
               Total Project Budget *
@@ -98,16 +112,19 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.totalBudget}
-                onChange={(e) => setFormData({ ...formData, totalBudget: e.target.value })}
+                {...register('totalBudget', { valueAsNumber: true })}
                 placeholder="0.00"
                 className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
-                required
+                aria-invalid={!!errors.totalBudget}
+                aria-describedby={errors.totalBudget ? 'totalBudget-error' : 'totalBudget-help'}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Enter the total approved budget for the project
-            </p>
+            <FormError error={errors.totalBudget} fieldName="totalBudget" />
+            {!errors.totalBudget && (
+              <p id="totalBudget-help" className="text-xs text-gray-500 mt-1">
+                Enter the total approved budget for the project
+              </p>
+            )}
           </div>
 
           <div>
@@ -123,15 +140,18 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.contingency}
-                onChange={(e) => setFormData({ ...formData, contingency: e.target.value })}
+                {...register('contingency', { valueAsNumber: true })}
                 placeholder="0.00"
                 className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
+                aria-describedby={errors.contingency ? 'contingency-error' : 'contingency-help'}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Optional contingency amount for unexpected costs
-            </p>
+            <FormError error={errors.contingency} fieldName="contingency" />
+            {!errors.contingency && (
+              <p id="contingency-help" className="text-xs text-gray-500 mt-1">
+                Optional contingency amount for unexpected costs
+              </p>
+            )}
           </div>
 
           <div>
@@ -143,14 +163,18 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
               <Input
                 id="baselineDate"
                 type="date"
-                value={formData.baselineDate}
-                onChange={(e) => setFormData({ ...formData, baselineDate: e.target.value })}
+                {...register('baselineDate')}
                 className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-10"
+                aria-invalid={!!errors.baselineDate}
+                aria-describedby={errors.baselineDate ? 'baselineDate-error' : 'baselineDate-help'}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              The date when this budget was approved/baselined
-            </p>
+            <FormError error={errors.baselineDate} fieldName="baselineDate" />
+            {!errors.baselineDate && (
+              <p id="baselineDate-help" className="text-xs text-gray-500 mt-1">
+                The date when this budget was approved/baselined
+              </p>
+            )}
           </div>
 
           <div>
@@ -160,34 +184,35 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
             <Input
               id="currency"
               type="text"
-              value={formData.currency}
-              onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+              {...register('currency')}
               className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
               disabled
+              aria-describedby="currency-help"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p id="currency-help" className="text-xs text-gray-500 mt-1">
               Currently only USD is supported
             </p>
           </div>
-        </form>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-            className="border-gray-700"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
-          >
-            {loading ? 'Creating...' : 'Create Budget'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="border-gray-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Budget'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

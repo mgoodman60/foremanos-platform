@@ -1,6 +1,6 @@
 /**
  * Bulk Photo Upload Modal
- * 
+ *
  * Allows users to upload multiple photos at once with drag-and-drop support.
  * Shows upload progress and results.
  */
@@ -26,6 +26,9 @@ interface FileWithPreview extends File {
   preview?: string;
 }
 
+const MAX_FILES = 20;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export function BulkUploadModal({
   conversationId,
   open,
@@ -43,24 +46,27 @@ export function BulkUploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
 
+  const validateFile = (file: File): string | null => {
+    if (!file.type.startsWith('image/')) {
+      return `${file.name} is not an image`;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return `${file.name} is too large (max 10MB)`;
+    }
+    return null;
+  };
+
   const handleFileSelect = (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
 
     const validFiles: FileWithPreview[] = [];
-    const maxFiles = 20;
 
-    for (let i = 0; i < Math.min(selectedFiles.length, maxFiles); i++) {
+    for (let i = 0; i < Math.min(selectedFiles.length, MAX_FILES); i++) {
       const file = selectedFiles[i];
-      
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image`);
-        continue;
-      }
+      const error = validateFile(file);
 
-      // Validate file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} is too large (max 10MB)`);
+      if (error) {
+        toast.error(error);
         continue;
       }
 
@@ -70,8 +76,8 @@ export function BulkUploadModal({
       validFiles.push(fileWithPreview);
     }
 
-    if (selectedFiles.length > maxFiles) {
-      toast.warning(`Only first ${maxFiles} files will be uploaded`);
+    if (selectedFiles.length > MAX_FILES) {
+      toast.warning(`Only first ${MAX_FILES} files will be uploaded`);
     }
 
     setFiles(validFiles);
@@ -124,7 +130,7 @@ export function BulkUploadModal({
       }
 
       const data = await response.json();
-      
+
       setResults({
         uploaded: data.uploaded.length,
         failed: data.failed.length,
@@ -181,23 +187,23 @@ export function BulkUploadModal({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
+            <Upload className="h-5 w-5" aria-hidden="true" />
             Bulk Photo Upload
           </DialogTitle>
         </DialogHeader>
 
         {/* Results Summary */}
         {results && (
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+          <div className="bg-gray-50 rounded-lg p-4 space-y-2" role="status" aria-live="polite">
             <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle className="h-5 w-5" />
+              <CheckCircle className="h-5 w-5" aria-hidden="true" />
               <span className="font-semibold">
                 {results.uploaded} photos uploaded successfully
               </span>
             </div>
             {results.failed > 0 && (
               <div className="flex items-center gap-2 text-red-600">
-                <AlertCircle className="h-5 w-5" />
+                <AlertCircle className="h-5 w-5" aria-hidden="true" />
                 <span>{results.failed} photos failed</span>
               </div>
             )}
@@ -219,15 +225,18 @@ export function BulkUploadModal({
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
+            role="region"
+            aria-label="File drop zone"
           >
-            <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
             <p className="text-gray-600 mb-2">
               Drag and drop photos here, or click to select
             </p>
             <p className="text-sm text-gray-500 mb-4">
-              Upload up to 20 photos at once (max 10MB each)
+              Upload up to {MAX_FILES} photos at once (max 10MB each)
             </p>
             <Button
+              type="button"
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
             >
@@ -240,6 +249,7 @@ export function BulkUploadModal({
               multiple
               className="hidden"
               onChange={(e) => handleFileSelect(e.target.files)}
+              aria-label="Select photos to upload"
             />
           </div>
         )}
@@ -253,6 +263,7 @@ export function BulkUploadModal({
                   {files.length} photo{files.length !== 1 ? 's' : ''} selected
                 </p>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
@@ -271,14 +282,16 @@ export function BulkUploadModal({
                       handleFileSelect(e.target.files);
                     }
                   }}
+                  aria-label="Add more photos"
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
+              <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto" role="list">
                 {files.map((file, index) => (
                   <div
                     key={index}
                     className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 group"
+                    role="listitem"
                   >
                     {file.preview && (
                       <img
@@ -289,8 +302,10 @@ export function BulkUploadModal({
                     )}
                     {!uploading && (
                       <button
+                        type="button"
                         onClick={() => removeFile(index)}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label={`Remove ${file.name}`}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -305,8 +320,8 @@ export function BulkUploadModal({
 
             {/* Progress Bar */}
             {uploading && (
-              <div className="space-y-2">
-                <Progress value={progress} className="w-full" />
+              <div className="space-y-2" role="status" aria-live="polite">
+                <Progress value={progress} className="w-full" aria-label="Upload progress" />
                 <p className="text-sm text-center text-gray-600">
                   Uploading and analyzing photos...
                 </p>
@@ -316,6 +331,7 @@ export function BulkUploadModal({
             {/* Action Buttons */}
             <div className="flex justify-end gap-2">
               <Button
+                type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={uploading}
@@ -324,6 +340,7 @@ export function BulkUploadModal({
               </Button>
               {!results && (
                 <Button
+                  type="button"
                   onClick={handleUpload}
                   disabled={uploading || files.length === 0}
                   className="bg-orange-500 hover:bg-orange-600"

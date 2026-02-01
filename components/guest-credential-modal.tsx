@@ -1,9 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Key, Copy, RefreshCw, Trash2, Clock, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
+import { guestCredentialsSchema, type GuestCredentialsFormData } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
 
 interface GuestCredentialModalProps {
   projectSlug?: string;
@@ -29,9 +34,31 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [guestData, setGuestData] = useState<GuestData | null>(null);
-  const [newUsername, setNewUsername] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  // Focus trap for accessibility
+  const containerRef = useFocusTrap({
+    isActive: true,
+    onEscape: onClose,
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<GuestCredentialsFormData>({
+    resolver: zodResolver(guestCredentialsSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      guestUsername: '',
+      guestPassword: '',
+    },
+  });
+
+  const newPassword = watch('guestPassword');
 
   useEffect(() => {
     fetchGuestData();
@@ -44,8 +71,10 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
       if (res.ok) {
         const data = await res.json();
         setGuestData(data);
-        setNewUsername(data.guestUsername);
-        setNewPassword(data.guestPassword || '');
+        reset({
+          guestUsername: data.guestUsername,
+          guestPassword: data.guestPassword || '',
+        });
       } else {
         toast.error('Failed to load guest credentials');
       }
@@ -57,20 +86,15 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
     }
   };
 
-  const handleUpdate = async () => {
-    if (!newUsername.trim()) {
-      toast.error('Job Pin is required');
-      return;
-    }
-
+  const onSubmit = async (data: GuestCredentialsFormData) => {
     setUpdating(true);
     try {
       const res = await fetch(`/api/projects/${projectSlug}/guest`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guestUsername: newUsername,
-          guestPassword: newPassword || null,
+          guestUsername: data.guestUsername,
+          guestPassword: data.guestPassword || null,
         }),
       });
 
@@ -78,8 +102,8 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
         toast.success('Guest credentials updated successfully');
         await fetchGuestData();
       } else {
-        const data = await res.json();
-        toast.error(data.error || 'Failed to update credentials');
+        const responseData = await res.json();
+        toast.error(responseData.error || 'Failed to update credentials');
       }
     } catch (error) {
       console.error('Error updating credentials:', error);
@@ -102,7 +126,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
 
       if (res.ok) {
         const data = await res.json();
-        setNewPassword(data.generatedPassword);
+        setValue('guestPassword', data.generatedPassword);
         setShowPassword(true);
         toast.success('New password generated!');
         await fetchGuestData();
@@ -150,6 +174,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
       <div
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="guest-credential-modal-title"
@@ -166,6 +191,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
               </div>
             </div>
             <button
+              type="button"
               onClick={onClose}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
               aria-label="Close"
@@ -196,6 +222,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                       {guestData?.guestUsername}
                     </code>
                     <button
+                      type="button"
                       onClick={() => copyToClipboard(guestData?.guestUsername || '', 'Job Pin')}
                       className="p-1.5 hover:bg-blue-100 rounded transition-colors"
                       title="Copy Job Pin"
@@ -208,11 +235,12 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                   <span className="text-gray-600">Password:</span>
                   <div className="flex items-center gap-2">
                     <code className="bg-white px-3 py-1 rounded font-mono text-gray-700">
-                      {guestData?.hasPassword ? (showPassword ? (guestData?.guestPassword || '•••••••') : '•••••••') : 'None (password-less)'}
+                      {guestData?.hasPassword ? (showPassword ? (guestData?.guestPassword || '') : '') : 'None (password-less)'}
                     </code>
                     {guestData?.hasPassword && (
                       <>
                         <button
+                          type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="p-1.5 hover:bg-blue-100 rounded transition-colors"
                           title={showPassword ? 'Hide password' : 'Show password'}
@@ -221,6 +249,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                         </button>
                         {showPassword && (
                           <button
+                            type="button"
                             onClick={() => copyToClipboard(guestData?.guestPassword || '', 'Password')}
                             className="p-1.5 hover:bg-blue-100 rounded transition-colors"
                             title="Copy password"
@@ -242,33 +271,38 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
             </div>
 
             {/* Update Form */}
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
               <h3 className="font-semibold text-gray-900">Update Credentials</h3>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="guestUsername" className="block text-sm font-medium text-gray-700 mb-1">
                   Job Pin
                 </label>
                 <input
+                  id="guestUsername"
                   type="text"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
+                  {...register('guestUsername')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
                   placeholder="Enter Job Pin"
+                  aria-invalid={!!errors.guestUsername}
+                  aria-describedby={errors.guestUsername ? 'guestUsername-error' : undefined}
                 />
+                <FormError error={errors.guestUsername} fieldName="guestUsername" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="guestPassword" className="block text-sm font-medium text-gray-700 mb-1">
                   Guest Password (Optional)
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="guestPassword"
                     type="text"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    {...register('guestPassword')}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
                     placeholder="Leave blank for password-less access"
+                    aria-invalid={!!errors.guestPassword}
+                    aria-describedby={errors.guestPassword ? 'guestPassword-error' : 'guestPassword-help'}
                   />
                   <Button
                     type="button"
@@ -280,21 +314,24 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                     Generate
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Leave blank to allow login with Job Pin only
-                </p>
+                <FormError error={errors.guestPassword} fieldName="guestPassword" />
+                {!errors.guestPassword && (
+                  <p id="guestPassword-help" className="text-xs text-gray-500 mt-1">
+                    Leave blank to allow login with Job Pin only
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-3">
                 <Button
-                  onClick={handleUpdate}
+                  type="submit"
                   disabled={updating}
                   className="flex-1 bg-[#003B71] hover:bg-[#002855] text-white"
                 >
                   {updating ? 'Updating...' : 'Update Credentials'}
                 </Button>
               </div>
-            </div>
+            </form>
 
             {/* Activity Log */}
             {guestData?.activityLogs && guestData.activityLogs.length > 0 && (
@@ -326,6 +363,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                   Revoking guest access will prevent the current guest user from accessing this project. This action cannot be undone.
                 </p>
                 <Button
+                  type="button"
                   onClick={handleRevokeAccess}
                   disabled={updating}
                   variant="destructive"

@@ -3,6 +3,8 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { SessionProvider } from '@/components/session-provider';
+import { AnnouncerProvider } from '@/components/ui/announcer';
+import { ProgressBarProvider } from '@/components/ui/progress-bar';
 import { Toaster } from 'sonner';
 
 const inter = Inter({ 
@@ -92,19 +94,30 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
+        {/* Skip to main content link for keyboard users - WCAG 2.1 AA */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded focus:outline-none focus:ring-2 focus:ring-orange-300"
+        >
+          Skip to main content
+        </a>
         <SessionProvider>
-          {children}
-          <Toaster 
-            position="top-right" 
-            richColors 
-            closeButton 
-            duration={3000}
-            toastOptions={{
-              style: {
-                fontFamily: 'Roboto Mono, monospace',
-              },
-            }}
-          />
+          <ProgressBarProvider>
+            <AnnouncerProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                duration={3000}
+                toastOptions={{
+                  style: {
+                    fontFamily: 'Roboto Mono, monospace',
+                  },
+                }}
+              />
+            </AnnouncerProvider>
+          </ProgressBarProvider>
         </SessionProvider>
       </body>
     </html>

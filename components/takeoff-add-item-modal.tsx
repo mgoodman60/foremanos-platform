@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +31,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TAKEOFF_CATEGORIES } from '@/lib/takeoff-categories';
+import { takeoffAddItemSchema, type TakeoffAddItemFormData, TAKEOFF_UNITS } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
 
 interface TakeoffLineItem {
   id?: string;
@@ -73,78 +77,66 @@ export function TakeoffAddItemModal({
   onSave,
   saving = false
 }: TakeoffAddItemModalProps) {
-  const [formData, setFormData] = useState<Partial<TakeoffLineItem>>({
-    category: '',
-    itemName: '',
-    quantity: 0,
-    unit: 'SF',
-    unitCost: 0,
-  });
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-
-  const handleChange = (field: keyof TakeoffLineItem, value: any) => {
-    setFormData((prev) => {
-      const updated = { ...prev, [field]: value };
-      
-      // Auto-calculate total cost
-      if (field === 'quantity' || field === 'unitCost') {
-        const qty = field === 'quantity' ? value : prev.quantity || 0;
-        const cost = field === 'unitCost' ? value : prev.unitCost || 0;
-        updated.totalCost = qty * cost;
-      }
-      
-      return updated;
-    });
-  };
-
-  const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    const category = TAKEOFF_CATEGORIES.find(c => c.id === categoryId);
-    if (category) {
-      handleChange('category', category.name.toLowerCase());
-      // Set default unit from first subcategory
-      if (category.subCategories.length > 0) {
-        handleChange('unit', category.subCategories[0].defaultUnit);
-      }
-    }
-  };
-
-  const handleSubmit = () => {
-    if (!formData.itemName?.trim()) {
-      toast.error('Item name is required');
-      return;
-    }
-    if (!formData.category?.trim()) {
-      toast.error('Category is required');
-      return;
-    }
-    if (!formData.quantity || formData.quantity <= 0) {
-      toast.error('Quantity must be greater than 0');
-      return;
-    }
-    
-    onSave(formData);
-    
-    // Reset form
-    setFormData({
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<TakeoffAddItemFormData>({
+    resolver: zodResolver(takeoffAddItemSchema),
+    mode: 'onBlur',
+    defaultValues: {
       category: '',
       itemName: '',
       quantity: 0,
       unit: 'SF',
       unitCost: 0,
+      description: '',
+      location: '',
+      sheetNumber: '',
+      gridLocation: '',
+      notes: '',
+    },
+  });
+
+  // Watch for quantity and unitCost changes to calculate total
+  const quantity = watch('quantity');
+  const unitCost = watch('unitCost');
+  const totalCost = (quantity || 0) * (unitCost || 0);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
+
+  const handleCategorySelect = (categoryId: string) => {
+    const category = TAKEOFF_CATEGORIES.find(c => c.id === categoryId);
+    if (category) {
+      setValue('category', category.name.toLowerCase());
+      // Set default unit from first subcategory
+      if (category.subCategories.length > 0) {
+        setValue('unit', category.subCategories[0].defaultUnit as typeof TAKEOFF_UNITS[number]);
+      }
+    }
+  };
+
+  const onSubmit = (data: TakeoffAddItemFormData) => {
+    onSave({
+      ...data,
+      totalCost,
     });
-    setSelectedCategory('');
+
+    // Reset form after save
+    reset();
   };
 
   const handleClose = () => {
-    setFormData({
-      category: '',
-      itemName: '',
-      quantity: 0,
-      unit: 'SF',
-      unitCost: 0,
-    });
-    setSelectedCategory('');
+    reset();
     onClose();
   };
 
@@ -158,184 +150,227 @@ export function TakeoffAddItemModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4" noValidate>
           {/* Category Selection */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-300">Category *</Label>
-            <Select value={selectedCategory} onValueChange={handleCategorySelect}>
-              <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                {TAKEOFF_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    <span className="flex items-center gap-2">
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      {cat.name} (CSI {cat.csiDivision})
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="category" className="text-sm text-gray-300">Category *</Label>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={TAKEOFF_CATEGORIES.find(c => c.name.toLowerCase() === field.value)?.id || ''}
+                  onValueChange={handleCategorySelect}
+                >
+                  <SelectTrigger
+                    id="category"
+                    className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                    aria-invalid={!!errors.category}
+                    aria-describedby={errors.category ? 'category-error' : undefined}
+                  >
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {TAKEOFF_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: cat.color }}
+                          />
+                          {cat.name} (CSI {cat.csiDivision})
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FormError error={errors.category} fieldName="category" />
           </div>
 
           {/* Item Name */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-300">
+            <Label htmlFor="itemName" className="text-sm text-gray-300">
               <Package className="inline h-3 w-3 mr-1" />
               Item Name *
             </Label>
             <Input
-              value={formData.itemName || ''}
-              onChange={(e) => handleChange('itemName', e.target.value)}
+              id="itemName"
+              {...register('itemName')}
               placeholder="e.g., 4 inch Concrete Slab on Grade"
               className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+              aria-invalid={!!errors.itemName}
+              aria-describedby={errors.itemName ? 'itemName-error' : undefined}
             />
+            <FormError error={errors.itemName} fieldName="itemName" />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-300">Description</Label>
+            <Label htmlFor="description" className="text-sm text-gray-300">Description</Label>
             <Textarea
-              value={formData.description || ''}
-              onChange={(e) => handleChange('description', e.target.value)}
+              id="description"
+              {...register('description')}
               placeholder="Optional description..."
               className="bg-dark-card border-gray-600 text-[#F8FAFC] min-h-[60px]"
+              aria-describedby={errors.description ? 'description-error' : undefined}
             />
+            <FormError error={errors.description} fieldName="description" />
           </div>
 
           {/* Quantity & Unit */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm text-gray-300">
+              <Label htmlFor="quantity" className="text-sm text-gray-300">
                 <Ruler className="inline h-3 w-3 mr-1" />
                 Quantity *
               </Label>
               <Input
+                id="quantity"
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.quantity || ''}
-                onChange={(e) => handleChange('quantity', parseFloat(e.target.value) || 0)}
+                {...register('quantity', { valueAsNumber: true })}
                 placeholder="0"
                 className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                aria-invalid={!!errors.quantity}
+                aria-describedby={errors.quantity ? 'quantity-error' : undefined}
               />
+              <FormError error={errors.quantity} fieldName="quantity" />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm text-gray-300">Unit *</Label>
-              <Select
-                value={formData.unit || 'SF'}
-                onValueChange={(value) => handleChange('unit', value)}
-              >
-                <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMON_UNITS.map((unit) => (
-                    <SelectItem key={unit.value} value={unit.value}>
-                      {unit.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="unit" className="text-sm text-gray-300">Unit *</Label>
+              <Controller
+                name="unit"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      id="unit"
+                      className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                      aria-invalid={!!errors.unit}
+                      aria-describedby={errors.unit ? 'unit-error' : undefined}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMMON_UNITS.map((unit) => (
+                        <SelectItem key={unit.value} value={unit.value}>
+                          {unit.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <FormError error={errors.unit} fieldName="unit" />
             </div>
           </div>
 
           {/* Unit Cost & Total */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm text-gray-300">
+              <Label htmlFor="unitCost" className="text-sm text-gray-300">
                 <DollarSign className="inline h-3 w-3 mr-1" />
                 Unit Cost ($)
               </Label>
               <Input
+                id="unitCost"
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.unitCost || ''}
-                onChange={(e) => handleChange('unitCost', parseFloat(e.target.value) || 0)}
+                {...register('unitCost', { valueAsNumber: true })}
                 placeholder="0.00"
                 className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                aria-describedby={errors.unitCost ? 'unitCost-error' : undefined}
               />
+              <FormError error={errors.unitCost} fieldName="unitCost" />
             </div>
             <div className="space-y-2">
               <Label className="text-sm text-gray-300">Total Cost</Label>
               <div className="h-10 flex items-center px-3 rounded-md bg-dark-card border border-gray-600 text-green-400 font-medium">
-                ${(formData.totalCost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
           </div>
 
           {/* Location */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-300">
+            <Label htmlFor="location" className="text-sm text-gray-300">
               <MapPin className="inline h-3 w-3 mr-1" />
               Location
             </Label>
             <Input
-              value={formData.location || ''}
-              onChange={(e) => handleChange('location', e.target.value)}
+              id="location"
+              {...register('location')}
               placeholder="e.g., Building A - First Floor"
               className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+              aria-describedby={errors.location ? 'location-error' : undefined}
             />
+            <FormError error={errors.location} fieldName="location" />
           </div>
 
           {/* Sheet & Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm text-gray-300">
+              <Label htmlFor="sheetNumber" className="text-sm text-gray-300">
                 <FileText className="inline h-3 w-3 mr-1" />
                 Sheet Number
               </Label>
               <Input
-                value={formData.sheetNumber || ''}
-                onChange={(e) => handleChange('sheetNumber', e.target.value)}
+                id="sheetNumber"
+                {...register('sheetNumber')}
                 placeholder="e.g., A-101"
                 className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                aria-describedby={errors.sheetNumber ? 'sheetNumber-error' : undefined}
               />
+              <FormError error={errors.sheetNumber} fieldName="sheetNumber" />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm text-gray-300">Grid Location</Label>
+              <Label htmlFor="gridLocation" className="text-sm text-gray-300">Grid Location</Label>
               <Input
-                value={formData.gridLocation || ''}
-                onChange={(e) => handleChange('gridLocation', e.target.value)}
+                id="gridLocation"
+                {...register('gridLocation')}
                 placeholder="e.g., A-1 to C-3"
                 className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                aria-describedby={errors.gridLocation ? 'gridLocation-error' : undefined}
               />
+              <FormError error={errors.gridLocation} fieldName="gridLocation" />
             </div>
           </div>
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-300">Notes</Label>
+            <Label htmlFor="notes" className="text-sm text-gray-300">Notes</Label>
             <Textarea
-              value={formData.notes || ''}
-              onChange={(e) => handleChange('notes', e.target.value)}
+              id="notes"
+              {...register('notes')}
               placeholder="Additional notes..."
               className="bg-dark-card border-gray-600 text-[#F8FAFC] min-h-[60px]"
+              aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
+            <FormError error={errors.notes} fieldName="notes" />
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            className="border-gray-600 text-gray-300"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            {saving ? 'Adding...' : 'Add Item'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="border-gray-600 text-gray-300"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={saving}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {saving ? 'Adding...' : 'Add Item'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

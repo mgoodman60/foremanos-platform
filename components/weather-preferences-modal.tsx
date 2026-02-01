@@ -1,23 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X, CloudRain, Wind, Thermometer, Eye, Bell, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { weatherPreferencesSchema, type WeatherPreferencesFormData } from '@/lib/schemas';
 
 interface WeatherPreferencesModalProps {
   projectId: string;
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface WeatherPreferences {
-  enableTemperatureAlerts: boolean;
-  enablePrecipitationAlerts: boolean;
-  enableWindAlerts: boolean;
-  enableVisibilityAlerts: boolean;
-  enableMorningBriefing: boolean;
-  morningBriefingTime: string;
-  notificationMethod: string;
 }
 
 export default function WeatherPreferencesModal({
@@ -27,15 +20,26 @@ export default function WeatherPreferencesModal({
 }: WeatherPreferencesModalProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [preferences, setPreferences] = useState<WeatherPreferences>({
-    enableTemperatureAlerts: true,
-    enablePrecipitationAlerts: true,
-    enableWindAlerts: true,
-    enableVisibilityAlerts: false,
-    enableMorningBriefing: true,
-    morningBriefingTime: '07:00',
-    notificationMethod: 'in_app',
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+  } = useForm<WeatherPreferencesFormData>({
+    resolver: zodResolver(weatherPreferencesSchema),
+    defaultValues: {
+      enableTemperatureAlerts: true,
+      enablePrecipitationAlerts: true,
+      enableWindAlerts: true,
+      enableVisibilityAlerts: false,
+      enableMorningBriefing: true,
+      morningBriefingTime: '07:00',
+      notificationMethod: 'in_app',
+    },
   });
+
+  const enableMorningBriefing = watch('enableMorningBriefing');
 
   useEffect(() => {
     if (isOpen) {
@@ -49,7 +53,7 @@ export default function WeatherPreferencesModal({
       const response = await fetch(`/api/weather/preferences?projectId=${projectId}`);
       if (response.ok) {
         const data = await response.json();
-        setPreferences(data);
+        reset(data);
       }
     } catch (error) {
       console.error('Error loading preferences:', error);
@@ -59,13 +63,13 @@ export default function WeatherPreferencesModal({
     }
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (data: WeatherPreferencesFormData) => {
     try {
       setSaving(true);
       const response = await fetch('/api/weather/preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, ...preferences }),
+        body: JSON.stringify({ projectId, ...data }),
       });
 
       if (response.ok) {
@@ -97,7 +101,7 @@ export default function WeatherPreferencesModal({
           <div className="flex items-center justify-between">
             <div>
               <h2 id="weather-preferences-modal-title" className="text-xl font-bold text-[#F8FAFC]">
-                🌤️ Weather Alert Preferences
+                Weather Alert Preferences
               </h2>
               <p className="text-sm text-gray-400 mt-1">
                 Customize weather alerts and notifications for this project
@@ -114,7 +118,7 @@ export default function WeatherPreferencesModal({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6" noValidate>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
@@ -137,20 +141,24 @@ export default function WeatherPreferencesModal({
                     <Thermometer className="w-5 h-5 text-red-400" />
                     <div>
                       <p className="font-medium text-[#F8FAFC]">Temperature Alerts</p>
-                      <p className="text-sm text-gray-400">High (&gt;95°F) or low (&lt;32°F) temperatures</p>
+                      <p className="text-sm text-gray-400">High (&gt;95F) or low (&lt;32F) temperatures</p>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={preferences.enableTemperatureAlerts}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, enableTemperatureAlerts: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
-                  </label>
+                  <Controller
+                    name="enableTemperatureAlerts"
+                    control={control}
+                    render={({ field }) => (
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                      </label>
+                    )}
+                  />
                 </div>
 
                 {/* Precipitation Alerts */}
@@ -162,17 +170,21 @@ export default function WeatherPreferencesModal({
                       <p className="text-sm text-gray-400">Rain, snow, or sleet (&gt;0.5 inches)</p>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={preferences.enablePrecipitationAlerts}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, enablePrecipitationAlerts: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
-                  </label>
+                  <Controller
+                    name="enablePrecipitationAlerts"
+                    control={control}
+                    render={({ field }) => (
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                      </label>
+                    )}
+                  />
                 </div>
 
                 {/* Wind Alerts */}
@@ -184,17 +196,21 @@ export default function WeatherPreferencesModal({
                       <p className="text-sm text-gray-400">High winds (&gt;25 mph)</p>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={preferences.enableWindAlerts}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, enableWindAlerts: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
-                  </label>
+                  <Controller
+                    name="enableWindAlerts"
+                    control={control}
+                    render={({ field }) => (
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                      </label>
+                    )}
+                  />
                 </div>
 
                 {/* Visibility Alerts */}
@@ -206,17 +222,21 @@ export default function WeatherPreferencesModal({
                       <p className="text-sm text-gray-400">Low visibility (&lt;1000 meters)</p>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={preferences.enableVisibilityAlerts}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, enableVisibilityAlerts: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
-                  </label>
+                  <Controller
+                    name="enableVisibilityAlerts"
+                    control={control}
+                    render={({ field }) => (
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                      </label>
+                    )}
+                  />
                 </div>
               </div>
 
@@ -235,31 +255,40 @@ export default function WeatherPreferencesModal({
                     <p className="font-medium text-[#F8FAFC]">Enable Morning Briefing</p>
                     <p className="text-sm text-gray-400">Auto-start daily report with weather summary</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={preferences.enableMorningBriefing}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, enableMorningBriefing: e.target.checked })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
-                  </label>
+                  <Controller
+                    name="enableMorningBriefing"
+                    control={control}
+                    render={({ field }) => (
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                      </label>
+                    )}
+                  />
                 </div>
 
-                {preferences.enableMorningBriefing && (
+                {enableMorningBriefing && (
                   <div className="p-4 bg-dark-card border border-gray-700 rounded-lg">
-                    <label className="block text-sm font-medium text-[#F8FAFC] mb-2">
+                    <label htmlFor="morningBriefingTime" className="block text-sm font-medium text-[#F8FAFC] mb-2">
                       Briefing Time
                     </label>
-                    <input
-                      type="time"
-                      value={preferences.morningBriefingTime}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, morningBriefingTime: e.target.value })
-                      }
-                      className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-[#F8FAFC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                    <Controller
+                      name="morningBriefingTime"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          id="morningBriefingTime"
+                          type="time"
+                          value={field.value}
+                          onChange={field.onChange}
+                          className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-[#F8FAFC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                        />
+                      )}
                     />
                   </div>
                 )}
@@ -272,67 +301,72 @@ export default function WeatherPreferencesModal({
                   Choose how you want to receive weather alerts
                 </p>
 
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-4 bg-dark-card border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors">
-                    <input
-                      type="radio"
-                      name="notificationMethod"
-                      value="in_app"
-                      checked={preferences.notificationMethod === 'in_app'}
-                      onChange={(e) =>
-                        setPreferences({ ...preferences, notificationMethod: e.target.value })
-                      }
-                      className="w-4 h-4 text-[#F97316] focus:ring-[#F97316]"
-                    />
-                    <div>
-                      <p className="font-medium text-[#F8FAFC]">In-App Only</p>
-                      <p className="text-sm text-gray-400">View alerts in the application</p>
-                    </div>
-                  </label>
+                <Controller
+                  name="notificationMethod"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 p-4 bg-dark-card border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors">
+                        <input
+                          type="radio"
+                          name="notificationMethod"
+                          value="in_app"
+                          checked={field.value === 'in_app'}
+                          onChange={() => field.onChange('in_app')}
+                          className="w-4 h-4 text-[#F97316] focus:ring-[#F97316]"
+                        />
+                        <div>
+                          <p className="font-medium text-[#F8FAFC]">In-App Only</p>
+                          <p className="text-sm text-gray-400">View alerts in the application</p>
+                        </div>
+                      </label>
 
-                  <label className="flex items-center gap-3 p-4 bg-dark-card border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors opacity-50">
-                    <input
-                      type="radio"
-                      name="notificationMethod"
-                      value="email"
-                      disabled
-                      className="w-4 h-4 text-[#F97316] focus:ring-[#F97316]"
-                    />
-                    <div>
-                      <p className="font-medium text-[#F8FAFC]">Email (Coming Soon)</p>
-                      <p className="text-sm text-gray-400">Receive alerts via email</p>
+                      <label className="flex items-center gap-3 p-4 bg-dark-card border border-gray-700 rounded-lg cursor-pointer hover:bg-[#353b43] transition-colors opacity-50">
+                        <input
+                          type="radio"
+                          name="notificationMethod"
+                          value="email"
+                          disabled
+                          className="w-4 h-4 text-[#F97316] focus:ring-[#F97316]"
+                        />
+                        <div>
+                          <p className="font-medium text-[#F8FAFC]">Email (Coming Soon)</p>
+                          <p className="text-sm text-gray-400">Receive alerts via email</p>
+                        </div>
+                      </label>
                     </div>
-                  </label>
-                </div>
+                  )}
+                />
               </div>
             </>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-dark-surface border-t border-gray-700 px-6 py-4 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-dark-card hover:bg-[#353b43] text-[#F8FAFC] rounded-lg transition-colors"
-            disabled={saving}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || loading}
-            className="px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {saving ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Saving...
-              </>
-            ) : (
-              'Save Preferences'
-            )}
-          </button>
-        </div>
+          {/* Footer */}
+          <div className="sticky bottom-0 bg-dark-surface border-t border-gray-700 px-6 py-4 -mx-6 -mb-6 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-dark-card hover:bg-[#353b43] text-[#F8FAFC] rounded-lg transition-colors"
+              disabled={saving}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || loading}
+              className="px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {saving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Saving...
+                </>
+              ) : (
+                'Save Preferences'
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

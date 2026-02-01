@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Calendar, Clock, TrendingUp, Shield, AlertTriangle } from 'lucide-react';
 import {
   Dialog,
@@ -16,6 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { crewPerformanceSchema, type CrewPerformanceFormData } from '@/lib/schemas';
+import { FormError } from '@/components/ui/form-error';
 
 interface CrewPerformanceFormProps {
   isOpen: boolean;
@@ -35,46 +39,68 @@ export default function CrewPerformanceForm({
   const params = useParams();
   const slug = params?.slug as string;
 
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    crewSize: '',
-    hoursWorked: '',
-    tasksCompleted: '',
-    unitsProduced: '',
-    safetyIncidents: '0',
-    qualityIssues: '0',
-    reworkRequired: false,
-    weatherDelay: false,
-    weatherNotes: '',
-    notes: '',
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CrewPerformanceFormData>({
+    resolver: zodResolver(crewPerformanceSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      date: new Date().toISOString().split('T')[0],
+      crewSize: undefined,
+      hoursWorked: undefined,
+      tasksCompleted: 0,
+      unitsProduced: undefined,
+      safetyIncidents: 0,
+      qualityIssues: 0,
+      reworkRequired: false,
+      weatherDelay: false,
+      weatherNotes: '',
+      notes: '',
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const weatherDelay = watch('weatherDelay');
 
-    if (!formData.date || !formData.crewSize || !formData.hoursWorked) {
-      toast.error('Date, crew size, and hours worked are required');
-      return;
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      reset({
+        date: new Date().toISOString().split('T')[0],
+        crewSize: undefined,
+        hoursWorked: undefined,
+        tasksCompleted: 0,
+        unitsProduced: undefined,
+        safetyIncidents: 0,
+        qualityIssues: 0,
+        reworkRequired: false,
+        weatherDelay: false,
+        weatherNotes: '',
+        notes: '',
+      });
     }
+  }, [isOpen, reset]);
 
-    setLoading(true);
+  const onSubmit = async (data: CrewPerformanceFormData) => {
     try {
       const response = await fetch(`/api/projects/${slug}/crews/${crewId}/performance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          date: formData.date,
-          crewSize: parseInt(formData.crewSize),
-          hoursWorked: parseFloat(formData.hoursWorked),
-          tasksCompleted: parseInt(formData.tasksCompleted) || 0,
-          unitsProduced: parseFloat(formData.unitsProduced) || undefined,
-          safetyIncidents: parseInt(formData.safetyIncidents),
-          qualityIssues: parseInt(formData.qualityIssues),
-          reworkRequired: formData.reworkRequired,
-          weatherDelay: formData.weatherDelay,
-          weatherNotes: formData.weatherNotes || undefined,
-          notes: formData.notes || undefined,
+          date: data.date,
+          crewSize: data.crewSize,
+          hoursWorked: data.hoursWorked,
+          tasksCompleted: data.tasksCompleted || 0,
+          unitsProduced: data.unitsProduced || undefined,
+          safetyIncidents: data.safetyIncidents,
+          qualityIssues: data.qualityIssues,
+          reworkRequired: data.reworkRequired,
+          weatherDelay: data.weatherDelay,
+          weatherNotes: data.weatherNotes || undefined,
+          notes: data.notes || undefined,
         }),
       });
 
@@ -82,20 +108,7 @@ export default function CrewPerformanceForm({
         toast.success('Performance data recorded');
         onSuccess?.();
         onClose();
-        // Reset form
-        setFormData({
-          date: new Date().toISOString().split('T')[0],
-          crewSize: '',
-          hoursWorked: '',
-          tasksCompleted: '',
-          unitsProduced: '',
-          safetyIncidents: '0',
-          qualityIssues: '0',
-          reworkRequired: false,
-          weatherDelay: false,
-          weatherNotes: '',
-          notes: '',
-        });
+        reset();
       } else {
         const error = await response.json();
         toast.error(error.error || 'Failed to record performance');
@@ -103,8 +116,6 @@ export default function CrewPerformanceForm({
     } catch (error) {
       console.error('Error recording performance:', error);
       toast.error('Failed to record performance');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -120,7 +131,7 @@ export default function CrewPerformanceForm({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4" noValidate>
           {/* Date and Crew Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -131,11 +142,12 @@ export default function CrewPerformanceForm({
               <Input
                 id="date"
                 type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                {...register('date')}
                 className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
-                required
+                aria-invalid={!!errors.date}
+                aria-describedby={errors.date ? 'date-error' : undefined}
               />
+              <FormError error={errors.date} fieldName="date" />
             </div>
 
             <div>
@@ -146,12 +158,13 @@ export default function CrewPerformanceForm({
                 id="crewSize"
                 type="number"
                 min="1"
-                value={formData.crewSize}
-                onChange={(e) => setFormData({ ...formData, crewSize: e.target.value })}
+                {...register('crewSize', { valueAsNumber: true })}
                 placeholder="Number of workers"
                 className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
-                required
+                aria-invalid={!!errors.crewSize}
+                aria-describedby={errors.crewSize ? 'crewSize-error' : undefined}
               />
+              <FormError error={errors.crewSize} fieldName="crewSize" />
             </div>
           </div>
 
@@ -172,12 +185,13 @@ export default function CrewPerformanceForm({
                   type="number"
                   step="0.5"
                   min="0"
-                  value={formData.hoursWorked}
-                  onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
+                  {...register('hoursWorked', { valueAsNumber: true })}
                   placeholder="8.0"
                   className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
-                  required
+                  aria-invalid={!!errors.hoursWorked}
+                  aria-describedby={errors.hoursWorked ? 'hoursWorked-error' : undefined}
                 />
+                <FormError error={errors.hoursWorked} fieldName="hoursWorked" />
               </div>
 
               <div>
@@ -188,11 +202,12 @@ export default function CrewPerformanceForm({
                   id="tasksCompleted"
                   type="number"
                   min="0"
-                  value={formData.tasksCompleted}
-                  onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })}
+                  {...register('tasksCompleted', { valueAsNumber: true })}
                   placeholder="0"
                   className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  aria-describedby={errors.tasksCompleted ? 'tasksCompleted-error' : undefined}
                 />
+                <FormError error={errors.tasksCompleted} fieldName="tasksCompleted" />
               </div>
 
               <div>
@@ -204,11 +219,12 @@ export default function CrewPerformanceForm({
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.unitsProduced}
-                  onChange={(e) => setFormData({ ...formData, unitsProduced: e.target.value })}
+                  {...register('unitsProduced', { valueAsNumber: true })}
                   placeholder="SF, LF, etc"
                   className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  aria-describedby={errors.unitsProduced ? 'unitsProduced-error' : undefined}
                 />
+                <FormError error={errors.unitsProduced} fieldName="unitsProduced" />
               </div>
             </div>
           </div>
@@ -229,10 +245,11 @@ export default function CrewPerformanceForm({
                   id="safetyIncidents"
                   type="number"
                   min="0"
-                  value={formData.safetyIncidents}
-                  onChange={(e) => setFormData({ ...formData, safetyIncidents: e.target.value })}
+                  {...register('safetyIncidents', { valueAsNumber: true })}
                   className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  aria-describedby={errors.safetyIncidents ? 'safetyIncidents-error' : undefined}
                 />
+                <FormError error={errors.safetyIncidents} fieldName="safetyIncidents" />
               </div>
 
               <div>
@@ -243,10 +260,11 @@ export default function CrewPerformanceForm({
                   id="qualityIssues"
                   type="number"
                   min="0"
-                  value={formData.qualityIssues}
-                  onChange={(e) => setFormData({ ...formData, qualityIssues: e.target.value })}
+                  {...register('qualityIssues', { valueAsNumber: true })}
                   className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  aria-describedby={errors.qualityIssues ? 'qualityIssues-error' : undefined}
                 />
+                <FormError error={errors.qualityIssues} fieldName="qualityIssues" />
               </div>
             </div>
 
@@ -254,8 +272,7 @@ export default function CrewPerformanceForm({
               <input
                 type="checkbox"
                 id="reworkRequired"
-                checked={formData.reworkRequired}
-                onChange={(e) => setFormData({ ...formData, reworkRequired: e.target.checked })}
+                {...register('reworkRequired')}
                 className="rounded border-gray-700 bg-dark-card"
               />
               <Label htmlFor="reworkRequired" className="text-gray-300">
@@ -275,8 +292,7 @@ export default function CrewPerformanceForm({
               <input
                 type="checkbox"
                 id="weatherDelay"
-                checked={formData.weatherDelay}
-                onChange={(e) => setFormData({ ...formData, weatherDelay: e.target.checked })}
+                {...register('weatherDelay')}
                 className="rounded border-gray-700 bg-dark-card"
               />
               <Label htmlFor="weatherDelay" className="text-gray-300">
@@ -284,19 +300,20 @@ export default function CrewPerformanceForm({
               </Label>
             </div>
 
-            {formData.weatherDelay && (
+            {weatherDelay && (
               <div>
                 <Label htmlFor="weatherNotes" className="text-gray-300">
                   Weather Details
                 </Label>
                 <Textarea
                   id="weatherNotes"
-                  value={formData.weatherNotes}
-                  onChange={(e) => setFormData({ ...formData, weatherNotes: e.target.value })}
+                  {...register('weatherNotes')}
                   placeholder="Describe weather conditions and impact..."
                   className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
                   rows={2}
+                  aria-describedby={errors.weatherNotes ? 'weatherNotes-error' : undefined}
                 />
+                <FormError error={errors.weatherNotes} fieldName="weatherNotes" />
               </div>
             )}
           </div>
@@ -308,32 +325,34 @@ export default function CrewPerformanceForm({
             </Label>
             <Textarea
               id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              {...register('notes')}
               placeholder="Any additional observations or comments..."
               className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
               rows={3}
+              aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
+            <FormError error={errors.notes} fieldName="notes" />
           </div>
-        </form>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-            className="border-gray-700"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-          >
-            {loading ? 'Recording...' : 'Record Performance'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="border-gray-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+            >
+              {isSubmitting ? 'Recording...' : 'Record Performance'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

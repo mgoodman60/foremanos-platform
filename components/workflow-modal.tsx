@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronRight, Check, AlertCircle, Loader2, Target } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface WorkflowStep {
   id: string;
@@ -46,6 +47,12 @@ export function WorkflowModal({
   const [scheduleContext, setScheduleContext] = useState<any>(null);
   const [weatherData, setWeatherData] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+
+  // Focus trap for accessibility
+  const containerRef = useFocusTrap({
+    isActive: isOpen,
+    onEscape: onClose,
+  });
 
   // Load available workflows and auto-select if only one
   useEffect(() => {
@@ -450,6 +457,7 @@ export function WorkflowModal({
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
       <div
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="workflow-modal-title"
