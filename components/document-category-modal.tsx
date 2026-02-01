@@ -29,6 +29,11 @@ export function DocumentCategoryModal({
     confidence: number;
     reasoning: string;
   } | null>(null);
+  const [autoAccepted, setAutoAccepted] = useState(false);
+  const [showChangeCategory, setShowChangeCategory] = useState(false);
+
+  // Threshold for auto-acceptance (90%+)
+  const AUTO_ACCEPT_THRESHOLD = 0.9;
 
   const categories = getAllCategories();
 
@@ -73,12 +78,18 @@ export function DocumentCategoryModal({
 
       if (res.ok) {
         const data = await res.json();
-        setAiSuggestion({
+        const suggestion = {
           category: data.suggestedCategory,
           confidence: data.confidence,
           reasoning: data.reasoning,
-        });
+        };
+        setAiSuggestion(suggestion);
         setValue('category', data.suggestedCategory);
+
+        // Auto-accept high confidence suggestions (90%+)
+        if (data.confidence >= AUTO_ACCEPT_THRESHOLD) {
+          setAutoAccepted(true);
+        }
       } else {
         // Fallback to 'other' if suggestion fails
         setValue('category', 'other');
@@ -150,25 +161,55 @@ export function DocumentCategoryModal({
           <>
             {loading ? (
               <div className="px-6 py-4 bg-dark-surface border-b border-gray-700">
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Analyzing document...</span>
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="relative">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#F97316]" />
+                  </div>
+                  <div>
+                    <p className="text-gray-300 font-medium">Analyzing document...</p>
+                    <p className="text-xs text-gray-500">AI is categorizing your document</p>
+                  </div>
                 </div>
               </div>
             ) : aiSuggestion && aiSuggestion.confidence >= 0.7 ? (
-              <div className="px-6 py-4 bg-dark-surface border-b border-gray-700">
+              <div className={`px-6 py-4 border-b ${
+                autoAccepted
+                  ? 'bg-green-900/20 border-green-700/50'
+                  : 'bg-dark-surface border-gray-700'
+              }`}>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                    autoAccepted ? 'text-green-400' : 'text-green-500'
+                  }`} />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-[#F8FAFC]">
-                      AI Suggestion: {getCategoryLabel(aiSuggestion.category)}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-[#F8FAFC]">
+                        {autoAccepted ? 'Auto-selected: ' : 'AI Suggestion: '}
+                        {getCategoryLabel(aiSuggestion.category)}
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        aiSuggestion.confidence >= AUTO_ACCEPT_THRESHOLD
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {(aiSuggestion.confidence * 100).toFixed(0)}% confident
+                      </span>
+                    </div>
                     <p className="text-xs text-gray-400 mt-1">
                       {aiSuggestion.reasoning}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Confidence: {(aiSuggestion.confidence * 100).toFixed(0)}%
-                    </p>
+                    {autoAccepted && !showChangeCategory && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAutoAccepted(false);
+                          setShowChangeCategory(true);
+                        }}
+                        className="mt-2 text-xs text-[#F97316] hover:text-[#EA580C] font-medium transition-colors"
+                      >
+                        Change category
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -199,7 +240,7 @@ export function DocumentCategoryModal({
             name="category"
             control={control}
             render={({ field }) => (
-              <div className="space-y-2">
+              <div className={`space-y-2 ${autoAccepted && !showChangeCategory ? 'hidden' : ''}`}>
                 {categories.map((category) => (
                   <button
                     key={category.value}

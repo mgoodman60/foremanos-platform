@@ -11,6 +11,7 @@ import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { BillingCard } from '@/components/billing-card';
 import { QuotaIndicator } from '@/components/quota-indicator';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
+import { SkeletonDashboard, SkeletonCardGrid } from '@/components/ui/skeleton-card';
 
 interface Project {
   id: string;
@@ -62,6 +63,9 @@ export default function DashboardPage() {
 
   // Track previous subscription tier for detecting upgrades/downgrades
   const [previousTier, setPreviousTier] = useState<string | null>(null);
+
+  // Last synced timestamp
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
 
   useEffect(() => {
     if (status === 'loading') {
@@ -148,6 +152,7 @@ export default function DashboardPage() {
         setOwnedProjects(data.ownedProjects || []);
         setSharedProjects(data.sharedProjects || []);
         setStats(data.stats);
+        setLastSynced(new Date());
         checkOnboardingStatus();
         fetchSubscriptionInfo();
       } else {
@@ -474,13 +479,40 @@ export default function DashboardPage() {
     }
   };
 
+  // Helper to format "Last synced" timestamp
+  const formatLastSynced = (): string => {
+    if (!lastSynced) return '';
+    const now = new Date();
+    const diffMs = now.getTime() - lastSynced.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+
+    if (diffSec < 10) return 'Just now';
+    if (diffSec < 60) return `${diffSec} sec ago`;
+    if (diffMin < 60) return `${diffMin} min ago`;
+    return lastSynced.toLocaleTimeString();
+  };
+
   if (loading || status === 'loading') {
     return (
-      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F97316] mx-auto"></div>
-          <p className="mt-4 text-gray-300">Loading dashboard...</p>
-        </div>
+      <div className="min-h-screen bg-dark-surface">
+        {/* Header skeleton */}
+        <header className="bg-dark-card border-b border-gray-700 shadow-sm sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 bg-gray-700 rounded-full animate-pulse" />
+                <div className="h-9 w-20 bg-gray-700 rounded-lg animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main content skeleton */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <SkeletonDashboard />
+        </main>
       </div>
     );
   }
@@ -590,6 +622,13 @@ export default function DashboardPage() {
               />
             </div>
             <div className="flex items-center gap-3">
+              {/* Last synced indicator */}
+              {lastSynced && (
+                <span className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Last synced: {formatLastSynced()}
+                </span>
+              )}
               {session?.user.role === 'admin' && (
                 <button
                   onClick={() => router.push('/admin')}

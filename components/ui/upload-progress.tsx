@@ -22,6 +22,20 @@ interface UploadProgressProps {
   onDismiss?: () => void;
   /** Additional CSS classes */
   className?: string;
+  /** Total file size in bytes (for speed/ETA calculation) */
+  totalBytes?: number;
+  /** Bytes uploaded so far (for speed/ETA calculation) */
+  uploadedBytes?: number;
+  /** Upload speed in bytes/second (optional, will be calculated if uploadedBytes provided) */
+  speed?: number;
+  /** For chunked uploads: current chunk number */
+  currentChunk?: number;
+  /** For chunked uploads: total number of chunks */
+  totalChunks?: number;
+  /** Current retry attempt (for showing retry count) */
+  retryAttempt?: number;
+  /** Max retry attempts */
+  maxRetries?: number;
 }
 
 /**
@@ -47,9 +61,19 @@ export function UploadProgress({
   onRetry,
   onDismiss,
   className,
+  totalBytes,
+  uploadedBytes,
+  speed,
+  currentChunk,
+  totalChunks,
+  retryAttempt,
+  maxRetries,
 }: UploadProgressProps) {
   const announcer = useAnnounceOptional();
   const previousStatus = useRef(status);
+  const previousBytesRef = useRef(uploadedBytes || 0);
+  const lastUpdateTimeRef = useRef(Date.now());
+  const calculatedSpeedRef = useRef(0);
 
   // Announce status changes to screen readers
   useEffect(() => {
@@ -78,6 +102,55 @@ export function UploadProgress({
     }
   }, [progress, fileName, status, announcer]);
 
+  // Calculate upload speed
+  useEffect(() => {
+    if (uploadedBytes !== undefined && status === 'uploading') {
+      const now = Date.now();
+      const timeDelta = (now - lastUpdateTimeRef.current) / 1000; // seconds
+      const bytesDelta = uploadedBytes - previousBytesRef.current;
+
+      if (timeDelta > 0.1 && bytesDelta > 0) {
+        calculatedSpeedRef.current = bytesDelta / timeDelta;
+      }
+
+      previousBytesRef.current = uploadedBytes;
+      lastUpdateTimeRef.current = now;
+    }
+  }, [uploadedBytes, status]);
+
+  // Helper to format bytes
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  };
+
+  // Helper to format speed
+  const formatSpeed = (bytesPerSecond: number): string => {
+    return `${formatBytes(bytesPerSecond)}/s`;
+  };
+
+  // Helper to format time remaining
+  const formatETA = (seconds: number): string => {
+    if (!isFinite(seconds) || seconds <= 0) return '';
+    if (seconds < 60) return `~${Math.ceil(seconds)} sec remaining`;
+    if (seconds < 3600) return `~${Math.ceil(seconds / 60)} min remaining`;
+    return `~${Math.ceil(seconds / 3600)} hr remaining`;
+  };
+
+  // Get actual speed (provided or calculated)
+  const actualSpeed = speed || calculatedSpeedRef.current;
+
+  // Calculate ETA
+  const getETA = (): string => {
+    if (!totalBytes || !uploadedBytes || actualSpeed <= 0) return '';
+    const remainingBytes = totalBytes - uploadedBytes;
+    const secondsRemaining = remainingBytes / actualSpeed;
+    return formatETA(secondsRemaining);
+  };
+
   const getStatusColor = () => {
     switch (status) {
       case 'success':
@@ -102,6 +175,40 @@ export function UploadProgress({
       default:
         return `${progress}%`;
     }
+  };
+
+  // Build detailed progress info for chunked uploads
+  const getDetailedProgress = (): string | null => {
+    if (status !== 'uploading') return null;
+
+    const parts: string[] = [];
+
+    // Chunk info
+    if (currentChunk !== undefined && totalChunks !== undefined) {
+      parts.push(`Chunk ${currentChunk}/${totalChunks}`);
+    }
+
+    // Speed info
+    if (actualSpeed > 0) {
+      parts.push(formatSpeed(actualSpeed));
+    }
+
+    // ETA
+    const eta = getETA();
+    if (eta) {
+      parts.push(eta);
+    }
+
+    return parts.length > 0 ? parts.join(' · ') : null;
+  };
+
+  // Get retry info
+  const getRetryInfo = (): string | null => {
+    if (retryAttempt !== undefined && retryAttempt > 0) {
+      const max = maxRetries || 3;
+      return `Retrying... (attempt ${retryAttempt}/${max})`;
+    }
+    return null;
   };
 
   const getStatusIcon = () => {
@@ -165,6 +272,25 @@ export function UploadProgress({
             />
           </div>
 
+          {/* Detailed progress info (speed, ETA, chunks) */}
+          {(() => {
+            const detailedProgress = getDetailedProgress();
+            const retryInfo = getRetryInfo();
+            if (detailedProgress || retryInfo) {
+              return (
+                <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-400">
+                  {retryInfo && (
+                    <span className="text-yellow-400">{retryInfo}</span>
+                  )}
+                  {detailedProgress && !retryInfo && (
+                    <span>{detailedProgress}</span>
+                  )}
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {/* Error message */}
           {status === 'error' && errorMessage && (
             <p className="mt-2 text-xs text-red-400">{errorMessage}</p>
@@ -226,6 +352,13 @@ interface UploadProgressListProps {
     progress: number;
     status: 'uploading' | 'processing' | 'success' | 'error';
     errorMessage?: string;
+    totalBytes?: number;
+    uploadedBytes?: number;
+    speed?: number;
+    currentChunk?: number;
+    totalChunks?: number;
+    retryAttempt?: number;
+    maxRetries?: number;
   }>;
   onCancel?: (id: string) => void;
   onRetry?: (id: string) => void;
@@ -268,6 +401,13 @@ export function UploadProgressList({
           progress={upload.progress}
           status={upload.status}
           errorMessage={upload.errorMessage}
+          totalBytes={upload.totalBytes}
+          uploadedBytes={upload.uploadedBytes}
+          speed={upload.speed}
+          currentChunk={upload.currentChunk}
+          totalChunks={upload.totalChunks}
+          retryAttempt={upload.retryAttempt}
+          maxRetries={upload.maxRetries}
           onCancel={onCancel ? () => onCancel(upload.id) : undefined}
           onRetry={onRetry ? () => onRetry(upload.id) : undefined}
           onDismiss={onDismiss ? () => onDismiss(upload.id) : undefined}

@@ -22,6 +22,7 @@ import DocumentProcessingMonitor from '@/components/document-processing-monitor'
 import OnboardingChecklist from '@/components/onboarding-checklist';
 import { MobileBottomNav } from '@/components/mobile';
 import SubmittalMetricsWidget from '@/components/submittals/SubmittalMetricsWidget';
+import { SkeletonProjectWorkspace } from '@/components/ui/skeleton-card';
 
 interface Project {
   id: string;
@@ -66,7 +67,10 @@ export default function ProjectPage() {
     admin: true
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
+  // Last synced timestamp
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
+
   // Mobile-specific state
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showQuickCapture, setShowQuickCapture] = useState(false);
@@ -150,6 +154,7 @@ export default function ProjectPage() {
       if (res.ok) {
         const data = await res.json();
         setProject(data.project);
+        setLastSynced(new Date());
       } else if (res.status === 403) {
         toast.error('You do not have access to this project');
         router.push('/dashboard');
@@ -525,15 +530,22 @@ export default function ProjectPage() {
     console.log('[CHUNKED UPLOAD] Upload complete!');
   };
 
+  // Helper to format "Last synced" timestamp
+  const formatLastSynced = (): string => {
+    if (!lastSynced) return '';
+    const now = new Date();
+    const diffMs = now.getTime() - lastSynced.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+
+    if (diffSec < 10) return 'Just now';
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffMin < 60) return `${diffMin}m ago`;
+    return lastSynced.toLocaleTimeString();
+  };
+
   if (loading || status === 'loading') {
-    return (
-      <div className="min-h-screen bg-dark-surface flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F97316] mx-auto"></div>
-          <p className="mt-4 text-gray-400">Loading project...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonProjectWorkspace />;
   }
 
   if (!project) {
@@ -570,6 +582,13 @@ export default function ProjectPage() {
               </button>
               <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 mx-1 flex-shrink-0" />
               <span className="text-[#F8FAFC] font-medium truncate">{project.name}</span>
+              {/* Last synced indicator */}
+              {lastSynced && (
+                <span className="hidden lg:flex items-center gap-1.5 ml-4 text-xs text-gray-500">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  {formatLastSynced()}
+                </span>
+              )}
             </nav>
 
             {/* Actions - Dropdown Menu */}
