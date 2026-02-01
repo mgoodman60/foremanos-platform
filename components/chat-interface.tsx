@@ -83,13 +83,50 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   const [smartSuggestions, setSmartSuggestions] = useState<string[]>([]);
   const [documentsLoaded, setDocumentsLoaded] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [currentConversation, setCurrentConversation] = useState<any>(null);
+
+  // Properly typed conversation metadata
+  interface ConversationMetadata {
+    id: string;
+    title: string;
+    conversationType: string;
+    isReadOnly: boolean;
+    finalized?: boolean;
+  }
+  const [currentConversation, setCurrentConversation] = useState<ConversationMetadata | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
-  const [finalizationStatus, setFinalizationStatus] = useState<any>(null);
+
+  // Properly typed finalization status
+  interface FinalizationStatus {
+    hasData: boolean;
+    canFinalize: boolean;
+    finalized: boolean;
+  }
+  const [finalizationStatus, setFinalizationStatus] = useState<FinalizationStatus | null>(null);
   const [isFinalizingReport, setIsFinalizingReport] = useState(false);
   const [showDailyReportTemplate, setShowDailyReportTemplate] = useState(false);
-  const [scheduleAnalysis, setScheduleAnalysis] = useState<any>(null);
+
+  // Properly typed schedule analysis (matches ScheduleUpdateReviewModal)
+  interface ScheduleUpdateSuggestion {
+    taskId: string;
+    taskName: string;
+    scheduleId?: string;
+    currentStatus: string;
+    currentPercentComplete: number;
+    suggestedStatus: string;
+    suggestedPercentComplete: number;
+    confidence: number;
+    reasoning: string;
+    impactType: 'progress' | 'delay' | 'completion' | 'acceleration';
+    severity: 'low' | 'medium' | 'high';
+  }
+
+  interface ScheduleAnalysis {
+    hasScheduleImpact: boolean;
+    suggestions: ScheduleUpdateSuggestion[];
+    summary: string;
+  }
+  const [scheduleAnalysis, setScheduleAnalysis] = useState<ScheduleAnalysis | null>(null);
   const [showScheduleReview, setShowScheduleReview] = useState(false);
   const [showTemplateExportDialog, setShowTemplateExportDialog] = useState(false);
   const [analyzingSchedule, setAnalyzingSchedule] = useState(false);
@@ -403,7 +440,6 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   // Conversation handlers
   const handleConversationSelect = (conversationId: string | null) => {
     setActiveConversationId(conversationId);
-    // TODO: Load messages for the selected conversation
     if (conversationId) {
       loadConversationMessages(conversationId);
     } else {

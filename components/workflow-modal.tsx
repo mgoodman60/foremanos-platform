@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { X, ChevronRight, Check, AlertCircle, Loader2, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import type { WeatherData, ScheduleContext } from '@/types/component-types';
 
 interface WorkflowStep {
   id: string;
   question: string;
   stepType: string;
-  options: any | null;
+  options: string[] | null;
   isRequired: boolean;
   helpText: string | null;
   order: number;
@@ -41,11 +42,12 @@ export function WorkflowModal({
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [currentSteps, setCurrentSteps] = useState<WorkflowStep[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [scheduleContext, setScheduleContext] = useState<any>(null);
-  const [weatherData, setWeatherData] = useState<any>(null);
+  const [scheduleContext, setScheduleContext] = useState<ScheduleContext | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
 
   // Focus trap for accessibility

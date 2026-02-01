@@ -171,7 +171,7 @@ export function isSuitableForWork(forecast: DailyWeatherData): {
   reason?: string;
 } {
   // Check for severe conditions
-  const conditions = forecast.conditions.toLowerCase();
+  const conditions = (forecast.conditions?.toLowerCase() || '');
   if (conditions.includes('thunder') || conditions.includes('lightning')) {
     return { suitable: false, reason: 'Lightning risk - outdoor work suspended' };
   }

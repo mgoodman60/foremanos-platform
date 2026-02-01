@@ -311,15 +311,19 @@ export async function getRelatedDocuments(
     // Extract references from this document
     const outgoingRefs = await extractCrossReferences(documentId);
 
-    // Check which other documents reference this one
-    const incomingRefs: DocumentReference[] = [];
-    for (const doc of document.Project.Document) {
-      if (doc.id !== documentId) {
-        const refs = await extractCrossReferences(doc.id);
-        const refsToThisDoc = refs.filter(r => r.targetDocumentId === documentId);
-        incomingRefs.push(...refsToThisDoc);
-      }
-    }
+    // Check which other documents reference this one - batch all queries in parallel
+    const otherDocIds = document.Project.Document
+      .filter((doc: { id: string }) => doc.id !== documentId)
+      .map((doc: { id: string }) => doc.id);
+
+    const allRefsResults = await Promise.all(
+      otherDocIds.map((docId: string) => extractCrossReferences(docId))
+    );
+
+    // Flatten and filter to find refs pointing to this document
+    const incomingRefs: DocumentReference[] = allRefsResults
+      .flat()
+      .filter(r => r.targetDocumentId === documentId);
 
     // Combine and format
     const related = new Map<string, any>();

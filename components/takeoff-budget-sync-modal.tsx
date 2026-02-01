@@ -28,6 +28,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import type { TakeoffItem } from '@/types/component-types';
 
 interface Budget {
   id: string;
@@ -44,7 +45,7 @@ interface TakeoffBudgetSummary {
     total: number;
   };
   byTrade: Record<string, {
-    items: any[];
+    items: TakeoffItem[];
     materialTotal: number;
     laborTotal: number;
     total: number;
@@ -143,7 +144,16 @@ export function TakeoffBudgetSyncModal({
     try {
       setSyncing(true);
 
-      const body: any = {
+      interface SyncRequestBody {
+        region: string;
+        action?: 'create-budget' | 'sync';
+        budgetName?: string;
+        contingencyPercent?: number;
+        budgetId?: string;
+        overwriteExisting?: boolean;
+      }
+
+      const body: SyncRequestBody = {
         region,
       };
 

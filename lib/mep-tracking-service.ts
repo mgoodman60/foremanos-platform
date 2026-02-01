@@ -496,12 +496,12 @@ export async function getMEPDashboardStats(projectId: string) {
   // Calculate upcoming maintenance
   const now = new Date();
   const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const upcomingMaintenance = maintenance.filter(m => 
-    new Date(m.nextDueDate) <= weekFromNow
+  const upcomingMaintenance = maintenance.filter(m =>
+    m.nextDueDate && new Date(m.nextDueDate) <= weekFromNow
   ).length;
-  
-  const overdueMaintenance = maintenance.filter(m => 
-    new Date(m.nextDueDate) < now
+
+  const overdueMaintenance = maintenance.filter(m =>
+    m.nextDueDate && new Date(m.nextDueDate) < now
   ).length;
   
   // Count pending submittals

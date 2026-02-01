@@ -289,28 +289,33 @@ export async function syncLookaheadToSchedule(
   tasks: LookaheadTask[]
 ): Promise<{ synced: number; created: number; errors: string[] }> {
   let synced = 0;
-  let created = 0;
+  const created = 0;
   const errors: string[] = [];
 
-  for (const task of tasks) {
+  // Filter tasks that need to be updated
+  const tasksToUpdate = tasks.filter(task => task.sourceTaskId);
+
+  if (tasksToUpdate.length > 0) {
     try {
-      if (task.sourceTaskId) {
-        // Update existing task
-        await prisma.scheduleTask.update({
-          where: { id: task.sourceTaskId },
-          data: {
-            actualStartDate: task.status !== 'not-started' ? new Date(task.startDate) : undefined,
-            percentComplete: task.percentComplete,
-            status: task.status === 'completed' ? 'completed' :
-                    task.status === 'in-progress' ? 'in_progress' : 'not_started',
-            notes: task.notes,
-          },
-        });
-        synced++;
-      }
-      // Skip creating new tasks - would need a valid scheduleId
-    } catch (e: any) {
-      errors.push(`Failed to sync task "${task.name}": ${e.message}`);
+      // Execute all updates within a transaction
+      await prisma.$transaction(
+        tasksToUpdate.map(task =>
+          prisma.scheduleTask.update({
+            where: { id: task.sourceTaskId! },
+            data: {
+              actualStartDate: task.status !== 'not-started' ? new Date(task.startDate) : undefined,
+              percentComplete: task.percentComplete,
+              status: task.status === 'completed' ? 'completed' :
+                      task.status === 'in-progress' ? 'in_progress' : 'not_started',
+              notes: task.notes,
+            },
+          })
+        )
+      );
+      synced = tasksToUpdate.length;
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      errors.push(`Failed to sync lookahead tasks: ${errorMessage}`);
     }
   }
 

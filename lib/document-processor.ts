@@ -106,28 +106,7 @@ export async function processDocument(
       return; // Exit early - queue will handle the rest
     }
 
-    // Update document with processing info (for small docs processed immediately)
-    await prisma.document.update({
-      where: { id: documentId },
-      data: { 
-        processed: true,
-        pagesProcessed: actualPages,
-        processingCost: actualCost,
-        processorType: classification.processorType,
-      },
-    });
-
-    // Track onboarding progress - document processed
-    try {
-      if (document.projectId) {
-        await markDocumentProcessed(ownerId, document.projectId);
-      }
-    } catch (error) {
-      // Silently fail - don't block processing
-      console.error('Failed to track onboarding progress:', error);
-    }
-
-    // Update user's monthly usage
+    // Get user for usage tracking
     const user = await prisma.user.findUnique({
       where: { id: ownerId },
       select: {
@@ -137,45 +116,63 @@ export async function processDocument(
       },
     });
 
-    if (user) {
-      // Check if we need to reset monthly quota (first day of new month)
-      const now = new Date();
-      const resetDate = user.processingResetAt || now;
-      const shouldReset = now.getMonth() !== resetDate.getMonth() || now.getFullYear() !== resetDate.getFullYear();
+    // Calculate user update values
+    const now = new Date();
+    const resetDate = user?.processingResetAt || now;
+    const shouldReset = user ? (now.getMonth() !== resetDate.getMonth() || now.getFullYear() !== resetDate.getFullYear()) : false;
 
-      await prisma.user.update({
-        where: { id: ownerId },
+    // Combine all database updates into a single transaction to prevent race conditions
+    await prisma.$transaction(async (tx) => {
+      // Update document with processing info and completion status in a single update
+      await tx.document.update({
+        where: { id: documentId },
         data: {
-          pagesProcessedThisMonth: shouldReset ? actualPages : (user.pagesProcessedThisMonth + actualPages),
-          totalProcessingCost: (user.totalProcessingCost || 0) + actualCost,
-          processingResetAt: shouldReset ? now : resetDate,
+          processed: true,
+          pagesProcessed: actualPages,
+          processingCost: actualCost,
+          processorType: classification.processorType,
+          queueStatus: 'completed',
+          lastProcessingError: null,
+          processedAt: now,
         },
       });
+
+      // Update user's monthly usage
+      if (user) {
+        await tx.user.update({
+          where: { id: ownerId },
+          data: {
+            pagesProcessedThisMonth: shouldReset ? actualPages : (user.pagesProcessedThisMonth + actualPages),
+            totalProcessingCost: (user.totalProcessingCost || 0) + actualCost,
+            processingResetAt: shouldReset ? now : resetDate,
+          },
+        });
+      }
+
+      // Create processing cost record
+      await tx.processingCost.create({
+        data: {
+          documentId: documentId,
+          userId: ownerId,
+          processorType: classification.processorType,
+          pages: actualPages,
+          cost: actualCost,
+          processingTime: processingTime,
+        },
+      });
+    });
+
+    // Track onboarding progress - document processed (non-critical, outside transaction)
+    try {
+      if (document.projectId) {
+        await markDocumentProcessed(ownerId, document.projectId);
+      }
+    } catch (error) {
+      // Silently fail - don't block processing
+      console.error('Failed to track onboarding progress:', error);
     }
 
-    // Create processing cost record
-    await prisma.processingCost.create({
-      data: {
-        documentId: documentId,
-        userId: ownerId,
-        processorType: classification.processorType,
-        pages: actualPages,
-        cost: actualCost,
-        processingTime: processingTime,
-      },
-    });
-
     console.log(`Document ${documentId} processed successfully with ${classification.processorType}: ${actualPages} pages, $${actualCost.toFixed(4)}`);
-    
-    // Mark as completed with success status
-    await prisma.document.update({
-      where: { id: documentId },
-      data: {
-        queueStatus: 'completed',
-        lastProcessingError: null, // Clear any previous errors
-        processedAt: new Date(),
-      },
-    });
 
     // Trigger intelligence extraction and room extraction in background
     const doc = await prisma.document.findUnique({

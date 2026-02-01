@@ -706,25 +706,32 @@ export async function verifySubmittalQuantities(
 
   const lineItemResults: VerificationResult[] = [];
 
+  // Verify all line items
   for (const lineItem of submittal.lineItems) {
     const result = await verifyLineItem(lineItem, requirements);
     lineItemResults.push(result);
-
-    // Update line item in database
-    await prisma.submittalLineItem.update({
-      where: { id: lineItem.id },
-      data: {
-        requiredQty: result.requiredQty,
-        complianceStatus: result.status,
-        varianceQty: result.varianceQty,
-        variancePercent: result.variancePercent,
-        verifiedAt: new Date(),
-        verificationNotes: result.notes,
-        linkedSourceIds: result.matchedSources.map(s => s.sourceId),
-        linkedSourceType: result.matchedSources[0]?.sourceType || null,
-      }
-    });
   }
+
+  // Batch update all line items in a single transaction
+  const verifiedAt = new Date();
+  await prisma.$transaction(
+    submittal.lineItems.map((lineItem, index) => {
+      const result = lineItemResults[index];
+      return prisma.submittalLineItem.update({
+        where: { id: lineItem.id },
+        data: {
+          requiredQty: result.requiredQty,
+          complianceStatus: result.status,
+          varianceQty: result.varianceQty,
+          variancePercent: result.variancePercent,
+          verifiedAt,
+          verificationNotes: result.notes,
+          linkedSourceIds: result.matchedSources.map(s => s.sourceId),
+          linkedSourceType: result.matchedSources[0]?.sourceType || null,
+        }
+      });
+    })
+  );
 
   const sufficientCount = lineItemResults.filter(r => r.status === 'SUFFICIENT').length;
   const insufficientCount = lineItemResults.filter(r => r.status === 'INSUFFICIENT').length;

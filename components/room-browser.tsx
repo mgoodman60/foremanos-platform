@@ -443,7 +443,7 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
 
 🔍 **Top Keywords Found:**
 ${Object.entries(data.keywordMatches || {})
-  .sort((a: any, b: any) => b[1] - a[1])
+  .sort((a, b) => (b[1] as number) - (a[1] as number))
   .slice(0, 5)
   .map(([keyword, count]) => `  • ${keyword}: ${count} times`)
   .join('\\n')}
@@ -1092,7 +1092,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
         {/* Sorting Controls */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">Sort by:</span>
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+          <Select value={sortBy} onValueChange={(value: 'roomNumber' | 'name' | 'type' | 'area' | 'status' | 'progress') => setSortBy(value)}>
             <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC] w-[140px]">
               <SelectValue />
             </SelectTrigger>

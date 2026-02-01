@@ -19,6 +19,9 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/projects/:path*',
+    '/project/:path*',
+    '/admin/:path*',
+    '/profile/:path*',
     '/settings/:path*',
     '/chat/:path*',
     '/chat',

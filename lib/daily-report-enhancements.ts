@@ -576,8 +576,13 @@ export async function transcribeVoiceToReport(
 }> {
   try {
     // First, transcribe the audio using Whisper
+    // Convert Buffer to proper File object for OpenAI API
+    const audioBuffer = Buffer.from(audioBase64, 'base64');
+    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+    const audioFile = new File([audioBlob], 'audio.webm', { type: 'audio/webm' });
+
     const transcriptionResponse = await getOpenAI().audio.transcriptions.create({
-      file: Buffer.from(audioBase64, 'base64') as unknown as File,
+      file: audioFile,
       model: 'whisper-1',
     });
 

@@ -3,6 +3,8 @@
  * Analyzes daily reports to detect schedule impacts and suggest updates
  */
 
+import { generateLookahead } from './lookahead-service';
+
 interface ScheduleUpdateSuggestion {
   taskId: string;
   taskName: string;
@@ -30,21 +32,8 @@ export async function analyzeScheduleImpact(
   projectId: string
 ): Promise<DailyReportAnalysis> {
   try {
-    // Get current schedule tasks
-    const scheduleResponse = await fetch(
-      `${process.env.NEXTAUTH_URL}/api/projects/${projectId}/schedule-lookahead`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (!scheduleResponse.ok) {
-      throw new Error('Failed to fetch schedule');
-    }
-
-    const scheduleData = await scheduleResponse.json();
+    // Get current schedule tasks directly from service (avoid HTTP self-call)
+    const scheduleData = await generateLookahead(projectId);
     const tasks = scheduleData.tasks || [];
 
     // Build context for AI

@@ -242,8 +242,13 @@ export async function recalculateBudgetItemActuals(projectId: string): Promise<n
 
   let updatedCount = 0;
 
-  // Prepare batch updates
-  const updatePromises: Promise<unknown>[] = [];
+  // Collect updates to execute in a transaction
+  const updates: Array<{
+    id: string;
+    name: string;
+    laborHours: number;
+    totalActualCost: number;
+  }> = [];
 
   for (const item of budget.BudgetItem) {
     const laborData = laborMap.get(item.id);
@@ -254,24 +259,37 @@ export async function recalculateBudgetItemActuals(projectId: string): Promise<n
     const materialCost = procurementData?.actualCost || 0;
     const totalActualCost = laborCost + materialCost;
 
-    // Update budget item if values changed
+    // Queue budget item update if values changed
     if (item.actualHours !== laborHours || item.actualCost !== totalActualCost) {
-      updatePromises.push(
-        prisma.budgetItem.update({
-          where: { id: item.id },
-          data: {
-            actualHours: laborHours,
-            actualCost: totalActualCost,
-          },
-        })
-      );
+      updates.push({
+        id: item.id,
+        name: item.name,
+        laborHours,
+        totalActualCost,
+      });
       updatedCount++;
-      console.log(`[CostRollup] Recalculated ${item.name}: ${laborHours} hours, $${totalActualCost.toFixed(2)}`);
     }
   }
 
-  // Execute all updates in parallel
-  await Promise.all(updatePromises);
+  // Execute all updates within a transaction
+  if (updates.length > 0) {
+    await prisma.$transaction(
+      updates.map(u =>
+        prisma.budgetItem.update({
+          where: { id: u.id },
+          data: {
+            actualHours: u.laborHours,
+            actualCost: u.totalActualCost,
+          },
+        })
+      )
+    );
+
+    // Log after transaction succeeds
+    updates.forEach(u => {
+      console.log(`[CostRollup] Recalculated ${u.name}: ${u.laborHours} hours, $${u.totalActualCost.toFixed(2)}`);
+    });
+  }
 
   return updatedCount;
 }

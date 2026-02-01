@@ -109,8 +109,23 @@ export async function GET(
     const completedWeight = tasks.reduce((sum, t) => sum + ((t.percentComplete || 0) / 100), 0);
     const percentComplete = totalTaskWeight > 0 ? (completedWeight / totalTaskWeight) * 100 : 0;
 
+    // Calculate Planned Value (PV) from baseline schedule
+    // PV = What work SHOULD be done by today according to baseline schedule
+    const today = new Date();
+    const projectStart = schedule?.startDate ? new Date(schedule.startDate) : null;
+    const projectEnd = schedule?.endDate ? new Date(schedule.endDate) : null;
+
+    let plannedPercentComplete = 0;
+    if (projectStart && projectEnd && today >= projectStart) {
+      const totalDuration = projectEnd.getTime() - projectStart.getTime();
+      const elapsedDuration = Math.min(today.getTime() - projectStart.getTime(), totalDuration);
+      plannedPercentComplete = totalDuration > 0 ? (elapsedDuration / totalDuration) * 100 : 0;
+    }
+
     // EVM Calculations
-    const plannedValue = totalBudget * (percentComplete / 100);
+    // PV = Work that should be done by now (time-based from baseline)
+    // EV = Work actually completed (actual progress)
+    const plannedValue = totalBudget * (plannedPercentComplete / 100);
     const earnedValue = totalBudget * (percentComplete / 100);
     const costVariance = earnedValue - actualCost;
     const scheduleVariance = earnedValue - plannedValue;

@@ -44,10 +44,25 @@ interface SheetIndexBrowserProps {
   onSheetSelect?: (sheet: SheetIndexEntry) => void;
 }
 
+interface DisciplineStats {
+  discipline: string;
+  count: number;
+}
+
+interface SheetIndexStats {
+  totalSheets: number;
+  byDiscipline: DisciplineStats[];
+  latestRevision?: string;
+  dateRange: {
+    earliest?: string;
+    latest?: string;
+  };
+}
+
 export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetIndexBrowserProps) {
   const [sheets, setSheets] = useState<SheetIndexEntry[]>([]);
   const [byDiscipline, setByDiscipline] = useState<Record<string, SheetIndexEntry[]>>({});
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<SheetIndexStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
@@ -276,7 +291,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
               <TabsTrigger value="all" className="data-[state=active]:bg-orange-500">
                 All ({sheets.length})
               </TabsTrigger>
-              {stats.byDiscipline.map((disc: any) => (
+              {stats.byDiscipline.map((disc: DisciplineStats) => (
                 <TabsTrigger
                   key={disc.discipline}
                   value={disc.discipline}
