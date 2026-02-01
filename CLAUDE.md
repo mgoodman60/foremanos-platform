@@ -411,9 +411,25 @@ npx prisma generate
 npm run build
 ```
 
-## Recent Fixes (January 2026)
+## Recent Fixes (January-February 2026)
 
-### Security Fixes
+### NPM Security Vulnerabilities (February 2026)
+Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
+
+| Fix | Vulnerabilities | Severity |
+|-----|----------------|----------|
+| Next.js 14.2.28 → 14.2.35 | 8 fixed | HIGH (SSRF, DoS, info exposure) |
+| fast-xml-parser@5.3.4 override | 11 fixed | HIGH (AWS SDK DoS) |
+| glob@10.5.0 override | 1 fixed | HIGH (command injection) |
+| lodash 4.17.21 → 4.17.23 | 1 fixed | MODERATE (prototype pollution) |
+
+**Remaining 8 vulnerabilities** require breaking changes:
+- esbuild (Vitest 2.x) - 3 MODERATE: Vitest 4.x causes 358 test failures
+- eslint - 1 MODERATE: Requires ESLint 9 + flat config migration
+- Next.js DoS - 2 HIGH: Requires Next.js 15+ major version upgrade
+- tar - 3 HIGH: Canvas rebuild fails (no Node.js v25 prebuilt binaries)
+
+### Security Fixes (January 2026)
 - **Auth bypass**: Fixed unauthenticated admin endpoint in `app/api/admin/finalize-reports/route.ts`
 - **Path traversal**: Added validation in `app/api/documents/[id]/route.ts`
 - **401/403 separation**: 13 admin API routes now return proper HTTP status codes
