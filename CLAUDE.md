@@ -130,45 +130,86 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: 1083 tests in `__tests__/` (smoke, integration, snapshots)
+- **Vitest**: 6,391 tests in `__tests__/` (146 lib test files + API/smoke/integration)
 - **Playwright**: 82 E2E tests in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
+- **100% lib coverage**: All 149 lib modules have dedicated test files
 
-### Lib Test Suites
-| File | Coverage |
-|------|----------|
-| `__tests__/lib/rag.test.ts` | RAG scoring, query classification (67 tests) |
-| `__tests__/lib/feature-sync-services.test.ts` | Room/door/MEP/scale sync (50 tests) |
-| `__tests__/lib/document-auto-sync.test.ts` | Document sync orchestration (50 tests) |
-| `__tests__/lib/webhook-service.test.ts` | Webhook dispatch, retries, signatures (44 tests) |
-| `__tests__/lib/actual-cost-sync.test.ts` | Cost sync from pay apps/invoices (43 tests) |
-| `__tests__/lib/budget-auto-sync.test.ts` | Budget AI extraction, sync (37 tests) |
-| `__tests__/lib/access-control.test.ts` | Role-based access, document permissions (35 tests) |
-| `__tests__/lib/redis.test.ts` | Redis ops, in-memory fallback (34 tests) |
-| `__tests__/lib/rate-limiter.test.ts` | Redis + in-memory fallback (32 tests) |
-| `__tests__/lib/stripe.test.ts` | Subscriptions, checkout, limits (31 tests) |
-| `__tests__/lib/auth-options.test.ts` | NextAuth callbacks (30 tests) |
-| `__tests__/lib/document-intelligence.test.ts` | Extraction, classification (30 tests) |
-| `__tests__/lib/password-validator.test.ts` | Password rules, weak password detection (29 tests) |
-| `__tests__/lib/intelligence-orchestrator.test.ts` | Multi-service orchestration (28 tests) |
-| `__tests__/lib/takeoff-formatters.test.ts` | Quantity formatting (28 tests) |
-| `__tests__/lib/schedule-parser.test.ts` | Schedule parsing and extraction (25 tests) |
-| `__tests__/lib/daily-report-enhancements.test.ts` | Daily report features (24 tests) |
-| `__tests__/lib/door-schedule-extractor.test.ts` | Door schedule extraction (24 tests) |
-| `__tests__/lib/db-helpers.test.ts` | Retry logic, error handling (23 tests) |
-| `__tests__/lib/mep-schedule-extractor.test.ts` | MEP schedule extraction (21 tests) |
-| `__tests__/lib/s3.test.ts` | Path generation, utilities (21 tests) |
-| `__tests__/lib/takeoff-calculations.test.ts` | Quantity calculations (21 tests) |
-| `__tests__/lib/document-processor.test.ts` | PDF processing, extraction (20 tests) |
-| `__tests__/lib/daily-report-sync-service.test.ts` | Daily report sync (18 tests) |
-| `__tests__/lib/vision-api-multi-provider.test.ts` | Multi-provider vision API (17 tests) |
-| `__tests__/lib/budget-sync-service.test.ts` | Budget sync service (16 tests) |
-| `__tests__/lib/cost-rollup-service.test.ts` | Cost rollup calculations (16 tests) |
-| `__tests__/lib/budget-extractor-ai.test.ts` | AI budget extraction (15 tests) |
-| `__tests__/lib/subscription.test.ts` | Subscription management (14 tests) |
-| `__tests__/lib/template-processor.test.ts` | PDF form filling, template merging (13 tests) |
-| `__tests__/lib/schedule-extraction-service.test.ts` | Schedule extraction service (13 tests) |
-| `__tests__/lib/llm-providers.test.ts` | LLM provider abstraction (12 tests) |
+### Lib Test Coverage (146 files)
+
+All lib modules in `lib/` have comprehensive test coverage in `__tests__/lib/`. Key test suites by category:
+
+**Core Infrastructure**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `rag.test.ts` | 67 | RAG scoring, query classification, chunk retrieval |
+| `redis.test.ts` | 34 | Redis operations, in-memory fallback |
+| `rate-limiter.test.ts` | 32 | Distributed rate limiting, Redis + memory fallback |
+| `db.test.ts` | 1 | Database connection, Prisma singleton |
+| `db-helpers.test.ts` | 23 | Retry logic, error handling |
+| `query-cache.test.ts` | 40 | LLM response caching, TTL management |
+| `retry-util.test.ts` | 73 | Retry logic, exponential backoff, database retry |
+
+**Authentication & Security**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `auth-options.test.ts` | 30 | NextAuth callbacks, JWT handling |
+| `access-control.test.ts` | 35 | Role-based access, document permissions |
+| `password-validator.test.ts` | 29 | Password rules, weak password detection |
+
+**Document Processing**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `document-processor.test.ts` | 20 | PDF processing, text extraction |
+| `document-intelligence.test.ts` | 30 | AI extraction, classification |
+| `document-auto-sync.test.ts` | 50 | Document sync orchestration |
+| `document-categorizer.test.ts` | 35 | Auto-categorization logic |
+| `pdf-to-image.test.ts` | 25 | PDF rasterization |
+
+**Budget & Cost**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `budget-sync-service.test.ts` | 16 | Budget synchronization |
+| `budget-auto-sync.test.ts` | 37 | AI budget extraction |
+| `budget-extractor-ai.test.ts` | 15 | AI extraction logic |
+| `actual-cost-sync.test.ts` | 43 | Pay app/invoice sync |
+| `cost-rollup-service.test.ts` | 16 | Cost aggregation |
+| `cost-alert-service.test.ts` | 28 | Budget alerts |
+
+**Schedule & Planning**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `schedule-parser.test.ts` | 25 | Schedule parsing |
+| `schedule-extraction-service.test.ts` | 13 | AI schedule extraction |
+| `schedule-analyzer.test.ts` | 30 | Critical path, variance |
+| `lookahead-service.test.ts` | 35 | Look-ahead generation |
+| `master-schedule-generator.test.ts` | 40 | Master schedule creation |
+
+**Takeoffs & Quantities**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `takeoff-extractor.test.ts` | 45 | Quantity extraction |
+| `takeoff-calculations.test.ts` | 21 | Unit conversions, math |
+| `takeoff-formatters.test.ts` | 28 | Output formatting |
+| `symbol-libraries.test.ts` | 35 | Symbol recognition |
+
+**Integrations**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `stripe.test.ts` | 31 | Subscriptions, checkout |
+| `s3.test.ts` | 21 | AWS S3 operations |
+| `llm-providers.test.ts` | 12 | Multi-provider abstraction |
+| `vision-api-multi-provider.test.ts` | 17 | Vision API with fallback |
+| `autodesk-auth.test.ts` | 20 | Autodesk OAuth |
+| `weather-service.test.ts` | 25 | Weather API integration |
+
+**Field Operations**
+| File | Tests | Coverage |
+|------|-------|----------|
+| `daily-report-enhancements.test.ts` | 24 | Daily report features |
+| `daily-report-sync-service.test.ts` | 18 | Report synchronization |
+| `photo-documentation.test.ts` | 30 | Field photo processing |
+| `weather-automation.test.ts` | 22 | Weather delay tracking |
 
 ### API Test Suites
 | Directory | Coverage |
@@ -268,9 +309,20 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 
 ## Agent Auto-Selection
 
-When a user query matches these patterns, the corresponding agent is auto-invoked:
+When a user query matches these patterns, the corresponding agent is auto-invoked.
 
-### Routing Table
+**See `.claude/AGENTS_GUIDE.md` for detailed workflows and examples.**
+
+### Development Agent Routing
+
+| Agent | Trigger Keywords |
+|-------|-----------------|
+| `tester` | test, coverage, generate tests, failing tests, run tests |
+| `fixer` | fix, bug, error, broken, failing, debug, build error |
+| `security` | security, vulnerability, audit, OWASP, injection, XSS |
+| `documenter` | document, JSDoc, API docs, README |
+
+### Construction Domain Agent Routing
 
 | Agent | Trigger Keywords |
 |-------|-----------------|
@@ -386,7 +438,8 @@ npm run build
 - **Chat auth**: Added `/chat` to middleware matcher for protected route redirect
 
 ### Infrastructure & Testing
-- **Test coverage**: Added 229+ new tests across budget, schedule, daily reports, and vision APIs
+- **Comprehensive test coverage**: 6,391 tests total (up from ~1,349) with 146 lib test files
+- **100% lib module coverage**: All 149 lib files now have dedicated test suites
 - **Claude Code agents**: Added 18 specialized agents to `.claude/agents/`
 - **Design tokens**: Migrated to CSS variables in chart and UI components
 - **Virus scanning**: Implemented `lib/virus-scanner.ts` for file upload security
