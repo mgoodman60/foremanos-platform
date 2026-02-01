@@ -437,6 +437,16 @@ npm run build
 - **Email service Prisma**: Fixed null filter syntax using `NOT: { email: null }` in `lib/email-service.ts`
 - **Chat auth**: Added `/chat` to middleware matcher for protected route redirect
 
+### Test File Lint & Type Fixes
+- **Missing imports**: Added `afterEach`/`afterAll` to 4 test files (analytics-service, calendar-export, redis-cache-adapter, report-change-log)
+- **NODE_ENV assignment**: Replaced direct `process.env.NODE_ENV =` with `vi.stubEnv()` in 3 files (autodesk-oss, logger, redis-client)
+- **Mock types**: Added `updatedAt` to 15+ ProjectDataSource mocks in document-intelligence-router.test.ts
+- **Enum usage**: Replaced string literals with `SymbolCategory` and `DisciplineCode` enums in legend-extractor.test.ts
+- **Type casts**: Fixed `IntersectionObserverEntry` casts with `as unknown as` pattern in lazy-loader.test.ts
+- **Sharp mocks**: Added full mock interface (resize, jpeg, png, toBuffer) in pdf-to-image-raster.test.ts
+- **Type narrowing**: Prevented control flow narrowing with `as string` casts in utils.test.ts
+- **ESLint errors**: Fixed `no-non-null-asserted-optional-chain` errors in cost-calculation-service.test.ts
+
 ### Infrastructure & Testing
 - **Comprehensive test coverage**: 6,391 tests total (up from ~1,349) with 146 lib test files
 - **100% lib module coverage**: All 149 lib files now have dedicated test suites
