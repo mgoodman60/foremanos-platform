@@ -138,12 +138,19 @@ function parseScaleFromAI(scaleData: any): DrawingScale {
  * Parse scale string into numerical ratio
  */
 function parseScaleRatio(scaleString: string): number {
-  // Architectural: 1/4"=1'-0" → 48
-  const archMatch = scaleString.match(/(\d+)\/(\d+)"\s*=\s*1'-?0?"/);
-  if (archMatch) {
-    const numerator = parseInt(archMatch[1]);
-    const denominator = parseInt(archMatch[2]);
+  // Architectural with fraction: 1/4"=1'-0" → 48
+  const archFractionMatch = scaleString.match(/(\d+)\/(\d+)"\s*=\s*1'-?0?"/);
+  if (archFractionMatch) {
+    const numerator = parseInt(archFractionMatch[1]);
+    const denominator = parseInt(archFractionMatch[2]);
     return 12 * (denominator / numerator); // 12 inches per foot
+  }
+
+  // Architectural with whole number: 3"=1'-0" → 32
+  const archWholeMatch = scaleString.match(/(\d+)"\s*=\s*1'-?0?"/);
+  if (archWholeMatch) {
+    const inches = parseInt(archWholeMatch[1]);
+    return 12 / inches; // 12 inches per foot divided by scale inches
   }
 
   // Metric: 1:100 → 100

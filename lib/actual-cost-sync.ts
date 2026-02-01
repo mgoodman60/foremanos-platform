@@ -176,25 +176,26 @@ export async function syncBudgetFromPayApp(
     return { updated: 0, skipped: 0 };
   }
 
-  let updated = 0;
-  let skipped = 0;
+  // Separate items with budgetItemId from those without
+  const itemsToUpdate = payApp.items.filter(item => item.budgetItemId);
+  const skipped = payApp.items.length - itemsToUpdate.length;
 
-  for (const item of payApp.items) {
-    if (item.budgetItemId) {
-      await prisma.budgetItem.update({
-        where: { id: item.budgetItemId },
-        data: {
-          actualCost: item.totalCompleted,
-          billedToDate: item.totalCompleted
-        }
-      });
-      updated++;
-    } else {
-      skipped++;
-    }
+  // Batch update using transaction instead of N individual queries
+  if (itemsToUpdate.length > 0) {
+    await prisma.$transaction(
+      itemsToUpdate.map(item =>
+        prisma.budgetItem.update({
+          where: { id: item.budgetItemId! },
+          data: {
+            actualCost: item.totalCompleted,
+            billedToDate: item.totalCompleted,
+          },
+        })
+      )
+    );
   }
 
-  return { updated, skipped };
+  return { updated: itemsToUpdate.length, skipped };
 }
 
 /**

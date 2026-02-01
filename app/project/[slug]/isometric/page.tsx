@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import DOMPurify from 'isomorphic-dompurify';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -451,9 +452,13 @@ export default function IsometricViewPage() {
                 </div>
 
                 {/* SVG Viewer */}
-                <div 
+                <div
                   className="bg-dark-surface rounded-lg border border-gray-700 overflow-hidden"
-                  dangerouslySetInnerHTML={{ __html: visualization.svgData }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(visualization.svgData, {
+                      USE_PROFILES: { svg: true, svgFilters: true },
+                    })
+                  }}
                 />
 
                 {/* Legend */}

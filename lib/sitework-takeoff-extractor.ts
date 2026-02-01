@@ -398,7 +398,7 @@ export type DrawingType =
 export function classifyDrawingType(sheetNumber: string, content: string): DrawingType {
   const sheet = sheetNumber?.toUpperCase() || '';
   const text = content?.toLowerCase() || '';
-  
+
   // Sheet number patterns (e.g., C1.0, C-100, GR-1, etc.)
   if (/^(GR|GRAD)/.test(sheet) || text.includes('grading plan')) {
     return 'grading';
@@ -406,22 +406,27 @@ export function classifyDrawingType(sheetNumber: string, content: string): Drawi
   if (/^(UT|UTIL)/.test(sheet) || text.includes('utility plan') || text.includes('storm plan') || text.includes('sewer plan')) {
     return 'utility';
   }
-  if (/^(L|LA|LP)\d/.test(sheet) || text.includes('landscape plan') || text.includes('planting plan')) {
+  if (/^(L|LA|LP)[-\d]/.test(sheet) || text.includes('landscape plan') || text.includes('planting plan')) {
     return 'landscape';
   }
   if (/^(PV|PAV)/.test(sheet) || text.includes('paving plan') || text.includes('parking plan')) {
     return 'paving';
   }
-  if (/^(EC|ESCP|SW)/.test(sheet) || text.includes('erosion') || text.includes('sediment')) {
-    return 'erosion_control';
-  }
+  // Check stormwater before erosion control (SW can match both)
   if (text.includes('detention') || text.includes('retention') || text.includes('stormwater')) {
     return 'stormwater';
   }
-  if (/^C\d/.test(sheet)) {
+  if (/^(EC|ESCP)/.test(sheet) || text.includes('erosion') || text.includes('sediment')) {
+    return 'erosion_control';
+  }
+  // SW prefix for stormwater (after text checks)
+  if (/^SW/.test(sheet)) {
+    return 'stormwater';
+  }
+  if (/^C[-\d]/.test(sheet)) {
     return 'civil_general';
   }
-  
+
   return 'unknown';
 }
 
@@ -1262,16 +1267,16 @@ export const CAD_LAYER_PATTERNS: Record<string, { division: number; category: st
  */
 export function parseCADLayerName(layerName: string): { division: number; category: string; itemKey: string } | null {
   const upperLayer = layerName.toUpperCase();
-  
+
   // Direct match first
   for (const [pattern, mapping] of Object.entries(CAD_LAYER_PATTERNS)) {
     if (upperLayer.startsWith(pattern) || upperLayer.includes(pattern)) {
       return mapping;
     }
   }
-  
-  // Keyword-based fallback
-  if (upperLayer.includes('GRADE') || upperLayer.includes('TOPO')) {
+
+  // Keyword-based fallback - check for GRAD before GRADE to avoid false positives
+  if (upperLayer.includes('GRAD') || upperLayer.includes('TOPO')) {
     return { division: 31, category: 'earthwork', itemKey: 'grading-fine' };
   }
   if (upperLayer.includes('PAVE') || upperLayer.includes('ASPH')) {
@@ -1289,7 +1294,7 @@ export function parseCADLayerName(layerName: string): { division: number; catego
   if (upperLayer.includes('TREE') || upperLayer.includes('PLANT') || upperLayer.includes('LAND')) {
     return { division: 32, category: 'landscape', itemKey: 'tree-2in-cal' };
   }
-  
+
   return null;
 }
 
@@ -1309,14 +1314,14 @@ export function convertCADToTakeoff(
     // Calculate quantities based on entity types
     let quantity = 0;
     let unit = 'EA';
-    
+
     // Linear features (pipes, curbs, etc.)
-    if (layer.totalLength && mapping.itemKey.includes('pipe') || mapping.itemKey.includes('curb') || mapping.itemKey.includes('fence')) {
+    if (layer.totalLength && (mapping.itemKey.includes('pipe') || mapping.itemKey.includes('curb') || mapping.itemKey.includes('fence'))) {
       quantity = layer.totalLength * scaleFactor;
       unit = 'LF';
     }
     // Area features (paving, grading, etc.)
-    else if (layer.totalArea && mapping.category === 'paving' || mapping.category === 'earthwork') {
+    else if (layer.totalArea && (mapping.category === 'paving' || mapping.category === 'earthwork')) {
       quantity = layer.totalArea * scaleFactor * scaleFactor; // Square the scale for area
       unit = 'SF';
     }

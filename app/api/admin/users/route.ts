@@ -3,6 +3,15 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { sendWelcomeEmail as sendWelcomeEmailService } from '@/lib/email-service';
+
+// Generate cryptographically secure password
+function generateSecurePassword(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  const bytes = crypto.randomBytes(16);
+  return Array.from(bytes).map(b => chars[b % chars.length]).join('');
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -10,9 +19,16 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthenticated' },
+        { status: 401 }
+      );
+    }
+
+    if (session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden' },
         { status: 403 }
       );
     }
@@ -53,9 +69,16 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized. Only admins can create users.' },
+        { error: 'Unauthenticated' },
+        { status: 401 }
+      );
+    }
+
+    if (session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden. Only admins can create users.' },
         { status: 403 }
       );
     }
@@ -115,8 +138,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate secure password if not provided
-    const finalPassword = password || Math.random().toString(36).slice(-12) + Math.random().toString(36).toUpperCase().slice(-4) + '!';
+    // Generate cryptographically secure password if not provided
+    const finalPassword = password || generateSecurePassword();
     
     // Hash password
     const hashedPassword = await bcrypt.hash(finalPassword, 10);
@@ -174,11 +197,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send welcome email if requested
-    // This would integrate with your email service
-    // if (sendWelcomeEmail) {
-    //   await sendWelcomeEmail(newUser.email, finalPassword);
-    // }
+    // Send welcome email if requested
+    if (sendWelcomeEmail && newUser.email) {
+      try {
+        await sendWelcomeEmailService(newUser.email, newUser.username, newUser.id);
+        console.log(`Welcome email sent to ${newUser.email}`);
+      } catch (emailError) {
+        // Don't fail user creation if email fails - it's not critical
+        console.error('Failed to send welcome email:', emailError);
+      }
+    }
 
     return NextResponse.json(
       {

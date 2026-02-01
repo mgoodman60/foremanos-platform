@@ -225,7 +225,7 @@ function extractMEPFromContent(
   const elements: MEPElement[] = [];
   let id = startId;
 
-  // Mechanical: Ducts, Equipment
+  // Mechanical: Ducts, Equipment, Risers
   if (system === 'mechanical') {
     // Duct patterns: "24x12 duct", "6\" round duct"
     const ductMatches = content.match(/\b(\d+[xX]\d+|\d+["']?\s*(?:round|dia(?:meter)?))\s+duct/gi);
@@ -246,12 +246,38 @@ function extractMEPFromContent(
     const equipMatches = content.match(/\b(AHU|RTU|MAU|EF|VAV|FCU)[-\s]?\d+/gi);
     if (equipMatches) {
       for (const match of equipMatches) {
+        const grid = extractGridNearMatch(content, match);
         elements.push({
           id: `mechanical-${id++}`,
           type: 'equipment',
           system: 'mechanical',
-          location: { floor, description: extractContext(content, match) },
+          location: {
+            floor,
+            grid,
+            description: extractContext(content, match)
+          },
           tag: match.toUpperCase(),
+          connections: []
+        });
+      }
+    }
+
+    // Risers: "Riser R-1", "R-1", "HR-1"
+    const riserMatches = content.match(/\b(?:riser\s+)?([A-Z]*R)[-\s]?(\d+)\b/gi);
+    if (riserMatches) {
+      for (const match of riserMatches) {
+        const tag = match.replace(/^riser\s+/i, '').toUpperCase();
+        const grid = extractGridNearMatch(content, match);
+        elements.push({
+          id: `mechanical-${id++}`,
+          type: 'riser',
+          system: 'mechanical',
+          location: {
+            floor,
+            grid,
+            description: extractContext(content, match)
+          },
+          tag,
           connections: []
         });
       }
@@ -260,16 +286,21 @@ function extractMEPFromContent(
 
   // Electrical: Panels, Conduit, Cable Tray
   if (system === 'electrical') {
-    // Panel patterns: "Panel LP-1", "MDP", "Panelboard A"
-    const panelMatches = content.match(/\b(?:panel(?:board)?|MDP|LP|DP|PP)[-\s]?[A-Z]?\d*/gi);
+    // Panel patterns: "Panel LP-1", "MDP", "Panelboard A", "LP-1"
+    const panelMatches = content.match(/\b(?:panel(?:board)?\s+)?(?:MDP|LP|DP|PP)[-\s]?\d+\b/gi);
     if (panelMatches) {
       for (const match of panelMatches) {
+        const grid = extractGridNearMatch(content, match);
         elements.push({
           id: `electrical-${id++}`,
           type: 'panel',
           system: 'electrical',
-          location: { floor, description: extractContext(content, match) },
-          tag: match.toUpperCase(),
+          location: {
+            floor,
+            grid,
+            description: extractContext(content, match)
+          },
+          tag: match.replace(/^panel(?:board)?\s+/i, '').toUpperCase(),
           connections: []
         });
       }
@@ -291,10 +322,10 @@ function extractMEPFromContent(
     }
   }
 
-  // Plumbing: Pipes, Fixtures
+  // Plumbing: Pipes, Fixtures, Risers
   if (system === 'plumbing') {
     // Pipe patterns: "4\" waste", "2\" water"
-    const pipeMatches = content.match(/\b\d+["']?\s*(?:waste|vent|water|drain|supply)/gi);
+    const pipeMatches = content.match(/\b\d+["']?\s*(?:waste|vent|water|drain|supply|line)/gi);
     if (pipeMatches) {
       for (const match of pipeMatches) {
         elements.push({
@@ -322,6 +353,51 @@ function extractMEPFromContent(
         });
       }
     }
+
+    // Risers: "Riser R-1", "WR-1", "SR-1"
+    const riserMatches = content.match(/\b(?:riser\s+)?([A-Z]*R)[-\s]?(\d+)\b/gi);
+    if (riserMatches) {
+      for (const match of riserMatches) {
+        const tag = match.replace(/^riser\s+/i, '').toUpperCase();
+        const grid = extractGridNearMatch(content, match);
+        elements.push({
+          id: `plumbing-${id++}`,
+          type: 'riser',
+          system: 'plumbing',
+          location: {
+            floor,
+            grid,
+            description: extractContext(content, match)
+          },
+          tag,
+          connections: []
+        });
+      }
+    }
+  }
+
+  // Fire Protection: Risers, Pipes
+  if (system === 'fire_protection') {
+    // Risers: "FS-R1", "Fire sprinkler riser"
+    const riserMatches = content.match(/\b(?:fire\s+sprinkler\s+riser\s+)?([A-Z]*R)[-\s]?(\d+)\b/gi);
+    if (riserMatches) {
+      for (const match of riserMatches) {
+        const tag = match.replace(/^fire\s+sprinkler\s+riser\s+/i, '').toUpperCase();
+        const grid = extractGridNearMatch(content, match);
+        elements.push({
+          id: `fire_protection-${id++}`,
+          type: 'riser',
+          system: 'fire_protection',
+          location: {
+            floor,
+            grid,
+            description: extractContext(content, match)
+          },
+          tag,
+          connections: []
+        });
+      }
+    }
   }
 
   return elements;
@@ -344,6 +420,11 @@ function inferElementType(description: string, system: MEPSystem): MEPElementTyp
   if (desc.includes('damper')) return 'damper';
   if (desc.includes('junction') || desc.includes('box')) return 'junction';
 
+  // Equipment indicators
+  if (desc.includes('air handling') || desc.includes('ahu')) return 'equipment';
+  if (desc.includes('fan') || desc.includes('unit')) return 'equipment';
+  if (desc.includes('boiler') || desc.includes('chiller')) return 'equipment';
+
   // System-specific defaults
   if (system === 'mechanical') return 'duct';
   if (system === 'electrical') return 'conduit';
@@ -362,6 +443,22 @@ function extractContext(content: string, match: string, contextLength: number = 
   const start = Math.max(0, index - contextLength);
   const end = Math.min(content.length, index + match.length + contextLength);
   return content.substring(start, end).trim();
+}
+
+/**
+ * Try to extract grid coordinate near a match in content
+ */
+function extractGridNearMatch(content: string, match: string): GridCoordinate | undefined {
+  const context = extractContext(content, match, 100);
+
+  // Look for patterns like "at grid A1", "at A2", "grid B3", etc.
+  const gridMatch = context.match(/(?:at\s+(?:grid\s+)?|grid\s+)([A-Z]\d+)/i);
+  if (gridMatch) {
+    const coord = parseGridCoordinate(gridMatch[1]);
+    return coord || undefined;
+  }
+
+  return undefined;
 }
 
 // ============================================================================
@@ -445,13 +542,40 @@ async function buildConnections(elements: MEPElement[]): Promise<void> {
 
       if (!sameFloor && !hasRiser) continue;
 
+      let shouldConnect = false;
+
       // Check proximity if both have grid locations
       if (elem1.location.grid && elem2.location.grid) {
         const distance = calculateGridDistance(elem1.location.grid, elem2.location.grid);
         if (distance <= 5) { // Within 5 grid spaces
-          elem1.connections.push(elem2.id);
-          elem2.connections.push(elem1.id);
+          shouldConnect = true;
         }
+      } else if (sameFloor) {
+        // If on same floor but no grid coordinates, check context for connection indicators
+        const context1 = elem1.location.description.toLowerCase();
+        const context2 = elem2.location.description.toLowerCase();
+
+        // Check if contexts mention connection keywords
+        const hasConnectionKeywords =
+          (context1.includes('connect') || context1.includes('serves') ||
+           context1.includes('to') || context1.includes('from') ||
+           context1.includes(' and ')) ||
+          (context2.includes('connect') || context2.includes('serves') ||
+           context2.includes('to') || context2.includes('from') ||
+           context2.includes(' and '));
+
+        // Don't connect if explicitly marked as isolated
+        const isIsolated =
+          context1.includes('isolated') || context2.includes('isolated');
+
+        if (hasConnectionKeywords && !isIsolated) {
+          shouldConnect = true;
+        }
+      }
+
+      if (shouldConnect) {
+        elem1.connections.push(elem2.id);
+        elem2.connections.push(elem1.id);
       }
     }
   }

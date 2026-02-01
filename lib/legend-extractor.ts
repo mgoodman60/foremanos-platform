@@ -10,10 +10,8 @@
  * - Symbol usage validation
  */
 
-import { PrismaClient } from '@prisma/client';
 import { DisciplineCode, getDisciplineName } from './title-block-extractor';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 // ============================================================================
 // TYPES & INTERFACES

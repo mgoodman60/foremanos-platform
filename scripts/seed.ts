@@ -17,6 +17,7 @@ async function main() {
       password: adminPassword,
       role: 'admin',
       approved: true,
+      hasCompletedOnboarding: true,
     },
     create: {
       email: 'admin@foremanos.site',
@@ -24,6 +25,7 @@ async function main() {
       password: adminPassword,
       role: 'admin',
       approved: true,
+      hasCompletedOnboarding: true,
     },
   });
   console.log('Admin user created:', adminUser.username);
@@ -32,13 +34,16 @@ async function main() {
   const testUserPassword = await bcrypt.hash('johndoe123', 10);
   const testUser = await prisma.user.upsert({
     where: { email: 'john@doe.com' },
-    update: {},
+    update: {
+      hasCompletedOnboarding: true,
+    },
     create: {
       email: 'john@doe.com',
       username: 'john',
       password: testUserPassword,
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
   });
   console.log('Test user created:', testUser.email);
@@ -52,6 +57,7 @@ async function main() {
       email: 'internal@construction.local',
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
     create: {
       email: 'internal@construction.local',
@@ -59,6 +65,7 @@ async function main() {
       password: clientPassword,
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
   });
   console.log('Client user created:', clientUser.username);
@@ -71,6 +78,7 @@ async function main() {
       password: ownerPassword,
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
     create: {
       email: 'owner@foremanos.test',
@@ -78,6 +86,7 @@ async function main() {
       password: ownerPassword,
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
   });
   console.log('Project owner user created:', ownerUser.username);
@@ -90,6 +99,7 @@ async function main() {
       password: contractorPassword,
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
     create: {
       email: 'contractor@foremanos.test',
@@ -97,9 +107,29 @@ async function main() {
       password: contractorPassword,
       role: 'client',
       approved: true,
+      hasCompletedOnboarding: true,
     },
   });
   console.log('Contractor user created:', contractorUser.username);
+
+  // Create unapproved user for E2E testing (pending@foremanos.test / pending123)
+  const pendingPassword = await bcrypt.hash('pending123', 10);
+  const pendingUser = await prisma.user.upsert({
+    where: { email: 'pending@foremanos.test' },
+    update: {
+      password: pendingPassword,
+      role: 'pending',
+      approved: false,
+    },
+    create: {
+      email: 'pending@foremanos.test',
+      username: 'pendinguser',
+      password: pendingPassword,
+      role: 'pending',
+      approved: false,
+    },
+  });
+  console.log('Pending user created (unapproved):', pendingUser.username);
 
   // ===== MAINTENANCE MODE =====
   console.log('\n--- Initializing Maintenance Mode ---');
@@ -1200,7 +1230,7 @@ async function main() {
   console.log('DATABASE SEED COMPLETED SUCCESSFULLY!');
   console.log('========================================');
   console.log('\nSummary:');
-  console.log('- Users: 5 (Admin, john, internal, ProjectOwner, Contractor)');
+  console.log('- Users: 6 (Admin, john, internal, ProjectOwner, Contractor, pendinguser)');
   console.log('- Projects: 3 (Riverside Apartments, Downtown Office Tower, Harbor Marina)');
   console.log('- Project Members: 3 (Admin as owner on all projects)');
   console.log('- Budgets: 3 (one per project)');

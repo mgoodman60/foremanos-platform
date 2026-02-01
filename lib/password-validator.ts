@@ -6,9 +6,10 @@ export interface PasswordValidationResult {
 }
 
 export function validatePassword(password: string): PasswordValidationResult {
-  // Relaxed rules in development mode
-  const isDev = process.env.NODE_ENV === 'development';
-  if (isDev && password.length >= 3) {
+  // Relaxed rules only when explicitly enabled via ALLOW_WEAK_PASSWORDS=true
+  // This prevents accidental weak password acceptance if NODE_ENV is misconfigured
+  const allowWeakPasswords = process.env.ALLOW_WEAK_PASSWORDS === 'true';
+  if (allowWeakPasswords && password.length >= 3) {
     return { valid: true };
   }
 

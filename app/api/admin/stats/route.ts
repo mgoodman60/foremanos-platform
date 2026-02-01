@@ -9,9 +9,16 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthenticated' },
+        { status: 401 }
+      );
+    }
+
+    if (session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden' },
         { status: 403 }
       );
     }

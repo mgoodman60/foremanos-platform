@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { SessionProvider } from '@/components/session-provider';
 import { Toaster } from 'sonner';
@@ -69,9 +70,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <script src="https://apps.abacus.ai/chatllm/appllm-lib.js"></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `
+        <Script
+          src="https://apps.abacus.ai/chatllm/appllm-lib.js"
+          strategy="lazyOnload"
+        />
+        <Script id="service-worker-registration" strategy="lazyOnload">
+          {`
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/service-worker.js').then(
@@ -84,8 +88,8 @@ export default function RootLayout({
                 );
               });
             }
-          `
-        }} />
+          `}
+        </Script>
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
         <SessionProvider>

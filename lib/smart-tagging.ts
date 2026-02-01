@@ -192,16 +192,20 @@ const PHASE_PATTERNS: Record<string, { keywords: string[]; tag: string; color: s
 };
 
 export function analyzeDocument(filename: string, content?: string): TaggingResult {
-  const normalizedFilename = filename.toLowerCase();
-  const normalizedContent = (content || '').toLowerCase();
+  // Normalize by converting to lowercase and replacing hyphens/underscores with spaces
+  const normalizedFilename = filename.toLowerCase().replace(/[-_]/g, ' ');
+  const normalizedContent = (content || '').toLowerCase().replace(/[-_]/g, ' ');
   const combinedText = `${normalizedFilename} ${normalizedContent}`;
   
   const suggestedTags: DocumentTag[] = [];
   const extractedInfo: TaggingResult['extractedInfo'] = {};
   
+  // Helper function to normalize keywords for matching
+  const normalizeKeyword = (kw: string) => kw.toLowerCase().replace(/[-_]/g, ' ');
+
   // Detect document type
   for (const [id, pattern] of Object.entries(DOCUMENT_PATTERNS)) {
-    const matchCount = pattern.keywords.filter(kw => combinedText.includes(kw)).length;
+    const matchCount = pattern.keywords.filter(kw => combinedText.includes(normalizeKeyword(kw))).length;
     if (matchCount > 0) {
       const confidence = Math.min(matchCount / pattern.keywords.length * 1.5, 1);
       if (confidence >= 0.3) {
@@ -218,10 +222,10 @@ export function analyzeDocument(filename: string, content?: string): TaggingResu
       }
     }
   }
-  
+
   // Detect trade
   for (const [id, pattern] of Object.entries(TRADE_PATTERNS)) {
-    const matchCount = pattern.keywords.filter(kw => combinedText.includes(kw)).length;
+    const matchCount = pattern.keywords.filter(kw => combinedText.includes(normalizeKeyword(kw))).length;
     if (matchCount > 0) {
       const confidence = Math.min(matchCount / pattern.keywords.length * 1.5, 1);
       if (confidence >= 0.3) {
@@ -238,10 +242,10 @@ export function analyzeDocument(filename: string, content?: string): TaggingResu
       }
     }
   }
-  
+
   // Detect phase
   for (const [id, pattern] of Object.entries(PHASE_PATTERNS)) {
-    const matchCount = pattern.keywords.filter(kw => combinedText.includes(kw)).length;
+    const matchCount = pattern.keywords.filter(kw => combinedText.includes(normalizeKeyword(kw))).length;
     if (matchCount > 0) {
       const confidence = Math.min(matchCount / pattern.keywords.length * 1.5, 1);
       if (confidence >= 0.3) {

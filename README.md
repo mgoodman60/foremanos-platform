@@ -71,7 +71,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ```
 ├── app/                    # Next.js App Router
-│   ├── api/               # 200+ API routes
+│   ├── api/               # 388 API routes
 │   ├── dashboard/         # User dashboard
 │   ├── project/[slug]/    # Project pages
 │   └── admin/             # Admin panel
@@ -111,6 +111,17 @@ yarn start        # Start production server
 yarn lint         # Run ESLint
 yarn prisma studio # Open Prisma database GUI
 ```
+
+## 🧪 Testing
+
+```bash
+npm test              # Run all tests (903 tests)
+npm test -- --run     # Run once without watch mode
+npm run test:watch    # Watch mode
+npx playwright test   # Run E2E tests
+```
+
+Key test suites cover: RAG scoring, rate limiting, authentication, Stripe integration, S3 operations, access control, password validation, webhooks, Redis caching, and document processing.
 
 ## 🚢 Deployment
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { ChevronRight, Home, Upload, FileText, X, Cloud, Settings, History, CloudRain, Users, Image as ImageIcon, Ruler, Calendar, Wrench, DoorOpen, DollarSign, BookOpen, Layers, Pin, Menu, ChevronDown, MoreVertical, User, Box, ClipboardList, Cpu, TrendingUp, BarChart2, Plug, Camera } from 'lucide-react';
 import { toast } from 'sonner';
@@ -917,9 +917,10 @@ export default function ProjectPage() {
               </button>
               
               <button
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}
                 className="p-1.5 sm:p-2 text-gray-300 hover:text-white hover:bg-dark-surface rounded-lg transition-colors ml-1"
                 title="Sign Out"
+                data-testid="logout-button"
               >
                 <span className="text-xs sm:text-sm font-medium">Sign Out</span>
               </button>

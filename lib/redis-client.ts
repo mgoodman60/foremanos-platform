@@ -15,7 +15,7 @@ function getRedisConfig() {
   return {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
-    password: process.env.REDIS_PASSWORD || undefined,
+    password: process.env.REDIS_PASSWORD,
     db: parseInt(process.env.REDIS_DB || '0'),
     maxRetriesPerRequest: 3,
     retryStrategy(times: number) {
@@ -98,9 +98,14 @@ export function isRedisConnected(): boolean {
  */
 export async function disconnectRedis(): Promise<void> {
   if (redisClient) {
-    await redisClient.quit();
-    redisClient = null;
-    isConnected = false;
+    try {
+      await redisClient.quit();
+    } catch (error) {
+      // Ignore quit errors, still reset state
+    } finally {
+      redisClient = null;
+      isConnected = false;
+    }
   }
 }
 

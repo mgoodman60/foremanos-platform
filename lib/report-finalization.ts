@@ -15,83 +15,21 @@ import { getFileUrl, generatePresignedUploadUrl } from './s3';
 import { format, parseISO } from 'date-fns';
 import { ScheduleTaskStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
+import { OneDriveService } from './onedrive-service';
+import { createScopedLogger } from './logger';
+import type {
+  WorkByTradeEntry,
+  CrewEntry,
+  ReportData,
+  PhotoEntry,
+  WeatherSnapshot,
+  MaterialDelivery,
+  EquipmentEntry,
+  ScheduleUpdateEntry,
+  QuantityCalculation,
+} from './types/report-data';
 
-// =============================================
-// TYPE DEFINITIONS FOR JSON FIELDS
-// =============================================
-
-/** Work entry by trade in daily report */
-interface WorkByTradeEntry {
-  trade: string;
-  company?: string;
-  description?: string;
-  location?: string;
-  crewSize?: number;
-}
-
-/** Crew entry in daily report */
-interface CrewEntry {
-  trade?: string;
-  company?: string;
-  count: number;
-}
-
-/** Report data stored in conversation JSON field */
-interface ReportData {
-  workByTrade?: WorkByTradeEntry[];
-  crew?: CrewEntry[];
-  notes?: string;
-  [key: string]: unknown;
-}
-
-/** Photo data stored in conversation JSON field */
-interface PhotoEntry {
-  id: string;
-  cloud_storage_path: string;
-  isPublic?: boolean;
-  caption?: string;
-  location?: string;
-  aiDescription?: string;
-  aiConfidence?: number;
-}
-
-/** Weather snapshot data */
-interface WeatherSnapshot {
-  time: string;
-  temperature?: number;
-  conditions?: string;
-  humidity?: number;
-  windSpeed?: number;
-}
-
-/** Material delivery entry */
-interface MaterialDelivery {
-  sub?: string;
-  material: string;
-  quantity?: number;
-}
-
-/** Equipment data entry */
-interface EquipmentEntry {
-  name: string;
-  type?: string;
-}
-
-/** Schedule update entry */
-interface ScheduleUpdateEntry {
-  activity: string;
-  plannedStatus?: string;
-  actualStatus?: string;
-}
-
-/** Quantity calculation entry */
-interface QuantityCalculation {
-  type: string;
-  description?: string;
-  location?: string;
-  actualQuantity?: number;
-  unit?: string;
-}
+const log = createScopedLogger('FINALIZATION');
 
 // Helper functions to replace date-fns-tz
 function toZonedTime(date: Date, timezone: string): Date {
@@ -420,30 +358,45 @@ async function exportToOneDrive(
       return { success: false, error: 'OneDrive sync not enabled' };
     }
 
-    // Import OneDrive service
-    // TODO: Implement OneDrive file upload function
-    // const { uploadFileToOneDrive } = await import('./onedrive-service');
+    // Initialize OneDrive service
+    const oneDriveService = await OneDriveService.fromProject(conversation.Project.id);
+    if (!oneDriveService) {
+      return { success: false, error: 'Failed to initialize OneDrive service' };
+    }
 
-    // Create "Daily Reports" folder in OneDrive if needed
+    // Create "Daily Reports" folder path
     const folderPath = `${conversation.Project?.oneDriveFolderPath || 'ForemanOS'}/Daily Reports`;
 
-    // Upload PDF
+    // Prepare file name
     const reportDate = conversation.dailyReportDate
       ? format(new Date(conversation.dailyReportDate), 'yyyy-MM-dd')
       : format(new Date(), 'yyyy-MM-dd');
 
     const fileName = `Daily_Report_${reportDate}.pdf`;
-    const uploadPath = `${folderPath}/${fileName}`;
 
-    // In actual implementation, you would:
-    // await uploadFileToOneDrive(pdfPath, uploadPath, conversation.Project);
+    // Fetch PDF from S3 (pdfPath is an S3 key, not a filesystem path)
+    const pdfUrl = await getFileUrl(pdfPath, false);
+    const pdfResponse = await fetch(pdfUrl);
+    if (!pdfResponse.ok) {
+      throw new Error(`Failed to fetch PDF from S3: ${pdfResponse.statusText}`);
+    }
+    const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+
+    // Upload to OneDrive
+    const uploadResult = await oneDriveService.uploadFile(
+      pdfBuffer,
+      fileName,
+      folderPath
+    );
+
+    const uploadPath = `${folderPath}/${fileName}`;
 
     return {
       success: true,
       path: uploadPath,
     };
   } catch (error) {
-    console.error('[FINALIZATION] OneDrive export error:', error);
+    log.error('OneDrive export error', error, { conversationId });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -568,7 +521,7 @@ async function indexForRAG(conversationId: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('[FINALIZATION] RAG indexing error:', error);
+    log.error('RAG indexing error', error);
     return false;
   }
 }
@@ -859,19 +812,19 @@ export async function finalizeReport(
     }
 
     // 5. Generate PDF
-    console.log('[FINALIZATION] Generating PDF for', conversationId);
+    log.info('Generating PDF', { conversationId });
     const pdfPath = await generateReportPDF(conversationId);
 
     // 6. Save to Document Library
-    console.log('[FINALIZATION] Saving to document library');
+    log.info('Saving to document library', { conversationId });
     const documentId = await saveToDocumentLibrary(conversationId, pdfPath);
 
     // 7. Export to OneDrive
-    console.log('[FINALIZATION] Exporting to OneDrive');
+    log.info('Exporting to OneDrive', { conversationId });
     const onedriveResult = await exportToOneDrive(conversationId, pdfPath);
 
     // 8. Index for RAG
-    console.log('[FINALIZATION] Indexing for RAG');
+    log.info('Indexing for RAG', { conversationId });
     const ragIndexed = await indexForRAG(conversationId);
 
     // 9. Update conversation as finalized
@@ -893,10 +846,10 @@ export async function finalizeReport(
       },
     });
 
-    console.log('[FINALIZATION] Report finalized successfully');
+    log.info('Report finalized successfully', { conversationId });
 
     // 10. Process automatic schedule updates
-    console.log('[FINALIZATION] Processing automatic schedule updates');
+    log.info('Processing automatic schedule updates', { conversationId });
     try {
       await processScheduleUpdatesAfterFinalization(
         conversationId,
@@ -904,12 +857,12 @@ export async function finalizeReport(
         userId
       );
     } catch (error) {
-      console.error('[FINALIZATION] Error processing schedule updates:', error);
+      log.error('Error processing schedule updates', error, { conversationId });
       // Don't fail finalization if schedule updates fail
     }
 
     // 11. Extract labor data from report (with budget item linking)
-    console.log('[FINALIZATION] Extracting labor data');
+    log.info('Extracting labor data', { conversationId });
     let laborCost = 0;
     try {
       if (conversation.Project?.id) {
@@ -921,16 +874,20 @@ export async function finalizeReport(
         );
         laborCost = laborResult.totalLaborCost;
         if (laborResult.entriesSaved > 0) {
-          console.log(`[FINALIZATION] Saved ${laborResult.entriesSaved} labor entries, ${laborResult.linkedToBudget} linked to budget, $${laborResult.totalLaborCost.toFixed(2)} total cost`);
+          log.info('Saved labor entries', {
+            entriesSaved: laborResult.entriesSaved,
+            linkedToBudget: laborResult.linkedToBudget,
+            totalLaborCost: laborResult.totalLaborCost,
+          });
         }
       }
     } catch (error) {
-      console.error('[FINALIZATION] Error extracting labor:', error);
+      log.error('Error extracting labor', error, { conversationId });
       // Don't fail finalization if labor extraction fails
     }
 
     // 12. Extract material data from report (with budget item linking)
-    console.log('[FINALIZATION] Extracting material data');
+    log.info('Extracting material data', { conversationId });
     let materialCost = 0;
     try {
       if (conversation.Project?.id) {
@@ -942,23 +899,28 @@ export async function finalizeReport(
         );
         materialCost = materialResult.totalMaterialCost;
         if (materialResult.entriesSaved > 0) {
-          console.log(`[FINALIZATION] Saved ${materialResult.entriesSaved} material entries, ${materialResult.linkedToBudget} linked to budget, $${materialResult.totalMaterialCost.toFixed(2)} total cost`);
+          log.info('Saved material entries', {
+            entriesSaved: materialResult.entriesSaved,
+            linkedToBudget: materialResult.linkedToBudget,
+            totalMaterialCost: materialResult.totalMaterialCost,
+          });
         }
       }
     } catch (error) {
-      console.error('[FINALIZATION] Error extracting materials:', error);
+      log.error('Error extracting materials', error, { conversationId });
       // Don't fail finalization if material extraction fails
     }
 
     // 13. Extract schedule actuals from daily report
-    console.log('[FINALIZATION] Extracting schedule actuals from daily report');
+    log.info('Extracting schedule actuals', { conversationId });
     try {
       if (conversation.Project?.id) {
         const { extractActualsFromDailyReport } = await import('./schedule-actuals-service');
         
         // Get work performed data from report
-        const reportData = conversation.reportData as any;
-        const workPerformed = reportData?.workPerformed || reportData?.summary || '';
+        // ReportData has [key: string]: unknown for dynamic fields like workPerformed/summary
+        const reportData = conversation.reportData as Record<string, unknown> | null;
+        const workPerformed = (reportData?.workPerformed as string) || (reportData?.summary as string) || '';
         
         const actualsResult = await extractActualsFromDailyReport(
           conversation.Project.id,

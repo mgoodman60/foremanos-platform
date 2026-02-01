@@ -320,13 +320,15 @@ function detectCategory(content: string, metadata: any): string {
   if (lowerContent.includes('insulation') || lowerContent.includes('batt') || lowerContent.includes('rigid') || lowerContent.includes('spray foam')) {
     return 'insulation';
   }
-  if (lowerContent.includes('excavation') || lowerContent.includes('grading') || lowerContent.includes('paving') || lowerContent.includes('asphalt') || lowerContent.includes('site')) {
-    return 'site';
-  }
-  // Division 31 - Earthwork
-  if (lowerContent.includes('cut') || lowerContent.includes('fill') || lowerContent.includes('backfill') || 
-      lowerContent.includes('compaction') || lowerContent.includes('proctor') || lowerContent.includes('subgrade')) {
+  // Division 31 - Earthwork (check before general site category)
+  if (lowerContent.includes('excavation') || lowerContent.includes('cut') || lowerContent.includes('fill') ||
+      lowerContent.includes('backfill') || lowerContent.includes('compaction') ||
+      lowerContent.includes('proctor') || lowerContent.includes('subgrade')) {
     return 'earthwork';
+  }
+  // General site work (less specific, so check after earthwork)
+  if (lowerContent.includes('grading') || lowerContent.includes('paving') || lowerContent.includes('asphalt') || lowerContent.includes('site')) {
+    return 'site';
   }
   // Division 32 - Exterior/Paving
   if (lowerContent.includes('striping') || lowerContent.includes('marking') || lowerContent.includes('ada ramp') ||
@@ -736,7 +738,7 @@ export async function autoExtractTakeoffs(
                            doc.name.toLowerCase().includes('landscape') ||
                            doc.name.toLowerCase().includes('paving') ||
                            doc.name.toLowerCase().includes('storm') ||
-                           doc.name.toLowerCase().match(/^c[-_]?\\d/i); // C-1, C1, C_1 sheet patterns
+                           doc.name.toLowerCase().match(/^c[-_]?\d/i); // C-1, C1, C_1 sheet patterns
       
       if (isSiteworkDoc) {
         console.log(`[TAKEOFF-AUTO] Running enhanced sitework extraction for ${doc.name}`);

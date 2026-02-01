@@ -1,4 +1,7 @@
 import { prisma } from '@/lib/db';
+import { createScopedLogger } from './logger';
+
+const log = createScopedLogger('EMAIL');
 
 interface EmailParams {
   to: string;
@@ -67,24 +70,23 @@ async function sendEmailDirect({
 
       // Handle specific error cases
       if (response.status === 403 && errorData.message?.includes('domain is not verified')) {
-        console.warn('⚠️ Resend domain not verified. Emails will be logged to console.');
-        console.warn('📋 To fix: Add and verify foremanos.site at https://resend.com/domains');
+        log.warn('Resend domain not verified - emails will be logged to console');
         logEmailToConsole(to, subject, body, type);
         return true; // Don't fail, just log
       } else if (response.status === 429) {
-        console.warn('⚠️ Rate limit hit. Please retry later.');
+        log.warn('Rate limit hit - please retry later');
         throw new Error('Rate limit exceeded - please retry later');
       } else {
-        console.error('Resend API error:', errorData);
+        log.error('Resend API error', errorData);
         throw new Error('Failed to send email via Resend');
       }
     }
 
     const data = await response.json();
-    console.log('✅ Email sent via Resend:', { to, subject, id: data.id });
+    log.info('Email sent via Resend', { to, subject, id: data.id });
     return true;
   } catch (error: unknown) {
-    console.error('Error sending email via Resend, falling back to console:', error);
+    log.error('Error sending email via Resend, falling back to console', error);
     logEmailToConsole(to, subject, body, type);
     return true; // Don't fail the whole operation
   }
@@ -123,7 +125,7 @@ export async function sendEmail({
 
     return { success: true };
   } catch (error) {
-    console.error('Error in sendEmail:', error);
+    log.error('Error in sendEmail', error);
     return { success: false };
   }
 }
@@ -228,7 +230,7 @@ export async function sendSignInNotification(
     const admins = await prisma.user.findMany({
       where: { 
         role: 'admin',
-        email: { not: null },
+        NOT: { email: null },
       },
       select: { id: true, email: true },
     });
@@ -248,7 +250,7 @@ export async function sendSignInNotification(
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending sign-in notification:', error);
+    log.error('Error sending sign-in notification', error);
     return { success: false };
   }
 }
@@ -266,7 +268,7 @@ export async function sendAdminAlert(
     const admins = await prisma.user.findMany({
       where: { 
         role: 'admin',
-        email: { not: null },
+        NOT: { email: null },
       },
       select: { id: true, email: true, username: true },
     });
@@ -286,7 +288,7 @@ export async function sendAdminAlert(
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending admin alert:', error);
+    log.error('Error sending admin alert', error);
     return { success: false };
   }
 }
@@ -313,7 +315,7 @@ export async function sendProjectNotification(
 
     // Only send email if project owner has an email address
     if (!project.User_Project_ownerIdToUser.email) {
-      console.log(`Skipping email notification: Project owner ${project.User_Project_ownerIdToUser.username} has no email`);
+      log.debug('Skipping email notification - project owner has no email', { username: project.User_Project_ownerIdToUser.username });
       return { success: true };
     }
 
@@ -328,7 +330,7 @@ export async function sendProjectNotification(
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending project notification:', error);
+    log.error('Error sending project notification', error);
     return { success: false };
   }
 }
@@ -347,7 +349,7 @@ export async function sendUserRequestNotification(
     const admins = await prisma.user.findMany({
       where: { 
         role: 'admin',
-        email: { not: null },
+        NOT: { email: null },
       },
       select: { id: true, email: true },
     });

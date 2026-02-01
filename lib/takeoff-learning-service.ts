@@ -494,9 +494,12 @@ export async function generateSuggestions(takeoffId: string): Promise<Correction
     const suggestions: CorrectionSuggestion[] = [];
 
     for (const item of lineItems) {
+      // Track if we've already suggested a change for a field on this item
+      const suggestedFields = new Set<string>();
+
       // Check for quantity adjustment patterns
       const qtyPatterns = patterns.filter(
-        (p: PatternRecord) => p.category === item.category && 
+        (p: PatternRecord) => p.category === item.category &&
              p.patternType === 'quantity_adjustment' &&
              matchesPatternKey(item.itemName, p.patternKey)
       );
@@ -505,7 +508,7 @@ export async function generateSuggestions(takeoffId: string): Promise<Correction
         const patternValue = pattern.patternValue as { adjustmentFactor?: number };
         if (patternValue.adjustmentFactor && patternValue.adjustmentFactor !== 1) {
           const suggestedQty = item.quantity * patternValue.adjustmentFactor;
-          
+
           // Only suggest if difference is significant (>5%)
           if (Math.abs(suggestedQty - item.quantity) / item.quantity > 0.05) {
             suggestions.push({
@@ -518,6 +521,7 @@ export async function generateSuggestions(takeoffId: string): Promise<Correction
               reason: `Based on ${pattern.usageCount} previous corrections for similar items`,
               patternId: pattern.id,
             });
+            suggestedFields.add('quantity');
           }
         }
       }
@@ -540,12 +544,14 @@ export async function generateSuggestions(takeoffId: string): Promise<Correction
             reason: `This category commonly uses ${patternValue.preferredUnit}`,
             patternId: pattern.id,
           });
+          suggestedFields.add('unit');
         }
       }
 
       // Check against category-specific common patterns
+      // Only suggest if we haven't already suggested a change for this field from learned patterns
       const categoryPattern = CORRECTION_PATTERNS[item.category.toLowerCase()];
-      if (categoryPattern) {
+      if (categoryPattern && !suggestedFields.has('unit')) {
         // Suggest common unit if current unit is unusual
         if (!categoryPattern.commonUnits.includes(item.unit.toUpperCase())) {
           suggestions.push({

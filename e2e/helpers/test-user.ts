@@ -119,9 +119,22 @@ export async function clearAuthState(page: Page): Promise<void> {
   const context = page.context();
   await context.clearCookies();
 
-  // Also clear localStorage if needed
-  await page.evaluate(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-  });
+  // Also clear localStorage if needed - must be on app domain first
+  try {
+    // Navigate to app domain if not already there
+    const currentUrl = page.url();
+    if (!currentUrl.includes('localhost:3000') && !currentUrl.includes('localhost:3001')) {
+      await page.goto('/');
+    }
+    await page.evaluate(() => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch {
+        // Ignore if localStorage not accessible
+      }
+    });
+  } catch {
+    // Ignore if page navigation or localStorage access fails
+  }
 }

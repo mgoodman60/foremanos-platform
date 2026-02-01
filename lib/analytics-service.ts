@@ -54,27 +54,46 @@ export async function calculateProjectKPIs(projectId: string): Promise<ProjectKP
   const now = new Date();
   const weekStart = startOfWeek(now);
 
-  // Fetch all related data in parallel with a single combined query structure
+  // Fetch all related data in parallel with graceful error handling
+  // Each query has its own catch to prevent one failure from breaking all analytics
   const [schedule, budget, documents, dailyReports, changeOrders, crews] = await Promise.all([
     prisma.schedule.findFirst({
       where: { projectId },
       include: { ScheduleTask: true },
+    }).catch((err) => {
+      console.error(`[Analytics] Failed to fetch schedule for ${projectId}:`, err);
+      return null;
     }),
     prisma.projectBudget.findFirst({
       where: { projectId },
       include: { BudgetItem: true },
+    }).catch((err) => {
+      console.error(`[Analytics] Failed to fetch budget for ${projectId}:`, err);
+      return null;
     }),
     prisma.document.findMany({
       where: { projectId, deletedAt: null },
+    }).catch((err) => {
+      console.error(`[Analytics] Failed to fetch documents for ${projectId}:`, err);
+      return [] as Awaited<ReturnType<typeof prisma.document.findMany>>;
     }),
     prisma.dailyReport.findMany({
       where: { projectId, createdAt: { gte: subDays(now, 30) } },
+    }).catch((err) => {
+      console.error(`[Analytics] Failed to fetch daily reports for ${projectId}:`, err);
+      return [] as Awaited<ReturnType<typeof prisma.dailyReport.findMany>>;
     }),
     prisma.changeOrder.findMany({
       where: { projectId },
+    }).catch((err) => {
+      console.error(`[Analytics] Failed to fetch change orders for ${projectId}:`, err);
+      return [] as Awaited<ReturnType<typeof prisma.changeOrder.findMany>>;
     }),
     prisma.crew.findMany({
       where: { projectId },
+    }).catch((err) => {
+      console.error(`[Analytics] Failed to fetch crews for ${projectId}:`, err);
+      return [] as Awaited<ReturnType<typeof prisma.crew.findMany>>;
     }),
   ]);
 

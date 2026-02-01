@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Camera, Upload, FileText, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PhotoGallery } from './photo-gallery';
@@ -28,13 +28,10 @@ export function DailyReportPhotos({
   const [loading, setLoading] = useState(false);
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const isDailyReport = conversationType === 'daily_report';
 
-  // Only show for daily report chats
-  if (conversationType !== 'daily_report') {
-    return null;
-  }
-
-  const fetchPhotos = async () => {
+  const fetchPhotos = useCallback(async () => {
+    if (!isDailyReport) return;
     setLoading(true);
     try {
       const response = await fetch(`/api/conversations/${conversationId}/photos`);
@@ -49,11 +46,16 @@ export function DailyReportPhotos({
     } finally {
       setLoading(false);
     }
-  };
+  }, [conversationId, isDailyReport]);
 
   useEffect(() => {
     fetchPhotos();
-  }, [conversationId]);
+  }, [fetchPhotos]);
+
+  // Only show for daily report chats
+  if (!isDailyReport) {
+    return null;
+  }
 
   const handlePhotoDeleted = (photoId: string) => {
     setPhotos((prev) => prev.filter((p) => p.id !== photoId));

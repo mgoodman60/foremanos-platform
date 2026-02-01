@@ -102,8 +102,18 @@ export async function GET(
     } 
     // Handle legacy local files (backward compatibility)
     else if (document.filePath) {
-      const filePath = path.join(process.cwd(), 'public', document.filePath);
-      
+      // Security: Prevent path traversal attacks
+      const publicDir = path.resolve(process.cwd(), 'public');
+      const filePath = path.resolve(publicDir, document.filePath);
+
+      // Ensure resolved path is within public directory
+      if (!filePath.startsWith(publicDir + path.sep)) {
+        return NextResponse.json(
+          { error: 'Invalid file path' },
+          { status: 400 }
+        );
+      }
+
       if (!fs.existsSync(filePath)) {
         return NextResponse.json(
           { error: 'Document file not found on server' },
@@ -246,9 +256,16 @@ export async function DELETE(
       }
     } else if (document.filePath) {
       // Delete legacy local file
-      const filePath = path.join(process.cwd(), 'public', document.filePath);
-      if (fs.existsSync(filePath)) {
+      // Security: Prevent path traversal attacks
+      const publicDir = path.resolve(process.cwd(), 'public');
+      const filePath = path.resolve(publicDir, document.filePath);
+
+      // Ensure resolved path is within public directory before deleting
+      if (filePath.startsWith(publicDir + path.sep) && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
+        console.log(`Deleted legacy local file: ${filePath}`);
+      } else if (!filePath.startsWith(publicDir + path.sep)) {
+        console.warn(`[Document Delete] Blocked path traversal attempt: ${document.filePath}`);
       }
     }
 

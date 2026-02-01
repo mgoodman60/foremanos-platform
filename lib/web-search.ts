@@ -48,35 +48,35 @@ export function shouldUseWebSearch(query: string, documentChunksFound: number): 
     // Building Codes
     'ibc', 'international building code', 'building code', 'code requirement',
     'code compliance', 'code section', 'irc', 'residential code',
-    
+
     // Fire Safety
     'nfpa', 'fire code', 'fire safety', 'fire protection', 'sprinkler',
     'fire alarm', 'egress', 'exit', 'fire rating', 'fire resistance',
-    
+
     // Accessibility
     'ada', 'accessibility', 'accessible', 'ansi', 'wheelchair',
     'handrail', 'ramp', 'clearance requirement',
-    
+
     // Electrical
     'nec', 'electrical code', 'wiring', 'circuit', 'outlet requirement',
-    
+
     // Plumbing
     'ipc', 'plumbing code', 'upc', 'fixture requirement',
-    
+
     // Mechanical
     'imc', 'mechanical code', 'hvac code', 'ventilation requirement',
-    
+
     // Energy
-    'iecc', 'energy code', 'insulation requirement',
-    
+    'iecc', 'energy code', 'insulation requirement', 'energy efficiency',
+
     // General Compliance
     'compliant', 'compliance', 'regulation', 'standard', 'required by code',
     'code requires', 'meets code', 'code minimum', 'code maximum',
     'osha', 'astm', 'asce', 'aci',
-    
+
     // Code-related questions
-    'what does the code say', 'what code requires', 'is this allowed',
-    'is this permitted', 'what is required', 'minimum requirement',
+    'what does the code say', 'what code requires', 'what does the code require',
+    'is this allowed', 'is this permitted', 'what is required', 'minimum requirement',
     'maximum allowed',
   ];
   
@@ -104,9 +104,15 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
     
     // Enhance query with construction context
     const enhancedQuery = enhanceQueryForConstruction(query);
-    
+
     console.log('🔍 Performing web search:', enhancedQuery);
-    
+
+    // Determine if we should mention construction in the prompt
+    const hasConstructionContext = enhancedQuery.toLowerCase().includes('construction');
+    const promptPrefix = hasConstructionContext
+      ? `Search the web for: "${enhancedQuery}"`
+      : `Search the web for construction-related information: "${enhancedQuery}"`;
+
     // Perform web search using Abacus AI API
     const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
       method: 'POST',
@@ -123,7 +129,7 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
           },
           {
             role: 'user',
-            content: `Search the web for construction-related information: "${enhancedQuery}"\n\nProvide 3-5 relevant sources with:\n1. Title\n2. URL\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
+            content: `${promptPrefix}\n\nProvide 3-5 relevant sources with:\n1. Title\n2. URL\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
           }
         ],
         web_search: true, // Enable web search
@@ -150,16 +156,23 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
     // Try to parse structured content
     const lines = content.split('\n').filter((line: string) => line.trim());
     let currentResult: Partial<WebSearchResult> = {};
-    
+
     for (const line of lines) {
       const lower = line.toLowerCase();
+      const trimmedLine = line.trim();
+
       if (lower.includes('title:') || lower.includes('**title')) {
+        // Save previous result if it has a URL
         if (currentResult.url) {
+          // Add default title if missing
+          if (!currentResult.title) {
+            currentResult.title = 'Construction Reference';
+          }
           results.push(currentResult as WebSearchResult);
         }
-        currentResult = { title: line.replace(/.*title:?\s*/i, '').replace(/\*\*/g, '').trim() };
+        currentResult = { title: trimmedLine.replace(/.*title:?\s*/i, '').replace(/\*\*/g, '').trim() };
       } else if (lower.includes('url:') || lower.includes('link:')) {
-        const urlMatch = line.match(urlPattern);
+        const urlMatch = trimmedLine.match(urlPattern);
         if (urlMatch) {
           currentResult.url = urlMatch[0];
           try {
@@ -168,15 +181,23 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
             currentResult.source = 'web';
           }
         }
-      } else if (lower.includes('snippet:') || lower.includes('description:')) {
-        currentResult.snippet = line.replace(/.*snippet:?\s*/i, '').replace(/.*description:?\s*/i, '').replace(/\*\*/g, '').trim();
-      } else if (currentResult.title && !currentResult.snippet && line.length > 20 && !line.includes('http')) {
-        currentResult.snippet = line.replace(/\*\*/g, '').trim();
+      } else if (lower.includes('snippet:')) {
+        currentResult.snippet = trimmedLine.replace(/^.*?snippet:\s*/i, '').replace(/\*\*/g, '').trim();
+      } else if (lower.includes('description:')) {
+        currentResult.snippet = trimmedLine.replace(/^.*?description:\s*/i, '').replace(/\*\*/g, '').trim();
+      } else if (currentResult.title && currentResult.url && !currentResult.snippet && trimmedLine.length > 20 && !urlPattern.test(trimmedLine)) {
+        // Extract content line as snippet if we have title and URL but no snippet yet
+        // Use regex test to check for actual URLs, not just the string "http"
+        currentResult.snippet = trimmedLine.replace(/\*\*/g, '').trim();
       }
     }
-    
-    // Add last result
+
+    // Add last result if it has a URL
     if (currentResult.url) {
+      // Add default title if missing
+      if (!currentResult.title) {
+        currentResult.title = 'Construction Reference';
+      }
       results.push(currentResult as WebSearchResult);
     }
     
@@ -222,18 +243,20 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
  */
 function enhanceQueryForConstruction(query: string): string {
   const lowerQuery = query.toLowerCase();
-  
-  // Add construction context if not already present
-  if (!lowerQuery.includes('construction') && !lowerQuery.includes('building')) {
-    // Add context based on query type
-    if (lowerQuery.includes('code') || lowerQuery.includes('requirement')) {
-      return `${query} construction building code`;
-    }
-    if (lowerQuery.includes('depth') || lowerQuery.includes('footing') || lowerQuery.includes('foundation')) {
-      return `${query} construction standards`;
-    }
+
+  // Don't add construction context if it's already present
+  if (lowerQuery.includes('construction')) {
+    return query;
   }
-  
+
+  // Add context based on query type
+  if (lowerQuery.includes('depth') || lowerQuery.includes('footing') || lowerQuery.includes('foundation')) {
+    return `${query} construction standards`;
+  }
+  if ((lowerQuery.includes('code') || lowerQuery.includes('requirement')) && !lowerQuery.includes('building')) {
+    return `${query} construction building code`;
+  }
+
   return query;
 }
 

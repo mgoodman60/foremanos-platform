@@ -1,7 +1,6 @@
 import { prisma } from './db';
-// import { ProjectType, TradeType } from '@prisma/client';
-type ProjectType = string;
-type TradeType = string;
+import { ProjectType, TradeType } from '@prisma/client';
+import type { DocumentChunkMetadata } from '@/types/document-metadata';
 
 /**
  * Workflow Step Interface
@@ -65,8 +64,8 @@ export async function getWorkflowTemplate(
   try {
     const template = await prisma.workflowTemplate.findFirst({
       where: {
-        projectType: projectType as any,
-        tradeType: tradeType as any,
+        projectType,
+        tradeType,
         isActive: true
       },
       include: {
@@ -92,7 +91,7 @@ export async function getAvailableWorkflows(projectType: ProjectType) {
   try {
     const templates = await prisma.workflowTemplate.findMany({
       where: {
-        projectType: projectType as any,
+        projectType,
         isActive: true
       },
       include: {
@@ -124,8 +123,8 @@ export async function createWorkflowTemplate(data: WorkflowTemplateData) {
       data: {
         name: data.name,
         description: data.description,
-        projectType: data.projectType as any,
-        tradeType: data.tradeType as any,
+        projectType: data.projectType,
+        tradeType: data.tradeType,
         WorkflowStep: {
           create: data.steps.map(step => ({
             question: step.question,
@@ -234,7 +233,7 @@ export async function updateReportingPattern(
       create: {
         userId,
         projectId,
-        preferredTradeType: data.preferredTradeType as any,
+        preferredTradeType: data.preferredTradeType,
         reportingStyle: data.reportingStyle,
         commonKeywords: data.commonKeywords,
         preferredQuestions: data.preferredQuestions,
@@ -243,7 +242,7 @@ export async function updateReportingPattern(
         workflowsUsed: 1
       },
       update: {
-        preferredTradeType: data.preferredTradeType as any,
+        preferredTradeType: data.preferredTradeType,
         reportingStyle: data.reportingStyle,
         commonKeywords: data.commonKeywords,
         preferredQuestions: data.preferredQuestions,
@@ -396,14 +395,14 @@ export async function getScheduleContext(
     
     // Extract relevant information
     const context = chunks
-      .map((chunk: any) => {
+      .map((chunk: { content: string; metadata?: unknown }) => {
         // Try to parse metadata for structured data
         try {
-          const metadata = chunk.metadata as any;
+          const metadata = chunk.metadata as DocumentChunkMetadata | null;
           if (metadata?.activities) {
             return `Scheduled: ${metadata.activities}`;
           }
-        } catch (e) {
+        } catch {
           // Fall back to content
         }
         return chunk.content.substring(0, 200);

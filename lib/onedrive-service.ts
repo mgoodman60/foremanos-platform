@@ -6,6 +6,10 @@ import { uploadFile, deleteFile } from './s3';
 import crypto from 'crypto';
 import { processUnprocessedDocuments } from './document-processor';
 import { suggestDocumentCategory } from './document-categorizer';
+import { createScopedLogger } from './logger';
+import type { OneDriveItem, OneDriveListResponse } from './types/report-data';
+
+const log = createScopedLogger('ONEDRIVE');
 
 export interface OneDriveConfig {
   projectId: string;
@@ -59,6 +63,7 @@ export class OneDriveService {
   }
 
   // Static method to generate OAuth authorization URL
+  // NOTE: Update scope to 'Files.ReadWrite Files.ReadWrite.All offline_access' for upload functionality
   static getAuthUrl(projectSlug: string): string {
     const params = new URLSearchParams({
       client_id: OneDriveService.CLIENT_ID,
@@ -68,7 +73,7 @@ export class OneDriveService {
       scope: 'Files.Read Files.Read.All offline_access',
       state: projectSlug, // Pass project slug in state
     });
-    
+
     return `https://login.microsoftonline.com/${OneDriveService.TENANT_ID}/oauth2/v2.0/authorize?${params}`;
   }
 
@@ -197,13 +202,13 @@ export class OneDriveService {
       }
 
       const data = await response.json();
-      return (data.value || []).map((item: any) => ({
+      return (data.value || []).map((item: OneDriveItem) => ({
         id: item.id,
         name: item.name,
         path: `/${item.name}`,
       }));
     } catch (error) {
-      console.error('Error listing OneDrive folders:', error);
+      log.error('Error listing OneDrive folders', error);
       return [];
     }
   }
@@ -234,7 +239,7 @@ export class OneDriveService {
       const data = await response.json();
       return data.value || [];
     } catch (error) {
-      console.error('Error listing OneDrive files:', error);
+      log.error('Error listing OneDrive files', error);
       throw error;
     }
   }
@@ -242,7 +247,7 @@ export class OneDriveService {
   // Download a file from OneDrive
   async downloadFile(fileId: string): Promise<Buffer> {
     const token = await this.getAccessToken();
-    
+
     const response = await fetch(
       `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`,
       {
@@ -258,6 +263,190 @@ export class OneDriveService {
 
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
+  }
+
+  // Create a folder in OneDrive (creates nested folders as needed)
+  async createFolder(folderPath: string): Promise<string> {
+    if (!OneDriveService.CLIENT_ID || !OneDriveService.CLIENT_SECRET) {
+      throw new Error('OneDrive credentials not configured. Set ONEDRIVE_CLIENT_ID and ONEDRIVE_CLIENT_SECRET environment variables.');
+    }
+
+    const token = await this.getAccessToken();
+
+    // Split path into segments and remove empty strings
+    const pathSegments = folderPath.split('/').filter(segment => segment.length > 0);
+
+    let parentId = 'root';
+    let folderId = '';
+
+    // Create each folder in the path
+    for (const segment of pathSegments) {
+      try {
+        // Check if folder exists
+        const checkResponse = await fetch(
+          `https://graph.microsoft.com/v1.0/me/drive/items/${parentId}/children?$filter=name eq '${encodeURIComponent(segment)}' and folder ne null`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!checkResponse.ok) {
+          throw new Error(`Failed to check for existing folder: ${checkResponse.statusText}`);
+        }
+
+        const checkData = await checkResponse.json();
+
+        if (checkData.value && checkData.value.length > 0) {
+          // Folder exists
+          folderId = checkData.value[0].id;
+        } else {
+          // Create folder
+          const createResponse = await fetch(
+            `https://graph.microsoft.com/v1.0/me/drive/items/${parentId}/children`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: segment,
+                folder: {},
+                '@microsoft.graph.conflictBehavior': 'rename',
+              }),
+            }
+          );
+
+          if (!createResponse.ok) {
+            const error = await createResponse.text();
+            throw new Error(`Failed to create folder '${segment}': ${error}`);
+          }
+
+          const createData = await createResponse.json();
+          folderId = createData.id;
+        }
+
+        parentId = folderId;
+      } catch (error) {
+        log.error(`Error creating folder segment '${segment}'`, error);
+        throw error;
+      }
+    }
+
+    return folderId;
+  }
+
+  // Upload a file to OneDrive
+  async uploadFile(
+    buffer: Buffer,
+    fileName: string,
+    folderPath?: string
+  ): Promise<{ fileId: string; webUrl: string }> {
+    if (!OneDriveService.CLIENT_ID || !OneDriveService.CLIENT_SECRET) {
+      throw new Error('OneDrive credentials not configured. Set ONEDRIVE_CLIENT_ID and ONEDRIVE_CLIENT_SECRET environment variables.');
+    }
+
+    const token = await this.getAccessToken();
+
+    // Create folder if folderPath is provided
+    let targetFolderId = 'root';
+    if (folderPath) {
+      targetFolderId = await this.createFolder(folderPath);
+    }
+
+    // Use simple upload for files < 4MB, otherwise use resumable upload
+    const useSimpleUpload = buffer.length < 4 * 1024 * 1024;
+
+    if (useSimpleUpload) {
+      // Simple upload
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/drive/items/${targetFolderId}:/${encodeURIComponent(fileName)}:/content`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/octet-stream',
+          },
+          body: buffer,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to upload file to OneDrive: ${error}`);
+      }
+
+      const data = await response.json();
+      return {
+        fileId: data.id,
+        webUrl: data.webUrl,
+      };
+    } else {
+      // Resumable upload for larger files
+      // Create upload session
+      const sessionResponse = await fetch(
+        `https://graph.microsoft.com/v1.0/me/drive/items/${targetFolderId}:/${encodeURIComponent(fileName)}:/createUploadSession`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            item: {
+              '@microsoft.graph.conflictBehavior': 'replace',
+              name: fileName,
+            },
+          }),
+        }
+      );
+
+      if (!sessionResponse.ok) {
+        const error = await sessionResponse.text();
+        throw new Error(`Failed to create upload session: ${error}`);
+      }
+
+      const sessionData = await sessionResponse.json();
+      const uploadUrl = sessionData.uploadUrl;
+
+      // Upload file in chunks (10MB chunks)
+      const chunkSize = 10 * 1024 * 1024;
+      let offset = 0;
+
+      while (offset < buffer.length) {
+        const chunk = buffer.slice(offset, Math.min(offset + chunkSize, buffer.length));
+        const chunkEnd = offset + chunk.length - 1;
+
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Length': chunk.length.toString(),
+            'Content-Range': `bytes ${offset}-${chunkEnd}/${buffer.length}`,
+          },
+          body: chunk,
+        });
+
+        if (!uploadResponse.ok && uploadResponse.status !== 202) {
+          const error = await uploadResponse.text();
+          throw new Error(`Failed to upload chunk: ${error}`);
+        }
+
+        offset += chunk.length;
+
+        // Last chunk returns the file metadata
+        if (offset >= buffer.length) {
+          const data = await uploadResponse.json();
+          return {
+            fileId: data.id,
+            webUrl: data.webUrl,
+          };
+        }
+      }
+
+      throw new Error('Upload completed but no file metadata received');
+    }
   }
 
   // Calculate hash of file content for change detection
@@ -322,7 +511,7 @@ export class OneDriveService {
           // Check if file type is supported
           if (!this.isSupportedFileType(file.name, file.size)) {
             result.skipped++;
-            console.log(`Skipping unsupported file: ${file.name} (${file.size} bytes)`);
+            log.debug(`Skipping unsupported file`, { fileName: file.name, size: file.size });
             continue;
           }
 
@@ -373,7 +562,7 @@ export class OneDriveService {
                 });
 
                 result.updated++;
-                console.log(`Updated document: ${file.name}`);
+                log.info(`Updated document`, { fileName: file.name });
               } else {
                 result.skipped++;
               }
@@ -398,9 +587,9 @@ export class OneDriveService {
             try {
               const suggestion = await suggestDocumentCategory(file.name, fileType);
               category = suggestion.suggestedCategory;
-              console.log(`Auto-categorized ${file.name} as ${category} (confidence: ${(suggestion.confidence * 100).toFixed(0)}%)`);
+              log.info(`Auto-categorized document`, { fileName: file.name, category, confidence: suggestion.confidence });
             } catch (error) {
-              console.error(`Failed to auto-categorize ${file.name}, using 'other':`, error);
+              log.error(`Failed to auto-categorize document`, error, { fileName: file.name });
             }
 
             // Create document record
@@ -424,11 +613,11 @@ export class OneDriveService {
             });
 
             result.added++;
-            console.log(`Added new document: ${file.name}`);
+            log.info(`Added new document`, { fileName: file.name });
           }
         } catch (error) {
           const errorMsg = `Error processing ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`;
-          console.error(errorMsg);
+          log.error(errorMsg, error);
           result.errors.push(errorMsg);
         }
       }
@@ -443,29 +632,29 @@ export class OneDriveService {
             },
           });
           result.deleted++;
-          console.log(`Soft deleted document: ${doc.name}`);
+          log.info(`Soft deleted document`, { fileName: doc.name });
         }
       }
 
     } catch (error) {
       const errorMsg = `Error syncing documents: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      console.error(errorMsg);
+      log.error(errorMsg, error);
       result.errors.push(errorMsg);
     }
 
     // Process any unprocessed documents after sync completes
-    console.log('Starting document processing for synced files...');
+    log.info('Starting document processing for synced files');
     try {
       const processingResult = await processUnprocessedDocuments(this.projectId);
-      console.log(`Document processing complete: ${processingResult.processed} processed, ${processingResult.failed} failed`);
-      
+      log.info(`Document processing complete`, { processed: processingResult.processed, failed: processingResult.failed });
+
       // Add processing errors to sync result
       if (processingResult.errors.length > 0) {
         result.errors.push(...processingResult.errors);
       }
     } catch (error) {
       const errorMsg = `Error processing documents: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      console.error(errorMsg);
+      log.error(errorMsg, error);
       result.errors.push(errorMsg);
     }
 

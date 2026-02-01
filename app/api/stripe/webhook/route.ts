@@ -3,8 +3,12 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
-type SubscriptionTier = string;
-type SubscriptionStatus = string;
+import { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
+import {
+  mapStripeStatusToPrisma,
+  extractSubscriptionDates,
+  getErrorMessage,
+} from '@/types/stripe-mappings';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -26,10 +30,11 @@ export async function POST(request: NextRequest) {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
+    } catch (err: unknown) {
+      const message = getErrorMessage(err);
+      console.error('Webhook signature verification failed:', message);
       return NextResponse.json(
-        { error: `Webhook Error: ${err.message}` },
+        { error: `Webhook Error: ${message}` },
         { status: 400 }
       );
     }
@@ -85,8 +90,8 @@ export async function POST(request: NextRequest) {
     await logPaymentEvent(event);
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
-    console.error('Webhook handler error:', error);
+  } catch (error: unknown) {
+    console.error('Webhook handler error:', getErrorMessage(error));
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
@@ -116,17 +121,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const tier = getTierFromPriceId(priceId);
 
   // Update user in database - Auto-approve paid accounts
+  const dates = extractSubscriptionDates(subscription);
   await prisma.user.update({
     where: { id: userId },
     data: {
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: subscriptionId,
       stripePriceId: priceId,
-      subscriptionTier: tier as any,
-      subscriptionStatus: subscription.status as any,
-      subscriptionStart: new Date((subscription as any).current_period_start * 1000),
-      subscriptionEnd: new Date((subscription as any).current_period_end * 1000),
-      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+      subscriptionTier: tier,
+      subscriptionStatus: mapStripeStatusToPrisma(subscription.status),
+      subscriptionStart: dates.currentPeriodStart,
+      subscriptionEnd: dates.currentPeriodEnd,
+      cancelAtPeriodEnd: dates.cancelAtPeriodEnd,
       // Auto-approve account after successful payment
       approved: true,
       role: 'client',
@@ -162,16 +168,17 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 async function updateUserSubscription(userId: string, subscription: Stripe.Subscription) {
   const priceId = subscription.items.data[0]?.price.id;
   const tier = getTierFromPriceId(priceId);
+  const dates = extractSubscriptionDates(subscription);
 
   await prisma.user.update({
     where: { id: userId },
     data: {
       stripePriceId: priceId,
-      subscriptionTier: tier as any,
-      subscriptionStatus: subscription.status as any,
-      subscriptionStart: new Date((subscription as any).current_period_start * 1000),
-      subscriptionEnd: new Date((subscription as any).current_period_end * 1000),
-      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+      subscriptionTier: tier,
+      subscriptionStatus: mapStripeStatusToPrisma(subscription.status),
+      subscriptionStart: dates.currentPeriodStart,
+      subscriptionEnd: dates.currentPeriodEnd,
+      cancelAtPeriodEnd: dates.cancelAtPeriodEnd,
     },
   });
 
@@ -212,7 +219,9 @@ async function downgradeToFree(userId: string) {
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  const subscriptionId = (invoice as any).subscription as string;
+  // subscription is an expandable field - access via type assertion
+  const sub = (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
+  const subscriptionId = typeof sub === 'string' ? sub : sub?.id;
 
   if (!subscriptionId) {
     return;
@@ -241,7 +250,9 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = (invoice as any).subscription as string;
+  // subscription is an expandable field - access via type assertion
+  const sub = (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
+  const subscriptionId = typeof sub === 'string' ? sub : sub?.id;
 
   if (!subscriptionId) {
     return;
@@ -282,17 +293,32 @@ async function logPaymentEvent(event: Stripe.Event) {
   try {
     // Extract user ID from event
     let userId: string | undefined;
+    const eventObject = event.data.object;
 
     if (event.type.startsWith('checkout.session')) {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = eventObject as Stripe.Checkout.Session;
       userId = session.metadata?.userId || session.client_reference_id || undefined;
-    } else if (event.type.startsWith('customer.subscription') || event.type.startsWith('invoice')) {
-      const obj = event.data.object as any;
-      userId = obj.metadata?.userId;
+    } else if (event.type.startsWith('customer.subscription')) {
+      const subscription = eventObject as Stripe.Subscription;
+      userId = subscription.metadata?.userId;
 
-      if (!userId && obj.customer) {
+      if (!userId && subscription.customer) {
+        const customerId = typeof subscription.customer === 'string'
+          ? subscription.customer
+          : subscription.customer.id;
         const user = await prisma.user.findFirst({
-          where: { stripeCustomerId: obj.customer as string },
+          where: { stripeCustomerId: customerId },
+        });
+        userId = user?.id;
+      }
+    } else if (event.type.startsWith('invoice')) {
+      const invoice = eventObject as Stripe.Invoice;
+      if (!userId && invoice.customer) {
+        const customerId = typeof invoice.customer === 'string'
+          ? invoice.customer
+          : invoice.customer.id;
+        const user = await prisma.user.findFirst({
+          where: { stripeCustomerId: customerId },
         });
         userId = user?.id;
       }
@@ -303,16 +329,16 @@ async function logPaymentEvent(event: Stripe.Event) {
       return;
     }
 
-    // Extract amount and currency
+    // Extract amount and currency using type narrowing
     let amount: number | null = null;
     let currency: string | null = null;
 
-    if ('amount_total' in event.data.object) {
-      amount = (event.data.object as any).amount_total;
-      currency = (event.data.object as any).currency;
-    } else if ('amount_paid' in event.data.object) {
-      amount = (event.data.object as any).amount_paid;
-      currency = (event.data.object as any).currency;
+    if ('amount_total' in eventObject && eventObject.amount_total !== null) {
+      amount = eventObject.amount_total as number;
+      currency = ('currency' in eventObject ? eventObject.currency : null) as string | null;
+    } else if ('amount_paid' in eventObject && eventObject.amount_paid !== null) {
+      amount = eventObject.amount_paid as number;
+      currency = ('currency' in eventObject ? eventObject.currency : null) as string | null;
     }
 
     await prisma.paymentHistory.create({
@@ -323,7 +349,8 @@ async function logPaymentEvent(event: Stripe.Event) {
         amount,
         currency,
         status: 'succeeded',
-        metadata: event.data.object as any,
+        // Store the event object as JSON - Prisma handles the serialization
+        metadata: JSON.parse(JSON.stringify(eventObject)),
       },
     });
   } catch (error) {
@@ -331,7 +358,9 @@ async function logPaymentEvent(event: Stripe.Event) {
   }
 }
 
-function getTierFromPriceId(priceId: string): SubscriptionTier {
+function getTierFromPriceId(priceId: string | undefined): SubscriptionTier {
+  if (!priceId) return 'free';
+
   // Map price IDs to tiers
   // This is a simple implementation - you might want to store this mapping in the database
   if (priceId.includes('starter')) return 'starter';
@@ -340,6 +369,6 @@ function getTierFromPriceId(priceId: string): SubscriptionTier {
   if (priceId.includes('business')) return 'business';
   if (priceId.includes('enterprise')) return 'enterprise';
 
-  // Default to starter if we can't determine
-  return 'starter';
+  // Default to free if we can't determine
+  return 'free';
 }

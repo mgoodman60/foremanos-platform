@@ -152,57 +152,48 @@ export async function recordEVMSnapshot(
 
   const today = startOfDay(new Date());
 
-  // Check if we already have a record for today
-  const existing = await prisma.earnedValue.findFirst({
+  // Use upsert to atomically handle create-or-update (prevents race condition)
+  await prisma.earnedValue.upsert({
     where: {
-      budgetId: budget.id,
-      periodDate: today,
-      periodType: 'daily',
-    },
-  });
-
-  if (existing) {
-    // Update existing record
-    await prisma.earnedValue.update({
-      where: { id: existing.id },
-      data: {
-        plannedValue: metrics.plannedValue,
-        earnedValue: metrics.earnedValue,
-        actualCost: metrics.actualCost,
-        costVariance: metrics.costVariance,
-        scheduleVariance: metrics.scheduleVariance,
-        costPerformanceIndex: metrics.costPerformanceIndex,
-        schedulePerformanceIndex: metrics.schedulePerformanceIndex,
-        estimateAtCompletion: metrics.estimateAtCompletion,
-        estimateToComplete: metrics.estimateToComplete,
-        varianceAtCompletion: metrics.varianceAtCompletion,
-        percentComplete: metrics.percentComplete,
-        percentSpent: metrics.percentSpent,
-      },
-    });
-  } else {
-    // Create new record
-    await prisma.earnedValue.create({
-      data: {
+      budgetId_periodDate_periodType: {
         budgetId: budget.id,
         periodDate: today,
         periodType: 'daily',
-        plannedValue: metrics.plannedValue,
-        earnedValue: metrics.earnedValue,
-        actualCost: metrics.actualCost,
-        costVariance: metrics.costVariance,
-        scheduleVariance: metrics.scheduleVariance,
-        costPerformanceIndex: metrics.costPerformanceIndex,
-        schedulePerformanceIndex: metrics.schedulePerformanceIndex,
-        estimateAtCompletion: metrics.estimateAtCompletion,
-        estimateToComplete: metrics.estimateToComplete,
-        varianceAtCompletion: metrics.varianceAtCompletion,
-        percentComplete: metrics.percentComplete,
-        percentSpent: metrics.percentSpent,
-        calculatedBy: calculatedBy,
       },
-    });
-  }
+    },
+    update: {
+      plannedValue: metrics.plannedValue,
+      earnedValue: metrics.earnedValue,
+      actualCost: metrics.actualCost,
+      costVariance: metrics.costVariance,
+      scheduleVariance: metrics.scheduleVariance,
+      costPerformanceIndex: metrics.costPerformanceIndex,
+      schedulePerformanceIndex: metrics.schedulePerformanceIndex,
+      estimateAtCompletion: metrics.estimateAtCompletion,
+      estimateToComplete: metrics.estimateToComplete,
+      varianceAtCompletion: metrics.varianceAtCompletion,
+      percentComplete: metrics.percentComplete,
+      percentSpent: metrics.percentSpent,
+    },
+    create: {
+      budgetId: budget.id,
+      periodDate: today,
+      periodType: 'daily',
+      plannedValue: metrics.plannedValue,
+      earnedValue: metrics.earnedValue,
+      actualCost: metrics.actualCost,
+      costVariance: metrics.costVariance,
+      scheduleVariance: metrics.scheduleVariance,
+      costPerformanceIndex: metrics.costPerformanceIndex,
+      schedulePerformanceIndex: metrics.schedulePerformanceIndex,
+      estimateAtCompletion: metrics.estimateAtCompletion,
+      estimateToComplete: metrics.estimateToComplete,
+      varianceAtCompletion: metrics.varianceAtCompletion,
+      percentComplete: metrics.percentComplete,
+      percentSpent: metrics.percentSpent,
+      calculatedBy: calculatedBy,
+    },
+  });
 }
 
 /**
@@ -214,40 +205,33 @@ export async function generateSCurveSnapshot(projectId: string): Promise<void> {
 
   const today = startOfDay(new Date());
 
-  // Check for existing snapshot today
-  const existing = await prisma.budgetSnapshot.findFirst({
+  // Use upsert to atomically handle create-or-update (prevents race condition)
+  await prisma.budgetSnapshot.upsert({
     where: {
-      projectId,
-      snapshotDate: today,
-    },
-  });
-
-  if (existing) {
-    await prisma.budgetSnapshot.update({
-      where: { id: existing.id },
-      data: {
-        plannedValue: metrics.plannedValue,
-        earnedValue: metrics.earnedValue,
-        actualCost: metrics.actualCost,
-        cpi: metrics.costPerformanceIndex,
-        spi: metrics.schedulePerformanceIndex,
-        percentComplete: metrics.percentComplete,
-      },
-    });
-  } else {
-    await prisma.budgetSnapshot.create({
-      data: {
+      projectId_snapshotDate: {
         projectId,
         snapshotDate: today,
-        plannedValue: metrics.plannedValue,
-        earnedValue: metrics.earnedValue,
-        actualCost: metrics.actualCost,
-        cpi: metrics.costPerformanceIndex,
-        spi: metrics.schedulePerformanceIndex,
-        percentComplete: metrics.percentComplete,
       },
-    });
-  }
+    },
+    update: {
+      plannedValue: metrics.plannedValue,
+      earnedValue: metrics.earnedValue,
+      actualCost: metrics.actualCost,
+      cpi: metrics.costPerformanceIndex,
+      spi: metrics.schedulePerformanceIndex,
+      percentComplete: metrics.percentComplete,
+    },
+    create: {
+      projectId,
+      snapshotDate: today,
+      plannedValue: metrics.plannedValue,
+      earnedValue: metrics.earnedValue,
+      actualCost: metrics.actualCost,
+      cpi: metrics.costPerformanceIndex,
+      spi: metrics.schedulePerformanceIndex,
+      percentComplete: metrics.percentComplete,
+    },
+  });
 }
 
 /**

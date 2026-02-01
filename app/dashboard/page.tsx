@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Plus, FolderOpen, FileText, Users, Shield, Search, Key, Copy, Share2, Check, Pencil, UserPlus, Eye, Edit, Crown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -601,8 +601,9 @@ export default function DashboardPage() {
               )}
               <NotificationCenter />
               <button
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}
                 className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-[#F8FAFC] hover:bg-[#3d434b] rounded-lg transition-colors"
+                data-testid="logout-button"
               >
                 Sign Out
               </button>

@@ -23,13 +23,18 @@ export const TEST_USERS = {
   },
   client: {
     username: 'john',
-    password: 'password123!',
+    password: 'johndoe123',
     role: 'client',
   },
-  guest: {
+  internal: {
     username: 'internal',
-    password: 'internal123!',
-    role: 'guest',
+    password: '825',
+    role: 'client',
+  },
+  unapproved: {
+    username: 'pendinguser',
+    password: 'pending123',
+    role: 'pending',
   },
 } as const;
 

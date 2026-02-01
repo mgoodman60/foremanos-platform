@@ -15,7 +15,8 @@ export function SessionProvider({ children }: Props) {
   }, []);
 
   if (!mounted) {
-    return null;
+    // Return a minimal placeholder to prevent blank screen during hydration
+    return <div className="min-h-screen" />;
   }
 
   return (

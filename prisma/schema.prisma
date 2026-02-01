@@ -259,6 +259,7 @@ model BudgetSnapshot {
   createdAt       DateTime @default(now())
   Project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@unique([projectId, snapshotDate])
   @@index([projectId])
   @@index([snapshotDate])
 }
@@ -530,7 +531,7 @@ model Document {
   processed             Boolean                 @default(false)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
-  projectId             String? // TODO: Should be required - needs migration
+  projectId             String
   description           String?
   tags                  String[]
   updatedBy             String?
@@ -1699,7 +1700,7 @@ model UnitPrice {
 
 model User {
   id                                                  String                     @id @default(cuid())
-  email                                               String?                    @unique // TODO: Should be required - needs migration
+  email                                               String                     @unique
   username                                            String                     @unique
   password                                            String?
   createdAt                                           DateTime                   @default(now())

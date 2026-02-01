@@ -13,6 +13,7 @@ import { withDatabaseRetry } from '@/lib/retry-util';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
+import { shouldBlockMacroFile } from '@/lib/macro-detector';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max for upload
@@ -166,6 +167,32 @@ export async function POST(request: Request) {
     } catch (scanError: any) {
       console.error('[UPLOAD] Virus scan error (non-blocking):', scanError.message);
       virusStatus = 'error';
+      // Continue with upload - graceful degradation
+    }
+
+    // Macro detection for Office documents
+    console.log('[UPLOAD] Checking for embedded macros...');
+    try {
+      const macroCheck = await shouldBlockMacroFile(buffer, fileName);
+      if (macroCheck.blocked) {
+        await logSecurityEvent('MACRO_BLOCKED', {
+          fileName,
+          reason: macroCheck.reason,
+          projectId,
+          userId,
+        });
+
+        return NextResponse.json(
+          {
+            error: 'File rejected: macros detected',
+            message: macroCheck.reason,
+          },
+          { status: 415 }
+        );
+      }
+      console.log('[UPLOAD] No macros detected');
+    } catch (macroError: any) {
+      console.error('[UPLOAD] Macro detection error (non-blocking):', macroError.message);
       // Continue with upload - graceful degradation
     }
 

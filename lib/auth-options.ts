@@ -45,9 +45,15 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Your account is pending approval');
         }
 
-        // For password-less guest accounts (password is null)
+        // Password-less login is ONLY allowed for explicit guest accounts
+        // Security: Requires both null password AND guest role to prevent
+        // accidental access if a non-guest user's password is cleared
         if (!user.password) {
-          // Allow login if no password provided
+          if (user.role !== 'guest') {
+            // Non-guest users must have a password - reject login
+            return null;
+          }
+          // Guest account: allow login without password
           if (!credentials.password || credentials.password === '') {
             return {
               id: user.id,
@@ -58,7 +64,7 @@ export const authOptions: NextAuthOptions = {
               subscriptionTier: user.subscriptionTier,
             };
           } else {
-            // Password provided but user has no password set
+            // Password provided but guest user has no password set
             return null;
           }
         }
@@ -160,14 +166,16 @@ export const authOptions: NextAuthOptions = {
           
           // Run all database operations in the background (non-blocking)
           // This prevents the JWT callback from being delayed by slow DB operations
-          Promise.all([
+          // Using void to explicitly mark as fire-and-forget pattern
+          void Promise.all([
             prisma.user.update({
               where: { id: user.id },
               data: { lastLoginAt: new Date() },
             }).catch((error: unknown) => {
               console.error('[AUTH] Error updating lastLoginAt:', error);
+              return null; // Return value to ensure Promise.all doesn't reject
             }),
-            
+
             logActivity({
               userId: user.id,
               action: 'user_login',
@@ -178,8 +186,9 @@ export const authOptions: NextAuthOptions = {
               },
             }).catch((error: unknown) => {
               console.error('[AUTH] Error logging activity:', error);
+              return null;
             }),
-            
+
             sendSignInNotification(
               user.email || user.username,
               user.username,
@@ -187,9 +196,12 @@ export const authOptions: NextAuthOptions = {
               'N/A'  // User agent not available in JWT callback
             ).catch((error: unknown) => {
               console.error('[AUTH] Error sending sign-in notification:', error);
+              return null;
             }),
-          ]).catch(() => {
-            // Silently fail - these are non-critical operations
+          ]).catch((error: unknown) => {
+            // This should never fire if individual catches return values,
+            // but log if it does for debugging unexpected errors
+            console.error('[AUTH] Unexpected Promise.all error:', error);
           });
         }
       }

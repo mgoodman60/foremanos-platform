@@ -17,16 +17,26 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    // Allow both admin users and system calls (no auth for scheduled tasks)
-    const isAdmin = session?.user?.email === 'admin@construction.local';
-    const isSystemCall = !session; // Scheduled task calls without auth
 
-    if (!isAdmin && !isSystemCall) {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
+    // Check for cron job authentication via secret header
+    const cronSecret = request.headers.get('x-cron-secret');
+    const isValidCronJob = cronSecret && cronSecret === process.env.CRON_SECRET;
+
+    // If not a valid cron job, require admin authentication
+    if (!isValidCronJob) {
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Unauthenticated' },
+          { status: 401 }
+        );
+      }
+
+      if (session.user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Admin access required' },
+          { status: 403 }
+        );
+      }
     }
 
     // Get reports ready for finalization

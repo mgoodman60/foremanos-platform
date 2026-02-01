@@ -5,8 +5,18 @@
 
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
+import { PDFDocument, PDFForm, PDFTextField, PDFCheckBox, PDFRadioGroup } from 'pdf-lib';
 import { getFileUrl } from './s3';
 import { prisma } from './db';
+import type { Prisma } from '@prisma/client';
+import type {
+  ReportData,
+  PhotoEntry,
+  WeatherSnapshot,
+  MaterialDelivery,
+  EquipmentEntry,
+  ScheduleUpdateEntry,
+} from './types/report-data';
 
 interface TemplateVariable {
   key: string;
@@ -14,7 +24,7 @@ interface TemplateVariable {
   type?: 'text' | 'number' | 'date' | 'boolean';
 }
 
-interface TemplateData {
+export interface TemplateData {
   // Project Info
   project_name?: string;
   project_slug?: string;
@@ -126,14 +136,14 @@ export async function extractDailyReportData(
     throw new Error('Conversation not found');
   }
 
-  // Extract data from JSON fields
-  const reportData = (conversation.reportData as any) || {};
-  const weatherSnapshots = (conversation.weatherSnapshots as any) || [];
-  const scheduledActivities = (conversation.scheduledActivities as any) || [];
-  const workLocations = (conversation.workLocations as any) || [];
-  const photos = (conversation.photos as any) || [];
-  const equipmentData = (conversation.equipmentData as any) || {};
-  const materialDeliveries = (conversation.materialDeliveries as any) || [];
+  // Extract data from JSON fields with proper typing
+  const reportData = (conversation.reportData as ReportData | null) || {};
+  const weatherSnapshots = (conversation.weatherSnapshots as WeatherSnapshot[] | null) || [];
+  const scheduledActivities = (conversation.scheduledActivities as ScheduleUpdateEntry[] | null) || [];
+  const workLocations = (conversation.workLocations as Array<{ name?: string; location?: string }> | null) || [];
+  const photos = (conversation.photos as PhotoEntry[] | null) || [];
+  const equipmentData = (conversation.equipmentData as Record<string, EquipmentEntry> | null) || {};
+  const materialDeliveries = (conversation.materialDeliveries as MaterialDelivery[] | null) || [];
 
   // Get latest weather snapshot
   const latestWeather = weatherSnapshots.length > 0 
@@ -215,7 +225,7 @@ export async function extractDailyReportData(
     weather_temperature: latestWeather?.temperature 
       ? `${latestWeather.temperature}°F` 
       : '',
-    weather_precipitation: latestWeather?.precipitation || '',
+    weather_precipitation: latestWeather?.precipitation?.toString() || '',
     weather_wind_speed: latestWeather?.windSpeed 
       ? `${latestWeather.windSpeed} mph` 
       : '',
@@ -240,7 +250,9 @@ export async function extractDailyReportData(
     equipment_issues: reportData.equipmentIssues || '',
 
     // Safety & Quality
-    safety_incidents: reportData.safetyIncidents || 0,
+    safety_incidents: typeof reportData.safetyIncidents === 'number'
+      ? reportData.safetyIncidents
+      : (Array.isArray(reportData.safetyIncidents) ? reportData.safetyIncidents.length : 0),
     quality_issues: reportData.qualityIssues || 0,
     inspections: reportData.inspections || '',
 
@@ -302,7 +314,7 @@ export async function processXlsxTemplate(
 ): Promise<Buffer> {
   try {
     const XlsxPopulate = require('xlsx-populate');
-    
+
     // Load the workbook
     const workbook = await XlsxPopulate.fromDataAsync(templateBuffer);
 
@@ -311,7 +323,7 @@ export async function processXlsxTemplate(
       // Get all cells with formulas or values
       sheet.usedRange().forEach((cell: any) => {
         const value = cell.value();
-        
+
         if (typeof value === 'string') {
           // Replace template variables like {{variable_name}}
           let newValue = value;
@@ -319,7 +331,7 @@ export async function processXlsxTemplate(
             const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
             newValue = newValue.replace(regex, String(data[key] || ''));
           });
-          
+
           if (newValue !== value) {
             cell.value(newValue);
           }
@@ -334,6 +346,117 @@ export async function processXlsxTemplate(
     console.error('[TEMPLATE_PROCESSOR] Error processing XLSX template:', error);
     throw new Error(
       `Failed to process XLSX template: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+/**
+ * Fill a PDF form with data
+ */
+export async function fillPdfForm(
+  pdfBuffer: Buffer,
+  data: TemplateData
+): Promise<Buffer> {
+  try {
+    // Load the PDF document
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+
+    // Get the form from the PDF
+    const form: PDFForm = pdfDoc.getForm();
+
+    // Get all fields in the form
+    const fields = form.getFields();
+
+    if (fields.length === 0) {
+      console.warn('[TEMPLATE_PROCESSOR] PDF has no form fields, returning original document');
+      return pdfBuffer;
+    }
+
+    // Iterate through all form fields
+    for (const field of fields) {
+      const fieldName = field.getName();
+
+      // Try to find matching data using various field name formats
+      // Support field names like: project_name, projectName, project-name, Project Name
+      const normalizedFieldName = fieldName.toLowerCase().replace(/[-\s]/g, '_');
+
+      // Find matching data key (case-insensitive, flexible matching)
+      const dataKey = Object.keys(data).find(
+        key => key.toLowerCase() === normalizedFieldName
+      );
+
+      if (!dataKey) {
+        // No matching data for this field, skip it
+        continue;
+      }
+
+      const value = data[dataKey];
+
+      // Skip null or undefined values
+      if (value === null || value === undefined) {
+        continue;
+      }
+
+      try {
+        // Fill field based on its type
+        if (field instanceof PDFTextField) {
+          // Text field - convert value to string
+          const textField = field as PDFTextField;
+          textField.setText(String(value));
+        } else if (field instanceof PDFCheckBox) {
+          // Checkbox - check if value is truthy
+          const checkbox = field as PDFCheckBox;
+          if (value) {
+            checkbox.check();
+          } else {
+            checkbox.uncheck();
+          }
+        } else if (field instanceof PDFRadioGroup) {
+          // Radio group - select option matching the value
+          const radioGroup = field as PDFRadioGroup;
+          const options = radioGroup.getOptions();
+          const valueStr = String(value).toLowerCase();
+
+          // Try to find matching option
+          const matchingOption = options.find(
+            opt => opt.toLowerCase() === valueStr
+          );
+
+          if (matchingOption) {
+            radioGroup.select(matchingOption);
+          }
+        }
+        // Note: PDFDropdown is also supported by pdf-lib but less common
+      } catch (fieldError) {
+        // Log field-specific error but continue processing other fields
+        console.warn(
+          `[TEMPLATE_PROCESSOR] Failed to fill field "${fieldName}":`,
+          fieldError instanceof Error ? fieldError.message : 'Unknown error'
+        );
+      }
+    }
+
+    // Optional: Flatten the form to make it non-editable
+    // Uncomment the next line if you want to prevent further editing
+    // form.flatten();
+
+    // Save the filled PDF
+    const filledPdfBytes = await pdfDoc.save();
+    return Buffer.from(filledPdfBytes);
+
+  } catch (error) {
+    console.error('[TEMPLATE_PROCESSOR] Error filling PDF form:', error);
+
+    // Check if this is a PDF without forms or invalid PDF
+    if (error instanceof Error) {
+      if (error.message.includes('Failed to parse PDF') ||
+          error.message.includes('Invalid PDF')) {
+        throw new Error('Invalid PDF file: The file may be corrupted or encrypted');
+      }
+    }
+
+    throw new Error(
+      `Failed to fill PDF form: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   }
 }
@@ -380,12 +503,9 @@ export async function processTemplateById(
       break;
 
     case 'pdf':
-      // PDF templates are typically pre-filled forms
-      // For now, we'll just return the original template
-      // TODO: Implement PDF form filling with pdf-lib
-      processedBuffer = templateBuffer;
+      // Fill PDF form fields with data
+      processedBuffer = await fillPdfForm(templateBuffer, data);
       contentType = 'application/pdf';
-      console.warn('[TEMPLATE_PROCESSOR] PDF template processing not yet implemented, returning original template');
       break;
 
     default:
@@ -410,7 +530,7 @@ export async function getTemplatesForType(
   projectId: string | null,
   templateType: string
 ): Promise<Array<{ id: string; name: string; description: string | null; fileFormat: string }>> {
-  const where: any = {
+  const where: Prisma.DocumentTemplateWhereInput = {
     templateType,
   };
 
