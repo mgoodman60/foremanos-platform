@@ -93,6 +93,7 @@ import {
   type MeasurementInfo,
   type TakeoffItem,
   type TakeoffRollup,
+  type TakeoffResult,
 } from '@/lib/rag-enhancements';
 
 describe('RAG Enhancements - Query Classification', () => {

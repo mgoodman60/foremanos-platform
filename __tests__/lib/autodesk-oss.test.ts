@@ -74,7 +74,7 @@ describe('Autodesk OSS - Bucket Management', () => {
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   describe('ensureBucket', () => {

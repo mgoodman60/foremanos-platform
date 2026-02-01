@@ -644,8 +644,7 @@ describe('lazy-loader', () => {
 
       // Setup minimal DOM if not available
       if (typeof document === 'undefined') {
-        // @ts-expect-error - Mocking document for tests
-        globalThis.document = {
+        (globalThis as Record<string, unknown>).document = {
           createElement: (tag: string) => ({
             tagName: tag.toUpperCase(),
             dataset: {},
@@ -664,20 +663,17 @@ describe('lazy-loader', () => {
     afterEach(() => {
       // Restore original window
       if (!originalWindow) {
-        // @ts-expect-error - Deleting window for test cleanup
-        delete globalThis.window;
+        delete (globalThis as Record<string, unknown>).window;
       }
       // Restore original document
       if (!originalDocument) {
-        // @ts-expect-error - Deleting document for test cleanup
-        delete globalThis.document;
+        delete (globalThis as Record<string, unknown>).document;
       }
       // Restore original IntersectionObserver
       if (originalIntersectionObserver) {
         globalThis.IntersectionObserver = originalIntersectionObserver;
       } else if (globalThis.IntersectionObserver) {
-        // @ts-expect-error - Deleting IntersectionObserver for test cleanup
-        delete globalThis.IntersectionObserver;
+        delete (globalThis as Record<string, unknown>).IntersectionObserver;
       }
     });
 
@@ -698,8 +694,7 @@ describe('lazy-loader', () => {
     });
 
     it('should create instance in non-browser environment', () => {
-      // @ts-expect-error - Deleting window for testing
-      delete globalThis.window;
+      delete (globalThis as Record<string, unknown>).window;
 
       const loader = new ProgressiveImageLoader();
       expect(loader).toBeInstanceOf(ProgressiveImageLoader);
@@ -730,8 +725,7 @@ describe('lazy-loader', () => {
     });
 
     it('should load image immediately when IntersectionObserver is not available', () => {
-      // @ts-expect-error - Removing IntersectionObserver
-      delete globalThis.IntersectionObserver;
+      delete (globalThis as Record<string, unknown>).IntersectionObserver;
 
       const loader = new ProgressiveImageLoader();
       const img = document.createElement('img');
@@ -768,7 +762,7 @@ describe('lazy-loader', () => {
             {
               target: img,
               isIntersecting: true,
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -807,7 +801,7 @@ describe('lazy-loader', () => {
             {
               target: img,
               isIntersecting: false,
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -838,7 +832,7 @@ describe('lazy-loader', () => {
       // First intersection
       if (observerCallback) {
         observerCallback(
-          [{ target: img, isIntersecting: true } as IntersectionObserverEntry],
+          [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
         );
       }
@@ -848,7 +842,7 @@ describe('lazy-loader', () => {
       // Second intersection (should not reload)
       if (observerCallback) {
         observerCallback(
-          [{ target: img, isIntersecting: true } as IntersectionObserverEntry],
+          [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
         );
       }
@@ -882,7 +876,7 @@ describe('lazy-loader', () => {
 
       if (observerCallback) {
         observerCallback(
-          [{ target: img, isIntersecting: true } as IntersectionObserverEntry],
+          [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
         );
       }
@@ -914,8 +908,7 @@ describe('lazy-loader', () => {
     });
 
     it('should handle disconnect without observer', () => {
-      // @ts-expect-error - Removing IntersectionObserver
-      delete globalThis.IntersectionObserver;
+      delete (globalThis as Record<string, unknown>).IntersectionObserver;
 
       const loader = new ProgressiveImageLoader();
       expect(() => loader.disconnect()).not.toThrow();
@@ -941,7 +934,7 @@ describe('lazy-loader', () => {
 
       if (observerCallback) {
         observerCallback(
-          [{ target: img, isIntersecting: true } as IntersectionObserverEntry],
+          [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
         );
       }

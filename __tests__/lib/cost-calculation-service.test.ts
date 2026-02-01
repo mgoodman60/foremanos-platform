@@ -187,8 +187,10 @@ describe('Cost Calculation Service', () => {
       const priceDefault = getCSIPriceForCategory('Walls', 'SF', 'default');
       const priceKentucky = getCSIPriceForCategory('Walls', 'SF', 'kentucky');
 
-      expect(priceKentucky?.unitCost).toBeLessThan(priceDefault?.unitCost!);
-      expect(priceKentucky?.unitCost).toBeCloseTo(priceDefault?.unitCost! * 0.88, 1);
+      expect(priceDefault).not.toBeNull();
+      expect(priceKentucky).not.toBeNull();
+      expect(priceKentucky!.unitCost).toBeLessThan(priceDefault!.unitCost);
+      expect(priceKentucky!.unitCost).toBeCloseTo(priceDefault!.unitCost * 0.88, 1);
     });
 
     it('should return null for unknown BIM category', () => {
@@ -213,8 +215,9 @@ describe('Cost Calculation Service', () => {
     it('should round prices to 2 decimal places', () => {
       const price = getCSIPriceForCategory('Walls', 'SF', 'california');
 
-      expect(price?.unitCost).toBe(Math.round(price?.unitCost! * 100) / 100);
-      expect(price?.laborRate).toBe(Math.round(price?.laborRate! * 100) / 100);
+      expect(price).not.toBeNull();
+      expect(price!.unitCost).toBe(Math.round(price!.unitCost * 100) / 100);
+      expect(price!.laborRate).toBe(Math.round(price!.laborRate * 100) / 100);
     });
   });
 
@@ -415,7 +418,9 @@ describe('Cost Calculation Service', () => {
       const priceDefault = await getUnitPrice('flooring', 'lvt', 'SF', null, 'default');
       const priceKentucky = await getUnitPrice('flooring', 'lvt', 'SF', null, 'kentucky');
 
-      expect(priceKentucky?.unitCost).toBeLessThan(priceDefault?.unitCost!);
+      expect(priceDefault).toBeDefined();
+      expect(priceKentucky).toBeDefined();
+      expect(priceKentucky!.unitCost).toBeLessThan(priceDefault!.unitCost);
     });
 
     it('should handle null projectId', async () => {

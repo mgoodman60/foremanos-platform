@@ -20,7 +20,7 @@ const mockSharpInstance = vi.hoisted(() => ({
 }));
 
 const mockSharp = vi.hoisted(() => {
-  const sharp = vi.fn(() => mockSharpInstance);
+  const sharp = vi.fn(() => mockSharpInstance) as ReturnType<typeof vi.fn> & { default?: unknown };
   sharp.default = sharp;
   return sharp;
 });
@@ -196,6 +196,10 @@ describe('PDF to Image Raster - rasterizePdfToImages', () => {
     // Create new mock for final metadata check
     const mockSharpFinal = vi.fn(() => ({
       metadata: vi.fn().mockResolvedValue({ width: 2000, height: 1500 }),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
     }));
     mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 
@@ -536,6 +540,10 @@ describe('PDF to Image Raster - Edge Cases', () => {
     // Create new mock for final metadata check with valid dimensions
     const mockSharpFinal = vi.fn(() => ({
       metadata: vi.fn().mockResolvedValue({ width: 1200, height: 1600 }),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
     }));
     mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 
@@ -603,6 +611,10 @@ describe('PDF to Image Raster - Aspect Ratio', () => {
 
     const mockSharpFinal = vi.fn(() => ({
       metadata: vi.fn().mockResolvedValue({ width: 2000, height: 1000 }),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
     }));
     mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 
@@ -636,6 +648,10 @@ describe('PDF to Image Raster - Aspect Ratio', () => {
 
     const mockSharpFinal = vi.fn(() => ({
       metadata: vi.fn().mockResolvedValue({ width: 1000, height: 2000 }),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
     }));
     mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 
@@ -669,6 +685,10 @@ describe('PDF to Image Raster - Aspect Ratio', () => {
 
     const mockSharpFinal = vi.fn(() => ({
       metadata: vi.fn().mockResolvedValue({ width: 2000, height: 2000 }),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
     }));
     mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 
@@ -695,6 +715,10 @@ describe('PDF to Image Raster - Aspect Ratio', () => {
 
     const mockSharpFinal = vi.fn(() => ({
       metadata: vi.fn().mockResolvedValue({ width: 800, height: 600 }),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
     }));
     mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 

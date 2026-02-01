@@ -804,8 +804,8 @@ describe('Lookahead Service - suggestWeatherAdjustments()', () => {
   it('should find next good weather day within 14 days', async () => {
     const { suggestWeatherAdjustments } = await import('@/lib/lookahead-service');
 
-    const weatherForecast = [
-      { date: '2024-01-14', condition: 'Clear', temp: 65, precipitation: 0, workImpact: 'none' as const },
+    const weatherForecast: Array<{ date: string; condition: string; temp: number; precipitation: number; workImpact: 'none' | 'low' | 'moderate' | 'high' | 'severe' }> = [
+      { date: '2024-01-14', condition: 'Clear', temp: 65, precipitation: 0, workImpact: 'none' },
     ];
 
     // Add 3 days of bad weather starting from the 15th
@@ -815,7 +815,7 @@ describe('Lookahead Service - suggestWeatherAdjustments()', () => {
         condition: 'Rain',
         temp: 50 - i,
         precipitation: 1.0 - (i * 0.1),
-        workImpact: 'high' as const,
+        workImpact: 'high',
       });
     }
 
@@ -825,7 +825,7 @@ describe('Lookahead Service - suggestWeatherAdjustments()', () => {
       condition: 'Clear',
       temp: 60,
       precipitation: 0,
-      workImpact: 'none' as const,
+      workImpact: 'none',
     });
 
     const lookahead = {

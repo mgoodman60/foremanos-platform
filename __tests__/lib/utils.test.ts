@@ -126,7 +126,7 @@ describe('utils', () => {
     });
 
     it('should merge with variant classes', () => {
-      const variant = 'primary';
+      const variant = 'primary' as string;
       const result = cn(
         'btn',
         variant === 'primary' && 'bg-blue-500 text-white',
@@ -399,7 +399,7 @@ describe('utils', () => {
     it('should support common UI component patterns', () => {
       const isActive = true;
       const isLoading = false;
-      const variant = 'primary';
+      const variant = 'primary' as string;
 
       const buttonClasses = cn(
         'inline-flex items-center justify-center rounded-md font-medium',
@@ -436,7 +436,7 @@ describe('utils', () => {
     });
 
     it('should support conditional styling with cn', () => {
-      const status = 'success';
+      const status = 'success' as string;
       const statusClasses = cn(
         'px-2 py-1 rounded text-sm font-semibold',
         status === 'success' && 'bg-green-100 text-green-800',

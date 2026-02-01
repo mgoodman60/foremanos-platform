@@ -35,11 +35,7 @@ describe('logger', () => {
 
   afterEach(() => {
     // Restore original environment
-    if (originalEnv === undefined) {
-      delete process.env.NODE_ENV;
-    } else {
-      process.env.NODE_ENV = originalEnv;
-    }
+    vi.unstubAllEnvs();
     // Restore Date
     (global.Date as typeof Date).now = originalDateNow;
     vi.restoreAllMocks();
@@ -50,7 +46,7 @@ describe('logger', () => {
   // ============================================
   describe('logger.debug', () => {
     it('should log debug messages in development mode', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       logger.debug('TEST_CONTEXT', 'Debug message');
 
@@ -63,7 +59,7 @@ describe('logger', () => {
     });
 
     it('should log debug messages with metadata in development mode', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       logger.debug('TEST_CONTEXT', 'Debug with meta', { userId: '123', action: 'test' });
 
@@ -76,7 +72,7 @@ describe('logger', () => {
     });
 
     it('should NOT log debug messages in production mode', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       logger.debug('TEST_CONTEXT', 'Should not appear');
 
@@ -84,7 +80,7 @@ describe('logger', () => {
     });
 
     it('should NOT log debug messages when NODE_ENV is undefined', () => {
-      delete process.env.NODE_ENV;
+      vi.stubEnv('NODE_ENV', '');
 
       logger.debug('TEST_CONTEXT', 'Should not appear');
 
@@ -92,7 +88,7 @@ describe('logger', () => {
     });
 
     it('should NOT log debug messages in test mode', () => {
-      process.env.NODE_ENV = 'test';
+      vi.stubEnv('NODE_ENV', 'test');
 
       logger.debug('TEST_CONTEXT', 'Should not appear');
 
@@ -100,7 +96,7 @@ describe('logger', () => {
     });
 
     it('should handle empty metadata object', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       logger.debug('TEST_CONTEXT', 'Message', {});
 
@@ -140,11 +136,7 @@ describe('logger', () => {
       const environments = ['development', 'production', 'test', undefined];
 
       environments.forEach((env) => {
-        if (env === undefined) {
-          delete process.env.NODE_ENV;
-        } else {
-          process.env.NODE_ENV = env;
-        }
+        vi.stubEnv('NODE_ENV', env ?? '');
 
         mocks.console.info.mockClear();
         logger.info('TEST', 'Message');
@@ -210,12 +202,12 @@ describe('logger', () => {
     });
 
     it('should log warnings in all environments', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       logger.warn('TEST', 'Warning message');
       expect(mocks.console.warn).toHaveBeenCalledTimes(1);
 
       mocks.console.warn.mockClear();
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       logger.warn('TEST', 'Warning message');
       expect(mocks.console.warn).toHaveBeenCalledTimes(1);
     });
@@ -379,7 +371,7 @@ describe('logger', () => {
     });
 
     it('should handle scoped debug in development', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const scopedLog = createScopedLogger('DEBUG_CONTEXT');
 
       scopedLog.debug('Debug info', { detail: 'value' });

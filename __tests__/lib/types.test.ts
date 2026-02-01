@@ -69,7 +69,7 @@ describe('lib/types', () => {
     it('should work with includes method', () => {
       expect(EXPENSE_CATEGORIES.includes('Food')).toBe(true);
       expect(EXPENSE_CATEGORIES.includes('Transportation')).toBe(true);
-      expect(EXPENSE_CATEGORIES.includes('Invalid')).toBe(false);
+      expect((EXPENSE_CATEGORIES as readonly string[]).includes('Invalid')).toBe(false);
     });
   });
 

@@ -388,6 +388,7 @@ describe('Document Intelligence Router - shouldOverrideExisting', () => {
       confidence: 60,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const result = await shouldOverrideExisting('project-1', 'scale', 'dwg');
@@ -407,6 +408,7 @@ describe('Document Intelligence Router - shouldOverrideExisting', () => {
       confidence: 100,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const result = await shouldOverrideExisting('project-1', 'scale', 'pdf_scan');
@@ -426,6 +428,7 @@ describe('Document Intelligence Router - shouldOverrideExisting', () => {
       confidence: 70,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const result = await shouldOverrideExisting('project-1', 'budget', 'xlsx');
@@ -479,6 +482,7 @@ describe('Document Intelligence Router - recordDataSource', () => {
       confidence: 100,
       metadata: {},
       extractedAt: expect.any(Date),
+      updatedAt: expect.any(Date),
     };
 
     vi.mocked(prisma.projectDataSource.upsert).mockResolvedValue(mockCreated);
@@ -521,6 +525,7 @@ describe('Document Intelligence Router - recordDataSource', () => {
       confidence: 95,
       metadata: { updated: true },
       extractedAt: new Date(),
+      updatedAt: new Date(),
     };
 
     vi.mocked(prisma.projectDataSource.upsert).mockResolvedValue(mockUpdated);
@@ -630,6 +635,7 @@ describe('Document Intelligence Router - getProjectDataSources', () => {
         confidence: 100,
         metadata: {},
         extractedAt: new Date(),
+        updatedAt: new Date(),
         Document: {
           id: 'doc-1',
           fileName: 'floor-plan.dwg',
@@ -645,6 +651,7 @@ describe('Document Intelligence Router - getProjectDataSources', () => {
         confidence: 70,
         metadata: {},
         extractedAt: new Date(),
+        updatedAt: new Date(),
         Document: {
           id: 'doc-2',
           fileName: 'budget.xlsx',
@@ -688,6 +695,7 @@ describe('Document Intelligence Router - getProjectDataSources', () => {
         confidence: 95,
         metadata: {},
         extractedAt: new Date(),
+        updatedAt: new Date(),
         Document: {
           id: 'doc-1',
           fileName: 'building.rvt',
@@ -762,6 +770,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       confidence: 100,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const result = await routeDocumentToProcessors(
@@ -786,6 +795,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       confidence: 60,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
     vi.mocked(prisma.projectDataSource.upsert).mockResolvedValue({} as any);
 
@@ -863,6 +873,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       confidence: 60,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
     vi.mocked(prisma.projectDataSource.upsert).mockResolvedValue({} as any);
 
@@ -888,6 +899,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       confidence: 100,
       metadata: {},
       extractedAt: new Date(),
+      updatedAt: new Date(),
     });
 
     await routeDocumentToProcessors(
@@ -935,8 +947,8 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
 
   it('should return features and triggered lists', async () => {
     // Mock findFirst to return different values based on feature type
-    vi.mocked(prisma.projectDataSource.findFirst).mockImplementation(async (args) => {
-      const featureType = (args?.where as any)?.featureType;
+    vi.mocked(prisma.projectDataSource.findFirst).mockImplementation((async (args: any) => {
+      const featureType = args?.where?.featureType;
 
       if (featureType === 'budget') {
         // budget - has existing with lower confidence
@@ -949,6 +961,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
           confidence: 50,
           metadata: {},
           extractedAt: new Date(),
+          updatedAt: new Date(),
         };
       }
 
@@ -963,12 +976,13 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
           confidence: 100,
           metadata: {},
           extractedAt: new Date(),
+          updatedAt: new Date(),
         };
       }
 
       // Other features - no existing
       return null;
-    });
+    }) as any);
     vi.mocked(prisma.projectDataSource.upsert).mockResolvedValue({} as any);
 
     const result = await routeDocumentToProcessors(
@@ -989,7 +1003,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
 
   it('should handle mixed override scenarios', async () => {
     let callCount = 0;
-    vi.mocked(prisma.projectDataSource.findFirst).mockImplementation(async () => {
+    vi.mocked(prisma.projectDataSource.findFirst).mockImplementation((async () => {
       callCount++;
       if (callCount === 1) return null; // First feature - no existing
       if (callCount === 2) { // Second feature - lower confidence existing
@@ -1002,6 +1016,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
           confidence: 60,
           metadata: {},
           extractedAt: new Date(),
+          updatedAt: new Date(),
         };
       }
       // Other features - higher confidence existing
@@ -1014,8 +1029,9 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
         confidence: 100,
         metadata: {},
         extractedAt: new Date(),
+        updatedAt: new Date(),
       };
-    });
+    }) as any);
     vi.mocked(prisma.projectDataSource.upsert).mockResolvedValue({} as any);
 
     const result = await routeDocumentToProcessors(
@@ -1102,13 +1118,13 @@ describe('Document Intelligence Router - Edge Cases', () => {
 
   it('should handle partial failures in routeDocumentToProcessors', async () => {
     let callCount = 0;
-    vi.mocked(prisma.projectDataSource.findFirst).mockImplementation(async () => {
+    vi.mocked(prisma.projectDataSource.findFirst).mockImplementation((async () => {
       callCount++;
       if (callCount === 2) {
         throw new Error('Database timeout');
       }
       return null;
-    });
+    }) as any);
     vi.mocked(prisma.projectDataSource.upsert).mockRejectedValue(new Error('Upsert failed'));
 
     // The error will be from upsert, not findFirst, since upsert happens after findFirst

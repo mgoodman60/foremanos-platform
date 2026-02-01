@@ -140,7 +140,7 @@ describe('Redis Client', () => {
 
     it('should log success message on connect event in development', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       mockRedisInstance.connect.mockResolvedValue(undefined);
       mockRedisInstance.ping.mockResolvedValue('PONG');
@@ -171,7 +171,7 @@ describe('Redis Client', () => {
 
     it('should not log success message in production', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       mockRedisInstance.connect.mockResolvedValue(undefined);
       mockRedisInstance.ping.mockResolvedValue('PONG');
@@ -187,7 +187,7 @@ describe('Redis Client', () => {
 
     it('should log error message on error event in development', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       mockRedisInstance.connect.mockResolvedValue(undefined);
       mockRedisInstance.ping.mockResolvedValue('PONG');
@@ -203,7 +203,7 @@ describe('Redis Client', () => {
 
     it('should not log error message on error event in production', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
 
       mockRedisInstance.connect.mockResolvedValue(undefined);
       mockRedisInstance.ping.mockResolvedValue('PONG');
@@ -219,7 +219,7 @@ describe('Redis Client', () => {
 
     it('should log close message on close event in development', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       mockRedisInstance.connect.mockResolvedValue(undefined);
       mockRedisInstance.ping.mockResolvedValue('PONG');
@@ -234,7 +234,7 @@ describe('Redis Client', () => {
 
     it('should log reconnecting message in development', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       mockRedisInstance.connect.mockResolvedValue(undefined);
       mockRedisInstance.ping.mockResolvedValue('PONG');
@@ -268,7 +268,7 @@ describe('Redis Client', () => {
 
     it('should log error message when connection fails in development', async () => {
       delete process.env.__NEXT_TEST_MODE;
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
 
       const error = new Error('Connection refused');
       mockRedisInstance.connect.mockRejectedValue(error);
