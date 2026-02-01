@@ -13,11 +13,13 @@ const prismaMock = {
     findFirst: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    upsert: vi.fn(),
   },
   budgetSnapshot: {
     findFirst: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    upsert: vi.fn(),
   },
   costAlert: {
     create: vi.fn(),
@@ -269,7 +271,7 @@ describe('Budget Sync Service - EVM Snapshot Recording', () => {
     vi.clearAllMocks();
   });
 
-  it('should create new EVM snapshot when none exists', async () => {
+  it('should upsert EVM snapshot with create data when none exists', async () => {
     const { recordEVMSnapshot } = await import('@/lib/budget-sync-service');
 
     prismaMock.projectBudget.findUnique.mockResolvedValue({
@@ -277,8 +279,7 @@ describe('Budget Sync Service - EVM Snapshot Recording', () => {
       projectId: 'project-1',
     });
 
-    prismaMock.earnedValue.findFirst.mockResolvedValue(null);
-    prismaMock.earnedValue.create.mockResolvedValue({ id: 'ev-1' });
+    prismaMock.earnedValue.upsert.mockResolvedValue({ id: 'ev-1' });
 
     const metrics = {
       plannedValue: 100000,
@@ -297,8 +298,21 @@ describe('Budget Sync Service - EVM Snapshot Recording', () => {
 
     await recordEVMSnapshot('project-1', metrics, 'user-1');
 
-    expect(prismaMock.earnedValue.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
+    expect(prismaMock.earnedValue.upsert).toHaveBeenCalledWith({
+      where: {
+        budgetId_periodDate_periodType: expect.objectContaining({
+          budgetId: 'budget-1',
+          periodType: 'daily',
+        }),
+      },
+      update: expect.objectContaining({
+        plannedValue: 100000,
+        earnedValue: 95000,
+        actualCost: 98000,
+        costPerformanceIndex: 0.97,
+        schedulePerformanceIndex: 0.95,
+      }),
+      create: expect.objectContaining({
         budgetId: 'budget-1',
         periodType: 'daily',
         plannedValue: 100000,
@@ -311,7 +325,7 @@ describe('Budget Sync Service - EVM Snapshot Recording', () => {
     });
   });
 
-  it('should update existing EVM snapshot for today', async () => {
+  it('should upsert EVM snapshot with update data for existing record', async () => {
     const { recordEVMSnapshot } = await import('@/lib/budget-sync-service');
 
     prismaMock.projectBudget.findUnique.mockResolvedValue({
@@ -319,13 +333,8 @@ describe('Budget Sync Service - EVM Snapshot Recording', () => {
       projectId: 'project-1',
     });
 
-    prismaMock.earnedValue.findFirst.mockResolvedValue({
-      id: 'ev-1',
-      budgetId: 'budget-1',
-      periodDate: startOfDay(new Date()),
-    });
-
-    prismaMock.earnedValue.update.mockResolvedValue({ id: 'ev-1' });
+    // Upsert handles both create and update atomically
+    prismaMock.earnedValue.upsert.mockResolvedValue({ id: 'ev-1' });
 
     const metrics = {
       plannedValue: 100000,
@@ -344,14 +353,16 @@ describe('Budget Sync Service - EVM Snapshot Recording', () => {
 
     await recordEVMSnapshot('project-1', metrics);
 
-    expect(prismaMock.earnedValue.update).toHaveBeenCalledWith({
-      where: { id: 'ev-1' },
-      data: expect.objectContaining({
-        plannedValue: 100000,
-        earnedValue: 95000,
-        actualCost: 98000,
-      }),
-    });
+    // Verify upsert was called with proper update data
+    expect(prismaMock.earnedValue.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          plannedValue: 100000,
+          earnedValue: 95000,
+          actualCost: 98000,
+        }),
+      })
+    );
   });
 });
 
