@@ -562,16 +562,17 @@ describe('PDF-to-Image Serverless - Dynamic Imports', () => {
     expect(typeof available).toBe('boolean');
   });
 
-  it('should check if canvas is available', async () => {
+  it('should always return false for canvas availability (removed Feb 2026)', async () => {
     const available = await isCanvasAvailable();
 
-    // In test environment, pdf-img-convert may or may not be installed
-    expect(typeof available).toBe('boolean');
+    // Canvas was removed to reduce bundle size for Vercel compatibility
+    expect(available).toBe(false);
   });
 });
 
 // ============================================
 // getBestStrategy Tests (4 tests)
+// Updated Feb 2026: Canvas removed, always returns native-pdf
 // ============================================
 
 describe('PDF-to-Image Serverless - getBestStrategy', () => {
@@ -579,14 +580,14 @@ describe('PDF-to-Image Serverless - getBestStrategy', () => {
     vi.clearAllMocks();
   });
 
-  it('should return native-pdf strategy when canvas is not available', async () => {
+  it('should always return native-pdf strategy (canvas removed Feb 2026)', async () => {
     // Mock console.log to suppress output
     const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const strategy = await getBestStrategy();
 
-    // Since canvas is likely not available in test environment
-    expect(['native-pdf', 'canvas-raster']).toContain(strategy);
+    // Canvas was removed, so always returns native-pdf
+    expect(strategy).toBe('native-pdf');
 
     consoleLogSpy.mockRestore();
   });
@@ -603,14 +604,12 @@ describe('PDF-to-Image Serverless - getBestStrategy', () => {
     consoleLogSpy.mockRestore();
   });
 
-  it('should prefer canvas-raster when available', async () => {
+  it('should never return canvas-raster strategy (canvas removed)', async () => {
     const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-    // This test documents the preference order
-    // In real environment with canvas installed, it would return 'canvas-raster'
     const strategy = await getBestStrategy();
 
-    expect(['canvas-raster', 'native-pdf']).toContain(strategy);
+    expect(strategy).not.toBe('canvas-raster');
 
     consoleLogSpy.mockRestore();
   });

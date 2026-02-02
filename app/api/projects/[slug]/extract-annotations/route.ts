@@ -87,21 +87,21 @@ export async function POST(
         // Get sheet number from document metadata
         const sheetNumber = ((document as any).metadata)?.sheetNumber || document.name.replace(/\.pdf$/i, '');
 
-        // Convert first page to image using serverless-compatible rasterization
+        // Extract first page as PDF for vision API processing
+        // Using PDF native mode for best quality with vision APIs (Claude, GPT-4V)
         const rasterResult = await rasterizeSinglePage(buffer, 1, {
           dpi: 150,
           maxWidth: 2048,
           maxHeight: 2048,
-          format: 'jpeg',
-          quality: 90
+          mode: 'pdf' // Use native PDF - better quality than rasterized images
         });
 
-        const imageBase64 = rasterResult.base64;
+        const pageBase64 = rasterResult.base64;
 
-        // Extract annotations using vision
+        // Extract annotations using vision (supports both PDF and image input)
         console.log(`[ANNOTATION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...`);
         const annotations = await extractAnnotationsWithVision(
-          imageBase64,
+          pageBase64,
           sheetNumber
         );
 

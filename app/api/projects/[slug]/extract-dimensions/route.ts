@@ -96,21 +96,21 @@ export async function POST(
 
         const scaleData = scaleChunk?.scaleData as any;
 
-        // Convert first page to image using serverless-compatible rasterization
+        // Extract first page as PDF for vision API processing
+        // Using PDF native mode for best quality with vision APIs (Claude, GPT-4V)
         const rasterResult = await rasterizeSinglePage(buffer, 1, {
           dpi: 150,
           maxWidth: 2048,
           maxHeight: 2048,
-          format: 'jpeg',
-          quality: 90
+          mode: 'pdf' // Use native PDF - better quality than rasterized images
         });
 
-        const imageBase64 = rasterResult.base64;
+        const pageBase64 = rasterResult.base64;
 
-        // Extract dimensions using vision
+        // Extract dimensions using vision (supports both PDF and image input)
         console.log(`[DIMENSION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...`);
         const dimensions = await extractDimensionsWithVision(
-          imageBase64,
+          pageBase64,
           sheetNumber,
           scaleData
         );

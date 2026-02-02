@@ -94,17 +94,18 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
         const buffer = Buffer.from(await response.arrayBuffer());
 
-        // Convert first page to image using serverless-compatible rasterizer
+        // Extract first page as PDF for vision API processing
+        // Using PDF native mode for best quality with vision APIs (Claude, GPT-4V)
         const rasterResult = await rasterizeSinglePage(buffer, 1, {
           dpi: 150,
           maxWidth: 1500,
-          format: 'jpeg'
+          mode: 'pdf' // Use native PDF - better quality than rasterized images
         });
-        const imageBase64 = rasterResult.base64;
+        const pageBase64 = rasterResult.base64;
 
-        // Extract legend
+        // Extract legend (supports both PDF and image input)
         const extractionResult = await extractLegendEntries(
-          imageBase64,
+          pageBase64,
           chunk.sheetNumber,
           chunk.discipline as any
         );

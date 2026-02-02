@@ -1,14 +1,55 @@
 /**
  * Enhanced Annotation Processing System
- * 
+ *
  * Extracts and categorizes construction notes, requirements, and
  * annotations by priority level and type.
- * 
+ *
  * Phase B.3 - Document Intelligence Roadmap
+ *
+ * NOTE: Updated Feb 2026 to support both image and PDF input.
+ * PDF input is automatically detected and handled by vision APIs.
  */
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+
+/**
+ * Detect if base64 content is a PDF (starts with %PDF- magic number)
+ */
+function isPdfContent(base64: string): boolean {
+  // PDF magic number in base64: "JVBERi" which is %PDF-
+  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
+}
+
+/**
+ * Build content array for vision API request, handling both image and PDF input
+ */
+function buildVisionContent(prompt: string, base64Data: string): any[] {
+  const isPdf = isPdfContent(base64Data);
+
+  if (isPdf) {
+    // PDF content - use file type for APIs that support it
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'file',
+        file: {
+          filename: 'page.pdf',
+          file_data: `data:application/pdf;base64,${base64Data}`,
+        },
+      }
+    ];
+  } else {
+    // Image content
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'image_url',
+        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
+      }
+    ];
+  }
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -157,9 +198,10 @@ export function extractAnnotationsFromText(
 
 /**
  * Extract annotations using GPT-4o Vision
+ * Supports both image and PDF input (auto-detected)
  */
 export async function extractAnnotationsWithVision(
-  imageBase64: string,
+  base64Data: string,
   sheetNumber: string
 ): Promise<Annotation[]> {
   const prompt = `Analyze this construction drawing and extract ALL text annotations, notes, and requirements.
@@ -205,13 +247,7 @@ Return as JSON:
       [
         {
           role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            {
-              type: 'image_url',
-              image_url: { url: `data:image/png;base64,${imageBase64}` }
-            }
-          ]
+          content: buildVisionContent(prompt, base64Data)
         }
       ],
       {

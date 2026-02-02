@@ -1,31 +1,33 @@
 /**
  * PDF to Image Rasterization Service
  *
- * Converts PDF pages to high-quality PNG images for vision AI processing.
- * This enables accurate analysis of construction drawings including:
- * - Symbol recognition
- * - Dimension extraction
- * - Spatial relationship understanding
- * - Legend cross-referencing
+ * Converts PDF pages for vision AI processing.
  *
- * NOTE: Uses dynamic imports for pdf-img-convert and sharp to support
- * serverless environments where native modules may not be available at build time.
+ * ARCHITECTURE DECISION (Feb 2026):
+ * - Removed canvas/pdf-img-convert dependency (179 MB) to meet Vercel 250 MB limit
+ * - Uses pdf-lib for PDF manipulation (pure JS, ~3 MB)
+ * - Uses sharp for image processing (already installed, ~32 MB)
+ *
+ * Two modes available:
+ * 1. PDF Native Mode (default): Extracts individual PDF pages
+ *    - Best for Claude, GPT-4V, and other vision APIs with native PDF support
+ *    - Preserves full visual fidelity of construction drawings
+ *
+ * 2. Placeholder Mode: Creates dimension-accurate white images
+ *    - For APIs that require image input but don't support PDF
+ *    - Not suitable for actual visual analysis - use PDF native mode instead
+ *
+ * For construction drawings, PDF native mode is strongly recommended as it:
+ * - Maintains exact vector graphics quality
+ * - Preserves text/dimension readability at any zoom
+ * - Supports Claude's excellent PDF understanding capabilities
  */
 
 import { PDFDocument } from 'pdf-lib';
 
-// Dynamic imports for native modules (canvas-dependent)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let pdfImgConvert: any = null;
+// Dynamic import for sharp
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let sharpFn: any = null;
-
-async function getPdfImgConvert() {
-  if (!pdfImgConvert) {
-    pdfImgConvert = await import('pdf-img-convert');
-  }
-  return pdfImgConvert;
-}
 
 async function getSharp() {
   if (!sharpFn) {
@@ -52,28 +54,36 @@ export interface RasterizationOptions {
   startPage?: number;
   /** End page (1-indexed) for range conversion */
   endPage?: number;
+  /**
+   * Output mode:
+   * - 'pdf': Extract as single-page PDFs (recommended for vision APIs)
+   * - 'placeholder': Create white placeholder images with correct dimensions
+   */
+  mode?: 'pdf' | 'placeholder';
 }
 
 export interface RasterizedPage {
   /** Page number (1-indexed) */
   pageNumber: number;
-  /** Base64 encoded image data */
+  /** Base64 encoded data (PDF or image depending on mode) */
   base64: string;
-  /** Image buffer */
+  /** Buffer data */
   buffer: Buffer;
-  /** Image width in pixels */
+  /** Width in pixels (calculated from PDF dimensions at given DPI) */
   width: number;
-  /** Image height in pixels */
+  /** Height in pixels (calculated from PDF dimensions at given DPI) */
   height: number;
-  /** MIME type of the image */
+  /** MIME type of the output */
   mimeType: string;
+  /** Whether this is native PDF output vs rasterized image */
+  isPdfNative: boolean;
 }
 
 /**
- * Convert PDF pages to high-quality PNG images
+ * Convert PDF pages for vision AI processing
  * @param pdfBuffer PDF file as Buffer
  * @param options Rasterization options
- * @returns Array of rasterized page images
+ * @returns Array of processed page results
  */
 export async function rasterizePdfToImages(
   pdfBuffer: Buffer,
@@ -88,19 +98,20 @@ export async function rasterizePdfToImages(
     page,
     startPage,
     endPage,
+    mode = 'pdf', // Default to PDF native mode
   } = options;
 
   try {
-    console.log('[PDF-RASTER] Starting PDF rasterization...');
-    
-    // Get total page count
+    console.log(`[PDF-RASTER] Starting PDF processing (mode: ${mode})...`);
+
+    // Load PDF document
     const pdfDoc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     const totalPages = pdfDoc.getPageCount();
     console.log(`[PDF-RASTER] PDF has ${totalPages} pages`);
 
     // Determine which pages to convert
     let pagesToConvert: number[] = [];
-    
+
     if (page !== undefined) {
       pagesToConvert = [page];
     } else if (startPage !== undefined || endPage !== undefined) {
@@ -113,97 +124,116 @@ export async function rasterizePdfToImages(
 
     console.log(`[PDF-RASTER] Converting pages: ${pagesToConvert.join(', ')}`);
 
-    // Convert PDF to images using pdf-img-convert
-    // Scale factor: 96 DPI is base, so scale = dpi / 96
-    const scale = dpi / 96;
-
-    const pdfConvert = await getPdfImgConvert();
-    const outputImages = await pdfConvert.convert(pdfBuffer, {
-      scale: scale,
-      page_numbers: pagesToConvert,
-    });
-
-    console.log(`[PDF-RASTER] Converted ${outputImages.length} pages to images`);
-
     const results: RasterizedPage[] = [];
 
-    for (let i = 0; i < outputImages.length; i++) {
-      const imageData = outputImages[i];
-      const pageNum = pagesToConvert[i];
-      
-      // Convert Uint8Array to Buffer
-      const rawBuffer = Buffer.from(imageData);
-
-      // Process with sharp for optimization and format conversion
-      const sharp = await getSharp();
-      let sharpInstance = sharp(rawBuffer);
-      
-      // Get image metadata
-      const metadata = await sharpInstance.metadata();
-      let finalWidth = metadata.width || maxWidth;
-      let finalHeight = metadata.height || maxHeight;
-      
-      // Resize if needed while maintaining aspect ratio
-      if (finalWidth > maxWidth || finalHeight > maxHeight) {
-        const aspectRatio = finalWidth / finalHeight;
-        if (finalWidth > maxWidth) {
-          finalWidth = maxWidth;
-          finalHeight = Math.round(maxWidth / aspectRatio);
-        }
-        if (finalHeight > maxHeight) {
-          finalHeight = maxHeight;
-          finalWidth = Math.round(maxHeight * aspectRatio);
-        }
-        sharpInstance = sharpInstance.resize(finalWidth, finalHeight, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        });
+    for (const pageNum of pagesToConvert) {
+      if (pageNum < 1 || pageNum > totalPages) {
+        continue;
       }
 
-      // Convert to desired format
-      let finalBuffer: Buffer;
-      let mimeType: string;
-      
-      if (format === 'jpeg') {
-        finalBuffer = await sharpInstance
-          .jpeg({ quality })
-          .toBuffer();
-        mimeType = 'image/jpeg';
-      } else {
-        finalBuffer = await sharpInstance
-          .png({ compressionLevel: 6 })
-          .toBuffer();
-        mimeType = 'image/png';
+      try {
+        // Get page dimensions from PDF
+        const pdfPage = pdfDoc.getPage(pageNum - 1); // 0-indexed
+        const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
+
+        // Calculate pixel dimensions at requested DPI
+        // PDF dimensions are in points (72 points per inch)
+        const scale = dpi / 72;
+        let pixelWidth = Math.round(pdfWidth * scale);
+        let pixelHeight = Math.round(pdfHeight * scale);
+
+        // Apply max constraints while maintaining aspect ratio
+        if (pixelWidth > maxWidth || pixelHeight > maxHeight) {
+          const aspectRatio = pixelWidth / pixelHeight;
+          if (pixelWidth > maxWidth) {
+            pixelWidth = maxWidth;
+            pixelHeight = Math.round(maxWidth / aspectRatio);
+          }
+          if (pixelHeight > maxHeight) {
+            pixelHeight = maxHeight;
+            pixelWidth = Math.round(maxHeight * aspectRatio);
+          }
+        }
+
+        if (mode === 'pdf') {
+          // PDF Native Mode: Extract as single-page PDF
+          const newDoc = await PDFDocument.create();
+          const [copiedPage] = await newDoc.copyPages(pdfDoc, [pageNum - 1]);
+          newDoc.addPage(copiedPage);
+          const pdfBytes = await newDoc.save();
+          const buffer = Buffer.from(pdfBytes);
+
+          results.push({
+            pageNumber: pageNum,
+            base64: buffer.toString('base64'),
+            buffer,
+            width: pixelWidth,
+            height: pixelHeight,
+            mimeType: 'application/pdf',
+            isPdfNative: true,
+          });
+
+          console.log(`[PDF-RASTER] Page ${pageNum}: ${pixelWidth}x${pixelHeight} (PDF native)`);
+        } else {
+          // Placeholder Mode: Create white image with correct dimensions
+          const sharp = await getSharp();
+
+          // Create white image at calculated dimensions
+          let sharpInstance = sharp({
+            create: {
+              width: pixelWidth,
+              height: pixelHeight,
+              channels: 4,
+              background: { r: 255, g: 255, b: 255, alpha: 1 },
+            },
+          });
+
+          // Convert to desired format
+          let finalBuffer: Buffer;
+          let mimeType: string;
+
+          if (format === 'jpeg') {
+            finalBuffer = await sharpInstance.jpeg({ quality }).toBuffer();
+            mimeType = 'image/jpeg';
+          } else {
+            finalBuffer = await sharpInstance.png({ compressionLevel: 6 }).toBuffer();
+            mimeType = 'image/png';
+          }
+
+          // Get final dimensions from metadata
+          const finalMetadata = await sharp(finalBuffer).metadata();
+
+          results.push({
+            pageNumber: pageNum,
+            base64: finalBuffer.toString('base64'),
+            buffer: finalBuffer,
+            width: finalMetadata.width || pixelWidth,
+            height: finalMetadata.height || pixelHeight,
+            mimeType,
+            isPdfNative: false,
+          });
+
+          console.log(`[PDF-RASTER] Page ${pageNum}: ${finalMetadata.width}x${finalMetadata.height} ${format} (placeholder)`);
+        }
+      } catch (pageError: any) {
+        console.error(`[PDF-RASTER] Error processing page ${pageNum}:`, pageError.message);
+        // Continue with other pages
       }
-
-      // Get final dimensions (sharp already loaded above)
-      const finalMetadata = await sharp(finalBuffer).metadata();
-
-      results.push({
-        pageNumber: pageNum,
-        base64: finalBuffer.toString('base64'),
-        buffer: finalBuffer,
-        width: finalMetadata.width || finalWidth,
-        height: finalMetadata.height || finalHeight,
-        mimeType,
-      });
-
-      console.log(`[PDF-RASTER] Page ${pageNum}: ${finalMetadata.width}x${finalMetadata.height} ${format}`);
     }
 
     return results;
   } catch (error: any) {
-    console.error('[PDF-RASTER] Rasterization error:', error.message);
-    throw new Error(`PDF rasterization failed: ${error.message}`);
+    console.error('[PDF-RASTER] Processing error:', error.message);
+    throw new Error(`PDF processing failed: ${error.message}`);
   }
 }
 
 /**
- * Convert a single PDF page to a high-quality image
+ * Convert a single PDF page for vision AI processing
  * @param pdfBuffer PDF file as Buffer
  * @param pageNumber Page to convert (1-indexed)
- * @param options Rasterization options
- * @returns Single rasterized page image
+ * @param options Processing options
+ * @returns Single processed page
  */
 export async function rasterizeSinglePage(
   pdfBuffer: Buffer,
@@ -216,14 +246,14 @@ export async function rasterizeSinglePage(
   });
 
   if (results.length === 0) {
-    throw new Error(`Failed to rasterize page ${pageNumber}`);
+    throw new Error(`Failed to process page ${pageNumber}`);
   }
 
   return results[0];
 }
 
 /**
- * Get the number of pages in a PDF without full rasterization
+ * Get the number of pages in a PDF without processing
  */
 export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
   try {
@@ -260,7 +290,7 @@ export async function optimizeImageForVision(
   const metadata = await sharpInstance.metadata();
 
   // Resize if needed
-  if ((metadata.width && metadata.width > maxWidth) || 
+  if ((metadata.width && metadata.width > maxWidth) ||
       (metadata.height && metadata.height > maxHeight)) {
     sharpInstance = sharpInstance.resize(maxWidth, maxHeight, {
       fit: 'inside',
@@ -284,4 +314,23 @@ export async function optimizeImageForVision(
     buffer: finalBuffer,
     mimeType,
   };
+}
+
+/**
+ * Check if PDF native processing is available (always true now)
+ */
+export async function isPdfProcessingAvailable(): Promise<boolean> {
+  return true;
+}
+
+/**
+ * Check if sharp is available for image processing
+ */
+export async function isSharpAvailable(): Promise<boolean> {
+  try {
+    await getSharp();
+    return true;
+  } catch {
+    return false;
+  }
 }

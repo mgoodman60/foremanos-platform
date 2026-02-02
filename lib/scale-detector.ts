@@ -1,17 +1,58 @@
 /**
  * Scale Detection & Validation System
  * Phase A.3: Automatically extracts, validates, and manages drawing scales
- * 
+ *
  * Features:
  * - Multiple scale extraction methods (Vision API + Pattern matching)
  * - Support for architectural (1/4"=1'-0") and metric (1:100) scales
  * - Multiple scales per sheet handling
  * - Scale validation and consistency checking
  * - Accurate quantity takeoffs
+ *
+ * NOTE: Updated Feb 2026 to support both image and PDF input.
+ * PDF input is automatically detected and handled by vision APIs.
  */
 
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './db';
+
+/**
+ * Detect if base64 content is a PDF (starts with %PDF- magic number)
+ */
+function isPdfContent(base64: string): boolean {
+  // PDF magic number in base64: "JVBERi" which is %PDF-
+  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
+}
+
+/**
+ * Build content array for vision API request, handling both image and PDF input
+ */
+function buildVisionContent(prompt: string, base64Data: string): any[] {
+  const isPdf = isPdfContent(base64Data);
+
+  if (isPdf) {
+    // PDF content - use file type for APIs that support it
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'file',
+        file: {
+          filename: 'page.pdf',
+          file_data: `data:application/pdf;base64,${base64Data}`,
+        },
+      }
+    ];
+  } else {
+    // Image content
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'image_url',
+        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
+      }
+    ];
+  }
+}
 
 /**
  * Supported scale formats
@@ -177,10 +218,7 @@ If you find multiple scales on the sheet, extract:
         messages: [
           {
             role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
-            ]
+            content: buildVisionContent(prompt, imageBase64)
           }
         ],
         temperature: 0.1,

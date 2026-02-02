@@ -74,13 +74,13 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
         const pdfResponse = await fetch(pdfUrl);
         const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
-        // Convert all PDF pages to images using serverless-compatible rasterization
+        // Extract PDF pages for vision API processing
+        // Using PDF native mode for best quality with vision APIs (Claude, GPT-4V)
         const rasterizedPages = await rasterizePdfToImages(pdfBuffer, {
           dpi: 150,
           maxWidth: 2048,
           maxHeight: 2048,
-          format: 'jpeg',
-          quality: 90
+          mode: 'pdf' // Use native PDF - better quality than rasterized images
         });
 
         // Process each page

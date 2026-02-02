@@ -1,17 +1,58 @@
 /**
  * Legend & Key Recognition System (Phase A.2)
  * Extracts legend sections from construction drawings and maps symbols to definitions
- * 
+ *
  * Capabilities:
  * - Legend region detection on sheets
  * - Symbol-to-definition mapping
  * - Dynamic symbol library updates
  * - Cross-sheet legend consolidation
  * - Symbol usage validation
+ *
+ * NOTE: Updated Feb 2026 to support both image and PDF input.
+ * PDF input is automatically detected and handled by vision APIs.
  */
 
 import { DisciplineCode, getDisciplineName } from './title-block-extractor';
 import { prisma } from '@/lib/db';
+
+/**
+ * Detect if base64 content is a PDF (starts with %PDF- magic number)
+ */
+function isPdfContent(base64: string): boolean {
+  // PDF magic number in base64: "JVBERi" which is %PDF-
+  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
+}
+
+/**
+ * Build content array for vision API request, handling both image and PDF input
+ */
+function buildVisionContent(prompt: string, base64Data: string): any[] {
+  const isPdf = isPdfContent(base64Data);
+
+  if (isPdf) {
+    // PDF content - use file type for APIs that support it
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'file',
+        file: {
+          filename: 'page.pdf',
+          file_data: `data:application/pdf;base64,${base64Data}`,
+        },
+      }
+    ];
+  } else {
+    // Image content
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'image_url',
+        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
+      }
+    ];
+  }
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -75,9 +116,10 @@ export interface LegendExtractionResult {
 
 /**
  * Detect legend regions on a construction drawing using GPT-4 Vision
+ * Supports both image and PDF input (auto-detected)
  */
 export async function detectLegendRegion(
-  imageBase64: string,
+  base64Data: string,
   sheetNumber: string
 ): Promise<{ found: boolean; boundingBox?: any; confidence: number }> {
   try {
@@ -94,13 +136,7 @@ export async function detectLegendRegion(
         messages: [
           {
             role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              {
-                type: 'image_url',
-                image_url: { url: `data:image/jpeg;base64,${imageBase64}` }
-              }
-            ]
+            content: buildVisionContent(prompt, base64Data)
           }
         ],
         max_tokens: 500,
@@ -140,9 +176,10 @@ export async function detectLegendRegion(
 
 /**
  * Extract legend entries from a detected legend region
+ * Supports both image and PDF input (auto-detected)
  */
 export async function extractLegendEntries(
-  imageBase64: string,
+  base64Data: string,
   sheetNumber: string,
   discipline?: DisciplineCode
 ): Promise<LegendExtractionResult> {
@@ -160,13 +197,7 @@ export async function extractLegendEntries(
         messages: [
           {
             role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              {
-                type: 'image_url',
-                image_url: { url: `data:image/jpeg;base64,${imageBase64}` }
-              }
-            ]
+            content: buildVisionContent(prompt, base64Data)
           }
         ],
         max_tokens: 2000,

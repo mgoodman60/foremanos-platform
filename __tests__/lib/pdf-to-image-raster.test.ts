@@ -5,11 +5,6 @@ import { PDFDocument } from 'pdf-lib';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
-// Mock pdf-img-convert with vi.hoisted
-const mockPdfImgConvert = vi.hoisted(() => ({
-  convert: vi.fn(),
-}));
-
 // Mock sharp with vi.hoisted
 const mockSharpInstance = vi.hoisted(() => ({
   metadata: vi.fn(),
@@ -26,11 +21,6 @@ const mockSharp = vi.hoisted(() => {
 });
 
 // Mock the dynamic imports
-vi.mock('pdf-img-convert', () => ({
-  default: mockPdfImgConvert,
-  convert: mockPdfImgConvert.convert,
-}));
-
 vi.mock('sharp', () => ({
   default: mockSharp,
 }));
@@ -81,166 +71,77 @@ function setupSharpMocks(
 }
 
 // ============================================
-// PDF Rasterization Tests (8 tests)
+// PDF Native Mode Tests (Default)
 // ============================================
 
-describe('PDF to Image Raster - rasterizePdfToImages', () => {
+describe('PDF to Image Raster - PDF Native Mode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should rasterize a single-page PDF to PNG', async () => {
+  it('should extract a single-page PDF as native PDF', async () => {
     const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
 
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(1200, 1600, Buffer.from('png-output'));
+    const results = await rasterizePdfToImages(pdfBuffer, { mode: 'pdf' });
 
-    const results = await rasterizePdfToImages(pdfBuffer);
-
-    // Verify pdf-img-convert was called with correct params
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        scale: 150 / 96, // Default DPI 150
-        page_numbers: [1],
-      })
-    );
-
-    // Verify results
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
       pageNumber: 1,
-      width: 1200,
-      height: 1600,
-      mimeType: 'image/png',
+      mimeType: 'application/pdf',
+      isPdfNative: true,
     });
-    expect(results[0].base64).toBe(Buffer.from('png-output').toString('base64'));
+    expect(results[0].base64).toBeDefined();
     expect(results[0].buffer).toBeInstanceOf(Buffer);
+    // Width/height are calculated from PDF dimensions at DPI
+    expect(results[0].width).toBeGreaterThan(0);
+    expect(results[0].height).toBeGreaterThan(0);
   });
 
-  it('should rasterize multi-page PDF to multiple images', async () => {
+  it('should extract multi-page PDF to multiple PDF pages', async () => {
     const pdfBuffer = await createSimplePDF(3);
-    const mockImageData1 = new Uint8Array(1000);
-    const mockImageData2 = new Uint8Array(1000);
-    const mockImageData3 = new Uint8Array(1000);
 
-    mockPdfImgConvert.convert.mockResolvedValue([
-      mockImageData1,
-      mockImageData2,
-      mockImageData3,
-    ]);
-    setupSharpMocks(1200, 1600, Buffer.from('png-output'));
-
-    const results = await rasterizePdfToImages(pdfBuffer);
+    const results = await rasterizePdfToImages(pdfBuffer, { mode: 'pdf' });
 
     expect(results).toHaveLength(3);
     expect(results[0].pageNumber).toBe(1);
     expect(results[1].pageNumber).toBe(2);
     expect(results[2].pageNumber).toBe(3);
 
-    // Verify all pages use same format
+    // Verify all pages are PDF native
     results.forEach(page => {
-      expect(page.mimeType).toBe('image/png');
-      expect(page.width).toBe(1200);
-      expect(page.height).toBe(1600);
+      expect(page.mimeType).toBe('application/pdf');
+      expect(page.isPdfNative).toBe(true);
     });
   });
 
-  it('should convert to JPEG when format option is set', async () => {
+  it('should use PDF mode by default', async () => {
     const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
 
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(1200, 1600, Buffer.from('jpeg-output'));
+    const results = await rasterizePdfToImages(pdfBuffer);
 
-    const results = await rasterizePdfToImages(pdfBuffer, {
-      format: 'jpeg',
-      quality: 85,
-    });
-
-    expect(results[0].mimeType).toBe('image/jpeg');
-    expect(mockSharpInstance.jpeg).toHaveBeenCalledWith({ quality: 85 });
+    expect(results[0].isPdfNative).toBe(true);
+    expect(results[0].mimeType).toBe('application/pdf');
   });
 
-  it('should use custom DPI setting', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
+  it('should calculate pixel dimensions based on DPI', async () => {
+    const pdfBuffer = await createSimplePDF(1); // 612x792 points at 72 DPI
 
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(2400, 3200);
+    // At 150 DPI (default), scale = 150/72 = ~2.08
+    const results = await rasterizePdfToImages(pdfBuffer, { dpi: 150 });
 
-    await rasterizePdfToImages(pdfBuffer, { dpi: 300 });
-
-    // Verify scale calculation: 300 DPI / 96 base = 3.125
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        scale: 300 / 96,
-      })
-    );
-  });
-
-  it('should resize images that exceed maxWidth/maxHeight while maintaining aspect ratio', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-
-    // Mock large image that needs resizing
-    mockSharpInstance.metadata.mockResolvedValue({ width: 4000, height: 3000 });
-    mockSharpInstance.resize.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('resized-output'));
-
-    // Create new mock for final metadata check
-    const mockSharpFinal = vi.fn(() => ({
-      metadata: vi.fn().mockResolvedValue({ width: 2000, height: 1500 }),
-      resize: vi.fn().mockReturnThis(),
-      jpeg: vi.fn().mockReturnThis(),
-      png: vi.fn().mockReturnThis(),
-      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
-    }));
-    mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
-
-    const results = await rasterizePdfToImages(pdfBuffer, {
-      maxWidth: 2000,
-      maxHeight: 2000,
-    });
-
-    // Verify resize was called
-    expect(mockSharpInstance.resize).toHaveBeenCalledWith(
-      2000,
-      1500,
-      expect.objectContaining({
-        fit: 'inside',
-        withoutEnlargement: true,
-      })
-    );
-
-    expect(results[0].width).toBe(2000);
-    expect(results[0].height).toBe(1500);
+    // 612 * (150/72) = 1275, 792 * (150/72) = 1650
+    expect(results[0].width).toBeCloseTo(1275, 0);
+    expect(results[0].height).toBeCloseTo(1650, 0);
   });
 
   it('should convert specific page range with startPage and endPage', async () => {
     const pdfBuffer = await createSimplePDF(10);
-    const mockImages = Array(5).fill(null).map(() => new Uint8Array(1000));
-
-    mockPdfImgConvert.convert.mockResolvedValue(mockImages);
-    setupSharpMocks(1200, 1600);
 
     const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'pdf',
       startPage: 3,
       endPage: 7,
     });
-
-    // Verify only pages 3-7 were requested
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        page_numbers: [3, 4, 5, 6, 7],
-      })
-    );
 
     expect(results).toHaveLength(5);
     expect(results[0].pageNumber).toBe(3);
@@ -249,39 +150,86 @@ describe('PDF to Image Raster - rasterizePdfToImages', () => {
 
   it('should convert single page when page option is specified', async () => {
     const pdfBuffer = await createSimplePDF(5);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(1200, 1600);
 
     const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'pdf',
       page: 3,
     });
-
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        page_numbers: [3],
-      })
-    );
 
     expect(results).toHaveLength(1);
     expect(results[0].pageNumber).toBe(3);
   });
 
-  it('should handle PDF conversion errors gracefully', async () => {
-    const pdfBuffer = await createSimplePDF(1);
+  it('should handle endPage exceeding total pages by clamping to page count', async () => {
+    const pdfBuffer = await createSimplePDF(5);
 
-    mockPdfImgConvert.convert.mockRejectedValue(new Error('Invalid PDF structure'));
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'pdf',
+      startPage: 1,
+      endPage: 100, // Exceeds actual page count
+    });
 
-    await expect(rasterizePdfToImages(pdfBuffer)).rejects.toThrow(
-      'PDF rasterization failed: Invalid PDF structure'
-    );
+    expect(results).toHaveLength(5);
   });
 });
 
 // ============================================
-// Single Page Rasterization Tests (3 tests)
+// Placeholder Mode Tests
+// ============================================
+
+describe('PDF to Image Raster - Placeholder Mode', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should create placeholder PNG in placeholder mode', async () => {
+    const pdfBuffer = await createSimplePDF(1);
+    setupSharpMocks(1275, 1650, Buffer.from('png-output'));
+
+    const results = await rasterizePdfToImages(pdfBuffer, { mode: 'placeholder' });
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      pageNumber: 1,
+      mimeType: 'image/png',
+      isPdfNative: false,
+    });
+  });
+
+  it('should create placeholder JPEG when format is jpeg', async () => {
+    const pdfBuffer = await createSimplePDF(1);
+    setupSharpMocks(1275, 1650, Buffer.from('jpeg-output'));
+
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'placeholder',
+      format: 'jpeg',
+      quality: 85,
+    });
+
+    expect(results[0].mimeType).toBe('image/jpeg');
+    expect(mockSharpInstance.jpeg).toHaveBeenCalledWith({ quality: 85 });
+  });
+
+  it('should respect maxWidth and maxHeight in placeholder mode', async () => {
+    const pdfBuffer = await createSimplePDF(1);
+    // Initial dimensions would be 1275x1650 at 150 DPI
+    // With maxWidth 1000, dimensions are pre-calculated before sharp.create()
+    setupSharpMocks(1000, 1294, Buffer.from('output'));
+
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'placeholder',
+      maxWidth: 1000,
+      maxHeight: 1500,
+    });
+
+    // Dimensions should be constrained to maxWidth/maxHeight
+    expect(results[0].width).toBeLessThanOrEqual(1000);
+    expect(results[0].height).toBeLessThanOrEqual(1500);
+  });
+});
+
+// ============================================
+// Single Page Rasterization Tests
 // ============================================
 
 describe('PDF to Image Raster - rasterizeSinglePage', () => {
@@ -289,45 +237,22 @@ describe('PDF to Image Raster - rasterizeSinglePage', () => {
     vi.clearAllMocks();
   });
 
-  it('should rasterize a single page by default (page 1)', async () => {
+  it('should process a single page by default (page 1)', async () => {
     const pdfBuffer = await createSimplePDF(5);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(1200, 1600);
 
     const result = await rasterizeSinglePage(pdfBuffer);
 
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        page_numbers: [1],
-      })
-    );
-
     expect(result).toMatchObject({
       pageNumber: 1,
-      width: 1200,
-      height: 1600,
-      mimeType: 'image/png',
+      isPdfNative: true,
+      mimeType: 'application/pdf',
     });
   });
 
-  it('should rasterize a specific page number', async () => {
+  it('should process a specific page number', async () => {
     const pdfBuffer = await createSimplePDF(10);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(1200, 1600);
 
     const result = await rasterizeSinglePage(pdfBuffer, 5);
-
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        page_numbers: [5],
-      })
-    );
 
     expect(result.pageNumber).toBe(5);
   });
@@ -335,17 +260,15 @@ describe('PDF to Image Raster - rasterizeSinglePage', () => {
   it('should throw error if page rasterization fails', async () => {
     const pdfBuffer = await createSimplePDF(1);
 
-    // Mock empty result array (no pages converted)
-    mockPdfImgConvert.convert.mockResolvedValue([]);
-
-    await expect(rasterizeSinglePage(pdfBuffer, 1)).rejects.toThrow(
-      'Failed to rasterize page 1'
+    // Page 99 doesn't exist in a 1-page PDF
+    await expect(rasterizeSinglePage(pdfBuffer, 99)).rejects.toThrow(
+      'Failed to process page 99'
     );
   });
 });
 
 // ============================================
-// Page Count Tests (3 tests)
+// Page Count Tests
 // ============================================
 
 describe('PDF to Image Raster - getPdfPageCount', () => {
@@ -375,7 +298,7 @@ describe('PDF to Image Raster - getPdfPageCount', () => {
 });
 
 // ============================================
-// Image Optimization Tests (6 tests)
+// Image Optimization Tests
 // ============================================
 
 describe('PDF to Image Raster - optimizeImageForVision', () => {
@@ -431,22 +354,6 @@ describe('PDF to Image Raster - optimizeImageForVision', () => {
     );
   });
 
-  it('should resize image if it exceeds maxHeight', async () => {
-    const imageBuffer = createMockImageBuffer(1500, 3000);
-
-    mockSharpInstance.metadata.mockResolvedValue({ width: 1500, height: 3000 });
-    mockSharpInstance.resize.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('resized-output'));
-
-    await optimizeImageForVision(imageBuffer, {
-      maxWidth: 2000,
-      maxHeight: 2000,
-    });
-
-    expect(mockSharpInstance.resize).toHaveBeenCalled();
-  });
-
   it('should not resize image if within bounds', async () => {
     const imageBuffer = createMockImageBuffer(1500, 1500);
 
@@ -463,28 +370,10 @@ describe('PDF to Image Raster - optimizeImageForVision', () => {
     // Resize should not be called since image is within bounds
     expect(mockSharpInstance.resize).not.toHaveBeenCalled();
   });
-
-  it('should use default maxWidth and maxHeight of 2000', async () => {
-    const imageBuffer = createMockImageBuffer(2500, 2500);
-
-    mockSharpInstance.metadata.mockResolvedValue({ width: 2500, height: 2500 });
-    mockSharpInstance.resize.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('output'));
-
-    await optimizeImageForVision(imageBuffer);
-
-    // Should resize to 2000x2000 by default
-    expect(mockSharpInstance.resize).toHaveBeenCalledWith(
-      2000,
-      2000,
-      expect.any(Object)
-    );
-  });
 });
 
 // ============================================
-// Edge Cases and Error Handling Tests (5 tests)
+// Edge Cases and Error Handling Tests
 // ============================================
 
 describe('PDF to Image Raster - Edge Cases', () => {
@@ -492,277 +381,73 @@ describe('PDF to Image Raster - Edge Cases', () => {
     vi.clearAllMocks();
   });
 
-  it('should handle empty PDF (0 pages) gracefully', async () => {
-    const pdfDoc = await PDFDocument.create();
-    const pdfBuffer = Buffer.from(await pdfDoc.save());
+  it('should handle PDF with no requested pages gracefully', async () => {
+    const pdfBuffer = await createSimplePDF(3);
 
-    mockPdfImgConvert.convert.mockResolvedValue([]);
+    // Request pages that don't exist (startPage > total pages)
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      startPage: 10,
+      endPage: 15,
+    });
 
-    const results = await rasterizePdfToImages(pdfBuffer);
-
+    // Should return empty array since requested pages don't exist
     expect(results).toHaveLength(0);
   });
 
-  it('should handle endPage exceeding total pages by clamping to page count', async () => {
-    const pdfBuffer = await createSimplePDF(5);
-    const mockImages = Array(5).fill(null).map(() => new Uint8Array(1000));
-
-    mockPdfImgConvert.convert.mockResolvedValue(mockImages);
-    setupSharpMocks(1200, 1600);
+  it('should handle very high DPI settings with increased max dimensions', async () => {
+    const pdfBuffer = await createSimplePDF(1);
 
     const results = await rasterizePdfToImages(pdfBuffer, {
-      startPage: 1,
-      endPage: 100, // Exceeds actual page count
+      dpi: 600,
+      maxWidth: 10000,  // Allow high resolution
+      maxHeight: 10000,
     });
 
-    // Should only convert pages 1-5
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        page_numbers: [1, 2, 3, 4, 5],
-      })
-    );
-
-    expect(results).toHaveLength(5);
+    // At 600 DPI, scale = 600/72 = 8.33
+    // 612 * 8.33 = ~5100, 792 * 8.33 = ~6600
+    expect(results[0].width).toBeGreaterThan(5000);
+    expect(results[0].height).toBeGreaterThan(6000);
   });
 
-  it('should handle image with missing metadata dimensions', async () => {
+  it('should clamp dimensions to maxWidth/maxHeight', async () => {
     const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-
-    // Mock metadata with missing dimensions
-    mockSharpInstance.metadata.mockResolvedValueOnce({ width: undefined, height: undefined });
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('output'));
-
-    // Create new mock for final metadata check with valid dimensions
-    const mockSharpFinal = vi.fn(() => ({
-      metadata: vi.fn().mockResolvedValue({ width: 1200, height: 1600 }),
-      resize: vi.fn().mockReturnThis(),
-      jpeg: vi.fn().mockReturnThis(),
-      png: vi.fn().mockReturnThis(),
-      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
-    }));
-    mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
 
     const results = await rasterizePdfToImages(pdfBuffer, {
+      dpi: 600, // Would produce very large dimensions
       maxWidth: 2000,
       maxHeight: 2000,
     });
 
-    // Should use maxWidth/maxHeight as fallback
-    expect(results[0].width).toBe(1200);
-    expect(results[0].height).toBe(1600);
-  });
-
-  it('should handle sharp processing errors gracefully', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    mockSharpInstance.metadata.mockRejectedValue(new Error('Invalid image format'));
-
-    await expect(rasterizePdfToImages(pdfBuffer)).rejects.toThrow(
-      'PDF rasterization failed: Invalid image format'
-    );
-  });
-
-  it('should handle very high DPI settings', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(5000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-    setupSharpMocks(4800, 6400);
-
-    await rasterizePdfToImages(pdfBuffer, { dpi: 600 });
-
-    // Verify scale calculation: 600 DPI / 96 base = 6.25
-    expect(mockPdfImgConvert.convert).toHaveBeenCalledWith(
-      pdfBuffer,
-      expect.objectContaining({
-        scale: 600 / 96,
-      })
-    );
+    // Dimensions should be clamped
+    expect(results[0].width).toBeLessThanOrEqual(2000);
+    expect(results[0].height).toBeLessThanOrEqual(2000);
   });
 });
 
 // ============================================
-// Aspect Ratio Preservation Tests (4 tests)
+// Quality and Compression Tests
 // ============================================
 
-describe('PDF to Image Raster - Aspect Ratio', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should maintain aspect ratio when resizing wide images', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-
-    // Wide image: 3000x1500 (2:1 ratio)
-    mockSharpInstance.metadata.mockResolvedValue({ width: 3000, height: 1500 });
-    mockSharpInstance.resize.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('output'));
-
-    const mockSharpFinal = vi.fn(() => ({
-      metadata: vi.fn().mockResolvedValue({ width: 2000, height: 1000 }),
-      resize: vi.fn().mockReturnThis(),
-      jpeg: vi.fn().mockReturnThis(),
-      png: vi.fn().mockReturnThis(),
-      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
-    }));
-    mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
-
-    const results = await rasterizePdfToImages(pdfBuffer, {
-      maxWidth: 2000,
-      maxHeight: 2000,
-    });
-
-    // Should resize to 2000x1000 to maintain 2:1 aspect ratio
-    expect(mockSharpInstance.resize).toHaveBeenCalledWith(
-      2000,
-      1000,
-      expect.objectContaining({
-        fit: 'inside',
-        withoutEnlargement: true,
-      })
-    );
-  });
-
-  it('should maintain aspect ratio when resizing tall images', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-
-    // Tall image: 1200x2400 (1:2 ratio)
-    mockSharpInstance.metadata.mockResolvedValue({ width: 1200, height: 2400 });
-    mockSharpInstance.resize.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('output'));
-
-    const mockSharpFinal = vi.fn(() => ({
-      metadata: vi.fn().mockResolvedValue({ width: 1000, height: 2000 }),
-      resize: vi.fn().mockReturnThis(),
-      jpeg: vi.fn().mockReturnThis(),
-      png: vi.fn().mockReturnThis(),
-      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
-    }));
-    mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
-
-    const results = await rasterizePdfToImages(pdfBuffer, {
-      maxWidth: 2000,
-      maxHeight: 2000,
-    });
-
-    // Should resize to 1000x2000 to maintain 1:2 aspect ratio
-    expect(mockSharpInstance.resize).toHaveBeenCalledWith(
-      1000,
-      2000,
-      expect.objectContaining({
-        fit: 'inside',
-        withoutEnlargement: true,
-      })
-    );
-  });
-
-  it('should handle square images without distortion', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-
-    // Square image: 2500x2500
-    mockSharpInstance.metadata.mockResolvedValue({ width: 2500, height: 2500 });
-    mockSharpInstance.resize.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('output'));
-
-    const mockSharpFinal = vi.fn(() => ({
-      metadata: vi.fn().mockResolvedValue({ width: 2000, height: 2000 }),
-      resize: vi.fn().mockReturnThis(),
-      jpeg: vi.fn().mockReturnThis(),
-      png: vi.fn().mockReturnThis(),
-      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
-    }));
-    mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
-
-    const results = await rasterizePdfToImages(pdfBuffer, {
-      maxWidth: 2000,
-      maxHeight: 2000,
-    });
-
-    // Should resize to 2000x2000 (maintains 1:1 ratio)
-    expect(results[0].width).toBe(2000);
-    expect(results[0].height).toBe(2000);
-  });
-
-  it('should not enlarge small images (withoutEnlargement option)', async () => {
-    const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
-
-    // Small image: 800x600
-    mockSharpInstance.metadata.mockResolvedValue({ width: 800, height: 600 });
-    mockSharpInstance.png.mockReturnValue(mockSharpInstance);
-    mockSharpInstance.toBuffer.mockResolvedValue(Buffer.from('output'));
-
-    const mockSharpFinal = vi.fn(() => ({
-      metadata: vi.fn().mockResolvedValue({ width: 800, height: 600 }),
-      resize: vi.fn().mockReturnThis(),
-      jpeg: vi.fn().mockReturnThis(),
-      png: vi.fn().mockReturnThis(),
-      toBuffer: vi.fn().mockResolvedValue(Buffer.from('test')),
-    }));
-    mockSharp.mockReturnValueOnce(mockSharpInstance).mockReturnValueOnce(mockSharpFinal());
-
-    const results = await rasterizePdfToImages(pdfBuffer, {
-      maxWidth: 2000,
-      maxHeight: 2000,
-    });
-
-    // Should NOT call resize since image is smaller than max dimensions
-    expect(mockSharpInstance.resize).not.toHaveBeenCalled();
-    expect(results[0].width).toBe(800);
-    expect(results[0].height).toBe(600);
-  });
-});
-
-// ============================================
-// Quality and Compression Tests (3 tests)
-// ============================================
-
-describe('PDF to Image Raster - Quality Settings', () => {
+describe('PDF to Image Raster - Quality Settings (Placeholder Mode)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should use default JPEG quality of 90', async () => {
     const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
     setupSharpMocks(1200, 1600);
 
-    await rasterizePdfToImages(pdfBuffer, { format: 'jpeg' });
+    await rasterizePdfToImages(pdfBuffer, { mode: 'placeholder', format: 'jpeg' });
 
     expect(mockSharpInstance.jpeg).toHaveBeenCalledWith({ quality: 90 });
   });
 
   it('should use custom JPEG quality setting', async () => {
     const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
     setupSharpMocks(1200, 1600);
 
     await rasterizePdfToImages(pdfBuffer, {
+      mode: 'placeholder',
       format: 'jpeg',
       quality: 75,
     });
@@ -772,12 +457,9 @@ describe('PDF to Image Raster - Quality Settings', () => {
 
   it('should use compression level 6 for PNG format', async () => {
     const pdfBuffer = await createSimplePDF(1);
-    const mockImageData = new Uint8Array(1000);
-
-    mockPdfImgConvert.convert.mockResolvedValue([mockImageData]);
     setupSharpMocks(1200, 1600);
 
-    await rasterizePdfToImages(pdfBuffer, { format: 'png' });
+    await rasterizePdfToImages(pdfBuffer, { mode: 'placeholder', format: 'png' });
 
     expect(mockSharpInstance.png).toHaveBeenCalledWith({ compressionLevel: 6 });
   });

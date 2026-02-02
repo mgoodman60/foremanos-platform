@@ -1,7 +1,7 @@
 /**
  * Title Block Intelligence System
  * Extracts project metadata from construction drawing title blocks
- * 
+ *
  * Capabilities:
  * - Sheet number and title extraction
  * - Revision tracking
@@ -9,6 +9,9 @@
  * - Date and authorship information
  * - Discipline classification
  * - Project metadata
+ *
+ * NOTE: Updated Feb 2026 to support both image and PDF input.
+ * PDF input is automatically detected and handled by vision APIs.
  */
 
 import { PrismaClient } from '@prisma/client';
@@ -16,6 +19,44 @@ import { parseScaleString } from './scale-detector';
 import { classifyDrawingWithPatterns, type DrawingClassification } from './drawing-classifier';
 
 const prisma = new PrismaClient();
+
+/**
+ * Detect if base64 content is a PDF (starts with %PDF- magic number)
+ */
+function isPdfContent(base64: string): boolean {
+  // PDF magic number in base64: "JVBERi" which is %PDF-
+  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
+}
+
+/**
+ * Build content array for vision API request, handling both image and PDF input
+ */
+function buildVisionContent(prompt: string, base64Data: string): any[] {
+  const isPdf = isPdfContent(base64Data);
+
+  if (isPdf) {
+    // PDF content - use file type for APIs that support it
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'file',
+        file: {
+          filename: 'page.pdf',
+          file_data: `data:application/pdf;base64,${base64Data}`,
+        },
+      }
+    ];
+  } else {
+    // Image content
+    return [
+      { type: 'text', text: prompt },
+      {
+        type: 'image_url',
+        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
+      }
+    ];
+  }
+}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -74,14 +115,15 @@ export interface SheetIndexEntry {
 
 /**
  * Extract title block data using GPT-4 Vision
+ * Supports both image and PDF input (auto-detected)
  */
 export async function extractTitleBlockWithVision(
-  imageBase64: string,
+  base64Data: string,
   fileName: string
 ): Promise<TitleBlockExtractionResult> {
   try {
     const prompt = generateTitleBlockPrompt();
-    
+
     const response = await fetch('https://routellm.abacus.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -93,18 +135,7 @@ export async function extractTitleBlockWithVision(
         messages: [
           {
             role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: prompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${imageBase64}`
-                }
-              }
-            ]
+            content: buildVisionContent(prompt, base64Data)
           }
         ],
         max_tokens: 1000,

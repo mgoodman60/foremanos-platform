@@ -332,29 +332,28 @@ export async function isSharpAvailable(): Promise<boolean> {
 }
 
 /**
- * Check if canvas-based rasterization is available
+ * Check if PDF processing is available (always true - uses pdf-lib)
+ */
+export async function isPdfProcessingAvailable(): Promise<boolean> {
+  return true;
+}
+
+/**
+ * @deprecated Use isPdfProcessingAvailable instead. Canvas is no longer used.
  */
 export async function isCanvasAvailable(): Promise<boolean> {
-  try {
-    const pdfImgConvert = await import('pdf-img-convert');
-    // Try a simple test - this will throw if canvas isn't available
-    return !!pdfImgConvert;
-  } catch {
-    return false;
-  }
+  // Canvas was removed to reduce bundle size (179 MB savings)
+  // Use native PDF processing instead, which works better with modern vision APIs
+  return false;
 }
 
 /**
  * Get the best available PDF processing strategy
+ * Always returns 'native-pdf' as this works with Claude/GPT-4V and preserves quality
  */
 export async function getBestStrategy(): Promise<'native-pdf' | 'canvas-raster' | 'text-only'> {
-  // Canvas-based rasterization gives best results for drawings
-  if (await isCanvasAvailable()) {
-    console.log('[PDF-SERVERLESS] Canvas available - using rasterization');
-    return 'canvas-raster';
-  }
-  
-  // Native PDF works well for modern vision APIs (Claude, GPT-4V)
+  // Native PDF works best for modern vision APIs (Claude, GPT-4V)
+  // Canvas was removed to meet Vercel serverless function size limits
   console.log('[PDF-SERVERLESS] Using native PDF strategy (Claude/GPT document support)');
   return 'native-pdf';
 }

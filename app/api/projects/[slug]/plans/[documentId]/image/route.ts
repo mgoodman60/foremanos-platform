@@ -128,26 +128,13 @@ export async function GET(
       }
     }
 
-    // If we have a PDF buffer, convert it to PNG using serverless-compatible rasterization
+    // Since canvas dependency was removed (Feb 2026) for Vercel compatibility,
+    // we now return PDF URLs for client-side rendering instead of server-side rasterization.
+    // This provides better quality anyway since the client can render at any resolution.
+    // The rasterizeSinglePage function now returns PDF pages by default.
     if (pdfBuffer) {
-      try {
-        console.log(`[Document Viewer] Converting page ${pageNumber} to image...`);
-        const rasterResult = await rasterizeSinglePage(pdfBuffer, pageNumber, {
-          dpi: 150,
-          maxWidth: 2048,
-          maxHeight: 2048,
-          format: 'png'
-        });
-
-        return new NextResponse(rasterResult.buffer, {
-          headers: {
-            'Content-Type': 'image/png',
-            'Cache-Control': 'public, max-age=3600'
-          }
-        });
-      } catch (error) {
-        console.error('[Document Viewer] Error converting PDF to image:', error);
-      }
+      console.log(`[Document Viewer] PDF rasterization not available (canvas removed). Using PDF URL fallback.`);
+      // Fall through to PDF URL fallback below
     }
 
     // Fallback: Return PDF URL for client-side rendering

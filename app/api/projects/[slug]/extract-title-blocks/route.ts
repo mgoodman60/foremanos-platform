@@ -81,13 +81,13 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
         for (const chunk of chunks) {
           try {
-            // Convert first page to image using serverless-compatible rasterization
+            // Extract first page as PDF for vision API processing
+            // Using PDF native mode for best quality with vision APIs (Claude, GPT-4V)
             const rasterResult = await rasterizeSinglePage(pdfBuffer, 1, {
               dpi: 150,
               maxWidth: 1500,
               maxHeight: 1500,
-              format: 'jpeg',
-              quality: 90
+              mode: 'pdf' // Use native PDF - better quality than rasterized images
             });
 
             // Extract title block
