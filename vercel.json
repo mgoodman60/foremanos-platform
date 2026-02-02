@@ -1,0 +1,32 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/chat/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/documents/upload-complete/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/documents/upload-chunk/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/projects/*/enhance/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/admin/finalize-reports/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING": "1"
+  },
+  "crons": [
+    {
+      "path": "/api/admin/finalize-reports",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}

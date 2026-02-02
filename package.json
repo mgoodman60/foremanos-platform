@@ -10,7 +10,8 @@
     "test:integration": "cross-env NODE_OPTIONS=--no-webstorage vitest run __tests__/api/chat/integration",
     "test:snapshot": "cross-env NODE_OPTIONS=--no-webstorage vitest run __tests__/api/chat/snapshots",
     "test:watch": "cross-env NODE_OPTIONS=--no-webstorage vitest watch",
-    "seed:test-user": "npx tsx scripts/seed-test-user.ts"
+    "seed:test-user": "npx tsx scripts/seed-test-user.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
