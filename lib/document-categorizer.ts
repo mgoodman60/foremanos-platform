@@ -69,11 +69,11 @@ export async function suggestDocumentCategory(
 
   // Use LLM for more complex analysis
   try {
-    const response = await fetch('https://routellm.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Updated from deprecated gpt-3.5-turbo (Jan 2026)

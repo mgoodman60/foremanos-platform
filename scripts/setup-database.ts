@@ -222,10 +222,9 @@ async function createAdminUser(): Promise<boolean> {
         username,
         password: hashedPassword,
         role: 'admin',
-        isApproved: true,
-        approvedAt: new Date(),
-        emailVerified: new Date(),
-        subscriptionTier: 'UNLIMITED',
+        approved: true,
+        emailVerified: true,
+        subscriptionTier: 'enterprise',
       },
     });
 

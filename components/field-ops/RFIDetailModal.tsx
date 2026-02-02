@@ -35,20 +35,20 @@ interface RFI {
   status: 'OPEN' | 'PENDING_RESPONSE' | 'RESPONDED' | 'CLOSED' | 'VOID';
   priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
   assignedToName: string | null;
-  assignedToEmail: string | null;
+  assignedToEmail?: string | null;
   ballInCourt: string | null;
   dueDate: string | null;
   response: string | null;
-  respondedAt: string | null;
-  specSection: string | null;
-  drawingRef: string | null;
+  respondedAt?: string | null;
+  specSection?: string | null;
+  drawingRef?: string | null;
   createdAt: string;
   createdByUser: { id: string; username: string };
   comments: Array<{
     id: string;
     content: string;
-    createdAt: string;
-    user: { id: string; username: string };
+    createdAt?: string;
+    user?: { id: string; username: string };
   }>;
   costImpact: number | null;
   scheduleImpact: number | null;
@@ -595,10 +595,12 @@ export default function RFIDetailModal({
                     {rfi.comments.map((comment) => (
                       <div key={comment.id} className="bg-gray-800/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-white">{comment.user.username}</span>
-                          <span className="text-xs text-gray-500">
-                            {format(new Date(comment.createdAt), 'MMM d, h:mm a')}
-                          </span>
+                          <span className="text-sm font-medium text-white">{comment.user?.username || 'Unknown'}</span>
+                          {comment.createdAt && (
+                            <span className="text-xs text-gray-500">
+                              {format(new Date(comment.createdAt), 'MMM d, h:mm a')}
+                            </span>
+                          )}
                         </div>
                         <p className="text-sm text-gray-300">{comment.content}</p>
                       </div>
