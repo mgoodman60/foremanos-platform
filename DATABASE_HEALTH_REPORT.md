@@ -307,8 +307,9 @@ npx prisma migrate dev
 
 ### Connection String Example:
 ```
-postgresql://neondb_owner:npg_kmDB3w7TrRhL@ep-twilight-glitter-ah8ybta3-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:[PASSWORD_REDACTED]@ep-twilight-glitter-ah8ybta3-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
 ```
+> **Note:** Credentials stored securely in `.env` file (not in git)
 
 ---
 
