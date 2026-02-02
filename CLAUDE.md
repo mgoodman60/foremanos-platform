@@ -308,10 +308,11 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 
 ## Skills (Slash Commands)
 
-11 skills available via `/command`:
+12 skills available via `/command`:
 
 | Command | Purpose |
 |---------|---------|
+| `/agent` | List and invoke specialized agents |
 | `/build` | Run build and report errors |
 | `/test` | Run tests with optional filter |
 | `/review` | Code review current changes |

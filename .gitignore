@@ -33,6 +33,7 @@ logs/
 *.swo
 .claude/*
 !.claude/agents/
+!.claude/skills/
 
 # OS
 .DS_Store
