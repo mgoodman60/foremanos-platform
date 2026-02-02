@@ -6,7 +6,7 @@
 import { setTimeout } from 'timers/promises';
 
 interface VisionAPIOptions {
-  model?: 'gpt-5.2' | 'gpt-4o' | 'gpt-4o-mini';
+  model?: 'gpt-4o' | 'gpt-4o-mini';
   maxRetries?: number;
   retryDelay?: number; // Base delay in ms
 }
@@ -50,7 +50,7 @@ export async function callVisionAPIWithRetry(
   options: VisionAPIOptions = {}
 ): Promise<VisionAPIResponse> {
   const {
-    model = 'gpt-5.2',
+    model = 'gpt-4o',
     maxRetries = 5,
     retryDelay = 1000,
   } = options;

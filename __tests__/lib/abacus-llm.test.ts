@@ -5,7 +5,7 @@ const fetchMock = vi.fn();
 global.fetch = fetchMock;
 
 // Store original env
-const originalEnv = process.env.ABACUSAI_API_KEY;
+const originalEnv = process.env.OPENAI_API_KEY;
 
 // Import after mocking
 import {
@@ -21,16 +21,16 @@ describe('Abacus LLM', () => {
     vi.clearAllMocks();
     fetchMock.mockReset();
     // Set API key for tests
-    process.env.ABACUSAI_API_KEY = 'test-abacus-api-key';
+    process.env.OPENAI_API_KEY = 'test-openai-api-key';
   });
 
   afterEach(() => {
     vi.clearAllMocks();
     // Restore original env
     if (originalEnv !== undefined) {
-      process.env.ABACUSAI_API_KEY = originalEnv;
+      process.env.OPENAI_API_KEY = originalEnv;
     } else {
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
     }
   });
 
@@ -73,12 +73,12 @@ describe('Abacus LLM', () => {
         });
 
         expect(fetchMock).toHaveBeenCalledWith(
-          'https://apps.abacus.ai/v1/chat/completions',
+          'https://api.openai.com/v1/chat/completions',
           expect.objectContaining({
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer test-abacus-api-key',
+              'Authorization': 'Bearer test-openai-api-key',
             },
           })
         );
@@ -89,7 +89,6 @@ describe('Abacus LLM', () => {
           messages,
           temperature: 0.3,
           max_tokens: 4000,
-          web_search: false,
         });
       });
 
@@ -119,7 +118,6 @@ describe('Abacus LLM', () => {
           model: 'gpt-4-turbo',
           temperature: 0.7,
           max_tokens: 2000,
-          web_search: true,
         };
 
         const result = await callAbacusLLM(messages, options);
@@ -133,7 +131,6 @@ describe('Abacus LLM', () => {
           messages,
           temperature: 0.7,
           max_tokens: 2000,
-          web_search: true,
         });
       });
 
@@ -361,15 +358,15 @@ describe('Abacus LLM', () => {
     });
 
     describe('Error cases', () => {
-      it('should throw error when ABACUSAI_API_KEY is not set', async () => {
-        delete process.env.ABACUSAI_API_KEY;
+      it('should throw error when OPENAI_API_KEY is not set', async () => {
+        delete process.env.OPENAI_API_KEY;
 
         const messages: LLMMessage[] = [
           { role: 'user', content: 'Hello' },
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'ABACUSAI_API_KEY environment variable is not set'
+          'OPENAI_API_KEY environment variable is not set'
         );
 
         expect(fetchMock).not.toHaveBeenCalled();
@@ -387,7 +384,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'LLM API request failed (400): Bad request - invalid model'
+          'OpenAI API request failed (400): Bad request - invalid model'
         );
       });
 
@@ -403,7 +400,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'LLM API request failed (401): Invalid API key'
+          'OpenAI API request failed (401): Invalid API key'
         );
       });
 
@@ -419,7 +416,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'LLM API request failed (429): Rate limit exceeded'
+          'OpenAI API request failed (429): Rate limit exceeded'
         );
       });
 
@@ -435,7 +432,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'LLM API request failed (500): Internal server error'
+          'OpenAI API request failed (500): Internal server error'
         );
       });
 
@@ -453,7 +450,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'LLM API request failed (503): No error details available'
+          'OpenAI API request failed (503): No error details available'
         );
       });
 
@@ -702,7 +699,10 @@ describe('Abacus LLM', () => {
         expect(callBody.messages).toEqual([
           {
             role: 'user',
-            content: `${textPrompt}\n\n[Image: data:image/jpeg;base64,${imageBase64}]`,
+            content: [
+              { type: 'text', text: textPrompt },
+              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
+            ],
           },
         ]);
       });
@@ -758,14 +758,12 @@ describe('Abacus LLM', () => {
           {
             temperature: 0.8,
             max_tokens: 1000,
-            web_search: true,
           }
         );
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody.temperature).toBe(0.8);
         expect(callBody.max_tokens).toBe(1000);
-        expect(callBody.web_search).toBe(true);
       });
 
       it('should handle empty image data', async () => {
@@ -783,7 +781,7 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('No image detected');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content).toContain('[Image: data:image/jpeg;base64,]');
+        expect(callBody.messages[0].content[1].image_url.url).toBe('data:image/jpeg;base64,');
       });
 
       it('should handle very long image base64 data', async () => {
@@ -805,12 +803,12 @@ describe('Abacus LLM', () => {
     });
 
     describe('Error cases', () => {
-      it('should throw error when ABACUSAI_API_KEY is not set', async () => {
-        delete process.env.ABACUSAI_API_KEY;
+      it('should throw error when OPENAI_API_KEY is not set', async () => {
+        delete process.env.OPENAI_API_KEY;
 
         await expect(
           callAbacusLLMWithVision('What is this?', 'imagedata')
-        ).rejects.toThrow('ABACUSAI_API_KEY environment variable is not set');
+        ).rejects.toThrow('OPENAI_API_KEY environment variable is not set');
       });
 
       it('should propagate API errors', async () => {
@@ -822,7 +820,7 @@ describe('Abacus LLM', () => {
 
         await expect(
           callAbacusLLMWithVision('Describe', 'badimage')
-        ).rejects.toThrow('LLM API request failed (400): Invalid image format');
+        ).rejects.toThrow('OpenAI API request failed (400): Invalid image format');
       });
 
       it('should handle network errors', async () => {
@@ -850,7 +848,8 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('Image analyzed');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content).toContain('\n\n[Image: data:image/jpeg;base64,imagedata]');
+        expect(callBody.messages[0].content[0].text).toBe('');
+        expect(callBody.messages[0].content[1].image_url.url).toBe('data:image/jpeg;base64,imagedata');
       });
 
       it('should handle special characters in text prompt', async () => {
@@ -869,7 +868,7 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('Processed');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content).toContain(prompt);
+        expect(callBody.messages[0].content[0].text).toBe(prompt);
       });
 
       it('should handle multiline text prompt', async () => {
@@ -888,7 +887,7 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('Response');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content).toContain(prompt);
+        expect(callBody.messages[0].content[0].text).toBe(prompt);
       });
 
       it('should default to gpt-4o when no model specified', async () => {

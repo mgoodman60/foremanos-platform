@@ -312,10 +312,10 @@ describe('error-messages', () => {
     });
 
     it('should handle different error categories', () => {
-      const authToast = formatToastError(401);
+      const authToast = formatToastError('Unauthorized');
       expect(authToast.title).toBe('Session Expired');
 
-      const serverToast = formatToastError(500);
+      const serverToast = formatToastError('Internal server error');
       expect(serverToast.title).toBe('Server Error');
     });
   });

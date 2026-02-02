@@ -39,16 +39,12 @@ describe('Vision API Multi-Provider', () => {
   });
 
   describe('getProviderDisplayName', () => {
-    it('should return correct display name for gpt-5.2', () => {
-      expect(getProviderDisplayName('gpt-5.2')).toBe('GPT-5.2 (Abacus AI)');
+    it('should return correct display name for gpt-4o', () => {
+      expect(getProviderDisplayName('gpt-4o')).toBe('GPT-4o (OpenAI)');
     });
 
     it('should return correct display name for claude-3.5-sonnet', () => {
       expect(getProviderDisplayName('claude-3.5-sonnet')).toBe('Claude Sonnet 4.5 (Anthropic)');
-    });
-
-    it('should return correct display name for gpt-4-vision', () => {
-      expect(getProviderDisplayName('gpt-4-vision')).toBe('GPT-4 Vision (OpenAI)');
     });
 
     it('should return provider name if not found', () => {
@@ -87,10 +83,10 @@ describe('Vision API Multi-Provider', () => {
       const result = await analyzeWithMultiProvider('base64image', 'Extract content');
 
       expect(result.success).toBe(true);
-      expect(result.provider).toBe('gpt-5.2');
+      expect(result.provider).toBe('gpt-4o');
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://apps.abacus.ai/v1/chat/completions',
+        'https://api.openai.com/v1/chat/completions',
         expect.any(Object)
       );
     });

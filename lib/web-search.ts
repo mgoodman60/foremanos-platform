@@ -113,7 +113,9 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
       ? `Search the web for: "${enhancedQuery}"`
       : `Search the web for construction-related information: "${enhancedQuery}"`;
 
-    // Perform web search using Abacus AI API
+    // Perform web search using OpenAI API
+    // Note: OpenAI doesn't have native web search, so we ask GPT-4o to provide
+    // relevant authoritative sources based on its training knowledge
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -125,14 +127,13 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
         messages: [
           {
             role: 'system',
-            content: 'You are a web search assistant. Extract relevant information from search results and format as structured data.'
+            content: 'You are an expert in construction codes and standards. Provide authoritative references with real URLs to official sources like ICC, NFPA, ADA.gov, OSHA, and other regulatory bodies. Only provide URLs that are known to exist.'
           },
           {
             role: 'user',
-            content: `${promptPrefix}\n\nProvide 3-5 relevant sources with:\n1. Title\n2. URL\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
+            content: `${promptPrefix}\n\nProvide 3-5 relevant authoritative sources with:\n1. Title\n2. URL (official source only)\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
           }
         ],
-        web_search: true, // Enable web search
         stream: false,
         max_tokens: 1500,
       }),

@@ -16,7 +16,7 @@ const fetchMock = vi.fn();
 global.fetch = fetchMock;
 
 // Set environment variables before importing
-process.env.ABACUSAI_API_KEY = 'test-abacus-key';
+process.env.OPENAI_API_KEY = 'test-openai-key';
 
 // Import after mocks are set up
 import {
@@ -40,7 +40,7 @@ describe('Vision API Wrapper', () => {
   });
 
   describe('callVisionAPIWithRetry - Success Cases', () => {
-    it('should successfully call vision API with gpt-5.2 on first attempt', async () => {
+    it('should successfully call vision API with gpt-4o on first attempt', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -64,12 +64,12 @@ describe('Vision API Wrapper', () => {
       expect(result.usedFallback).toBeUndefined();
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://routellm.abacus.ai/v1/chat/completions',
+        'https://api.openai.com/v1/chat/completions',
         expect.objectContaining({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer test-abacus-key',
+            'Authorization': 'Bearer test-openai-key',
           },
         })
       );
@@ -101,12 +101,12 @@ describe('Vision API Wrapper', () => {
         }),
       });
 
-      await callVisionAPIWithRetry('base64', 'prompt', { model: 'gpt-4o-vision' });
+      await callVisionAPIWithRetry('base64', 'prompt', { model: 'gpt-4o' });
 
       const callArgs = fetchMock.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
 
-      expect(body.model).toBe('gpt-4o-vision');
+      expect(body.model).toBe('gpt-4o');
     });
 
     it('should set correct temperature and max_tokens', async () => {
@@ -523,9 +523,9 @@ describe('Vision API Wrapper', () => {
     });
   });
 
-  describe('callVisionAPIWithRetry - Claude Haiku Fallback', () => {
-    it('should fall back to Claude Haiku after primary model exhausts retries', async () => {
-      // Primary model (gpt-5.2) fails all retries
+  describe('callVisionAPIWithRetry - GPT-4o-mini Fallback', () => {
+    it('should fall back to gpt-4o-mini after primary model exhausts retries', async () => {
+      // Primary model (gpt-4o) fails all retries
       for (let i = 0; i < 3; i++) {
         fetchMock.mockResolvedValueOnce({
           ok: true,
@@ -533,29 +533,29 @@ describe('Vision API Wrapper', () => {
           text: async () => '<!DOCTYPE html>Cloudflare</html>',
         });
       }
-      // Claude Haiku succeeds
+      // gpt-4o-mini succeeds
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
         text: async () => JSON.stringify({
-          choices: [{ message: { content: 'Claude Haiku success' } }],
+          choices: [{ message: { content: 'gpt-4o-mini success' } }],
         }),
       });
 
       const result = await callVisionAPIWithRetry('base64', 'prompt', {
-        model: 'gpt-5.2',
+        model: 'gpt-4o',
         maxRetries: 3,
         retryDelay: 100,
       });
 
       expect(result.success).toBe(true);
-      expect(result.data).toBe('Claude Haiku success');
+      expect(result.data).toBe('gpt-4o-mini success');
       expect(result.usedFallback).toBe(true);
-      expect(result.fallbackMethod).toBe('claude-haiku');
+      expect(result.fallbackMethod).toBe('gpt-4o-mini');
       expect(fetchMock).toHaveBeenCalledTimes(4); // 3 for primary + 1 for fallback
     });
 
-    it('should not fall back to Claude Haiku if already using Claude Haiku', async () => {
+    it('should not fall back to gpt-4o-mini if already using gpt-4o-mini', async () => {
       for (let i = 0; i < 3; i++) {
         fetchMock.mockResolvedValueOnce({
           ok: true,
@@ -565,7 +565,7 @@ describe('Vision API Wrapper', () => {
       }
 
       const result = await callVisionAPIWithRetry('base64', 'prompt', {
-        model: 'claude-haiku',
+        model: 'gpt-4o-mini',
         maxRetries: 3,
         retryDelay: 100,
       });
@@ -575,7 +575,7 @@ describe('Vision API Wrapper', () => {
       expect(fetchMock).toHaveBeenCalledTimes(3); // Only primary attempts, no fallback
     });
 
-    it('should use different retry settings for Claude Haiku fallback', async () => {
+    it('should use different retry settings for gpt-4o-mini fallback', async () => {
       // Primary fails
       for (let i = 0; i < 2; i++) {
         fetchMock.mockResolvedValueOnce({
@@ -631,7 +631,7 @@ describe('Vision API Wrapper', () => {
   });
 
   describe('callVisionAPIWithRetry - Default Options', () => {
-    it('should use default model gpt-5.2', async () => {
+    it('should use default model gpt-4o', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -644,7 +644,7 @@ describe('Vision API Wrapper', () => {
 
       const callArgs = fetchMock.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
-      expect(body.model).toBe('gpt-5.2');
+      expect(body.model).toBe('gpt-4o');
     });
 
     // Skip - involves retry delays

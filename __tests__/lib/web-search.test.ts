@@ -232,7 +232,7 @@ describe('Web Search Service', () => {
   describe('performWebSearch', () => {
     describe('Success Cases', () => {
       it('should perform web search and return structured results', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -265,7 +265,7 @@ Source: ada.gov
         expect(result.results.length).toBeGreaterThan(0);
         expect(result.query).toContain('IBC building code requirements');
         expect(mockFetch).toHaveBeenCalledWith(
-          'https://apps.abacus.ai/v1/chat/completions',
+          'https://api.openai.com/v1/chat/completions',
           expect.objectContaining({
             method: 'POST',
             headers: {
@@ -277,7 +277,7 @@ Source: ada.gov
       });
 
       it('should extract URLs from content', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -307,7 +307,7 @@ Here are some relevant sources:
       });
 
       it('should limit results to 5', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -334,7 +334,7 @@ Snippet: Content for result ${i + 1}
       });
 
       it('should extract source domain from URL', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -362,7 +362,7 @@ Snippet: Test content
       });
 
       it('should handle URLs without www prefix', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -386,7 +386,7 @@ Snippet: Test content
       });
 
       it('should enhance query with construction context', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         mockFetch.mockResolvedValue({
           ok: true,
@@ -403,7 +403,7 @@ Snippet: Test content
       });
 
       it('should add construction context for foundation queries', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         mockFetch.mockResolvedValue({
           ok: true,
@@ -420,7 +420,7 @@ Snippet: Test content
       });
 
       it('should not add duplicate construction context', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         mockFetch.mockResolvedValue({
           ok: true,
@@ -441,7 +441,7 @@ Snippet: Test content
 
     describe('API Configuration', () => {
       it('should send correct request parameters', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-key-123';
+        process.env.OPENAI_API_KEY = 'test-key-123';
 
         mockFetch.mockResolvedValue({
           ok: true,
@@ -451,7 +451,7 @@ Snippet: Test content
         await performWebSearch('test query');
 
         expect(mockFetch).toHaveBeenCalledWith(
-          'https://apps.abacus.ai/v1/chat/completions',
+          'https://api.openai.com/v1/chat/completions',
           expect.objectContaining({
             method: 'POST',
             headers: {
@@ -465,7 +465,6 @@ Snippet: Test content
         const body = JSON.parse(callArgs.body as string);
 
         expect(body.model).toBe('gpt-4o');
-        expect(body.web_search).toBe(true);
         expect(body.stream).toBe(false);
         expect(body.max_tokens).toBe(1500);
         expect(body.messages).toHaveLength(2);
@@ -476,7 +475,7 @@ Snippet: Test content
 
     describe('Error Handling', () => {
       it('should handle missing API key gracefully', async () => {
-        delete process.env.ABACUSAI_API_KEY;
+        delete process.env.OPENAI_API_KEY;
 
         const result = await performWebSearch('test query');
 
@@ -487,7 +486,7 @@ Snippet: Test content
       });
 
       it('should handle API error responses', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         mockFetch.mockResolvedValue({
           ok: false,
@@ -502,7 +501,7 @@ Snippet: Test content
       });
 
       it('should handle network errors', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         mockFetch.mockRejectedValue(new Error('Network error'));
 
@@ -517,7 +516,7 @@ Snippet: Test content
       });
 
       it('should handle malformed API responses', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         mockFetch.mockResolvedValue({
           ok: true,
@@ -532,7 +531,7 @@ Snippet: Test content
       });
 
       it('should handle invalid URLs gracefully', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -562,7 +561,7 @@ Snippet: Test content
       });
 
       it('should filter out results without URLs', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -595,7 +594,7 @@ Snippet: This has no URL
 
     describe('Content Parsing', () => {
       it('should parse structured content with labels', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -624,7 +623,7 @@ Source: codes.example.com
       });
 
       it('should handle description label as snippet', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -652,7 +651,7 @@ Description: This is a description instead of snippet
       });
 
       it('should extract snippet from content if no label', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -680,7 +679,7 @@ This is content that should become the snippet because it is long enough and has
       });
 
       it('should create fallback results from URLs only', async () => {
-        process.env.ABACUSAI_API_KEY = 'test-api-key';
+        process.env.OPENAI_API_KEY = 'test-api-key';
 
         const mockResponse = {
           choices: [
@@ -880,7 +879,7 @@ https://example.org/page2
 
   describe('Integration Scenarios', () => {
     it('should handle full workflow for code query', async () => {
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
 
       const query = 'ADA door width requirements';
 
@@ -926,7 +925,7 @@ Source: ada.gov
     });
 
     it('should handle empty API key and empty query gracefully', async () => {
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
 
       const result = await performWebSearch('');
 
@@ -937,7 +936,7 @@ Source: ada.gov
 
   describe('Edge Cases', () => {
     it('should handle very long queries', async () => {
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
 
       const longQuery = 'building code requirements '.repeat(50);
 
@@ -952,7 +951,7 @@ Source: ada.gov
     });
 
     it('should handle Unicode and emoji in queries', async () => {
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
 
       mockFetch.mockResolvedValue({
         ok: true,
@@ -965,7 +964,7 @@ Source: ada.gov
     });
 
     it('should handle results with missing fields', async () => {
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
 
       const mockResponse = {
         choices: [
@@ -993,7 +992,7 @@ URL: https://example.com
     });
 
     it('should handle JSON parsing errors', async () => {
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
 
       mockFetch.mockResolvedValue({
         ok: true,

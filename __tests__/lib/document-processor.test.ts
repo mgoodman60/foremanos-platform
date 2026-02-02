@@ -29,7 +29,7 @@ const mockPrisma = vi.hoisted(() => {
       findUnique: vi.fn(),
     },
     // Add $transaction mock that passes through the callback with the same prisma client
-    $transaction: vi.fn((callback: (tx: typeof prismaClient) => Promise<unknown>) => callback(prismaClient)),
+    $transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) => callback(prismaClient)),
   };
   return prismaClient;
 });
