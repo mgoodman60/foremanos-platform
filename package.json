@@ -11,6 +11,7 @@
     "test:snapshot": "cross-env NODE_OPTIONS=--no-webstorage vitest run __tests__/api/chat/snapshots",
     "test:watch": "cross-env NODE_OPTIONS=--no-webstorage vitest watch",
     "seed:test-user": "npx tsx scripts/seed-test-user.ts",
+    "setup:database": "npx tsx scripts/setup-database.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {
