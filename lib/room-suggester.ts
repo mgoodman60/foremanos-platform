@@ -44,9 +44,9 @@ export async function getRoomSuggestionsFromText(
     tradeType?: string;
   }
 ): Promise<RoomSuggestion[]> {
-  const ABACUS_API_KEY = process.env.ABACUSAI_API_KEY;
-  if (!ABACUS_API_KEY) {
-    throw new Error('ABACUSAI_API_KEY not configured');
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY not configured');
   }
 
   // Get all rooms for the project
@@ -108,11 +108,11 @@ Guidelines:
 - Return ONLY valid JSON`;
 
   try {
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ABACUS_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',

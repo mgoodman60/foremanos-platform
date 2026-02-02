@@ -126,12 +126,11 @@ export async function analyzeQuotePDF(
     // Use OpenAI-compatible API with vision for PDF analysis
     const OpenAI = (await import('openai')).default;
     const openai = new OpenAI({
-      apiKey: process.env.ABACUSAI_API_KEY,
-      baseURL: 'https://api.abacus.ai/llm/v1',
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
     const response = await openai.chat.completions.create({
-      model: 'claude-3-5-sonnet',
+      model: 'gpt-5.2',
       messages: [
         {
           role: 'user',

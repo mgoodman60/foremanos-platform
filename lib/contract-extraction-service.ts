@@ -11,8 +11,7 @@ let openaiInstance: OpenAI | null = null;
 function getOpenAI(): OpenAI {
   if (!openaiInstance) {
     openaiInstance = new OpenAI({
-      apiKey: process.env.ABACUSAI_API_KEY || '',
-      baseURL: 'https://api.abacus.ai/llm/v1',
+      apiKey: process.env.OPENAI_API_KEY || '',
     });
   }
   return openaiInstance;
@@ -122,7 +121,7 @@ Provide the extracted data as a JSON object with these fields:
 ONLY respond with valid JSON. Do not include any other text.`;
 
     const response = await getOpenAI().chat.completions.create({
-      model: 'claude-3-5-sonnet',
+      model: 'gpt-5.2',
       messages: [
         { role: 'system', content: systemPrompt },
         {

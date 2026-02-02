@@ -492,7 +492,7 @@ Extract all tasks now:`;
         ]
       }
     ], {
-      model: 'claude-sonnet-4-20250514',
+      model: 'gpt-5.2',
       temperature: 0.1,
       max_tokens: 8000,
     });

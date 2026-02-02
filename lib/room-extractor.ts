@@ -176,9 +176,9 @@ async function extractRoomDataWithLLM(
   chunks: string[],
   projectName: string
 ): Promise<ExtractedRoom[]> {
-  const ABACUS_API_KEY = process.env.ABACUSAI_API_KEY;
-  if (!ABACUS_API_KEY) {
-    throw new Error('ABACUSAI_API_KEY not configured');
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY not configured');
   }
 
   // STEP 1: Pattern-based extraction to find all room numbers

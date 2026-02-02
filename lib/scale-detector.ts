@@ -157,9 +157,9 @@ export async function detectScalesWithVision(
   confidence: number;
 }> {
   try {
-    const apiKey = process.env.ABACUSAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      throw new Error('ABACUSAI_API_KEY not configured');
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
     const prompt = `Analyze this construction drawing and extract ALL scales.
@@ -207,7 +207,7 @@ If you find multiple scales on the sheet, extract:
 - "AS NOTED" → scaleString: "AS NOTED", format: "custom", confidence: 1.0
 - If no scale found → empty scales array, confidence: 0.0`;
 
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

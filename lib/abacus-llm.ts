@@ -1,15 +1,20 @@
 /**
- * Abacus LLM API Helper
- * 
- * Provides a simple interface for calling the Abacus LLM API
- * from server-side code.
+ * OpenAI LLM API Helper
+ *
+ * Provides a simple interface for calling OpenAI's API directly.
+ * Updated Feb 2026: Switched from Abacus AI proxy to direct OpenAI.
  */
 
 export interface LLMMessageContent {
   type: string;
   text?: string;
   image_url?: { url: string };
-  // Claude document format for PDFs
+  // File content for PDFs
+  file?: {
+    filename: string;
+    file_data: string;
+  };
+  // Document content (Claude-compatible format, converted for OpenAI)
   source?: {
     type: string;
     media_type: string;
@@ -26,7 +31,6 @@ export interface LLMOptions {
   model?: string;
   temperature?: number;
   max_tokens?: number;
-  web_search?: boolean;
   response_format?: { type: string };
 }
 
@@ -41,45 +45,85 @@ export interface LLMResponse {
 }
 
 /**
- * Call the Abacus LLM API with the given messages
+ * Call OpenAI's API with the given messages
+ * @deprecated Use callOpenAILLM instead - this alias kept for backwards compatibility
  */
 export async function callAbacusLLM(
   messages: LLMMessage[],
   options: LLMOptions = {}
 ): Promise<LLMResponse> {
-  const apiKey = process.env.ABACUSAI_API_KEY;
+  return callOpenAILLM(messages, options);
+}
+
+/**
+ * Convert messages with document content to OpenAI-compatible format
+ */
+function convertMessagesForOpenAI(messages: LLMMessage[]): LLMMessage[] {
+  return messages.map(msg => {
+    if (typeof msg.content === 'string') {
+      return msg;
+    }
+
+    // Convert array content to OpenAI format
+    const convertedContent: LLMMessageContent[] = msg.content.map(item => {
+      // Handle document type (Claude format) - convert to base64 data URL
+      if (item.type === 'document' && item.source) {
+        const mediaType = item.source.media_type || 'application/pdf';
+        const base64Data = item.source.data;
+        // OpenAI can process PDFs as images with vision models
+        return {
+          type: 'image_url',
+          image_url: { url: `data:${mediaType};base64,${base64Data}` }
+        };
+      }
+      // Pass through other types unchanged
+      return item;
+    });
+
+    return { ...msg, content: convertedContent };
+  });
+}
+
+/**
+ * Call OpenAI's API with the given messages
+ */
+export async function callOpenAILLM(
+  messages: LLMMessage[],
+  options: LLMOptions = {}
+): Promise<LLMResponse> {
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('ABACUSAI_API_KEY environment variable is not set');
+    throw new Error('OPENAI_API_KEY environment variable is not set');
   }
 
   const {
     model = 'gpt-4o',
     temperature = 0.3,
     max_tokens = 4000,
-    web_search = false,
     response_format,
   } = options;
+
+  // Convert document content to OpenAI-compatible format
+  const convertedMessages = convertMessagesForOpenAI(messages);
 
   const requestBody: {
     model: string;
     messages: LLMMessage[];
     temperature: number;
     max_tokens: number;
-    web_search: boolean;
     response_format?: { type: string };
   } = {
     model,
-    messages,
+    messages: convertedMessages,
     temperature,
     max_tokens,
-    web_search,
   };
 
   if (response_format) {
     requestBody.response_format = response_format;
   }
 
-  const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -90,11 +134,11 @@ export async function callAbacusLLM(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => 'No error details available');
-    throw new Error(`LLM API request failed (${response.status}): ${errorText}`);
+    throw new Error(`OpenAI API request failed (${response.status}): ${errorText}`);
   }
 
   const data = await response.json();
-  
+
   return {
     content: data.choices?.[0]?.message?.content || '',
     model: data.model || model,
@@ -103,9 +147,21 @@ export async function callAbacusLLM(
 }
 
 /**
- * Call the Abacus LLM API with vision (image analysis)
+ * Call OpenAI's API with vision (image analysis)
+ * @deprecated Use callOpenAILLMWithVision instead - this alias kept for backwards compatibility
  */
 export async function callAbacusLLMWithVision(
+  textPrompt: string,
+  imageBase64: string,
+  options: LLMOptions = {}
+): Promise<LLMResponse> {
+  return callOpenAILLMWithVision(textPrompt, imageBase64, options);
+}
+
+/**
+ * Call OpenAI's API with vision (image analysis)
+ */
+export async function callOpenAILLMWithVision(
   textPrompt: string,
   imageBase64: string,
   options: LLMOptions = {}
@@ -113,9 +169,12 @@ export async function callAbacusLLMWithVision(
   const messages: LLMMessage[] = [
     {
       role: 'user',
-      content: `${textPrompt}\n\n[Image: data:image/jpeg;base64,${imageBase64}]`,
+      content: [
+        { type: 'text', text: textPrompt },
+        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
+      ],
     },
   ];
 
-  return callAbacusLLM(messages, { ...options, model: options.model || 'gpt-4o' });
+  return callOpenAILLM(messages, { ...options, model: options.model || 'gpt-4o' });
 }

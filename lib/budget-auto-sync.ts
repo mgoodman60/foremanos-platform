@@ -54,8 +54,7 @@ Return ONLY the JSON array, no explanation.`;
 
   try {
     const openai = new OpenAI({
-      apiKey: process.env.ABACUSAI_API_KEY,
-      baseURL: 'https://routellm.abacus.ai/v1',
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
     const response = await openai.chat.completions.create({

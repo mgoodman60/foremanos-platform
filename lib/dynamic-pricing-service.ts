@@ -156,7 +156,6 @@ Use web search to find the most current pricing data. Consider:
       ], {
         temperature: 0.3,
         max_tokens: 2000,
-        web_search: true  // Enable web search for current pricing data
       });
       
       // Parse the response

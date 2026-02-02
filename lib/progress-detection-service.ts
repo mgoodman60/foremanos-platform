@@ -12,8 +12,7 @@ let openaiInstance: OpenAI | null = null;
 function getOpenAI(): OpenAI {
   if (!openaiInstance) {
     openaiInstance = new OpenAI({
-      apiKey: process.env.ABACUSAI_API_KEY || '',
-      baseURL: 'https://api.abacus.ai/llm/v1',
+      apiKey: process.env.OPENAI_API_KEY || '',
     });
   }
   return openaiInstance;

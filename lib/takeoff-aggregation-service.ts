@@ -501,7 +501,7 @@ Only suggest merges for items that are clearly the same material.`;
   try {
     const response = await callAbacusLLM(
       [{ role: 'user', content: prompt }],
-      { model: 'claude-3-5-sonnet' }
+      { model: 'gpt-5.2' }
     );
     const content = response.content;
     

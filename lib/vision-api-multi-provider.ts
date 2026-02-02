@@ -2,25 +2,24 @@
  * Multi-Provider Vision API Wrapper
  *
  * Provides resilient vision processing with automatic fallback across multiple providers:
- * 1. GPT-5.2 (Abacus AI) - Primary, highest quality
+ * 1. GPT-4o (OpenAI) - Primary, highest quality
  * 2. Claude 4.5 Sonnet (Anthropic) - Equal/better quality, different infrastructure
- * 3. GPT-4 Vision (OpenAI) - Proven reliability
  *
  * Features:
- * - Automatic provider switching on Cloudflare blocks
+ * - Automatic provider switching on errors
  * - Quality validation with confidence scoring
  * - Provider performance tracking
  * - Per-provider rate limiting
  *
- * Note: Gemini removed (Jan 2026) - adds complexity without significant benefit
+ * Updated Feb 2026: Switched from Abacus AI proxy to direct OpenAI API
  */
 
 import fs from 'fs';
 import path from 'path';
 import { logger } from '@/lib/logger';
 
-// Provider types (Gemini removed - OpenAI + Anthropic provide complete coverage)
-export type VisionProvider = 'gpt-5.2' | 'claude-3.5-sonnet' | 'gpt-4-vision';
+// Provider types (using direct OpenAI + Anthropic)
+export type VisionProvider = 'gpt-4o' | 'claude-3.5-sonnet';
 
 interface ProviderConfig {
   name: VisionProvider;
@@ -46,11 +45,11 @@ interface QualityMetrics {
   score: number; // 0-100
 }
 
-// Provider configurations (Gemini removed Jan 2026)
+// Provider configurations (Updated Feb 2026 - direct OpenAI)
 const PROVIDERS: ProviderConfig[] = [
   {
-    name: 'gpt-5.2',
-    displayName: 'GPT-5.2 (Abacus AI)',
+    name: 'gpt-4o',
+    displayName: 'GPT-4o (OpenAI)',
     maxRetries: 3,
     baseDelay: 1000,
   },
@@ -58,12 +57,6 @@ const PROVIDERS: ProviderConfig[] = [
     name: 'claude-3.5-sonnet',
     displayName: 'Claude Sonnet 4.5 (Anthropic)',
     maxRetries: 3,
-    baseDelay: 1000,
-  },
-  {
-    name: 'gpt-4-vision',
-    displayName: 'GPT-4 Vision (OpenAI)',
-    maxRetries: 2,
     baseDelay: 1000,
   },
 ];
@@ -141,22 +134,22 @@ function isPdfContent(base64: string): boolean {
   return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
 }
 
-// Call Abacus AI (GPT-5.2)
-async function callAbacusAI(
+// Call OpenAI GPT-4o (primary vision model)
+async function callOpenAIVision(
   imageBase64: string,
   prompt: string,
   retryCount: number = 0
 ): Promise<VisionResponse> {
   const config = PROVIDERS[0];
-  const apiKey = process.env.ABACUSAI_API_KEY;
-  
+  const apiKey = process.env.OPENAI_API_KEY;
+
   if (!apiKey) {
     return {
       success: false,
       content: '',
-      provider: 'gpt-5.2',
+      provider: 'gpt-4o',
       attempts: retryCount + 1,
-      error: 'ABACUSAI_API_KEY not configured',
+      error: 'OPENAI_API_KEY not configured',
     };
   }
 
@@ -189,14 +182,14 @@ async function callAbacusAI(
       });
     }
     
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-5.2',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'user',
@@ -232,7 +225,7 @@ async function callAbacusAI(
     return {
       success: true,
       content,
-      provider: 'gpt-5.2',
+      provider: 'gpt-4o',
       attempts: retryCount + 1,
     };
   } catch (error: any) {
@@ -246,7 +239,7 @@ async function callAbacusAI(
       return {
         success: false,
         content: '',
-        provider: 'gpt-5.2',
+        provider: 'gpt-4o',
         attempts: retryCount + 1,
         error: 'CLOUDFLARE_BLOCK',
       };
@@ -259,7 +252,7 @@ async function callAbacusAI(
       return {
         success: false,
         content: '',
-        provider: 'gpt-5.2',
+        provider: 'gpt-4o',
         attempts: retryCount + 1,
         error: isTimeout ? 'TIMEOUT' : 'NETWORK_ERROR',
       };
@@ -270,13 +263,13 @@ async function callAbacusAI(
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      return callAbacusAI(imageBase64, prompt, retryCount + 1);
+      return callOpenAIVision(imageBase64, prompt, retryCount + 1);
     }
 
     return {
       success: false,
       content: '',
-      provider: 'gpt-5.2',
+      provider: 'gpt-4o',
       attempts: retryCount + 1,
       error: error.message,
     };
@@ -389,7 +382,7 @@ async function callOpenAI(
     return {
       success: false,
       content: '',
-      provider: 'gpt-4-vision',
+      provider: 'gpt-4o',
       attempts: retryCount + 1,
       error: 'OpenAI API key not configured',
     };
@@ -437,7 +430,7 @@ async function callOpenAI(
     return {
       success: true,
       content,
-      provider: 'gpt-4-vision',
+      provider: 'gpt-4o',
       attempts: retryCount + 1,
     };
   } catch (error: any) {
@@ -452,7 +445,7 @@ async function callOpenAI(
     return {
       success: false,
       content: '',
-      provider: 'gpt-4-vision',
+      provider: 'gpt-4o',
       attempts: retryCount + 1,
       error: error.message,
     };
@@ -524,7 +517,7 @@ export async function analyzeWithLoadBalancing(
   logger.info('VISION_API', `Load-Balanced Vision Analysis Started`, { pageNumber: pageNumber || 'N/A' });
 
   const providerFunctions = [
-    callAbacusAI,
+    callOpenAIVision,
     callAnthropic,
     callOpenAI,
   ];
@@ -576,7 +569,7 @@ export async function analyzeWithMultiProvider(
   logger.info('VISION_API', 'Multi-Provider Vision Analysis Started');
 
   const providerFunctions = [
-    callAbacusAI,
+    callOpenAIVision,
     callAnthropic,
     callOpenAI,
   ];
@@ -643,7 +636,7 @@ export async function analyzeWithMultiProvider(
   return {
     success: false,
     content: '',
-    provider: 'gpt-4-vision', // Last attempted
+    provider: 'gpt-4o', // Last attempted
     attempts: totalAttempts,
     error: `All providers failed. Last error: ${lastError}`,
     confidenceScore: 0,

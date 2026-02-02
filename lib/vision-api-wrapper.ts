@@ -6,7 +6,7 @@
 import { setTimeout } from 'timers/promises';
 
 interface VisionAPIOptions {
-  model?: 'gpt-5.2' | 'gpt-4o-vision' | 'claude-haiku';
+  model?: 'gpt-5.2' | 'gpt-4o' | 'gpt-4o-mini';
   maxRetries?: number;
   retryDelay?: number; // Base delay in ms
 }
@@ -16,7 +16,7 @@ interface VisionAPIResponse {
   data?: any;
   error?: string;
   usedFallback?: boolean;
-  fallbackMethod?: 'text-extraction' | 'claude-haiku';
+  fallbackMethod?: 'text-extraction' | 'gpt-4o-mini';
   retriesUsed?: number;
 }
 
@@ -63,11 +63,11 @@ export async function callVisionAPIWithRetry(
     try {
       console.log(`[VISION] Attempt ${attempt + 1}/${maxRetries} with ${model}`);
       
-      const response = await fetch('https://routellm.abacus.ai/v1/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
           model: model,
@@ -132,26 +132,26 @@ export async function callVisionAPIWithRetry(
     }
   }
 
-  // All retries failed - try Claude Haiku as fallback
-  if (model !== 'claude-haiku') {
-    console.log('[VISION] Primary model exhausted, trying Claude Haiku fallback...');
-    
+  // All retries failed - try GPT-4o-mini as fallback
+  if (model !== 'gpt-4o-mini') {
+    console.log('[VISION] Primary model exhausted, trying GPT-4o-mini fallback...');
+
     try {
       const fallbackResult = await callVisionAPIWithRetry(
         imageBase64,
         prompt,
-        { model: 'claude-haiku', maxRetries: 3, retryDelay: 2000 }
+        { model: 'gpt-4o-mini', maxRetries: 3, retryDelay: 2000 }
       );
-      
+
       if (fallbackResult.success) {
         return {
           ...fallbackResult,
           usedFallback: true,
-          fallbackMethod: 'claude-haiku',
+          fallbackMethod: 'gpt-4o-mini',
         };
       }
     } catch (fallbackError) {
-      console.error('[VISION] Claude Haiku fallback also failed:', fallbackError);
+      console.error('[VISION] GPT-4o-mini fallback also failed:', fallbackError);
     }
   }
 

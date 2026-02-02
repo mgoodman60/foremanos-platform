@@ -278,9 +278,9 @@ async function extractFinishDataWithLLM(
   chunks: string[],
   existingRoomNumbers: string[]
 ): Promise<FinishScheduleEntry[]> {
-  const ABACUS_API_KEY = process.env.ABACUSAI_API_KEY;
-  if (!ABACUS_API_KEY) {
-    throw new Error('ABACUSAI_API_KEY not configured');
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY not configured');
   }
 
   // Combine relevant chunks

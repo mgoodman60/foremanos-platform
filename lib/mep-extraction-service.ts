@@ -282,7 +282,7 @@ If no equipment is found, return empty array: []`;
 
   const response = await callAbacusLLM(
     [{ role: 'user', content: prompt }],
-    { model: 'claude-3-5-sonnet' }
+    { model: 'gpt-5.2' }
   );
 
   const content = response.content;

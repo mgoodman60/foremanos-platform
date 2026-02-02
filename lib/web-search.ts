@@ -96,7 +96,7 @@ export function shouldUseWebSearch(query: string, documentChunksFound: number): 
  */
 export async function performWebSearch(query: string): Promise<WebSearchResponse> {
   try {
-    const apiKey = process.env.ABACUSAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.warn('⚠️ Web search skipped: API key not configured');
       return { results: [], query, hasResults: false };
@@ -114,7 +114,7 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
       : `Search the web for construction-related information: "${enhancedQuery}"`;
 
     // Perform web search using Abacus AI API
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

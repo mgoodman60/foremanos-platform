@@ -92,13 +92,13 @@ Return ONLY a JSON object with this structure:
   "summary": "string - brief summary of schedule impacts"
 }`;
 
-    const apiKey = process.env.ABACUSAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      console.warn('ABACUSAI_API_KEY not configured, using keyword-based analysis');
+      console.warn('OPENAI_API_KEY not configured, using keyword-based analysis');
       return keywordBasedAnalysis(reportContent, scheduleContext);
     }
 
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
