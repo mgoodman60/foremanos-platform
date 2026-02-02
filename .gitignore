@@ -64,3 +64,5 @@ assets/tour/video_temp/
 
 # Package lock (use yarn.lock instead)
 package-lock.json
+.vercel
+.env*.local
