@@ -42,7 +42,7 @@ vi.mock('openai', () => ({
 }));
 
 // Set environment variable for OpenAI
-process.env.ABACUSAI_API_KEY = 'test-api-key';
+process.env.OPENAI_API_KEY = 'test-api-key';
 
 // Import functions after mocks
 import {

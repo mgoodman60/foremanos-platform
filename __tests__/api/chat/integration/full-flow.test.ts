@@ -25,7 +25,7 @@ describe('Chat API Full Request Flow', () => {
     vi.clearAllMocks();
     shouldUseNewRouteMock.mockReturnValue(true);
     checkRestrictedQueryMock.mockResolvedValue({ isRestricted: false, denialMessage: '' });
-    process.env.ABACUSAI_API_KEY = 'test-key';
+    process.env.OPENAI_API_KEY = 'test-key';
 
     vi.mocked(getCachedResponse).mockResolvedValue(null);
     vi.mocked(checkRateLimit).mockResolvedValue({

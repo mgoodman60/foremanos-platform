@@ -10,7 +10,7 @@ import type { ContextBuilderOptions, LLMHandlerOptions, StreamResponseOptions } 
 describe('Chat API Processors Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.ABACUSAI_API_KEY = 'test-key';
+    process.env.OPENAI_API_KEY = 'test-key';
   });
 
   afterEach(() => {

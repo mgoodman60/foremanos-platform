@@ -80,7 +80,7 @@ describe('Contract Extraction Service - extractContractData', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset environment variable
-    process.env.ABACUSAI_API_KEY = 'test-api-key';
+    process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   it('should successfully extract contract data from PDF', async () => {

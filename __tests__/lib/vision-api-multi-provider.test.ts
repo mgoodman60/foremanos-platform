@@ -15,9 +15,8 @@ vi.mock('fs', () => ({
 }));
 
 // Set environment variables before importing
-process.env.ABACUSAI_API_KEY = 'test-abacus-key';
-process.env.ANTHROPIC_API_KEY = 'sk-ant-test-anthropic-key';
 process.env.OPENAI_API_KEY = 'sk-test-openai-key';
+process.env.ANTHROPIC_API_KEY = 'sk-ant-test-anthropic-key';
 
 // Import after mocks are set up
 import {

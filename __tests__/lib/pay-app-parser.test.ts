@@ -24,7 +24,7 @@ vi.mock('fs', () => ({
 }));
 
 // Mock environment variables
-process.env.ABACUSAI_API_KEY = 'test-abacus-api-key';
+process.env.OPENAI_API_KEY = 'test-abacus-api-key';
 
 describe('PayAppParser', () => {
   beforeEach(() => {
@@ -806,8 +806,8 @@ describe('PayAppParser', () => {
         await parsePayAppDocument(fileBuffer, 'pay-app.pdf', 'application/pdf');
 
         expect(mocks.OpenAI).toHaveBeenCalledWith({
-          apiKey: 'test-abacus-api-key',
-          baseURL: 'https://llmapi.abacus.ai/v1',
+          apiKey: 'test-openai-api-key',
+          baseURL: 'https://api.openai.com/v1',
         });
       });
 

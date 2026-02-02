@@ -16,7 +16,7 @@ vi.mock('@/lib/lookahead-service', () => ({
 
 // Set environment variables before importing
 process.env.NEXTAUTH_URL = 'http://localhost:3000';
-process.env.ABACUSAI_API_KEY = 'test-abacus-key';
+process.env.OPENAI_API_KEY = 'test-openai-key';
 
 // Import functions after mocks are set up
 import {
@@ -29,7 +29,7 @@ describe('Schedule Analyzer', () => {
     vi.clearAllMocks();
     fetchMock.mockReset();
     mockGenerateLookahead.mockReset();
-    process.env.ABACUSAI_API_KEY = 'test-abacus-key';
+    process.env.OPENAI_API_KEY = 'test-abacus-key';
   });
 
   afterEach(() => {
@@ -162,7 +162,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should fall back to keyword analysis when ABACUSAI_API_KEY is missing', async () => {
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
 
       mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
@@ -315,7 +315,7 @@ describe('Schedule Analyzer', () => {
     };
 
     beforeEach(() => {
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
     });
 
     it('should detect delay keywords', async () => {
@@ -857,7 +857,7 @@ describe('Schedule Analyzer', () => {
         ],
       };
 
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
 
       mockGenerateLookahead.mockResolvedValueOnce(specialCharsSchedule);
 
@@ -887,7 +887,7 @@ describe('Schedule Analyzer', () => {
         ],
       };
 
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
 
       mockGenerateLookahead.mockResolvedValueOnce(schedule);
 

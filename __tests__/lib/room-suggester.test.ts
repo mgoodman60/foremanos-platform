@@ -64,7 +64,7 @@ describe('Room Suggester Service', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.ABACUSAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
   });
 
   afterEach(() => {
@@ -143,12 +143,12 @@ describe('Room Suggester Service', () => {
 
   describe('getRoomSuggestionsFromText', () => {
     beforeEach(() => {
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
     });
 
     describe('Configuration validation', () => {
       it('should throw error when ABACUSAI_API_KEY is not configured', async () => {
-        delete process.env.ABACUSAI_API_KEY;
+        delete process.env.OPENAI_API_KEY;
 
         await expect(
           getRoomSuggestionsFromText('test-project', { description: 'Kitchen tile' })
@@ -156,7 +156,7 @@ describe('Room Suggester Service', () => {
       });
 
       it('should throw error when ABACUSAI_API_KEY is empty string', async () => {
-        process.env.ABACUSAI_API_KEY = '';
+        process.env.OPENAI_API_KEY = '';
 
         await expect(
           getRoomSuggestionsFromText('test-project', { description: 'Kitchen tile' })
@@ -234,7 +234,7 @@ describe('Room Suggester Service', () => {
         });
 
         expect(mocks.fetch).toHaveBeenCalledWith(
-          'https://apps.abacus.ai/v1/chat/completions',
+          'https://api.openai.com/v1/chat/completions',
           expect.objectContaining({
             method: 'POST',
             headers: {

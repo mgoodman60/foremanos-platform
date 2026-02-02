@@ -131,7 +131,7 @@ const mockSheetLegend = {
 describe('detectLegendRegion', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.ABACUSAI_API_KEY = 'test-api-key';
+    process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   it('should detect legend region successfully', async () => {
@@ -284,7 +284,7 @@ describe('detectLegendRegion', () => {
 describe('extractLegendEntries', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.ABACUSAI_API_KEY = 'test-api-key';
+    process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   it('should extract legend entries successfully', async () => {

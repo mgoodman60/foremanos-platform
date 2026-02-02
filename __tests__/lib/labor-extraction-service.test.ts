@@ -46,7 +46,7 @@ vi.mock('./project-specific-pricing', () => ({
 describe('Labor Extraction Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.ABACUSAI_API_KEY = 'test-api-key';
+    process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   describe('extractLaborFromReport', () => {

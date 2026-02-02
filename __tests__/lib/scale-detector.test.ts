@@ -41,7 +41,7 @@ describe('ScaleDetector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Set default API key for tests
-    process.env.ABACUSAI_API_KEY = 'test-api-key';
+    process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
@@ -274,7 +274,7 @@ describe('ScaleDetector', () => {
     });
 
     it('should handle missing API key', async () => {
-      delete process.env.ABACUSAI_API_KEY;
+      delete process.env.OPENAI_API_KEY;
 
       const result = await detectScalesWithVision('base64ImageData');
 

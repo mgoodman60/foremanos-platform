@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-process.env.ABACUSAI_API_KEY = 'test-key';
+process.env.OPENAI_API_KEY = 'test-key';
 
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn().mockResolvedValue(null),

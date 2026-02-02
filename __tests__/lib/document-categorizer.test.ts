@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockFetch = vi.hoisted(() => vi.fn());
 
 // Set environment variables before importing
-process.env.ABACUSAI_API_KEY = 'test-api-key-12345';
+process.env.OPENAI_API_KEY = 'test-api-key-12345';
 
 // Import functions after setting env vars and mocks
 import {
@@ -321,7 +321,7 @@ describe('Document Categorizer', () => {
       expect(result.confidence).toBe(0.92);
       expect(result.reasoning).toContain('technical specifications');
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://routellm.abacus.ai/v1/chat/completions',
+        'https://api.openai.com/v1/chat/completions',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({

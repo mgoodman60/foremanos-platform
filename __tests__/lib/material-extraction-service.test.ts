@@ -369,7 +369,7 @@ describe('Material Extraction Service', () => {
     it('should use correct OpenAI configuration', async () => {
       const { extractMaterialsFromReport } = await import('@/lib/material-extraction-service');
 
-      process.env.ABACUSAI_API_KEY = 'test-api-key';
+      process.env.OPENAI_API_KEY = 'test-api-key';
 
       mocks.prisma.chatMessage.findMany.mockResolvedValue([
         {
