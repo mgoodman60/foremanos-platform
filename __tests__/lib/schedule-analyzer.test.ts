@@ -161,7 +161,7 @@ describe('Schedule Analyzer', () => {
       expect(result.hasScheduleImpact).toBeDefined();
     });
 
-    it('should fall back to keyword analysis when ABACUSAI_API_KEY is missing', async () => {
+    it('should fall back to keyword analysis when OPENAI_API_KEY is missing', async () => {
       delete process.env.OPENAI_API_KEY;
 
       mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);

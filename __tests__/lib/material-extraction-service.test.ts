@@ -403,7 +403,7 @@ describe('Material Extraction Service', () => {
       await extractMaterialsFromReport('conv-1', 'project-1');
 
       expect(mocks.openai.chat.completions.create).toHaveBeenCalledWith({
-        model: 'claude-3-5-sonnet',
+        model: 'gpt-5.2',
         messages: expect.arrayContaining([
           expect.objectContaining({ role: 'system' }),
           expect.objectContaining({ role: 'user' }),

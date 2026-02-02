@@ -147,20 +147,20 @@ describe('Room Suggester Service', () => {
     });
 
     describe('Configuration validation', () => {
-      it('should throw error when ABACUSAI_API_KEY is not configured', async () => {
+      it('should throw error when OPENAI_API_KEY is not configured', async () => {
         delete process.env.OPENAI_API_KEY;
 
         await expect(
           getRoomSuggestionsFromText('test-project', { description: 'Kitchen tile' })
-        ).rejects.toThrow('ABACUSAI_API_KEY not configured');
+        ).rejects.toThrow('OPENAI_API_KEY not configured');
       });
 
-      it('should throw error when ABACUSAI_API_KEY is empty string', async () => {
+      it('should throw error when OPENAI_API_KEY is empty string', async () => {
         process.env.OPENAI_API_KEY = '';
 
         await expect(
           getRoomSuggestionsFromText('test-project', { description: 'Kitchen tile' })
-        ).rejects.toThrow('ABACUSAI_API_KEY not configured');
+        ).rejects.toThrow('OPENAI_API_KEY not configured');
       });
     });
 

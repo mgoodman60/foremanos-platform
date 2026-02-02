@@ -24,7 +24,7 @@ vi.mock('fs', () => ({
 }));
 
 // Mock environment variables
-process.env.OPENAI_API_KEY = 'test-abacus-api-key';
+process.env.OPENAI_API_KEY = 'test-openai-api-key';
 
 describe('PayAppParser', () => {
   beforeEach(() => {
@@ -807,7 +807,6 @@ describe('PayAppParser', () => {
 
         expect(mocks.OpenAI).toHaveBeenCalledWith({
           apiKey: 'test-openai-api-key',
-          baseURL: 'https://api.openai.com/v1',
         });
       });
 

@@ -102,7 +102,7 @@ describe('Contract Extraction Service - extractContractData', () => {
     expect(result).toEqual(mockResponse);
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'claude-3-5-sonnet',
+        model: 'gpt-5.2',
         max_tokens: 4000,
       })
     );
@@ -302,7 +302,7 @@ describe('Contract Extraction Service - extractContractData', () => {
     // Verify the chat completions API was called
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'claude-3-5-sonnet',
+        model: 'gpt-5.2',
         max_tokens: 4000,
       })
     );
