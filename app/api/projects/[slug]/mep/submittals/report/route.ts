@@ -87,78 +87,19 @@ export async function POST(
     // Generate HTML report
     const htmlContent = generateReportHTML(project, submittals, projectWide);
 
-    // Call HTML2PDF API
-    const createResponse = await fetch('https://apps.abacus.ai/api/createConvertHtmlToPdfRequest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        deployment_token: process.env.ABACUSAI_API_KEY,
-        html_content: htmlContent,
-        pdf_options: {
-          format: 'Letter',
-          margin: { top: '0.5in', right: '0.5in', bottom: '0.75in', left: '0.5in' },
-          print_background: true,
-          display_header_footer: true,
-          footer_template: `
-            <div style="font-size: 9px; width: 100%; text-align: center; color: #666;">
-              Page <span class="pageNumber"></span> of <span class="totalPages"></span>
-            </div>
-          `
-        },
-        base_url: process.env.NEXTAUTH_URL || '',
-      }),
+    // Return HTML content for browser-based PDF printing
+    // The client can use window.print() or a library like html2pdf.js
+    const filename = projectWide
+      ? `Verification_Report_${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}`
+      : `Submittal_Verification_${submittals[0].submittalNumber}_${format(new Date(), 'yyyy-MM-dd')}`;
+
+    return new NextResponse(htmlContent, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="${filename}.html"`,
+        'X-Suggested-Filename': `${filename}.pdf`,
+      },
     });
-
-    if (!createResponse.ok) {
-      console.error('PDF create error:', await createResponse.text());
-      return NextResponse.json({ error: 'Failed to create PDF request' }, { status: 500 });
-    }
-
-    const { request_id } = await createResponse.json();
-    if (!request_id) {
-      return NextResponse.json({ error: 'No request ID returned' }, { status: 500 });
-    }
-
-    // Poll for status
-    const maxAttempts = 60;
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const statusResponse = await fetch('https://apps.abacus.ai/api/getConvertHtmlToPdfStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          request_id,
-          deployment_token: process.env.ABACUSAI_API_KEY
-        }),
-      });
-
-      const statusResult = await statusResponse.json();
-      const status = statusResult?.status || 'FAILED';
-      const result = statusResult?.result || null;
-
-      if (status === 'SUCCESS' && result?.result) {
-        const pdfBuffer = Buffer.from(result.result, 'base64');
-        const filename = projectWide
-          ? `Verification_Report_${project.name.replace(/[^a-zA-Z0-9]/g, '_')}_${format(new Date(), 'yyyy-MM-dd')}.pdf`
-          : `Submittal_Verification_${submittals[0].submittalNumber}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-
-        return new NextResponse(pdfBuffer, {
-          headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${filename}"`,
-          },
-        });
-      } else if (status === 'FAILED') {
-        return NextResponse.json({ error: result?.error || 'PDF generation failed' }, { status: 500 });
-      }
-
-      attempts++;
-    }
-
-    return NextResponse.json({ error: 'PDF generation timed out' }, { status: 500 });
   } catch (error) {
     console.error('[Report Export Error]:', error);
     return NextResponse.json({ error: 'Failed to generate report' }, { status: 500 });

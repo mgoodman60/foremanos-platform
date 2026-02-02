@@ -154,7 +154,7 @@ export async function POST(
 
           try {
             // Try AI extraction first for better results
-            const apiKey = process.env.ABACUSAI_API_KEY;
+            const apiKey = process.env.OPENAI_API_KEY;
             const extracted = apiKey
               ? await extractElevationsWithAI(content, docType, apiKey)
               : await extractElevationsFromDocument(content, docType);

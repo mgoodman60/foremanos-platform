@@ -151,7 +151,7 @@ export async function POST(
     }
 
     // Use AI to extract subcontractor information
-    const apiKey = process.env.ABACUSAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { error: 'AI API not configured' },
@@ -159,14 +159,14 @@ export async function POST(
       );
     }
 
-    const apiResponse = await fetch('https://api.abacus.ai/v1/chat/completions', {
+    const apiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',

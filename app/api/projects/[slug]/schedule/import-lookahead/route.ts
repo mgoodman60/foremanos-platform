@@ -57,14 +57,14 @@ export async function POST(
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     
     // Use LLM to extract 3WLA data from Excel
-    const response = await fetch('https://api.abacus.ai/v0/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'user',
