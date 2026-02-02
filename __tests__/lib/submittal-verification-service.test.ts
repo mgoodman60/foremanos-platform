@@ -4,8 +4,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // MOCKS
 // =============================================================================
 
-const mocks = vi.hoisted(() => ({
-  prisma: {
+const mocks = vi.hoisted(() => {
+  const prismaClient = {
     doorScheduleItem: {
       findMany: vi.fn(),
     },
@@ -31,8 +31,12 @@ const mocks = vi.hoisted(() => ({
       upsert: vi.fn(),
       findMany: vi.fn(),
     },
-  },
-}));
+    $transaction: vi.fn(async (operations: Promise<unknown>[]) => {
+      return Promise.all(operations);
+    }),
+  };
+  return { prisma: prismaClient };
+});
 
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
 

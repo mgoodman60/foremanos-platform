@@ -8,6 +8,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const fetchMock = vi.fn();
 global.fetch = fetchMock;
 
+// Mock lookahead-service
+const mockGenerateLookahead = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/lookahead-service', () => ({
+  generateLookahead: mockGenerateLookahead,
+}));
+
 // Set environment variables before importing
 process.env.NEXTAUTH_URL = 'http://localhost:3000';
 process.env.ABACUSAI_API_KEY = 'test-abacus-key';
@@ -22,6 +28,7 @@ describe('Schedule Analyzer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchMock.mockReset();
+    mockGenerateLookahead.mockReset();
     process.env.ABACUSAI_API_KEY = 'test-abacus-key';
   });
 
@@ -75,11 +82,8 @@ describe('Schedule Analyzer', () => {
     };
 
     it('should successfully analyze schedule impact with AI', async () => {
-      // Mock schedule fetch
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      // Mock schedule data from lookahead service
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       // Mock AI analysis
       fetchMock.mockResolvedValueOnce({
@@ -107,10 +111,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle AI response with markdown code blocks', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       // AI response wrapped in markdown
       const wrappedResponse = '```json\n' + JSON.stringify(mockAIResponse) + '\n```';
@@ -130,14 +131,12 @@ describe('Schedule Analyzer', () => {
       const result = await analyzeScheduleImpact('Completed foundation work', 'project-1');
 
       expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].taskId).toBe('T001');
     });
 
     it('should handle schedule fetch failure gracefully', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      mockGenerateLookahead.mockRejectedValueOnce(new Error('Schedule fetch failed'));
 
       const result = await analyzeScheduleImpact('Some report content', 'project-1');
 
@@ -149,10 +148,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle AI API failure and fall back to keyword analysis', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       fetchMock.mockResolvedValueOnce({
         ok: false,
@@ -168,10 +164,7 @@ describe('Schedule Analyzer', () => {
     it('should fall back to keyword analysis when ABACUSAI_API_KEY is missing', async () => {
       delete process.env.ABACUSAI_API_KEY;
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Completed foundation work at Building A',
@@ -179,16 +172,15 @@ describe('Schedule Analyzer', () => {
       );
 
       expect(result).toBeDefined();
-      expect(result.hasScheduleImpact).toBeDefined();
-      // Should use keyword-based analysis
-      expect(fetchMock).toHaveBeenCalledTimes(1); // Only schedule fetch, no AI call
+      expect(result.hasScheduleImpact).toBe(true);
+      // May get multiple suggestions if multiple tasks match
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      // Should use keyword-based analysis (no AI fetch call)
+      expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it('should handle AI response with no content', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -208,10 +200,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle AI response with invalid JSON', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -234,10 +223,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle empty schedule tasks', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ tasks: [] }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -259,13 +245,12 @@ describe('Schedule Analyzer', () => {
       const result = await analyzeScheduleImpact('Some report', 'project-1');
 
       expect(result).toBeDefined();
+      expect(result.hasScheduleImpact).toBe(false);
+      expect(result.suggestions).toHaveLength(0);
     });
 
     it('should handle multiple task suggestions', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const multiTaskResponse = {
         hasScheduleImpact: true,
@@ -334,10 +319,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should detect delay keywords', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Foundation work delayed due to weather delay',
@@ -351,10 +333,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should detect completion keywords', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Foundation work completed and finished today',
@@ -368,10 +347,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should detect progress keywords', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Continuing Foundation work, making good progress',
@@ -385,10 +361,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should match task by name', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'foundation work is in progress',
@@ -399,10 +372,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should match task by location', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Work at building a is progressing well',
@@ -413,10 +383,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should return no impact when no tasks mentioned', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'General site cleanup was performed',
@@ -444,10 +411,7 @@ describe('Schedule Analyzer', () => {
         ],
       };
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => highProgressTask,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(highProgressTask);
 
       const result = await analyzeScheduleImpact(
         'Foundation work continuing with progress',
@@ -455,20 +419,21 @@ describe('Schedule Analyzer', () => {
       );
 
       // Should cap at 95%
+      expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].suggestedPercentComplete).toBe(95);
     });
 
     it('should set confidence to 60 for keyword-based analysis', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Foundation work completed',
         'project-1'
       );
 
+      expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].confidence).toBe(60);
     });
 
@@ -488,16 +453,15 @@ describe('Schedule Analyzer', () => {
         ],
       };
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => taskWithoutLocation,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(taskWithoutLocation);
 
       const result = await analyzeScheduleImpact(
         'Foundation work completed',
         'project-1'
       );
 
+      expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].taskName).toBe('Foundation Work');
     });
 
@@ -512,16 +476,15 @@ describe('Schedule Analyzer', () => {
       ];
 
       for (const keyword of delayKeywords) {
-        fetchMock.mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockScheduleData,
-        });
+        mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
         const result = await analyzeScheduleImpact(
           `Foundation work ${keyword}`,
           'project-1'
         );
 
+        expect(result.hasScheduleImpact).toBe(true);
+        expect(result.suggestions).toHaveLength(1);
         expect(result.suggestions[0].impactType).toBe('delay');
       }
     });
@@ -530,31 +493,29 @@ describe('Schedule Analyzer', () => {
       const completionKeywords = ['completed', 'finished', 'done', 'final', 'wrapped up'];
 
       for (const keyword of completionKeywords) {
-        fetchMock.mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockScheduleData,
-        });
+        mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
         const result = await analyzeScheduleImpact(
           `Foundation work ${keyword}`,
           'project-1'
         );
 
+        expect(result.hasScheduleImpact).toBe(true);
+        expect(result.suggestions).toHaveLength(1);
         expect(result.suggestions[0].impactType).toBe('completion');
       }
     });
 
     it('should detect percentage symbols in content', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockScheduleData,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       const result = await analyzeScheduleImpact(
         'Foundation work is 75% complete',
         'project-1'
       );
 
+      expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].impactType).toBe('progress');
     });
   });
@@ -802,7 +763,7 @@ describe('Schedule Analyzer', () => {
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle network timeout on schedule fetch', async () => {
-      fetchMock.mockRejectedValueOnce(new Error('Network timeout'));
+      mockGenerateLookahead.mockRejectedValueOnce(new Error('Network timeout'));
 
       const result = await analyzeScheduleImpact('Some content', 'project-1');
 
@@ -811,10 +772,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle network timeout on AI fetch', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ tasks: [] }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
       fetchMock.mockRejectedValueOnce(new Error('Network timeout'));
 
@@ -824,10 +782,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle malformed schedule data', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ not_tasks: 'invalid' }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ not_tasks: 'invalid' } as any);
 
       const result = await analyzeScheduleImpact('Some content', 'project-1');
 
@@ -835,10 +790,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle empty report content', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ tasks: [] }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -865,10 +817,7 @@ describe('Schedule Analyzer', () => {
     it('should handle very long report content', async () => {
       const longContent = 'A'.repeat(10000);
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ tasks: [] }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -910,16 +859,15 @@ describe('Schedule Analyzer', () => {
 
       delete process.env.ABACUSAI_API_KEY;
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => specialCharsSchedule,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(specialCharsSchedule);
 
       const result = await analyzeScheduleImpact(
         'Foundation & Concrete Work (Phase 1) is completed',
         'project-1'
       );
 
+      expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].taskName).toBe('Foundation & Concrete Work (Phase 1)');
     });
 
@@ -941,24 +889,20 @@ describe('Schedule Analyzer', () => {
 
       delete process.env.ABACUSAI_API_KEY;
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => schedule,
-      });
+      mockGenerateLookahead.mockResolvedValueOnce(schedule);
 
       const result = await analyzeScheduleImpact(
         'foundation work completed at building a',
         'project-1'
       );
 
+      expect(result.hasScheduleImpact).toBe(true);
+      expect(result.suggestions).toHaveLength(1);
       expect(result.suggestions[0].taskName).toBe('FOUNDATION WORK');
     });
 
     it('should handle AI response with empty choices array', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ tasks: [] }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -973,10 +917,7 @@ describe('Schedule Analyzer', () => {
     });
 
     it('should handle AI response with null choices', async () => {
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ tasks: [] }),
-      });
+      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
       fetchMock.mockResolvedValueOnce({
         ok: true,

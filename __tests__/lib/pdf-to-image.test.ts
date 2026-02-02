@@ -29,7 +29,7 @@ function createInvalidPDFBuffer(): Buffer {
 
 async function verifyPDFBuffer(buffer: Buffer): Promise<boolean> {
   try {
-    await PDFDocument.load(buffer);
+    await PDFDocument.load(new Uint8Array(buffer));
     return true;
   } catch {
     return false;
@@ -37,7 +37,7 @@ async function verifyPDFBuffer(buffer: Buffer): Promise<boolean> {
 }
 
 async function getPDFPageCountFromBuffer(buffer: Buffer): Promise<number> {
-  const doc = await PDFDocument.load(buffer);
+  const doc = await PDFDocument.load(new Uint8Array(buffer));
   return doc.getPageCount();
 }
 
@@ -300,7 +300,7 @@ describe('convertPdfToImages', () => {
 
       // Each extracted page should be a valid PDF
       for (let i = 0; i < results.length; i++) {
-        const extractedPdf = await PDFDocument.load(results[i].buffer);
+        const extractedPdf = await PDFDocument.load(new Uint8Array(results[i].buffer));
         expect(extractedPdf.getPageCount()).toBe(1);
 
         // Verify page dimensions are preserved

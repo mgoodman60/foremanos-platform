@@ -29,6 +29,10 @@ const prismaMock = {
     aggregate: vi.fn(),
     update: vi.fn(),
   },
+  // Add $transaction mock for batched updates
+  $transaction: vi.fn(async (operations: Promise<unknown>[]) => {
+    return Promise.all(operations);
+  }),
 };
 
 vi.mock('@/lib/db', () => ({

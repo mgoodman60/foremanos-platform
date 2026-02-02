@@ -13,7 +13,7 @@ test.describe('Project-Level Access', () => {
       await adminPage.goto('/dashboard');
 
       // Wait for dashboard to load
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       // Should be on dashboard (not redirected to login)
       expect(adminPage.url()).toContain('/dashboard');
@@ -31,7 +31,7 @@ test.describe('Project-Level Access', () => {
       await clientPage.goto('/dashboard');
 
       // Wait for dashboard to load
-      await clientPage.waitForLoadState('networkidle');
+      await clientPage.waitForLoadState('domcontentloaded');
 
       // Page should load successfully
       const body = await clientPage.locator('body').textContent();
@@ -46,7 +46,7 @@ test.describe('Project-Level Access', () => {
       await adminPage.goto('/project/riverside-apartments');
 
       // Should load successfully (not redirect to error page)
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       // Check we're on a project page
       const url = adminPage.url();
@@ -57,7 +57,7 @@ test.describe('Project-Level Access', () => {
       adminPage,
     }) => {
       await adminPage.goto('/project/downtown-office-tower');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       const url = adminPage.url();
       expect(url).toContain('downtown-office-tower');
@@ -65,7 +65,7 @@ test.describe('Project-Level Access', () => {
 
     test('admin can access Harbor Marina project', async ({ adminPage }) => {
       await adminPage.goto('/project/harbor-marina');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       const url = adminPage.url();
       expect(url).toContain('harbor-marina');
@@ -75,7 +75,7 @@ test.describe('Project-Level Access', () => {
       adminPage,
     }) => {
       await adminPage.goto('/project/non-existent-project-12345');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       // Should either redirect or show not found
       const body = await adminPage.locator('body').textContent();
@@ -94,7 +94,7 @@ test.describe('Project-Level Access', () => {
   test.describe('Project Feature Access', () => {
     test('admin can access project budget page', async ({ adminPage }) => {
       await adminPage.goto('/project/riverside-apartments/budget');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       // Should not redirect to login
       expect(adminPage.url().includes('/login')).toBeFalsy();
@@ -102,21 +102,21 @@ test.describe('Project-Level Access', () => {
 
     test('admin can access project schedule page', async ({ adminPage }) => {
       await adminPage.goto('/project/riverside-apartments/schedule');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       expect(adminPage.url().includes('/login')).toBeFalsy();
     });
 
     test('admin can access project documents page', async ({ adminPage }) => {
       await adminPage.goto('/project/riverside-apartments/documents');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       expect(adminPage.url().includes('/login')).toBeFalsy();
     });
 
     test('admin can access project chat page', async ({ adminPage }) => {
       await adminPage.goto('/project/riverside-apartments/chat');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded');
 
       expect(adminPage.url().includes('/login')).toBeFalsy();
     });
@@ -126,17 +126,17 @@ test.describe('Project-Level Access', () => {
     test('admin can navigate between projects', async ({ adminPage }) => {
       // Start at Riverside
       await adminPage.goto('/project/riverside-apartments');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded', { timeout: 15000 });
       expect(adminPage.url()).toContain('riverside-apartments');
 
       // Navigate to Downtown
       await adminPage.goto('/project/downtown-office-tower');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded', { timeout: 15000 });
       expect(adminPage.url()).toContain('downtown-office-tower');
 
       // Navigate to Harbor
       await adminPage.goto('/project/harbor-marina');
-      await adminPage.waitForLoadState('networkidle');
+      await adminPage.waitForLoadState('domcontentloaded', { timeout: 15000 });
       expect(adminPage.url()).toContain('harbor-marina');
     });
   });

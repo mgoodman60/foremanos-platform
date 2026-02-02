@@ -44,7 +44,9 @@ export async function convertPdfToImages(
   } = options;
 
   try {
-    const srcDoc = await PDFDocument.load(pdfBuffer);
+    // Convert Buffer to Uint8Array for pdf-lib compatibility
+    const pdfArray = new Uint8Array(pdfBuffer);
+    const srcDoc = await PDFDocument.load(pdfArray);
     const totalPages = srcDoc.getPageCount();
     
     // Determine which pages to extract
@@ -117,7 +119,9 @@ export async function convertSinglePage(
  */
 export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
   try {
-    const doc = await PDFDocument.load(pdfBuffer);
+    // Convert Buffer to Uint8Array for pdf-lib compatibility
+    const pdfArray = new Uint8Array(pdfBuffer);
+    const doc = await PDFDocument.load(pdfArray);
     return doc.getPageCount();
   } catch (error: any) {
     console.error('[PDF-UTILS] Error getting page count:', error.message);

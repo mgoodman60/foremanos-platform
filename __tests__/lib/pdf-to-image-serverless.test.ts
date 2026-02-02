@@ -83,7 +83,7 @@ describe('PDF-to-Image Serverless - extractPageAsPdf', () => {
 
     // Verify extracted PDF is valid
     const extractedBuffer = Buffer.from(result.base64, 'base64');
-    const extractedDoc = await PDFDocument.load(extractedBuffer);
+    const extractedDoc = await PDFDocument.load(new Uint8Array(extractedBuffer));
     expect(extractedDoc.getPageCount()).toBe(1);
   });
 
@@ -351,7 +351,7 @@ describe('PDF-to-Image Serverless - splitPdfIntoPages', () => {
 
       // Verify it's a valid PDF
       const pageBuffer = Buffer.from(page.base64, 'base64');
-      const pageDoc = await PDFDocument.load(pageBuffer);
+      const pageDoc = await PDFDocument.load(new Uint8Array(pageBuffer));
       expect(pageDoc.getPageCount()).toBe(1);
     }
   });

@@ -40,7 +40,7 @@ export async function extractPageAsPdf(
   pageNumber: number
 ): Promise<{ base64: string; pageCount: number }> {
   try {
-    const srcDoc = await PDFDocument.load(pdfBuffer);
+    const srcDoc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     const pageCount = srcDoc.getPageCount();
     
     if (pageNumber < 1 || pageNumber > pageCount) {
@@ -71,7 +71,7 @@ export async function getPageInfo(
   pdfBuffer: Buffer,
   pageNumber: number = 1
 ): Promise<{ width: number; height: number; rotation: number; pageCount: number }> {
-  const doc = await PDFDocument.load(pdfBuffer);
+  const doc = await PDFDocument.load(new Uint8Array(pdfBuffer));
   const pageCount = doc.getPageCount();
   
   if (pageNumber < 1 || pageNumber > pageCount) {
@@ -131,7 +131,7 @@ export async function splitPdfIntoPages(
   startPage: number = 1,
   endPage?: number
 ): Promise<PageImage[]> {
-  const srcDoc = await PDFDocument.load(pdfBuffer);
+  const srcDoc = await PDFDocument.load(new Uint8Array(pdfBuffer));
   const pageCount = srcDoc.getPageCount();
   const lastPage = endPage ? Math.min(endPage, pageCount) : pageCount;
   

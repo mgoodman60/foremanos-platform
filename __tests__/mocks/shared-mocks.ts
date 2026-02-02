@@ -368,3 +368,23 @@ vi.mock('bcryptjs', () => ({
   hash: bcryptHashMock,
   compare: bcryptCompareMock,
 }));
+
+// ============================================
+// Virus Scanner Mocks
+// ============================================
+export const scanFileBufferMock = vi.fn().mockResolvedValue({ clean: true, threats: [] });
+export const logSecurityEventMock = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('@/lib/virus-scanner', () => ({
+  scanFileBuffer: scanFileBufferMock,
+  logSecurityEvent: logSecurityEventMock,
+}));
+
+// ============================================
+// Macro Detector Mocks
+// ============================================
+export const shouldBlockMacroFileMock = vi.fn().mockReturnValue(false);
+
+vi.mock('@/lib/macro-detector', () => ({
+  shouldBlockMacroFile: shouldBlockMacroFileMock,
+}));

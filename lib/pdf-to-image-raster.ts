@@ -94,7 +94,7 @@ export async function rasterizePdfToImages(
     console.log('[PDF-RASTER] Starting PDF rasterization...');
     
     // Get total page count
-    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const pdfDoc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     const totalPages = pdfDoc.getPageCount();
     console.log(`[PDF-RASTER] PDF has ${totalPages} pages`);
 
@@ -227,7 +227,7 @@ export async function rasterizeSinglePage(
  */
 export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
   try {
-    const doc = await PDFDocument.load(pdfBuffer);
+    const doc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     return doc.getPageCount();
   } catch (error: any) {
     console.error('[PDF-RASTER] Error getting page count:', error.message);

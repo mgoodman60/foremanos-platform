@@ -10,6 +10,11 @@ const mockPrisma = vi.hoisted(() => ({
   weatherImpact: {
     findMany: vi.fn(),
   },
+  // Add $transaction mock that handles array of operations (batched updates)
+  $transaction: vi.fn(async (operations: Promise<unknown>[]) => {
+    // Execute all operations in the array
+    return Promise.all(operations);
+  }),
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
@@ -979,6 +984,10 @@ describe('Lookahead Service - suggestWeatherAdjustments()', () => {
 describe('Lookahead Service - syncLookaheadToSchedule()', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Restore $transaction default implementation after clearAllMocks
+    mockPrisma.$transaction.mockImplementation(async (operations: Promise<unknown>[]) => {
+      return Promise.all(operations);
+    });
   });
 
   it('should sync lookahead task updates back to schedule', async () => {
@@ -1113,7 +1122,8 @@ describe('Lookahead Service - syncLookaheadToSchedule()', () => {
   it('should collect errors for failed updates', async () => {
     const { syncLookaheadToSchedule } = await import('@/lib/lookahead-service');
 
-    mockPrisma.scheduleTask.update.mockRejectedValue(
+    // With batched transactions, the transaction itself rejects
+    mockPrisma.$transaction.mockRejectedValueOnce(
       new Error('Task not found')
     );
 
@@ -1133,7 +1143,7 @@ describe('Lookahead Service - syncLookaheadToSchedule()', () => {
 
     expect(result.synced).toBe(0);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]).toContain('Failed to sync task "Problem Task"');
+    expect(result.errors[0]).toContain('Failed to sync lookahead tasks');
     expect(result.errors[0]).toContain('Task not found');
   });
 
@@ -1180,13 +1190,11 @@ describe('Lookahead Service - syncLookaheadToSchedule()', () => {
     expect(mockPrisma.scheduleTask.update).toHaveBeenCalledTimes(3);
   });
 
-  it('should continue syncing after individual failures', async () => {
+  it('should fail all syncs if transaction fails', async () => {
     const { syncLookaheadToSchedule } = await import('@/lib/lookahead-service');
 
-    mockPrisma.scheduleTask.update
-      .mockResolvedValueOnce({}) // Success
-      .mockRejectedValueOnce(new Error('Update failed')) // Failure
-      .mockResolvedValueOnce({}); // Success
+    // When using batched transactions, if any operation fails, the whole transaction fails
+    mockPrisma.$transaction.mockRejectedValueOnce(new Error('Update failed'));
 
     const tasks = [
       {
@@ -1220,10 +1228,11 @@ describe('Lookahead Service - syncLookaheadToSchedule()', () => {
 
     const result = await syncLookaheadToSchedule('project-1', tasks);
 
-    expect(result.synced).toBe(2);
+    // With batched transactions, all operations fail together
+    expect(result.synced).toBe(0);
     expect(result.created).toBe(0);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]).toContain('Task 2');
+    expect(result.errors[0]).toContain('Failed to sync lookahead tasks');
   });
 
   it('should handle empty task list', async () => {
@@ -1241,6 +1250,10 @@ describe('Lookahead Service - syncLookaheadToSchedule()', () => {
     const { syncLookaheadToSchedule } = await import('@/lib/lookahead-service');
 
     mockPrisma.scheduleTask.update.mockResolvedValue({});
+    // Reset $transaction to default implementation for this test
+    mockPrisma.$transaction.mockImplementation(async (operations: Promise<unknown>[]) => {
+      return Promise.all(operations);
+    });
 
     const tasks = [
       {

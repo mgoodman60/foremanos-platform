@@ -13,14 +13,14 @@ test.describe('Session and Logout', () => {
     }) => {
       // Navigate to dashboard
       await authenticatedPage.goto('/dashboard');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // Verify we're on dashboard (authenticated)
       expect(authenticatedPage.url()).toContain('/dashboard');
 
       // Reload the page
       await authenticatedPage.reload();
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // Should still be on dashboard (session persisted)
       expect(authenticatedPage.url()).toContain('/dashboard');
@@ -31,18 +31,18 @@ test.describe('Session and Logout', () => {
       authenticatedPage,
     }) => {
       // Start at dashboard
-      await authenticatedPage.goto('/dashboard');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.goto('/dashboard', { timeout: 15000 });
+      await authenticatedPage.waitForLoadState('domcontentloaded');
       expect(authenticatedPage.url()).toContain('/dashboard');
 
       // Navigate to a project
-      await authenticatedPage.goto('/project/riverside-apartments');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.goto('/project/riverside-apartments', { timeout: 15000 });
+      await authenticatedPage.waitForLoadState('domcontentloaded');
       expect(authenticatedPage.url()).not.toContain('/login');
 
       // Navigate back to dashboard
-      await authenticatedPage.goto('/dashboard');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.goto('/dashboard', { timeout: 15000 });
+      await authenticatedPage.waitForLoadState('domcontentloaded');
       expect(authenticatedPage.url()).toContain('/dashboard');
     });
   });
@@ -51,7 +51,7 @@ test.describe('Session and Logout', () => {
     test('logout redirects to login page', async ({ authenticatedPage }) => {
       // Start at dashboard
       await authenticatedPage.goto('/dashboard');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // Try to find and click logout button/link
       // Common selectors for logout
@@ -88,7 +88,7 @@ test.describe('Session and Logout', () => {
       } else {
         // If no logout button found, try navigating to /api/auth/signout
         await authenticatedPage.goto('/api/auth/signout');
-        await authenticatedPage.waitForLoadState('networkidle');
+        await authenticatedPage.waitForLoadState('domcontentloaded');
 
         // NextAuth signout page or redirect
         const url = authenticatedPage.url();
@@ -104,26 +104,26 @@ test.describe('Session and Logout', () => {
       authenticatedPage,
     }) => {
       // Start authenticated
-      await authenticatedPage.goto('/dashboard');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.goto('/dashboard', { timeout: 15000 });
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // Sign out via API
-      await authenticatedPage.goto('/api/auth/signout');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.goto('/api/auth/signout', { timeout: 15000 });
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // If there's a confirm button, click it
       const confirmBtn = authenticatedPage.locator('button[type="submit"]');
       if ((await confirmBtn.count()) > 0) {
         await confirmBtn.click();
-        await authenticatedPage.waitForLoadState('networkidle');
+        await authenticatedPage.waitForLoadState('domcontentloaded');
       }
 
       // Clear cookies to ensure logout
       await authenticatedPage.context().clearCookies();
 
       // Try to access protected route
-      await authenticatedPage.goto('/dashboard');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.goto('/dashboard', { timeout: 15000 });
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // Should redirect to login
       expect(authenticatedPage.url()).toContain('/login');
@@ -136,13 +136,13 @@ test.describe('Session and Logout', () => {
     }) => {
       // Open first page
       const page1 = await authenticatedContext.newPage();
-      await page1.goto('/dashboard');
-      await page1.waitForLoadState('networkidle');
+      await page1.goto('/dashboard', { timeout: 15000 });
+      await page1.waitForLoadState('domcontentloaded');
 
       // Open second page in same context
       const page2 = await authenticatedContext.newPage();
-      await page2.goto('/project/riverside-apartments');
-      await page2.waitForLoadState('networkidle');
+      await page2.goto('/project/riverside-apartments', { timeout: 15000 });
+      await page2.waitForLoadState('domcontentloaded');
 
       // Both should be authenticated (not redirected to login)
       expect(page1.url()).toContain('/dashboard');
@@ -159,7 +159,7 @@ test.describe('Session and Logout', () => {
     }) => {
       // When already authenticated, going to login may redirect
       await authenticatedPage.goto('/login');
-      await authenticatedPage.waitForLoadState('networkidle');
+      await authenticatedPage.waitForLoadState('domcontentloaded');
 
       // Either stays on login (some apps allow this) or redirects to dashboard
       const url = authenticatedPage.url();

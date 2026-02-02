@@ -6,28 +6,33 @@ import { PDFDocument } from 'pdf-lib';
 // ============================================
 
 // Mock prisma with vi.hoisted to ensure it's available before mock calls
-const mockPrisma = vi.hoisted(() => ({
-  document: {
-    findUnique: vi.fn(),
-    findMany: vi.fn(),
-    update: vi.fn(),
-  },
-  documentChunk: {
-    create: vi.fn(),
-    createMany: vi.fn(),
-    updateMany: vi.fn(),
-  },
-  processingCost: {
-    create: vi.fn(),
-  },
-  user: {
-    findUnique: vi.fn(),
-    update: vi.fn(),
-  },
-  project: {
-    findUnique: vi.fn(),
-  },
-}));
+const mockPrisma = vi.hoisted(() => {
+  const prismaClient = {
+    document: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+    },
+    documentChunk: {
+      create: vi.fn(),
+      createMany: vi.fn(),
+      updateMany: vi.fn(),
+    },
+    processingCost: {
+      create: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    project: {
+      findUnique: vi.fn(),
+    },
+    // Add $transaction mock that passes through the callback with the same prisma client
+    $transaction: vi.fn((callback: (tx: typeof prismaClient) => Promise<unknown>) => callback(prismaClient)),
+  };
+  return prismaClient;
+});
 
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
