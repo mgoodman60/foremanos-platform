@@ -565,3 +565,84 @@ Benefits:
 - **Analytics**: Project KPI and metrics service (`lib/analytics-service.ts`)
 - **Workflow**: State machine for document processing (`lib/workflow-service.ts`)
 - **Logger**: Centralized structured logging utility (`lib/logger.ts`)
+
+### Chat API & UI Fixes (February 2026)
+
+**SPEC-001: Chat API Error Handling**
+- Added structured error logging to `app/api/chat/route.ts`, `lib/llm-providers.ts`, `lib/chat/processors/response-streamer.ts`, `lib/chat/processors/llm-handler.ts`
+- Error messages now show specific details (401/429/500) instead of generic failures
+- Logs capture full API response details with `[CHAT_API]` context prefix
+
+**SPEC-002: Project Creation API Fix**
+- Fixed response case mismatch in `app/api/projects/route.ts` (`Project` → `project`)
+- Users now see success toast instead of "Internal server error"
+
+**SPEC-003: Dialog Accessibility (WCAG 2.1)**
+Added ARIA attributes to 14 dialog/modal components:
+- `components/photo-library.tsx` (3 dialogs)
+- `components/room-browser.tsx`, `components/room-comparison.tsx`
+- `components/document-library.tsx`, `components/document-metadata-modal.tsx`
+- `components/mep/EquipmentList.tsx`, `components/mep/MaintenanceSchedule.tsx`, `components/mep/SubmittalList.tsx`
+- `components/daily-report-history.tsx`, `components/photo-documentation-hub.tsx`
+- `components/conversation-sidebar.tsx`, `components/batch-upload-modal.tsx`
+
+**SPEC-004: Chat Error Messages**
+- Enhanced `components/chat-interface.tsx` with specific error messages:
+  - 401: "Session expired. Please log in again."
+  - 429: "Too many requests. Wait a moment."
+  - Network errors: "Connection failed. Check your internet connection."
+
+**SPEC-005: Prerequisites Banner**
+- Added document upload banner to `app/project/[slug]/page.tsx`
+- Shows when `project.documentCount === 0`
+
+**SPEC-006: UI/UX Improvements**
+- Sticky onboarding progress in `components/onboarding-wizard.tsx`
+- Enhanced hover/focus states in `components/conversation-sidebar.tsx`, `components/tools-menu.tsx`, `components/document-library.tsx`
+- Improved empty state CTAs with prominent buttons and icons
+
+## Infrastructure Status
+
+### Production Environment (Vercel)
+
+**URL**: https://foremanos.vercel.app
+
+| Service | Status | Notes |
+|---------|--------|-------|
+| PostgreSQL (Neon) | ✅ Working | 7 users, 4 projects, schema in sync |
+| OpenAI API | ✅ Configured | Production, Preview, Development |
+| Anthropic API | ✅ Configured | Production, Preview, Development |
+| NextAuth | ✅ Configured | JWT-based authentication |
+| AWS S3 | ❌ NOT SET UP | Required for document uploads |
+| Redis | ⚠️ Optional | Falls back to in-memory cache |
+| Stripe | ⚠️ Optional | Payment features disabled |
+| Resend | ⚠️ Optional | Email notifications disabled |
+
+### S3 Setup Required
+
+To enable document uploads, add these environment variables to Vercel:
+
+```bash
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=your-bucket-name
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_FOLDER_PREFIX=foremanos/  # Optional
+```
+
+**S3 Bucket Configuration:**
+1. Create S3 bucket with private access
+2. Enable CORS for your domain
+3. Create IAM user with `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` permissions
+4. Add credentials to Vercel environment variables
+
+### Database Details
+
+| Property | Value |
+|----------|-------|
+| Provider | Neon PostgreSQL |
+| Project | wispy-scene-93200332 |
+| Region | us-east-1 |
+| Connection | Pooled (serverless) |
+| Schema | 112 Prisma models |
+| Status | In sync with schema |
