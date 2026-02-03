@@ -138,7 +138,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        Project: {
+        project: {
           id: project.id,
           name: project.name,
           slug: project.slug,

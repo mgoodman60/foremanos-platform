@@ -113,12 +113,17 @@ export function DailyReportHistory({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="daily-report-history-dialog-title"
+    >
       <div className="bg-dark-surface border border-gray-700 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
-            <h2 className="text-xl font-bold text-[#F8FAFC]">Daily Report History</h2>
+            <h2 id="daily-report-history-dialog-title" className="text-xl font-bold text-[#F8FAFC]">Daily Report History</h2>
             <p className="text-sm text-gray-400 mt-1">
               {projectName}
             </p>
@@ -128,6 +133,7 @@ export function DailyReportHistory({
             variant="ghost"
             size="sm"
             className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
+            aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -183,15 +189,21 @@ export function DailyReportHistory({
               {/* Grouped Reports */}
               {groupedReports.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-dark-card rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-gray-600">
-                    <Calendar className="w-8 h-8 text-gray-500" />
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-blue-500/30">
+                    <Calendar className="w-10 h-10 text-blue-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-[#F8FAFC] mb-2">
+                  <h3 className="text-xl font-bold text-[#F8FAFC] mb-2">
                     No Daily Reports Yet
                   </h3>
-                  <p className="text-sm text-gray-400 text-center max-w-md">
+                  <p className="text-base text-gray-300 text-center max-w-md mb-4">
                     Start creating daily reports to track your project progress. They will appear here.
                   </p>
+                  <button
+                    onClick={onClose}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Create First Report
+                  </button>
                 </div>
               ) : (
                 <div className="space-y-6">

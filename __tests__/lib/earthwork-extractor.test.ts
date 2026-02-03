@@ -411,7 +411,7 @@ describe('Earthwork Extractor', () => {
       await extractElevationsWithAI(documentContent, 'grading', 'test-api-key');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://routellm.abacus.ai/v1/chat/completions',
+        'https://api.openai.com/v1/chat/completions',
         expect.objectContaining({
           method: 'POST',
           headers: {

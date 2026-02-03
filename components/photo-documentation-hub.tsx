@@ -640,14 +640,19 @@ function LinkPhotosModal({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photo-link-dialog-title"
+    >
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
         <div className="p-4 border-b border-slate-700 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">Link Photos</h3>
+            <h3 id="photo-link-dialog-title" className="text-lg font-semibold text-white">Link Photos</h3>
             <p className="text-gray-400 text-sm">Link {selectedCount} photo(s) to:</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close dialog">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -756,11 +761,17 @@ function PhotoPreviewModal({
   getEntityColor: (type: string) => string;
 }) {
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photo-preview-dialog-title"
+    >
       <div className="relative max-w-4xl w-full mx-4">
         <button
           onClick={onClose}
           className="absolute -top-10 right-0 text-white hover:text-gray-300"
+          aria-label="Close preview"
         >
           <X className="w-6 h-6" />
         </button>
@@ -777,7 +788,10 @@ function PhotoPreviewModal({
 
           <div className="p-4 space-y-3">
             {photo.caption && (
-              <p className="text-white text-lg">{photo.caption}</p>
+              <p id="photo-preview-dialog-title" className="text-white text-lg">{photo.caption}</p>
+            )}
+            {!photo.caption && (
+              <p id="photo-preview-dialog-title" className="text-white text-lg">Photo Preview</p>
             )}
             {photo.aiDescription && (
               <p className="text-gray-400 text-sm italic">

@@ -1598,11 +1598,16 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
       {/* Room Comparison Modal */}
       {showComparison && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="room-comparison-title"
+        >
           <div className="w-full max-w-4xl max-h-[90vh] overflow-auto">
-            <RoomComparison 
-              projectSlug={projectSlug} 
-              onClose={() => setShowComparison(false)} 
+            <RoomComparison
+              projectSlug={projectSlug}
+              onClose={() => setShowComparison(false)}
             />
           </div>
         </div>

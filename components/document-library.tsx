@@ -1043,38 +1043,47 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           ) : documents.length === 0 ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center max-w-md px-4">
-                <div className="w-20 h-20 bg-dark-card rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-gray-600">
-                  <FileText className="w-10 h-10 text-gray-500" />
+                <div className="w-24 h-24 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-orange-500/30">
+                  <FileText className="w-12 h-12 text-orange-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-[#F8FAFC] mb-3">
+                <h3 className="text-2xl font-bold text-[#F8FAFC] mb-3">
                   {userRole === 'guest' ? 'No Documents Available' : 'No Documents Yet'}
                 </h3>
-                <p className="text-gray-400 mb-6 leading-relaxed">
-                  {userRole === 'guest' 
+                <p className="text-gray-300 mb-6 leading-relaxed text-base">
+                  {userRole === 'guest'
                     ? 'You currently have no document access. Contact your project administrator to request access to project documents.'
                     : 'Get started by uploading your first document. Plans, specifications, contracts, and more can be stored here.'}
                 </p>
                 {userRole !== 'guest' && (
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-[#F97316]" />
+                  <>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mb-6 px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] active:bg-[#C2410C] text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-base"
+                    >
+                      <Upload className="w-5 h-5 inline mr-2" />
+                      Upload Your First Document
+                    </button>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
+                          <FileText className="w-4 h-4 text-[#F97316]" />
+                        </div>
+                        <span>PDF & DOCX</span>
                       </div>
-                      <span>PDF & DOCX</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
-                        <Upload className="w-4 h-4 text-[#F97316]" />
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
+                          <Upload className="w-4 h-4 text-[#F97316]" />
+                        </div>
+                        <span>Up to 200MB</span>
                       </div>
-                      <span>Up to 200MB</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-[#F97316]" />
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
+                          <Shield className="w-4 h-4 text-[#F97316]" />
+                        </div>
+                        <span>Secure Storage</span>
                       </div>
-                      <span>Secure Storage</span>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
@@ -1086,7 +1095,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-dark-card border border-gray-700 rounded-lg p-3 lg:p-4 hover:border-[#F97316] transition-all"
+                  className="bg-dark-card border border-gray-700 rounded-lg p-3 lg:p-4 hover:border-[#F97316] hover:shadow-lg hover:bg-dark-surface transition-all group"
                 >
                   {/* Mobile & Tablet Simple View (< 1024px) */}
                   <div className="lg:hidden">
@@ -1373,10 +1382,10 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="rename-dialog-title"
+          aria-labelledby="document-library-rename-dialog-title"
         >
           <div className="bg-dark-card border border-gray-700 rounded-lg shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
-            <h3 id="rename-dialog-title" className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Document</h3>
+            <h3 id="document-library-rename-dialog-title" className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Document</h3>
             <p className="text-sm text-gray-400 mb-4">
               Enter a new name for "{renameDocument?.name}"
             </p>

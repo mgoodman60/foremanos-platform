@@ -136,7 +136,7 @@ export default function RoomComparison({ projectSlug, onClose }: RoomComparisonP
       <div className="px-4 py-3 border-b flex items-center justify-between bg-gray-50">
         <div className="flex items-center gap-2">
           <ArrowLeftRight className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Room Comparison</h3>
+          <h3 id="room-comparison-title" className="font-semibold text-gray-900">Room Comparison</h3>
         </div>
         {onClose && (
           <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded">

@@ -718,14 +718,32 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        if (response.status === 503) {
-          throw new Error('System is currently under maintenance. Please try again later.');
+        // Handle specific HTTP status codes with tailored messages
+        if (response.status === 401) {
+          throw new Error('Session expired. Please log in again.');
         } else if (response.status === 429) {
-          throw new Error('Too many requests. Please wait a moment before trying again.');
-        } else if (response.status === 0) {
-          throw new Error('Network error. Please check your internet connection and try again.');
+          throw new Error('Too many requests. Wait a moment.');
+        } else if (response.status === 503) {
+          throw new Error('Service under maintenance. Try again later.');
+        } else if (response.status === 500) {
+          throw new Error('Service temporarily unavailable.');
         }
-        throw new Error('Failed to send message. Please check your connection and try again.');
+
+        // Try to get error details from response
+        try {
+          const errorData = await response.json();
+          const errorMsg = errorData.error || errorData.message;
+
+          // Check for "no documents" error
+          if (errorMsg && errorMsg.toLowerCase().includes('no document')) {
+            throw new Error('Upload documents to enable AI chat.');
+          }
+
+          throw new Error(errorMsg || 'Failed to send message. Please try again.');
+        } catch (jsonError) {
+          // If JSON parsing fails, use generic message
+          throw new Error('Failed to send message. Please try again.');
+        }
       }
 
       // Handle streaming response
@@ -800,25 +818,29 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      
+
       let errorMsg = 'Sorry, I encountered an error processing your request.';
-      
+
       // Handle specific error types
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           errorMsg = 'Request timed out. The query may be too complex or the server is slow to respond. Please try again.';
-        } else if (error.message.includes('fetch') || error.message.includes('NetworkError')) {
-          errorMsg = 'Network connection failed. Please check your internet connection and try again.';
         } else {
+          // Use the error message we set in the response handling
           errorMsg = error.message;
         }
       }
-      
+
+      // Handle network errors (fetch failed entirely before getting a response)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMsg = 'Connection failed. Check your internet connection.';
+      }
+
       // Check if it's a network connectivity issue
       if (!navigator.onLine) {
-        errorMsg = 'You appear to be offline. Please check your internet connection and try again.';
+        errorMsg = 'Connection failed. Check your internet connection.';
       }
-      
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',

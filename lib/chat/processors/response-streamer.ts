@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getQuickFollowUps as generateQuickFollowUps } from '@/lib/follow-up-generator';
 import { validateBeforeResponse, EnhancedChunk } from '@/lib/rag-enhancements';
 import { cacheResponse, analyzeQueryComplexity } from '@/lib/query-cache';
+import { logger } from '@/lib/logger';
 import type { StreamResponseOptions, LLMResponse, ConversationResult, BuiltContext } from '@/types/chat';
 
 /**
@@ -149,7 +150,12 @@ export function streamResponse(options: StreamResponseOptions): Response {
           }
         }
       } catch (error) {
-        console.error('Stream error:', error);
+        logger.error('CHAT_API', 'Stream processing error', error as Error, {
+          userId,
+          conversationId: conversation.id,
+          hasMessage: !!message,
+          responseLength: fullResponse.length,
+        });
         controller.error(error);
       } finally {
         controller.close();
@@ -170,17 +176,56 @@ export function streamResponse(options: StreamResponseOptions): Response {
  * Create error response for chat API
  */
 export function createErrorResponse(error: unknown): NextResponse {
-  console.error('Chat API error:', error);
-  console.error('Error details:', error instanceof Error ? error.message : String(error));
-  console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-
+  const errorObj = error instanceof Error ? error : new Error(String(error));
   const errorWithStatus = error as Error & { status?: number };
   const statusCode = errorWithStatus.status || 500;
 
+  // Extract detailed error message from API errors
+  let userFriendlyMessage = 'Failed to process chat request';
+  let technicalDetails = errorObj.message;
+
+  // Parse API errors for better user feedback
+  if (errorObj.message.includes('OPENAI_API_KEY') || errorObj.message.includes('ANTHROPIC_API_KEY')) {
+    userFriendlyMessage = 'AI service configuration error. Please contact support.';
+    technicalDetails = 'API key not configured';
+  } else if (errorObj.message.includes('API request failed')) {
+    // Extract status code and error details from API error message
+    const match = errorObj.message.match(/failed \((\d+)\): (.+)/);
+    if (match) {
+      const [, apiStatus, apiError] = match;
+      userFriendlyMessage = `AI service error (${apiStatus})`;
+      technicalDetails = apiError;
+
+      // Provide specific messages for common API errors
+      if (apiStatus === '401') {
+        userFriendlyMessage = 'AI service authentication failed. Please contact support.';
+      } else if (apiStatus === '429') {
+        userFriendlyMessage = 'AI service rate limit exceeded. Please try again in a moment.';
+      } else if (apiStatus === '500' || apiStatus === '503') {
+        userFriendlyMessage = 'AI service is temporarily unavailable. Please try again later.';
+      }
+    }
+  } else if (errorObj.message.includes('timeout') || errorObj.message.includes('ECONNREFUSED')) {
+    userFriendlyMessage = 'Connection to AI service timed out. Please try again.';
+  } else if (errorObj.message.includes('network') || errorObj.message.includes('fetch')) {
+    userFriendlyMessage = 'Network error connecting to AI service. Please check your connection.';
+  } else if (errorObj.message) {
+    // Use the original error message if it's user-friendly
+    userFriendlyMessage = errorObj.message;
+  }
+
+  // Log with structured logger
+  logger.error('CHAT_API', 'Chat request failed', errorObj, {
+    statusCode,
+    userFriendlyMessage,
+    technicalDetails,
+    errorType: errorObj.constructor.name,
+  });
+
   return NextResponse.json(
     {
-      error: 'Failed to process chat request',
-      details: error instanceof Error ? error.message : String(error),
+      error: userFriendlyMessage,
+      details: technicalDetails,
     },
     { status: statusCode }
   );

@@ -1,6 +1,7 @@
 import { getCachedResponse, cacheResponse, analyzeQueryComplexity } from '@/lib/query-cache';
 import { prisma } from '@/lib/db';
 import { streamLLM, type LLMMessage } from '@/lib/llm-providers';
+import { logger } from '@/lib/logger';
 import type { LLMHandlerOptions, LLMResponse, BuiltContext } from '@/types/chat';
 
 /**
@@ -128,7 +129,20 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
     };
   } catch (error: unknown) {
     const err = error as Error & { status?: number };
-    console.error('LLM API error:', err.message);
+
+    // Log detailed error information
+    logger.error('CHAT_API', 'LLM API call failed', err, {
+      model: selectedModel,
+      hasImage: !!image,
+      messageLength: message?.length || 0,
+      contextChunks: context.chunks.length,
+      projectSlug,
+      userRole,
+      errorMessage: err.message,
+      statusCode: err.status,
+    });
+
+    // Re-throw to propagate to error handler
     throw err;
   }
 }

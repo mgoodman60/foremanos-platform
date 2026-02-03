@@ -539,7 +539,7 @@ export function ToolsMenu({
     <button
       key={tool.id}
       onClick={() => handleToolClick(tool)}
-      className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors group"
+      className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface hover:text-white rounded transition-colors group focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-card"
     >
       <div className="flex items-center gap-3">
         <span className={tool.iconColor}>{tool.icon}</span>
@@ -584,7 +584,7 @@ export function ToolsMenu({
       <div className="border-b border-gray-700 last:border-b-0">
         <button
           onClick={() => toggleSection(id)}
-          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-dark-surface transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-dark-surface transition-colors focus:outline-none focus:bg-dark-surface"
         >
           <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase">
             {label}
@@ -613,7 +613,7 @@ export function ToolsMenu({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors font-medium"
+        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F97316] hover:bg-[#EA580C] active:bg-[#C2410C] text-white rounded-lg transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-medium"
         title="Project Tools"
       >
         <MoreVertical className="w-4 h-4" />

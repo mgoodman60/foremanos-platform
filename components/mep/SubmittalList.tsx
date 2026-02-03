@@ -379,11 +379,16 @@ function AddSubmittalModal({ onClose, onSubmit }: { onClose: () => void; onSubmi
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mep-submittal-add-dialog-title"
+    >
       <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h3 className="text-lg font-medium text-white">New Submittal</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <h3 id="mep-submittal-add-dialog-title" className="text-lg font-medium text-white">New Submittal</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close dialog">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -502,14 +507,19 @@ function ReviewSubmittalModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mep-submittal-review-dialog-title"
+    >
       <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
-            <h3 className="text-lg font-medium text-white">Review Submittal</h3>
+            <h3 id="mep-submittal-review-dialog-title" className="text-lg font-medium text-white">Review Submittal</h3>
             <p className="text-sm text-gray-400">{submittal.submittalNumber} - {submittal.title}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close dialog">
             <X className="w-5 h-5" />
           </button>
         </div>

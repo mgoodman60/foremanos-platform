@@ -323,7 +323,7 @@ export function ConversationSidebar({
         <div className="border-b border-gray-700">
           <button
             onClick={() => setDashboardExpanded(!dashboardExpanded)}
-            className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors"
+            className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors focus:outline-none focus:bg-dark-card"
           >
             <div className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4 text-[#F97316]" />
@@ -366,7 +366,7 @@ export function ConversationSidebar({
                     <Button
                       onClick={() => setShowPhotoLibrary(true)}
                       variant="outline"
-                      className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
+                      className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white hover:border-green-500 py-2 transition-all focus:ring-2 focus:ring-green-500"
                     >
                       <ImageIcon className="h-4 w-4" />
                       <span>Photo Library</span>
@@ -375,7 +375,7 @@ export function ConversationSidebar({
                       onClick={() => setShowQuickCapture(true)}
                       disabled={!activeConversationId}
                       size="icon"
-                      className="bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       title="Quick capture photo"
                     >
                       <Camera className="h-4 w-4" />
@@ -384,7 +384,7 @@ export function ConversationSidebar({
                   <Button
                     onClick={() => setShowPhotoTimeline(true)}
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
+                    className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white hover:border-blue-500 py-2 transition-all focus:ring-2 focus:ring-blue-500"
                   >
                     <Calendar className="h-4 w-4" />
                     <span>Photo Timeline</span>
@@ -399,7 +399,7 @@ export function ConversationSidebar({
         <div className="border-b border-gray-700">
           <button
             onClick={() => setHistoryExpanded(!historyExpanded)}
-            className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors"
+            className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors focus:outline-none focus:bg-dark-card"
           >
             <div className="flex items-center gap-2">
               <History className="h-4 w-4 text-[#F97316]" />
@@ -413,7 +413,7 @@ export function ConversationSidebar({
               <Button
                 onClick={onNewConversation}
                 variant="outline"
-                className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
+                className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white hover:border-orange-500 py-2 transition-all focus:ring-2 focus:ring-orange-500"
               >
                 <Plus className="h-4 w-4" />
                 <span>New Conversation</span>
@@ -426,7 +426,7 @@ export function ConversationSidebar({
                 <Button
                   onClick={handleOpenDailyReport}
                   disabled={loadingDailyReport}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white py-3 rounded-lg transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 active:from-blue-800 active:to-blue-700 text-white py-3 rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-dark-surface disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Calendar className="h-5 w-5" />
                   <span className="font-semibold">
@@ -454,15 +454,22 @@ export function ConversationSidebar({
               ) : conversations.length === 0 ? (
                 <div className="flex items-center justify-center min-h-[200px] px-4">
                   <div className="text-center max-w-xs">
-                    <div className="w-12 h-12 bg-dark-card rounded-full flex items-center justify-center mx-auto mb-3 border-2 border-dashed border-gray-600">
-                      <MessageSquare className="w-6 h-6 text-gray-500" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-orange-500/30">
+                      <MessageSquare className="w-8 h-8 text-orange-400" />
                     </div>
-                    <h3 className="text-sm font-semibold text-[#F8FAFC] mb-2">
+                    <h3 className="text-base font-bold text-[#F8FAFC] mb-2">
                       No Conversations Yet
                     </h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">
+                    <p className="text-sm text-gray-400 leading-relaxed mb-4">
                       Start a new conversation to get help with your construction project.
                     </p>
+                    <Button
+                      onClick={onNewConversation}
+                      className="bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Start First Conversation
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -473,10 +480,10 @@ export function ConversationSidebar({
               tabIndex={0}
               aria-label={`${conv.title} - ${conv.messageCount} message${conv.messageCount !== 1 ? 's' : ''}`}
               aria-current={activeConversationId === conv.id ? 'true' : 'false'}
-              className={`group relative rounded-lg p-3 cursor-pointer transition-colors ${
+              className={`group relative rounded-lg p-3 cursor-pointer transition-all ${
                 activeConversationId === conv.id
-                  ? 'bg-[#F97316]/20 border border-[#F97316]'
-                  : 'hover:bg-dark-card border border-transparent'
+                  ? 'bg-[#F97316]/20 border border-[#F97316] shadow-md'
+                  : 'hover:bg-dark-card hover:shadow-sm border border-transparent hover:border-gray-600'
               }`}
               onClick={() => {
                 if (editingId !== conv.id) {

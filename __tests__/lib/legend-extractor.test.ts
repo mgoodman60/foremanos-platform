@@ -158,7 +158,7 @@ describe('detectLegendRegion', () => {
     await detectLegendRegion('base64image', 'A1.1');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://routellm.abacus.ai/v1/chat/completions',
+      'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
         method: 'POST',
         headers: {

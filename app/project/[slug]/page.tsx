@@ -996,8 +996,35 @@ export default function ProjectPage() {
 
       {/* Chat Interface */}
       <main className="flex-1 pb-16 md:pb-0">
-        <ChatInterface 
-          userRole={session?.user.role || 'guest'} 
+        {/* Prerequisites Banner - Show when no documents uploaded */}
+        {project.documentCount === 0 && (
+          <div className="mx-3 sm:mx-6 mt-4 mb-4">
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <svg className="h-5 w-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-amber-200 font-medium">
+                    Upload construction documents to enable AI-powered analysis
+                  </p>
+                  <p className="text-amber-200/70 text-sm mt-1">
+                    Upload drawings, specs, or contracts to start asking questions
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-3 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded-md text-sm font-medium transition-colors"
+              >
+                Upload Documents
+              </button>
+            </div>
+          </div>
+        )}
+
+        <ChatInterface
+          userRole={session?.user.role || 'guest'}
           projectSlug={slug}
           projectId={project.id}
           mobileOpen={showMobileSidebar}

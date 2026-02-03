@@ -312,12 +312,17 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photo-library-title"
+    >
       <div className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
-            <h2 className="text-2xl font-bold text-[#F8FAFC]">Photo Library</h2>
+            <h2 id="photo-library-title" className="text-2xl font-bold text-[#F8FAFC]">Photo Library</h2>
             <p className="text-sm text-gray-400 mt-1">
               {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
               {selectedPhotos.size > 0 && ` · ${selectedPhotos.size} selected`}
@@ -477,9 +482,14 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
 
       {/* Bulk Tag Dialog */}
       {showBulkTagDialog && (
-        <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="photo-library-bulk-tag-title"
+        >
           <div className="bg-dark-surface border border-gray-700 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
+            <h3 id="photo-library-bulk-tag-title" className="text-xl font-bold text-[#F8FAFC] mb-4">
               Tag {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
             </h3>
             <div className="space-y-4">
@@ -534,9 +544,14 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
 
       {/* Bulk Caption Dialog */}
       {showBulkCaptionDialog && (
-        <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="photo-library-bulk-caption-title"
+        >
           <div className="bg-dark-surface border border-gray-700 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
+            <h3 id="photo-library-bulk-caption-title" className="text-xl font-bold text-[#F8FAFC] mb-4">
               Caption {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
             </h3>
             <div className="space-y-4">

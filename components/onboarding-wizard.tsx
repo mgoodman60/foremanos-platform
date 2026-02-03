@@ -205,8 +205,8 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onComplete(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="sticky top-0 z-10 bg-white pb-4 border-b">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-[#003B71] bg-opacity-10 rounded-lg">
               <Icon className="w-6 h-6 text-[#003B71]" />
@@ -219,7 +219,7 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
           </p>
         </DialogHeader>
 
-        <div className="py-6">{step.content}</div>
+        <div className="py-6 overflow-y-auto flex-1">{step.content}</div>
 
         <DialogFooter className="flex items-center justify-between">
           <Button

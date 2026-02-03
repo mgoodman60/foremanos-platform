@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { incrementQueryCount } from '@/lib/subscription';
+import { logger } from '@/lib/logger';
 
 // Middleware modules
 import {
@@ -51,6 +52,15 @@ export const maxDuration = 60; // 60 seconds timeout for long-running queries
  */
 export async function POST(request: NextRequest) {
   const auth = await checkAuth(request);
+
+  // Parse request body early for error logging
+  let requestBody: { projectSlug?: string; message?: string; image?: string; conversationId?: string } | null = null;
+  try {
+    requestBody = await request.clone().json();
+  } catch (e) {
+    // Ignore parsing errors - will be caught by validation
+  }
+
   try {
     // 1. Maintenance check
     const maintenance = await checkMaintenance();
@@ -161,6 +171,16 @@ export async function POST(request: NextRequest) {
       userRole: auth.userRole,
     });
   } catch (error) {
+    // Log error with request context for debugging
+    logger.error('CHAT_API', 'Chat request failed at route level', error as Error, {
+      userId: auth.userId,
+      userRole: auth.userRole,
+      projectSlug: requestBody?.projectSlug,
+      hasMessage: !!requestBody?.message,
+      hasImage: !!requestBody?.image,
+      conversationId: requestBody?.conversationId,
+    });
+
     return createErrorResponse(error);
   } finally {
     // Increment query count for logged-in users

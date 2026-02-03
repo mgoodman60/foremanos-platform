@@ -8,6 +8,8 @@
  * Replaces Abacus AI middleware for direct API access (Jan 2026)
  */
 
+import { logger } from '@/lib/logger';
+
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
   content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
@@ -231,7 +233,16 @@ async function streamOpenAI(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => 'No error details available');
-    throw new Error(`OpenAI API request failed (${response.status}): ${errorText}`);
+    const errorMessage = `OpenAI API request failed (${response.status}): ${errorText}`;
+
+    logger.error('CHAT_API', 'OpenAI streaming API error', new Error(errorMessage), {
+      statusCode: response.status,
+      statusText: response.statusText,
+      model,
+      errorBody: errorText.substring(0, 500), // Log first 500 chars of error
+    });
+
+    throw new Error(errorMessage);
   }
 
   return response.body as ReadableStream<Uint8Array>;
@@ -291,7 +302,16 @@ async function streamAnthropic(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => 'No error details available');
-    throw new Error(`Anthropic API request failed (${response.status}): ${errorText}`);
+    const errorMessage = `Anthropic API request failed (${response.status}): ${errorText}`;
+
+    logger.error('CHAT_API', 'Anthropic streaming API error', new Error(errorMessage), {
+      statusCode: response.status,
+      statusText: response.statusText,
+      model,
+      errorBody: errorText.substring(0, 500), // Log first 500 chars of error
+    });
+
+    throw new Error(errorMessage);
   }
 
   return response.body as ReadableStream<Uint8Array>;
