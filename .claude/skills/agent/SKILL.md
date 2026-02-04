@@ -23,8 +23,9 @@ Manage and invoke ForemanOS specialized agents.
 | `documenter` | Generate documentation for code, APIs, features |
 | `database` | Prisma schema, migrations, query optimization |
 | `ui` | React components, design system, accessibility |
+| `ux-design` | User research, design specs, accessibility audits, user flows |
 
-### Integration Agents
+### Specialized Agents
 
 | Name | Description |
 |------|-------------|
@@ -32,6 +33,8 @@ Manage and invoke ForemanOS specialized agents.
 | `pdf-specialist` | PDF processing, construction drawings, form filling |
 | `refactoring-agent` | Large-scale code restructuring, pattern migrations |
 | `infra-specialist` | Infrastructure, deployment, Vercel, environment config |
+| `analytics-reports` | Report generation, KPI dashboards, data visualization, exports |
+| `resilience-architect` | Error handling, retry strategies, graceful degradation, logging |
 
 ### Construction Domain Agents
 
@@ -87,3 +90,6 @@ Agents are also automatically selected based on keywords in user queries:
 - "generate docs" → documenter agent
 - "takeoff" → quantity-surveyor agent
 - "clash detection" → bim-specialist agent
+- "UX audit", "user flow", "WCAG" → ux-design agent
+- "report", "KPI", "dashboard", "analytics" → analytics-reports agent
+- "error handling", "retry", "circuit breaker" → resilience-architect agent

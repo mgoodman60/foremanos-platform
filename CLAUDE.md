@@ -33,13 +33,14 @@ npm run seed:test-user   # Seed test user for development
 ### Core Directories
 
 ```
-app/api/          # 388 API routes organized by feature domain
-lib/              # 200+ service modules (RAG, S3, Stripe, auth, etc.)
-components/       # 280+ React components (Shadcn/Radix UI primitives)
-prisma/           # Database schema and migrations
-__tests__/        # Vitest tests (smoke, API, integration, snapshots)
-e2e/              # Playwright E2E tests
-.claude/agents/   # 18 custom Claude Code agents
+app/api/          # 389 API routes organized by feature domain
+lib/              # 212 service modules (RAG, S3, Stripe, auth, etc.)
+components/       # 292 React components (Shadcn/Radix UI primitives)
+prisma/           # Database schema and migrations (112 models)
+__tests__/        # Vitest tests (148 test files: lib, API, smoke, hooks)
+e2e/              # Playwright E2E tests (23 spec files)
+.claude/agents/   # 22 custom Claude Code agents
+.claude/skills/   # 12 slash command skills
 ```
 
 ### Key Service Modules
@@ -134,12 +135,12 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: 6,559 tests in `__tests__/` (146 lib test files + API/smoke/integration)
-- **Playwright**: 327 E2E tests in `e2e/` (23 test files)
+- **Vitest**: 148 test files in `__tests__/` (127 lib + 17 API + 3 smoke + 1 hooks)
+- **Playwright**: 23 E2E spec files in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
-- **100% lib coverage**: All 149 lib modules have dedicated test files
+- **Comprehensive lib coverage**: All major lib modules have dedicated test files
 
-### Lib Test Coverage (146 files)
+### Lib Test Coverage (127 files)
 
 All lib modules in `lib/` have comprehensive test coverage in `__tests__/lib/`. Key test suites by category:
 
@@ -274,9 +275,9 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 
 ## Custom Agents
 
-18 specialized agents in `.claude/agents/`:
+22 specialized agents in `.claude/agents/`:
 
-### Development Agents (6)
+### Development Agents (7)
 | Agent | Purpose |
 |-------|---------|
 | `security` | Vulnerability scanning, security audits, code review (OWASP, auth, injection) |
@@ -285,13 +286,17 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 | `database` | Prisma schema, migrations, query optimization |
 | `fixer` | Bug fixes, build validation, dependency updates |
 | `ui` | React components and design system |
+| `ux-design` | User research, design specs, accessibility audits, user flows |
 
-### Specialized Agents (3)
+### Specialized Agents (6)
 | Agent | Purpose |
 |-------|---------|
 | `stripe-expert` | Stripe payment integration |
 | `pdf-specialist` | PDF processing for construction drawings |
 | `refactoring-agent` | Large-scale code refactoring |
+| `infra-specialist` | Vercel deployment, bundle optimization, DevOps |
+| `analytics-reports` | Report generation, data visualization, KPI dashboards |
+| `resilience-architect` | Error handling, retry strategies, graceful degradation, observability |
 
 ### Construction Domain Agents (9)
 | Agent | Purpose |
@@ -339,6 +344,9 @@ When a user query matches these patterns, the corresponding agent is auto-invoke
 | `fixer` | fix, bug, error, broken, failing, debug, build error |
 | `security` | security, vulnerability, audit, OWASP, injection, XSS |
 | `documenter` | document, JSDoc, API docs, README |
+| `ux-design` | UX, user flow, usability, accessibility audit, WCAG, heuristic |
+| `analytics-reports` | report, KPI, dashboard, chart, EVM, export CSV, analytics |
+| `resilience-architect` | error handling, retry, circuit breaker, graceful degradation, logging |
 
 ### Construction Domain Agent Routing
 
@@ -428,11 +436,13 @@ Required:
 Optional:
 - `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` - AI providers
 - `STRIPE_SECRET_KEY` - Payments
-- `AWS_REGION`, `AWS_BUCKET_NAME` - S3 storage
+- `AWS_REGION`, `AWS_BUCKET_NAME` - S3 storage (see `S3_SETUP_GUIDE.md` for detailed AWS setup)
 - `REDIS_URL` - Caching (falls back to memory)
 - `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_SECRET` - OneDrive integration
 - `ONEDRIVE_TENANT_ID`, `ONEDRIVE_REDIRECT_URI` - OneDrive OAuth
 - `RESEND_API_KEY` - Email service
+
+**Note:** See `S3_SETUP_GUIDE.md` for comprehensive AWS S3 bucket configuration, IAM permissions, and CORS setup instructions.
 
 ## Known Quirks
 
@@ -451,6 +461,21 @@ npm run build
 
 ## Recent Fixes (January-February 2026)
 
+### February 2026 - Security & Infrastructure
+
+**jspdf HIGH Severity Vulnerability Fix**
+Migrated from jspdf to @react-pdf/renderer to address multiple HIGH severity vulnerabilities:
+
+| Migration | Impact |
+|-----------|--------|
+| `components/room-pdf-generator.tsx` | Room report PDF generation |
+| `components/room-bulk-export.tsx` | Bulk room export functionality |
+| `components/project-summary-report.tsx` | Project summary reports |
+
+**Documentation Created:**
+- `JSPDF_MIGRATION_SUMMARY.md` - Complete migration guide and implementation details
+- `S3_SETUP_GUIDE.md` - Comprehensive AWS S3 setup instructions
+
 ### NPM Security Vulnerabilities (February 2026)
 Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
 
@@ -460,6 +485,7 @@ Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
 | fast-xml-parser@5.3.4 override | 11 fixed | HIGH (AWS SDK DoS) |
 | glob@10.5.0 override | 1 fixed | HIGH (command injection) |
 | lodash 4.17.21 → 4.17.23 | 1 fixed | MODERATE (prototype pollution) |
+| jspdf migration to @react-pdf/renderer | Multiple HIGH vulnerabilities fixed | HIGH |
 
 **Remaining 8 vulnerabilities** require breaking changes:
 - esbuild (Vitest 2.x) - 3 MODERATE: Vitest 4.x causes 358 test failures
@@ -505,10 +531,10 @@ Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
 - **ESLint errors**: Fixed `no-non-null-asserted-optional-chain` errors in cost-calculation-service.test.ts
 
 ### Infrastructure & Testing
-- **Comprehensive test coverage**: 6,559 Vitest tests + 327 Playwright E2E tests
-- **100% lib module coverage**: All 149 lib files now have dedicated test suites
+- **Comprehensive test coverage**: 152 Vitest test files + 23 Playwright E2E spec files
+- **Strong lib module coverage**: 131 lib test files covering major functionality
 - **23 E2E test files**: Full user-facing feature coverage
-- **Claude Code agents**: Added 18 specialized agents to `.claude/agents/`
+- **Claude Code agents**: Added 19 specialized agents to `.claude/agents/`
 - **Design tokens**: Migrated to CSS variables in chart and UI components
 - **Virus scanning**: Implemented `lib/virus-scanner.ts` for file upload security
 - **Vercel compatibility**: Serverless function fixes and build optimizations
@@ -565,6 +591,14 @@ Benefits:
 - **Analytics**: Project KPI and metrics service (`lib/analytics-service.ts`)
 - **Workflow**: State machine for document processing (`lib/workflow-service.ts`)
 - **Logger**: Centralized structured logging utility (`lib/logger.ts`)
+
+### OpenAI Migration (February 2026)
+
+Migrated from Abacus AI to direct OpenAI API:
+- Updated `lib/llm-providers.ts` for direct OpenAI integration
+- Fixed remaining API routes using Abacus AI endpoints
+- Updated test files for OpenAI API compatibility
+- Removed canvas dependency to fix Vercel 250MB function limit
 
 ### Chat API & UI Fixes (February 2026)
 
