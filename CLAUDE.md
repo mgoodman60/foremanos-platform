@@ -34,13 +34,13 @@ npm run seed:test-user   # Seed test user for development
 
 ```
 app/api/          # 389 API routes organized by feature domain
-lib/              # 212 service modules (RAG, S3, Stripe, auth, etc.)
-components/       # 292 React components (Shadcn/Radix UI primitives)
+lib/              # 213 service modules (RAG, S3, Stripe, auth, etc.)
+components/       # 299 React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (148 test files: lib, API, smoke, hooks)
+__tests__/        # Vitest tests (153 test files: lib, API, smoke, hooks)
 e2e/              # Playwright E2E tests (23 spec files)
-.claude/agents/   # 22 custom Claude Code agents
-.claude/skills/   # 12 slash command skills
+.claude/agents/   # 23 custom Claude Code agents
+.claude/skills/   # 13 slash command skills
 ```
 
 ### Key Service Modules
@@ -276,7 +276,7 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 
 ## Custom Agents
 
-22 specialized agents in `.claude/agents/`:
+23 specialized agents in `.claude/agents/`:
 
 ### Development Agents (7)
 | Agent | Purpose |
@@ -314,7 +314,7 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 
 ## Skills (Slash Commands)
 
-12 skills available via `/command`:
+13 skills available via `/command`:
 
 | Command | Purpose |
 |---------|---------|
@@ -330,6 +330,29 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 | `/daily` | Daily standup summary |
 | `/commit` | Smart commit with message |
 | `/check` | Quick health check (lint, types, tests) |
+| `/construction-plan-intelligence` | Construction document processing pipeline enhancement |
+
+### Construction Plan Intelligence Skill
+
+**Trigger:** Any work touching `lib/document-processor-batch.ts`, `lib/intelligence-orchestrator.ts`, `lib/rag.ts`, `lib/takeoff-memory-service.ts`, `lib/symbol-learner.ts`, or Prisma schema changes to `Document`, `DocumentChunk`, `DrawingType`, `SheetLegend`, or `MaterialTakeoff` models.
+
+**Before making changes to these files**, always read `.claude/skills/construction-plan-intelligence/SKILL.md` first. It defines 10 specific extraction quality gaps, implementation priorities, and integration points with line-number precision.
+
+**Reference files** (9 files in `references/`):
+
+| File | Purpose |
+|------|---------|
+| `discipline_prompts.md` | Per-discipline vision prompt templates |
+| `cross_reference_patterns.md` | Drawing cross-reference resolution logic |
+| `takeoff_formulas.md` | Material quantity formulas, waste factors, sanity checks |
+| `query_routing.md` | RAG query-to-sheet-type routing table |
+| `assembly_patterns.md` | Wall/ceiling/floor assembly resolution and CSI keynote mapping |
+| `schema_migrations.md` | New Prisma models (`DrawingCrossReference`, `SheetContinuity`) |
+| `continuity_patterns.md` | Multi-page drawing continuation detection |
+| `revision_tracking.md` | Revision delta detection and comparison logic |
+| `validation_rules.md` | Scale plausibility checks and extraction validation |
+
+**Asset library:** `assets/construction_symbols_library.json` — 230 symbols across 26 CSI MasterFormat categories. Used for vision prompt injection (load only relevant division symbols per discipline), symbol learner baseline vocabulary, and assembly keynote resolution.
 
 ## Agent Auto-Selection
 
@@ -532,8 +555,8 @@ Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
 - **ESLint errors**: Fixed `no-non-null-asserted-optional-chain` errors in cost-calculation-service.test.ts
 
 ### Infrastructure & Testing
-- **Comprehensive test coverage**: 152 Vitest test files + 23 Playwright E2E spec files
-- **Strong lib module coverage**: 131 lib test files covering major functionality
+- **Comprehensive test coverage**: 153 Vitest test files + 23 Playwright E2E spec files
+- **Strong lib module coverage**: 128 lib test files covering major functionality
 - **23 E2E test files**: Full user-facing feature coverage
 - **Claude Code agents**: Added 19 specialized agents to `.claude/agents/`
 - **Design tokens**: Migrated to CSS variables in chart and UI components

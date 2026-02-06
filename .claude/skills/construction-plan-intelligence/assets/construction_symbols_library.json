@@ -1,0 +1,1928 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Comprehensive construction symbol reference library organized by CSI MasterFormat divisions. Each entry describes the visual appearance of standard construction drawing symbols to aid vision-model extraction and classification.",
+    "total_divisions": 22,
+    "usage": "Loaded by symbol-learner.ts as baseline vocabulary. Relevant subsets injected into discipline-specific vision prompts during two-pass extraction (Gap 1). Visual descriptions help bridge vision model output to construction meaning.",
+    "id_scheme": "D{division}-{category_abbrev}-{sequence}",
+    "confidence_baseline": "Symbols matched against this library receive a +25 confidence boost in symbol-learner.ts scoring"
+  },
+
+  "Division 01 - General Requirements": [
+    {
+      "id": "D01-GEN-001",
+      "symbol_name": "North Arrow",
+      "category": "General/Orientation",
+      "description": "Compass-style arrow or stylized pointer labeled 'N' or 'NORTH'. May include a circle or diamond shape with directional indicator.",
+      "typical_usage": "Placed on site plans, floor plans, and roof plans to orient the viewer. Usually appears once per sheet.",
+      "vision_hints": "Look for prominent arrow symbol with 'N' label, often in corner or margin area of drawing."
+    },
+    {
+      "id": "D01-GEN-002",
+      "symbol_name": "Section Cut Marker",
+      "category": "General/Reference",
+      "description": "Circle (typically split) with a line or arrow through it indicating direction of view. Contains drawing number on top, sheet number on bottom, separated by horizontal line.",
+      "typical_usage": "Used on floor plans, elevations, and details to reference section views on other sheets.",
+      "vision_hints": "Circle with internal horizontal divider. Top half = detail/drawing number, bottom half = sheet number. Arrow or thick line shows cut direction."
+    },
+    {
+      "id": "D01-GEN-003",
+      "symbol_name": "Detail Bubble / Detail Marker",
+      "category": "General/Reference",
+      "description": "Circle or oval with drawing number over sheet number, connected by a leader line to the area of detail. May have a dashed boundary indicating the area covered.",
+      "typical_usage": "References enlarged detail views. Found on floor plans, sections, and elevations.",
+      "vision_hints": "Similar to section marker but typically smaller. Look for dashed rectangle or cloud shape around the referenced area."
+    },
+    {
+      "id": "D01-GEN-004",
+      "symbol_name": "Elevation Marker",
+      "category": "General/Reference",
+      "description": "Circle (often with pointed triangle at bottom) containing drawing number over sheet number. Arrow or triangle points toward the face being viewed.",
+      "typical_usage": "Placed on floor plans to indicate exterior or interior elevation views.",
+      "vision_hints": "Circle with triangular pointer. Multiple elevation markers often clustered around a building footprint pointing in different directions."
+    },
+    {
+      "id": "D01-GEN-005",
+      "symbol_name": "Column Grid Line",
+      "category": "General/Reference",
+      "description": "Long dashed or chain line extending across drawing with a circle at each end containing a letter (A, B, C...) or number (1, 2, 3...).",
+      "typical_usage": "Structural grid system used on all plan views to locate structural elements. Letters typically run one direction, numbers the other.",
+      "vision_hints": "Network of perpendicular lines with circled identifiers at ends. Usually extends beyond building footprint."
+    },
+    {
+      "id": "D01-GEN-006",
+      "symbol_name": "Revision Cloud",
+      "category": "General/Revision",
+      "description": "Cloud-shaped or scalloped boundary drawn around an area that has been revised. Usually accompanied by a revision triangle with number.",
+      "typical_usage": "Indicates changed areas on revised drawings. Paired with revision block in title block.",
+      "vision_hints": "Irregular bumpy/scalloped closed shape. Look for adjacent triangle with revision number (△1, △2)."
+    },
+    {
+      "id": "D01-GEN-007",
+      "symbol_name": "Revision Triangle",
+      "category": "General/Revision",
+      "description": "Small triangle (△) containing a revision number, placed near revision clouds and in the title block revision schedule.",
+      "typical_usage": "Identifies specific revision number. Cross-referenced with revision schedule in title block.",
+      "vision_hints": "Small equilateral triangle with number inside. Often appears multiple times on revised sheets."
+    },
+    {
+      "id": "D01-GEN-008",
+      "symbol_name": "Match Line",
+      "category": "General/Continuity",
+      "description": "Heavy dashed or chain line across a drawing indicating where the plan continues on another sheet. Labeled with adjacent sheet number.",
+      "typical_usage": "Used when a floor plan is too large for one sheet. Text like 'SEE SHEET A-102' appears on one side.",
+      "vision_hints": "Bold dashed line spanning width of drawing. Text annotations on both sides referencing other sheet numbers."
+    },
+    {
+      "id": "D01-GEN-009",
+      "symbol_name": "Key Plan / Index Plan",
+      "category": "General/Reference",
+      "description": "Small simplified building footprint in corner of sheet with the current sheet's coverage area highlighted or hatched.",
+      "typical_usage": "Shows which portion of the overall building is depicted on the current sheet. Common on large projects.",
+      "vision_hints": "Small diagram in sheet corner or margin. One zone highlighted/shaded to indicate current sheet coverage."
+    },
+    {
+      "id": "D01-GEN-010",
+      "symbol_name": "Drawing Scale Bar",
+      "category": "General/Scale",
+      "description": "Graduated bar showing measurement at the drawing's scale. May be graphical (alternating black/white segments) or textual (1/4\" = 1'-0\").",
+      "typical_usage": "Appears near title or in title block. Critical for dimensional verification.",
+      "vision_hints": "Horizontal bar with alternating fills and dimension labels. Often accompanied by text scale notation."
+    },
+    {
+      "id": "D01-GEN-011",
+      "symbol_name": "Spot Elevation",
+      "category": "General/Dimension",
+      "description": "X or + symbol with an elevation value (e.g., +100'-0\", EL. 100.00). May include an arrow pointing to the specific location.",
+      "typical_usage": "Indicates finished floor elevation or grade elevation at a specific point.",
+      "vision_hints": "Cross or X mark with adjacent elevation number. Common at floor transitions, landings, and site grade points."
+    },
+    {
+      "id": "D01-GEN-012",
+      "symbol_name": "Level Datum / Benchmark",
+      "category": "General/Dimension",
+      "description": "Triangle or arrow pointing to a horizontal line with elevation value. In sections/elevations, shows vertical reference.",
+      "typical_usage": "Establishes vertical datum points on sections and elevations. References survey benchmark.",
+      "vision_hints": "Right-pointing triangle touching a horizontal dashed line with elevation text. Multiple levels stacked vertically in sections."
+    },
+    {
+      "id": "D01-GEN-013",
+      "symbol_name": "Keynote Symbol",
+      "category": "General/Reference",
+      "description": "Number or alphanumeric code in a circle, hexagon, or diamond shape connected to an element by a leader line. References a keynote legend.",
+      "typical_usage": "Links drawing elements to keynote schedule listing materials, products, or spec sections.",
+      "vision_hints": "Small geometric shape (circle, diamond, hexagon) with number inside, connected by leader to building element."
+    },
+    {
+      "id": "D01-GEN-014",
+      "symbol_name": "Graphic Scale Indicator",
+      "category": "General/Scale",
+      "description": "Text notation showing drawing scale ratio, e.g., '1/4\" = 1'-0\"', '1:50', '3/8\" = 1'-0\"'. Often enclosed in a box or placed below drawing title.",
+      "typical_usage": "Every plan, section, elevation, and detail includes its scale. Multiple scales possible on one sheet.",
+      "vision_hints": "Text with fraction or ratio format near drawing title. Look for patterns like X\" = Y'-Z\" or 1:NN."
+    },
+    {
+      "id": "D01-GEN-015",
+      "symbol_name": "Break Line",
+      "category": "General/Convention",
+      "description": "Jagged or zigzag line indicating that a portion of the drawing has been omitted or shortened for clarity.",
+      "typical_usage": "Used to shorten long elements (walls, pipes, structural members) that would otherwise not fit at scale.",
+      "vision_hints": "Zigzag or wavy interruption in an otherwise continuous element. Two parallel lines with zigzag between them."
+    },
+    {
+      "id": "D01-GEN-016",
+      "symbol_name": "Title Block",
+      "category": "General/Sheet Info",
+      "description": "Bordered area (usually right side or bottom of sheet) containing project name, sheet title, sheet number, date, revision history, firm information, stamps, and approvals.",
+      "typical_usage": "Every drawing sheet has a title block. Primary source of sheet metadata.",
+      "vision_hints": "Rectangular bordered area at sheet edge with multiple text fields, logos, and structured layout."
+    },
+    {
+      "id": "D01-GEN-017",
+      "symbol_name": "Drawing Title / View Title",
+      "category": "General/Reference",
+      "description": "Text label below each plan, section, or detail view with the drawing title, number, and scale. Often underlined or in a styled block.",
+      "typical_usage": "Identifies each view on a sheet. Format typically: DRAWING TITLE (number) SCALE: X\" = Y'-0\".",
+      "vision_hints": "Bold or underlined text below each drawing view. Contains drawing number and scale notation."
+    },
+    {
+      "id": "D01-GEN-018",
+      "symbol_name": "Zone Designator",
+      "category": "General/Continuity",
+      "description": "Letter or number label at drawing edges (A, B, C along top; 1, 2, 3 along side) creating a coordinate grid for locating elements.",
+      "typical_usage": "Allows verbal reference to drawing locations (e.g., 'See Zone B-3'). Common on large format sheets.",
+      "vision_hints": "Evenly spaced letters/numbers along sheet margins, sometimes in small boxes or circles."
+    }
+  ],
+
+  "Division 02 - Existing Conditions": [
+    {
+      "id": "D02-EXC-001",
+      "symbol_name": "Existing Construction to Remain",
+      "category": "Demolition",
+      "description": "Drawn with lighter or thinner lines than new work. May be shown as gray, screened, or dashed. Sometimes labeled 'E' or '(E)'.",
+      "typical_usage": "Distinguishes existing elements that will not be demolished from new construction.",
+      "vision_hints": "Lighter line weight or gray-toned elements compared to bold new construction lines."
+    },
+    {
+      "id": "D02-EXC-002",
+      "symbol_name": "Demolition / Remove",
+      "category": "Demolition",
+      "description": "Dashed lines or elements with X hatching through them. May use a specific demolition line type or be labeled 'DEMO', 'REMOVE', or struck through.",
+      "typical_usage": "Indicates elements to be removed during renovation/remodel work.",
+      "vision_hints": "Dashed outlines of walls/elements, often with X pattern through them. Look for 'DEMO' text labels."
+    },
+    {
+      "id": "D02-EXC-003",
+      "symbol_name": "Existing Wall",
+      "category": "Demolition",
+      "description": "Wall shown in lighter line weight or with hatching/fill pattern distinct from new walls. Labeled '(E)' or 'EXIST.'.",
+      "typical_usage": "Renovation plans showing which walls are existing vs. new construction.",
+      "vision_hints": "Wall outlines with '(E)' label, drawn lighter than new walls on same sheet."
+    },
+    {
+      "id": "D02-EXC-004",
+      "symbol_name": "New Construction Indicator",
+      "category": "Demolition",
+      "description": "Bold or heavy line weight distinguishing new work from existing. May be labeled '(N)' or 'NEW'. On demo plans, new work may be shown dashed.",
+      "typical_usage": "Renovation drawings where new and existing elements coexist.",
+      "vision_hints": "Heavier/bolder lines than surrounding existing elements. '(N)' or 'NEW' labels."
+    },
+    {
+      "id": "D02-EXC-005",
+      "symbol_name": "Salvage / Relocate",
+      "category": "Demolition",
+      "description": "Element marked with 'SALVAGE', 'RELOCATE', or 'S/R'. May show current and future positions with leader lines.",
+      "typical_usage": "Items to be carefully removed and reinstalled elsewhere.",
+      "vision_hints": "Element with text label 'SALVAGE' or 'RELOCATE' and sometimes arrow showing new location."
+    },
+    {
+      "id": "D02-EXC-006",
+      "symbol_name": "Phase Line / Phase Boundary",
+      "category": "Demolition/Phasing",
+      "description": "Heavy dashed or colored line separating construction phases. Labeled 'PHASE 1', 'PHASE 2', etc.",
+      "typical_usage": "Phased construction projects showing work boundaries for each phase.",
+      "vision_hints": "Bold boundary line with phase labels. Different phases may use different line types or fills."
+    }
+  ],
+
+  "Division 03 - Concrete": [
+    {
+      "id": "D03-CON-001",
+      "symbol_name": "Concrete Column (Plan)",
+      "category": "Structural",
+      "description": "Filled/hatched circle (round column) or square/rectangle (rectangular column) in plan view. Hatching uses concrete stipple pattern (dots).",
+      "typical_usage": "Foundation and framing plans showing column locations at grid intersections.",
+      "vision_hints": "Solid or stipple-filled geometric shape at grid line intersections. Sized typically 12\"x12\" to 36\"x36\"."
+    },
+    {
+      "id": "D03-CON-002",
+      "symbol_name": "Concrete Wall (Section)",
+      "category": "Structural",
+      "description": "Concrete section fill shows random dot/stipple pattern (poche). Distinguished from masonry (diagonal lines) and earth (varied dots with triangles).",
+      "typical_usage": "Wall sections, foundation details, retaining wall sections.",
+      "vision_hints": "Random scattered dots pattern (stipple/poche) filling wall or slab cross-sections."
+    },
+    {
+      "id": "D03-CON-003",
+      "symbol_name": "Spread Footing (Plan)",
+      "category": "Structural",
+      "description": "Dashed rectangle (below grade) centered on column location. Dimensions shown. May include rebar callout (#4 @ 12\" O.C. E.W.).",
+      "typical_usage": "Foundation plans showing individual column footings.",
+      "vision_hints": "Dashed rectangle around column grid point with dimension strings. Rebar notation nearby."
+    },
+    {
+      "id": "D03-CON-004",
+      "symbol_name": "Continuous / Strip Footing (Plan)",
+      "category": "Structural",
+      "description": "Dashed rectangle running along wall lines (below grade). Width dimension shown perpendicular to wall.",
+      "typical_usage": "Foundation plans showing footings beneath bearing walls.",
+      "vision_hints": "Dashed parallel lines following wall path below grade. Width callout like '2'-0\" WIDE'."
+    },
+    {
+      "id": "D03-CON-005",
+      "symbol_name": "Slab on Grade",
+      "category": "Structural",
+      "description": "In section: concrete slab with stipple fill sitting on gravel/earth. Thickness noted. May show vapor barrier (heavy line), wire mesh, or rebar.",
+      "typical_usage": "Foundation and slab details, floor plan notes for SOG thickness.",
+      "vision_hints": "Horizontal concrete section (stipple fill) with thickness dimension, sitting on triangular earth pattern."
+    },
+    {
+      "id": "D03-CON-006",
+      "symbol_name": "Rebar Callout",
+      "category": "Structural",
+      "description": "Text notation: '#' followed by bar size and spacing, e.g., '#5 @ 12\" O.C. E.W.' (Each Way) or '#4 @ 18\" O.C. T&B' (Top and Bottom).",
+      "typical_usage": "Foundation plans, slab details, wall sections, beam details.",
+      "vision_hints": "Text pattern: #N @ NN\" O.C. with optional E.W., T&B, or CONT. suffixes."
+    },
+    {
+      "id": "D03-CON-007",
+      "symbol_name": "Concrete Grade Beam",
+      "category": "Structural",
+      "description": "Dashed rectangle connecting footings below grade. Cross-section shows concrete with rebar (circles for longitudinal bars, dots for stirrups).",
+      "typical_usage": "Foundation plans linking isolated footings.",
+      "vision_hints": "Dashed outline connecting column footings. Section shows rectangular concrete with corner rebar dots."
+    },
+    {
+      "id": "D03-CON-008",
+      "symbol_name": "Pier / Caisson",
+      "category": "Structural",
+      "description": "Circle (plan view) or vertical rectangle (section) representing deep foundation element. Labeled with diameter and depth.",
+      "typical_usage": "Deep foundation plans where soil conditions require piers.",
+      "vision_hints": "Large dashed circle on foundation plan, often 24\" to 60\" diameter, with depth notation."
+    },
+    {
+      "id": "D03-CON-009",
+      "symbol_name": "Control Joint / Saw Cut",
+      "category": "Structural",
+      "description": "Thin dashed or chain line in slab plan with 'CJ' or 'SJ' label. Shows where joints are cut to control cracking.",
+      "typical_usage": "Slab plans showing joint layout pattern.",
+      "vision_hints": "Grid of dashed lines across slab area, spaced 12'-15' apart, labeled CJ or SJ."
+    },
+    {
+      "id": "D03-CON-010",
+      "symbol_name": "Expansion Joint",
+      "category": "Structural",
+      "description": "Double line with gap or zigzag fill showing full separation between concrete sections. Labeled 'EJ' or 'EXPANSION JOINT'.",
+      "typical_usage": "Slab and wall plans where thermal movement requires full separation.",
+      "vision_hints": "Double parallel lines with gap, zigzag, or diamond fill. 'EJ' label."
+    },
+    {
+      "id": "D03-CON-011",
+      "symbol_name": "Embed Plate",
+      "category": "Structural",
+      "description": "Rectangle with X through it (plan view) embedded in concrete element. Labeled with size and anchor bolt pattern.",
+      "typical_usage": "Foundation plans and concrete details for steel-to-concrete connections.",
+      "vision_hints": "Small rectangle with diagonal X, usually at column locations or wall connections."
+    },
+    {
+      "id": "D03-CON-012",
+      "symbol_name": "Concrete Masonry Unit (CMU) Fill",
+      "category": "Structural",
+      "description": "Section fill pattern showing diagonal lines at 45° (differs from concrete stipple). Represents masonry/block construction.",
+      "typical_usage": "Wall sections, details where CMU block is used.",
+      "vision_hints": "Diagonal line hatching at 45° in wall cross-sections. Distinguished from concrete (dots) by line pattern."
+    }
+  ],
+
+  "Division 04 - Masonry": [
+    {
+      "id": "D04-MAS-001",
+      "symbol_name": "CMU Block Wall (Plan)",
+      "category": "Architectural/Structural",
+      "description": "Double-line wall with diagonal hatch fill or cell pattern showing block coursing. Nominal width noted (8\", 12\").",
+      "typical_usage": "Floor plans showing masonry partition or exterior walls.",
+      "vision_hints": "Wall with diagonal line fill or visible cell pattern. Width label like '8\" CMU' or '12\" CMU'."
+    },
+    {
+      "id": "D04-MAS-002",
+      "symbol_name": "Brick Veneer (Section)",
+      "category": "Architectural",
+      "description": "Section fill showing diagonal crosshatch pattern (two sets of diagonal lines crossing). Distinguished from CMU (single diagonal) and concrete (stipple).",
+      "typical_usage": "Wall sections and exterior details showing brick cladding.",
+      "vision_hints": "Crosshatch (X-pattern) fill in thin section, usually 4\" thick on exterior face of wall."
+    },
+    {
+      "id": "D04-MAS-003",
+      "symbol_name": "Stone / Cut Stone (Section)",
+      "category": "Architectural",
+      "description": "Irregular shaped outlines with stipple fill between, or random rubble pattern. Coursed stone shows regular horizontal lines.",
+      "typical_usage": "Exterior wall details, landscape walls, fireplace details.",
+      "vision_hints": "Irregular polygon shapes with textured fill, representing natural or cut stone profiles."
+    },
+    {
+      "id": "D04-MAS-004",
+      "symbol_name": "Grout-Filled Cell",
+      "category": "Structural",
+      "description": "CMU cell shown solid or with concrete stipple fill, indicating cells filled with grout. Rebar dot may be centered.",
+      "typical_usage": "Structural CMU walls where specific cells are grouted and reinforced.",
+      "vision_hints": "Within CMU wall pattern, certain cells shown darker/filled versus hollow cells."
+    },
+    {
+      "id": "D04-MAS-005",
+      "symbol_name": "Bond Beam",
+      "category": "Structural",
+      "description": "Horizontal band within CMU wall shown with rebar and grout fill. Labeled 'BB' or 'BOND BEAM' with rebar callout.",
+      "typical_usage": "CMU wall elevations and sections at lintels, mid-height, and top of wall.",
+      "vision_hints": "Horizontal highlighted course in CMU wall with rebar notation, typically at 4' intervals."
+    },
+    {
+      "id": "D04-MAS-006",
+      "symbol_name": "Lintel",
+      "category": "Structural",
+      "description": "Steel angle or concrete beam shown above openings in masonry walls. Labeled with size (L4x3x1/4) or rebar schedule.",
+      "typical_usage": "Masonry wall details and schedules above door and window openings.",
+      "vision_hints": "Highlighted element spanning across top of opening in masonry wall. Angle or beam profile in section."
+    }
+  ],
+
+  "Division 05 - Metals": [
+    {
+      "id": "D05-STL-001",
+      "symbol_name": "Steel Column (Plan)",
+      "category": "Structural",
+      "description": "Wide-flange (I-shape or H-shape) profile shown in plan view at grid intersections. Labeled with designation (W12x26, W14x48).",
+      "typical_usage": "Structural framing plans showing column locations and sizes.",
+      "vision_hints": "I-shaped or H-shaped cross-section at grid intersections. Text label like 'W' followed by depth x weight."
+    },
+    {
+      "id": "D05-STL-002",
+      "symbol_name": "Steel Beam",
+      "category": "Structural",
+      "description": "Single or double line between columns labeled with wide-flange designation (W16x31, W21x44). In section, shows I-beam profile.",
+      "typical_usage": "Structural framing plans showing beam spans between columns or walls.",
+      "vision_hints": "Line between grid points with W-shape designation label. Multiple beams shown as parallel lines."
+    },
+    {
+      "id": "D05-STL-003",
+      "symbol_name": "Steel Joist",
+      "category": "Structural",
+      "description": "Light line or dashed line between supports labeled with joist designation (16K3, 24K7, 28LH06). Shown as series of parallel elements.",
+      "typical_usage": "Roof and floor framing plans using open-web steel joists.",
+      "vision_hints": "Series of parallel lines at regular spacing (4'-6') with alphanumeric joist designation."
+    },
+    {
+      "id": "D05-STL-004",
+      "symbol_name": "Steel Deck",
+      "category": "Structural",
+      "description": "Wavy line or corrugated pattern in section view representing metal deck. Labeled with gauge and depth (20GA, 1.5\" or 3\" DECK).",
+      "typical_usage": "Roof and floor sections showing metal deck on steel framing.",
+      "vision_hints": "Corrugated or wavy thin line in section at top of steel framing. Gauge and depth notation."
+    },
+    {
+      "id": "D05-STL-005",
+      "symbol_name": "Base Plate / Anchor Bolt",
+      "category": "Structural",
+      "description": "Rectangle (plate) with circles at corners (anchor bolts) shown at column base in plan. Section shows plate thickness and bolt embedment.",
+      "typical_usage": "Foundation and column base details.",
+      "vision_hints": "Rectangle with 4 circles at corners surrounding column profile. Bolt diameter and plate size noted."
+    },
+    {
+      "id": "D05-STL-006",
+      "symbol_name": "Steel Section Fill",
+      "category": "Structural",
+      "description": "Solid black fill in cross-section views representing steel members. Distinguished from concrete (stipple) and wood (parallel lines).",
+      "typical_usage": "Wall sections, connection details, any section cut through steel.",
+      "vision_hints": "Solid black filled shapes — I-beams, angles, tubes, plates — in section views."
+    },
+    {
+      "id": "D05-STL-007",
+      "symbol_name": "Steel Tube / HSS",
+      "category": "Structural",
+      "description": "Hollow rectangular or round section. Labeled HSS (Hollow Structural Section) with dimensions (HSS6x6x1/4, HSS6.000x0.250).",
+      "typical_usage": "Bracing, columns, decorative elements, canopies.",
+      "vision_hints": "Hollow rectangle or circle in section. Label starts with 'HSS' followed by dimensions."
+    },
+    {
+      "id": "D05-STL-008",
+      "symbol_name": "Steel Angle",
+      "category": "Structural",
+      "description": "L-shaped section in details. Labeled with leg sizes and thickness (L4x3x1/4, L3x3x3/8).",
+      "typical_usage": "Lintels, shelf angles, bracing, connections.",
+      "vision_hints": "L-shaped solid fill in section. Label starts with 'L' followed by leg dimensions."
+    },
+    {
+      "id": "D05-STL-009",
+      "symbol_name": "Weld Symbol",
+      "category": "Structural",
+      "description": "Arrow pointing to joint with horizontal reference line and weld type symbols (fillet triangle, groove V-shape, etc.). Size and length noted.",
+      "typical_usage": "Steel connection details and structural details.",
+      "vision_hints": "Arrow with tail connecting to reference line. Small geometric symbols (triangles, V-shapes) at reference line."
+    },
+    {
+      "id": "D05-STL-010",
+      "symbol_name": "Moment Connection",
+      "category": "Structural",
+      "description": "Beam-to-column connection shown with full-penetration welds and stiffener plates. Distinguished from shear connection (bolts/angles only).",
+      "typical_usage": "Moment frame details on structural detail sheets.",
+      "vision_hints": "Complex connection detail with thick weld symbols, stiffener plates between column flanges."
+    },
+    {
+      "id": "D05-STL-011",
+      "symbol_name": "Steel Brace",
+      "category": "Structural",
+      "description": "Diagonal line between column-beam intersections on framing plan. Labeled with member size. X-brace or chevron patterns.",
+      "typical_usage": "Lateral bracing shown on framing plans. Critical for seismic/wind resistance.",
+      "vision_hints": "Diagonal lines in structural bays forming X, V, or chevron patterns. Member size label."
+    }
+  ],
+
+  "Division 06 - Wood, Plastics, and Composites": [
+    {
+      "id": "D06-WD-001",
+      "symbol_name": "Wood Section Fill",
+      "category": "Structural/Architectural",
+      "description": "Parallel lines (end grain pattern) in section view representing dimensional lumber or timber. End grain may show growth rings.",
+      "typical_usage": "Wall sections, framing details, any section cut through wood members.",
+      "vision_hints": "Parallel curved lines in rectangular cross-section. Distinguished from concrete (dots) and steel (solid black)."
+    },
+    {
+      "id": "D06-WD-002",
+      "symbol_name": "Wood Stud Wall (Plan)",
+      "category": "Architectural",
+      "description": "Double-line wall with parallel line fill or left open (no fill) for wood frame. Nominal width noted (2x4, 2x6).",
+      "typical_usage": "Floor plans showing wood-framed partitions and exterior walls.",
+      "vision_hints": "Double-line wall, typically thinner than masonry walls. Label like '2x4 STUD WALL' or '2x6 @ 16\" O.C.'."
+    },
+    {
+      "id": "D06-WD-003",
+      "symbol_name": "Wood Joist",
+      "category": "Structural",
+      "description": "Parallel lines representing floor or ceiling joists. Labeled with size and spacing (2x10 @ 16\" O.C.). Arrow shows span direction.",
+      "typical_usage": "Floor and roof framing plans.",
+      "vision_hints": "Parallel lines at regular spacing with arrow showing span. Size and spacing notation."
+    },
+    {
+      "id": "D06-WD-004",
+      "symbol_name": "Engineered Wood Beam (LVL/PSL/Glulam)",
+      "category": "Structural",
+      "description": "Beam labeled with engineered product designation: LVL (Laminated Veneer Lumber), PSL (Parallel Strand Lumber), GLB (Glulam Beam).",
+      "typical_usage": "Framing plans for longer spans or higher loads than dimensional lumber.",
+      "vision_hints": "Beam line between supports with label like '5-1/4\" x 11-7/8\" LVL' or '6-3/4\" x 12\" GLB'."
+    },
+    {
+      "id": "D06-WD-005",
+      "symbol_name": "Plywood/Sheathing",
+      "category": "Structural/Architectural",
+      "description": "Thin layer in section with face grain pattern (alternating parallel lines at different angles) or labeled 'PLY' with thickness.",
+      "typical_usage": "Wall sections, roof details, floor assemblies showing sheathing layers.",
+      "vision_hints": "Thin layer (1/2\", 5/8\", 3/4\") in wall/floor/roof section with face grain pattern or 'PLY' label."
+    },
+    {
+      "id": "D06-WD-006",
+      "symbol_name": "Truss",
+      "category": "Structural",
+      "description": "Triangulated framework of members shown in elevation. Labeled with span, pitch, and bearing requirements.",
+      "typical_usage": "Roof framing plans and truss elevations/schedules.",
+      "vision_hints": "Triangular framework with diagonal web members. Span and slope noted. Often shown as single line in plan."
+    },
+    {
+      "id": "D06-WD-007",
+      "symbol_name": "Header / Lintel (Wood)",
+      "category": "Structural",
+      "description": "Double or triple member shown above openings in framed walls. Labeled with size (2-2x10 HDR, 4x12 HDR).",
+      "typical_usage": "Framing plans and wall sections above windows and doors.",
+      "vision_hints": "Bold line or double-line above opening in framed wall. 'HDR' label with size."
+    },
+    {
+      "id": "D06-WD-008",
+      "symbol_name": "Blocking",
+      "category": "Structural",
+      "description": "Short members shown between joists or studs, perpendicular to main framing. Labeled 'BLKG' or 'SOLID BLOCKING'.",
+      "typical_usage": "Framing plans at bearing points, mid-span stiffeners, or backing for fixtures.",
+      "vision_hints": "Short perpendicular lines between parallel framing members. 'BLKG' notation."
+    }
+  ],
+
+  "Division 07 - Thermal and Moisture Protection": [
+    {
+      "id": "D07-INS-001",
+      "symbol_name": "Batt Insulation",
+      "category": "Architectural",
+      "description": "Wavy or zigzag lines filling cavity between studs or layers in section view. Labeled with R-value and thickness.",
+      "typical_usage": "Wall sections, ceiling details, floor assemblies.",
+      "vision_hints": "Wavy/scalloped pattern filling wall cavity in section. R-value label like 'R-19 BATT INSUL.'."
+    },
+    {
+      "id": "D07-INS-002",
+      "symbol_name": "Rigid Insulation",
+      "category": "Architectural",
+      "description": "Stipple or foam pattern (small X's or dots) in a uniform thickness layer. Labeled with type and R-value (XPS, EPS, Polyiso).",
+      "typical_usage": "Exterior wall assemblies, roof assemblies, below-grade waterproofing details.",
+      "vision_hints": "Uniform-thickness layer with small X or dot pattern. R-value and thickness notation."
+    },
+    {
+      "id": "D07-INS-003",
+      "symbol_name": "Vapor Barrier / Vapor Retarder",
+      "category": "Architectural",
+      "description": "Heavy single line or bold dashed line in section, typically on warm side of insulation. Labeled 'VB' or 'VAPOR BARRIER'.",
+      "typical_usage": "Wall and roof sections showing moisture control layers.",
+      "vision_hints": "Single bold line in wall/roof section adjacent to insulation layer. 'VB' or 'V.B.' label."
+    },
+    {
+      "id": "D07-INS-004",
+      "symbol_name": "Waterproof Membrane",
+      "category": "Architectural",
+      "description": "Bold line (often with specific symbol like dots on one side) on exterior face of below-grade walls or under slabs. Labeled 'W.P.' or 'WATERPROOFING'.",
+      "typical_usage": "Foundation wall sections, slab details, plaza deck details.",
+      "vision_hints": "Bold or heavy line on exterior face of foundation wall. 'WP' or 'WATERPROOFING' label."
+    },
+    {
+      "id": "D07-INS-005",
+      "symbol_name": "Flashing",
+      "category": "Architectural",
+      "description": "Bold angled line or bent plate symbol at wall-to-roof, wall-to-window, or wall-to-foundation transitions. Labeled 'FL' or 'FLASH.'.",
+      "typical_usage": "Exterior envelope details at transitions and penetrations.",
+      "vision_hints": "Bent line (like a bent plate profile) at material transitions. 'FLASH' or 'FL' label."
+    },
+    {
+      "id": "D07-INS-006",
+      "symbol_name": "Roofing Membrane",
+      "category": "Architectural",
+      "description": "Bold line at top of roof assembly representing single-ply, built-up, or modified bitumen roofing. May show multiple plies.",
+      "typical_usage": "Roof details and sections.",
+      "vision_hints": "Top layer(s) of roof section. Label identifies system type (TPO, EPDM, BUR)."
+    },
+    {
+      "id": "D07-INS-007",
+      "symbol_name": "Caulk / Sealant Joint",
+      "category": "Architectural",
+      "description": "Small filled circle or hourglass shape at joints between materials. Labeled 'SEALANT' or 'CAULK' with specification reference.",
+      "typical_usage": "Exterior envelope details, expansion joints, window/door perimeters.",
+      "vision_hints": "Small dot or hourglass at material joints in detail views. 'SEALANT' leader notation."
+    }
+  ],
+
+  "Division 08 - Openings": [
+    {
+      "id": "D08-DR-001",
+      "symbol_name": "Door (Plan - Swing)",
+      "category": "Architectural",
+      "description": "Arc showing door swing with straight line representing door leaf. Single line from hinge to strike side. Gap in wall at door opening.",
+      "typical_usage": "Floor plans showing all door locations and swing directions.",
+      "vision_hints": "Quarter-circle arc with straight line from wall. Gap in wall lines. Door number tag nearby."
+    },
+    {
+      "id": "D08-DR-002",
+      "symbol_name": "Door Number Tag",
+      "category": "Architectural",
+      "description": "Number in a circle, hexagon, diamond, or rectangle positioned near door. References door schedule for size, type, hardware, and fire rating.",
+      "typical_usage": "Every door on floor plans has a unique identifier referencing the door schedule.",
+      "vision_hints": "Geometric shape with number inside, positioned adjacent to door symbol. Sequential numbering (101, 102...)."
+    },
+    {
+      "id": "D08-DR-003",
+      "symbol_name": "Double Door (Plan)",
+      "category": "Architectural",
+      "description": "Two door swings (arcs) meeting at center of opening. Both leaves shown. May be equal or unequal pairs.",
+      "typical_usage": "Floor plans at main entries, conference rooms, loading areas.",
+      "vision_hints": "Two adjacent quarter-circle arcs mirrored at center of opening."
+    },
+    {
+      "id": "D08-DR-004",
+      "symbol_name": "Sliding Door (Plan)",
+      "category": "Architectural",
+      "description": "Dashed line showing door panel sliding behind wall or parallel panel. No swing arc. Arrow may show slide direction.",
+      "typical_usage": "Floor plans for pocket doors, barn doors, sliding glass doors.",
+      "vision_hints": "Dashed line parallel to wall indicating recessed pocket. No arc. Arrow showing direction."
+    },
+    {
+      "id": "D08-DR-005",
+      "symbol_name": "Overhead / Rolling Door",
+      "category": "Architectural",
+      "description": "Dashed line across opening with 'OHD' label or specific symbol showing coil above. No swing arc shown.",
+      "typical_usage": "Loading docks, warehouse entries, service areas.",
+      "vision_hints": "Dashed line across wide opening. 'OHD' or 'ROLLING DOOR' label. Typically 8'-16' wide."
+    },
+    {
+      "id": "D08-DR-006",
+      "symbol_name": "Window (Plan)",
+      "category": "Architectural",
+      "description": "Three or four parallel lines in wall representing glass and frame. May show operable sash with arrow or special symbol for window type.",
+      "typical_usage": "Floor plans showing window locations in exterior walls.",
+      "vision_hints": "Multiple thin parallel lines within exterior wall thickness. Window tag number nearby."
+    },
+    {
+      "id": "D08-DR-007",
+      "symbol_name": "Window Number Tag",
+      "category": "Architectural",
+      "description": "Number or alphanumeric code in geometric shape near window. References window schedule for size, type, glazing, and U-value.",
+      "typical_usage": "Every window on floor plans references the window schedule.",
+      "vision_hints": "Tag shape with identifier near window symbol. May use letter-number format (W-1, W-2)."
+    },
+    {
+      "id": "D08-DR-008",
+      "symbol_name": "Curtain Wall (Plan)",
+      "category": "Architectural",
+      "description": "Series of thin lines representing mullion grid in exterior wall. Individual panels may be labeled with type codes.",
+      "typical_usage": "Floor plans at glass curtain wall systems, storefronts.",
+      "vision_hints": "Thin regularly-spaced lines in exterior wall, much lighter than solid walls. Mullion spacing noted."
+    },
+    {
+      "id": "D08-DR-009",
+      "symbol_name": "Storefront Entrance",
+      "category": "Architectural",
+      "description": "Combination of curtain wall framing with door leaf(s). Shows frame profile and door swing within glazed system.",
+      "typical_usage": "Floor plans at retail entries, lobby entrances.",
+      "vision_hints": "Door swing within thin-line glazing system. Frame profiles thicker at door locations."
+    },
+    {
+      "id": "D08-DR-010",
+      "symbol_name": "Hardware Set Tag",
+      "category": "Architectural",
+      "description": "Alphanumeric code near door referencing hardware group/set. E.g., 'HW-1', 'HS-3'.",
+      "typical_usage": "Door plans/schedules linking to hardware specification.",
+      "vision_hints": "Small text tag near door, typically 'HW-' or 'HS-' prefix followed by number."
+    }
+  ],
+
+  "Division 09 - Finishes": [
+    {
+      "id": "D09-FIN-001",
+      "symbol_name": "Room Name / Number Tag",
+      "category": "Architectural",
+      "description": "Text block within a room showing room name and number. May be in a box, circle, or stylized format. Room number often references finish schedule.",
+      "typical_usage": "Every room on floor plans has a name and number identifier.",
+      "vision_hints": "Centered text in rooms: name on one line, number below. May be in bordered box. E.g., 'OFFICE\\n101'."
+    },
+    {
+      "id": "D09-FIN-002",
+      "symbol_name": "Floor Finish Tag",
+      "category": "Architectural",
+      "description": "Code or number in a geometric shape (often diamond or triangle) within a room. References floor finish schedule (CARPET, VCT, CERAMIC, POLISHED CONC.).",
+      "typical_usage": "Floor plans indicating finish material for each room.",
+      "vision_hints": "Small diamond or triangle with code inside each room. Sometimes integrated with room tag."
+    },
+    {
+      "id": "D09-FIN-003",
+      "symbol_name": "Wall Finish Indicator",
+      "category": "Architectural",
+      "description": "Code or symbol on wall surfaces indicating finish treatment (paint, tile, FRP, wood panel). May use arrow pointing to wall face.",
+      "typical_usage": "Interior elevations and finish plans showing wall treatments.",
+      "vision_hints": "Text or code with leader pointing to wall surface. Keywords: PAINT, TILE, FRP, PANEL."
+    },
+    {
+      "id": "D09-FIN-004",
+      "symbol_name": "Ceiling Height Indicator",
+      "category": "Architectural",
+      "description": "Height notation in rooms, often on reflected ceiling plans. Shows ceiling height above finished floor (e.g., '9'-0\" CLG', 'CLG HT: 10'-0\"').",
+      "typical_usage": "Reflected ceiling plans and room finish schedules.",
+      "vision_hints": "Height dimension with 'CLG' or 'AFF' (Above Finished Floor) suffix in room areas."
+    },
+    {
+      "id": "D09-FIN-005",
+      "symbol_name": "Ceiling Type Symbol",
+      "category": "Architectural",
+      "description": "Pattern or code indicating ceiling material: ACT (Acoustic Ceiling Tile) shown as grid, GWB (Gypsum) shown plain, exposed structure shown with framing.",
+      "typical_usage": "Reflected ceiling plans showing ceiling material types.",
+      "vision_hints": "Grid pattern (ACT) or plain area (GWB) on RCP. Type code label like 'ACT-1' or 'GWB-1'."
+    },
+    {
+      "id": "D09-FIN-006",
+      "symbol_name": "Tile Pattern / Layout",
+      "category": "Architectural",
+      "description": "Grid lines within floor or wall area showing tile layout, size, and pattern. May include grout joint lines.",
+      "typical_usage": "Enlarged floor plans and interior elevations at tile areas.",
+      "vision_hints": "Regular grid pattern within defined area. Tile size notation (12x12, 24x24, etc.)."
+    },
+    {
+      "id": "D09-FIN-007",
+      "symbol_name": "Wall Type Tag",
+      "category": "Architectural",
+      "description": "Alphanumeric code in circle or box on wall, referencing wall type schedule/legend. E.g., 'WT-1', 'A1', 'W3'. Shows assembly composition.",
+      "typical_usage": "Floor plans identifying wall construction type for each wall segment.",
+      "vision_hints": "Code in geometric shape on or near wall with leader. References wall type schedule."
+    },
+    {
+      "id": "D09-FIN-008",
+      "symbol_name": "Base/Baseboard Indicator",
+      "category": "Architectural",
+      "description": "Symbol or notation at wall base indicating baseboard type. May reference finish schedule or detail.",
+      "typical_usage": "Floor plans and interior elevations showing base trim types.",
+      "vision_hints": "Small symbol or text at wall-floor intersection. 'BASE TYPE' or 'RB' (rubber base) notation."
+    }
+  ],
+
+  "Division 10 - Specialties": [
+    {
+      "id": "D10-SPE-001",
+      "symbol_name": "Fire Extinguisher Cabinet",
+      "category": "Architectural/Life Safety",
+      "description": "Small rectangle on wall with 'FEC' label or fire extinguisher icon. May show recessed or surface-mounted.",
+      "typical_usage": "Floor plans showing code-required fire extinguisher locations.",
+      "vision_hints": "Small rectangle on wall face with 'FEC' or fire extinguisher symbol."
+    },
+    {
+      "id": "D10-SPE-002",
+      "symbol_name": "Toilet Partition",
+      "category": "Architectural",
+      "description": "Thin lines showing toilet stall partitions with door swings. Pilaster and panel layout shown.",
+      "typical_usage": "Enlarged restroom floor plans.",
+      "vision_hints": "Thin partition lines in restroom areas with small door swings. Typically 60\" wide stalls."
+    },
+    {
+      "id": "D10-SPE-003",
+      "symbol_name": "Toilet Accessory",
+      "category": "Architectural",
+      "description": "Small symbols on restroom walls: TP (toilet paper holder), SD (soap dispenser), PT (paper towel), GM (grab mirror). Referenced to accessory schedule.",
+      "typical_usage": "Enlarged restroom plans and interior elevations.",
+      "vision_hints": "Small labeled rectangles or symbols on restroom walls. Two-letter abbreviation codes."
+    },
+    {
+      "id": "D10-SPE-004",
+      "symbol_name": "Signage Location",
+      "category": "Architectural",
+      "description": "Diamond, triangle, or custom symbol with sign type code. References signage schedule for size, content, mounting.",
+      "typical_usage": "Floor plans and signage plans showing room signs, wayfinding, ADA signs.",
+      "vision_hints": "Small geometric symbol at door sides or corridors. 'SN' or sign type code."
+    },
+    {
+      "id": "D10-SPE-005",
+      "symbol_name": "Corner Guard",
+      "category": "Architectural",
+      "description": "Small L-shaped symbol at wall corners indicating corner protection. Height and type noted.",
+      "typical_usage": "Floor plans in high-traffic areas, corridors, kitchens.",
+      "vision_hints": "Small mark at outside wall corners. 'CG' label or keynote reference."
+    }
+  ],
+
+  "Division 11 - Equipment": [
+    {
+      "id": "D11-EQP-001",
+      "symbol_name": "Kitchen Equipment",
+      "category": "Architectural/Equipment",
+      "description": "Specific outline shapes representing commercial kitchen equipment: ranges, ovens, sinks, prep tables, walk-ins. Each labeled with equipment number.",
+      "typical_usage": "Commercial kitchen floor plans and food service layouts.",
+      "vision_hints": "Detailed outlines of appliance shapes with 'EQ-' prefix numbers. Referenced to equipment schedule."
+    },
+    {
+      "id": "D11-EQP-002",
+      "symbol_name": "Washer / Dryer",
+      "category": "Architectural/Equipment",
+      "description": "Circle (front-load) or square (top-load) with 'W' and 'D' labels representing laundry equipment.",
+      "typical_usage": "Residential plans, hotel laundry rooms, multi-family layouts.",
+      "vision_hints": "Circle or square shapes labeled 'W' and 'D' in utility/laundry rooms."
+    }
+  ],
+
+  "Division 12 - Furnishings": [
+    {
+      "id": "D12-FUR-001",
+      "symbol_name": "Casework / Cabinet",
+      "category": "Architectural",
+      "description": "Rectangular outlines along walls representing base cabinets (24\" deep) and upper cabinets (12\" deep, shown dashed above). Labeled 'BASE CAB' and 'UPPER CAB'.",
+      "typical_usage": "Kitchen, break room, lab, and reception area floor plans.",
+      "vision_hints": "Solid rectangular outline (base) with parallel dashed outline above (uppers) along walls."
+    },
+    {
+      "id": "D12-FUR-002",
+      "symbol_name": "Countertop",
+      "category": "Architectural",
+      "description": "Slightly wider line or outline extending beyond base cabinet depth. Shows counter overhang and material notation.",
+      "typical_usage": "Kitchen and lab plans, reception desks.",
+      "vision_hints": "Outline extending 1-2\" beyond cabinet face. May show sink cutouts or equipment locations."
+    }
+  ],
+
+  "Division 14 - Conveying Equipment": [
+    {
+      "id": "D14-CVY-001",
+      "symbol_name": "Elevator",
+      "category": "Architectural",
+      "description": "Rectangle representing cab with diagonal X through it. Door opening shown on one or more sides. Labeled 'ELEV.' with capacity and stops.",
+      "typical_usage": "Floor plans showing elevator shaft and door locations.",
+      "vision_hints": "Rectangle with diagonal X in shaft area. Door opening at landing side. 'ELEV' or 'EL' label."
+    },
+    {
+      "id": "D14-CVY-002",
+      "symbol_name": "Stair Arrow (Up/Down)",
+      "category": "Architectural",
+      "description": "Arrow within stairway indicating direction of travel: 'UP' with arrow pointing in ascending direction, 'DN' pointing descending.",
+      "typical_usage": "Every floor plan stair shows direction from that level.",
+      "vision_hints": "Arrow within stair outline with 'UP' or 'DN' text. Break line at mid-floor showing upper/lower runs."
+    },
+    {
+      "id": "D14-CVY-003",
+      "symbol_name": "Escalator",
+      "category": "Architectural",
+      "description": "Parallel lines with steps pattern and directional arrow. Wider than stairs, with handrail outlines on both sides.",
+      "typical_usage": "Floor plans in retail, transit, and public buildings.",
+      "vision_hints": "Parallel lines with step pattern and direction arrow. Usually paired (up and down side by side)."
+    }
+  ],
+
+  "Division 21 - Fire Suppression": [
+    {
+      "id": "D21-FIR-001",
+      "symbol_name": "Fire Sprinkler Head (Pendant)",
+      "category": "Fire Protection",
+      "description": "Circle with dot in center, or circle with short stem. 'P' designation for pendant (hangs below ceiling). Coverage radius may be shown dashed.",
+      "typical_usage": "Fire protection plans and reflected ceiling plans showing sprinkler layout.",
+      "vision_hints": "Small circles at regular spacing on ceiling plans. 'P', 'U' (upright), or 'SW' (sidewall) designation."
+    },
+    {
+      "id": "D21-FIR-002",
+      "symbol_name": "Fire Sprinkler Head (Upright)",
+      "category": "Fire Protection",
+      "description": "Circle with upward-pointing triangle or stem. 'U' designation. Used in exposed/industrial ceilings.",
+      "typical_usage": "Fire protection plans in warehouses, mechanical rooms, parking garages.",
+      "vision_hints": "Circle with upward indicator. 'U' label. In open-ceiling areas."
+    },
+    {
+      "id": "D21-FIR-003",
+      "symbol_name": "Fire Sprinkler Head (Concealed)",
+      "category": "Fire Protection",
+      "description": "Circle with special symbol indicating concealed cover plate. 'C' designation. Flush with finished ceiling.",
+      "typical_usage": "Fire protection plans in finished office/retail spaces.",
+      "vision_hints": "Circle with 'C' label. In finished ceiling areas where aesthetics matter."
+    },
+    {
+      "id": "D21-FIR-004",
+      "symbol_name": "Sprinkler Riser",
+      "category": "Fire Protection",
+      "description": "Circle or rectangle with 'RISER' label showing where sprinkler supply enters the floor. Pipe size noted.",
+      "typical_usage": "Fire protection plans showing supply point for each floor/zone.",
+      "vision_hints": "Larger circle or rectangle labeled 'RISER' or 'SR', usually in mechanical/riser room."
+    },
+    {
+      "id": "D21-FIR-005",
+      "symbol_name": "Fire Department Connection (FDC)",
+      "category": "Fire Protection",
+      "description": "Specific symbol (often Siamese connection icon) on exterior wall. Labeled 'FDC' with inlet size.",
+      "typical_usage": "Site plans and first-floor plans showing exterior FDC location.",
+      "vision_hints": "Symbol on building exterior labeled 'FDC' or 'FIRE DEPT. CONN.' with pipe size."
+    },
+    {
+      "id": "D21-FIR-006",
+      "symbol_name": "Standpipe",
+      "category": "Fire Protection",
+      "description": "Vertical pipe symbol in stair towers labeled 'SP' or 'STANDPIPE'. Hose valve connection shown at each floor.",
+      "typical_usage": "Fire protection plans in stairwells showing standpipe locations.",
+      "vision_hints": "Pipe symbol in stair area with 'SP' label and hose valve symbol at landing."
+    },
+    {
+      "id": "D21-FIR-007",
+      "symbol_name": "Inspector's Test Connection",
+      "category": "Fire Protection",
+      "description": "Small valve symbol at end of most remote sprinkler branch. Labeled 'ITC' or 'INSPECTOR'S TEST'.",
+      "typical_usage": "Fire protection plans showing test connection at hydraulically remote point.",
+      "vision_hints": "Valve symbol at end of most distant sprinkler branch line. 'ITC' label."
+    },
+    {
+      "id": "D21-FIR-008",
+      "symbol_name": "Fire Sprinkler Pipe Size",
+      "category": "Fire Protection",
+      "description": "Number on or adjacent to sprinkler pipe lines indicating pipe diameter. Main lines larger (4\", 6\"), branch lines smaller (1\", 1-1/4\").",
+      "typical_usage": "Fire protection plans showing pipe routing and sizing.",
+      "vision_hints": "Numbers along pipe lines. Larger numbers on mains, smaller on branches near heads."
+    }
+  ],
+
+  "Division 22 - Plumbing": [
+    {
+      "id": "D22-PLB-001",
+      "symbol_name": "Lavatory / Sink (Plan)",
+      "category": "Plumbing",
+      "description": "Oval or rounded rectangle representing basin, shown against wall or in countertop. Faucet symbol may be shown.",
+      "typical_usage": "Floor plans in restrooms, kitchens, janitor closets.",
+      "vision_hints": "Oval or rounded shape at wall/counter with drain point. In restrooms and utility areas."
+    },
+    {
+      "id": "D22-PLB-002",
+      "symbol_name": "Water Closet / Toilet (Plan)",
+      "category": "Plumbing",
+      "description": "Elongated oval (bowl) with rectangular tank against wall. Outline shows fixture footprint. May include centerline to wall dimension.",
+      "typical_usage": "Floor plans in all restrooms.",
+      "vision_hints": "Oval with rectangle behind it against wall. 15\" from wall centerline typical."
+    },
+    {
+      "id": "D22-PLB-003",
+      "symbol_name": "Urinal (Plan)",
+      "category": "Plumbing",
+      "description": "Semi-circular or D-shaped symbol against wall. Smaller footprint than water closet.",
+      "typical_usage": "Floor plans in men's restrooms.",
+      "vision_hints": "Small D-shape or semi-circle against wall. Spaced typically 30\" on center."
+    },
+    {
+      "id": "D22-PLB-004",
+      "symbol_name": "Floor Drain",
+      "category": "Plumbing",
+      "description": "Circle with X through it or circle with crosshairs. Labeled 'FD' with drain size. May show slope arrows pointing to drain.",
+      "typical_usage": "Plumbing plans in restrooms, kitchens, mechanical rooms, laundry areas.",
+      "vision_hints": "Circle with X or crosshairs. 'FD' label. Slope arrows radiating outward from drain."
+    },
+    {
+      "id": "D22-PLB-005",
+      "symbol_name": "Cleanout",
+      "category": "Plumbing",
+      "description": "Circle with 'CO' label or circle with arrow indicating cleanout access direction. Shows maintenance access point on drain/sewer line.",
+      "typical_usage": "Plumbing plans along horizontal drain runs.",
+      "vision_hints": "Circle with 'CO' text near pipe junctions or direction changes."
+    },
+    {
+      "id": "D22-PLB-006",
+      "symbol_name": "Hose Bibb",
+      "category": "Plumbing",
+      "description": "Triangle or arrow symbol on exterior wall indicating outdoor faucet/spigot. Labeled 'HB'.",
+      "typical_usage": "Plumbing plans showing exterior hose connections.",
+      "vision_hints": "Small triangle on exterior wall. 'HB' label. Usually near landscaping or wash-down areas."
+    },
+    {
+      "id": "D22-PLB-007",
+      "symbol_name": "Water Heater",
+      "category": "Plumbing",
+      "description": "Circle or rectangle labeled 'WH' with capacity (40 GAL, 80 GAL) and BTU rating. Gas or electric noted.",
+      "typical_usage": "Plumbing plans in mechanical rooms, utility closets.",
+      "vision_hints": "Circle labeled 'WH' in mechanical/utility space. Capacity and fuel type noted."
+    },
+    {
+      "id": "D22-PLB-008",
+      "symbol_name": "Domestic Water Pipe",
+      "category": "Plumbing",
+      "description": "Lines with specific patterns: CW (Cold Water) = solid line, HW (Hot Water) = long dash, HWR (Hot Water Return) = short dash. Pipe size noted.",
+      "typical_usage": "Plumbing plans showing water distribution.",
+      "vision_hints": "Pipe lines with different dash patterns. 'CW', 'HW', 'HWR' labels. Size in inches."
+    },
+    {
+      "id": "D22-PLB-009",
+      "symbol_name": "Sanitary Sewer Pipe",
+      "category": "Plumbing",
+      "description": "Line with 'S' markers at intervals or specific dash pattern. Size and slope noted (e.g., '4\" SAN @ 1/8\"/FT').",
+      "typical_usage": "Plumbing plans showing waste/drain piping.",
+      "vision_hints": "Pipe line with 'S' markers or long-short-long dash. Slope notation. Flows to building drain."
+    },
+    {
+      "id": "D22-PLB-010",
+      "symbol_name": "Vent Pipe",
+      "category": "Plumbing",
+      "description": "Line with 'V' markers at intervals. Connects to drain system and extends through roof. Size noted.",
+      "typical_usage": "Plumbing plans and risers showing vent piping.",
+      "vision_hints": "Pipe line with 'V' markers. Typically smaller diameter (1.5\"-3\"). Runs vertically through building."
+    },
+    {
+      "id": "D22-PLB-011",
+      "symbol_name": "Gas Pipe",
+      "category": "Plumbing",
+      "description": "Line with 'G' markers at intervals or dot-dash pattern. Size and pressure noted. Labeled 'GAS' or 'NAT. GAS'.",
+      "typical_usage": "Plumbing/mechanical plans showing gas distribution to equipment.",
+      "vision_hints": "Pipe line with 'G' markers. Size and 'GAS' label. Runs to furnaces, water heaters, kitchen equipment."
+    },
+    {
+      "id": "D22-PLB-012",
+      "symbol_name": "Plumbing Valve",
+      "category": "Plumbing",
+      "description": "Various symbols: gate valve (circle with stem), ball valve (filled triangle), check valve (circle with arrow). Type and size labeled.",
+      "typical_usage": "Plumbing plans at equipment connections, branches, and isolation points.",
+      "vision_hints": "Small geometric symbol on pipe line. Valve type abbreviation nearby (GV, BV, CV)."
+    },
+    {
+      "id": "D22-PLB-013",
+      "symbol_name": "Grease Trap / Interceptor",
+      "category": "Plumbing",
+      "description": "Rectangle or special symbol in drain line from kitchen. Labeled 'GT' or 'GREASE INTERCEPTOR' with capacity.",
+      "typical_usage": "Plumbing plans serving commercial kitchens.",
+      "vision_hints": "Rectangle in drain line between kitchen fixtures and building sewer. 'GT' label with GPM rating."
+    },
+    {
+      "id": "D22-PLB-014",
+      "symbol_name": "Roof Drain",
+      "category": "Plumbing",
+      "description": "Circle with X or target pattern on roof plan. Connected to storm drainage. 'RD' label with pipe size.",
+      "typical_usage": "Plumbing and roof plans showing roof drainage points.",
+      "vision_hints": "Circle with crosshair on roof plan. 'RD' label. Storm pipe line connecting to storm system."
+    },
+    {
+      "id": "D22-PLB-015",
+      "symbol_name": "Drinking Fountain / Water Cooler",
+      "category": "Plumbing",
+      "description": "Small rectangle or specific icon against wall. Labeled 'DF' or 'WC' (water cooler). ADA unit may be noted separately.",
+      "typical_usage": "Floor plans in corridors, break rooms, common areas.",
+      "vision_hints": "Small rectangle at wall in corridor. 'DF' label. Often shown as hi-lo pair for ADA compliance."
+    }
+  ],
+
+  "Division 23 - Heating, Ventilating, and Air Conditioning (HVAC)": [
+    {
+      "id": "D23-MEC-001",
+      "symbol_name": "Supply Air Duct (Plan)",
+      "category": "Mechanical/HVAC",
+      "description": "Rectangular outline with single crosshatch or solid fill. Width dimension shown. Direction arrows indicate airflow.",
+      "typical_usage": "Mechanical plans showing supply duct routing from AHU to diffusers.",
+      "vision_hints": "Rectangular outline with airflow arrows. Dimension labels (e.g., '24x12'). Connected to supply diffusers."
+    },
+    {
+      "id": "D23-MEC-002",
+      "symbol_name": "Return Air Duct (Plan)",
+      "category": "Mechanical/HVAC",
+      "description": "Rectangular outline with dashed lines or different fill from supply duct. May use 'R' label.",
+      "typical_usage": "Mechanical plans showing return duct routing back to AHU.",
+      "vision_hints": "Dashed rectangular outline or different fill than supply. 'RA' or 'R' label. Connected to return grilles."
+    },
+    {
+      "id": "D23-MEC-003",
+      "symbol_name": "Exhaust Air Duct",
+      "category": "Mechanical/HVAC",
+      "description": "Rectangular outline with 'E' or 'EA' label. Different line type from supply and return. Routes to exterior or exhaust fan.",
+      "typical_usage": "Mechanical plans showing exhaust from restrooms, kitchens, mechanical rooms.",
+      "vision_hints": "Duct with 'EA' or 'E' label. Routes to exterior wall or roof. Found near restrooms and kitchens."
+    },
+    {
+      "id": "D23-MEC-004",
+      "symbol_name": "Round Duct",
+      "category": "Mechanical/HVAC",
+      "description": "Single line with diameter dimension, or two parallel lines for larger sizes. Diameter noted (e.g., '10\" Ø').",
+      "typical_usage": "Mechanical plans for branch ducts and flexible connections.",
+      "vision_hints": "Single line with diameter dimension. 'Ø' symbol. Typically branches from rectangular main."
+    },
+    {
+      "id": "D23-MEC-005",
+      "symbol_name": "Flexible Duct",
+      "category": "Mechanical/HVAC",
+      "description": "Wavy or zigzag line representing flex duct connection. Typically short runs from rigid duct to diffuser.",
+      "typical_usage": "Mechanical plans showing final connections to diffusers/registers.",
+      "vision_hints": "Wavy/zigzag line, typically 6'-8' max length. Connects rigid duct branch to ceiling diffuser."
+    },
+    {
+      "id": "D23-MEC-006",
+      "symbol_name": "Supply Air Diffuser (Ceiling)",
+      "category": "Mechanical/HVAC",
+      "description": "Square with X through it (4-way diffuser), rectangle with lines (linear diffuser), or circle (round diffuser). CFM noted.",
+      "typical_usage": "Mechanical plans and reflected ceiling plans showing supply outlets.",
+      "vision_hints": "Square-X pattern, linear bars, or circle on ceiling plan. CFM value nearby (e.g., '200 CFM')."
+    },
+    {
+      "id": "D23-MEC-007",
+      "symbol_name": "Return Air Grille",
+      "category": "Mechanical/HVAC",
+      "description": "Rectangle with parallel horizontal lines (louver pattern). Connected to return duct. Size and CFM noted.",
+      "typical_usage": "Mechanical plans and RCPs showing return air pickup points.",
+      "vision_hints": "Rectangle with horizontal lines inside. Connected to return duct. 'RA' label."
+    },
+    {
+      "id": "D23-MEC-008",
+      "symbol_name": "Exhaust Fan",
+      "category": "Mechanical/HVAC",
+      "description": "Circle with propeller/blade symbol inside or arrow showing discharge direction. Labeled with fan designation (EF-1, EF-2). CFM noted.",
+      "typical_usage": "Mechanical plans and roof plans showing exhaust fan locations.",
+      "vision_hints": "Circle with propeller symbol. 'EF-' prefix designation. CFM and static pressure noted."
+    },
+    {
+      "id": "D23-MEC-009",
+      "symbol_name": "Air Handling Unit (AHU)",
+      "category": "Mechanical/HVAC",
+      "description": "Large rectangle with internal sections showing filter, coil, fan, and mixing box. Labeled 'AHU-1', 'AHU-2'. CFM capacity noted.",
+      "typical_usage": "Mechanical plans in mechanical rooms showing primary air handling equipment.",
+      "vision_hints": "Large rectangular equipment outline in mechanical room. 'AHU-' designation. Internal component sections."
+    },
+    {
+      "id": "D23-MEC-010",
+      "symbol_name": "VAV Box (Variable Air Volume)",
+      "category": "Mechanical/HVAC",
+      "description": "Small rectangle or diamond above ceiling representing zone control box. Labeled 'VAV-' with zone number. CFM range noted.",
+      "typical_usage": "Mechanical plans showing zone terminal units in ceiling space.",
+      "vision_hints": "Small rectangle on duct line with 'VAV-' label. CFM min/max range. Controls symbol nearby."
+    },
+    {
+      "id": "D23-MEC-011",
+      "symbol_name": "Thermostat",
+      "category": "Mechanical/HVAC",
+      "description": "Small circle or 'T' on wall, connected by control line to VAV box or equipment. Labeled 'T' or 'STAT'.",
+      "typical_usage": "Mechanical plans showing temperature control locations.",
+      "vision_hints": "Small circle or 'T' on wall, usually 48\" AFF. Dashed control line to VAV or equipment."
+    },
+    {
+      "id": "D23-MEC-012",
+      "symbol_name": "Damper",
+      "category": "Mechanical/HVAC",
+      "description": "Symbol across duct showing blade position. Fire damper (FD), smoke damper (SD), combination (FSD), volume damper (VD).",
+      "typical_usage": "Mechanical plans at fire-rated wall/floor penetrations and for balancing.",
+      "vision_hints": "Symbol across duct at wall penetrations. 'FD', 'SD', 'FSD', or 'VD' label."
+    },
+    {
+      "id": "D23-MEC-013",
+      "symbol_name": "Condensing Unit / Compressor",
+      "category": "Mechanical/HVAC",
+      "description": "Rectangle with fan circle on roof or ground-mounted pad. Labeled 'CU-' or 'RTU-' (Rooftop Unit). Tonnage noted.",
+      "typical_usage": "Roof plans and site plans showing outdoor HVAC equipment.",
+      "vision_hints": "Rectangle with circle on roof or mechanical yard. 'CU-' or 'RTU-' designation. Tonnage/capacity noted."
+    },
+    {
+      "id": "D23-MEC-014",
+      "symbol_name": "Refrigerant Pipe",
+      "category": "Mechanical/HVAC",
+      "description": "Paired lines (liquid and suction) with 'RL' and 'RS' labels or specific line types. Size noted.",
+      "typical_usage": "Mechanical plans connecting condensing units to air handlers or fan coil units.",
+      "vision_hints": "Paired pipe lines with 'RL'/'RS' labels running between indoor and outdoor equipment."
+    },
+    {
+      "id": "D23-MEC-015",
+      "symbol_name": "Hydronic Pipe (Hot/Chilled Water)",
+      "category": "Mechanical/HVAC",
+      "description": "Pipe lines with specific patterns: HWS (Hot Water Supply), HWR (Hot Water Return), CHWS (Chilled Water Supply), CHWR (Chilled Water Return).",
+      "typical_usage": "Mechanical plans showing piping between boilers, chillers, and terminal equipment.",
+      "vision_hints": "Pipe lines with two/three letter abbreviation labels. Different dash patterns for supply vs. return."
+    },
+    {
+      "id": "D23-MEC-016",
+      "symbol_name": "Duct Size / Transition",
+      "category": "Mechanical/HVAC",
+      "description": "Duct dimension annotation (WxH format: '24x12') with tapered lines showing size transition. Reducer shown as trapezoidal.",
+      "typical_usage": "Mechanical plans wherever duct size changes.",
+      "vision_hints": "Trapezoidal shape in duct run where width/height changes. Dimensions on both sides."
+    },
+    {
+      "id": "D23-MEC-017",
+      "symbol_name": "Turning Vanes",
+      "category": "Mechanical/HVAC",
+      "description": "Small curved lines inside duct elbows indicating airflow turning vanes for efficiency.",
+      "typical_usage": "Mechanical plans at duct turns, especially larger ducts.",
+      "vision_hints": "Small parallel curved lines inside duct 90° elbows."
+    }
+  ],
+
+  "Division 26 - Electrical": [
+    {
+      "id": "D26-ELE-001",
+      "symbol_name": "Duplex Receptacle",
+      "category": "Electrical",
+      "description": "Circle with two short parallel lines extending from one side. Standard 120V convenience outlet. Height noted if not standard (18\" AFF).",
+      "typical_usage": "Electrical power plans throughout building.",
+      "vision_hints": "Small circle with two short parallel lines. Most common electrical symbol on plans."
+    },
+    {
+      "id": "D26-ELE-002",
+      "symbol_name": "GFCI Receptacle",
+      "category": "Electrical",
+      "description": "Duplex receptacle symbol with 'GFI' or 'GFCI' label. Required in wet locations per code.",
+      "typical_usage": "Electrical plans in kitchens, restrooms, outdoor, garage, laundry areas.",
+      "vision_hints": "Receptacle symbol with 'GFI' or 'GFCI' text nearby. In wet/damp locations."
+    },
+    {
+      "id": "D26-ELE-003",
+      "symbol_name": "220V/240V Receptacle",
+      "category": "Electrical",
+      "description": "Receptacle symbol with '220V' or '240V' label or additional line. Used for high-power equipment.",
+      "typical_usage": "Electrical plans for ranges, dryers, welders, large equipment.",
+      "vision_hints": "Receptacle symbol with voltage notation. Typically on dedicated circuit near specific equipment."
+    },
+    {
+      "id": "D26-ELE-004",
+      "symbol_name": "Floor Receptacle",
+      "category": "Electrical",
+      "description": "Receptacle symbol inside a square or with specific floor-mount indicator. 'FLR' label.",
+      "typical_usage": "Electrical plans in open office areas, conference rooms where wall outlets aren't accessible.",
+      "vision_hints": "Receptacle symbol with square around it or 'FLR' notation. Located away from walls."
+    },
+    {
+      "id": "D26-ELE-005",
+      "symbol_name": "Single-Pole Light Switch",
+      "category": "Electrical",
+      "description": "Letter 'S' or 'S1' with a small slash mark. Connected to controlled fixture(s) by dashed curved line (switch leg).",
+      "typical_usage": "Electrical lighting plans at room entries.",
+      "vision_hints": "'S' with small mark near doors. Dashed arc line connecting to ceiling fixture(s)."
+    },
+    {
+      "id": "D26-ELE-006",
+      "symbol_name": "Three-Way Switch",
+      "category": "Electrical",
+      "description": "'S3' symbol. Paired switches controlling same fixture(s) from two locations. Both connected by dashed lines to same fixture.",
+      "typical_usage": "Electrical plans at hallways, staircases, rooms with multiple entrances.",
+      "vision_hints": "'S3' label. Two switches connected by dashed lines to same fixture group."
+    },
+    {
+      "id": "D26-ELE-007",
+      "symbol_name": "Dimmer Switch",
+      "category": "Electrical",
+      "description": "'SD' or 'S' with dimmer notation. Controls light level of connected fixture(s).",
+      "typical_usage": "Electrical plans in conference rooms, dining areas, lobbies.",
+      "vision_hints": "'SD' label near door. Dashed line to dimmable fixture(s)."
+    },
+    {
+      "id": "D26-ELE-008",
+      "symbol_name": "Recessed Ceiling Light",
+      "category": "Electrical",
+      "description": "Circle with solid fill or specific recessed symbol. Labeled with fixture type (A, B, C referencing lighting schedule).",
+      "typical_usage": "Electrical lighting plans and reflected ceiling plans.",
+      "vision_hints": "Filled or half-filled circle on ceiling plan. Fixture type letter nearby."
+    },
+    {
+      "id": "D26-ELE-009",
+      "symbol_name": "2x4 Fluorescent / LED Troffer",
+      "category": "Electrical",
+      "description": "Rectangle (2'x4' or 2'x2') in ceiling grid. May show lamp configuration inside. Fixture type letter.",
+      "typical_usage": "Reflected ceiling plans in offices, classrooms, commercial spaces.",
+      "vision_hints": "Rectangle fitting into ceiling grid (ACT) pattern. Fixture type designation letter."
+    },
+    {
+      "id": "D26-ELE-010",
+      "symbol_name": "Wall-Mounted Light / Sconce",
+      "category": "Electrical",
+      "description": "Semi-circle or bracket symbol on wall line. Fixture type letter. Mounting height noted.",
+      "typical_usage": "Electrical plans in corridors, restrooms, exterior walls.",
+      "vision_hints": "Semi-circle or small symbol on wall line. Mounting height in notes."
+    },
+    {
+      "id": "D26-ELE-011",
+      "symbol_name": "Exit Sign",
+      "category": "Electrical/Life Safety",
+      "description": "Rectangle with 'EXIT' text or specific exit sign symbol. May include emergency lighting (battery backup). Shown with arrows for direction.",
+      "typical_usage": "Electrical and life safety plans at exits, corridors, stairways.",
+      "vision_hints": "Small rectangle with 'EXIT' label at doorways and corridor intersections."
+    },
+    {
+      "id": "D26-ELE-012",
+      "symbol_name": "Emergency Light",
+      "category": "Electrical/Life Safety",
+      "description": "Symbol with battery indicator or 'EM' label. Provides illumination during power failure. May be combined with exit sign.",
+      "typical_usage": "Electrical and life safety plans per code-required egress lighting.",
+      "vision_hints": "'EM' label or battery symbol. Located along egress paths per code spacing requirements."
+    },
+    {
+      "id": "D26-ELE-013",
+      "symbol_name": "Electrical Panel",
+      "category": "Electrical",
+      "description": "Rectangle on wall with panel designation (LP-1, PP-A, MDP). Connected to branch circuits by home-run lines with slash marks (circuit numbers).",
+      "typical_usage": "Electrical power plans in electrical rooms, mechanical rooms, utility areas.",
+      "vision_hints": "Rectangle on wall with panel name. Lines radiating out with hash marks indicating circuit numbers."
+    },
+    {
+      "id": "D26-ELE-014",
+      "symbol_name": "Home Run (Circuit)",
+      "category": "Electrical",
+      "description": "Line from device(s) to panel with arrow and slash marks. Number of slashes = number of conductors. Circuit number noted at panel end.",
+      "typical_usage": "Electrical plans showing circuit routing from devices to panels.",
+      "vision_hints": "Lines with arrow toward panel. Slash marks across line (// = 2-wire, /// = 3-wire). Circuit # at arrow."
+    },
+    {
+      "id": "D26-ELE-015",
+      "symbol_name": "Transformer",
+      "category": "Electrical",
+      "description": "Two circles or coil symbols side by side. Labeled with KVA rating and voltage (45KVA 480-208/120V).",
+      "typical_usage": "Electrical plans showing voltage step-down equipment.",
+      "vision_hints": "Two adjacent circles or coil symbols. KVA rating and voltage transformation noted."
+    },
+    {
+      "id": "D26-ELE-016",
+      "symbol_name": "Motor Connection",
+      "category": "Electrical",
+      "description": "Circle with 'M' inside connected to equipment. HP rating and voltage noted. Disconnect switch shown nearby.",
+      "typical_usage": "Electrical plans at HVAC equipment, pumps, elevators.",
+      "vision_hints": "Circle with 'M' at mechanical equipment. 'HP' rating. Disconnect symbol (rectangle with handle) nearby."
+    },
+    {
+      "id": "D26-ELE-017",
+      "symbol_name": "Junction Box",
+      "category": "Electrical",
+      "description": "Small square or octagon symbol where circuits junction. 'J' or 'JB' label.",
+      "typical_usage": "Electrical plans where circuits change direction or split.",
+      "vision_hints": "Small square at wire junction points. 'JB' label. Multiple circuit lines converging."
+    },
+    {
+      "id": "D26-ELE-018",
+      "symbol_name": "Conduit Run",
+      "category": "Electrical",
+      "description": "Line (solid or dashed based on concealment) showing raceway path. Size and type noted (3/4\"C, 1\"EMT, 2\"RGS).",
+      "typical_usage": "Electrical plans showing conduit routing, especially for larger feeders.",
+      "vision_hints": "Line with conduit size and type notation. Solid = exposed/accessible, dashed = concealed."
+    },
+    {
+      "id": "D26-ELE-019",
+      "symbol_name": "Exterior Light / Pole Light",
+      "category": "Electrical",
+      "description": "Circle with fixture type letter on site plan, positioned on pole or building. Mounting height and photocell control noted.",
+      "typical_usage": "Site electrical plans showing parking and pathway lighting.",
+      "vision_hints": "Circles on site plan with pole locations. Fixture schedule reference. Photometric coverage shown."
+    },
+    {
+      "id": "D26-ELE-020",
+      "symbol_name": "Occupancy Sensor",
+      "category": "Electrical",
+      "description": "Circle with motion lines or 'OS' label on ceiling or wall. Coverage pattern may be shown dashed.",
+      "typical_usage": "Electrical and lighting control plans per energy code.",
+      "vision_hints": "'OS' label on ceiling in rooms. Dashed circle showing coverage area. Connected to switch circuit."
+    }
+  ],
+
+  "Division 27 - Communications": [
+    {
+      "id": "D27-COM-001",
+      "symbol_name": "Data Outlet / Network Jack",
+      "category": "Communications",
+      "description": "Triangle or specific data symbol on wall. Labeled with category (CAT6, CAT6A) and jack count.",
+      "typical_usage": "Telecommunications plans at workstations, offices, conference rooms.",
+      "vision_hints": "Small triangle on wall. Data category label. Often paired with power receptacle."
+    },
+    {
+      "id": "D27-COM-002",
+      "symbol_name": "Telephone Outlet",
+      "category": "Communications",
+      "description": "Triangle with 'T' or telephone handset symbol. May be combined with data outlet as combo jack.",
+      "typical_usage": "Telecommunications plans at desk locations.",
+      "vision_hints": "Triangle with 'T' on wall near desks. In modern plans, often combined with data outlet."
+    },
+    {
+      "id": "D27-COM-003",
+      "symbol_name": "TV / Cable Outlet",
+      "category": "Communications",
+      "description": "Triangle with 'TV' or coaxial cable symbol. Mounting height noted.",
+      "typical_usage": "Telecommunications plans in conference rooms, waiting areas, break rooms.",
+      "vision_hints": "Triangle with 'TV' label. Usually at 18\" or 48\" AFF depending on mount type."
+    },
+    {
+      "id": "D27-COM-004",
+      "symbol_name": "Wireless Access Point (WAP)",
+      "category": "Communications",
+      "description": "Circle with antenna symbol or 'WAP' label on ceiling. Coverage radius may be shown.",
+      "typical_usage": "Telecommunications plans showing WiFi coverage.",
+      "vision_hints": "'WAP' on ceiling plan with dashed coverage circle. Spacing for full coverage overlap."
+    },
+    {
+      "id": "D27-COM-005",
+      "symbol_name": "Telecom Room / MDF / IDF",
+      "category": "Communications",
+      "description": "Room labeled 'TR', 'MDF' (Main Distribution Frame), or 'IDF' (Intermediate Distribution Frame). Shows rack locations and pathway entries.",
+      "typical_usage": "Floor plans identifying telecommunications rooms.",
+      "vision_hints": "Room labeled 'TELECOM', 'TR', 'MDF', or 'IDF'. Equipment rack outlines inside."
+    }
+  ],
+
+  "Division 28 - Electronic Safety and Security": [
+    {
+      "id": "D28-FA-001",
+      "symbol_name": "Fire Alarm Pull Station",
+      "category": "Fire Alarm/Life Safety",
+      "description": "Specific symbol (often a hexagon or special shape) at exits. Labeled 'PS' or 'PULL STATION'. Mounted 42\"-48\" AFF.",
+      "typical_usage": "Fire alarm plans at all exits per code.",
+      "vision_hints": "Symbol near exit doors at 42\"-48\" AFF. 'PS' label. Required within 5' of each exit."
+    },
+    {
+      "id": "D28-FA-002",
+      "symbol_name": "Smoke Detector",
+      "category": "Fire Alarm/Life Safety",
+      "description": "Circle with 'S' or 'SD' label, or specific smoke detector icon on ceiling. May show coverage radius.",
+      "typical_usage": "Fire alarm plans on ceilings per NFPA spacing requirements.",
+      "vision_hints": "Circle with 'SD' on ceiling. Spacing per NFPA 72 (typically 30' max between detectors)."
+    },
+    {
+      "id": "D28-FA-003",
+      "symbol_name": "Heat Detector",
+      "category": "Fire Alarm/Life Safety",
+      "description": "Circle with 'H' or 'HD' label. Used where smoke detectors would false alarm (kitchens, garages, mechanical rooms).",
+      "typical_usage": "Fire alarm plans in areas unsuitable for smoke detection.",
+      "vision_hints": "Circle with 'HD' on ceiling. In kitchens, garages, loading docks, mechanical rooms."
+    },
+    {
+      "id": "D28-FA-004",
+      "symbol_name": "Fire Alarm Horn/Strobe (Notification Appliance)",
+      "category": "Fire Alarm/Life Safety",
+      "description": "Symbol showing horn (audible) and strobe (visual) notification. Labeled 'H/S' or 'NAC'. Wall-mounted in corridors.",
+      "typical_usage": "Fire alarm plans in corridors, open areas, restrooms (strobe only) per ADA.",
+      "vision_hints": "'H/S' or horn/strobe symbol on walls. ADA-required strobes in restrooms."
+    },
+    {
+      "id": "D28-FA-005",
+      "symbol_name": "Fire Alarm Control Panel (FACP)",
+      "category": "Fire Alarm/Life Safety",
+      "description": "Rectangle labeled 'FACP' showing main fire alarm panel location. Typically near main entrance for fire department access.",
+      "typical_usage": "Fire alarm plans showing panel location, usually in main electrical room or lobby.",
+      "vision_hints": "Rectangle with 'FACP' near building entry or electrical room. Central point for all fire alarm wiring."
+    },
+    {
+      "id": "D28-FA-006",
+      "symbol_name": "Duct Smoke Detector",
+      "category": "Fire Alarm/Life Safety",
+      "description": "Smoke detector symbol associated with duct. Labeled 'DSD' or 'DUCT DET'. Shuts down AHU on detection.",
+      "typical_usage": "Fire alarm and mechanical plans at AHU supply and return ducts over 2000 CFM.",
+      "vision_hints": "Smoke detector symbol on or near large duct. 'DSD' label. Associated with AHU shutdown relay."
+    },
+    {
+      "id": "D28-SEC-001",
+      "symbol_name": "Security Camera",
+      "category": "Security",
+      "description": "Camera icon or triangle showing field of view. Labeled 'CAM' with designation number.",
+      "typical_usage": "Security plans at entries, parking, corridors, high-security areas.",
+      "vision_hints": "Camera icon or pie-shaped view cone. 'CAM-' designation. Coverage area may be shown shaded."
+    },
+    {
+      "id": "D28-SEC-002",
+      "symbol_name": "Card Reader / Access Control",
+      "category": "Security",
+      "description": "Small rectangle on wall near doors labeled 'CR' or 'CARD READER'. Connected to security system.",
+      "typical_usage": "Security plans at controlled entry points.",
+      "vision_hints": "Small rectangle at door frame. 'CR' label. Typically 42\"-48\" AFF on lock side."
+    },
+    {
+      "id": "D28-SEC-003",
+      "symbol_name": "Door Contact / Position Switch",
+      "category": "Security",
+      "description": "Small symbol at door frame showing magnetic contact. Labeled 'DC' or 'CONTACT'. Monitors door open/closed status.",
+      "typical_usage": "Security plans at perimeter doors and secured openings.",
+      "vision_hints": "Small mark at door head or frame. 'DC' label. Wired to security panel."
+    },
+    {
+      "id": "D28-SEC-004",
+      "symbol_name": "Motion Sensor (Security)",
+      "category": "Security",
+      "description": "Circle with coverage cone or 'PIR' (Passive Infrared) label. Detects occupancy in secured areas.",
+      "typical_usage": "Security plans covering interior spaces during unoccupied hours.",
+      "vision_hints": "'PIR' or motion sensor icon. Coverage cone showing protected area."
+    }
+  ],
+
+  "Division 31 - Earthwork": [
+    {
+      "id": "D31-EW-001",
+      "symbol_name": "Existing Grade Line",
+      "category": "Civil/Site",
+      "description": "Long-dash, short-dash line with 'EG' label showing existing ground surface elevation. Elevation values at key points.",
+      "typical_usage": "Site plans, grading plans, and building sections showing existing terrain.",
+      "vision_hints": "Dash-dot line labeled 'EG' or 'EXISTING GRADE'. Spot elevations noted along line."
+    },
+    {
+      "id": "D31-EW-002",
+      "symbol_name": "Finished Grade Line",
+      "category": "Civil/Site",
+      "description": "Solid or specific line type with 'FG' label showing proposed final ground elevation after grading.",
+      "typical_usage": "Grading plans and building sections showing proposed terrain.",
+      "vision_hints": "Line labeled 'FG' or 'FINISH GRADE'. Compared against existing grade to determine cut/fill."
+    },
+    {
+      "id": "D31-EW-003",
+      "symbol_name": "Contour Line",
+      "category": "Civil/Site",
+      "description": "Curved lines connecting points of equal elevation. Existing contours = dashed, proposed contours = solid. Index contours (every 5th) are bolder with elevation label.",
+      "typical_usage": "Grading plans showing existing and proposed topography.",
+      "vision_hints": "Curved parallel lines across site with elevation numbers. Dashed = existing, solid = proposed."
+    },
+    {
+      "id": "D31-EW-004",
+      "symbol_name": "Spot Elevation (Site)",
+      "category": "Civil/Site",
+      "description": "X or + mark with elevation value to two decimal places (e.g., 100.50). Shows specific ground elevation at a point.",
+      "typical_usage": "Grading plans at building corners, curbs, swales, and drainage points.",
+      "vision_hints": "X or + with decimal elevation (XX.XX format). At key drainage and transition points."
+    },
+    {
+      "id": "D31-EW-005",
+      "symbol_name": "Cut/Fill Boundary",
+      "category": "Civil/Site",
+      "description": "Line where existing and proposed contours intersect (zero cut/fill line). Areas inside labeled 'CUT' or 'FILL' with depth.",
+      "typical_usage": "Grading plans showing earthwork quantities.",
+      "vision_hints": "Boundary line with 'CUT' and 'FILL' labels on opposite sides. Depth values noted."
+    },
+    {
+      "id": "D31-EW-006",
+      "symbol_name": "Slope Arrow",
+      "category": "Civil/Site",
+      "description": "Arrow pointing in direction of drainage (downhill) with slope ratio (e.g., 2% or 1:48). Shows surface drainage direction.",
+      "typical_usage": "Grading plans, parking lots, sidewalks, building pads.",
+      "vision_hints": "Arrow with percentage or ratio. Points downhill. Multiple arrows showing drainage pattern."
+    },
+    {
+      "id": "D31-EW-007",
+      "symbol_name": "Boring / Test Pit Location",
+      "category": "Civil/Geotechnical",
+      "description": "Circle with 'B-1', 'TP-1' designation showing where geotechnical investigation occurred. References geotech report.",
+      "typical_usage": "Site plans showing geotechnical exploration locations.",
+      "vision_hints": "Circle with 'B-' or 'TP-' designation. Cross-references geotechnical report boring logs."
+    },
+    {
+      "id": "D31-EW-008",
+      "symbol_name": "Earth Section Fill",
+      "category": "Civil/General",
+      "description": "Random dot pattern with small triangular shapes representing natural earth/soil in section views.",
+      "typical_usage": "Foundation sections, site cross-sections showing ground material.",
+      "vision_hints": "Random dots and small triangles pattern below grade line. Fills earth areas in section views."
+    }
+  ],
+
+  "Division 32 - Exterior Improvements": [
+    {
+      "id": "D32-EXT-001",
+      "symbol_name": "Property Line",
+      "category": "Civil/Site",
+      "description": "Long dash-dot-dot line showing legal property boundary. Bearing and distance labeled on each segment. May show iron pins at corners.",
+      "typical_usage": "Site plans and surveys defining legal property limits.",
+      "vision_hints": "Dash-dot-dot line around site perimeter. Bearing/distance labels (e.g., N45°30'E 150.00')."
+    },
+    {
+      "id": "D32-EXT-002",
+      "symbol_name": "Setback Line",
+      "category": "Civil/Site",
+      "description": "Dashed line parallel to property line showing required building setback. Distance from property line noted.",
+      "typical_usage": "Site plans showing zoning setback requirements.",
+      "vision_hints": "Dashed line inside and parallel to property line. Distance dimension to property line."
+    },
+    {
+      "id": "D32-EXT-003",
+      "symbol_name": "Curb and Gutter",
+      "category": "Civil/Site",
+      "description": "Parallel lines at road edge showing curb face and gutter flow line. Type noted (vertical, rolled, valley gutter).",
+      "typical_usage": "Site plans and grading plans at roads and parking lots.",
+      "vision_hints": "Parallel lines at pavement edge. Spot elevations at intervals. Flow arrows in gutter."
+    },
+    {
+      "id": "D32-EXT-004",
+      "symbol_name": "Parking Stall",
+      "category": "Civil/Site",
+      "description": "Rectangle with parallel lines showing individual parking space. Dimensions noted (9'x18' standard, wider for ADA).",
+      "typical_usage": "Site plans showing parking layout. ADA spaces marked with wheelchair symbol.",
+      "vision_hints": "Rows of parallel-line rectangles. ADA symbol at accessible spaces. Count noted for code compliance."
+    },
+    {
+      "id": "D32-EXT-005",
+      "symbol_name": "ADA Parking Symbol",
+      "category": "Civil/Site",
+      "description": "International wheelchair symbol in parking stall and on adjacent signage. Adjacent striped access aisle (5' or 8' wide).",
+      "typical_usage": "Site plans at required accessible parking locations near building entries.",
+      "vision_hints": "Wheelchair symbol in parking stall. Striped access aisle adjacent. 'VAN ACCESSIBLE' at wider spaces."
+    },
+    {
+      "id": "D32-EXT-006",
+      "symbol_name": "Sidewalk",
+      "category": "Civil/Site",
+      "description": "Parallel lines showing paved pedestrian path. Width noted (typically 5' min for ADA). Expansion joints shown as perpendicular lines.",
+      "typical_usage": "Site plans showing pedestrian circulation.",
+      "vision_hints": "Parallel lines with perpendicular joint lines at regular intervals. 5'-6' wide typically."
+    },
+    {
+      "id": "D32-EXT-007",
+      "symbol_name": "Tree / Landscape Symbol",
+      "category": "Civil/Landscape",
+      "description": "Circular organic shape for canopy (existing = solid, proposed = open circle). Caliper, species, and root ball size noted.",
+      "typical_usage": "Landscape plans and site plans showing vegetation.",
+      "vision_hints": "Circular organic shapes. Existing trees darker/solid, new trees open outlines. Species abbreviations."
+    },
+    {
+      "id": "D32-EXT-008",
+      "symbol_name": "Fence Line",
+      "category": "Civil/Site",
+      "description": "Line with X marks or specific fence symbol. Type labeled (CHAIN LINK, WOOD, WROUGHT IRON). Height noted.",
+      "typical_usage": "Site plans showing perimeter and security fencing.",
+      "vision_hints": "Line with X marks or plus signs at intervals. Fence type and height label."
+    },
+    {
+      "id": "D32-EXT-009",
+      "symbol_name": "Retaining Wall",
+      "category": "Civil/Structural",
+      "description": "Heavy line with hatch marks on high side (earth retention). Height and type noted. Section detail referenced.",
+      "typical_usage": "Site plans and grading plans where grade change requires retention.",
+      "vision_hints": "Heavy line with short perpendicular marks on uphill side. Height annotation."
+    },
+    {
+      "id": "D32-EXT-010",
+      "symbol_name": "Pavement Section Indicator",
+      "category": "Civil/Site",
+      "description": "Symbol or keynote on pavement areas referencing section detail showing pavement buildup (asphalt/concrete over base over subgrade).",
+      "typical_usage": "Site plans identifying pavement types and referencing structural sections.",
+      "vision_hints": "Keynote or symbol on paved areas. References detail showing layer thicknesses."
+    }
+  ],
+
+  "Division 33 - Utilities": [
+    {
+      "id": "D33-UTL-001",
+      "symbol_name": "Storm Sewer Pipe",
+      "category": "Civil/Utilities",
+      "description": "Dashed line with 'ST' or 'SD' markers. Size, material, and slope noted (e.g., '12\" RCP @ 0.5%'). Flow direction arrow.",
+      "typical_usage": "Utility plans showing storm water collection and conveyance.",
+      "vision_hints": "Dashed line with 'ST' markers. Pipe size, slope, and invert elevations at structures."
+    },
+    {
+      "id": "D33-UTL-002",
+      "symbol_name": "Sanitary Sewer Pipe (Site)",
+      "category": "Civil/Utilities",
+      "description": "Dashed line with 'SS' markers. Size, material, slope, and invert elevations noted. Flow arrows show direction.",
+      "typical_usage": "Utility plans showing sanitary sewer collection to municipal system.",
+      "vision_hints": "Dashed line with 'SS' markers. Invert elevations at manholes. Flows downhill to main."
+    },
+    {
+      "id": "D33-UTL-003",
+      "symbol_name": "Water Main",
+      "category": "Civil/Utilities",
+      "description": "Solid line with 'W' markers. Size noted (6\", 8\", 12\"). Shows fire hydrant tees, valve locations, and service taps.",
+      "typical_usage": "Utility plans showing domestic and fire water supply.",
+      "vision_hints": "Solid line with 'W' markers. Size labels. Fire hydrant symbols along route."
+    },
+    {
+      "id": "D33-UTL-004",
+      "symbol_name": "Fire Hydrant",
+      "category": "Civil/Utilities",
+      "description": "Circle with arms (stylized hydrant shape) connected to water main. Spacing per fire code (typically 300'-600' apart).",
+      "typical_usage": "Site and utility plans showing fire protection water supply points.",
+      "vision_hints": "Distinctive hydrant icon on or near water main. Gate valve symbol at tee connection."
+    },
+    {
+      "id": "D33-UTL-005",
+      "symbol_name": "Manhole",
+      "category": "Civil/Utilities",
+      "description": "Circle with cross or MH designation. Rim and invert elevations noted. Pipe sizes entering and leaving shown.",
+      "typical_usage": "Utility plans at pipe junctions, direction changes, and access points.",
+      "vision_hints": "Circle with 'MH-' designation. Rim elevation on top, invert elevations for each pipe connection."
+    },
+    {
+      "id": "D33-UTL-006",
+      "symbol_name": "Catch Basin / Storm Inlet",
+      "category": "Civil/Utilities",
+      "description": "Square with diagonal lines or specific inlet symbol. Type noted (curb inlet, area drain, trench drain). Rim and invert elevations.",
+      "typical_usage": "Utility and grading plans at low points for storm water collection.",
+      "vision_hints": "Square with diagonal lines at pavement low points. 'CB-' or 'INLET' designation. Elevations noted."
+    },
+    {
+      "id": "D33-UTL-007",
+      "symbol_name": "Gas Line (Site)",
+      "category": "Civil/Utilities",
+      "description": "Line with 'G' markers or specific gas line symbol. Size and pressure noted. Gas meter symbol at building entry.",
+      "typical_usage": "Utility plans showing gas service from main to building.",
+      "vision_hints": "Line with 'G' markers. Gas meter symbol (rectangle) at building exterior."
+    },
+    {
+      "id": "D33-UTL-008",
+      "symbol_name": "Electric Line (Site)",
+      "category": "Civil/Utilities",
+      "description": "Line with 'E' markers showing underground electric service. Transformer pad or pole shown. Conduit size noted.",
+      "typical_usage": "Site utility plans showing electric service routing.",
+      "vision_hints": "Line with 'E' markers. Transformer rectangle with 'XFMR' label. Conduit size annotation."
+    },
+    {
+      "id": "D33-UTL-009",
+      "symbol_name": "Telecom/Fiber Line (Site)",
+      "category": "Civil/Utilities",
+      "description": "Line with 'T' or 'FO' markers showing underground communication service. Handhole/pullbox symbols at intervals.",
+      "typical_usage": "Site utility plans showing telecommunications routing.",
+      "vision_hints": "Line with 'T' or 'FO' markers. Handhole rectangles at direction changes."
+    },
+    {
+      "id": "D33-UTL-010",
+      "symbol_name": "Detention/Retention Pond",
+      "category": "Civil/Utilities",
+      "description": "Irregular shape on site with contour lines showing pond grading. Inlet and outlet pipe connections. Volume calculations noted.",
+      "typical_usage": "Site and grading plans showing stormwater management facilities.",
+      "vision_hints": "Irregular enclosed shape with internal contours. Inlet/outlet pipes. Wet or dry pond notation."
+    },
+    {
+      "id": "D33-UTL-011",
+      "symbol_name": "Utility Easement",
+      "category": "Civil/Utilities",
+      "description": "Dashed boundary line with 'U.E.' label and width noted (typically 10'-20' wide). Restricts building within easement.",
+      "typical_usage": "Site plans showing utility easement corridors.",
+      "vision_hints": "Dashed parallel lines with 'U.E.' or 'UTILITY EASEMENT' label and width dimension."
+    }
+  ],
+
+  "Common Hatch Patterns (Section Fills)": [
+    {
+      "id": "HATCH-001",
+      "symbol_name": "Concrete (Poche)",
+      "category": "Material/Section",
+      "description": "Random scattered dots/stipple pattern filling concrete cross-sections.",
+      "typical_usage": "Any section cut through concrete elements (walls, slabs, columns, footings).",
+      "vision_hints": "Random dots/specks, not organized in a pattern. Distinguished from earth (triangles+dots) and gravel (large dots)."
+    },
+    {
+      "id": "HATCH-002",
+      "symbol_name": "Masonry (CMU/Brick)",
+      "category": "Material/Section",
+      "description": "Diagonal lines at 45° for CMU. Crosshatch (two directions) for brick. Spacing and angle varies by convention.",
+      "typical_usage": "Section cuts through masonry walls.",
+      "vision_hints": "Regular diagonal lines (CMU) or cross-diagonal lines (brick) at consistent spacing."
+    },
+    {
+      "id": "HATCH-003",
+      "symbol_name": "Steel",
+      "category": "Material/Section",
+      "description": "Solid black fill for structural steel sections.",
+      "typical_usage": "Section cuts through steel beams, columns, angles, plates.",
+      "vision_hints": "Completely solid black fill. Small cross-sections = angles/plates. I-shape = wide flange."
+    },
+    {
+      "id": "HATCH-004",
+      "symbol_name": "Wood (End Grain)",
+      "category": "Material/Section",
+      "description": "Parallel curved lines representing wood grain pattern in cross-section.",
+      "typical_usage": "Section cuts through dimensional lumber, timber, engineered wood.",
+      "vision_hints": "Curved parallel lines within rectangular section. May show growth ring pattern."
+    },
+    {
+      "id": "HATCH-005",
+      "symbol_name": "Earth / Soil",
+      "category": "Material/Section",
+      "description": "Random dots with small triangular shapes scattered throughout. Coarser pattern than concrete.",
+      "typical_usage": "Section views below grade showing undisturbed or fill earth.",
+      "vision_hints": "Dots with small triangles. Coarser and more varied than concrete stipple pattern."
+    },
+    {
+      "id": "HATCH-006",
+      "symbol_name": "Gravel / Aggregate",
+      "category": "Material/Section",
+      "description": "Large irregular circles or dots representing crushed stone or gravel base material.",
+      "typical_usage": "Section views showing gravel base under slabs, behind retaining walls.",
+      "vision_hints": "Large irregular dots/circles, much bigger than concrete stipple. Under slabs and behind walls."
+    },
+    {
+      "id": "HATCH-007",
+      "symbol_name": "Sand",
+      "category": "Material/Section",
+      "description": "Fine dots in a uniform pattern, finer than concrete stipple.",
+      "typical_usage": "Section views showing sand bedding for pipes or under slabs.",
+      "vision_hints": "Very fine, uniform dot pattern. Typically thin layer (2\"-4\") under pipe or slab."
+    },
+    {
+      "id": "HATCH-008",
+      "symbol_name": "Insulation (Batt)",
+      "category": "Material/Section",
+      "description": "Wavy/scalloped lines filling cavity spaces.",
+      "typical_usage": "Wall, ceiling, and floor sections showing thermal insulation.",
+      "vision_hints": "Repeating wave/scallop pattern in wall cavities. R-value label nearby."
+    },
+    {
+      "id": "HATCH-009",
+      "symbol_name": "Insulation (Rigid/Board)",
+      "category": "Material/Section",
+      "description": "Small X's or stipple in uniform layer, typically 1\"-4\" thick.",
+      "typical_usage": "Exterior wall, roof, and foundation sections showing rigid board insulation.",
+      "vision_hints": "Uniform layer with small X pattern. Thinner than batt cavities. On exterior face."
+    },
+    {
+      "id": "HATCH-010",
+      "symbol_name": "Glass",
+      "category": "Material/Section",
+      "description": "Thin line(s) representing glass pane in section. Single line for single glazing, two lines for insulated glazing.",
+      "typical_usage": "Window and curtain wall sections/details.",
+      "vision_hints": "Very thin lines in window/door frame sections. Two parallel thin lines = insulated glass unit."
+    },
+    {
+      "id": "HATCH-011",
+      "symbol_name": "Gypsum Board (GWB/Drywall)",
+      "category": "Material/Section",
+      "description": "Thin layer with fine stipple or left unfilled with thickness noted (1/2\", 5/8\"). Often shown as simple lines on wall faces.",
+      "typical_usage": "Wall and ceiling sections showing drywall finish layers.",
+      "vision_hints": "Thin layers (1/2\" or 5/8\") on stud faces. May be double-layer (fire-rated). Simple thin line representation."
+    },
+    {
+      "id": "HATCH-012",
+      "symbol_name": "Ceramic Tile",
+      "category": "Material/Section",
+      "description": "Small square grid pattern on surface or thin layer with tile pattern in section.",
+      "typical_usage": "Floor and wall details showing tile installation.",
+      "vision_hints": "Grid pattern on surface in elevation. Thin layer over substrate in section."
+    }
+  ],
+
+  "Common Line Types": [
+    {
+      "id": "LINE-001",
+      "symbol_name": "Object Line (Solid)",
+      "category": "Convention",
+      "description": "Continuous solid line of medium weight showing visible edges of objects.",
+      "typical_usage": "All visible edges, walls, equipment outlines.",
+      "vision_hints": "Standard solid line. Most common line on any drawing."
+    },
+    {
+      "id": "LINE-002",
+      "symbol_name": "Hidden Line (Dashed)",
+      "category": "Convention",
+      "description": "Short dashed line showing edges hidden behind other objects. Also used for elements below the cut plane (below-grade in plan).",
+      "typical_usage": "Items behind or below visible surfaces: foundations in plan, beams above in RCP.",
+      "vision_hints": "Even short dashes. Shows items you can't directly see from view angle."
+    },
+    {
+      "id": "LINE-003",
+      "symbol_name": "Center Line",
+      "category": "Convention",
+      "description": "Long-short-long dash pattern showing centerline of symmetric elements. Labeled 'CL' or with center line symbol.",
+      "typical_usage": "Column grids, pipe centerlines, equipment centerlines, symmetry lines.",
+      "vision_hints": "Long-short-long dash pattern. 'CL' symbol. Through center of symmetric elements."
+    },
+    {
+      "id": "LINE-004",
+      "symbol_name": "Property Line",
+      "category": "Convention",
+      "description": "Long-dash-dot-dot pattern specifically for legal property boundaries.",
+      "typical_usage": "Site plans showing property limits.",
+      "vision_hints": "Long dash followed by two short dashes/dots. Around site perimeter."
+    },
+    {
+      "id": "LINE-005",
+      "symbol_name": "Cut Plane Line",
+      "category": "Convention",
+      "description": "Heavy long-dash line showing where a section cut occurs. Ends with section markers showing direction of view.",
+      "typical_usage": "Floor plans showing where section views are taken.",
+      "vision_hints": "Heavy dashed line across plan with section bubbles at ends. Arrows show viewing direction."
+    },
+    {
+      "id": "LINE-006",
+      "symbol_name": "Grid Line",
+      "category": "Convention",
+      "description": "Long chain (center line type) with circle bubbles at ends containing grid identifier (A, B, 1, 2...).",
+      "typical_usage": "All structural and architectural plans for element location reference.",
+      "vision_hints": "Perpendicular network of lines with circled identifiers at ends."
+    }
+  ],
+
+  "Accessibility (ADA) Symbols": [
+    {
+      "id": "ADA-001",
+      "symbol_name": "International Symbol of Accessibility",
+      "category": "Accessibility",
+      "description": "Wheelchair icon (ISA) indicating accessible route, parking, restroom, or entrance.",
+      "typical_usage": "Floor plans, site plans at accessible features per ADA/ABA requirements.",
+      "vision_hints": "Stylized wheelchair figure. Found at accessible parking, restrooms, entries, routes."
+    },
+    {
+      "id": "ADA-002",
+      "symbol_name": "Accessible Route",
+      "category": "Accessibility",
+      "description": "Path marked with wheelchair symbol and/or dashed boundary showing accessible travel route. Min 36\" wide, max 2% cross-slope.",
+      "typical_usage": "Site plans and floor plans showing compliant pedestrian paths.",
+      "vision_hints": "Path with wheelchair symbols. Width dimensions. Slope percentages noted."
+    },
+    {
+      "id": "ADA-003",
+      "symbol_name": "Tactile Warning / Detectable Warning",
+      "category": "Accessibility",
+      "description": "Dot pattern area at curb ramps and platform edges showing truncated dome surface.",
+      "typical_usage": "Site plans at curb ramps, transit platforms, hazardous vehicular areas.",
+      "vision_hints": "Dot grid pattern at transitions between pedestrian and vehicular surfaces."
+    },
+    {
+      "id": "ADA-004",
+      "symbol_name": "Grab Bar",
+      "category": "Accessibility",
+      "description": "Thick line on restroom walls showing grab bar locations. Length and height dimensions noted per ADA.",
+      "typical_usage": "Enlarged restroom plans and elevations at accessible toilet and shower stalls.",
+      "vision_hints": "Bold line segments on walls near toilet and shower. Length (42\", 36\") and height (33\"-36\") noted."
+    }
+  ],
+
+  "Life Safety / Egress Symbols": [
+    {
+      "id": "LS-001",
+      "symbol_name": "Exit Door / Egress Door",
+      "category": "Life Safety",
+      "description": "Door symbol with 'EXIT' label or arrow. Required hardware noted (panic bar, closer). Fire rating if applicable.",
+      "typical_usage": "Life safety plans showing required egress doors.",
+      "vision_hints": "Door with 'EXIT' text or exit sign symbol above. Panic hardware notation."
+    },
+    {
+      "id": "LS-002",
+      "symbol_name": "Area of Rescue Assistance / Area of Refuge",
+      "category": "Life Safety",
+      "description": "Wheelchair symbol with specific area boundary at stairs or elevators. Two-way communication device shown.",
+      "typical_usage": "Life safety plans at stairway landings in multi-story buildings.",
+      "vision_hints": "Wheelchair symbol near stairs with 'AREA OF RESCUE ASSISTANCE' label. Communication device symbol."
+    },
+    {
+      "id": "LS-003",
+      "symbol_name": "Occupancy Separation / Fire Barrier",
+      "category": "Life Safety",
+      "description": "Wall shown with fire rating notation (1-HR, 2-HR). Special symbol or heavier line weight. 'F.R.' label.",
+      "typical_usage": "Life safety and architectural plans showing fire-rated separations.",
+      "vision_hints": "Wall with fire rating text (1-HR, 2-HR FIRE BARRIER). May use special fill or thicker lines."
+    },
+    {
+      "id": "LS-004",
+      "symbol_name": "Fire Rating Tag",
+      "category": "Life Safety",
+      "description": "Symbol or text on wall indicating fire-resistance rating. '1 HR', '2 HR', or fire symbol with rating.",
+      "typical_usage": "Floor plans and life safety plans identifying fire-rated construction.",
+      "vision_hints": "Small tag or text on walls showing hour rating. May be integrated with wall type tag."
+    },
+    {
+      "id": "LS-005",
+      "symbol_name": "Travel Distance Indicator",
+      "category": "Life Safety",
+      "description": "Dimension line or dashed path showing distance from most remote point to nearest exit. Length noted per code maximums.",
+      "typical_usage": "Life safety plans demonstrating code compliance for egress travel distance.",
+      "vision_hints": "Dashed path line with dimension from remote corners to exit doors. Distance in feet."
+    },
+    {
+      "id": "LS-006",
+      "symbol_name": "Smoke/Fire Partition",
+      "category": "Life Safety",
+      "description": "Wall or barrier with smoke-resistance notation. 'SMOKE BARRIER' or 'SMOKE PARTITION' label.",
+      "typical_usage": "Life safety plans in healthcare, assembly, and corridor separations.",
+      "vision_hints": "Wall with 'SMOKE BARRIER' or 'SM' label. May use different line pattern than fire walls."
+    }
+  ]
+}
