@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays, parseISO, startOfWeek } from 'date-fns';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 // POST /api/projects/[slug]/schedule/import-lookahead - Import 3WLA from Excel
 export async function POST(
@@ -64,7 +65,7 @@ export async function POST(
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',

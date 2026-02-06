@@ -9,6 +9,7 @@ import { prisma } from './db';
 import { getCSIDivisionByNumber, type CSIDivision } from './csi-divisions';
 import { callAbacusLLM } from './abacus-llm';
 import { generateAbbreviationContext } from './construction-abbreviations';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 interface ExtractedRoom {
   roomNumber: string;
@@ -300,7 +301,7 @@ Return ONLY the JSON array, no additional text.`;
         content: prompt,
       },
     ], {
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       temperature: 0.1,
       max_tokens: 16000, // Increased from 4000 to accommodate 50-100+ rooms with details
     });

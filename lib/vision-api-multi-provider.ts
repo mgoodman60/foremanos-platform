@@ -2,8 +2,9 @@
  * Multi-Provider Vision API Wrapper
  *
  * Provides resilient vision processing with automatic fallback across multiple providers:
- * 1. GPT-4o (OpenAI) - Primary, highest quality
- * 2. Claude 4.5 Sonnet (Anthropic) - Equal/better quality, different infrastructure
+ * 1. Claude Opus 4.6 (Anthropic) - Primary, highest quality for construction drawings
+ * 2. GPT-5.2 (OpenAI) - Fallback, excellent quality
+ * 3. Claude Sonnet 4.5 (Anthropic) - Secondary fallback
  *
  * Features:
  * - Automatic provider switching on errors
@@ -11,15 +12,16 @@
  * - Provider performance tracking
  * - Per-provider rate limiting
  *
- * Updated Feb 2026: Switched from Abacus AI proxy to direct OpenAI API
+ * Updated Feb 2026: Claude Opus 4.6 primary, gpt-4o removed
  */
 
 import fs from 'fs';
 import path from 'path';
 import { logger } from '@/lib/logger';
+import { VISION_MODEL, FALLBACK_MODEL, DEFAULT_MODEL } from '@/lib/model-config';
 
-// Provider types (using direct OpenAI + Anthropic)
-export type VisionProvider = 'gpt-4o' | 'claude-3.5-sonnet';
+// Provider types (Claude Opus primary, OpenAI + Claude fallbacks)
+export type VisionProvider = 'claude-opus-4-6' | 'gpt-5.2' | 'claude-sonnet-4-5';
 
 interface ProviderConfig {
   name: VisionProvider;
@@ -45,16 +47,22 @@ interface QualityMetrics {
   score: number; // 0-100
 }
 
-// Provider configurations (Updated Feb 2026 - direct OpenAI)
+// Provider configurations (Updated Feb 2026 - Claude Opus primary)
 const PROVIDERS: ProviderConfig[] = [
   {
-    name: 'gpt-4o',
-    displayName: 'GPT-4o (OpenAI)',
+    name: 'claude-opus-4-6',
+    displayName: 'Claude Opus 4.6 (Anthropic)',
     maxRetries: 3,
     baseDelay: 1000,
   },
   {
-    name: 'claude-3.5-sonnet',
+    name: 'gpt-5.2',
+    displayName: 'GPT-5.2 (OpenAI)',
+    maxRetries: 3,
+    baseDelay: 1000,
+  },
+  {
+    name: 'claude-sonnet-4-5',
     displayName: 'Claude Sonnet 4.5 (Anthropic)',
     maxRetries: 3,
     baseDelay: 1000,
@@ -134,81 +142,92 @@ function isPdfContent(base64: string): boolean {
   return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
 }
 
-// Call OpenAI GPT-4o (primary vision model)
-async function callOpenAIVision(
+// Call Claude Opus 4.6 (primary vision model)
+async function callClaudeOpusVision(
   imageBase64: string,
   prompt: string,
   retryCount: number = 0
 ): Promise<VisionResponse> {
   const config = PROVIDERS[0];
-  const apiKey = process.env.OPENAI_API_KEY;
+  const secrets = getApiSecrets();
+  const apiKey = secrets.anthropic;
 
   if (!apiKey) {
     return {
       success: false,
       content: '',
-      provider: 'gpt-4o',
+      provider: 'claude-opus-4-6',
       attempts: retryCount + 1,
-      error: 'OPENAI_API_KEY not configured',
+      error: 'Anthropic API key not configured',
     };
   }
 
   try {
     // Detect content type - PDF or image
     const isPdf = isPdfContent(imageBase64);
-    const mimeType = isPdf ? 'application/pdf' : 'image/jpeg';
-    
-    // Add timeout for faster failover in dev environment (where Abacus AI may not be accessible)
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout for PDFs
-    
-    // Build the content array based on content type
-    const contentArray: any[] = [{ type: 'text', text: prompt }];
-    
+
+    // Build content array based on content type
+    const contentArray: any[] = [];
+
     if (isPdf) {
-      // For PDFs, use file content type
+      // For PDFs, use document type
       contentArray.push({
-        type: 'file',
-        file: {
-          filename: 'page.pdf',
-          file_data: `data:application/pdf;base64,${imageBase64}`,
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: imageBase64,
         },
       });
     } else {
-      // For images, use image_url type
+      // For images, use image type
       contentArray.push({
-        type: 'image_url',
-        image_url: { url: `data:${mimeType};base64,${imageBase64}` },
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: 'image/jpeg',
+          data: imageBase64,
+        },
       });
     }
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+
+    contentArray.push({
+      type: 'text',
+      text: prompt,
+    });
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: VISION_MODEL,
+        max_tokens: 4000,
+        temperature: 0.1,
         messages: [
           {
             role: 'user',
             content: contentArray,
           },
         ],
-        max_tokens: 4000,
-        temperature: 0.1,
       }),
-      signal: controller.signal,
     });
-    
-    clearTimeout(timeout);
 
     const responseText = await response.text();
 
-    // Check for Cloudflare block
+    // Check for Cloudflare block or rate limit
     if (isCloudflareBlock(response, responseText)) {
-      throw new Error('CLOUDFLARE_BLOCK');
+      logger.info('VISION_API', `${config.displayName}: Cloudflare/rate-limit block detected, switching provider`);
+      return {
+        success: false,
+        content: '',
+        provider: 'claude-opus-4-6',
+        attempts: retryCount + 1,
+        error: 'CLOUDFLARE_BLOCK',
+      };
     }
 
     if (!response.ok) {
@@ -216,7 +235,7 @@ async function callOpenAIVision(
     }
 
     const data = JSON.parse(responseText);
-    const content = data.choices?.[0]?.message?.content || '';
+    const content = data.content?.[0]?.text || '';
 
     if (!content) {
       throw new Error('Empty response from API');
@@ -225,72 +244,43 @@ async function callOpenAIVision(
     return {
       success: true,
       content,
-      provider: 'gpt-4o',
+      provider: 'claude-opus-4-6',
       attempts: retryCount + 1,
     };
   } catch (error: any) {
-    const isCloudflare = error.message === 'CLOUDFLARE_BLOCK';
-    const isTimeout = error.name === 'AbortError';
-    const isNetworkError = error.message?.includes('fetch failed') || error.message?.includes('ENOTFOUND');
-    
-    // Don't retry on Cloudflare blocks - immediately switch provider
-    if (isCloudflare) {
-      logger.info('VISION_API', `${config.displayName}: Cloudflare block detected, switching provider`);
-      return {
-        success: false,
-        content: '',
-        provider: 'gpt-4o',
-        attempts: retryCount + 1,
-        error: 'CLOUDFLARE_BLOCK',
-      };
-    }
-    
-    // Don't retry on network errors/timeouts in dev - immediately switch to fallback
-    if (isTimeout || isNetworkError) {
-      const errorType = isTimeout ? 'timeout' : 'network error';
-      logger.info('VISION_API', `${config.displayName}: ${errorType} detected (expected in dev), switching provider`);
-      return {
-        success: false,
-        content: '',
-        provider: 'gpt-4o',
-        attempts: retryCount + 1,
-        error: isTimeout ? 'TIMEOUT' : 'NETWORK_ERROR',
-      };
-    }
-
-    // Retry on other errors
+    // Retry on errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      return callOpenAIVision(imageBase64, prompt, retryCount + 1);
+      return callClaudeOpusVision(imageBase64, prompt, retryCount + 1);
     }
 
     return {
       success: false,
       content: '',
-      provider: 'gpt-4o',
+      provider: 'claude-opus-4-6',
       attempts: retryCount + 1,
       error: error.message,
     };
   }
 }
 
-// Call Anthropic Claude
-async function callAnthropic(
+// Call Claude Sonnet 4.5 (secondary fallback)
+async function callClaudeSonnetVision(
   imageBase64: string,
   prompt: string,
   retryCount: number = 0
 ): Promise<VisionResponse> {
-  const config = PROVIDERS[1];
+  const config = PROVIDERS[2];
   const secrets = getApiSecrets();
   const apiKey = secrets.anthropic;
-  
+
   if (!apiKey) {
     return {
       success: false,
       content: '',
-      provider: 'claude-3.5-sonnet',
+      provider: 'claude-sonnet-4-5',
       attempts: retryCount + 1,
       error: 'Anthropic API key not configured',
     };
@@ -305,7 +295,7 @@ async function callAnthropic(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20251101', // Claude Sonnet 4.5 - Latest & Best
+        model: DEFAULT_MODEL,
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
@@ -346,7 +336,7 @@ async function callAnthropic(
     return {
       success: true,
       content,
-      provider: 'claude-3.5-sonnet',
+      provider: 'claude-sonnet-4-5',
       attempts: retryCount + 1,
     };
   } catch (error: any) {
@@ -355,40 +345,43 @@ async function callAnthropic(
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      return callAnthropic(imageBase64, prompt, retryCount + 1);
+      return callClaudeSonnetVision(imageBase64, prompt, retryCount + 1);
     }
 
     return {
       success: false,
       content: '',
-      provider: 'claude-3.5-sonnet',
+      provider: 'claude-sonnet-4-5',
       attempts: retryCount + 1,
       error: error.message,
     };
   }
 }
 
-// Call OpenAI GPT-4 Vision (Gemini removed Jan 2026)
-async function callOpenAI(
+// Call GPT-5.2 (OpenAI fallback)
+async function callGPT52Vision(
   imageBase64: string,
   prompt: string,
   retryCount: number = 0
 ): Promise<VisionResponse> {
-  const config = PROVIDERS[2]; // Updated index after Gemini removal
-  const secrets = getApiSecrets();
-  const apiKey = secrets.openai;
-  
+  const config = PROVIDERS[1];
+  const apiKey = process.env.OPENAI_API_KEY;
+
   if (!apiKey) {
     return {
       success: false,
       content: '',
-      provider: 'gpt-4o',
+      provider: 'gpt-5.2',
       attempts: retryCount + 1,
       error: 'OpenAI API key not configured',
     };
   }
 
   try {
+    // Add timeout for faster failover in dev environment
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -396,7 +389,7 @@ async function callOpenAI(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o', // Updated from deprecated gpt-4-vision-preview
+        model: FALLBACK_MODEL,
         messages: [
           {
             role: 'user',
@@ -412,9 +405,17 @@ async function callOpenAI(
         max_tokens: 4000,
         temperature: 0.1,
       }),
+      signal: controller.signal,
     });
 
+    clearTimeout(timeout);
+
     const responseText = await response.text();
+
+    // Check for Cloudflare block
+    if (isCloudflareBlock(response, responseText)) {
+      throw new Error('CLOUDFLARE_BLOCK');
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${responseText}`);
@@ -430,22 +431,51 @@ async function callOpenAI(
     return {
       success: true,
       content,
-      provider: 'gpt-4o',
+      provider: 'gpt-5.2',
       attempts: retryCount + 1,
     };
   } catch (error: any) {
-    // Retry on errors
+    const isCloudflare = error.message === 'CLOUDFLARE_BLOCK';
+    const isTimeout = error.name === 'AbortError';
+    const isNetworkError = error.message?.includes('fetch failed') || error.message?.includes('ENOTFOUND');
+
+    // Don't retry on Cloudflare blocks - immediately switch provider
+    if (isCloudflare) {
+      logger.info('VISION_API', `${config.displayName}: Cloudflare block detected, switching provider`);
+      return {
+        success: false,
+        content: '',
+        provider: 'gpt-5.2',
+        attempts: retryCount + 1,
+        error: 'CLOUDFLARE_BLOCK',
+      };
+    }
+
+    // Don't retry on network errors/timeouts in dev - immediately switch to fallback
+    if (isTimeout || isNetworkError) {
+      const errorType = isTimeout ? 'timeout' : 'network error';
+      logger.info('VISION_API', `${config.displayName}: ${errorType} detected (expected in dev), switching provider`);
+      return {
+        success: false,
+        content: '',
+        provider: 'gpt-5.2',
+        attempts: retryCount + 1,
+        error: isTimeout ? 'TIMEOUT' : 'NETWORK_ERROR',
+      };
+    }
+
+    // Retry on other errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      return callOpenAI(imageBase64, prompt, retryCount + 1);
+      return callGPT52Vision(imageBase64, prompt, retryCount + 1);
     }
 
     return {
       success: false,
       content: '',
-      provider: 'gpt-4o',
+      provider: 'gpt-5.2',
       attempts: retryCount + 1,
       error: error.message,
     };
@@ -517,9 +547,9 @@ export async function analyzeWithLoadBalancing(
   logger.info('VISION_API', `Load-Balanced Vision Analysis Started`, { pageNumber: pageNumber || 'N/A' });
 
   const providerFunctions = [
-    callOpenAIVision,
-    callAnthropic,
-    callOpenAI,
+    callClaudeOpusVision,
+    callGPT52Vision,
+    callClaudeSonnetVision,
   ];
 
   // Get primary provider using round-robin
@@ -569,9 +599,9 @@ export async function analyzeWithMultiProvider(
   logger.info('VISION_API', 'Multi-Provider Vision Analysis Started');
 
   const providerFunctions = [
-    callOpenAIVision,
-    callAnthropic,
-    callOpenAI,
+    callClaudeOpusVision,
+    callGPT52Vision,
+    callClaudeSonnetVision,
   ];
 
   let lastError = '';
@@ -632,11 +662,11 @@ export async function analyzeWithMultiProvider(
 
   // All providers failed
   logger.error('VISION_API', 'All providers failed - Multi-Provider Vision Analysis Failed');
-  
+
   return {
     success: false,
     content: '',
-    provider: 'gpt-4o', // Last attempted
+    provider: 'claude-opus-4-6', // Last attempted
     attempts: totalAttempts,
     error: `All providers failed. Last error: ${lastError}`,
     confidenceScore: 0,
@@ -673,7 +703,7 @@ export async function analyzeWithDirectPdf(
     return {
       success: false,
       content: '',
-      provider: 'claude-3.5-sonnet',
+      provider: 'claude-sonnet-4-5',
       attempts: 1,
       error: 'Anthropic API key not configured for direct PDF processing',
     };
@@ -721,7 +751,7 @@ export async function analyzeWithDirectPdf(
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5-20251101',
+          model: DEFAULT_MODEL,
           max_tokens: 8000,
           temperature: 0.1,
           messages: [
@@ -773,7 +803,7 @@ export async function analyzeWithDirectPdf(
       return {
         success: true,
         content,
-        provider: 'claude-3.5-sonnet',
+        provider: 'claude-sonnet-4-5',
         attempts: attempt + 1,
         confidenceScore: quality.score,
       };
@@ -805,7 +835,7 @@ export async function analyzeWithDirectPdf(
   return {
     success: false,
     content: '',
-    provider: 'claude-3.5-sonnet',
+    provider: 'claude-sonnet-4-5',
     attempts: maxRetries,
     error: `Direct PDF processing failed: ${lastError}`,
     confidenceScore: 0,
@@ -820,7 +850,8 @@ export type DocumentProcessingType = 'visual' | 'text-heavy' | 'mixed';
  */
 export function getProcessingType(processorType: string): DocumentProcessingType {
   switch (processorType) {
-    case 'gpt-4o-vision':
+    case 'claude-opus-vision':
+    case 'gpt-4o-vision': // Legacy
       // Architectural plans, site photos, drawings - need visual processing
       return 'visual';
     case 'claude-haiku-ocr':

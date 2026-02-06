@@ -34,13 +34,12 @@ describe('Query Cache', () => {
   });
 
   describe('analyzeQueryComplexity', () => {
-    describe('Gantt chart / Planning queries (GPT-5.2 with reasoning)', () => {
-      it('should classify gantt chart queries as complex with reasoning', () => {
+    describe('Gantt chart / Planning queries (Claude Opus)', () => {
+      it('should classify gantt chart queries as complex', () => {
         const result = analyzeQueryComplexity('Create a gantt chart for the project');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('medium');
+        expect(result.model).toBe('claude-opus-4-6');
         expect(result.reason).toContain('scheduling/planning');
       });
 
@@ -48,74 +47,65 @@ describe('Query Cache', () => {
         const result = analyzeQueryComplexity('What is the critical path for this project?');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('medium');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect schedule analysis queries', () => {
         const result = analyzeQueryComplexity('Analyze the project schedule for delays');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('medium');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect timeline dependency queries', () => {
         const result = analyzeQueryComplexity('Show timeline dependencies between tasks');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('medium');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect construction timeline queries', () => {
         const result = analyzeQueryComplexity('What is the construction timeline?');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('medium');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect schedule conflict queries', () => {
         const result = analyzeQueryComplexity('Find schedule conflicts in the plan');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('medium');
+        expect(result.model).toBe('claude-opus-4-6');
       });
     });
 
-    describe('Complex queries (GPT-5.2 instant)', () => {
+    describe('Complex queries (Claude Opus)', () => {
       it('should classify image analysis as complex', () => {
         const result = analyzeQueryComplexity('Analyze this image of the foundation');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('light');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect photo queries', () => {
         const result = analyzeQueryComplexity('Review the photo from the site visit');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('light');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect diagram queries', () => {
         const result = analyzeQueryComplexity('Explain this diagram');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('light');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should detect drawing queries', () => {
         const result = analyzeQueryComplexity('What does this drawing show?');
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('light');
+        expect(result.model).toBe('claude-opus-4-6');
       });
 
       it('should handle very long queries as complex', () => {
@@ -123,18 +113,17 @@ describe('Query Cache', () => {
         const result = analyzeQueryComplexity(longQuery);
 
         expect(result.complexity).toBe('complex');
-        expect(result.model).toBe('gpt-5.2');
-        expect(result.reasoning_effort).toBe('light');
+        expect(result.model).toBe('claude-opus-4-6');
         expect(result.reason).toContain('Very long query');
       });
     });
 
-    describe('Medium queries (Claude 3.5 Sonnet)', () => {
+    describe('Medium queries (Claude Sonnet 4.5)', () => {
       it('should classify comparison queries as medium', () => {
         const result = analyzeQueryComplexity('Compare the spec with the submittal');
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
         expect(result.reasoning_effort).toBeUndefined();
       });
 
@@ -142,35 +131,35 @@ describe('Query Cache', () => {
         const result = analyzeQueryComplexity('difference between the two specs');
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should detect summarize across documents', () => {
         const result = analyzeQueryComplexity('Summarize all the requirements');
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should detect multi-document queries', () => {
         const result = analyzeQueryComplexity('Review information across multiple documents');
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should detect analyze why queries', () => {
         const result = analyzeQueryComplexity('Analyze why the cost increased');
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should detect step-by-step queries', () => {
         const result = analyzeQueryComplexity('Explain the process step by step');
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should handle medium-length queries as medium', () => {
@@ -178,7 +167,7 @@ describe('Query Cache', () => {
         const result = analyzeQueryComplexity(mediumQuery);
 
         expect(result.complexity).toBe('medium');
-        expect(result.model).toBe('claude-sonnet-4-5-20251101');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
     });
 
@@ -288,14 +277,14 @@ describe('Query Cache', () => {
         expect(result).toBeNull();
       });
 
-      it('should extend TTL for high-value queries (GPT-5.2)', async () => {
+      it('should extend TTL for high-value queries (Claude Opus)', async () => {
         const query = 'Show the gantt chart';
         const cachedEntry = {
           response: 'Here is the gantt chart...',
           timestamp: Date.now() - 1000 * 60 * 60 * 50, // 50 hours ago
           hitCount: 2,
           complexity: 'complex' as const,
-          model: 'gpt-5.2',
+          model: 'claude-opus-4-6',
           projectId,
         };
 
@@ -304,7 +293,7 @@ describe('Query Cache', () => {
 
         const result = await getCachedResponse(query, projectId, documentIds);
 
-        // Should still be valid (72h TTL for GPT-5.2)
+        // Should still be valid (72h TTL for Claude Opus)
         expect(result).toBe(cachedEntry.response);
         expect(mockRedis.setCached).toHaveBeenCalledWith(
           expect.any(String),
@@ -622,7 +611,7 @@ describe('Query Cache', () => {
         );
       });
 
-      it('should use high-value TTL for GPT-5.2 queries', async () => {
+      it('should use high-value TTL for Claude Opus queries', async () => {
         mockRedis.isRedisAvailable.mockReturnValue(true);
         mockRedis.setCached.mockResolvedValue(true);
 
@@ -632,7 +621,7 @@ describe('Query Cache', () => {
           projectId,
           documentIds,
           'complex',
-          'gpt-5.2'
+          'claude-opus-4-6'
         );
 
         expect(mockRedis.setCached).toHaveBeenCalledWith(
@@ -656,7 +645,7 @@ describe('Query Cache', () => {
           projectId,
           documentIds,
           'medium',
-          'claude-sonnet-4-5-20251101'
+          'claude-sonnet-4-5-20250929'
         );
 
         expect(mockRedis.setCached).toHaveBeenCalledWith(
@@ -809,14 +798,14 @@ describe('Query Cache', () => {
         mockRedis.isRedisAvailable.mockReturnValue(false);
 
         const highValueResponse = 'Here is the detailed gantt chart showing all project tasks and dependencies.';
-        // Add high-value entry (GPT-5.2)
+        // Add high-value entry (Claude Opus)
         await cacheResponse(
           'Show gantt chart',
           highValueResponse,
           projectId,
           ['doc-high'],
           'complex',
-          'gpt-5.2'
+          'claude-opus-4-6'
         );
 
         // Fill rest with low-value entries
@@ -831,7 +820,7 @@ describe('Query Cache', () => {
           );
         }
 
-        // Add one more - should evict a low-value entry, not the GPT-5.2 one
+        // Add one more - should evict a low-value entry, not the Claude Opus one
         await cacheResponse(
           'Another low value',
           'Another response with sufficient length to pass the 50 character validation.',
@@ -861,8 +850,8 @@ describe('Query Cache', () => {
       expect(stats.cacheSize).toBe(0);
       expect(stats.estimatedSavings).toBe(0);
       expect(stats.hitRate).toBe(0);
-      expect(stats.gpt52Hits).toBe(0);
-      expect(stats.gpt52Savings).toBe(0);
+      expect(stats.opusHits).toBe(0);
+      expect(stats.opusSavings).toBe(0);
       expect(stats.highValueEntries).toBe(0);
       expect(stats.avgHitCount).toBe(0);
     });
@@ -909,14 +898,14 @@ describe('Query Cache', () => {
       expect(stats.estimatedSavings).toBeCloseTo(0.045, 3);
     });
 
-    it('should track GPT-5.2 specific metrics', async () => {
+    it('should track Claude Opus specific metrics', async () => {
       await cacheResponse(
         'Show gantt chart',
         'Here is the detailed gantt chart showing all project tasks and dependencies.',
         'proj-1',
         ['doc-1'],
         'complex',
-        'gpt-5.2'
+        'claude-opus-4-6'
       );
 
       // Generate hits
@@ -924,20 +913,20 @@ describe('Query Cache', () => {
       await getCachedResponse('Show gantt chart', 'proj-1', ['doc-1']);
 
       const stats = getCacheStats();
-      expect(stats.gpt52Hits).toBe(2);
-      // 2 hits * $0.21 = $0.42
-      expect(stats.gpt52Savings).toBeCloseTo(0.42, 2);
+      expect(stats.opusHits).toBe(2);
+      // 2 hits * $0.75 (claude-opus-4-6 cost) = $1.50
+      expect(stats.opusSavings).toBeCloseTo(1.50, 2);
     });
 
-    it('should count high-value entries (GPT-5.2 or hitCount > 5)', async () => {
-      // High-value: GPT-5.2
+    it('should count high-value entries (Claude Opus or hitCount > 5)', async () => {
+      // High-value: Claude Opus
       await cacheResponse(
         'Gantt chart',
         'Here is the detailed gantt chart for the project showing all tasks and dependencies.',
         'proj-1',
         ['doc-1'],
         'complex',
-        'gpt-5.2'
+        'claude-opus-4-6'
       );
 
       // Low-value initially
@@ -1015,8 +1004,8 @@ describe('Query Cache', () => {
 
     it('should return queries sorted by hit count', async () => {
       await cacheResponse('Q1', 'Answer 1 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-1'], 'simple', 'gpt-4o-mini');
-      await cacheResponse('Q2', 'Answer 2 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-2'], 'medium', 'claude-sonnet-4-5-20251101');
-      await cacheResponse('Q3', 'Answer 3 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-3'], 'complex', 'gpt-5.2');
+      await cacheResponse('Q2', 'Answer 2 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-2'], 'medium', 'claude-sonnet-4-5-20250929');
+      await cacheResponse('Q3', 'Answer 3 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-3'], 'complex', 'claude-opus-4-6');
 
       // Q1: 5 hits
       for (let i = 0; i < 5; i++) {
@@ -1082,7 +1071,7 @@ describe('Query Cache', () => {
       // Budget queries (high-value)
       expect(queries.some(q => q.toLowerCase().includes('budget'))).toBe(true);
 
-      // Code compliance (high-value, GPT-5.2)
+      // Code compliance (high-value, Claude Opus)
       expect(queries.some(q => q.toLowerCase().includes('ada'))).toBe(true);
     });
   });
@@ -1258,7 +1247,7 @@ describe('Query Cache', () => {
 
       // Switch to in-memory
       mockRedis.isRedisAvailable.mockReturnValue(false);
-      await cacheResponse('Q2', 'Answer 2 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-2'], 'complex', 'gpt-5.2');
+      await cacheResponse('Q2', 'Answer 2 with sufficient length to pass the 50 character validation.', 'proj-1', ['doc-2'], 'complex', 'claude-opus-4-6');
 
       // Generate hits and misses
       await getCachedResponse('Q1', 'proj-1', ['doc-1']); // hit

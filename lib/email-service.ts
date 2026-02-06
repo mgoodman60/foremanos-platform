@@ -449,7 +449,7 @@ export async function sendEmailVerification(
             <li>✓ <strong>1 Project</strong> - Manage your construction site</li>
             <li>✓ <strong>50 Queries/Month</strong> - AI-powered answers</li>
             <li>✓ <strong>Document Analysis</strong> - OCR & intelligent search</li>
-            <li>✓ <strong>GPT-3.5 Access</strong> - Fast, accurate responses</li>
+            <li>✓ <strong>AI-Powered Analysis</strong> - Fast, accurate responses</li>
           </ul>
         </div>
         

@@ -4,9 +4,10 @@
  */
 
 import { setTimeout } from 'timers/promises';
+import { VISION_MODEL, FALLBACK_MODEL } from '@/lib/model-config';
 
 interface VisionAPIOptions {
-  model?: 'gpt-4o' | 'gpt-4o-mini';
+  model?: string;
   maxRetries?: number;
   retryDelay?: number; // Base delay in ms
 }
@@ -16,7 +17,7 @@ interface VisionAPIResponse {
   data?: any;
   error?: string;
   usedFallback?: boolean;
-  fallbackMethod?: 'text-extraction' | 'gpt-4o-mini';
+  fallbackMethod?: 'text-extraction' | string;
   retriesUsed?: number;
 }
 
@@ -50,7 +51,7 @@ export async function callVisionAPIWithRetry(
   options: VisionAPIOptions = {}
 ): Promise<VisionAPIResponse> {
   const {
-    model = 'gpt-4o',
+    model = VISION_MODEL,
     maxRetries = 5,
     retryDelay = 1000,
   } = options;
@@ -132,26 +133,26 @@ export async function callVisionAPIWithRetry(
     }
   }
 
-  // All retries failed - try GPT-4o-mini as fallback
-  if (model !== 'gpt-4o-mini') {
-    console.log('[VISION] Primary model exhausted, trying GPT-4o-mini fallback...');
+  // All retries failed - try fallback model
+  if (model !== FALLBACK_MODEL) {
+    console.log(`[VISION] Primary model exhausted, trying ${FALLBACK_MODEL} fallback...`);
 
     try {
       const fallbackResult = await callVisionAPIWithRetry(
         imageBase64,
         prompt,
-        { model: 'gpt-4o-mini', maxRetries: 3, retryDelay: 2000 }
+        { model: FALLBACK_MODEL, maxRetries: 3, retryDelay: 2000 }
       );
 
       if (fallbackResult.success) {
         return {
           ...fallbackResult,
           usedFallback: true,
-          fallbackMethod: 'gpt-4o-mini',
+          fallbackMethod: FALLBACK_MODEL as any,
         };
       }
     } catch (fallbackError) {
-      console.error('[VISION] GPT-4o-mini fallback also failed:', fallbackError);
+      console.error(`[VISION] ${FALLBACK_MODEL} fallback also failed:`, fallbackError);
     }
   }
 

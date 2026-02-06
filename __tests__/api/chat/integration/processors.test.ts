@@ -113,7 +113,7 @@ describe('Chat API Processors Integration', () => {
 
     expect(response).toHaveProperty('stream');
     expect(response).toHaveProperty('model');
-    expect(response.model).toBe('gpt-4');
+    expect(response.model).toBe('gpt-4o-mini');
   });
 
   it('streamResponse should format SSE responses and metadata', async () => {

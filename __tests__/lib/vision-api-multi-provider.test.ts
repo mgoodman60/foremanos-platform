@@ -38,12 +38,12 @@ describe('Vision API Multi-Provider', () => {
   });
 
   describe('getProviderDisplayName', () => {
-    it('should return correct display name for gpt-4o', () => {
-      expect(getProviderDisplayName('gpt-4o')).toBe('GPT-4o (OpenAI)');
+    it('should return correct display name for claude-opus-4-6', () => {
+      expect(getProviderDisplayName('claude-opus-4-6')).toBe('Claude Opus 4.6 (Anthropic)');
     });
 
-    it('should return correct display name for claude-3.5-sonnet', () => {
-      expect(getProviderDisplayName('claude-3.5-sonnet')).toBe('Claude Sonnet 4.5 (Anthropic)');
+    it('should return correct display name for claude-sonnet-4-5', () => {
+      expect(getProviderDisplayName('claude-sonnet-4-5')).toBe('Claude Sonnet 4.5 (Anthropic)');
     });
 
     it('should return provider name if not found', () => {
@@ -70,47 +70,47 @@ describe('Vision API Multi-Provider', () => {
   });
 
   describe('analyzeWithMultiProvider - Provider Fallback', () => {
-    it('should use GPT-5.2 (Abacus) as primary provider', async () => {
+    it('should use Claude Opus 4.6 as primary provider', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
         text: async () => JSON.stringify({
-          choices: [{ message: { content: 'Sheet A-101\nExtracted content here with more details and structured data: key=value' } }],
+          content: [{ text: 'Sheet A-101\nExtracted content here with more details and structured data: key=value' }],
         }),
       });
 
       const result = await analyzeWithMultiProvider('base64image', 'Extract content');
 
       expect(result.success).toBe(true);
-      expect(result.provider).toBe('gpt-4o');
+      expect(result.provider).toBe('claude-opus-4-6');
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://api.openai.com/v1/chat/completions',
+        'https://api.anthropic.com/v1/messages',
         expect.any(Object)
       );
     });
 
-    it('should fall back to Claude when Abacus returns Cloudflare block', async () => {
-      // Abacus returns 403 (Cloudflare)
+    it('should fall back to GPT-5.2 when Claude Opus is blocked', async () => {
+      // Claude Opus returns 403 (Cloudflare block - immediate failover)
       fetchMock
         .mockResolvedValueOnce({
           ok: false,
           status: 403,
-          text: async () => 'Cloudflare blocked request',
+          text: async () => 'Forbidden',
         })
-        // Claude succeeds
+        // GPT-5.2 succeeds
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
           text: async () => JSON.stringify({
-            content: [{ text: 'Sheet A-101\nExtracted content from Claude with structured: data' }],
+            choices: [{ message: { content: 'Sheet A-101\nExtracted content from GPT-5.2 with structured: data' } }],
           }),
         });
 
       const result = await analyzeWithMultiProvider('base64image', 'Extract content');
 
       expect(result.success).toBe(true);
-      expect(result.provider).toBe('claude-3.5-sonnet');
+      expect(result.provider).toBe('gpt-5.2');
     });
 
     // Note: Tests for multi-provider fallback with retries are skipped
@@ -123,7 +123,7 @@ describe('Vision API Multi-Provider', () => {
         ok: true,
         status: 200,
         text: async () => JSON.stringify({
-          choices: [{ message: { content: 'Sheet A-101' } }], // Short content, no structured data
+          content: [{ text: 'Sheet A-101' }], // Short content, no structured data
         }),
       });
 
@@ -141,7 +141,7 @@ describe('Vision API Multi-Provider', () => {
         ok: true,
         status: 200,
         text: async () => JSON.stringify({
-          choices: [{ message: { content: longContent } }],
+          content: [{ text: longContent }],
         }),
       });
 
@@ -155,7 +155,7 @@ describe('Vision API Multi-Provider', () => {
         ok: true,
         status: 200,
         text: async () => JSON.stringify({
-          choices: [{ message: { content: '{"key": "value", "type": "data"}' } }],
+          content: [{ text: '{"key": "value", "type": "data"}' }],
         }),
       });
 
@@ -168,8 +168,9 @@ describe('Vision API Multi-Provider', () => {
     // as the internal retry logic with delays conflicts with mock timing
   });
 
-  describe('Cloudflare Block Detection', () => {
-    it('should detect 403 status as Cloudflare block', async () => {
+  describe('Error Detection and Fallback', () => {
+    it('should detect 403 status and fall back to next provider', async () => {
+      // 403 triggers Cloudflare block detection - immediate failover, no retries
       fetchMock
         .mockResolvedValueOnce({
           ok: false,
@@ -180,17 +181,18 @@ describe('Vision API Multi-Provider', () => {
           ok: true,
           status: 200,
           text: async () => JSON.stringify({
-            content: [{ text: 'Sheet A-101\nContent with structured: data' }],
+            choices: [{ message: { content: 'Sheet A-101\nContent with structured: data' } }],
           }),
         });
 
       const result = await analyzeWithMultiProvider('base64image', 'Extract content');
 
-      // Should have switched to Claude
-      expect(result.provider).toBe('claude-3.5-sonnet');
+      // Should have switched to GPT-5.2 (second provider)
+      expect(result.provider).toBe('gpt-5.2');
     });
 
-    it('should detect 429 status as Cloudflare block', async () => {
+    it('should detect 429 status and fall back to next provider', async () => {
+      // 429 triggers Cloudflare block detection - immediate failover
       fetchMock
         .mockResolvedValueOnce({
           ok: false,
@@ -201,34 +203,35 @@ describe('Vision API Multi-Provider', () => {
           ok: true,
           status: 200,
           text: async () => JSON.stringify({
-            content: [{ text: 'Sheet A-101\nContent with structured: data' }],
+            choices: [{ message: { content: 'Sheet A-101\nContent with structured: data' } }],
           }),
         });
 
       const result = await analyzeWithMultiProvider('base64image', 'Extract content');
 
-      expect(result.provider).toBe('claude-3.5-sonnet');
+      expect(result.provider).toBe('gpt-5.2');
     });
 
-    it('should detect Cloudflare signature in response text', async () => {
+    it('should detect Cloudflare signature and fall back', async () => {
+      // Cloudflare signature in response text triggers immediate failover
       fetchMock
         .mockResolvedValueOnce({
           ok: false,
-          status: 200, // Non-error status but Cloudflare content
+          status: 200,
           text: async () => 'Just a moment... cloudflare challenge',
         })
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
           text: async () => JSON.stringify({
-            content: [{ text: 'Sheet A-101\nContent with structured: data' }],
+            choices: [{ message: { content: 'Sheet A-101\nContent with structured: data' } }],
           }),
         });
 
       const result = await analyzeWithMultiProvider('base64image', 'Extract content');
 
-      // Should have switched to Claude
-      expect(result.provider).toBe('claude-3.5-sonnet');
+      // Should have switched to GPT-5.2
+      expect(result.provider).toBe('gpt-5.2');
     });
   });
 
@@ -236,7 +239,7 @@ describe('Vision API Multi-Provider', () => {
   // as vi.resetModules() doesn't preserve the fetch mock properly
 
   describe('analyzeWithDirectPdf', () => {
-    it('should use Claude for direct PDF processing', async () => {
+    it('should use Claude Sonnet for direct PDF processing', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -249,7 +252,7 @@ describe('Vision API Multi-Provider', () => {
       const result = await analyzeWithDirectPdf(pdfBase64, 'Extract content');
 
       expect(result.success).toBe(true);
-      expect(result.provider).toBe('claude-3.5-sonnet');
+      expect(result.provider).toBe('claude-sonnet-4-5');
       expect(fetchMock).toHaveBeenCalledWith(
         'https://api.anthropic.com/v1/messages',
         expect.any(Object)

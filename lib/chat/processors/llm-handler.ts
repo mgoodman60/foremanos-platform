@@ -2,6 +2,8 @@ import { getCachedResponse, cacheResponse, analyzeQueryComplexity } from '@/lib/
 import { prisma } from '@/lib/db';
 import { streamLLM, type LLMMessage } from '@/lib/llm-providers';
 import { logger } from '@/lib/logger';
+import { VISION_MODEL } from '@/lib/model-config';
+import { getEffectiveModel, type SubscriptionTier } from '@/lib/stripe';
 import type { LLMHandlerOptions, LLMResponse, BuiltContext } from '@/types/chat';
 
 /**
@@ -69,12 +71,19 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
   // Analyze query complexity and select appropriate model
   const complexityAnalysis = message
     ? analyzeQueryComplexity(message)
-    : { complexity: 'complex' as "medium" | "simple" | "complex", reason: 'Image analysis requires GPT-5.2 vision', model: 'gpt-5.2' };
+    : { complexity: 'complex' as "medium" | "simple" | "complex", reason: `Image analysis requires ${VISION_MODEL} vision`, model: VISION_MODEL };
 
-  // Images always use GPT-5.2 (vision required)
-  const selectedModel = image ? 'gpt-5.2' : complexityAnalysis.model;
+  // Images always use vision model (Claude Opus 4.6)
+  const selectedModel = image ? VISION_MODEL : complexityAnalysis.model;
 
-  console.log(`🤖 [MODEL SELECTION] Using ${selectedModel} - ${complexityAnalysis.reason}`);
+  // Enforce tier-based model access
+  const tier = (options.subscriptionTier || 'free') as SubscriptionTier;
+  const effectiveModel = getEffectiveModel(tier, selectedModel, complexityAnalysis.complexity as 'simple' | 'medium' | 'complex');
+  if (effectiveModel !== selectedModel) {
+    logger.info('CHAT_API', `Model downgraded for ${tier} tier`, { requested: selectedModel, effective: effectiveModel });
+  }
+
+  console.log(`🤖 [MODEL SELECTION] Using ${effectiveModel} - ${complexityAnalysis.reason}`);
 
   // Determine if web search should be enabled
   const useWebSearch = !!image || (context.webSearchResults && context.webSearchResults.length > 0);
@@ -106,25 +115,19 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
     userMessage as LLMMessage,
   ];
 
-  // Log reasoning effort for GPT-5.2 models
-  if (selectedModel.includes('gpt-5.2') && complexityAnalysis.reasoning_effort) {
-    console.log(`⚡ [REASONING] Using ${complexityAnalysis.reasoning_effort} reasoning for GPT-5.2`);
-  }
-
   // Call LLM API via provider abstraction (routes to OpenAI or Anthropic)
   // Note: Abacus AI removed (Jan 2026) - using direct APIs now
   try {
     const stream = await streamLLM(messages, {
-      model: selectedModel,
+      model: effectiveModel,
       max_tokens: 2000,
       temperature: 0.3,
-      reasoning_effort: complexityAnalysis.reasoning_effort,
     });
 
     // Return the response body as a readable stream
     return {
       stream,
-      model: selectedModel,
+      model: effectiveModel,
       cached: false,
     };
   } catch (error: unknown) {
@@ -132,7 +135,7 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
 
     // Log detailed error information
     logger.error('CHAT_API', 'LLM API call failed', err, {
-      model: selectedModel,
+      model: effectiveModel,
       hasImage: !!image,
       messageLength: message?.length || 0,
       contextChunks: context.chunks.length,

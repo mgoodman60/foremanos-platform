@@ -1,12 +1,14 @@
 /**
  * Web Search Utility for Hybrid RAG System
- * 
+ *
  * Provides supplementary information from the web to bolster document-based answers.
  * Used as a fallback when document information is insufficient or for general
  * construction standards, building codes, and industry best practices.
- * 
+ *
  * IMPORTANT: Web results SUPPLEMENT documents, never override them.
  */
+
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 export interface WebSearchResult {
   title: string;
@@ -123,7 +125,7 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'system',

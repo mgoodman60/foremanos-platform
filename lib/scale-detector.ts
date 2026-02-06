@@ -15,6 +15,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './db';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 /**
  * Detect if base64 content is a PDF (starts with %PDF- magic number)
@@ -214,7 +215,7 @@ If you find multiple scales on the sheet, extract:
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',

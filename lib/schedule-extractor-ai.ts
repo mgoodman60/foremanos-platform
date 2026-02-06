@@ -12,6 +12,7 @@ import { generateAbbreviationContext, expandAbbreviationsInText } from './constr
 import { getFileUrl } from './s3';
 import { withLock, isLocked } from './extraction-lock-service';
 import { ScheduleTaskStatus } from '@prisma/client';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 interface ExtractedTask {
   taskId: string;
@@ -351,7 +352,7 @@ async function extractTasksFromChunkBatch(
         content: prompt,
       },
     ], {
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       temperature: 0.1,
       max_tokens: 16000,
     });

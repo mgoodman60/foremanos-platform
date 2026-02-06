@@ -6,6 +6,7 @@
 import OpenAI from 'openai';
 import { readFileSync } from 'fs';
 import path from 'path';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 let openaiInstance: OpenAI | null = null;
 
@@ -148,7 +149,7 @@ Respond ONLY with valid JSON in this exact format:
     }
 
     const response = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       messages,
       max_tokens: 8000,
       temperature: 0.1

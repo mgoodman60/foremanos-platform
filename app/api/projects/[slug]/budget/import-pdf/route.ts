@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { BUDGET_PHASES } from '@/lib/budget-phases';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 // Helper to parse Walker Company PDF text
 function parseWalkerCompanyPDF(text: string): Array<{
@@ -132,7 +133,7 @@ export async function POST(
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',

@@ -4,6 +4,7 @@
  */
 
 import { generateLookahead } from './lookahead-service';
+import { SIMPLE_MODEL } from '@/lib/model-config';
 
 interface ScheduleUpdateSuggestion {
   taskId: string;
@@ -105,7 +106,7 @@ Return ONLY a JSON object with this structure:
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: SIMPLE_MODEL,
         messages: [
           {
             role: 'user',

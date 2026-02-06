@@ -8,6 +8,7 @@
 
 import { prisma } from '@/lib/db';
 import OpenAI from 'openai';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 let openaiInstance: OpenAI | null = null;
 
@@ -589,7 +590,7 @@ export async function transcribeVoiceToReport(
 
     // Then, structure the transcription into report fields
     const structureResponse = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       messages: [
         {
           role: 'system',

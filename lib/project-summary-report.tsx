@@ -1,10 +1,12 @@
 /**
  * Project Summary Report Generator
  * Generates comprehensive project status reports in PDF/DOCX
+ * Migrated from jspdf to @react-pdf/renderer for PDF generation
  */
 
 import { prisma } from './db';
-import jsPDF from 'jspdf';
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 import PizZip from 'pizzip';
 
 export interface ProjectSummaryData {
@@ -169,160 +171,277 @@ export async function gatherProjectSummaryData(
   };
 }
 
+// PDF Styles using @react-pdf/renderer
+const pdfStyles = StyleSheet.create({
+  page: {
+    padding: 42,
+    fontFamily: 'Helvetica',
+    fontSize: 10,
+  },
+  header: {
+    backgroundColor: '#003B71',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 110,
+    padding: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: 'Helvetica-Bold',
+    color: '#FFFFFF',
+    marginBottom: 5,
+  },
+  headerProject: {
+    fontSize: 14,
+    color: '#FFFFFF',
+  },
+  content: {
+    marginTop: 130,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
+    marginTop: 10,
+    marginBottom: 7,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 5,
+    fontSize: 10,
+  },
+  infoLabel: {
+    fontFamily: 'Helvetica-Bold',
+    width: 100,
+  },
+  infoValue: {
+    flex: 1,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    fontSize: 10,
+  },
+  statItem: {
+    flex: 1,
+  },
+  progressBar: {
+    height: 22,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 4,
+    marginBottom: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  progressFill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    height: 22,
+    backgroundColor: '#22C55E',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    position: 'absolute',
+  },
+  listItem: {
+    fontSize: 10,
+    marginBottom: 4,
+  },
+  activityItem: {
+    fontSize: 9,
+    marginBottom: 4,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 8,
+    color: '#808080',
+  },
+});
+
+// Header Component
+const ReportHeader: React.FC<{ data: ProjectSummaryData }> = ({ data }) => (
+  <View style={pdfStyles.header} fixed>
+    <Text style={pdfStyles.headerTitle}>Project Summary Report</Text>
+    <Text style={pdfStyles.headerProject}>{data.project.name}</Text>
+  </View>
+);
+
+// Project Info Section
+const ProjectInfo: React.FC<{ data: ProjectSummaryData }> = ({ data }) => {
+  const infoLines: [string, string][] = [
+    ['Status:', data.project.status.toUpperCase()],
+    ...(data.project.address ? [['Location:', data.project.address]] as [string, string][] : []),
+    ...(data.project.clientName ? [['Client:', data.project.clientName]] as [string, string][] : []),
+    ...(data.project.projectManager ? [['PM:', data.project.projectManager]] as [string, string][] : []),
+    ...(data.project.superintendent ? [['Super:', data.project.superintendent]] as [string, string][] : []),
+    ['Generated:', new Date().toLocaleDateString()],
+  ];
+
+  return (
+    <View>
+      <Text style={pdfStyles.sectionTitle}>Project Information</Text>
+      {infoLines.map(([label, value], idx) => (
+        <View key={idx} style={pdfStyles.infoRow}>
+          <Text style={pdfStyles.infoLabel}>{label}</Text>
+          <Text style={pdfStyles.infoValue}>{value}</Text>
+        </View>
+      ))}
+    </View>
+  );
+};
+
+// Room Summary Section
+const RoomSummary: React.FC<{ data: ProjectSummaryData }> = ({ data }) => {
+  const progress = data.rooms.total > 0
+    ? Math.round((data.rooms.completed / data.rooms.total) * 100)
+    : 0;
+
+  return (
+    <View>
+      <Text style={pdfStyles.sectionTitle}>Room Summary</Text>
+      <View style={pdfStyles.statsRow}>
+        <Text style={pdfStyles.statItem}>Total Rooms: {data.rooms.total}</Text>
+        <Text style={{ ...pdfStyles.statItem, color: '#22C55E' }}>
+          Completed: {data.rooms.completed}
+        </Text>
+        <Text style={{ ...pdfStyles.statItem, color: '#3B82F6' }}>
+          In Progress: {data.rooms.inProgress}
+        </Text>
+        <Text style={{ ...pdfStyles.statItem, color: '#9CA3AF' }}>
+          Not Started: {data.rooms.notStarted}
+        </Text>
+      </View>
+      <View style={pdfStyles.progressBar}>
+        <View style={{ ...pdfStyles.progressFill, width: `${progress}%` }} />
+        <Text style={pdfStyles.progressText}>{progress}% Complete</Text>
+      </View>
+    </View>
+  );
+};
+
+// Schedule Summary Section
+const ScheduleSummary: React.FC<{ data: ProjectSummaryData }> = ({ data }) => {
+  if (data.schedule.tasks === 0) return null;
+
+  return (
+    <View>
+      <Text style={pdfStyles.sectionTitle}>Schedule Summary</Text>
+      <View style={pdfStyles.statsRow}>
+        <Text style={pdfStyles.statItem}>Total Tasks: {data.schedule.tasks}</Text>
+        <Text style={pdfStyles.statItem}>Completed: {data.schedule.completedTasks}</Text>
+        <Text style={pdfStyles.statItem}>Critical Path: {data.schedule.criticalPath}</Text>
+        {data.schedule.delayedTasks > 0 && (
+          <Text style={{ ...pdfStyles.statItem, color: '#EF4444' }}>
+            Delayed: {data.schedule.delayedTasks}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+};
+
+// Budget Summary Section
+const BudgetSummary: React.FC<{ data: ProjectSummaryData }> = ({ data }) => {
+  if (!data.budget) return null;
+
+  const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
+  const variance = data.budget.variance;
+
+  return (
+    <View>
+      <Text style={pdfStyles.sectionTitle}>Budget Summary</Text>
+      <View style={pdfStyles.statsRow}>
+        <Text style={pdfStyles.statItem}>
+          Budget: {formatCurrency(data.budget.totalBudget)}
+        </Text>
+        <Text style={pdfStyles.statItem}>
+          Spent: {formatCurrency(data.budget.actualCost)}
+        </Text>
+        <Text style={{ ...pdfStyles.statItem, color: variance >= 0 ? '#22C55E' : '#EF4444' }}>
+          Variance: {formatCurrency(Math.abs(variance))} {variance >= 0 ? 'under' : 'over'}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+// Documents Section
+const DocumentsSummary: React.FC<{ data: ProjectSummaryData }> = ({ data }) => (
+  <View>
+    <Text style={pdfStyles.sectionTitle}>Documents</Text>
+    <Text style={pdfStyles.listItem}>Total Documents: {data.documents.total}</Text>
+    {Object.entries(data.documents.byCategory)
+      .slice(0, 5)
+      .map(([cat, count], idx) => (
+        <Text key={idx} style={pdfStyles.listItem}>
+          • {cat}: {count}
+        </Text>
+      ))}
+  </View>
+);
+
+// Recent Activity Section
+const RecentActivity: React.FC<{ data: ProjectSummaryData }> = ({ data }) => {
+  if (data.recentActivity.length === 0) return null;
+
+  return (
+    <View>
+      <Text style={pdfStyles.sectionTitle}>Recent Activity</Text>
+      {data.recentActivity.map((activity, idx) => (
+        <Text key={idx} style={pdfStyles.activityItem}>
+          {activity.date}: {activity.description}
+        </Text>
+      ))}
+    </View>
+  );
+};
+
+// Footer Component
+const ReportFooter: React.FC = () => (
+  <Text style={pdfStyles.footer} fixed>
+    Generated by ForemanOS
+  </Text>
+);
+
+// Main PDF Document
+const ProjectSummaryDocument: React.FC<{ data: ProjectSummaryData }> = ({ data }) => (
+  <Document>
+    <Page size="LETTER" style={pdfStyles.page}>
+      <ReportHeader data={data} />
+      <View style={pdfStyles.content}>
+        <ProjectInfo data={data} />
+        <RoomSummary data={data} />
+        <ScheduleSummary data={data} />
+        <BudgetSummary data={data} />
+        <DocumentsSummary data={data} />
+        <RecentActivity data={data} />
+      </View>
+      <ReportFooter />
+    </Page>
+  </Document>
+);
+
 /**
- * Generate PDF summary report
+ * Generate PDF summary report using @react-pdf/renderer
  */
 export async function generateProjectSummaryPDF(
   data: ProjectSummaryData
 ): Promise<Blob> {
-  const pdf = new jsPDF('p', 'mm', 'letter');
-  const pageWidth = 215.9;
-  const margin = 15;
-  const contentWidth = pageWidth - margin * 2;
-  let y = 20;
-
-  // Title
-  pdf.setFillColor(0, 59, 113);
-  pdf.rect(0, 0, pageWidth, 40, 'F');
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFontSize(24);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Summary Report', pageWidth / 2, 20, { align: 'center' });
-  pdf.setFontSize(14);
-  pdf.text(data.project.name, pageWidth / 2, 32, { align: 'center' });
-  pdf.setTextColor(0, 0, 0);
-  y = 55;
-
-  // Project Info
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Information', margin, y);
-  y += 7;
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  
-  const infoLines = [
-    ['Status:', data.project.status.toUpperCase()],
-    ...(data.project.address ? [['Location:', data.project.address]] : []),
-    ...(data.project.clientName ? [['Client:', data.project.clientName]] : []),
-    ...(data.project.projectManager ? [['PM:', data.project.projectManager]] : []),
-    ...(data.project.superintendent ? [['Super:', data.project.superintendent]] : []),
-    ['Generated:', new Date().toLocaleDateString()],
-  ];
-  
-  infoLines.forEach(([label, value]) => {
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(label as string, margin, y);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(value as string, margin + 30, y);
-    y += 5;
-  });
-  y += 10;
-
-  // Room Summary
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Room Summary', margin, y);
-  y += 7;
-  
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Total Rooms: ${data.rooms.total}`, margin, y);
-  pdf.setTextColor(34, 197, 94); // green
-  pdf.text(`Completed: ${data.rooms.completed}`, margin + 50, y);
-  pdf.setTextColor(59, 130, 246); // blue
-  pdf.text(`In Progress: ${data.rooms.inProgress}`, margin + 100, y);
-  pdf.setTextColor(156, 163, 175); // gray
-  pdf.text(`Not Started: ${data.rooms.notStarted}`, margin + 150, y);
-  pdf.setTextColor(0, 0, 0);
-  y += 10;
-
-  // Progress bar
-  const progress = data.rooms.total > 0 
-    ? Math.round((data.rooms.completed / data.rooms.total) * 100) 
-    : 0;
-  pdf.setFillColor(229, 231, 235);
-  pdf.roundedRect(margin, y, contentWidth, 8, 2, 2, 'F');
-  pdf.setFillColor(34, 197, 94);
-  pdf.roundedRect(margin, y, (contentWidth * progress) / 100, 8, 2, 2, 'F');
-  pdf.setFontSize(8);
-  pdf.text(`${progress}% Complete`, pageWidth / 2, y + 5.5, { align: 'center' });
-  y += 15;
-
-  // Schedule Summary
-  if (data.schedule.tasks > 0) {
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Schedule Summary', margin, y);
-    y += 7;
-    
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Total Tasks: ${data.schedule.tasks}`, margin, y);
-    pdf.text(`Completed: ${data.schedule.completedTasks}`, margin + 50, y);
-    pdf.text(`Critical Path: ${data.schedule.criticalPath}`, margin + 100, y);
-    if (data.schedule.delayedTasks > 0) {
-      pdf.setTextColor(239, 68, 68); // red
-      pdf.text(`Delayed: ${data.schedule.delayedTasks}`, margin + 150, y);
-      pdf.setTextColor(0, 0, 0);
-    }
-    y += 12;
-  }
-
-  // Budget Summary
-  if (data.budget) {
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Budget Summary', margin, y);
-    y += 7;
-    
-    const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Budget: ${formatCurrency(data.budget.totalBudget)}`, margin, y);
-    pdf.text(`Spent: ${formatCurrency(data.budget.actualCost)}`, margin + 60, y);
-    const variance = data.budget.variance;
-    pdf.setTextColor(variance >= 0 ? 34 : 239, variance >= 0 ? 197 : 68, variance >= 0 ? 94 : 68);
-    pdf.text(`Variance: ${formatCurrency(Math.abs(variance))} ${variance >= 0 ? 'under' : 'over'}`, margin + 120, y);
-    pdf.setTextColor(0, 0, 0);
-    y += 12;
-  }
-
-  // Documents
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Documents', margin, y);
-  y += 7;
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Total Documents: ${data.documents.total}`, margin, y);
-  y += 5;
-  Object.entries(data.documents.byCategory).slice(0, 5).forEach(([cat, count]) => {
-    pdf.text(`• ${cat}: ${count}`, margin + 5, y);
-    y += 4;
-  });
-  y += 8;
-
-  // Recent Activity
-  if (data.recentActivity.length > 0) {
-    pdf.setFontSize(12);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Recent Activity', margin, y);
-    y += 7;
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'normal');
-    data.recentActivity.forEach((activity) => {
-      pdf.text(`${activity.date}: ${activity.description}`, margin, y);
-      y += 4;
-    });
-  }
-
-  // Footer
-  pdf.setFontSize(8);
-  pdf.setTextColor(128, 128, 128);
-  pdf.text('Generated by ForemanOS', pageWidth / 2, 270, { align: 'center' });
-
-  return pdf.output('blob');
+  const doc = <ProjectSummaryDocument data={data} />;
+  const blob = await pdf(doc).toBlob();
+  return blob;
 }
 
 /**
@@ -332,8 +451,8 @@ export async function generateProjectSummaryDOCX(
   data: ProjectSummaryData
 ): Promise<Blob> {
   const today = new Date().toLocaleDateString();
-  const progress = data.rooms.total > 0 
-    ? Math.round((data.rooms.completed / data.rooms.total) * 100) 
+  const progress = data.rooms.total > 0
+    ? Math.round((data.rooms.completed / data.rooms.total) * 100)
     : 0;
 
   const escapeXml = (str: string) => {
@@ -359,7 +478,7 @@ export async function generateProjectSummaryDOCX(
       <w:r><w:t>Generated: ${today}</w:t></w:r>
     </w:p>
     <w:p/>
-    
+
     <w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Project Information</w:t></w:r></w:p>
     <w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Status: </w:t></w:r><w:r><w:t>${escapeXml(data.project.status.toUpperCase())}</w:t></w:r></w:p>
     ${data.project.address ? `<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Location: </w:t></w:r><w:r><w:t>${escapeXml(data.project.address)}</w:t></w:r></w:p>` : ''}
@@ -367,7 +486,7 @@ export async function generateProjectSummaryDOCX(
     ${data.project.projectManager ? `<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Project Manager: </w:t></w:r><w:r><w:t>${escapeXml(data.project.projectManager)}</w:t></w:r></w:p>` : ''}
     ${data.project.superintendent ? `<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Superintendent: </w:t></w:r><w:r><w:t>${escapeXml(data.project.superintendent)}</w:t></w:r></w:p>` : ''}
     <w:p/>
-    
+
     <w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Room Summary</w:t></w:r></w:p>
     <w:p><w:r><w:t>Total Rooms: ${data.rooms.total} | Completed: ${data.rooms.completed} | In Progress: ${data.rooms.inProgress} | Not Started: ${data.rooms.notStarted}</w:t></w:r></w:p>
     <w:p><w:r><w:rPr><w:b/><w:color w:val="22C55E"/></w:rPr><w:t>Overall Progress: ${progress}%</w:t></w:r></w:p>
@@ -393,7 +512,7 @@ export async function generateProjectSummaryDOCX(
   bodyXml += `
     <w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Documents</w:t></w:r></w:p>
     <w:p><w:r><w:t>Total Documents: ${data.documents.total}</w:t></w:r></w:p>
-    ${Object.entries(data.documents.byCategory).slice(0, 8).map(([cat, count]) => 
+    ${Object.entries(data.documents.byCategory).slice(0, 8).map(([cat, count]) =>
       `<w:p><w:r><w:t>• ${escapeXml(cat)}: ${count}</w:t></w:r></w:p>`
     ).join('')}
     <w:p/>`;
@@ -401,7 +520,7 @@ export async function generateProjectSummaryDOCX(
   if (data.recentActivity.length > 0) {
     bodyXml += `
     <w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Recent Activity</w:t></w:r></w:p>
-    ${data.recentActivity.map(a => 
+    ${data.recentActivity.map(a =>
       `<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>${a.date}: </w:t></w:r><w:r><w:t>${escapeXml(a.description)}</w:t></w:r></w:p>`
     ).join('')}`;
   }

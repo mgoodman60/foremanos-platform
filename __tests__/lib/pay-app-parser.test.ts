@@ -110,7 +110,7 @@ describe('PayAppParser', () => {
         expect(result.confidence).toBe('high');
 
         expect(mocks.openai.chat.completions.create).toHaveBeenCalledWith({
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
           messages: expect.arrayContaining([
             expect.objectContaining({ role: 'system' }),
             expect.objectContaining({
@@ -850,7 +850,7 @@ describe('PayAppParser', () => {
         expect(mocks.OpenAI).toHaveBeenCalledTimes(initialCallCount);
       });
 
-      it('should use gpt-4o model with correct parameters', async () => {
+      it('should use claude-sonnet-4-5-20250929 model with correct parameters', async () => {
         const { parsePayAppDocument } = await import('@/lib/pay-app-parser');
 
         const mockResponse = {
@@ -883,7 +883,7 @@ describe('PayAppParser', () => {
         await parsePayAppDocument(fileBuffer, 'pay-app.pdf', 'application/pdf');
 
         expect(mocks.openai.chat.completions.create).toHaveBeenCalledWith({
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
           messages: expect.any(Array),
           max_tokens: 8000,
           temperature: 0.1,

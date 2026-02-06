@@ -353,7 +353,7 @@ describe('extractPlumbingFixtures', () => {
     await extractPlumbingFixtures('project-1');
 
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith({
-      model: 'gpt-4o',
+      model: 'claude-sonnet-4-5-20250929',
       messages: [
         {
           role: 'user',
@@ -390,7 +390,7 @@ describe('extractPlumbingFixtures', () => {
 
     // Verify the LLM was called with the right parameters
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith({
-      model: 'gpt-4o',
+      model: 'claude-sonnet-4-5-20250929',
       messages: expect.arrayContaining([
         expect.objectContaining({
           role: 'user',

@@ -8,6 +8,7 @@
  */
 
 import { ElevationGrid, CrossSection, parseElevationData } from './earthwork-calculator';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 export interface ExtractedElevations {
   existing: { x: number; y: number; elev: number }[];
@@ -163,7 +164,7 @@ Return ONLY valid JSON.`;
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
         response_format: { type: 'json_object' },

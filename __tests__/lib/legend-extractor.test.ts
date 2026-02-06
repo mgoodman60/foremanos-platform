@@ -165,7 +165,7 @@ describe('detectLegendRegion', () => {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer test-api-key',
         },
-        body: expect.stringContaining('gpt-4o'),
+        body: expect.stringContaining('claude-sonnet-4-5-20250929'),
       })
     );
   });

@@ -5,6 +5,8 @@
  * Updated Feb 2026: Switched from Abacus AI proxy to direct OpenAI.
  */
 
+import { EXTRACTION_MODEL } from '@/lib/model-config';
+
 export interface LLMMessageContent {
   type: string;
   text?: string;
@@ -97,7 +99,7 @@ export async function callOpenAILLM(
   }
 
   const {
-    model = 'gpt-4o',
+    model = EXTRACTION_MODEL,
     temperature = 0.3,
     max_tokens = 4000,
     response_format,
@@ -176,5 +178,5 @@ export async function callOpenAILLMWithVision(
     },
   ];
 
-  return callOpenAILLM(messages, { ...options, model: options.model || 'gpt-4o' });
+  return callOpenAILLM(messages, { ...options, model: options.model || EXTRACTION_MODEL });
 }

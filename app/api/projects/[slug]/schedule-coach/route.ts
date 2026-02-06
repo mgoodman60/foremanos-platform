@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { analyzeScheduleForImprovements } from '@/lib/schedule-improvement-analyzer';
 import { callAbacusLLM } from '@/lib/abacus-llm';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 export const maxDuration = 120;
 
@@ -342,7 +343,7 @@ Return JSON format:
 
   try {
     const response = await callAbacusLLM([{ role: 'user', content: prompt }], {
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       max_tokens: 4000,
       temperature: 0.5
     });

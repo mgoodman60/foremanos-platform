@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db';
 import OpenAI from 'openai';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 interface ExtractedBudgetItem {
   phaseCode: number;
@@ -58,7 +59,7 @@ Return ONLY the JSON array, no explanation.`;
     });
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 4000,
     });

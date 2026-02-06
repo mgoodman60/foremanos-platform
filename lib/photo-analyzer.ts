@@ -1,6 +1,6 @@
 /**
  * Photo Analysis Service
- * 
+ *
  * Analyzes construction progress photos using AI to:
  * - Generate descriptive captions
  * - Auto-tag content (flooring, walls, fixtures, etc.)
@@ -8,6 +8,7 @@
  */
 
 import { prisma } from './db';
+import { VISION_MODEL } from '@/lib/model-config';
 
 interface PhotoAnalysisResult {
   description: string;
@@ -75,7 +76,7 @@ Guidelines:
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: VISION_MODEL,
         messages: [
           {
             role: 'user',
@@ -216,7 +217,7 @@ Guidelines:
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: VISION_MODEL,
         messages: [
           {
             role: 'user',

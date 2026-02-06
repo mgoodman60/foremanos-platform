@@ -94,7 +94,7 @@ describe('LLM Providers', () => {
         ok: true,
         json: async () => ({
           content: [{ text: 'Hello from Claude' }],
-          model: 'claude-sonnet-4-5-20251101',
+          model: 'claude-sonnet-4-5-20250929',
           usage: { input_tokens: 15, output_tokens: 25 },
         }),
       });
@@ -107,7 +107,7 @@ describe('LLM Providers', () => {
       const result = await callAnthropic(messages);
 
       expect(result.content).toBe('Hello from Claude');
-      expect(result.model).toBe('claude-sonnet-4-5-20251101');
+      expect(result.model).toBe('claude-sonnet-4-5-20250929');
       expect(result.usage?.prompt_tokens).toBe(15);
       expect(result.usage?.completion_tokens).toBe(25);
       expect(result.usage?.total_tokens).toBe(40);
@@ -129,7 +129,7 @@ describe('LLM Providers', () => {
         ok: true,
         json: async () => ({
           content: [{ text: 'Response' }],
-          model: 'claude-sonnet-4-5-20251101',
+          model: 'claude-sonnet-4-5-20250929',
         }),
       });
 
@@ -214,6 +214,25 @@ describe('LLM Providers', () => {
       );
     });
 
+    it('should route claude-opus-4-6 to Anthropic', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'Opus response' }],
+          model: 'claude-opus-4-6',
+        }),
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Analyze this contract' }];
+      const result = await callLLM(messages, { model: 'claude-opus-4-6' });
+
+      expect(result.content).toBe('Opus response');
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.anthropic.com/v1/messages',
+        expect.any(Object)
+      );
+    });
+
     it('should default to gpt-4o-mini when no model specified', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -268,6 +287,26 @@ describe('LLM Providers', () => {
       );
       const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
       expect(callBody.stream).toBe(true);
+    });
+
+    it('should return readable stream for Claude Opus 4.6', async () => {
+      const mockStream = new ReadableStream();
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        body: mockStream,
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Analyze this budget' }];
+      const result = await streamLLM(messages, { model: 'claude-opus-4-6' });
+
+      expect(result).toBe(mockStream);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.anthropic.com/v1/messages',
+        expect.any(Object)
+      );
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(callBody.stream).toBe(true);
+      expect(callBody.model).toBe('claude-opus-4-6');
     });
   });
 });

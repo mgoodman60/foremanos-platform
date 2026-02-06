@@ -18,6 +18,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 // ============================================================================
 // INTERFACES
@@ -416,7 +417,7 @@ Return ONLY a valid JSON array:
     const response = await callAbacusLLM([
       { role: 'system', content: 'You extract light fixture schedule data from construction documents. Return valid JSON only.' },
       { role: 'user', content: prompt }
-    ], { model: 'gpt-4o', temperature: 0.1, max_tokens: 6000 });
+    ], { model: EXTRACTION_MODEL, temperature: 0.1, max_tokens: 6000 });
 
     const content = response.content || '';
     const jsonMatch = content.match(/\[\s*[\s\S]*\]/);
@@ -465,7 +466,7 @@ Return ONLY a valid JSON array:
     const response = await callAbacusLLM([
       { role: 'system', content: 'You extract plumbing fixture schedule data from construction documents. Return valid JSON only.' },
       { role: 'user', content: prompt }
-    ], { model: 'gpt-4o', temperature: 0.1, max_tokens: 6000 });
+    ], { model: EXTRACTION_MODEL, temperature: 0.1, max_tokens: 6000 });
 
     const content = response.content || '';
     const jsonMatch = content.match(/\[\s*[\s\S]*\]/);
@@ -523,7 +524,7 @@ Return ONLY a valid JSON array:
     const response = await callAbacusLLM([
       { role: 'system', content: 'You extract HVAC equipment schedule data from construction documents. Return valid JSON only.' },
       { role: 'user', content: prompt }
-    ], { model: 'gpt-4o', temperature: 0.1, max_tokens: 6000 });
+    ], { model: EXTRACTION_MODEL, temperature: 0.1, max_tokens: 6000 });
 
     const content = response.content || '';
     const jsonMatch = content.match(/\[\s*[\s\S]*\]/);
@@ -565,7 +566,7 @@ Return ONLY a valid JSON array:
     const response = await callAbacusLLM([
       { role: 'system', content: 'You extract mechanical abbreviations from construction documents. Return valid JSON only.' },
       { role: 'user', content: prompt }
-    ], { model: 'gpt-4o', temperature: 0.1, max_tokens: 8000 });
+    ], { model: EXTRACTION_MODEL, temperature: 0.1, max_tokens: 8000 });
 
     const content = response.content || '';
     const jsonMatch = content.match(/\[\s*[\s\S]*\]/);

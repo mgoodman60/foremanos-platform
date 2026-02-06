@@ -464,7 +464,7 @@ Snippet: Test content
         const callArgs = mockFetch.mock.calls[0][1];
         const body = JSON.parse(callArgs.body as string);
 
-        expect(body.model).toBe('gpt-4o');
+        expect(body.model).toBe('claude-sonnet-4-5-20250929');
         expect(body.stream).toBe(false);
         expect(body.max_tokens).toBe(1500);
         expect(body.messages).toHaveLength(2);

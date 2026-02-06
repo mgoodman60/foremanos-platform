@@ -1,10 +1,12 @@
 /**
  * Room Bulk Export Service
  * Generates PDF/DOCX exports for multiple rooms in a single document
+ * Migrated from jspdf to @react-pdf/renderer for PDF generation
  */
 
 import { prisma } from './db';
-import jsPDF from 'jspdf';
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 import PizZip from 'pizzip';
 
 export interface BulkExportOptions {
@@ -93,188 +95,252 @@ function cleanName(name: string | null | undefined): string {
   return name.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+// PDF Styles using @react-pdf/renderer
+const pdfStyles = StyleSheet.create({
+  page: {
+    padding: 42,
+    fontFamily: 'Helvetica',
+    fontSize: 10,
+  },
+  titlePage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainTitle: {
+    fontSize: 24,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 10,
+  },
+  projectName: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 12,
+    marginBottom: 5,
+    color: '#666666',
+  },
+  tocTitle: {
+    fontSize: 18,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 20,
+  },
+  tocItem: {
+    fontSize: 10,
+    marginBottom: 6,
+  },
+  roomHeader: {
+    backgroundColor: '#003B71',
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    padding: 8,
+    marginBottom: 15,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  infoLabel: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    width: 60,
+  },
+  infoValue: {
+    fontSize: 9,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  categoryTitle: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    marginTop: 6,
+    marginBottom: 3,
+  },
+  listItem: {
+    fontSize: 8,
+    marginLeft: 10,
+    marginBottom: 3,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    right: 42,
+    fontSize: 8,
+    color: '#666666',
+  },
+});
+
+// Title Page Component
+const TitlePage: React.FC<{ projectName: string; roomCount: number }> = ({
+  projectName,
+  roomCount,
+}) => (
+  <Page size="LETTER" style={pdfStyles.page}>
+    <View style={pdfStyles.titlePage}>
+      <Text style={pdfStyles.mainTitle}>Room Schedule Export</Text>
+      <Text style={pdfStyles.projectName}>{projectName}</Text>
+      <Text style={pdfStyles.subtitle}>{roomCount} Rooms</Text>
+      <Text style={pdfStyles.subtitle}>
+        Generated: {new Date().toLocaleDateString()}
+      </Text>
+    </View>
+  </Page>
+);
+
+// Table of Contents Page
+const TableOfContentsPage: React.FC<{ rooms: RoomExportData[] }> = ({ rooms }) => (
+  <Page size="LETTER" style={pdfStyles.page}>
+    <Text style={pdfStyles.tocTitle}>Table of Contents</Text>
+    {rooms.map((room, idx) => (
+      <Text key={room.id} style={pdfStyles.tocItem}>
+        {idx + 1}. {room.roomNumber} - {room.name}
+      </Text>
+    ))}
+  </Page>
+);
+
+// Room Page Component
+const RoomPage: React.FC<{
+  room: RoomExportData;
+  pageNumber: number;
+  totalPages: number;
+  options: Partial<BulkExportOptions>;
+}> = ({ room, pageNumber, totalPages, options }) => {
+  // Group finish items by category
+  const groupedFinish: Record<string, any[]> = {};
+  if (options.includeFinishSchedule !== false) {
+    room.finishItems.forEach((item) => {
+      const cat = item.category || 'Other';
+      if (!groupedFinish[cat]) groupedFinish[cat] = [];
+      groupedFinish[cat].push(item);
+    });
+  }
+
+  return (
+    <Page size="LETTER" style={pdfStyles.page}>
+      <Text style={pdfStyles.roomHeader}>
+        {room.roomNumber} - {room.name}
+      </Text>
+
+      {/* Room Info */}
+      <View style={{ marginBottom: 15 }}>
+        <View style={pdfStyles.infoRow}>
+          <Text style={pdfStyles.infoLabel}>Type:</Text>
+          <Text style={pdfStyles.infoValue}>{room.type}</Text>
+          <Text style={{ ...pdfStyles.infoLabel, marginLeft: 60 }}>Status:</Text>
+          <Text style={pdfStyles.infoValue}>{room.status}</Text>
+        </View>
+        <View style={pdfStyles.infoRow}>
+          <Text style={pdfStyles.infoLabel}>Floor:</Text>
+          <Text style={pdfStyles.infoValue}>{room.floorNumber?.toString() || '-'}</Text>
+          <Text style={{ ...pdfStyles.infoLabel, marginLeft: 60 }}>Progress:</Text>
+          <Text style={pdfStyles.infoValue}>{room.percentComplete}%</Text>
+        </View>
+        <View style={pdfStyles.infoRow}>
+          <Text style={pdfStyles.infoLabel}>Area:</Text>
+          <Text style={pdfStyles.infoValue}>
+            {room.area ? `${room.area} SF` : '-'}
+          </Text>
+        </View>
+      </View>
+
+      {/* Finish Schedule */}
+      {options.includeFinishSchedule !== false && room.finishItems.length > 0 && (
+        <View>
+          <Text style={pdfStyles.sectionTitle}>Finish Schedule</Text>
+          {Object.entries(groupedFinish).map(([category, items]) => (
+            <View key={category}>
+              <Text style={pdfStyles.categoryTitle}>{category.toUpperCase()}</Text>
+              {items.map((item, idx) => {
+                const text = `• ${cleanName(item.itemName)}: ${cleanName(
+                  item.description || item.productName
+                )}`;
+                return (
+                  <Text key={idx} style={pdfStyles.listItem}>
+                    {text}
+                  </Text>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* MEP Equipment */}
+      {options.includeMEP !== false && room.mepEquipment.length > 0 && (
+        <View>
+          <Text style={pdfStyles.sectionTitle}>MEP Equipment</Text>
+          {room.mepEquipment.map((item, idx) => {
+            const text = `• ${cleanName(item.equipmentTag || item.type)}: ${cleanName(
+              item.description || item.manufacturer
+            )}`;
+            return (
+              <Text key={idx} style={pdfStyles.listItem}>
+                {text}
+              </Text>
+            );
+          })}
+        </View>
+      )}
+
+      {/* Notes */}
+      {room.notes && (
+        <View>
+          <Text style={pdfStyles.sectionTitle}>Notes</Text>
+          <Text style={{ fontSize: 8, marginLeft: 5 }}>{room.notes}</Text>
+        </View>
+      )}
+
+      {/* Page Number */}
+      <Text style={pdfStyles.footer}>
+        Page {pageNumber} of {totalPages}
+      </Text>
+    </Page>
+  );
+};
+
+// Main PDF Document
+const BulkExportDocument: React.FC<{
+  projectName: string;
+  rooms: RoomExportData[];
+  options: Partial<BulkExportOptions>;
+}> = ({ projectName, rooms, options }) => {
+  const totalPages = rooms.length + 2; // Title + TOC + rooms
+
+  return (
+    <Document>
+      <TitlePage projectName={projectName} roomCount={rooms.length} />
+      <TableOfContentsPage rooms={rooms} />
+      {rooms.map((room, idx) => (
+        <RoomPage
+          key={room.id}
+          room={room}
+          pageNumber={idx + 3}
+          totalPages={totalPages}
+          options={options}
+        />
+      ))}
+    </Document>
+  );
+};
+
 /**
- * Generate bulk PDF export
+ * Generate bulk PDF export using @react-pdf/renderer
  */
 export async function generateBulkPDF(
   projectName: string,
   rooms: RoomExportData[],
   options: Partial<BulkExportOptions>
 ): Promise<Blob> {
-  const pdf = new jsPDF('p', 'mm', 'letter');
-  const pageWidth = 215.9;
-  const pageHeight = 279.4;
-  const margin = 15;
-  const contentWidth = pageWidth - margin * 2;
-  
-  // Title page
-  pdf.setFontSize(24);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Room Schedule Export', pageWidth / 2, 60, { align: 'center' });
-  
-  pdf.setFontSize(16);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(projectName, pageWidth / 2, 80, { align: 'center' });
-  
-  pdf.setFontSize(12);
-  pdf.text(`${rooms.length} Rooms`, pageWidth / 2, 95, { align: 'center' });
-  pdf.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 105, { align: 'center' });
-
-  // Table of contents
-  pdf.addPage();
-  pdf.setFontSize(18);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Table of Contents', margin, 25);
-  
-  let tocY = 40;
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  
-  rooms.forEach((room, idx) => {
-    if (tocY > pageHeight - 20) {
-      pdf.addPage();
-      tocY = 25;
-    }
-    pdf.text(`${idx + 1}. ${room.roomNumber} - ${room.name}`, margin, tocY);
-    tocY += 6;
-  });
-
-  // Each room
-  rooms.forEach((room, roomIndex) => {
-    pdf.addPage();
-    let y = 20;
-
-    // Room header
-    pdf.setFillColor(0, 59, 113);  // Brand blue
-    pdf.rect(margin, y, contentWidth, 12, 'F');
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(`${room.roomNumber} - ${room.name}`, margin + 5, y + 8);
-    pdf.setTextColor(0, 0, 0);
-    y += 20;
-
-    // Room info grid
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'normal');
-    const infoLeft = [
-      ['Type:', room.type],
-      ['Floor:', room.floorNumber?.toString() || '-'],
-      ['Area:', room.area ? `${room.area} SF` : '-'],
-    ];
-    const infoRight = [
-      ['Status:', room.status],
-      ['Progress:', `${room.percentComplete}%`],
-    ];
-
-    infoLeft.forEach(([label, value], i) => {
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(label, margin, y + i * 5);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(value, margin + 20, y + i * 5);
-    });
-
-    infoRight.forEach(([label, value], i) => {
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(label, margin + 80, y + i * 5);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(value, margin + 100, y + i * 5);
-    });
-    y += 20;
-
-    // Finish Schedule
-    if (options.includeFinishSchedule !== false && room.finishItems.length > 0) {
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Finish Schedule', margin, y);
-      y += 6;
-
-      // Group by category
-      const grouped: Record<string, any[]> = {};
-      room.finishItems.forEach((item) => {
-        const cat = item.category || 'Other';
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(item);
-      });
-
-      pdf.setFontSize(8);
-      Object.entries(grouped).forEach(([category, items]) => {
-        if (y > pageHeight - 30) {
-          pdf.addPage();
-          y = 20;
-        }
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(category.toUpperCase(), margin, y);
-        y += 4;
-        pdf.setFont('helvetica', 'normal');
-        items.forEach((item) => {
-          if (y > pageHeight - 15) {
-            pdf.addPage();
-            y = 20;
-          }
-          const text = `• ${cleanName(item.itemName)}: ${cleanName(item.description || item.productName)}`;
-          const lines = pdf.splitTextToSize(text, contentWidth - 5);
-          pdf.text(lines, margin + 3, y);
-          y += lines.length * 3.5;
-        });
-        y += 2;
-      });
-      y += 5;
-    }
-
-    // MEP Equipment
-    if (options.includeMEP !== false && room.mepEquipment.length > 0) {
-      if (y > pageHeight - 40) {
-        pdf.addPage();
-        y = 20;
-      }
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('MEP Equipment', margin, y);
-      y += 6;
-
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
-      room.mepEquipment.forEach((item) => {
-        if (y > pageHeight - 15) {
-          pdf.addPage();
-          y = 20;
-        }
-        const text = `• ${cleanName(item.equipmentTag || item.type)}: ${cleanName(item.description || item.manufacturer)}`;
-        const lines = pdf.splitTextToSize(text, contentWidth - 5);
-        pdf.text(lines, margin + 3, y);
-        y += lines.length * 3.5;
-      });
-      y += 5;
-    }
-
-    // Notes
-    if (room.notes) {
-      if (y > pageHeight - 30) {
-        pdf.addPage();
-        y = 20;
-      }
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Notes', margin, y);
-      y += 5;
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
-      const noteLines = pdf.splitTextToSize(room.notes, contentWidth);
-      pdf.text(noteLines, margin, y);
-    }
-
-    // Page number
-    pdf.setFontSize(8);
-    pdf.text(
-      `Page ${roomIndex + 3} of ${rooms.length + 2}`,
-      pageWidth - margin,
-      pageHeight - 10,
-      { align: 'right' }
-    );
-  });
-
-  return pdf.output('blob');
+  const doc = <BulkExportDocument projectName={projectName} rooms={rooms} options={options} />;
+  const blob = await pdf(doc).toBlob();
+  return blob;
 }
 
 /**

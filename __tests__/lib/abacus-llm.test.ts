@@ -45,7 +45,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
           usage: {
             prompt_tokens: 50,
             completion_tokens: 100,
@@ -65,7 +65,7 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLM(messages);
 
         expect(result.content).toBe('This is a test response');
-        expect(result.model).toBe('gpt-4o');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
         expect(result.usage).toEqual({
           prompt_tokens: 50,
           completion_tokens: 100,
@@ -85,7 +85,7 @@ describe('Abacus LLM', () => {
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody).toEqual({
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
           messages,
           temperature: 0.3,
           max_tokens: 4000,
@@ -143,7 +143,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -168,7 +168,7 @@ describe('Abacus LLM', () => {
       it('should not include response_format when not provided', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -195,7 +195,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -229,7 +229,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -268,7 +268,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -287,7 +287,7 @@ describe('Abacus LLM', () => {
 
       it('should handle missing choices array', async () => {
         const mockResponse = {
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -302,7 +302,7 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLM(messages);
 
         expect(result.content).toBe('');
-        expect(result.model).toBe('gpt-4o');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should handle missing usage data', async () => {
@@ -314,7 +314,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -490,7 +490,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -510,7 +510,7 @@ describe('Abacus LLM', () => {
       it('should handle temperature of 0', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -531,7 +531,7 @@ describe('Abacus LLM', () => {
       it('should handle temperature of 1', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -552,7 +552,7 @@ describe('Abacus LLM', () => {
       it('should handle max_tokens of 1', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'x' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -573,7 +573,7 @@ describe('Abacus LLM', () => {
       it('should handle very large max_tokens', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -594,7 +594,7 @@ describe('Abacus LLM', () => {
       it('should handle very long message content', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -617,7 +617,7 @@ describe('Abacus LLM', () => {
       it('should handle special characters in content', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -637,7 +637,7 @@ describe('Abacus LLM', () => {
       it('should handle multiple message roles', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -672,7 +672,7 @@ describe('Abacus LLM', () => {
               },
             },
           ],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
           usage: {
             prompt_tokens: 100,
             completion_tokens: 50,
@@ -691,11 +691,11 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLMWithVision(textPrompt, imageBase64);
 
         expect(result.content).toBe('I see a construction site');
-        expect(result.model).toBe('gpt-4o');
+        expect(result.model).toBe('claude-sonnet-4-5-20250929');
         expect(result.usage?.total_tokens).toBe(150);
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.model).toBe('gpt-4o');
+        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
         expect(callBody.messages).toEqual([
           {
             role: 'user',
@@ -741,7 +741,7 @@ describe('Abacus LLM', () => {
       it('should pass through custom options', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -769,7 +769,7 @@ describe('Abacus LLM', () => {
       it('should handle empty image data', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'No image detected' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -787,7 +787,7 @@ describe('Abacus LLM', () => {
       it('should handle very long image base64 data', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'Large image processed' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -836,7 +836,7 @@ describe('Abacus LLM', () => {
       it('should handle empty text prompt', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'Image analyzed' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -855,7 +855,7 @@ describe('Abacus LLM', () => {
       it('should handle special characters in text prompt', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'Processed' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -874,7 +874,7 @@ describe('Abacus LLM', () => {
       it('should handle multiline text prompt', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'Response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -893,7 +893,7 @@ describe('Abacus LLM', () => {
       it('should default to gpt-4o when no model specified', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'Response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -904,13 +904,13 @@ describe('Abacus LLM', () => {
         await callAbacusLLMWithVision('Analyze', 'imagedata', {});
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.model).toBe('gpt-4o');
+        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
       });
 
       it('should preserve existing options when merging', async () => {
         const mockResponse = {
           choices: [{ message: { content: 'Response' } }],
-          model: 'gpt-4o',
+          model: 'claude-sonnet-4-5-20250929',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -930,7 +930,7 @@ describe('Abacus LLM', () => {
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody.temperature).toBe(0.5);
         expect(callBody.response_format).toEqual({ type: 'json_object' });
-        expect(callBody.model).toBe('gpt-4o');
+        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
       });
     });
   });
@@ -968,7 +968,7 @@ describe('Abacus LLM', () => {
     it('should return properly typed LLMResponse', async () => {
       const mockResponse = {
         choices: [{ message: { content: 'test' } }],
-        model: 'gpt-4o',
+        model: 'claude-sonnet-4-5-20250929',
         usage: {
           prompt_tokens: 10,
           completion_tokens: 20,

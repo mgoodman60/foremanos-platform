@@ -5,6 +5,7 @@
 
 import { prisma } from './db';
 import OpenAI from 'openai';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 let openaiInstance: OpenAI | null = null;
 
@@ -123,7 +124,7 @@ For each panel include:
 Return ONLY valid JSON array, no markdown.`;
 
     const response = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,
     });
@@ -197,7 +198,7 @@ For each fixture include:
 Return ONLY valid JSON array, no markdown.`;
 
     const response = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,
     });

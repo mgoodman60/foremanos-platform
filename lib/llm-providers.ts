@@ -9,6 +9,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { SIMPLE_MODEL, DEFAULT_MODEL } from '@/lib/model-config';
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -46,7 +47,7 @@ export async function callOpenAI(
   }
 
   const {
-    model = 'gpt-4o-mini',
+    model = SIMPLE_MODEL,
     temperature = 0.3,
     max_tokens = 4000,
     stream = false,
@@ -101,7 +102,7 @@ export async function callAnthropic(
   }
 
   const {
-    model = 'claude-sonnet-4-5-20251101',
+    model = DEFAULT_MODEL,
     temperature = 0.3,
     max_tokens = 4000,
   } = options;
@@ -170,16 +171,16 @@ export async function callLLM(
   messages: LLMMessage[],
   options: LLMOptions = {}
 ): Promise<LLMResponse> {
-  const model = options.model || 'gpt-4o-mini';
+  const model = options.model || SIMPLE_MODEL;
 
   // Route based on model prefix
   if (model.startsWith('claude-')) {
-    console.log(`[LLM] Routing to Anthropic: ${model}`);
+    logger.info('LLM', `Routing to Anthropic: ${model}`);
     return callAnthropic(messages, options);
   }
 
   // Default to OpenAI (gpt-*, o3-*, o4-*, etc.)
-  console.log(`[LLM] Routing to OpenAI: ${model}`);
+  logger.info('LLM', `Routing to OpenAI: ${model}`);
   return callOpenAI(messages, options);
 }
 
@@ -191,7 +192,7 @@ export async function streamLLM(
   messages: LLMMessage[],
   options: LLMOptions = {}
 ): Promise<ReadableStream<Uint8Array>> {
-  const model = options.model || 'gpt-4o-mini';
+  const model = options.model || SIMPLE_MODEL;
 
   // For Claude models, we need to use the Anthropic streaming endpoint
   if (model.startsWith('claude-')) {
@@ -211,7 +212,7 @@ async function streamOpenAI(
   }
 
   const {
-    model = 'gpt-4o-mini',
+    model = SIMPLE_MODEL,
     temperature = 0.3,
     max_tokens = 4000,
   } = options;
@@ -258,7 +259,7 @@ async function streamAnthropic(
   }
 
   const {
-    model = 'claude-sonnet-4-5-20251101',
+    model = DEFAULT_MODEL,
     temperature = 0.3,
     max_tokens = 4000,
   } = options;

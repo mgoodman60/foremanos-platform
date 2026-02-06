@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 // Valid trade types
 const VALID_TRADE_TYPES = [
@@ -166,7 +167,7 @@ export async function POST(
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'system',

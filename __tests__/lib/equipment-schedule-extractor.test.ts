@@ -268,13 +268,13 @@ describe('extractMechanicalEquipment', () => {
     expect(createCall.messages[0].content).toContain('Rooftop Unit');
   });
 
-  it('should use gpt-4o model with low temperature', async () => {
+  it('should use claude-sonnet-4-5-20250929 model with low temperature', async () => {
     const { extractMechanicalEquipment } = await import('@/lib/equipment-schedule-extractor');
     await extractMechanicalEquipment('project-1');
 
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'gpt-4o',
+        model: 'claude-sonnet-4-5-20250929',
         temperature: 0.1,
       })
     );
@@ -478,13 +478,13 @@ describe('extractDiffusers', () => {
     expect(result[0].quantity).toBe(1);
   });
 
-  it('should use gpt-4o model with low temperature', async () => {
+  it('should use claude-sonnet-4-5-20250929 model with low temperature', async () => {
     const { extractDiffusers } = await import('@/lib/equipment-schedule-extractor');
     await extractDiffusers('project-1');
 
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'gpt-4o',
+        model: 'claude-sonnet-4-5-20250929',
         temperature: 0.1,
       })
     );

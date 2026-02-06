@@ -15,6 +15,7 @@
 
 import { DisciplineCode, getDisciplineName } from './title-block-extractor';
 import { prisma } from '@/lib/db';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 /**
  * Detect if base64 content is a PDF (starts with %PDF- magic number)
@@ -132,7 +133,7 @@ export async function detectLegendRegion(
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',
@@ -193,7 +194,7 @@ export async function extractLegendEntries(
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',

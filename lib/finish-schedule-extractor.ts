@@ -7,6 +7,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 interface FinishScheduleEntry {
   roomNumber: string;
@@ -376,7 +377,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.
         content: prompt,
       },
     ], {
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       temperature: 0.1,
       max_tokens: 8000,
     });
@@ -471,7 +472,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
         content: prompt,
       },
     ], {
-      model: 'gpt-4o',
+      model: EXTRACTION_MODEL,
       temperature: 0.1,
       max_tokens: 8000,
     });

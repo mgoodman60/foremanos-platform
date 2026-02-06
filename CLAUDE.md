@@ -67,7 +67,8 @@ e2e/              # Playwright E2E tests (23 spec files)
 | `lib/feature-sync-services.ts` | Room/door/MEP/scale/schedule sync |
 | `lib/analytics-service.ts` | Project KPIs, schedule/cost variance, metrics dashboard |
 | `lib/query-cache.ts` | Redis-backed query caching for LLM cost reduction |
-| `lib/vision-api-multi-provider.ts` | Multi-provider vision with fallback (GPT-5.2, Claude 4.5) |
+| `lib/model-config.ts` | Centralized LLM model constants (single source of truth) |
+| `lib/vision-api-multi-provider.ts` | Multi-provider vision with fallback (Claude Opus, GPT-5.2, Claude Sonnet) |
 | `lib/rag-enhancements.ts` | Extended RAG with advanced retrieval strategies |
 | `lib/budget-sync-service.ts` | Budget synchronization and AI extraction |
 | `lib/workflow-service.ts` | Workflow orchestration and state transitions |
@@ -135,7 +136,7 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: 148 test files in `__tests__/` (127 lib + 17 API + 3 smoke + 1 hooks)
+- **Vitest**: 153 test files in `__tests__/` (128 lib + 17 API + 3 smoke + 1 hooks)
 - **Playwright**: 23 E2E spec files in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 - **Comprehensive lib coverage**: All major lib modules have dedicated test files
@@ -394,7 +395,7 @@ Defined in `lib/rate-limiter.ts`:
 - AUTH: 5 login attempts/5 minutes
 
 ### Subscription Tiers
-Six tiers (Free → Enterprise) with query limits and model access configured in Stripe price IDs.
+Six tiers (Free → Enterprise) with query limits and model access configured in Stripe price IDs. Tier enforcement via `getEffectiveModel()` in `lib/stripe.ts` automatically downgrades models based on subscription level. Model constants centralized in `lib/model-config.ts`.
 
 ### Design Tokens
 Use `lib/design-tokens.ts` for colors instead of hardcoded values:
@@ -592,7 +593,40 @@ Benefits:
 - **Workflow**: State machine for document processing (`lib/workflow-service.ts`)
 - **Logger**: Centralized structured logging utility (`lib/logger.ts`)
 
-### OpenAI Migration (February 2026)
+### LLM Model Migration: Claude-Primary Architecture (February 2026)
+
+Migrated from stale OpenAI models to Claude-primary LLM usage with centralized configuration and tier-based enforcement.
+
+**Centralized Model Config (`lib/model-config.ts`)**:
+
+| Constant | Value | Usage |
+|----------|-------|-------|
+| `DEFAULT_MODEL` | `claude-sonnet-4-5-20250929` | Primary for all paid tiers |
+| `PREMIUM_MODEL` | `claude-opus-4-6` | Complex queries, Business/Enterprise |
+| `VISION_MODEL` | `claude-opus-4-6` | Vision/image analysis (all tiers) |
+| `FALLBACK_MODEL` | `gpt-5.2` | OpenAI fallback (NOT gpt-4o) |
+| `SIMPLE_MODEL` | `gpt-4o-mini` | Cheap simple queries, Free tier |
+| `EXTRACTION_MODEL` | `claude-sonnet-4-5-20250929` | Document extraction tasks |
+
+**Tier Enforcement** (`lib/stripe.ts`):
+- `isModelAllowed(tier, model)` — checks if model is permitted for tier
+- `getEffectiveModel(tier, requestedModel, complexity)` — downgrades to best allowed model
+- Free: `gpt-4o-mini` only; Starter: + Claude Sonnet; Pro+: all models including Opus
+
+**Complexity Routing** (`lib/query-cache.ts`):
+- Simple queries → `gpt-4o-mini` (cheapest)
+- Medium queries → Claude Sonnet 4.5 (balanced)
+- Complex/Gantt → Claude Opus 4.6 (best quality)
+
+**Vision Provider Chain** (`lib/vision-api-multi-provider.ts`):
+- Claude Opus 4.6 (primary) → GPT-5.2 (fallback) → Claude Sonnet 4.5 (secondary)
+- Cloudflare block detection triggers immediate failover
+
+**`resolveModelAlias()`** maps deprecated models: `gpt-4o` → `gpt-5.2`, `gpt-3.5-turbo` → `gpt-4o-mini`, `claude-3-5-sonnet` → `claude-sonnet-4-5-20250929`
+
+**Files changed**: 30+ source files, 15+ test files. Zero `gpt-4o` references at runtime.
+
+### Earlier OpenAI Migration (February 2026)
 
 Migrated from Abacus AI to direct OpenAI API:
 - Updated `lib/llm-providers.ts` for direct OpenAI integration

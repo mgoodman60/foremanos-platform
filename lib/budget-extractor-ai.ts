@@ -152,7 +152,7 @@ Respond with ONLY valid JSON in this exact format:
   ];
 
   const llmResponse = await callAbacusLLM(messages, {
-    model: 'claude-sonnet-4-5-20251101',
+    model: 'claude-opus-4-6',
     max_tokens: 8000,
     temperature: 0.1,
   });
@@ -234,7 +234,7 @@ Respond with ONLY valid JSON:
   const messages = [{ role: 'user' as const, content: prompt }];
 
   const llmResponse = await callAbacusLLM(messages, {
-    model: 'claude-sonnet-4-5-20251101',
+    model: 'claude-opus-4-6',
     max_tokens: 4000,
     temperature: 0.1,
   });

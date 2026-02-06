@@ -40,7 +40,7 @@ describe('Vision API Wrapper', () => {
   });
 
   describe('callVisionAPIWithRetry - Success Cases', () => {
-    it('should successfully call vision API with gpt-4o on first attempt', async () => {
+    it('should successfully call vision API with claude-opus-4-6 on first attempt', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -101,12 +101,12 @@ describe('Vision API Wrapper', () => {
         }),
       });
 
-      await callVisionAPIWithRetry('base64', 'prompt', { model: 'gpt-4o' });
+      await callVisionAPIWithRetry('base64', 'prompt', { model: 'claude-opus-4-6' });
 
       const callArgs = fetchMock.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
 
-      expect(body.model).toBe('gpt-4o');
+      expect(body.model).toBe('claude-opus-4-6');
     });
 
     it('should set correct temperature and max_tokens', async () => {
@@ -524,8 +524,8 @@ describe('Vision API Wrapper', () => {
   });
 
   describe('callVisionAPIWithRetry - GPT-4o-mini Fallback', () => {
-    it('should fall back to gpt-4o-mini after primary model exhausts retries', async () => {
-      // Primary model (gpt-4o) fails all retries
+    it('should fall back to gpt-5.2 after primary model exhausts retries', async () => {
+      // Primary model (claude-opus-4-6) fails all retries
       for (let i = 0; i < 3; i++) {
         fetchMock.mockResolvedValueOnce({
           ok: true,
@@ -533,29 +533,29 @@ describe('Vision API Wrapper', () => {
           text: async () => '<!DOCTYPE html>Cloudflare</html>',
         });
       }
-      // gpt-4o-mini succeeds
+      // gpt-5.2 succeeds
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
         text: async () => JSON.stringify({
-          choices: [{ message: { content: 'gpt-4o-mini success' } }],
+          choices: [{ message: { content: 'gpt-5.2 success' } }],
         }),
       });
 
       const result = await callVisionAPIWithRetry('base64', 'prompt', {
-        model: 'gpt-4o',
+        model: 'claude-opus-4-6',
         maxRetries: 3,
         retryDelay: 100,
       });
 
       expect(result.success).toBe(true);
-      expect(result.data).toBe('gpt-4o-mini success');
+      expect(result.data).toBe('gpt-5.2 success');
       expect(result.usedFallback).toBe(true);
-      expect(result.fallbackMethod).toBe('gpt-4o-mini');
+      expect(result.fallbackMethod).toBe('gpt-5.2');
       expect(fetchMock).toHaveBeenCalledTimes(4); // 3 for primary + 1 for fallback
     });
 
-    it('should not fall back to gpt-4o-mini if already using gpt-4o-mini', async () => {
+    it('should not fall back to gpt-5.2 if already using gpt-5.2', async () => {
       for (let i = 0; i < 3; i++) {
         fetchMock.mockResolvedValueOnce({
           ok: true,
@@ -565,7 +565,7 @@ describe('Vision API Wrapper', () => {
       }
 
       const result = await callVisionAPIWithRetry('base64', 'prompt', {
-        model: 'gpt-4o-mini',
+        model: 'gpt-5.2',
         maxRetries: 3,
         retryDelay: 100,
       });
@@ -575,7 +575,7 @@ describe('Vision API Wrapper', () => {
       expect(fetchMock).toHaveBeenCalledTimes(3); // Only primary attempts, no fallback
     });
 
-    it('should use different retry settings for gpt-4o-mini fallback', async () => {
+    it('should use different retry settings for gpt-5.2 fallback', async () => {
       // Primary fails
       for (let i = 0; i < 2; i++) {
         fetchMock.mockResolvedValueOnce({
@@ -631,7 +631,7 @@ describe('Vision API Wrapper', () => {
   });
 
   describe('callVisionAPIWithRetry - Default Options', () => {
-    it('should use default model gpt-4o', async () => {
+    it('should use default model claude-opus-4-6', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -644,7 +644,7 @@ describe('Vision API Wrapper', () => {
 
       const callArgs = fetchMock.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
-      expect(body.model).toBe('gpt-4o');
+      expect(body.model).toBe('claude-opus-4-6');
     });
 
     // Skip - involves retry delays

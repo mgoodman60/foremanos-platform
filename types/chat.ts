@@ -185,6 +185,8 @@ export interface LLMHandlerOptions {
   projectSlug: string;
   /** User role. */
   userRole: string;
+  /** User's subscription tier (optional, defaults to 'free'). */
+  subscriptionTier?: string;
 }
 
 /**
@@ -195,7 +197,7 @@ export interface LLMHandlerOptions {
 export interface LLMResponse {
   /** Readable stream of LLM response. */
   stream: ReadableStream;
-  /** Model used (e.g., 'gpt-4', 'claude-3.5-sonnet'). */
+  /** Model used (e.g., 'gpt-4', 'claude-3.5-sonnet', 'claude-opus-4-6'). */
   model: string;
   /** Number of tokens used (if available). */
   tokensUsed?: number;

@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { getCached, setCached, isRedisAvailable } from './redis';
+import { SIMPLE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL } from '@/lib/model-config';
 
 /**
  * Query Cache System with Redis Integration
@@ -40,15 +41,17 @@ const CACHE_TTL_HOURS = 48; // 48 hours for common queries (increased from 24)
 const MAX_CACHE_SIZE = 2000; // Maximum 2000 entries (increased from 1000)
 const HIGH_VALUE_CACHE_BOOST = 72; // High-value queries cached for 72 hours
 
-// Model pricing (Updated January 2026)
+// Model pricing (Updated February 2026)
 const MODEL_COSTS = {
   'gpt-4o-mini': 0.015,       // Simple queries (75% cheaper than GPT-3.5)
   'gpt-3.5-turbo': 0.03,      // Legacy simple queries (deprecated)
-  'claude-sonnet-4-5-20251101': 0.15, // Medium complexity queries (Claude 4.5)
+  'claude-sonnet-4-5-20251101': 0.15, // Legacy (backward compatibility)
+  'claude-sonnet-4-5-20250929': 0.15, // Current default Claude model
+  'claude-opus-4-6': 0.75,            // Premium complex queries (Claude Opus 4.6)
   'gpt-4o': 0.30,             // Complex queries and images (legacy, deprecated)
-  'gpt-5.2': 0.21,            // Complex queries (NEW - 30% cheaper input than GPT-4o)
+  'gpt-5.2': 0.21,            // OpenAI fallback
   'gpt-5.2-2025-12-11': 0.21, // Alias for gpt-5.2
-  'gpt-5.2-thinking': 0.30,   // Gantt charts and critical path analysis
+  'gpt-5.2-thinking': 0.30,   // Legacy
   'o3-mini': 0.08,            // Fast reasoning (alternative to Claude for medium queries)
 } as const;
 
@@ -125,24 +128,22 @@ function generateCacheKey(query: string, projectId: string, documentIds: string[
 
 /**
  * Determine query complexity and select appropriate model
- * COST OPTIMIZATION (Updated January 2026): 
- *   70% → GPT-4o-mini ($0.015) - 75% cheaper than GPT-3.5!
- *   20% → Claude 3.5 ($0.15) - Best for conversational multi-step reasoning
- *   9% → GPT-5.2 ($0.21) - 30% better accuracy, replaces GPT-4o
- *   1% → GPT-5.2 Thinking ($0.30) - Gantt charts/critical path only
- * 
- * Net Savings: ~85% cost reduction on simple queries, ~30% on complex queries
+ * COST OPTIMIZATION (Updated February 2026):
+ *   70% → gpt-4o-mini ($0.015) - Simple queries
+ *   20% → Claude Sonnet 4.5 ($0.15) - Medium complexity
+ *   10% → Claude Opus 4.6 ($0.75) - Complex queries
+ *
+ * Net Savings: ~85% cost reduction on simple queries vs GPT-3.5
  */
 export function analyzeQueryComplexity(query: string): {
   complexity: 'simple' | 'medium' | 'complex';
   reason: string;
   model: string;
-  reasoning_effort?: 'light' | 'medium' | 'high';
 } {
   const lowerQuery = query.toLowerCase();
-  
-  // ===== GANTT CHART / PLANNING (GPT-5.2 Thinking) - Highest priority! =====
-  // Route construction schedule/timeline queries to GPT-5.2 with reasoning
+
+  // ===== GANTT CHART / PLANNING (Claude Opus) - Highest priority! =====
+  // Route construction schedule/timeline queries to Claude Opus for best accuracy
   const ganttIndicators = [
     /gantt/i,
     /critical path/i,
@@ -160,19 +161,18 @@ export function analyzeQueryComplexity(query: string): {
     /task.*dependencies/i,
     /schedule.*recovery/i,
   ];
-  
+
   for (const pattern of ganttIndicators) {
     if (pattern.test(lowerQuery)) {
       return {
         complexity: 'complex',
-        reason: 'Construction scheduling/planning requires GPT-5.2 with reasoning',
-        model: 'gpt-5.2',
-        reasoning_effort: 'medium', // Enable reasoning for better analysis
+        reason: 'Construction scheduling/planning requires Claude Opus for advanced analysis',
+        model: PREMIUM_MODEL,
       };
     }
   }
   
-  // ===== COMPLEX (GPT-5.2 Instant) - Replaces GPT-4o for most tasks =====
+  // ===== COMPLEX (Claude Opus) - For vision, multi-doc analysis, compliance =====
   const complexIndicators = [
     // Vision and image requirements
     /image/i,
@@ -180,24 +180,24 @@ export function analyzeQueryComplexity(query: string): {
     /picture/i,
     /drawing/i,
     /diagram/i,
-    
+
     // Heavy multi-document analysis with calculations
     /calculate.*across/i,
     /total.*cost.*estimate/i,
     /material.*takeoff.*multiple/i,
-    
+
     // Code compliance with multiple codes
     /ibc.*and.*nfpa/i,
     /multiple.*code/i,
     /compliance.*check.*all/i,
-    
+
     // Critical decision-making with analysis
     /should we.*and.*why/i,
     /recommend.*with.*analysis/i,
     /best approach.*considering/i,
   ];
   
-  // ===== MEDIUM (Claude 3.5 Sonnet) - Multi-step reasoning (20% of queries) =====
+  // ===== MEDIUM (Claude Sonnet 4.5) - Multi-step reasoning (20% of queries) =====
   const mediumIndicators = [
     // Document synthesis and comparison
     /compare.*with/i,
@@ -206,27 +206,27 @@ export function analyzeQueryComplexity(query: string): {
     /across.*documents/i,
     /combine.*information/i,
     /review.*multiple/i,
-    
+
     // Detailed analysis requiring reasoning
     /analyze.*why/i,
     /evaluate.*and/i,
     /assess.*impact/i,
     /explain.*process/i,
     /explain.*relationship/i,
-    
+
     // Multi-step reasoning
     /first.*then.*finally/i,
     /step by step/i,
     /walk me through.*process/i,
     /what.*and.*how/i,
-    
+
     // Complex specifications (not simple lookups)
     /specification.*requirements.*for/i,
     /all.*requirements/i,
     /compliance.*requirements/i,
   ];
   
-  // ===== SIMPLE (GPT-3.5-turbo) - Most queries should go here (70% target) =====
+  // ===== SIMPLE (gpt-4o-mini) - Most queries should go here (70% target) =====
   const simpleIndicators = [
     // Basic information retrieval
     /^what is/i,
@@ -241,13 +241,13 @@ export function analyzeQueryComplexity(query: string): {
     /^get/i,
     /^give me/i,
     /^tell me/i,
-    
+
     // Counting and quantity queries (simple lookups)
     /how many.*are/i,
     /number of/i,
     /count/i,
     /total.*quantity/i,
-    
+
     // Measurement and dimension queries (simple lookups)
     /what.*depth/i,
     /what.*height/i,
@@ -256,7 +256,7 @@ export function analyzeQueryComplexity(query: string): {
     /what.*dimension/i,
     /how.*deep/i,
     /how.*thick/i,
-    
+
     // Simple yes/no questions
     /^is there/i,
     /^does/i,
@@ -264,7 +264,7 @@ export function analyzeQueryComplexity(query: string): {
     /^do you/i,
     /^is it/i,
     /^are there/i,
-    
+
     // Status and basic facts
     /status/i,
     /date/i,
@@ -273,30 +273,30 @@ export function analyzeQueryComplexity(query: string): {
     /address/i,
     /phone/i,
     /contact/i,
-    
+
     // Simple document lookups
     /sheet number/i,
     /page number/i,
     /which document/i,
     /what document/i,
-    
+
     // Single-document simple queries
     /^what.*in.*schedule/i,
     /^what.*on.*plan/i,
     /^show.*from/i,
-    
+
     // Simple specification lookups (not complex analysis)
     /specification.*for\s+\w+$/i,  // "specification for doors" (single item)
     /requirement.*for\s+\w+$/i,    // "requirement for concrete" (single item)
     /detail.*of\s+\w+$/i,          // "detail of footing" (single item)
-    
+
     // Timeline and schedule (simple lookups)
     /completion date/i,
     /start date/i,
     /end date/i,
     /project.*duration/i,
     /milestone/i,
-    
+
     // Simple material queries
     /^what.*material/i,
     /^what.*type/i,
@@ -308,59 +308,57 @@ export function analyzeQueryComplexity(query: string): {
     if (pattern.test(lowerQuery)) {
       return {
         complexity: 'complex',
-        reason: 'Requires advanced reasoning, vision, or multi-code compliance',
-        model: 'gpt-5.2', // GPT-5.2 (30% better accuracy, cheaper input than GPT-4o)
-        reasoning_effort: 'light', // Light reasoning for most complex queries
+        reason: 'Requires advanced reasoning, vision, or multi-code compliance (Claude Opus)',
+        model: PREMIUM_MODEL,
       };
     }
   }
-  
+
   // Check for simple indicators BEFORE medium (route more to simple)
   for (const pattern of simpleIndicators) {
     if (pattern.test(lowerQuery)) {
       return {
         complexity: 'simple',
         reason: 'Basic information retrieval or simple lookup',
-        model: 'gpt-4o-mini', // Upgraded from GPT-3.5 (75% cheaper, better accuracy)
+        model: SIMPLE_MODEL,
       };
     }
   }
-  
-  // Check for medium indicators (Claude 3.5 Sonnet)
+
+  // Check for medium indicators (Claude Sonnet 4.5)
   for (const pattern of mediumIndicators) {
     if (pattern.test(lowerQuery)) {
       return {
         complexity: 'medium',
         reason: 'Requires document synthesis, detailed analysis, or multi-step reasoning',
-        model: 'claude-sonnet-4-5-20251101',
+        model: DEFAULT_MODEL,
       };
     }
   }
-  
+
   // Query length checks - be more aggressive about routing to simple
   if (query.length > 500) {
     return {
       complexity: 'complex',
-      reason: 'Very long query requires GPT-5.2 for comprehensive processing',
-      model: 'gpt-5.2',
-      reasoning_effort: 'light',
+      reason: 'Very long query requires Claude Opus for comprehensive processing',
+      model: PREMIUM_MODEL,
     };
   }
-  
+
   if (query.length > 300) {
     return {
       complexity: 'medium',
-      reason: 'Long query benefits from Claude 3.5\'s detailed analysis',
-      model: 'claude-sonnet-4-5-20251101',
+      reason: 'Long query benefits from Claude Sonnet\'s detailed analysis',
+      model: DEFAULT_MODEL,
     };
   }
-  
+
   // DEFAULT TO SIMPLE (was medium before - this saves costs!)
-  // GPT-4o-mini handles most construction queries well with RAG context (75% cheaper than GPT-3.5!)
+  // gpt-4o-mini handles most construction queries well with RAG context
   return {
     complexity: 'simple',
-    reason: 'Standard construction query with document context - GPT-4o-mini sufficient',
-    model: 'gpt-4o-mini',
+    reason: 'Standard construction query with document context',
+    model: SIMPLE_MODEL,
   };
 }
 
@@ -415,7 +413,7 @@ export async function getCachedResponse(query: string, projectId: string, docume
       if (redisEntry) {
         // Check if entry is expired
         const ageHours = (Date.now() - redisEntry.timestamp) / (1000 * 60 * 60);
-        const isHighValue = redisEntry.model.includes('gpt-5.2') || redisEntry.hitCount > 5;
+        const isHighValue = redisEntry.model.includes('claude-opus') || redisEntry.hitCount > 5;
         const ttl = isHighValue ? HIGH_VALUE_CACHE_BOOST : CACHE_TTL_HOURS;
         
         if (ageHours <= ttl) {
@@ -472,7 +470,7 @@ export async function getCachedResponse(query: string, projectId: string, docume
   
   // Check if entry is expired (use dynamic TTL based on value)
   const ageHours = (Date.now() - entry.timestamp) / (1000 * 60 * 60);
-  const isHighValue = entry.model.includes('gpt-5.2') || entry.hitCount > 5;
+  const isHighValue = entry.model.includes('claude-opus') || entry.hitCount > 5;
   const ttl = isHighValue ? HIGH_VALUE_CACHE_BOOST : CACHE_TTL_HOURS;
   
   if (ageHours > ttl) {
@@ -495,9 +493,9 @@ export async function getCachedResponse(query: string, projectId: string, docume
  */
 function isHighValueQuery(query: string, model: string): boolean {
   const lowerQuery = query.toLowerCase();
-  
-  // GPT-5.2 queries are automatically high-value (more expensive)
-  if (model.includes('gpt-5.2')) {
+
+  // Claude Opus queries are automatically high-value (most expensive)
+  if (model.includes('claude-opus')) {
     return true;
   }
   
@@ -559,7 +557,7 @@ export async function cacheResponse(
     
     // First pass: try to evict low-value entries
     for (const [k, v] of cache.entries()) {
-      const isHighValue = v.model.includes('gpt-5.2') || v.hitCount > 5;
+      const isHighValue = v.model.includes('claude-opus') || v.hitCount > 5;
       if (!isHighValue && v.timestamp < oldestTime) {
         oldestTime = v.timestamp;
         oldestKey = k;
@@ -616,53 +614,53 @@ export async function cacheResponse(
 }
 
 /**
- * Get cache statistics with GPT-5.2 specific metrics
- * ENHANCED: Tracks high-value queries and GPT-5.2 savings separately
+ * Get cache statistics with Claude Opus specific metrics
+ * ENHANCED: Tracks high-value queries and Claude Opus savings separately
  */
 export function getCacheStats(): CacheStats & {
-  gpt52Hits?: number;
-  gpt52Savings?: number;
+  opusHits?: number;
+  opusSavings?: number;
   highValueEntries?: number;
   avgHitCount?: number;
 } {
   const totalRequests = stats.hits + stats.misses;
   const hitRate = totalRequests > 0 ? (stats.hits / totalRequests) * 100 : 0;
-  
+
   // Calculate estimated savings based on actual model costs
   let totalSavings = 0;
-  let gpt52Savings = 0;
-  let gpt52Hits = 0;
+  let opusSavings = 0;
+  let opusHits = 0;
   let highValueEntries = 0;
   let totalHitCount = 0;
-  
+
   for (const entry of cache.values()) {
     const modelCost = MODEL_COSTS[entry.model as keyof typeof MODEL_COSTS] || 0.15;
     const savingsForEntry = entry.hitCount * modelCost;
     totalSavings += savingsForEntry;
     totalHitCount += entry.hitCount;
-    
-    // Track GPT-5.2 specific metrics
-    if (entry.model.includes('gpt-5.2')) {
-      gpt52Savings += savingsForEntry;
-      gpt52Hits += entry.hitCount;
+
+    // Track Claude Opus specific metrics
+    if (entry.model.includes('claude-opus')) {
+      opusSavings += savingsForEntry;
+      opusHits += entry.hitCount;
     }
-    
+
     // Count high-value entries
-    if (entry.model.includes('gpt-5.2') || entry.hitCount > 5) {
+    if (entry.model.includes('claude-opus') || entry.hitCount > 5) {
       highValueEntries++;
     }
   }
-  
+
   const avgHitCount = cache.size > 0 ? Math.round(totalHitCount / cache.size * 10) / 10 : 0;
-  
+
   return {
     totalHits: stats.hits,
     totalMisses: stats.misses,
     cacheSize: cache.size,
     estimatedSavings: totalSavings,
     hitRate: Math.round(hitRate * 10) / 10,
-    gpt52Hits,
-    gpt52Savings: Math.round(gpt52Savings * 100) / 100,
+    opusHits,
+    opusSavings: Math.round(opusSavings * 100) / 100,
     highValueEntries,
     avgHitCount,
   };

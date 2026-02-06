@@ -17,6 +17,7 @@
 import { PrismaClient } from '@prisma/client';
 import { parseScaleString } from './scale-detector';
 import { classifyDrawingWithPatterns, type DrawingClassification } from './drawing-classifier';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 const prisma = new PrismaClient();
 
@@ -131,7 +132,7 @@ export async function extractTitleBlockWithVision(
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',

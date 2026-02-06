@@ -164,7 +164,7 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
 
       const roomData = await response.json();
 
-      // Dynamically import jsPDF to avoid SSR issues
+      // Dynamically import PDF generator to avoid SSR issues
       const { generateRoomSheetPDF } = await import('@/lib/room-pdf-generator');
       const pdfBlob = await generateRoomSheetPDF(roomData);
 

@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { convertSinglePage } from './pdf-to-image';
 import { getFileUrl } from './s3';
+import { EXTRACTION_MODEL } from '@/lib/model-config';
 
 const prisma = new PrismaClient();
 
@@ -414,7 +415,7 @@ Return a JSON object with:
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: EXTRACTION_MODEL,
         messages: [
           {
             role: 'user',
