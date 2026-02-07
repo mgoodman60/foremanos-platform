@@ -12,7 +12,7 @@ interface DocumentCategoryModalProps {
   isOpen: boolean;
   fileName: string;
   fileType: string;
-  onConfirm: (category: string) => void;
+  onConfirm: (category: string) => void | Promise<void>;
   onCancel: () => void;
 }
 
@@ -24,6 +24,7 @@ export function DocumentCategoryModal({
   onCancel,
 }: DocumentCategoryModalProps) {
   const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<{
     category: string;
     confidence: number;
@@ -102,8 +103,13 @@ export function DocumentCategoryModal({
     }
   };
 
-  const onSubmit = (data: DocumentCategoryFormData) => {
-    onConfirm(data.category);
+  const onSubmit = async (data: DocumentCategoryFormData) => {
+    setIsUploading(true);
+    try {
+      await onConfirm(data.category);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -276,19 +282,32 @@ export function DocumentCategoryModal({
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 text-sm text-gray-400 hover:text-[#F8FAFC] transition-colors"
+              disabled={isUploading}
+              className={`px-4 py-2 text-sm transition-colors ${
+                isUploading
+                  ? 'text-gray-500 cursor-not-allowed'
+                  : 'text-gray-400 hover:text-[#F8FAFC]'
+              }`}
             >
               Cancel
             </button>
             <button
               type="submit"
+              disabled={isUploading}
               className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
-                fileName
+                isUploading
+                  ? 'bg-[#F97316] text-white opacity-75 cursor-not-allowed'
+                  : fileName
                   ? 'bg-[#F97316] text-white hover:bg-[#ea580c]'
                   : 'bg-[#F97316] text-white hover:bg-[#ea580c] shadow-lg ring-2 ring-[#F97316]/50'
               }`}
             >
-              {fileName ? (
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Uploading...</span>
+                </>
+              ) : fileName ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Confirm & Upload</span>

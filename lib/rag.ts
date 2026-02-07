@@ -490,17 +490,17 @@ function detectQueryIntent(query: string): string[] {
 
   // Budget/Cost related
   if (lowerQuery.match(/\b(cost|budget|price|pricing|estimate|bid|quote|payment|invoice|expense)\b/i)) {
-    intents.push('budget_cost');
+    intents.push('budgets');
   }
 
   // Schedule related
   if (lowerQuery.match(/\b(schedule|timeline|deadline|milestone|duration|gantt|critical path|phase|when|date)\b/i)) {
-    intents.push('schedule');
+    intents.push('schedules');
   }
 
   // Plans/Drawings related
   if (lowerQuery.match(/\b(plan|drawing|blueprint|sheet|elevation|section|detail|dimension|scale|layout)\b/i)) {
-    intents.push('plans_drawings');
+    intents.push('plans');
   }
 
   // Specifications related
@@ -515,7 +515,7 @@ function detectQueryIntent(query: string): string[] {
 
   // Daily Reports related
   if (lowerQuery.match(/\b(daily|log|report|inspection|progress|status|field|observation|weather)\b/i)) {
-    intents.push('daily_reports');
+    intents.push('reports');
   }
 
   return intents;
@@ -610,8 +610,8 @@ function extractKeywords(query: string): string[] {
     'window': ['window', 'windows', 'glazing', 'opening'],
     'many': ['many', 'count', 'number', 'total', 'quantity', 'amount'],
     'count': ['count', 'number', 'total', 'quantity', 'many', 'amount'],
-    'schedule': ['schedule', 'table', 'list', 'legend', 'chart'],
-    'legend': ['legend', 'schedule', 'key', 'symbol', 'table'],
+    'schedules': ['schedules', 'table', 'list', 'legend', 'chart'],
+    'legend': ['legend', 'schedules', 'key', 'symbol', 'table'],
     
     // Measurement & Dimension terms
     'depth': ['depth', 'deep', 'below', 'bottom', 'minimum', 'depth of'],
@@ -864,7 +864,7 @@ function calculateRelevanceScore(
     'fire': 10, 'sprinkler': 10, 'alarm': 10,
     
     // Project management
-    'schedule': 8, 'budget': 8, 'cost': 8, 'timeline': 8,
+    'schedules': 8, 'budget': 8, 'cost': 8, 'timeline': 8,
     'milestone': 8, 'phase': 8, 'contractor': 8,
     
     // Counting & Fixture terms (for "how many" questions)
@@ -1063,7 +1063,7 @@ function classifyQueryType(query: string): 'regulatory' | 'project_document' | '
   
   // Project-specific keywords
   const projectKeywords = [
-    'plan', 'drawing', 'sheet', 'schedule', 'budget', 'cost', 'timeline',
+    'plan', 'drawing', 'sheet', 'schedules', 'budget', 'cost', 'timeline',
     'contractor', 'vendor', 'material', 'equipment', 'installation',
     'phase', 'milestone', 'deliverable', 'who is', 'when is', 'where is',
   ];
@@ -2203,7 +2203,7 @@ export async function getScaleContext(
  */
 export function isDrawingTypeQuery(query: string): boolean {
   const drawingTypeKeywords = [
-    'floor plan', 'elevation', 'section', 'detail', 'schedule',
+    'floor plan', 'elevation', 'section', 'detail', 'schedules',
     'what sheet', 'which drawing', 'what type', 'drawing type',
     'plan shows', 'drawing shows', 'sheet shows',
     'architectural', 'structural', 'mechanical', 'electrical', 'plumbing',
@@ -2242,7 +2242,7 @@ export async function getDrawingTypeContext(
       elevation: ['elevation', 'exterior view', 'building elevation'],
       section: ['section', 'wall section', 'building section'],
       detail: ['detail', 'enlarged', 'connection detail'],
-      schedule: ['schedule', 'door schedule', 'window schedule', 'finish schedule'],
+      schedule: ['schedules', 'door schedule', 'window schedule', 'finish schedule'],
       mechanical: ['hvac', 'mechanical', 'ductwork', 'air handling'],
       electrical: ['electrical', 'power', 'lighting', 'panel'],
       plumbing: ['plumbing', 'water', 'sanitary', 'waste'],

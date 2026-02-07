@@ -229,7 +229,7 @@ describe('Document Auto-Sync - processDocumentForSync', () => {
       mockPrisma.document.findUnique.mockResolvedValue({
         id: 'doc-1',
         fileName: 'Budget.xlsx',
-        category: 'budget_cost',
+        category: 'budgets',
       });
 
       mockRouter.determineSourceType.mockReturnValue('xlsx');
@@ -445,7 +445,7 @@ describe('Document Auto-Sync - processDocumentForSync', () => {
       mockPrisma.document.findUnique.mockResolvedValue({
         id: 'doc-1',
         fileName: 'Budget.xlsx',
-        category: 'budget_cost',
+        category: 'budgets',
       });
 
       mockRouter.determineSourceType.mockReturnValue('xlsx');
@@ -755,7 +755,7 @@ describe('Document Auto-Sync - handleDocumentDeletion', () => {
       ]);
 
       mockPrisma.document.findMany.mockResolvedValue([
-        { id: 'doc-2', fileName: 'Budget.xlsx', category: 'budget_cost' },
+        { id: 'doc-2', fileName: 'Budget.xlsx', category: 'budgets' },
       ]);
 
       mockRouter.determineSourceType.mockReturnValue('xlsx');
@@ -994,7 +994,7 @@ describe('Document Auto-Sync - getProjectSyncStatus', () => {
     mockPrisma.projectDataSource.findMany.mockResolvedValue([]);
     mockPrisma.document.findMany.mockResolvedValue([
       { id: 'doc-1', fileName: 'Floor-Plan.pdf', category: 'architectural_plans' },
-      { id: 'doc-2', fileName: 'Budget.xlsx', category: 'budget_cost' },
+      { id: 'doc-2', fileName: 'Budget.xlsx', category: 'budgets' },
     ]);
 
     mockRouter.determineSourceType

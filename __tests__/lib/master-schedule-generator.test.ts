@@ -247,7 +247,7 @@ describe('Master Schedule Generator', () => {
       expect(mocks.extractDetailedScheduleFromPlans).toHaveBeenCalledWith('project-1');
       expect(mocks.matchTasksToSubcontractors).toHaveBeenCalled();
       expect(result.totalTasks).toBeGreaterThan(30);
-      expect(result.sourcesUsed).toContain('plans');
+      expect(result.sourcesUsed).toContain('plans_drawings');
       expect(result.sourcesUsed).toContain('specifications');
     });
 
@@ -773,7 +773,7 @@ describe('Master Schedule Generator', () => {
       });
 
       mocks.prisma.document.findMany.mockResolvedValue([
-        { id: 'doc-1', name: 'floor_plan.pdf', category: 'plans_drawings' },
+        { id: 'doc-1', name: 'floor_plan.pdf', category: 'plans' },
         { id: 'doc-2', name: 'tech_specs.pdf', category: 'specifications' },
         { id: 'doc-3', name: 'contract.pdf', category: 'contracts' },
       ]);

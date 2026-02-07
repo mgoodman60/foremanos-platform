@@ -96,11 +96,11 @@ export async function enhanceProjectData(projectSlug: string): Promise<Enhanceme
     console.log(`[Enhancement] Starting project data enhancement for: ${project.name}`);
 
     // Module 1: Extract budget from documents if not present
-    const budgetDocs = project.Document.filter(d => 
-      d.name.toLowerCase().includes('budget') || 
+    const budgetDocs = project.Document.filter(d =>
+      d.name.toLowerCase().includes('budget') ||
       d.category === 'budget_cost'
     );
-    
+
     if (budgetDocs.length > 0) {
       const budgetResult = await enhanceBudgetData(project.id, budgetDocs);
       result.modulesRun.push('budget_extraction');

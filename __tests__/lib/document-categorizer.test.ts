@@ -40,13 +40,13 @@ describe('Document Categorizer', () => {
   describe('CATEGORY_INFO', () => {
     it('should contain all expected categories', () => {
       const expectedCategories = [
-        'budget_cost',
-        'schedule',
         'plans_drawings',
         'specifications',
+        'schedule',
         'contracts',
-        'daily_reports',
+        'budget_cost',
         'photos',
+        'daily_reports',
         'other',
       ];
 
@@ -395,7 +395,7 @@ describe('Document Categorizer', () => {
             {
               message: {
                 content: JSON.stringify({
-                  category: 'budget_cost',
+                  category: 'budgets',
                   confidence: 0.85,
                   reasoning: 'Cost estimate document',
                 }),
@@ -504,7 +504,7 @@ describe('Document Categorizer', () => {
             {
               message: {
                 content: JSON.stringify({
-                  category: 'plans_drawings',
+                  category: 'plans',
                   confidence: 0.94,
                   reasoning: 'MEP drawing detected',
                 }),
@@ -520,13 +520,13 @@ describe('Document Categorizer', () => {
       const systemMessage = callBody.messages.find((m: any) => m.role === 'system');
       expect(systemMessage).toBeDefined();
       expect(systemMessage.content).toContain('construction document classifier');
-      expect(systemMessage.content).toContain('budget_cost');
-      expect(systemMessage.content).toContain('schedule');
       expect(systemMessage.content).toContain('plans_drawings');
       expect(systemMessage.content).toContain('specifications');
+      expect(systemMessage.content).toContain('schedule');
       expect(systemMessage.content).toContain('contracts');
-      expect(systemMessage.content).toContain('daily_reports');
+      expect(systemMessage.content).toContain('budget_cost');
       expect(systemMessage.content).toContain('photos');
+      expect(systemMessage.content).toContain('daily_reports');
       expect(systemMessage.content).toContain('other');
     });
 
@@ -590,7 +590,7 @@ describe('Document Categorizer', () => {
     });
 
     it('should handle filename with multiple keywords', async () => {
-      // "budget" appears before "schedule" in filename, should match first
+      // Both "budget" and "schedule" appear in filename, but "budget_cost" category is checked first in CATEGORY_INFO
       const result = await suggestDocumentCategory('budget-and-schedule.pdf', 'pdf');
       expect(result.suggestedCategory).toBe('budget_cost');
       expect(result.confidence).toBe(0.85);
@@ -645,13 +645,13 @@ describe('Document Categorizer', () => {
   // ============================================
 
   describe('suggestDocumentCategory - keyword priority', () => {
-    it('should match "cost" keyword for budget_cost', async () => {
+    it('should match "cost" keyword for budgets', async () => {
       const result = await suggestDocumentCategory('cost-estimate.pdf', 'pdf');
       expect(result.suggestedCategory).toBe('budget_cost');
       expect(result.reasoning).toContain('cost');
     });
 
-    it('should match "estimate" keyword for budget_cost', async () => {
+    it('should match "estimate" keyword for budgets', async () => {
       const result = await suggestDocumentCategory('project-estimate.xlsx', 'xlsx');
       expect(result.suggestedCategory).toBe('budget_cost');
       expect(result.reasoning).toContain('estimate');
@@ -665,15 +665,15 @@ describe('Document Categorizer', () => {
       expect(result.reasoning).toContain('critical path');
     });
 
-    it('should match "mep" keyword for plans_drawings', async () => {
+    it('should match "mep" keyword for plans', async () => {
       const result = await suggestDocumentCategory('mep-coordination.pdf', 'pdf');
       expect(result.suggestedCategory).toBe('plans_drawings');
       expect(result.reasoning).toContain('mep');
     });
 
-    it('should match "daily" keyword for daily_reports', async () => {
+    it('should match "daily" keyword for reports', async () => {
       // "inspection" contains "spec" which matches specifications first
-      // Use "daily log" to ensure it matches daily_reports
+      // Use "daily log" to ensure it matches reports
       const result = await suggestDocumentCategory('daily-log.pdf', 'pdf');
       expect(result.suggestedCategory).toBe('daily_reports');
       expect(result.reasoning).toContain('daily');

@@ -421,16 +421,10 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
       'budget_cost': 'Financial document for cost tracking and budget management',
       'schedule': 'Project timeline with task sequencing and milestones',
       'specifications': 'Technical requirements and material standards',
-      'contracts': 'Legal agreements and project contracts',
-      'permits': 'Regulatory approvals and compliance documentation',
-      'reports': 'Project status reports and documentation',
-      'rfi': 'Request for Information - clarification needed',
-      'submittals': 'Vendor/contractor submittals for approval',
-      'change_orders': 'Approved modifications to project scope or cost',
-      'meeting_minutes': 'Record of project meeting discussions',
-      'safety': 'Safety protocols and compliance documents',
-      'geotechnical': 'Soil analysis and site condition reports',
-      'survey': 'Land survey and boundary information',
+      'contracts': 'Legal agreements, project contracts, RFIs, and submittals',
+      'daily_reports': 'Project status reports and daily documentation',
+      'photos': 'Field photos and visual documentation',
+      'other': 'Miscellaneous project documents',
     };
     
     // Discipline-specific content descriptions

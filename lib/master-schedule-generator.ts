@@ -215,7 +215,7 @@ export async function generateMasterSchedule(
         isMilestone: t.isMilestone
       }));
 
-      sourcesUsed.push('plans', 'specifications');
+      sourcesUsed.push('plans_drawings', 'specifications');
       if (budgetItems.length > 0) sourcesUsed.push('SOV/budget');
       if (subcontractors.length > 0) sourcesUsed.push('subcontractors');
     }
@@ -759,7 +759,7 @@ export async function canGenerateSchedule(projectId: string): Promise<{
     where: { projectId }
   });
 
-  const hasPlans = documents.some(d => 
+  const hasPlans = documents.some(d =>
     d.name.toLowerCase().includes('plan') ||
     d.name.toLowerCase().includes('dwg') ||
     d.name.toLowerCase().includes('cad') ||

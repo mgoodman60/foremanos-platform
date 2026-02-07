@@ -194,7 +194,7 @@ export function FloorPlanViewer({
             fileName.includes('floor') ||
             category === 'plans_drawings' ||
             category === 'architectural' ||
-            category === 'plans' ||
+            category === 'plans_drawings' ||
             // Also match common construction document names
             name === 'plans' ||
             fileName === 'plans.pdf' ||

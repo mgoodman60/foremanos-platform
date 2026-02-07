@@ -327,7 +327,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     setShowCategoryModal(true);
   };
 
-  const handleCategorySelected = (category: DocumentCategory) => {
+  const handleCategorySelected = async (category: DocumentCategory) => {
     if (!pendingFile) {
       // User selected category first, now prompt for file
       setPreSelectedCategory(category);
@@ -346,7 +346,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       setTimeout(() => fileInputRef.current?.click(), 100);
     } else {
       // User dropped file first, category selected second (old flow)
-      handleUpload(category);
+      await handleUpload(category);
     }
   };
 

@@ -6,6 +6,7 @@
 type DocumentCategory = string;
 
 // Category display names and descriptions
+// Keys must match Prisma DocumentCategory enum in schema.prisma
 export const CATEGORY_INFO: Record<DocumentCategory, { label: string; description: string; keywords: string[] }> = {
   budget_cost: {
     label: 'Budget & Cost',
@@ -20,7 +21,7 @@ export const CATEGORY_INFO: Record<DocumentCategory, { label: string; descriptio
   plans_drawings: {
     label: 'Plans & Drawings',
     description: 'Architectural, structural, MEP drawings and plans',
-    keywords: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan']
+    keywords: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan', 'conformance']
   },
   specifications: {
     label: 'Specifications',
@@ -85,8 +86,8 @@ export async function suggestDocumentCategory(
 - schedule: Gantt charts, timelines, project schedules
 - plans_drawings: Architectural/structural/MEP drawings and plans
 - specifications: Technical specs, product datasheets
-- contracts: Contracts, change orders, RFIs
-- daily_reports: Daily logs, inspection reports, progress reports
+- contracts: Contracts, change orders, RFIs, legal documents
+- daily_reports: Daily reports, inspection reports, progress reports
 - photos: Progress photos, site documentation images
 - other: Miscellaneous documents
 

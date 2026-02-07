@@ -41,17 +41,17 @@ export const MAX_FILE_SIZE = 50 * 1024 * 1024;
 /**
  * Document categories
  */
+/**
+ * Must match the Prisma DocumentCategory enum in schema.prisma
+ */
 export const DOCUMENT_CATEGORIES = [
-  'plans',
+  'budget_cost',
+  'schedule',
+  'plans_drawings',
   'specifications',
-  'schedules',
   'contracts',
-  'budgets',
-  'submittals',
-  'rfis',
+  'daily_reports',
   'photos',
-  'reports',
-  'correspondence',
   'other',
 ] as const;
 
