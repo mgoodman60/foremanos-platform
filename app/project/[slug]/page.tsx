@@ -252,20 +252,14 @@ export default function ProjectPage() {
     setUploadProgress(5);
 
     try {
-      // Use chunked upload for files larger than 5MB
-      if (pendingFile.size > 5 * 1024 * 1024) {
-        await uploadInChunks(pendingFile, category);
-      } else {
-        await uploadDirect(pendingFile, category);
-      }
+      // Always use presigned URL flow (no size limit, bypasses Vercel)
+      await uploadDirect(pendingFile, category);
 
       setUploadProgress(100);
       toast.success(`Document "${pendingFile.name}" uploaded successfully!`);
-      
-      // Refresh project data
+
       await fetchProject();
-      
-      // Reset file input and pending file
+
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -374,139 +368,68 @@ export default function ProjectPage() {
   };
 
   const uploadDirect = async (file: File, category: DocumentCategory) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('projectId', project!.id);
-    formData.append('category', category);
+    const toastId = toast.loading('Preparing upload...');
 
-    setUploadProgress(30);
-
-    const toastId = toast.loading('Uploading document...');
-    
-    const res = await fetchWithRetry('/api/documents/upload', {
+    // Step 1: Get presigned URL
+    const presignRes = await fetchWithRetry('/api/documents/presign', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileSize: file.size,
+        contentType: file.type || 'application/octet-stream',
+        projectId: project!.id,
+        category,
+      }),
       retryOptions: {
-        maxRetries: 3,
-        initialDelay: 2000,
+        maxRetries: 2,
+        initialDelay: 1000,
         onRetry: (attempt: number) => {
-          toast.loading(`Upload interrupted, retrying... (${attempt}/3)`, { id: toastId });
+          toast.loading(`Preparing upload, retrying... (${attempt}/2)`, { id: toastId });
         },
       },
     });
 
-    toast.dismiss(toastId);
-    setUploadProgress(70);
-
-    if (!res.ok) {
-      // Try to parse as JSON, but handle plain text errors
-      let errorMessage = 'Failed to upload document';
-      let errorCode: string | undefined;
-      let retryAdvice: string | undefined;
+    if (!presignRes.ok) {
+      toast.dismiss(toastId);
+      let errorMessage = 'Failed to prepare upload';
       try {
-        const data = await res.json();
+        const data = await presignRes.json();
         errorMessage = data.error || errorMessage;
-        errorCode = data.errorCode;
-        retryAdvice = data.retryAdvice;
-      } catch (jsonError) {
-        // Response is not JSON, try to get text
-        try {
-          const text = await res.text();
-          errorMessage = text || errorMessage;
-        } catch (textError) {
-          // Can't read response, use status text
-          errorMessage = `Upload failed: ${res.statusText}`;
-        }
-      }
-      const parts = [errorMessage];
-      if (errorCode) {
-        parts[0] = `[${errorCode}] ${parts[0]}`;
-      }
-      if (retryAdvice) {
-        parts.push(retryAdvice);
-      }
-      throw new Error(parts.join(' — '));
-    }
-  };
-
-  const uploadInChunks = async (file: File, category: DocumentCategory) => {
-    const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
-    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-    const uploadId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-
-    console.log(`[CHUNKED UPLOAD] Starting: ${file.name} (${totalChunks} chunks)`);
-    const toastId = toast.loading(`Uploading ${file.name}...`);
-
-    // Upload each chunk with retry
-    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-      const start = chunkIndex * CHUNK_SIZE;
-      const end = Math.min(start + CHUNK_SIZE, file.size);
-      const chunk = file.slice(start, end);
-
-      const formData = new FormData();
-      formData.append('chunk', chunk);
-      formData.append('metadata', JSON.stringify({
-        uploadId,
-        fileName: file.name,
-        fileSize: file.size,
-        chunkIndex,
-        totalChunks,
-        projectId: project!.id,
-      }));
-
-      const res = await fetchWithRetry('/api/documents/upload-chunk', {
-        method: 'POST',
-        body: formData,
-        retryOptions: {
-          maxRetries: 3,
-          initialDelay: 2000,
-          onRetry: (attempt: number) => {
-            toast.loading(`Chunk ${chunkIndex + 1} upload interrupted, retrying... (${attempt}/3)`, { id: toastId });
-          },
-        },
-      });
-
-      if (!res.ok) {
-        toast.dismiss(toastId);
-        // Try to parse as JSON, but handle plain text errors
-        let errorMessage = `Failed to upload chunk ${chunkIndex + 1}`;
-        try {
-          const data = await res.json();
-          errorMessage = data.error || errorMessage;
-        } catch (jsonError) {
-          // Response is not JSON, try to get text
-          try {
-            const text = await res.text();
-            errorMessage = `${errorMessage}: ${text}`;
-          } catch (textError) {
-            // Can't read response, use status text
-            errorMessage = `${errorMessage}: ${res.statusText}`;
-          }
-        }
-        throw new Error(errorMessage);
-      }
-
-      // Update progress (reserve last 10% for assembly)
-      const progress = 10 + Math.floor((chunkIndex + 1) / totalChunks * 80);
-      setUploadProgress(progress);
-      toast.loading(`Uploading... ${Math.round(progress)}%`, { id: toastId });
-      
-      console.log(`[CHUNKED UPLOAD] Chunk ${chunkIndex + 1}/${totalChunks} uploaded`);
+      } catch { /* ignore */ }
+      throw new Error(errorMessage);
     }
 
-    // Complete the upload (server will assemble chunks)
-    console.log('[CHUNKED UPLOAD] Completing upload...');
-    setUploadProgress(90);
-    toast.loading('Finalizing upload...', { id: toastId });
+    const { uploadUrl, cloudStoragePath } = await presignRes.json();
+    setUploadProgress(20);
+    toast.loading('Uploading to storage...', { id: toastId });
 
-    const completeRes = await fetchWithRetry('/api/documents/upload-complete', {
+    // Step 2: Upload directly to R2
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file,
+    });
+
+    if (!uploadRes.ok) {
+      toast.dismiss(toastId);
+      if (uploadRes.status === 403) {
+        throw new Error('Upload URL expired. Please try again.');
+      }
+      throw new Error(`Upload to storage failed (${uploadRes.status})`);
+    }
+
+    setUploadProgress(70);
+    toast.loading('Confirming upload...', { id: toastId });
+
+    // Step 3: Confirm upload
+    const confirmRes = await fetchWithRetry('/api/documents/confirm-upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        uploadId,
+        cloudStoragePath,
         fileName: file.name,
         fileSize: file.size,
-        totalChunks,
         projectId: project!.id,
         category,
       }),
@@ -514,33 +437,21 @@ export default function ProjectPage() {
         maxRetries: 3,
         initialDelay: 2000,
         onRetry: (attempt: number) => {
-          toast.loading(`Finalizing interrupted, retrying... (${attempt}/3)`, { id: toastId });
+          toast.loading(`Confirming upload, retrying... (${attempt}/3)`, { id: toastId });
         },
       },
     });
 
     toast.dismiss(toastId);
 
-    if (!completeRes.ok) {
-      // Try to parse as JSON, but handle plain text errors
-      let errorMessage = 'Failed to complete upload';
+    if (!confirmRes.ok) {
+      let errorMessage = 'Failed to confirm upload';
       try {
-        const data = await completeRes.json();
+        const data = await confirmRes.json();
         errorMessage = data.error || errorMessage;
-      } catch (jsonError) {
-        // Response is not JSON, try to get text
-        try {
-          const text = await completeRes.text();
-          errorMessage = text || errorMessage;
-        } catch (textError) {
-          // Can't read response, use status text
-          errorMessage = `Upload completion failed: ${completeRes.statusText}`;
-        }
-      }
+      } catch { /* ignore */ }
       throw new Error(errorMessage);
     }
-
-    console.log('[CHUNKED UPLOAD] Upload complete!');
   };
 
   // Helper to format "Last synced" timestamp

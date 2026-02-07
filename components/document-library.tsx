@@ -204,19 +204,37 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
     setUploading(true);
     setUploadProgress(0);
-    const formData = new FormData();
-    formData.append('file', fileToUpload);
-    formData.append('projectId', projectId);
-    formData.append('category', category);
 
     try {
-      // Use XMLHttpRequest for progress tracking
+      // Step 1: Get presigned URL (lightweight JSON request)
+      const presignRes = await fetch('/api/documents/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: fileToUpload.name,
+          fileSize: fileToUpload.size,
+          contentType: fileToUpload.type || 'application/octet-stream',
+          projectId,
+          category,
+        }),
+      });
+
+      if (!presignRes.ok) {
+        const data = await presignRes.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to prepare upload');
+      }
+
+      const { uploadUrl, cloudStoragePath } = await presignRes.json();
+      setUploadProgress(10);
+
+      // Step 2: Upload file directly to R2 via presigned URL (XHR for progress)
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
-            const percent = Math.round((e.loaded / e.total) * 100);
+            // Map progress to 10-90% range (10% for presign, 90-100% for confirm)
+            const percent = 10 + Math.round((e.loaded / e.total) * 80);
             setUploadProgress(percent);
           }
         });
@@ -224,52 +242,56 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
         xhr.addEventListener('load', () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
+          } else if (xhr.status === 403) {
+            reject(new Error('Upload URL expired. Please try again.'));
           } else {
-            let errorMessage = 'Failed to upload document';
-            let errorCode: string | undefined;
-            let retryAdvice: string | undefined;
-            try {
-              const data = JSON.parse(xhr.responseText);
-              errorMessage = data.error || errorMessage;
-              errorCode = data.errorCode;
-              retryAdvice = data.retryAdvice;
-            } catch {
-              // JSON parse failed — use raw response text as fallback
-              const rawText = xhr.responseText?.trim();
-              if (rawText) {
-                errorMessage = rawText;
-              } else if (xhr.statusText) {
-                errorMessage = `Upload failed: ${xhr.statusText}`;
-              }
-            }
-
-            // Build a detailed error message with errorCode and retryAdvice
-            const parts = [errorMessage];
-            if (errorCode) {
-              parts[0] = `[${errorCode}] ${parts[0]}`;
-            }
-            if (retryAdvice) {
-              parts.push(retryAdvice);
-            }
-            reject(new Error(parts.join(' — ')));
+            reject(new Error(`Upload to storage failed (${xhr.status})`));
           }
         });
 
         xhr.addEventListener('error', () => {
-          reject(new Error('Network error — check your connection and try again'));
+          reject(new Error('Network error during upload — check your connection and try again'));
         });
 
-        xhr.open('POST', '/api/documents/upload');
-        xhr.send(formData);
+        xhr.open('PUT', uploadUrl);
+        xhr.setRequestHeader('Content-Type', fileToUpload.type || 'application/octet-stream');
+        xhr.send(fileToUpload);
       });
 
+      setUploadProgress(90);
+
+      // Step 3: Confirm upload (server validates, scans, creates record)
+      const confirmRes = await fetch('/api/documents/confirm-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cloudStoragePath,
+          fileName: fileToUpload.name,
+          fileSize: fileToUpload.size,
+          projectId,
+          category,
+        }),
+      });
+
+      if (!confirmRes.ok) {
+        const data = await confirmRes.json().catch(() => ({}));
+        const errorMessage = data.error || 'Failed to confirm upload';
+        const errorCode = data.errorCode;
+        const retryAdvice = data.retryAdvice;
+        const parts = [errorMessage];
+        if (errorCode) parts[0] = `[${errorCode}] ${parts[0]}`;
+        if (retryAdvice) parts.push(retryAdvice);
+        throw new Error(parts.join(' — '));
+      }
+
+      setUploadProgress(100);
       toast.success('Document uploaded successfully');
       setShowCategoryModal(false);
       setPendingFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      fetchDocuments(); // Refresh the list
+      fetchDocuments();
     } catch (error) {
       console.error('Upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to upload document');
