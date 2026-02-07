@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generatePresignedUploadUrl } from '@/lib/s3';
+import { validateS3Config } from '@/lib/aws-config';
 import { prisma } from '@/lib/db';
 
 // POST - Get presigned URL for photo upload
@@ -13,6 +14,14 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const s3Check = validateS3Config();
+    if (!s3Check.valid) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Please contact your administrator.' },
+        { status: 503 }
+      );
     }
 
     const conversationId = params.id;

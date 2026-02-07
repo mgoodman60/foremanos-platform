@@ -2,6 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Operating Mode
+
+**Claude operates as an orchestrator.** Do not write implementation code directly.
+Delegate all coding work to specialized agents or agent teams.
+
+### Decision Framework
+
+**Use an agent team when:**
+- The task involves 3+ independent workstreams (e.g., frontend + backend + tests)
+- Code review is needed across multiple concerns (security, performance, coverage)
+- Debugging where multiple hypotheses should be tested simultaneously
+- Research or investigation where different angles should be explored in parallel
+- Refactoring multiple modules that don't share files
+- The user says "let's work on..." (implies a session, not a quick fix)
+
+**Use a single agent (subagent) when:**
+- A focused, single-concern task (one file, one module)
+- The result just needs to be reported back
+- Workers don't need to talk to each other
+
+**Handle directly (no agent) when:**
+- Trivial fixes (typo, single-line config change)
+- Answering questions about the codebase
+- The user explicitly says to do it directly
+
+### What Claude Does Directly
+- Read and analyze code (for planning and review)
+- Run verification commands (build, test, lint) to check agent work
+- Create/edit configuration and documentation files (CLAUDE.md, agents, skills, plans)
+- Orchestrate agents and teams (spawn, assign, monitor, synthesize)
+- Answer questions about the codebase
+- Commit and push (when asked)
+
+### Agent Team Best Practices
+- Assign each teammate distinct files to avoid conflicts
+- Use delegate mode when coordinating 3+ teammates
+- Give each teammate specific context in their spawn prompt (they don't inherit conversation history)
+- Aim for 5-6 tasks per teammate
+- Require plan approval for risky or schema-changing work
+- Start research/review teammates before implementation teammates
+
 ## Build & Development Commands
 
 ```bash
@@ -39,8 +80,8 @@ components/       # 299 React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations (112 models)
 __tests__/        # Vitest tests (153 test files: lib, API, smoke, hooks)
 e2e/              # Playwright E2E tests (23 spec files)
-.claude/agents/   # 23 custom Claude Code agents
-.claude/skills/   # 13 slash command skills
+.claude/agents/   # 24 custom Claude Code agents
+.claude/skills/   # 13 project slash commands + 24 installed skills (see below)
 ```
 
 ### Key Service Modules
@@ -141,81 +182,9 @@ Key model groups in `prisma/schema.prisma`:
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 - **Comprehensive lib coverage**: All major lib modules have dedicated test files
 
-### Lib Test Coverage (127 files)
+### Test Coverage
 
-All lib modules in `lib/` have comprehensive test coverage in `__tests__/lib/`. Key test suites by category:
-
-**Core Infrastructure**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `rag.test.ts` | 67 | RAG scoring, query classification, chunk retrieval |
-| `redis.test.ts` | 34 | Redis operations, in-memory fallback |
-| `rate-limiter.test.ts` | 32 | Distributed rate limiting, Redis + memory fallback |
-| `db.test.ts` | 1 | Database connection, Prisma singleton |
-| `db-helpers.test.ts` | 23 | Retry logic, error handling |
-| `query-cache.test.ts` | 40 | LLM response caching, TTL management |
-| `retry-util.test.ts` | 73 | Retry logic, exponential backoff, database retry |
-
-**Authentication & Security**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `auth-options.test.ts` | 30 | NextAuth callbacks, JWT handling |
-| `access-control.test.ts` | 35 | Role-based access, document permissions |
-| `password-validator.test.ts` | 29 | Password rules, weak password detection |
-
-**Document Processing**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `document-processor.test.ts` | 20 | PDF processing, text extraction |
-| `document-intelligence.test.ts` | 30 | AI extraction, classification |
-| `document-auto-sync.test.ts` | 50 | Document sync orchestration |
-| `document-categorizer.test.ts` | 35 | Auto-categorization logic |
-| `pdf-to-image.test.ts` | 25 | PDF rasterization |
-
-**Budget & Cost**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `budget-sync-service.test.ts` | 16 | Budget synchronization |
-| `budget-auto-sync.test.ts` | 37 | AI budget extraction |
-| `budget-extractor-ai.test.ts` | 15 | AI extraction logic |
-| `actual-cost-sync.test.ts` | 43 | Pay app/invoice sync |
-| `cost-rollup-service.test.ts` | 16 | Cost aggregation |
-| `cost-alert-service.test.ts` | 28 | Budget alerts |
-
-**Schedule & Planning**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `schedule-parser.test.ts` | 25 | Schedule parsing |
-| `schedule-extraction-service.test.ts` | 13 | AI schedule extraction |
-| `schedule-analyzer.test.ts` | 30 | Critical path, variance |
-| `lookahead-service.test.ts` | 35 | Look-ahead generation |
-| `master-schedule-generator.test.ts` | 40 | Master schedule creation |
-
-**Takeoffs & Quantities**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `takeoff-extractor.test.ts` | 45 | Quantity extraction |
-| `takeoff-calculations.test.ts` | 21 | Unit conversions, math |
-| `takeoff-formatters.test.ts` | 28 | Output formatting |
-| `symbol-libraries.test.ts` | 35 | Symbol recognition |
-
-**Integrations**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `stripe.test.ts` | 31 | Subscriptions, checkout |
-| `s3.test.ts` | 21 | AWS S3 operations |
-| `llm-providers.test.ts` | 12 | Multi-provider abstraction |
-| `vision-api-multi-provider.test.ts` | 17 | Vision API with fallback |
-| `autodesk-auth.test.ts` | 20 | Autodesk OAuth |
-| `weather-service.test.ts` | 25 | Weather API integration |
-
-**Field Operations**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `daily-report-enhancements.test.ts` | 24 | Daily report features |
-| `daily-report-sync-service.test.ts` | 18 | Report synchronization |
-| `photo-documentation.test.ts` | 30 | Field photo processing |
-| `weather-automation.test.ts` | 22 | Weather delay tracking |
+128 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
 
 ### API Test Suites
 | Directory | Coverage |
@@ -276,14 +245,15 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 
 ## Custom Agents
 
-23 specialized agents in `.claude/agents/`:
+24 specialized agents in `.claude/agents/`:
 
-### Development Agents (7)
+### Development Agents (8)
 | Agent | Purpose |
 |-------|---------|
 | `security` | Vulnerability scanning, security audits, code review (OWASP, auth, injection) |
 | `tester` | Run tests, generate tests, improve coverage |
 | `documenter` | Project and API documentation |
+| `content-writer` | Marketing copy, feature descriptions, landing pages, changelogs |
 | `database` | Prisma schema, migrations, query optimization |
 | `fixer` | Bug fixes, build validation, dependency updates |
 | `ui` | React components and design system |
@@ -312,13 +282,59 @@ Shared mocks are centralized in `__tests__/mocks/shared-mocks.ts` for reuse acro
 | `bim-specialist` | Autodesk/BIM integration, clash detection |
 | `photo-analyst` | Field photo analysis for progress/safety |
 
-## Skills (Slash Commands)
+## Agent Teams
 
-13 skills available via `/command`:
+9 predefined team configurations for coordinated multi-agent work. Teams are ephemeral — created per task, torn down when done. Use `/team` to list teams or `/team <number> <task>` to invoke one.
+
+| # | Team | Agents | Purpose |
+|---|------|--------|---------|
+| 1 | UI/UX Feature | `ux-design`, `ui`, `coder`, `tester` | End-to-end UI feature delivery |
+| 2 | Construction Pipeline | `document-intelligence`, `quantity-surveyor`, `data-sync`, `documenter`, `tester` | Extraction and RAG pipeline improvements |
+| 3 | Back-End API | `coder`, `database`, `tester` | Schema + API routes + unit tests |
+| 4 | Quality & Resilience | `tester`, `security`, `resilience-architect`, `fixer` | Pre-deployment validation |
+| 5 | Project Operations | `project-controls`, `analytics-reports`, `field-operations`, `data-sync`, `photo-analyst` | Reports, metrics, data pipelines |
+| 6 | Docs & Marketing | `documenter`, `ux-design`, `content-writer` | Documentation and marketing content |
+| 7 | Migration & Upgrade | `refactoring-agent`, `fixer`, `tester`, `security` | Major dependency upgrades |
+| 8 | Compliance & Safety | `compliance-checker`, `field-operations`, `submittal-tracker`, `photo-analyst` | Safety audits, permits, OSHA |
+| 9 | Full-Stack Feature | `coder`, `ux-design`, `database`, `ui`, `tester`, `security` | Full-stack: schema + API + UI + tests |
+
+**Full-stack workflow:** Team 3 (API) → Team 1 (UI) → Team 4 (QA), or Team 9 for all-in-one
+
+See `.claude/AGENTS_GUIDE.md` for full team definitions, workflows, and invocation patterns.
+Templates: `.claude/plans/templates/team-invocation.md`, `.claude/plans/templates/implementation-spec.md`
+
+### Team Auto-Selection
+
+When the user's request matches these patterns, **automatically create the team** instead of using a single agent.
+
+| User Says | Team | Why |
+|-----------|------|-----|
+| "Let's work on UI", "build a new page", "add a component", "redesign the..." | Team 1 (UI/UX) | Multi-step: research → design → build → test |
+| "Improve extraction", "fix the RAG", "takeoff accuracy", "new discipline" | Team 2 (Pipeline) | Coordinated: prompts + formulas + scoring + tests |
+| "Add a new API endpoint", "build the backend for...", "new feature" (backend-scoped) | Team 3 (API) | Schema + route + tests as atomic unit |
+| "Pre-deploy check", "validate before release", "run quality checks" | Team 4 (Quality) | Parallel: tests + security + resilience + fixes |
+| "Generate reports", "project metrics", "sprint status" | Team 5 (Ops) | Data flow: field → sync → controls → reports |
+| "Write docs", "marketing copy", "changelog", "landing page content" | Team 6 (Docs) | Research + technical docs + copy |
+| "Upgrade Next.js", "migrate to ESLint 9", "fix vulnerabilities" | Team 7 (Migration) | Incremental: analyze → update → test → verify |
+| "Safety audit", "permit check", "OSHA compliance" | Team 8 (Compliance) | Cross-domain: photos + field + permits + submittals |
+| "Add a feature", "build a new...", "implement...", "let's add...", "new feature" | Team 9 (Feature) | Full-stack: schema → API → UI → tests → security |
+
+### Single Agent vs Team Escalation
+
+Use a **single agent** for focused, single-file tasks. Auto-escalate to a **team** when the task:
+- Spans 3+ files or concerns
+- Involves research → implementation → testing
+- Would benefit from parallel exploration
+- The user says "let's work on..." (implies a session, not a quick fix)
+
+## Project Skills (Slash Commands)
+
+14 project-level skills available via `/command`:
 
 | Command | Purpose |
 |---------|---------|
 | `/agent` | List and invoke specialized agents |
+| `/team` | Create and manage agent teams (see Team Auto-Selection above) |
 | `/build` | Run build and report errors |
 | `/test` | Run tests with optional filter |
 | `/review` | Code review current changes |
@@ -460,13 +476,17 @@ Required:
 Optional:
 - `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` - AI providers
 - `STRIPE_SECRET_KEY` - Payments
-- `AWS_REGION`, `AWS_BUCKET_NAME` - S3 storage (see `S3_SETUP_GUIDE.md` for detailed AWS setup)
+- `S3_ENDPOINT` - S3-compatible endpoint URL (required for Cloudflare R2, e.g., `https://<account-id>.r2.cloudflarestorage.com`)
+- `AWS_REGION` - AWS region or `auto` for R2 (also used for Cloudflare R2)
+- `AWS_BUCKET_NAME` - S3/R2 bucket name (also used for Cloudflare R2)
+- `AWS_ACCESS_KEY_ID` - S3/R2 access key (also used for Cloudflare R2)
+- `AWS_SECRET_ACCESS_KEY` - S3/R2 secret key (also used for Cloudflare R2)
 - `REDIS_URL` - Caching (falls back to memory)
 - `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_SECRET` - OneDrive integration
 - `ONEDRIVE_TENANT_ID`, `ONEDRIVE_REDIRECT_URI` - OneDrive OAuth
 - `RESEND_API_KEY` - Email service
 
-**Note:** See `S3_SETUP_GUIDE.md` for comprehensive AWS S3 bucket configuration, IAM permissions, and CORS setup instructions.
+**Note:** See `S3_SETUP_GUIDE.md` for comprehensive Cloudflare R2 (recommended) or AWS S3 bucket configuration. R2 offers zero egress fees and simpler setup without IAM policies or CORS configuration.
 
 ## Known Quirks
 
@@ -483,214 +503,25 @@ npx prisma generate
 npm run build
 ```
 
-## Recent Fixes (January-February 2026)
+## Recent Changes & Known Blockers
 
-### February 2026 - Security & Infrastructure
-
-**jspdf HIGH Severity Vulnerability Fix**
-Migrated from jspdf to @react-pdf/renderer to address multiple HIGH severity vulnerabilities:
-
-| Migration | Impact |
-|-----------|--------|
-| `components/room-pdf-generator.tsx` | Room report PDF generation |
-| `components/room-bulk-export.tsx` | Bulk room export functionality |
-| `components/project-summary-report.tsx` | Project summary reports |
-
-**Documentation Created:**
-- `JSPDF_MIGRATION_SUMMARY.md` - Complete migration guide and implementation details
-- `S3_SETUP_GUIDE.md` - Comprehensive AWS S3 setup instructions
-
-### NPM Security Vulnerabilities (February 2026)
-Fixed 25 of 33 npm vulnerabilities via safe updates and overrides:
-
-| Fix | Vulnerabilities | Severity |
-|-----|----------------|----------|
-| Next.js 14.2.28 → 14.2.35 | 8 fixed | HIGH (SSRF, DoS, info exposure) |
-| fast-xml-parser@5.3.4 override | 11 fixed | HIGH (AWS SDK DoS) |
-| glob@10.5.0 override | 1 fixed | HIGH (command injection) |
-| lodash 4.17.21 → 4.17.23 | 1 fixed | MODERATE (prototype pollution) |
-| jspdf migration to @react-pdf/renderer | Multiple HIGH vulnerabilities fixed | HIGH |
-
-**Remaining 8 vulnerabilities** require breaking changes:
+### Remaining NPM Vulnerabilities (8 — require breaking changes)
 - esbuild (Vitest 2.x) - 3 MODERATE: Vitest 4.x causes 358 test failures
 - eslint - 1 MODERATE: Requires ESLint 9 + flat config migration
 - Next.js DoS - 2 HIGH: Requires Next.js 15+ major version upgrade
 - tar - 3 HIGH: Canvas rebuild fails (no Node.js v25 prebuilt binaries)
 
-### Security Fixes (January 2026)
-- **Auth bypass**: Fixed unauthenticated admin endpoint in `app/api/admin/finalize-reports/route.ts`
-- **Path traversal**: Added validation in `app/api/documents/[id]/route.ts`
-- **401/403 separation**: 13 admin API routes now return proper HTTP status codes
+### LLM Model Config (actively referenced)
+Centralized in `lib/model-config.ts`. See `model-config.ts` for all constants. Key points:
+- `resolveModelAlias()` maps deprecated models (gpt-4o, gpt-3.5-turbo, claude-3-5-sonnet) to current ones
+- Tier enforcement via `getEffectiveModel()` in `lib/stripe.ts`
+- Vision provider chain: Claude Opus 4.6 → GPT-5.2 → Claude Sonnet 4.5
 
-### Database Bug Fixes
-- **N+1 query**: Batch transaction in `lib/actual-cost-sync.ts:182`
-- **Race condition**: Upsert pattern in `lib/budget-sync-service.ts:156`
-- **Promise.all handling**: Error logging in `lib/auth-options.ts:169`
-- **Null checks**: Graceful degradation in `lib/analytics-service.ts:58`
-
-### Type Safety Improvements
-- Removed 20+ `as any` casts from Stripe webhook route
-- Imported Prisma enums directly in `lib/workflow-service.ts`
-- Created type helper files for Stripe and document metadata
-
-### UI Fixes
-- **Onboarding modal**: Fixed `onOpenChange` callback in `components/onboarding-wizard.tsx`
-- **SSR hydration**: Fixed blank screen flash in `components/session-provider.tsx`
-
-### E2E Test Fixes
-- **localStorage access**: Fixed SecurityError in `e2e/helpers/test-user.ts` with try-catch and domain navigation
-- **Chat page**: Created `app/chat/page.tsx` with project selection interface
-- **API test expectations**: Fixed property paths and HTTP methods in `e2e/api.spec.ts`
-- **Email service Prisma**: Fixed null filter syntax using `NOT: { email: null }` in `lib/email-service.ts`
-- **Chat auth**: Added `/chat` to middleware matcher for protected route redirect
-
-### Test File Lint & Type Fixes
-- **Missing imports**: Added `afterEach`/`afterAll` to 4 test files (analytics-service, calendar-export, redis-cache-adapter, report-change-log)
-- **NODE_ENV assignment**: Replaced direct `process.env.NODE_ENV =` with `vi.stubEnv()` in 3 files (autodesk-oss, logger, redis-client)
-- **Mock types**: Added `updatedAt` to 15+ ProjectDataSource mocks in document-intelligence-router.test.ts
-- **Enum usage**: Replaced string literals with `SymbolCategory` and `DisciplineCode` enums in legend-extractor.test.ts
-- **Type casts**: Fixed `IntersectionObserverEntry` casts with `as unknown as` pattern in lazy-loader.test.ts
-- **Sharp mocks**: Added full mock interface (resize, jpeg, png, toBuffer) in pdf-to-image-raster.test.ts
-- **Type narrowing**: Prevented control flow narrowing with `as string` casts in utils.test.ts
-- **ESLint errors**: Fixed `no-non-null-asserted-optional-chain` errors in cost-calculation-service.test.ts
-
-### Infrastructure & Testing
-- **Comprehensive test coverage**: 153 Vitest test files + 23 Playwright E2E spec files
-- **Strong lib module coverage**: 128 lib test files covering major functionality
-- **23 E2E test files**: Full user-facing feature coverage
-- **Claude Code agents**: Added 19 specialized agents to `.claude/agents/`
-- **Design tokens**: Migrated to CSS variables in chart and UI components
-- **Virus scanning**: Implemented `lib/virus-scanner.ts` for file upload security
-- **Vercel compatibility**: Serverless function fixes and build optimizations
-
-### Test Infrastructure Improvements (February 2026)
-Fixed 177 Vitest test failures and added 7 new E2E test files:
-
-**Vitest Mock Fixes:**
-- Added `$transaction` mock to document-processor, lookahead-service, cost-rollup-service, submittal-verification-service tests
-- Fixed `timers/promises` mock pattern in vision-api-wrapper tests using `vi.hoisted()`
-- Added lookahead-service mock to schedule-analyzer tests
-- Fixed Buffer to Uint8Array conversion in pdf-to-image modules
-- Added virus-scanner and macro-detector mocks to shared-mocks.ts
-- Skipped fillPdfForm tests (pdf-lib/Vitest compatibility issue)
-- Skipped upload tests (FormData Node.js environment limitation)
-
-**New E2E Test Files (7 files, ~227 tests):**
-| File | Tests | Coverage |
-|------|-------|----------|
-| `e2e/document-upload.spec.ts` | 28 | Document upload workflow, progress, validation |
-| `e2e/daily-reports.spec.ts` | 22 | Daily report CRUD, labor/equipment entries |
-| `e2e/mep-submittals.spec.ts` | 30 | MEP submittal tracking, approval workflows |
-| `e2e/takeoffs.spec.ts` | 37 | Quantity takeoffs, export, filtering |
-| `e2e/bim-viewer.spec.ts` | 37 | BIM/3D viewer, navigation, properties |
-| `e2e/compliance.spec.ts` | 31 | Permits, inspections, OSHA compliance |
-| `e2e/photo-upload.spec.ts` | 42 | Field photos, gallery, annotations |
-
-**E2E Test Fixes:**
-- Changed `networkidle` to `domcontentloaded` for reliability
-- Updated project slugs to match seeded test data (riverside-apartments)
-- Fixed selectors to match actual UI components
-
-### Logging & Observability (Phase 6 - February 2026)
-Replaced ~215 `console.log/error/warn` calls with structured `logger` from `@/lib/logger` in 5 high-volume modules:
-
-| File | Calls Replaced |
-|------|----------------|
-| `lib/vision-api-multi-provider.ts` | 63 |
-| `lib/document-processor.ts` | 69 |
-| `lib/chat/processors/context-builder.ts` | 30 |
-| `lib/intelligence-orchestrator.ts` | 23 |
-| `lib/schedule-extractor-ai.ts` | 30 |
-
-Benefits:
-- Structured JSON output for log aggregation services
-- Consistent context prefixes (e.g., `VISION_API`, `PROCESS`, `PHASE_A`)
-- Metadata objects instead of string interpolation
-- Error objects properly serialized with stack traces
-- Debug level only logs in development
-
-### New Service Modules
-- **Vision API**: Multi-provider vision with fallback (`lib/vision-api-multi-provider.ts`)
-- **Query caching**: Redis-backed LLM response caching (`lib/query-cache.ts`)
-- **Analytics**: Project KPI and metrics service (`lib/analytics-service.ts`)
-- **Workflow**: State machine for document processing (`lib/workflow-service.ts`)
-- **Logger**: Centralized structured logging utility (`lib/logger.ts`)
-
-### LLM Model Migration: Claude-Primary Architecture (February 2026)
-
-Migrated from stale OpenAI models to Claude-primary LLM usage with centralized configuration and tier-based enforcement.
-
-**Centralized Model Config (`lib/model-config.ts`)**:
-
-| Constant | Value | Usage |
-|----------|-------|-------|
-| `DEFAULT_MODEL` | `claude-sonnet-4-5-20250929` | Primary for all paid tiers |
-| `PREMIUM_MODEL` | `claude-opus-4-6` | Complex queries, Business/Enterprise |
-| `VISION_MODEL` | `claude-opus-4-6` | Vision/image analysis (all tiers) |
-| `FALLBACK_MODEL` | `gpt-5.2` | OpenAI fallback (NOT gpt-4o) |
-| `SIMPLE_MODEL` | `gpt-4o-mini` | Cheap simple queries, Free tier |
-| `EXTRACTION_MODEL` | `claude-sonnet-4-5-20250929` | Document extraction tasks |
-
-**Tier Enforcement** (`lib/stripe.ts`):
-- `isModelAllowed(tier, model)` — checks if model is permitted for tier
-- `getEffectiveModel(tier, requestedModel, complexity)` — downgrades to best allowed model
-- Free: `gpt-4o-mini` only; Starter: + Claude Sonnet; Pro+: all models including Opus
-
-**Complexity Routing** (`lib/query-cache.ts`):
-- Simple queries → `gpt-4o-mini` (cheapest)
-- Medium queries → Claude Sonnet 4.5 (balanced)
-- Complex/Gantt → Claude Opus 4.6 (best quality)
-
-**Vision Provider Chain** (`lib/vision-api-multi-provider.ts`):
-- Claude Opus 4.6 (primary) → GPT-5.2 (fallback) → Claude Sonnet 4.5 (secondary)
-- Cloudflare block detection triggers immediate failover
-
-**`resolveModelAlias()`** maps deprecated models: `gpt-4o` → `gpt-5.2`, `gpt-3.5-turbo` → `gpt-4o-mini`, `claude-3-5-sonnet` → `claude-sonnet-4-5-20250929`
-
-**Files changed**: 30+ source files, 15+ test files. Zero `gpt-4o` references at runtime.
-
-### Earlier OpenAI Migration (February 2026)
-
-Migrated from Abacus AI to direct OpenAI API:
-- Updated `lib/llm-providers.ts` for direct OpenAI integration
-- Fixed remaining API routes using Abacus AI endpoints
-- Updated test files for OpenAI API compatibility
-- Removed canvas dependency to fix Vercel 250MB function limit
-
-### Chat API & UI Fixes (February 2026)
-
-**SPEC-001: Chat API Error Handling**
-- Added structured error logging to `app/api/chat/route.ts`, `lib/llm-providers.ts`, `lib/chat/processors/response-streamer.ts`, `lib/chat/processors/llm-handler.ts`
-- Error messages now show specific details (401/429/500) instead of generic failures
-- Logs capture full API response details with `[CHAT_API]` context prefix
-
-**SPEC-002: Project Creation API Fix**
-- Fixed response case mismatch in `app/api/projects/route.ts` (`Project` → `project`)
-- Users now see success toast instead of "Internal server error"
-
-**SPEC-003: Dialog Accessibility (WCAG 2.1)**
-Added ARIA attributes to 14 dialog/modal components:
-- `components/photo-library.tsx` (3 dialogs)
-- `components/room-browser.tsx`, `components/room-comparison.tsx`
-- `components/document-library.tsx`, `components/document-metadata-modal.tsx`
-- `components/mep/EquipmentList.tsx`, `components/mep/MaintenanceSchedule.tsx`, `components/mep/SubmittalList.tsx`
-- `components/daily-report-history.tsx`, `components/photo-documentation-hub.tsx`
-- `components/conversation-sidebar.tsx`, `components/batch-upload-modal.tsx`
-
-**SPEC-004: Chat Error Messages**
-- Enhanced `components/chat-interface.tsx` with specific error messages:
-  - 401: "Session expired. Please log in again."
-  - 429: "Too many requests. Wait a moment."
-  - Network errors: "Connection failed. Check your internet connection."
-
-**SPEC-005: Prerequisites Banner**
-- Added document upload banner to `app/project/[slug]/page.tsx`
-- Shows when `project.documentCount === 0`
-
-**SPEC-006: UI/UX Improvements**
-- Sticky onboarding progress in `components/onboarding-wizard.tsx`
-- Enhanced hover/focus states in `components/conversation-sidebar.tsx`, `components/tools-menu.tsx`, `components/document-library.tsx`
-- Improved empty state CTAs with prominent buttons and icons
+### Known Test Limitations
+- `fillPdfForm` tests skipped (pdf-lib/Vitest compatibility issue)
+- Upload tests skipped (FormData Node.js environment limitation)
+- Vision-api-wrapper tests have retry delays (~6s each)
+- Use `vi.hoisted()` for mocks needed before module imports (see Mock Pattern above)
 
 ## Infrastructure Status
 
@@ -704,28 +535,31 @@ Added ARIA attributes to 14 dialog/modal components:
 | OpenAI API | ✅ Configured | Production, Preview, Development |
 | Anthropic API | ✅ Configured | Production, Preview, Development |
 | NextAuth | ✅ Configured | JWT-based authentication |
-| AWS S3 | ❌ NOT SET UP | Required for document uploads |
+| Cloudflare R2 | ✅ Configured | S3-compatible object storage (zero egress fees) |
 | Redis | ⚠️ Optional | Falls back to in-memory cache |
 | Stripe | ⚠️ Optional | Payment features disabled |
 | Resend | ⚠️ Optional | Email notifications disabled |
 
-### S3 Setup Required
+### R2 Setup (Cloudflare)
 
-To enable document uploads, add these environment variables to Vercel:
+ForemanOS now uses Cloudflare R2 for object storage (S3-compatible with zero egress fees). To configure:
 
 ```bash
-AWS_REGION=us-east-1
-AWS_BUCKET_NAME=your-bucket-name
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+AWS_REGION=auto
+AWS_BUCKET_NAME=foremanos-documents
+AWS_ACCESS_KEY_ID=<r2-access-key>
+AWS_SECRET_ACCESS_KEY=<r2-secret-key>
 AWS_FOLDER_PREFIX=foremanos/  # Optional
 ```
 
-**S3 Bucket Configuration:**
-1. Create S3 bucket with private access
-2. Enable CORS for your domain
-3. Create IAM user with `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` permissions
-4. Add credentials to Vercel environment variables
+**R2 Configuration:**
+1. Create Cloudflare account and R2 bucket
+2. Generate R2 API token with Object Read & Write permissions
+3. Add credentials to Vercel environment variables
+4. No CORS, IAM policies, or bucket policies needed
+
+See `S3_SETUP_GUIDE.md` for detailed setup instructions (Option B: Cloudflare R2).
 
 ### Database Details
 
@@ -737,3 +571,19 @@ AWS_FOLDER_PREFIX=foremanos/  # Optional
 | Connection | Pooled (serverless) |
 | Schema | 112 Prisma models |
 | Status | In sync with schema |
+
+## Installed Skills (Community + Custom)
+
+24 additional skills installed via the skills CLI, organized by category. These extend Claude's capabilities with specialized domain knowledge, workflows, and tool integrations. Skills are loaded automatically when trigger conditions match the user's query.
+
+24 skills installed (7 frontend, 3 backend, 6 marketing, 2 meta/testing, 6 construction domain). Skills are auto-loaded by the system prompt when trigger conditions match. Read a skill's `SKILL.md` for full guidance before applying.
+
+### Skill Notes
+
+- **Skills location**: Community skills install to `~/.agents/skills/<name>/` and are symlinked to `~/.claude/skills/<name>/`. Custom skills reside directly in `~/.claude/skills/<name>/`.
+- **Loading**: Skills are loaded on-demand when their trigger conditions match. Read the skill's `SKILL.md` before applying its guidance.
+- **`tailwind-design-system`**: Targets Tailwind v4. CVA (Class Variance Authority) patterns from this skill are still valuable for ForemanOS which runs Tailwind v3.
+- **`frontend-design`**: Consumer-oriented aesthetic guidance. Best for login/onboarding/dashboard work, less suited for data-dense admin panels.
+- **`agent-browser`**: This is a tool skill that adds browser automation capabilities. It may reach for the browser when simpler approaches (API calls, direct file reads) suffice. Prefer simpler approaches first.
+- **`accessibility-compliance`**: Most valuable when building interfaces for government or public-sector construction clients who require WCAG AA/AAA compliance.
+- **`material-pricing` + `agent-browser`**: These two skills pair well together. `material-pricing` provides the domain knowledge for construction supplier pricing, while `agent-browser` enables live web scraping from supplier sites (Ferguson, Graybar, Grainger, etc.).

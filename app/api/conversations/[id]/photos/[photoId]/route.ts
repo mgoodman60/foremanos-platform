@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { createS3Client, getBucketConfig } from '@/lib/aws-config';
+import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { PhotoMetadata } from '@/lib/photo-analyzer';
 
@@ -106,6 +106,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
+      );
+    }
+
+    const s3Check = validateS3Config();
+    if (!s3Check.valid) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Please contact your administrator.' },
+        { status: 503 }
       );
     }
 

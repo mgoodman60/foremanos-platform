@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { createS3Client, getBucketConfig } from '@/lib/aws-config';
+import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +21,14 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const s3Check = validateS3Config();
+    if (!s3Check.valid) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Please contact your administrator.' },
+        { status: 503 }
+      );
     }
 
     const formData = await request.formData();

@@ -25,6 +25,111 @@ ForemanOS uses AWS S3 to store construction documents, drawings, photos, and oth
 
 The S3 integration is **required** for ForemanOS to function properly. Without S3 credentials, document uploads will fail.
 
+## Option B: Cloudflare R2 (Recommended)
+
+Cloudflare R2 is S3-compatible object storage with **zero egress fees**, making it ideal for construction document management where large PDFs and drawings are frequently downloaded.
+
+### Why R2?
+
+- **Zero egress costs** - Download files without paying bandwidth fees
+- **S3-compatible** - Works with existing AWS SDK code
+- **Simpler setup** - No IAM policies, CORS, or bucket policies needed
+- **Free tier** - 10 GB storage + 10 million reads/month free forever
+- **Global CDN** - Built-in edge caching for faster file delivery
+
+### R2 Setup Steps
+
+#### 1. Create Cloudflare Account
+
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) and sign up (free tier includes R2)
+2. Verify your email address
+
+#### 2. Create R2 Bucket
+
+1. In Cloudflare Dashboard, navigate to **R2 Object Storage** in the left sidebar
+2. Click **Create bucket**
+3. **Bucket name**: `foremanos-documents` (must be lowercase, no spaces)
+4. **Location**: Choose **Automatic** (distributes globally) or select a specific region
+5. Click **Create bucket**
+
+#### 3. Generate API Token
+
+1. Go to **R2 Object Storage** → **Manage R2 API Tokens**
+2. Click **Create API token**
+3. **Token name**: `ForemanOS Production`
+4. **Permissions**: Select **Object Read & Write**
+5. **Specify bucket**: Choose `foremanos-documents` (or leave blank for all buckets)
+6. **TTL**: Select **Forever** (or set expiration if rotating credentials)
+7. Click **Create API token**
+
+#### 4. Save Credentials
+
+**CRITICAL**: You will only see the secret once. Copy and save:
+
+- **Access Key ID**: `<32-character hex string>`
+- **Secret Access Key**: `<64-character hex string>`
+- **Endpoint URL**: `https://<account-id>.r2.cloudflarestorage.com` (shown at top of page)
+
+#### 5. Configure Environment Variables
+
+Add these to your `.env.local` (local development) or Vercel (production):
+
+```bash
+# Cloudflare R2 Configuration
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+AWS_REGION=auto
+AWS_ACCESS_KEY_ID=<your-r2-access-key-id>
+AWS_SECRET_ACCESS_KEY=<your-r2-secret-access-key>
+AWS_BUCKET_NAME=foremanos-documents
+AWS_FOLDER_PREFIX=foremanos/
+```
+
+**Important**:
+- Replace `<account-id>` with your Cloudflare Account ID (found in R2 dashboard)
+- Set `AWS_REGION=auto` (R2 doesn't use traditional AWS regions)
+- Use your R2 API token credentials, not AWS credentials
+
+#### 6. No CORS, IAM, or Bucket Policies Needed
+
+Unlike AWS S3, Cloudflare R2:
+- **Automatically handles presigned URLs** - No CORS configuration required
+- **No IAM policies** - API tokens handle permissions
+- **No bucket policies** - Access control is managed through API tokens
+
+#### 7. Deploy to Vercel
+
+Add the 5 environment variables above to Vercel:
+1. Go to [vercel.com/dashboard](https://vercel.com/dashboard) → Your Project → **Settings** → **Environment Variables**
+2. Add each variable for **Production**, **Preview**, and **Development** environments
+3. Click **Save**
+4. Redeploy your application
+
+#### 8. Verification
+
+Test upload flow:
+1. Log in to ForemanOS
+2. Upload a document to a project
+3. Verify the file appears in Cloudflare R2:
+   - Go to R2 dashboard → `foremanos-documents` bucket
+   - Navigate to `foremanos/uploads/` folder
+   - File should appear with timestamped name
+
+### R2 Cost Comparison
+
+| Operation | R2 | AWS S3 Standard |
+|-----------|-----|-----------------|
+| Storage (50 GB) | $0.75/month | $1.15/month |
+| PUT requests (10,000) | $0.045 | $0.05 |
+| GET requests (50,000) | $0.018 | $0.02 |
+| **Egress (10 GB)** | **$0.00** | **$0.90** |
+| **Total/month** | **$0.81** | **$2.12** |
+
+**For ForemanOS use cases with frequent document downloads (construction drawings, PDFs, photos), R2 can save 60-80% on hosting costs.**
+
+---
+
+## Option A: AWS S3 (Traditional)
+
 ## Step 1: Create S3 Bucket
 
 ### 1.1 Sign in to AWS Console

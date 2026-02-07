@@ -8,13 +8,15 @@ export function getBucketConfig() {
 }
 
 export function createS3Client() {
+  const endpoint = process.env.S3_ENDPOINT;
   return new S3Client({
-    region: process.env.AWS_REGION || 'us-east-1',
+    region: process.env.AWS_REGION || 'auto',
+    ...(endpoint && { endpoint, forcePathStyle: true }),
   });
 }
 
 export function validateS3Config(): { valid: boolean; missing: string[] } {
-  const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_BUCKET_NAME'];
+  const required = ['S3_ENDPOINT', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_BUCKET_NAME'];
   const missing = required.filter(key => !process.env[key]);
   return { valid: missing.length === 0, missing };
 }

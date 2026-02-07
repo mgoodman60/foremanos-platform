@@ -105,8 +105,8 @@ export async function getFileUrl(
 ): Promise<string> {
   const { bucketName } = getBucketConfig();
 
-  if (isPublic) {
-    // Return public URL
+  if (isPublic && !process.env.S3_ENDPOINT) {
+    // AWS-style public URL (only when using native S3, not R2)
     return `https://${bucketName}.s3.${AWS_REGION}.amazonaws.com/${cloud_storage_path}`;
   } else {
     // Generate signed URL

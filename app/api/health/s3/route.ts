@@ -18,6 +18,7 @@ export async function GET() {
     status: 'checking',
     bucketName: bucketName || '(not set)',
     region: process.env.AWS_REGION || 'us-east-1',
+    endpoint: process.env.S3_ENDPOINT || '(not set)',
     folderPrefix: folderPrefix || '(none)',
     credentialsSet: validation.valid,
     missingVars: validation.missing,

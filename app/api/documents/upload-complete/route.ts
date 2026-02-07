@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { createS3Client, getBucketConfig } from '@/lib/aws-config';
+import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/db';
 import crypto from 'crypto';
@@ -30,11 +30,19 @@ function calculateFileHash(buffer: Buffer): string {
 export async function POST(request: Request) {
   const startTime = Date.now();
   console.log('[COMPLETE] Starting chunk assembly...');
-  
+
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const s3Check = validateS3Config();
+    if (!s3Check.valid) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Please contact your administrator.' },
+        { status: 503 }
+      );
     }
 
     const body: CompleteUploadRequest = await request.json();

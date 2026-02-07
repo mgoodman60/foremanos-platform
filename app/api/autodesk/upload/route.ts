@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { uploadFile } from '@/lib/autodesk-oss';
 import { startTranslation, isSupportedFormat, SUPPORTED_FORMATS } from '@/lib/autodesk-model-derivative';
 import { prisma } from '@/lib/db';
+import { validateS3Config } from '@/lib/aws-config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,14 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const s3Check = validateS3Config();
+    if (!s3Check.valid) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Please contact your administrator.' },
+        { status: 503 }
+      );
     }
 
     const formData = await request.formData();

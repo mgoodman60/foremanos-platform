@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl } from '@/lib/s3';
+import { validateS3Config } from '@/lib/aws-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,14 @@ export async function POST(
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const s3Check = validateS3Config();
+    if (!s3Check.valid) {
+      return NextResponse.json(
+        { error: 'File storage is not configured. Please contact your administrator.' },
+        { status: 503 }
+      );
     }
 
     const user = await prisma.user.findUnique({
