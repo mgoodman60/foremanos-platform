@@ -304,10 +304,13 @@ The About page stands out as a white-background page in a sea of dark marketing 
 ## 10. Priority Implementation Roadmap
 
 ### Sprint 1: Navigation & Brand Consistency
-1. Add `LandingHeader` + `Footer` to all 11 missing marketing pages
-2. Replace Pricing page custom header with shared `LandingHeader`
-3. Fix CTA colors on Demo, Security, and About pages (blue/green -> orange)
-4. Replace old logo (`foremanos-logo.png`) with new logo in chat-interface.tsx and pdf-template.tsx
+1. ✅ **DONE** - Add `LandingHeader` + `Footer` to all 11 missing marketing pages
+2. ✅ **DONE** - Replace Pricing page custom header with shared `LandingHeader`
+3. ✅ **PARTIAL** - Fix CTA colors on Demo, Security, and About pages (blue/green -> orange)
+   - ✅ Demo page CTAs converted to orange
+   - ✅ Security page CTA converted to orange gradient
+   - ⏸️ About page CTA colors remain (blue ribbon and step circles)
+4. ✅ **DONE** - Replace old logo (`foremanos-logo.png`) with new logo in chat-interface.tsx and pdf-template.tsx
 
 ### Sprint 2: Content & Trust
 5. Replace product page screenshot placeholders with actual screenshots or remove
