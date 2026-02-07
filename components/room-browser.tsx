@@ -801,9 +801,9 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
   };
 
   return (
-    <div className="flex flex-col bg-dark-surface text-[#F8FAFC] overflow-auto w-full" style={{ maxHeight: 'calc(100vh - 80px)', minHeight: '600px' }}>
+    <div className="flex flex-col bg-dark-surface text-slate-50 overflow-auto w-full" style={{ maxHeight: 'calc(100vh - 80px)', minHeight: '600px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-700 p-4 sticky top-0 z-10 bg-dark-surface">
+      <div className="flex items-center justify-between border-b border-dark-hover p-4 sticky top-0 z-10 bg-dark-surface">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-orange-500" />
           <h2 className="text-lg font-semibold">Room Browser</h2>
@@ -907,7 +907,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
       {/* Summary Stats */}
       {summary && (
-        <div className="border-b border-gray-700 p-4">
+        <div className="border-b border-dark-hover p-4">
           <div className="grid grid-cols-4 gap-3">
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-500">{summary.totalRooms}</div>
@@ -930,7 +930,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
       )}
 
       {/* Floor Plan Viewer Ribbon */}
-      <div className={`border-b border-gray-700 transition-all duration-300 ${floorPlanExpanded ? 'p-0' : 'p-3'}`}>
+      <div className={`border-b border-dark-hover transition-all duration-300 ${floorPlanExpanded ? 'p-0' : 'p-3'}`}>
         <FloorPlanViewer
           projectSlug={projectSlug}
           rooms={rooms}
@@ -992,7 +992,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                   bulkUpdateFloor(floor);
                 }}
               >
-                <SelectTrigger className="h-8 w-[140px] bg-[#3d4551] border-orange-500/50 text-[#F8FAFC] text-xs">
+                <SelectTrigger className="h-8 w-[140px] bg-dark-hover border-orange-500/50 text-slate-50 text-xs">
                   <SelectValue placeholder="Select floor" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1012,7 +1012,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
       )}
 
       {/* Search and Filters */}
-      <div className="space-y-3 border-b border-gray-700 p-4">
+      <div className="space-y-3 border-b border-dark-hover p-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -1020,14 +1020,14 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
             placeholder="Search rooms..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+            className="bg-dark-card border-dark-hover pl-10 text-slate-50 placeholder:text-gray-400"
           />
         </div>
 
         {/* Filters */}
         <div className="flex gap-2">
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-dark-hover text-slate-50">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
@@ -1041,7 +1041,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
           </Select>
 
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-dark-hover text-slate-50">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -1053,7 +1053,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
           </Select>
 
           <Select value={filterFloor} onValueChange={setFilterFloor}>
-            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-dark-hover text-slate-50">
               <SelectValue placeholder="Floor" />
             </SelectTrigger>
             <SelectContent>
@@ -1069,7 +1069,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
         {/* Select All Checkbox */}
         {sortedRooms.length > 0 && (
-          <div className="flex items-center gap-2 pt-2 border-t border-gray-700">
+          <div className="flex items-center gap-2 pt-2 border-t border-dark-hover">
             <input
               type="checkbox"
               id="select-all"
@@ -1081,7 +1081,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                   clearSelection();
                 }
               }}
-              className="h-4 w-4 rounded border-gray-600 bg-dark-card text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
+              className="h-4 w-4 rounded border-dark-hover bg-dark-card text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
             />
             <label htmlFor="select-all" className="text-sm text-gray-400 cursor-pointer">
               Select all visible ({sortedRooms.length})
@@ -1093,7 +1093,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">Sort by:</span>
           <Select value={sortBy} onValueChange={(value: 'roomNumber' | 'name' | 'type' | 'area' | 'status' | 'progress') => setSortBy(value)}>
-            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC] w-[140px]">
+            <SelectTrigger className="bg-dark-card border-dark-hover text-slate-50 w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -1109,7 +1109,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
             variant="ghost"
             size="sm"
             onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card px-2"
+            className="text-gray-400 hover:text-slate-50 hover:bg-dark-card px-2"
             title={`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
           >
             {sortDirection === 'asc' ? (
@@ -1159,7 +1159,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                   ? 'No rooms match your filters'
                   : 'No rooms found in this project'}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-400">
                 {searchQuery || filterType !== 'all' || filterStatus !== 'all' || filterFloor !== 'all'
                   ? 'Try adjusting your search criteria'
                   : 'Click below to extract rooms from processed documents'}
@@ -1192,7 +1192,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                 {/* Floor Header */}
                 <button
                   onClick={() => toggleFloor(floor)}
-                  className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-dark-hover transition-colors"
                 >
                   {expandedFloors.has(floor) ? (
                     <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -1200,7 +1200,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   )}
                   <Layers className="h-4 w-4 text-orange-500" />
-                  <span className="font-medium text-[#F8FAFC]">{getFloorLabel(floor)}</span>
+                  <span className="font-medium text-slate-50">{getFloorLabel(floor)}</span>
                   <Badge variant="secondary" className="ml-auto">
                     {roomsByFloor[floor].length}
                   </Badge>
@@ -1213,7 +1213,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                       <div
                         key={room.id}
                         id={`room-${room.id}`}
-                        className="rounded-lg border border-gray-700 bg-dark-surface overflow-hidden transition-all duration-300"
+                        className="rounded-lg border border-dark-hover bg-dark-surface overflow-hidden transition-all duration-300"
                       >
                         {/* Room Header - Always Visible */}
                         <div className="flex items-start gap-3 p-3">
@@ -1227,7 +1227,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                 toggleRoomSelection(room.id);
                               }}
                               onClick={(e) => e.stopPropagation()}
-                              className="h-4 w-4 rounded border-gray-600 bg-dark-card text-orange-500 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer"
+                              className="h-4 w-4 rounded border-dark-hover bg-dark-card text-orange-500 focus:ring-orange-500 focus:ring-offset-0 cursor-pointer"
                               title="Select room"
                             />
                           </div>
@@ -1241,7 +1241,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                           <div className="flex-1 min-w-0">
                             {/* Room Name & Number */}
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium text-[#F8FAFC] truncate">{room.name}</h3>
+                              <h3 className="font-medium text-slate-50 truncate">{room.name}</h3>
                               {room.roomNumber && (
                                 <Badge variant="outline" className="text-xs">
                                   {room.roomNumber}
@@ -1267,7 +1267,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                   }}
                                   disabled={updatingRoomId === room.id}
                                 >
-                                  <SelectTrigger className="h-6 w-[120px] text-xs bg-[#3d4551] hover:bg-[#4a5160] border-orange-500/50 text-[#F8FAFC] shadow-sm">
+                                  <SelectTrigger className="h-6 w-[120px] text-xs bg-dark-hover hover:bg-dark-hover/80 border-orange-500/50 text-slate-50 shadow-sm">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1284,7 +1284,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                             </div>
 
                             {/* Metadata Row */}
-                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
                               {room.area && (
                                 <div className="flex items-center gap-1">
                                   <Ruler className="h-3 w-3" />
@@ -1308,13 +1308,13 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                             {/* Progress Bar */}
                             {room.percentComplete > 0 && (
                               <div className="mt-2">
-                                <div className="h-1.5 w-full rounded-full bg-gray-700">
+                                <div className="h-1.5 w-full rounded-full bg-dark-hover">
                                   <div
                                     className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400"
                                     style={{ width: `${room.percentComplete}%` }}
                                   />
                                 </div>
-                                <p className="mt-1 text-xs text-gray-500">{room.percentComplete}% Complete</p>
+                                <p className="mt-1 text-xs text-gray-400">{room.percentComplete}% Complete</p>
                               </div>
                             )}
                           </div>
@@ -1335,7 +1335,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
                         {/* Collapsible Room Details */}
                         {expandedRooms.has(room.id) && (
-                          <div className="border-t border-gray-700 bg-dark-card p-4 space-y-4">
+                          <div className="border-t border-dark-hover bg-dark-card p-4 space-y-4">
                             {/* Export Buttons */}
                             <div className="flex justify-end gap-2">
                               <Button
@@ -1343,7 +1343,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                 variant="outline"
                                 onClick={() => exportRoomToDOCX(room)}
                                 disabled={exportingDocxRoomId === room.id || exportingRoomId === room.id}
-                                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                                className="border-dark-hover text-gray-300 hover:bg-dark-hover hover:text-white"
                               >
                                 {exportingDocxRoomId === room.id ? (
                                   <>
@@ -1383,59 +1383,59 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                               <div className="grid grid-cols-2 gap-3 text-xs">
                                 {room.roomNumber && (
                                   <div>
-                                    <span className="text-gray-500">Room Number:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.roomNumber}</p>
+                                    <span className="text-gray-400">Room Number:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.roomNumber}</p>
                                   </div>
                                 )}
                                 <div>
-                                  <span className="text-gray-500">Type:</span>
-                                  <p className="text-[#F8FAFC] mt-0.5">{getRoomTypeLabel(room.type)}</p>
+                                  <span className="text-gray-400">Type:</span>
+                                  <p className="text-slate-50 mt-0.5">{getRoomTypeLabel(room.type)}</p>
                                 </div>
                                 {room.doorType && (
                                   <div>
-                                    <span className="text-gray-500">Door Type:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.doorType}</p>
+                                    <span className="text-gray-400">Door Type:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.doorType}</p>
                                   </div>
                                 )}
                                 {room.area && (
                                   <div>
-                                    <span className="text-gray-500">Area:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.area.toFixed(2)} sq ft</p>
+                                    <span className="text-gray-400">Area:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.area.toFixed(2)} sq ft</p>
                                   </div>
                                 )}
                                 <div>
-                                  <span className="text-gray-500">Status:</span>
+                                  <span className="text-gray-400">Status:</span>
                                   <div className="mt-0.5">{getStatusBadge(room.status)}</div>
                                 </div>
                                 {room.gridLocation && (
                                   <div>
-                                    <span className="text-gray-500">Grid Location:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.gridLocation}</p>
+                                    <span className="text-gray-400">Grid Location:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.gridLocation}</p>
                                   </div>
                                 )}
                                 {room.sheetId && (
                                   <div>
-                                    <span className="text-gray-500">Sheet:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.sheetId}</p>
+                                    <span className="text-gray-400">Sheet:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.sheetId}</p>
                                   </div>
                                 )}
                                 {room.tradeType && (
                                   <div>
-                                    <span className="text-gray-500">Trade Type:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.tradeType}</p>
+                                    <span className="text-gray-400">Trade Type:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.tradeType}</p>
                                   </div>
                                 )}
                                 {room.assignedTo && (
                                   <div>
-                                    <span className="text-gray-500">Assigned To:</span>
-                                    <p className="text-[#F8FAFC] mt-0.5">{room.assignedTo}</p>
+                                    <span className="text-gray-400">Assigned To:</span>
+                                    <p className="text-slate-50 mt-0.5">{room.assignedTo}</p>
                                   </div>
                                 )}
                               </div>
                               {room.notes && (
                                 <div className="mt-3">
-                                  <span className="text-gray-500">Notes:</span>
-                                  <p className="text-[#F8FAFC] mt-1 text-xs">{room.notes}</p>
+                                  <span className="text-gray-400">Notes:</span>
+                                  <p className="text-slate-50 mt-1 text-xs">{room.notes}</p>
                                 </div>
                               )}
                             </div>
@@ -1453,42 +1453,42 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                         <span className="capitalize text-orange-400 font-medium min-w-[60px] shrink-0">
                                           {item.category}:
                                         </span>
-                                        <span className="text-[#F8FAFC] break-words whitespace-normal overflow-hidden">
+                                        <span className="text-slate-50 break-words whitespace-normal overflow-hidden">
                                           {item.finishType || 'Not specified'}
                                         </span>
                                       </div>
                                       {item.material && (
                                         <div className="pl-[68px] text-gray-400 mb-1 break-words whitespace-normal">
-                                          <span className="text-gray-500">Material:</span> {item.material}
+                                          <span className="text-gray-400">Material:</span> {item.material}
                                         </div>
                                       )}
                                       {item.manufacturer && (
                                         <div className="pl-[68px] text-gray-400 mb-1 break-words whitespace-normal">
-                                          <span className="text-gray-500">Mfr:</span> {item.manufacturer}
+                                          <span className="text-gray-400">Mfr:</span> {item.manufacturer}
                                           {item.modelNumber && (
                                             <span className="block pl-0 text-gray-400 break-words">
-                                              <span className="text-gray-500">Model:</span> {item.modelNumber}
+                                              <span className="text-gray-400">Model:</span> {item.modelNumber}
                                             </span>
                                           )}
                                         </div>
                                       )}
                                       {item.color && (
                                         <div className="pl-[68px] text-gray-400 mb-1 break-words whitespace-normal">
-                                          <span className="text-gray-500">Color:</span> {item.color}
+                                          <span className="text-gray-400">Color:</span> {item.color}
                                         </div>
                                       )}
                                       {item.dimensions && (
                                         <div className="pl-[68px] text-gray-400 mb-1 break-words whitespace-normal">
-                                          <span className="text-gray-500">Dim:</span> {item.dimensions}
+                                          <span className="text-gray-400">Dim:</span> {item.dimensions}
                                         </div>
                                       )}
                                       {item.csiCode && (
-                                        <div className="pl-[68px] text-gray-500 break-words whitespace-normal">
-                                          <span className="text-gray-600">CSI:</span> {item.csiCode}
+                                        <div className="pl-[68px] text-gray-400 break-words whitespace-normal">
+                                          <span className="text-gray-400">CSI:</span> {item.csiCode}
                                         </div>
                                       )}
                                       {item.notes && (
-                                        <div className="pl-[68px] text-gray-500 mt-1 italic break-words whitespace-normal">
+                                        <div className="pl-[68px] text-gray-400 mt-1 italic break-words whitespace-normal">
                                           {item.notes}
                                         </div>
                                       )}
@@ -1540,7 +1540,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                             <div key={item.id} className="flex items-center justify-between text-xs bg-dark-surface rounded px-2 py-1.5">
                                               <div className="flex items-center gap-2 flex-1 min-w-0">
                                                 <span className="font-mono text-gray-500 flex-shrink-0">{item.tag}</span>
-                                                <span className="text-[#F8FAFC] truncate">{item.name}</span>
+                                                <span className="text-slate-50 truncate">{item.name}</span>
                                               </div>
                                               <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                                                 {item.quantity && (
@@ -1567,8 +1567,8 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                             {/* No Finish Data Message */}
                             {(!room.FinishScheduleItem || room.FinishScheduleItem.length === 0) && (!room.mepEquipment || room.mepEquipment.length === 0) && (
                               <div className="text-center py-4">
-                                <Circle className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                                <p className="text-xs text-gray-500">No finish schedule or MEP data available for this room</p>
+                                <Circle className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                                <p className="text-xs text-gray-400">No finish schedule or MEP data available for this room</p>
                               </div>
                             )}
                           </div>

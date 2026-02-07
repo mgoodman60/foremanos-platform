@@ -319,7 +319,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
                   {filteredSymbols.map((symbol, idx) => (
                     <div
                       key={idx}
-                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
+                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-dark-surface transition-colors"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

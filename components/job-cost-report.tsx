@@ -515,7 +515,7 @@ export default function JobCostReport() {
                 <React.Fragment key={group.phaseCode}>
                   {/* Phase Header Row */}
                   <tr
-                    className="bg-[#262c34] cursor-pointer hover:bg-dark-card border-t border-gray-700"
+                    className="bg-dark-card cursor-pointer hover:bg-dark-card border-t border-gray-700"
                     onClick={() => togglePhase(group.phaseCode)}
                   >
                     <td colSpan={2} className="px-3 py-2 font-semibold text-blue-400">
@@ -536,7 +536,7 @@ export default function JobCostReport() {
                   
                   {/* Phase Items */}
                   {expandedPhases.has(group.phaseCode) && group.items.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#262c34] border-t border-gray-700/50">
+                    <tr key={item.id} className="hover:bg-dark-card border-t border-gray-700/50">
                       <td className="px-3 py-1.5 text-gray-400">{item.categoryNumber}</td>
                       <td className="px-3 py-1.5">{item.name}</td>
                       <td className="px-3 py-1.5 text-right font-mono">

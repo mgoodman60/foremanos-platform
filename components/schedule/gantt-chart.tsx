@@ -63,14 +63,14 @@ function getTaskCategory(task: GanttTask, today: Date = new Date()): TaskCategor
 const categoryStyles: Record<TaskCategory, { bg: string; border: string; text: string; icon: React.ReactNode; label: string }> = {
   'critical': {
     bg: 'bg-red-600',
-    border: 'ring-2 ring-red-400 ring-offset-1 ring-offset-[#2d333b]',
+    border: 'ring-2 ring-red-400 ring-offset-1 ring-offset-dark-card',
     text: 'text-red-400',
     icon: <Zap className="h-3 w-3" />,
     label: 'Critical Path'
   },
   'whats-next': {
     bg: 'bg-amber-500',
-    border: 'ring-2 ring-amber-400/50 ring-offset-1 ring-offset-[#2d333b]',
+    border: 'ring-2 ring-amber-400/50 ring-offset-1 ring-offset-dark-card',
     text: 'text-amber-400',
     icon: <PlayCircle className="h-3 w-3" />,
     label: "What's Next"
@@ -84,7 +84,7 @@ const categoryStyles: Record<TaskCategory, { bg: string; border: string; text: s
   },
   'behind': {
     bg: 'bg-rose-600',
-    border: 'ring-2 ring-rose-400/70 ring-offset-1 ring-offset-[#2d333b]',
+    border: 'ring-2 ring-rose-400/70 ring-offset-1 ring-offset-dark-card',
     text: 'text-rose-400',
     icon: <TrendingDown className="h-3 w-3" />,
     label: 'Behind Schedule'
@@ -838,7 +838,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                 "transition-all",
                 viewMode === 'day' 
                   ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-[#3d444d]'
+                  : 'text-gray-300 hover:text-white hover:bg-dark-hover'
               )}
             >
               Day
@@ -851,7 +851,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                 "transition-all",
                 viewMode === 'week' 
                   ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-[#3d444d]'
+                  : 'text-gray-300 hover:text-white hover:bg-dark-hover'
               )}
             >
               Week
@@ -864,7 +864,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                 "transition-all",
                 viewMode === 'month' 
                   ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-[#3d444d]'
+                  : 'text-gray-300 hover:text-white hover:bg-dark-hover'
               )}
             >
               Month
@@ -1316,7 +1316,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                                   styles.bg,
                                   // Use purple styling for what-if modified tasks
                                   isModifiedInWhatIf 
-                                    ? 'ring-2 ring-purple-400 ring-offset-1 ring-offset-[#2d333b] shadow-lg shadow-purple-500/30'
+                                    ? 'ring-2 ring-purple-400 ring-offset-1 ring-offset-dark-card shadow-lg shadow-purple-500/30'
                                     : styles.border,
                                   !isModifiedInWhatIf && category === 'critical' && 'shadow-lg shadow-red-500/30',
                                   !isModifiedInWhatIf && category === 'whats-next' && 'shadow-lg shadow-amber-500/20',

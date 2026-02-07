@@ -433,7 +433,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
                   {filteredAnnotations.map((ann: Annotation, idx) => (
                     <div
                       key={`${ann.id}-${idx}`}
-                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors"
+                      className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-dark-surface transition-colors"
                     >
                       <div className="flex items-start gap-3">
                         <div className={`${getPriorityColor(ann.priority)} p-2 rounded`}>

@@ -20,7 +20,7 @@ export default function FieldOpsNavigation({ projectSlug }: FieldOpsNavigationPr
   ];
 
   return (
-    <nav className="flex items-center gap-1 p-1 bg-[#0D1117] rounded-lg">
+    <nav className="flex items-center gap-1 p-1 bg-dark-base rounded-lg">
       {tabs.map((tab) => {
         const isActive = pathname === tab.href;
         const Icon = tab.icon;

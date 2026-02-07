@@ -192,7 +192,7 @@ export function QuickCaptureModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h3 id="quick-capture-modal-title" className="text-lg font-semibold text-[#F8FAFC]">Quick Capture</h3>
+          <h3 id="quick-capture-modal-title" className="text-lg font-semibold text-slate-50">Quick Capture</h3>
           <Button
             type="button"
             onClick={onClose}
@@ -276,7 +276,7 @@ export function QuickCaptureModal({
               type="text"
               {...register('location')}
               placeholder="e.g., 2nd Floor, Room 201"
-              className="bg-dark-card border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 text-slate-50 placeholder:text-gray-500"
               aria-invalid={!!errors.location}
               aria-describedby={errors.location ? 'location-error' : undefined}
             />
@@ -297,7 +297,7 @@ export function QuickCaptureModal({
                   id="trade"
                   value={field.value || ''}
                   onChange={field.onChange}
-                  className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC]"
+                  className="w-full px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-slate-50"
                   aria-invalid={!!errors.trade}
                   aria-describedby={errors.trade ? 'trade-error' : undefined}
                 >
@@ -323,7 +323,7 @@ export function QuickCaptureModal({
               type="text"
               {...register('caption')}
               placeholder="Brief description..."
-              className="bg-dark-card border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 text-slate-50 placeholder:text-gray-500"
               aria-invalid={!!errors.caption}
               aria-describedby={errors.caption ? 'caption-error' : undefined}
             />

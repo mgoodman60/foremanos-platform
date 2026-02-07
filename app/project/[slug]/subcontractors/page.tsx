@@ -369,7 +369,7 @@ export default function SubcontractorsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                <Users className="w-8 h-8 text-[#F97316]" />
+                <Users className="w-8 h-8 text-orange-500" />
                 Subcontractor Management
               </h1>
               <p className="text-gray-400 mt-1">Manage subcontractors for this project</p>
@@ -385,7 +385,7 @@ export default function SubcontractorsPage() {
               </Button>
               <Button
                 onClick={handleAdd}
-                className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+                className="bg-orange-500 hover:bg-orange-600 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Subcontractor
@@ -444,7 +444,7 @@ export default function SubcontractorsPage() {
               {!searchTerm && filterTrade === 'all' && (
                 <Button
                   onClick={handleAdd}
-                  className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Subcontractor
@@ -458,7 +458,7 @@ export default function SubcontractorsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-xl font-semibold text-white">{sub.companyName}</h3>
-                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-[#F97316]/20 text-[#F97316]">
+                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-orange-500/20 text-orange-500">
                         {getTradeName(sub.tradeType)}
                       </span>
                     </div>
@@ -599,7 +599,7 @@ export default function SubcontractorsPage() {
             <Button
               onClick={handleSubmitAdd}
               disabled={submitting}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {submitting ? 'Adding...' : 'Add Subcontractor'}
             </Button>
@@ -685,7 +685,7 @@ export default function SubcontractorsPage() {
             <Button
               onClick={handleSubmitEdit}
               disabled={submitting}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {submitting ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -726,7 +726,7 @@ export default function SubcontractorsPage() {
         <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#F97316]" />
+              <FileText className="w-5 h-5 text-orange-500" />
               Import Subcontractors
             </DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -738,7 +738,7 @@ export default function SubcontractorsPage() {
             {/* File Upload */}
             <div>
               <Label className="text-gray-300 mb-2 block">Upload Document</Label>
-              <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-[#F97316] transition-colors">
+              <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-orange-500 transition-colors">
                 <input
                   type="file"
                   id="import-file"
@@ -749,7 +749,7 @@ export default function SubcontractorsPage() {
                 <label htmlFor="import-file" className="cursor-pointer">
                   <Upload className="w-10 h-10 text-gray-500 mx-auto mb-3" />
                   {importFile ? (
-                    <div className="text-[#F97316] font-medium">{importFile.name}</div>
+                    <div className="text-orange-500 font-medium">{importFile.name}</div>
                   ) : (
                     <>
                       <p className="text-gray-300 mb-1">Click to upload or drag & drop</p>
@@ -802,7 +802,7 @@ export default function SubcontractorsPage() {
             <Button
               onClick={handleImportSubmit}
               disabled={importing || (!importFile && !importText.trim())}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {importing ? (
                 <>

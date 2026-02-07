@@ -456,9 +456,9 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
   const filteredEquipment = getFilteredEquipment();
 
   return (
-    <div className="flex h-full max-h-[80vh] flex-col bg-dark-surface text-[#F8FAFC] overflow-hidden">
+    <div className="flex h-full max-h-[80vh] flex-col bg-dark-surface text-slate-50 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-700 p-4">
+      <div className="flex items-center justify-between border-b border-dark-hover p-4">
         <div className="flex items-center gap-2">
           <Wrench className="h-5 w-5 text-blue-500" />
           <h2 className="text-lg font-semibold">MEP Equipment Browser</h2>
@@ -483,7 +483,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             size="sm"
             onClick={exportToCSV}
             disabled={filteredEquipment.length === 0}
-            className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
+            className="border-dark-hover text-gray-300 hover:bg-dark-card hover:text-white"
           >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
@@ -509,7 +509,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
 
       {/* Stats Summary */}
       {stats && (
-        <div className="border-b border-gray-700 p-4">
+        <div className="border-b border-dark-hover p-4">
           <div className="grid grid-cols-4 gap-3">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-500">{stats.total}</div>
@@ -532,7 +532,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       )}
 
       {/* Filters */}
-      <div className="space-y-3 border-b border-gray-700 p-4">
+      <div className="space-y-3 border-b border-dark-hover p-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -540,14 +540,14 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             placeholder="Search equipment tags, types, locations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+            className="bg-dark-card border-dark-hover pl-10 text-slate-50 placeholder:text-gray-400"
           />
         </div>
 
         {/* Trade & Status Filters */}
         <div className="flex gap-2">
           <Select value={selectedTrade} onValueChange={setSelectedTrade}>
-            <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="flex-1 bg-dark-card border-dark-hover text-slate-50">
               <SelectValue placeholder="All Trades" />
             </SelectTrigger>
             <SelectContent>
@@ -560,7 +560,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
           </Select>
 
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="flex-1 bg-dark-card border-dark-hover text-slate-50">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -631,7 +631,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                     <AlertTriangle className="mt-1 h-5 w-5 text-red-500 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-medium text-[#F8FAFC]">{conflict.description}</h4>
+                        <h4 className="font-medium text-slate-50">{conflict.description}</h4>
                         <Badge
                           variant="outline"
                           className={`text-xs ${
@@ -706,7 +706,14 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                   {/* Trade Header */}
                   <button
                     onClick={() => toggleTrade(trade)}
-                    className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleTrade(trade);
+                      }
+                    }}
+                    aria-expanded={expandedTrades.has(trade)}
+                    className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-dark-hover transition-colors"
                   >
                     {expandedTrades.has(trade) ? (
                       <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -714,7 +721,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     )}
                     <TradeIcon className={`h-5 w-5 ${config.color}`} />
-                    <span className="font-medium text-[#F8FAFC]">{config.label}</span>
+                    <span className="font-medium text-slate-50">{config.label}</span>
                     <span className="text-xs text-gray-400">({eqList.length})</span>
                     <div className="ml-auto text-xs text-gray-500">{config.description}</div>
                   </button>
@@ -729,7 +736,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                         return (
                           <div
                             key={eq.id}
-                            className="rounded-lg border border-gray-700 bg-dark-surface text-sm transition-all overflow-hidden"
+                            className="rounded-lg border border-dark-hover bg-dark-surface text-sm transition-all overflow-hidden"
                           >
                             {/* Collapsible Header */}
                             <button
@@ -754,7 +761,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                               <div className="flex-1 min-w-0">
                                 {/* Header Row - Name prominently displayed */}
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-medium text-[#F8FAFC]">
+                                  <h4 className="font-medium text-slate-50">
                                     {formatItemName(eq.name)}
                                   </h4>
                                   {getStatusBadge(eq.status)}
@@ -783,7 +790,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
 
                             {/* Expanded Content */}
                             {isExpanded && (
-                              <div className="border-t border-gray-700 bg-[#161b22] p-4">
+                              <div className="border-t border-dark-hover bg-dark-subtle p-4">
                                 {/* Tag and Type */}
                                 <div className="flex items-center gap-2 mb-3">
                                   <span className="text-xs font-mono text-gray-500">{eq.tag}</span>
@@ -832,7 +839,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
 
                                 {/* Room Breakdown */}
                                 {hasRoomData && (
-                                  <div className="mt-3 border-t border-gray-700 pt-3">
+                                  <div className="mt-3 border-t border-dark-hover pt-3">
                                     <h5 className="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-1">
                                       <MapPin className="h-3 w-3" />
                                       Quantity by Location
@@ -858,7 +865,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
 
                                 {/* Notes */}
                                 {eq.notes && eq.notes.length > 0 && (
-                                  <div className="mt-3 border-t border-gray-700 pt-3">
+                                  <div className="mt-3 border-t border-dark-hover pt-3">
                                     <h5 className="text-xs font-semibold text-gray-400 mb-2">Notes</h5>
                                     {eq.notes.map((note, idx) => (
                                       <p key={idx} className="text-xs text-gray-500 italic">
@@ -883,7 +890,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
 
       {/* Location Assignment Dialog */}
       <Dialog open={showLocationAssignment} onOpenChange={setShowLocationAssignment}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-dark-surface border-gray-700 text-[#F8FAFC]">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-dark-surface border-dark-hover text-slate-50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MapPinned className="h-5 w-5 text-green-500" />
@@ -894,7 +901,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
           {locationData ? (
             <div className="flex-1 overflow-hidden">
               {/* Stats */}
-              <div className="flex gap-4 mb-4 p-3 bg-[#161b22] rounded-lg">
+              <div className="flex gap-4 mb-4 p-3 bg-dark-subtle rounded-lg">
                 <div className="text-center">
                   <div className="text-lg font-bold text-blue-500">{locationData.stats.total}</div>
                   <div className="text-xs text-gray-400">Total Items</div>
@@ -921,7 +928,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-[#161b22] hover:bg-[#1c2128]"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-dark-subtle hover:bg-dark-active"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
@@ -954,10 +961,10 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                             }));
                           }}
                         >
-                          <SelectTrigger className="w-48 bg-dark-base border-gray-600">
+                          <SelectTrigger className="w-48 bg-dark-base border-dark-hover">
                             <SelectValue placeholder="Select room..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#161b22] border-gray-700">
+                          <SelectContent className="bg-dark-subtle border-dark-hover">
                             {locationData.rooms.map((room) => (
                               <SelectItem key={room.id} value={room.id}>
                                 {room.roomNumber ? `${room.roomNumber} - ` : ''}{room.name}
@@ -984,11 +991,11 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             </div>
           )}
 
-          <DialogFooter className="border-t border-gray-700 pt-4 flex-wrap gap-2">
+          <DialogFooter className="border-t border-dark-hover pt-4 flex-wrap gap-2">
             <Button
               variant="outline"
               onClick={() => setShowLocationAssignment(false)}
-              className="border-gray-600 text-gray-300"
+              className="border-dark-hover text-gray-300"
             >
               Cancel
             </Button>

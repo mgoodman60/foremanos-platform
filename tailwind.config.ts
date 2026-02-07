@@ -70,6 +70,8 @@ const config: Config = {
         'dark-surface': 'var(--bg-dark-surface)',
         'dark-card': 'var(--bg-dark-card)',
         'dark-hover': 'var(--bg-dark-hover)',
+        'dark-subtle': 'var(--bg-dark-subtle)',
+        'dark-active': 'var(--bg-dark-active)',
         'client-primary': 'var(--client-primary)',
         'client-primary-dark': 'var(--client-primary-dark)',
       },

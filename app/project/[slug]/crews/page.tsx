@@ -87,7 +87,7 @@ export default function CrewsPage() {
                 {project.name}
               </button>
               <ChevronRight className="w-4 h-4 mx-2 flex-shrink-0" />
-              <span className="text-[#F8FAFC] font-medium">Crews</span>
+              <span className="text-slate-50 font-medium">Crews</span>
             </nav>
 
             {/* Back Button */}

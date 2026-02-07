@@ -15,7 +15,7 @@ import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine
 } from 'recharts';
-import { chartColors, semanticColors } from '@/lib/design-tokens';
+import { chartColors, semanticColors, neutralColors, backgroundColors } from '@/lib/design-tokens';
 
 interface CashFlowData {
   period: string;
@@ -271,27 +271,27 @@ export default function CashFlowChart() {
         ) : (
           <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={cashFlowData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="period" 
-                stroke="#9CA3AF"
-                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+              <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+              <XAxis
+                dataKey="period"
+                stroke={neutralColors.gray[400]}
+                tick={{ fill: neutralColors.gray[400], fontSize: 12 }}
               />
-              <YAxis 
-                stroke="#9CA3AF"
+              <YAxis
+                stroke={neutralColors.gray[400]}
                 tickFormatter={formatCurrency}
-                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                tick={{ fill: neutralColors.gray[400], fontSize: 12 }}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1F2328', 
-                  border: '1px solid #374151',
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: backgroundColors.dark.card,
+                  border: `1px solid ${neutralColors.gray[700]}`,
                   borderRadius: '8px'
                 }}
                 formatter={(value) => typeof value === "number" ? formatCurrency(value) : ""}
               />
               <Legend />
-              <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="3 3" />
+              <ReferenceLine y={0} stroke={neutralColors.gray[500]} strokeDasharray="3 3" />
               <Area
                 type="monotone"
                 dataKey="forecastInflow"
@@ -335,27 +335,27 @@ export default function CashFlowChart() {
           <h4 className="font-medium text-white mb-4">Cumulative Cash Position</h4>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={cashFlowData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="period" 
-                stroke="#9CA3AF"
-                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+              <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+              <XAxis
+                dataKey="period"
+                stroke={neutralColors.gray[400]}
+                tick={{ fill: neutralColors.gray[400], fontSize: 12 }}
               />
-              <YAxis 
-                stroke="#9CA3AF"
+              <YAxis
+                stroke={neutralColors.gray[400]}
                 tickFormatter={formatCurrency}
-                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                tick={{ fill: neutralColors.gray[400], fontSize: 12 }}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1F2328', 
-                  border: '1px solid #374151',
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: backgroundColors.dark.card,
+                  border: `1px solid ${neutralColors.gray[700]}`,
                   borderRadius: '8px'
                 }}
                 formatter={(value) => typeof value === "number" ? formatCurrency(value) : ""}
               />
               <Legend />
-              <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="3 3" />
+              <ReferenceLine y={0} stroke={neutralColors.gray[500]} strokeDasharray="3 3" />
               <Line
                 type="monotone"
                 dataKey="cumulativePlanned"

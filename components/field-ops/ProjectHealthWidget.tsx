@@ -98,7 +98,7 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
 
   if (loading) {
     return (
-      <div className="bg-[#161B22] border border-gray-700 rounded-xl p-6">
+      <div className="bg-dark-subtle border border-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-center h-32">
           <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
         </div>
@@ -108,7 +108,7 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
 
   if (!health) {
     return (
-      <div className="bg-[#161B22] border border-gray-700 rounded-xl p-6">
+      <div className="bg-dark-subtle border border-gray-700 rounded-xl p-6">
         <p className="text-gray-400 text-center">Unable to calculate health score</p>
       </div>
     );
@@ -140,7 +140,7 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
   }
 
   return (
-    <div className="bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden">
+    <div className="bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">

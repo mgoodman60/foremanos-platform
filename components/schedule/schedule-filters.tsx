@@ -127,7 +127,7 @@ export function ScheduleFilters({
           <Button 
             variant="outline" 
             className={cn(
-              "gap-2 bg-[#3d444d] border-gray-500 text-gray-200 hover:bg-[#4d555e] hover:border-gray-400",
+              "gap-2 bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400",
               filters.statuses.length > 0 && "border-orange-500/50 bg-orange-500/10"
             )}
           >
@@ -167,7 +167,7 @@ export function ScheduleFilters({
             <Button 
               variant="outline" 
               className={cn(
-                "gap-2 bg-[#3d444d] border-gray-500 text-gray-200 hover:bg-[#4d555e] hover:border-gray-400",
+                "gap-2 bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400",
                 filters.trades.length > 0 && "border-blue-500/50 bg-blue-500/10"
               )}
             >
@@ -204,7 +204,7 @@ export function ScheduleFilters({
             <Button 
               variant="outline" 
               className={cn(
-                "gap-2 bg-[#3d444d] border-gray-500 text-gray-200 hover:bg-[#4d555e] hover:border-gray-400",
+                "gap-2 bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400",
                 filters.assignees.length > 0 && "border-purple-500/50 bg-purple-500/10"
               )}
             >
@@ -242,7 +242,7 @@ export function ScheduleFilters({
           'gap-2',
           filters.criticalPathOnly 
             ? 'bg-red-500 hover:bg-red-600 border-red-500 text-white shadow-lg shadow-red-500/20' 
-            : 'bg-[#3d444d] border-gray-500 text-gray-200 hover:bg-[#4d555e] hover:border-gray-400'
+            : 'bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400'
         )}
       >
         <Zap className={cn("h-4 w-4", filters.criticalPathOnly && "text-yellow-300")} />

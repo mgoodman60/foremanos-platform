@@ -251,14 +251,14 @@ export default function TemplatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#F8FAFC]">Document Templates</h1>
+          <h1 className="text-3xl font-bold text-slate-50">Document Templates</h1>
           <p className="text-gray-400 mt-2">
             Upload and manage custom templates for document exports
           </p>
         </div>
         <Button
           onClick={() => setShowUploadDialog(true)}
-          className="bg-[#F97316] hover:bg-[#ea6d0a] flex items-center gap-2"
+          className="bg-orange-500 hover:bg-orange-600 flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Upload Template
@@ -280,7 +280,7 @@ export default function TemplatesPage() {
         <Card className="bg-dark-card border-gray-700">
           <CardContent className="p-12 text-center">
             <FileText className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-[#F8FAFC] mb-2">
+            <h3 className="text-xl font-semibold text-slate-50 mb-2">
               No Templates Yet
             </h3>
             <p className="text-gray-400 mb-4">
@@ -288,7 +288,7 @@ export default function TemplatesPage() {
             </p>
             <Button
               onClick={() => setShowUploadDialog(true)}
-              className="bg-[#F97316] hover:bg-[#ea6d0a]"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload Your First Template
@@ -302,8 +302,8 @@ export default function TemplatesPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-[#F8FAFC] flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-[#F97316]" />
+                    <CardTitle className="text-slate-50 flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-orange-500" />
                       {template.name}
                     </CardTitle>
                     {template.description && (
@@ -374,7 +374,7 @@ export default function TemplatesPage() {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-md">
+        <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-md">
           <DialogHeader>
             <DialogTitle>Upload New Template</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -392,7 +392,7 @@ export default function TemplatesPage() {
                   type="file"
                   accept=".docx,.xlsx,.pdf"
                   onChange={handleFileSelect}
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-slate-50"
                 />
                 {selectedFile && (
                   <Button
@@ -420,7 +420,7 @@ export default function TemplatesPage() {
                 value={uploadForm.name}
                 onChange={e => setUploadForm({ ...uploadForm, name: e.target.value })}
                 placeholder="e.g., Daily Report Template"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                className="bg-dark-surface border-gray-700 text-slate-50"
               />
             </div>
 
@@ -432,7 +432,7 @@ export default function TemplatesPage() {
                 value={uploadForm.description}
                 onChange={e => setUploadForm({ ...uploadForm, description: e.target.value })}
                 placeholder="Brief description of this template"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                className="bg-dark-surface border-gray-700 text-slate-50"
                 rows={3}
               />
             </div>
@@ -444,7 +444,7 @@ export default function TemplatesPage() {
                 value={uploadForm.templateType}
                 onValueChange={value => setUploadForm({ ...uploadForm, templateType: value })}
               >
-                <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
+                <SelectTrigger className="bg-dark-surface border-gray-700 text-slate-50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-dark-card border-gray-700">
@@ -484,7 +484,7 @@ export default function TemplatesPage() {
             <Button
               onClick={handleUpload}
               disabled={!selectedFile || !uploadForm.name || uploading}
-              className="bg-[#F97316] hover:bg-[#ea6d0a]"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               {uploading ? 'Uploading...' : 'Upload Template'}
             </Button>

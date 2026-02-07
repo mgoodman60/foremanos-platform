@@ -142,7 +142,7 @@ export function TakeoffAddItemModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg bg-dark-surface border-gray-700 text-[#F8FAFC]">
+      <DialogContent className="max-w-lg bg-dark-surface border-dark-hover text-slate-50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-green-500" />
@@ -164,7 +164,7 @@ export function TakeoffAddItemModal({
                 >
                   <SelectTrigger
                     id="category"
-                    className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                    className="bg-dark-card border-dark-hover text-slate-50"
                     aria-invalid={!!errors.category}
                     aria-describedby={errors.category ? 'category-error' : undefined}
                   >
@@ -199,9 +199,10 @@ export function TakeoffAddItemModal({
               id="itemName"
               {...register('itemName')}
               placeholder="e.g., 4 inch Concrete Slab on Grade"
-              className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+              className="bg-dark-card border-dark-hover text-slate-50"
               aria-invalid={!!errors.itemName}
               aria-describedby={errors.itemName ? 'itemName-error' : undefined}
+              aria-required="true"
             />
             <FormError error={errors.itemName} fieldName="itemName" />
           </div>
@@ -213,7 +214,7 @@ export function TakeoffAddItemModal({
               id="description"
               {...register('description')}
               placeholder="Optional description..."
-              className="bg-dark-card border-gray-600 text-[#F8FAFC] min-h-[60px]"
+              className="bg-dark-card border-dark-hover text-slate-50 min-h-[60px]"
               aria-describedby={errors.description ? 'description-error' : undefined}
             />
             <FormError error={errors.description} fieldName="description" />
@@ -233,9 +234,10 @@ export function TakeoffAddItemModal({
                 min="0"
                 {...register('quantity', { valueAsNumber: true })}
                 placeholder="0"
-                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-dark-hover text-slate-50"
                 aria-invalid={!!errors.quantity}
                 aria-describedby={errors.quantity ? 'quantity-error' : undefined}
+                aria-required="true"
               />
               <FormError error={errors.quantity} fieldName="quantity" />
             </div>
@@ -248,7 +250,7 @@ export function TakeoffAddItemModal({
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger
                       id="unit"
-                      className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                      className="bg-dark-card border-dark-hover text-slate-50"
                       aria-invalid={!!errors.unit}
                       aria-describedby={errors.unit ? 'unit-error' : undefined}
                     >
@@ -282,14 +284,14 @@ export function TakeoffAddItemModal({
                 min="0"
                 {...register('unitCost', { valueAsNumber: true })}
                 placeholder="0.00"
-                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-dark-hover text-slate-50"
                 aria-describedby={errors.unitCost ? 'unitCost-error' : undefined}
               />
               <FormError error={errors.unitCost} fieldName="unitCost" />
             </div>
             <div className="space-y-2">
               <Label className="text-sm text-gray-300">Total Cost</Label>
-              <div className="h-10 flex items-center px-3 rounded-md bg-dark-card border border-gray-600 text-green-400 font-medium">
+              <div className="h-10 flex items-center px-3 rounded-md bg-dark-card border border-dark-hover text-green-400 font-medium">
                 ${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
@@ -305,7 +307,7 @@ export function TakeoffAddItemModal({
               id="location"
               {...register('location')}
               placeholder="e.g., Building A - First Floor"
-              className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+              className="bg-dark-card border-dark-hover text-slate-50"
               aria-describedby={errors.location ? 'location-error' : undefined}
             />
             <FormError error={errors.location} fieldName="location" />
@@ -322,7 +324,7 @@ export function TakeoffAddItemModal({
                 id="sheetNumber"
                 {...register('sheetNumber')}
                 placeholder="e.g., A-101"
-                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-dark-hover text-slate-50"
                 aria-describedby={errors.sheetNumber ? 'sheetNumber-error' : undefined}
               />
               <FormError error={errors.sheetNumber} fieldName="sheetNumber" />
@@ -333,7 +335,7 @@ export function TakeoffAddItemModal({
                 id="gridLocation"
                 {...register('gridLocation')}
                 placeholder="e.g., A-1 to C-3"
-                className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                className="bg-dark-card border-dark-hover text-slate-50"
                 aria-describedby={errors.gridLocation ? 'gridLocation-error' : undefined}
               />
               <FormError error={errors.gridLocation} fieldName="gridLocation" />
@@ -347,7 +349,7 @@ export function TakeoffAddItemModal({
               id="notes"
               {...register('notes')}
               placeholder="Additional notes..."
-              className="bg-dark-card border-gray-600 text-[#F8FAFC] min-h-[60px]"
+              className="bg-dark-card border-dark-hover text-slate-50 min-h-[60px]"
               aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
             <FormError error={errors.notes} fieldName="notes" />
@@ -358,7 +360,7 @@ export function TakeoffAddItemModal({
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="border-gray-600 text-gray-300"
+              className="border-dark-hover text-gray-300"
             >
               Cancel
             </Button>

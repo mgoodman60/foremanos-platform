@@ -147,7 +147,7 @@ export function SalesChatbot() {
               )}
               <Button
                 onClick={handleOpen}
-                className="w-16 h-16 rounded-full shadow-2xl bg-[#003B71] hover:bg-[#002851] text-white flex items-center justify-center group"
+                className="w-16 h-16 rounded-full shadow-2xl bg-client-primary hover:bg-client-primary-dark text-white flex items-center justify-center group"
                 aria-label="Open sales chat"
               >
                 <MessageCircle className="h-8 w-8 group-hover:scale-110 transition-transform" />
@@ -168,7 +168,7 @@ export function SalesChatbot() {
             className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] shadow-2xl rounded-2xl overflow-hidden bg-white"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#003B71] to-[#0052a3] text-white p-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-client-primary to-blue-700 text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <MessageCircle className="h-5 w-5" />
@@ -209,7 +209,7 @@ export function SalesChatbot() {
                       <div
                         className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                           message.sender === 'user'
-                            ? 'bg-[#003B71] text-white rounded-br-sm'
+                            ? 'bg-client-primary text-white rounded-br-sm'
                             : 'bg-white text-gray-800 shadow-sm rounded-bl-sm border border-gray-200'
                         }`}
                       >
@@ -262,7 +262,7 @@ export function SalesChatbot() {
                     />
                     <Button
                       type="submit"
-                      className="bg-[#003B71] hover:bg-[#002851] text-white"
+                      className="bg-client-primary hover:bg-client-primary-dark text-white"
                       disabled={!inputValue.trim()}
                     >
                       <Send className="h-4 w-4" />

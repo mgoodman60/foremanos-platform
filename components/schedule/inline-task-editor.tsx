@@ -166,7 +166,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
                 "flex-1 text-xs py-1 rounded border transition-colors",
                 percentComplete === val
                   ? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
-                  : 'bg-dark-card border-gray-600 text-gray-400 hover:bg-[#3d444d]'
+                  : 'bg-dark-card border-gray-600 text-gray-400 hover:bg-dark-hover'
               )}
             >
               {val}%

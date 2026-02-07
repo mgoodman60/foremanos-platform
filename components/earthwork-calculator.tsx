@@ -201,18 +201,25 @@ export default function EarthworkCalculator({
   };
   
   return (
-    <div className="bg-[#2D333B] rounded-lg border border-gray-700">
+    <div className="bg-dark-card rounded-lg border border-gray-700">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-[#373E47] transition-colors rounded-lg"
+        aria-expanded={isExpanded}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }
+        }}
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-dark-hover transition-colors rounded-lg"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-900/30 rounded-lg">
             <Mountain className="w-5 h-5 text-amber-500" />
           </div>
           <div className="text-left">
-            <h3 className="font-semibold text-[#F8FAFC]">Earthwork Calculator</h3>
+            <h3 className="font-semibold text-slate-50">Earthwork Calculator</h3>
             <p className="text-sm text-gray-400">Calculate cut/fill volumes from plans</p>
           </div>
         </div>
@@ -343,7 +350,7 @@ export default function EarthworkCalculator({
                         className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                           selectedDocs.includes(doc.id)
                             ? 'bg-amber-900/30 border border-amber-600'
-                            : 'bg-dark-surface border border-transparent hover:bg-[#373E47]'
+                            : 'bg-dark-surface border border-transparent hover:bg-dark-hover'
                         }`}
                       >
                         <input
@@ -402,7 +409,7 @@ export default function EarthworkCalculator({
           {result && (
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-[#F8FAFC] flex items-center gap-2">
+                <h4 className="font-semibold text-slate-50 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
                   Calculation Results
                 </h4>
@@ -479,14 +486,14 @@ export default function EarthworkCalculator({
               {/* Cost Estimate */}
               <div className="border border-gray-700 rounded-lg overflow-hidden">
                 <div className="bg-dark-surface px-4 py-2 border-b border-gray-700">
-                  <h5 className="font-medium text-[#F8FAFC]">Cost Estimate</h5>
+                  <h5 className="font-medium text-slate-50">Cost Estimate</h5>
                   <p className="text-xs text-gray-400">
                     Regional multiplier: {result.costEstimate.regionalMultiplier}x (KY-Morehead)
                   </p>
                 </div>
                 <div className="divide-y divide-gray-700">
                   {result.costEstimate.breakdown.map((item, idx) => (
-                    <div key={idx} className="px-4 py-2 flex items-center justify-between text-sm bg-[#2D333B]">
+                    <div key={idx} className="px-4 py-2 flex items-center justify-between text-sm bg-dark-card">
                       <div>
                         <span className="text-gray-200">{item.item}</span>
                         <span className="text-gray-400 ml-2">
@@ -501,7 +508,7 @@ export default function EarthworkCalculator({
                 </div>
                 <div className="bg-amber-900/40 px-4 py-3 flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-[#F8FAFC]">Total Earthwork Cost</div>
+                    <div className="font-semibold text-slate-50">Total Earthwork Cost</div>
                     <div className="text-xs text-gray-400">
                       Est. {result.costEstimate.laborHours.toLocaleString()} labor hours
                     </div>

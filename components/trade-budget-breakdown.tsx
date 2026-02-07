@@ -225,7 +225,7 @@ export default function TradeBudgetBreakdown() {
   return (
     <Card className="bg-dark-card border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg font-semibold text-[#F8FAFC] flex items-center gap-2">
+        <CardTitle className="text-lg font-semibold text-slate-50 flex items-center gap-2">
           <HardHat className="h-5 w-5 text-orange-500" />
           Cost by Trade
         </CardTitle>

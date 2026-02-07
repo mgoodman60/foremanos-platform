@@ -715,7 +715,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                   {/* Subcontractor Header - Collapsible */}
                   <tr 
                     key={`${group.id}-header`} 
-                    className="bg-[#374151] print:bg-gray-200 cursor-pointer hover:bg-[#404852] transition-colors"
+                    className="bg-gray-700 print:bg-gray-200 cursor-pointer hover:bg-gray-600 transition-colors"
                     onClick={() => toggleGroupCollapse(group.id)}
                   >
                     <td className="border border-gray-600 print:border-gray-400 p-2 font-bold text-blue-400 print:text-blue-800">

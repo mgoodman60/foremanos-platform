@@ -147,7 +147,7 @@ export function UploadErrorDialog({
           <div className="flex-1">
             <h2
               id="upload-error-title"
-              className="text-lg font-semibold text-[#F8FAFC]"
+              className="text-lg font-semibold text-slate-50"
             >
               {errorInfo.title}
             </h2>

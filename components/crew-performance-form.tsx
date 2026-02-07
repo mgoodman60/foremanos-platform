@@ -144,6 +144,7 @@ export default function CrewPerformanceForm({
                 type="date"
                 {...register('date')}
                 className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
+                aria-required="true"
                 aria-invalid={!!errors.date}
                 aria-describedby={errors.date ? 'date-error' : undefined}
               />
@@ -161,6 +162,7 @@ export default function CrewPerformanceForm({
                 {...register('crewSize', { valueAsNumber: true })}
                 placeholder="Number of workers"
                 className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
+                aria-required="true"
                 aria-invalid={!!errors.crewSize}
                 aria-describedby={errors.crewSize ? 'crewSize-error' : undefined}
               />
@@ -169,11 +171,12 @@ export default function CrewPerformanceForm({
           </div>
 
           {/* Productivity Metrics */}
-          <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
-            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-green-400" />
-              Productivity Metrics
-            </h3>
+          <fieldset className="border-0 p-0 m-0 min-w-0">
+            <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
+              <legend className="text-sm font-semibold text-slate-50 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-green-400" />
+                Productivity Metrics
+              </legend>
 
             <div className="grid grid-cols-3 gap-4">
               <div>
@@ -188,6 +191,7 @@ export default function CrewPerformanceForm({
                   {...register('hoursWorked', { valueAsNumber: true })}
                   placeholder="8.0"
                   className="bg-dark-card border-gray-700 text-slate-50 mt-1"
+                  aria-required="true"
                   aria-invalid={!!errors.hoursWorked}
                   aria-describedby={errors.hoursWorked ? 'hoursWorked-error' : undefined}
                 />
@@ -227,14 +231,16 @@ export default function CrewPerformanceForm({
                 <FormError error={errors.unitsProduced} fieldName="unitsProduced" />
               </div>
             </div>
-          </div>
+            </div>
+          </fieldset>
 
           {/* Safety & Quality */}
-          <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
-            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-400" />
-              Safety & Quality
-            </h3>
+          <fieldset className="border-0 p-0 m-0 min-w-0">
+            <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
+              <legend className="text-sm font-semibold text-slate-50 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-blue-400" />
+                Safety & Quality
+              </legend>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -279,14 +285,16 @@ export default function CrewPerformanceForm({
                 Rework Required
               </Label>
             </div>
-          </div>
+            </div>
+          </fieldset>
 
           {/* Weather Impact */}
-          <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
-            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-yellow-400" />
-              Weather Impact
-            </h3>
+          <fieldset className="border-0 p-0 m-0 min-w-0">
+            <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
+              <legend className="text-sm font-semibold text-slate-50 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                Weather Impact
+              </legend>
 
             <div className="flex items-center space-x-2">
               <input
@@ -316,7 +324,8 @@ export default function CrewPerformanceForm({
                 <FormError error={errors.weatherNotes} fieldName="weatherNotes" />
               </div>
             )}
-          </div>
+            </div>
+          </fieldset>
 
           {/* Additional Notes */}
           <div>

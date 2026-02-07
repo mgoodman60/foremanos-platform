@@ -322,7 +322,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
-            <h2 id="photo-library-title" className="text-2xl font-bold text-[#F8FAFC]">Photo Library</h2>
+            <h2 id="photo-library-title" className="text-2xl font-bold text-slate-50">Photo Library</h2>
             <p className="text-sm text-gray-400 mt-1">
               {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
               {selectedPhotos.size > 0 && ` · ${selectedPhotos.size} selected`}
@@ -335,7 +335,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   onClick={() => setShowBulkTagDialog(true)}
                   disabled={bulkProcessing}
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card hover:text-white"
                 >
                   <Tag className="h-4 w-4 mr-2" />
                   Tag
@@ -344,7 +344,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   onClick={() => setShowBulkCaptionDialog(true)}
                   disabled={bulkProcessing}
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card hover:text-white"
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Caption
@@ -389,7 +389,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               placeholder="Search by caption, description, or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-dark-card border-gray-600 text-[#F8FAFC] placeholder:text-gray-500"
+              className="pl-10 bg-dark-card border-dark-hover text-slate-50 placeholder:text-gray-400"
             />
           </div>
 
@@ -399,7 +399,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
+              className="px-3 py-2 bg-dark-card border border-dark-hover rounded-lg text-sm text-slate-50 hover:bg-dark-hover transition-colors"
             >
               <option value="date-desc">📅 Newest First</option>
               <option value="date-asc">📅 Oldest First</option>
@@ -411,7 +411,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               <select
                 value={selectedTrade}
                 onChange={(e) => setSelectedTrade(e.target.value)}
-                className="px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
+                className="px-3 py-2 bg-dark-card border border-dark-hover rounded-lg text-sm text-slate-50 hover:bg-dark-hover transition-colors"
               >
                 <option value="all">🔨 All Trades</option>
                 {trades.map(trade => (
@@ -425,7 +425,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
               <select
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
-                className="px-3 py-2 bg-dark-card border border-gray-600 rounded-lg text-sm text-[#F8FAFC] hover:bg-[#3d434b] transition-colors"
+                className="px-3 py-2 bg-dark-card border border-dark-hover rounded-lg text-sm text-slate-50 hover:bg-dark-hover transition-colors"
               >
                 <option value="all">📍 All Locations</option>
                 {locations.map(loc => (
@@ -440,7 +440,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                 onClick={toggleSelectAll}
                 variant="outline"
                 size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white"
+                className="border-dark-hover text-gray-300 hover:bg-dark-card hover:text-white"
               >
                 {selectedPhotos.size === filteredPhotos.length ? (
                   <CheckSquare className="h-4 w-4 mr-2" />
@@ -489,7 +489,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
           aria-labelledby="photo-library-bulk-tag-title"
         >
           <div className="bg-dark-surface border border-gray-700 rounded-lg p-6 w-full max-w-md">
-            <h3 id="photo-library-bulk-tag-title" className="text-xl font-bold text-[#F8FAFC] mb-4">
+            <h3 id="photo-library-bulk-tag-title" className="text-xl font-bold text-slate-50 mb-4">
               Tag {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
             </h3>
             <div className="space-y-4">
@@ -502,7 +502,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   placeholder="e.g., Electrical, Plumbing"
                   value={bulkTrade}
                   onChange={(e) => setBulkTrade(e.target.value)}
-                  className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                  className="bg-dark-card border-dark-hover text-slate-50"
                 />
               </div>
               <div>
@@ -514,7 +514,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   placeholder="e.g., Basement, 2nd Floor"
                   value={bulkLocation}
                   onChange={(e) => setBulkLocation(e.target.value)}
-                  className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                  className="bg-dark-card border-dark-hover text-slate-50"
                 />
               </div>
               <div className="flex gap-2 justify-end pt-4">
@@ -551,7 +551,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
           aria-labelledby="photo-library-bulk-caption-title"
         >
           <div className="bg-dark-surface border border-gray-700 rounded-lg p-6 w-full max-w-md">
-            <h3 id="photo-library-bulk-caption-title" className="text-xl font-bold text-[#F8FAFC] mb-4">
+            <h3 id="photo-library-bulk-caption-title" className="text-xl font-bold text-slate-50 mb-4">
               Caption {selectedPhotos.size} Photo{selectedPhotos.size !== 1 ? 's' : ''}
             </h3>
             <div className="space-y-4">
@@ -564,7 +564,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
                   placeholder="Enter caption for all selected photos"
                   value={bulkCaption}
                   onChange={(e) => setBulkCaption(e.target.value)}
-                  className="bg-dark-card border-gray-600 text-[#F8FAFC]"
+                  className="bg-dark-card border-dark-hover text-slate-50"
                 />
               </div>
               <div className="flex gap-2 justify-end pt-4">
@@ -621,7 +621,7 @@ function PhotoCard({ photo, selected, onToggleSelect }: PhotoCardProps) {
   return (
     <Card
       className={`bg-dark-card border-2 transition-all cursor-pointer group ${
-        selected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-gray-700 hover:border-gray-600'
+        selected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-gray-700 hover:border-dark-hover'
       }`}
       onClick={onToggleSelect}
     >
@@ -684,7 +684,7 @@ function PhotoCard({ photo, selected, onToggleSelect }: PhotoCardProps) {
 
         {/* Caption */}
         {photo.caption && (
-          <p className="text-sm text-[#F8FAFC] line-clamp-2">{photo.caption}</p>
+          <p className="text-sm text-slate-50 line-clamp-2">{photo.caption}</p>
         )}
 
         {/* AI Description */}

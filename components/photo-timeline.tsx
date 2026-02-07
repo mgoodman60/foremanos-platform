@@ -132,7 +132,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
-            <h2 id="photo-timeline-title" className="text-2xl font-bold text-[#F8FAFC]">Photo Timeline</h2>
+            <h2 id="photo-timeline-title" className="text-2xl font-bold text-slate-50">Photo Timeline</h2>
             <p className="text-sm text-gray-400 mt-1">
               {photos.length} photo{photos.length !== 1 ? 's' : ''} across {groupedPhotos.length} day{groupedPhotos.length !== 1 ? 's' : ''}
             </p>
@@ -185,19 +185,19 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
                 <div key={group.date} className="relative">
                   {/* Timeline dot and line */}
                   <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-700">
-                    <div className="absolute top-6 left-0 -translate-x-1/2 w-4 h-4 rounded-full bg-orange-500 border-4 border-[#1F2328]"></div>
+                    <div className="absolute top-6 left-0 -translate-x-1/2 w-4 h-4 rounded-full bg-orange-500 border-4 border-dark-surface"></div>
                   </div>
 
                   {/* Day header */}
                   <div className="ml-10">
                     <button
                       onClick={() => toggleDay(group.date)}
-                      className="flex items-center justify-between w-full p-4 bg-dark-card border border-gray-700 rounded-lg hover:bg-[#3d434b] transition-colors group"
+                      className="flex items-center justify-between w-full p-4 bg-dark-card border border-gray-700 rounded-lg hover:bg-dark-hover transition-colors group"
                     >
                       <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-orange-500" />
                         <div className="text-left">
-                          <h3 className="text-lg font-semibold text-[#F8FAFC]">
+                          <h3 className="text-lg font-semibold text-slate-50">
                             {group.displayDate}
                           </h3>
                           <p className="text-sm text-gray-400">
@@ -300,7 +300,7 @@ function TimelinePhotoCard({ photo }: TimelinePhotoCardProps) {
 
         {/* Caption */}
         {photo.caption && (
-          <p className="text-sm text-[#F8FAFC] line-clamp-2">{photo.caption}</p>
+          <p className="text-sm text-slate-50 line-clamp-2">{photo.caption}</p>
         )}
 
         {/* AI Description */}

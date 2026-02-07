@@ -18,7 +18,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import { chartColors } from '@/lib/design-tokens';
+import { chartColors, backgroundColors, neutralColors, textColors, borderColors } from '@/lib/design-tokens';
 
 interface DataVisualizationProps {
   type: 'bar' | 'line' | 'pie' | 'area' | 'table';
@@ -69,7 +69,7 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
       <div className="my-4 overflow-x-auto rounded-lg border border-gray-700">
         {title && (
           <div className="bg-dark-card px-4 py-3 border-b border-gray-700">
-            <h3 className="font-semibold text-lg text-[#F8FAFC]">{title}</h3>
+            <h3 className="font-semibold text-lg text-slate-50">{title}</h3>
           </div>
         )}
         <div className="overflow-x-auto">
@@ -92,7 +92,7 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
                   {headers.map((header) => (
                     <td
                       key={`${rowIndex}-${header}`}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-[#F8FAFC]"
+                      className="px-6 py-4 whitespace-nowrap text-sm text-slate-50"
                     >
                       {typeof row[header] === 'number'
                         ? row[header].toLocaleString()
@@ -111,21 +111,21 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
   // Helper function to render the appropriate chart
   const renderChart = () => {
     const tooltipStyle = {
-      backgroundColor: '#1F2328',
-      border: '1px solid #374151',
+      backgroundColor: backgroundColors.dark.card,
+      border: `1px solid ${neutralColors.gray[700]}`,
       borderRadius: '6px',
-      color: '#F8FAFC',
+      color: textColors.dark.primary,
     };
 
     switch (type) {
       case 'bar':
         return (
           <BarChart data={validData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xKey} stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+            <XAxis dataKey={xKey} stroke={neutralColors.gray[400]} />
+            <YAxis stroke={neutralColors.gray[400]} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ color: '#F8FAFC' }} />
+            <Legend wrapperStyle={{ color: textColors.dark.primary }} />
             {yKeys.map((key, index) => (
               <Bar
                 key={key}
@@ -140,11 +140,11 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
       case 'line':
         return (
           <LineChart data={validData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xKey} stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+            <XAxis dataKey={xKey} stroke={neutralColors.gray[400]} />
+            <YAxis stroke={neutralColors.gray[400]} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ color: '#F8FAFC' }} />
+            <Legend wrapperStyle={{ color: textColors.dark.primary }} />
             {yKeys.map((key, index) => (
               <Line
                 key={key}
@@ -161,11 +161,11 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
       case 'area':
         return (
           <AreaChart data={validData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xKey} stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+            <XAxis dataKey={xKey} stroke={neutralColors.gray[400]} />
+            <YAxis stroke={neutralColors.gray[400]} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ color: '#F8FAFC' }} />
+            <Legend wrapperStyle={{ color: textColors.dark.primary }} />
             {yKeys.map((key, index) => (
               <Area
                 key={key}
@@ -192,14 +192,14 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
               label={({ name, percent }) =>
                 `${name}: ${((percent || 0) * 100).toFixed(1)}%`
               }
-              labelLine={{ stroke: '#9CA3AF' }}
+              labelLine={{ stroke: neutralColors.gray[400] }}
             >
               {validData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
             </Pie>
             <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ color: '#F8FAFC' }} />
+            <Legend wrapperStyle={{ color: textColors.dark.primary }} />
           </PieChart>
         );
       
@@ -207,11 +207,11 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
         // Default to bar chart if type is not recognized
         return (
           <BarChart data={validData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xKey} stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+            <XAxis dataKey={xKey} stroke={neutralColors.gray[400]} />
+            <YAxis stroke={neutralColors.gray[400]} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ color: '#F8FAFC' }} />
+            <Legend wrapperStyle={{ color: textColors.dark.primary }} />
             {yKeys.map((key, index) => (
               <Bar
                 key={key}
@@ -231,7 +231,7 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
   return (
     <div className="my-6 p-4 bg-dark-card border border-gray-700 rounded-lg">
       {title && (
-        <h3 className="font-semibold text-lg mb-4 text-[#F8FAFC]">{title}</h3>
+        <h3 className="font-semibold text-lg mb-4 text-slate-50">{title}</h3>
       )}
       <ResponsiveContainer width="100%" height={height}>
         {chart}

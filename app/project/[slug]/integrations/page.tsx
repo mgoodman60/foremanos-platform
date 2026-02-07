@@ -32,7 +32,7 @@ export default function IntegrationsPage() {
 
   if (status === 'loading' || !project) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-base flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500" />
       </div>
     );
@@ -46,9 +46,9 @@ export default function IntegrationsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0D1117]">
+    <div className="min-h-screen bg-dark-base">
       {/* Header */}
-      <header className="bg-[#161B22] border-b border-gray-800 sticky top-0 z-10">
+      <header className="bg-dark-subtle border-b border-gray-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <button
@@ -69,7 +69,7 @@ export default function IntegrationsPage() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-[#161B22] border-b border-gray-800">
+      <div className="bg-dark-subtle border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-1 overflow-x-auto">
             {tabs.map((tab) => {
@@ -97,7 +97,7 @@ export default function IntegrationsPage() {
       <main id="main-content" className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'weather' && (
           <div className="space-y-6">
-            <div className="bg-[#161B22] rounded-lg p-4 border border-gray-800">
+            <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
               <h2 className="text-lg font-semibold text-white mb-2">Weather Integration</h2>
               <p className="text-gray-400 text-sm">
                 Real-time weather data and construction impact analysis. Weather is automatically
@@ -110,7 +110,7 @@ export default function IntegrationsPage() {
 
         {activeTab === 'export' && (
           <div className="space-y-6">
-            <div className="bg-[#161B22] rounded-lg p-4 border border-gray-800">
+            <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
               <h2 className="text-lg font-semibold text-white mb-2">Data Export</h2>
               <p className="text-gray-400 text-sm">
                 Export project data in CSV format for use in Excel, Google Sheets, or other tools.
@@ -123,7 +123,7 @@ export default function IntegrationsPage() {
 
         {activeTab === 'calendar' && (
           <div className="space-y-6">
-            <div className="bg-[#161B22] rounded-lg p-4 border border-gray-800">
+            <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
               <h2 className="text-lg font-semibold text-white mb-2">Calendar Subscriptions</h2>
               <p className="text-gray-400 text-sm">
                 Subscribe to project calendars to see milestones, critical path tasks, and deadlines
@@ -136,7 +136,7 @@ export default function IntegrationsPage() {
 
         {activeTab === 'webhooks' && (
           <div className="space-y-6">
-            <div className="bg-[#161B22] rounded-lg p-4 border border-gray-800">
+            <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
               <h2 className="text-lg font-semibold text-white mb-2">Webhook Notifications</h2>
               <p className="text-gray-400 text-sm">
                 Send real-time notifications to external systems when events occur in your project.

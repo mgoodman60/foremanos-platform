@@ -855,7 +855,7 @@ export default function SchedulesPage() {
                     "relative transition-all",
                     selectedSchedule?.id === schedule.id 
                       ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
-                      : "bg-[#3d444d] border-gray-500 text-gray-200 hover:bg-[#4d555e] hover:border-gray-400"
+                      : "bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400"
                   )}
                 >
                   {schedule.name}
@@ -952,49 +952,49 @@ export default function SchedulesPage() {
                     <TabsList className="bg-dark-card border border-gray-600 p-1 justify-start gap-1">
                       <TabsTrigger 
                         value="gantt" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
                       >
                         <BarChart3 className="h-4 w-4" />
                         Gantt Chart
                       </TabsTrigger>
                       <TabsTrigger 
                         value="lookahead" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
                       >
                         <CalendarDays className="h-4 w-4" />
                         3-Week Lookahead
                       </TabsTrigger>
                       <TabsTrigger 
                         value="analysis" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
                       >
                         <Activity className="h-4 w-4" />
                         Analysis
                       </TabsTrigger>
                       <TabsTrigger 
                         value="health" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
                       >
                         <HeartPulse className="h-4 w-4" />
                         Health Check
                       </TabsTrigger>
                       <TabsTrigger 
                         value="weather" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-blue-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-blue-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-blue-500"
                       >
                         <Cloud className="h-4 w-4" />
                         Weather
                       </TabsTrigger>
                       <TabsTrigger 
                         value="field" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-green-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-green-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-green-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-green-500"
                       >
                         <Smartphone className="h-4 w-4" />
                         Field View
                       </TabsTrigger>
                       <TabsTrigger 
                         value="ai-coach" 
-                        className="text-gray-300 bg-[#3d444d] hover:bg-[#4d555e] data-[state=active]:bg-purple-600 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-purple-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-purple-600 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-purple-500"
                       >
                         <Brain className="h-4 w-4" />
                         AI Coach
@@ -1007,7 +1007,7 @@ export default function SchedulesPage() {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="bg-[#3d444d] border-gray-500 text-gray-200 hover:bg-[#4d555e] hover:border-gray-400"
+                          className="bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400"
                           disabled={baselineLoading}
                         >
                           {baselineLoading ? (

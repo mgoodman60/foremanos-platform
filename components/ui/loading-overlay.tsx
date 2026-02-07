@@ -50,7 +50,7 @@ export function LoadingOverlay({
         <Loader2
           className={cn(
             'w-10 h-10 animate-spin',
-            variant === 'dark' ? 'text-orange-500' : 'text-[#003B71]'
+            variant === 'dark' ? 'text-orange-500' : 'text-client-primary'
           )}
           aria-hidden="true"
         />

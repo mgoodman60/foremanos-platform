@@ -531,7 +531,7 @@ export default function TakeoffsPage() {
             </Button>
             <Button
               onClick={() => setShowCreateModal(true)}
-              className="bg-[#F97316] hover:bg-[#ea6a0a]"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Takeoff
@@ -700,7 +700,7 @@ export default function TakeoffsPage() {
                   <div className="flex items-center gap-3">
                     <Button
                       onClick={() => setShowLineItemModal(true)}
-                      className="bg-[#F97316] hover:bg-[#ea6a0a]"
+                      className="bg-orange-500 hover:bg-orange-600"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Line Item
@@ -935,7 +935,7 @@ export default function TakeoffsPage() {
               </Button>
               <Button
                 onClick={handleCreateTakeoff}
-                className="bg-[#F97316] hover:bg-[#ea6a0a]"
+                className="bg-orange-500 hover:bg-orange-600"
               >
                 Create Takeoff
               </Button>
@@ -1032,7 +1032,7 @@ export default function TakeoffsPage() {
               {newLineItem.quantity > 0 && newLineItem.unitCost > 0 && (
                 <div className="bg-dark-surface border border-gray-700 rounded-lg p-3">
                   <div className="text-sm text-gray-400">Total Cost</div>
-                  <div className="text-2xl font-bold text-[#F97316]">
+                  <div className="text-2xl font-bold text-orange-500">
                     ${(newLineItem.quantity * newLineItem.unitCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
@@ -1060,7 +1060,7 @@ export default function TakeoffsPage() {
               </Button>
               <Button
                 onClick={handleAddLineItem}
-                className="bg-[#F97316] hover:bg-[#ea6a0a]"
+                className="bg-orange-500 hover:bg-orange-600"
               >
                 Add Item
               </Button>

@@ -213,8 +213,16 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
             </div>
             <DialogTitle className="text-xl">{step.title}</DialogTitle>
           </div>
-          <Progress value={progress} className="h-2" />
-          <p className="text-sm text-gray-400 mt-2">
+          <Progress
+            value={progress}
+            className="h-2"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Onboarding progress: Step ${currentStep + 1} of ${steps.length}`}
+          />
+          <p className="text-sm text-gray-400 mt-2" aria-current="step">
             Step {currentStep + 1} of {steps.length}
           </p>
         </DialogHeader>

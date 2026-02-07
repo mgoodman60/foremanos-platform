@@ -245,7 +245,7 @@ export default function SubcontractorQuotes() {
     <div className="space-y-6">
       {/* View Toggle */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 bg-[#22272e] p-1 rounded-lg border border-gray-700">
+        <div className="flex items-center gap-2 bg-dark-surface p-1 rounded-lg border border-gray-700">
           <button
             onClick={() => setViewMode('quotes')}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -392,7 +392,7 @@ export default function SubcontractorQuotes() {
             >
               {/* Quote Header */}
               <div
-                className="p-4 cursor-pointer hover:bg-[#373e47] transition-colors"
+                className="p-4 cursor-pointer hover:bg-dark-hover transition-colors"
                 onClick={() => setExpandedQuote(expandedQuote === quote.id ? null : quote.id)}
               >
                 <div className="flex items-center justify-between">
@@ -527,7 +527,7 @@ export default function SubcontractorQuotes() {
                   {quote.scopeDescription && (
                     <div>
                       <h4 className="text-sm font-medium text-gray-400 mb-2">Scope of Work</h4>
-                      <p className="text-gray-300 text-sm bg-[#1f2328] p-3 rounded-lg">
+                      <p className="text-gray-300 text-sm bg-dark-card p-3 rounded-lg">
                         {quote.scopeDescription}
                       </p>
                     </div>

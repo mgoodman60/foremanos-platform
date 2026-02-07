@@ -154,7 +154,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
         <div className="text-center mb-6">
           <p className="text-lg text-gray-300 mt-2">AI-Powered Construction Plan Intelligence</p>
         </div>
-        <h2 id="login-modal-title" className="text-3xl font-bold text-center text-[#F8FAFC]">
+        <h2 id="login-modal-title" className="text-3xl font-bold text-center text-slate-50">
           Sign In to Your Account
         </h2>
         <p className="text-gray-400 mt-2 text-center max-w-md">

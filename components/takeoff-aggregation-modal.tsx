@@ -313,7 +313,7 @@ export function TakeoffAggregationModal({
                     <div key={cat.category} className="bg-dark-card rounded-lg overflow-hidden">
                       <button
                         onClick={() => toggleCategory(cat.category)}
-                        className="w-full flex items-center justify-between p-3 hover:bg-[#373e47] transition-colors"
+                        className="w-full flex items-center justify-between p-3 hover:bg-dark-hover transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           {expandedCategories.has(cat.category) ? (

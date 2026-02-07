@@ -240,7 +240,7 @@ export default function ModelElementTree({
   };
 
   return (
-    <div className={`bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden flex flex-col ${className}`}>
+    <div className={`bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden flex flex-col ${className}`}>
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">

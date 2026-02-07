@@ -225,7 +225,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                       type="button"
                       onClick={() => copyToClipboard(guestData?.guestUsername || '', 'Job Pin')}
                       className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
-                      title="Copy Job Pin"
+                      aria-label="Copy Job Pin"
                     >
                       <Copy className="w-4 h-4 text-client-primary" />
                     </button>
@@ -243,7 +243,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
-                          title={showPassword ? 'Hide password' : 'Show password'}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           <Key className="w-4 h-4 text-client-primary" />
                         </button>
@@ -252,7 +252,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                             type="button"
                             onClick={() => copyToClipboard(guestData?.guestPassword || '', 'Password')}
                             className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
-                            title="Copy password"
+                            aria-label="Copy password"
                           >
                             <Copy className="w-4 h-4 text-client-primary" />
                           </button>

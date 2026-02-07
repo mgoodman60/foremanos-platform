@@ -31,7 +31,7 @@ export default function MEPNavigation({ projectSlug }: MEPNavigationProps) {
   ];
   
   return (
-    <div className="border-b border-gray-700 bg-[#161B22]">
+    <div className="border-b border-gray-700 bg-dark-subtle">
       <nav className="flex space-x-1 px-4 overflow-x-auto scrollbar-hide" aria-label="MEP Navigation">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href || 

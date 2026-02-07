@@ -515,10 +515,10 @@ export function FloorPlanViewer({
   const showAutoGrid = !imageUrl && !hasPlanDocuments && !hasDwg;
 
   return (
-    <div className={`relative bg-[#1a1d21] border border-gray-700 rounded-lg overflow-hidden ${className}`}>
+    <div className={`relative bg-dark-active border border-gray-700 rounded-lg overflow-hidden ${className}`}>
       {/* Header - Clickable to collapse/expand */}
       <div 
-        className="flex items-center justify-between border-b border-gray-700 px-4 py-2 bg-dark-card cursor-pointer hover:bg-[#363d47] transition-colors"
+        className="flex items-center justify-between border-b border-gray-700 px-4 py-2 bg-dark-card cursor-pointer hover:bg-dark-hover transition-colors"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <div className="flex items-center gap-2">

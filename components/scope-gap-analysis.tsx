@@ -176,7 +176,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#2d333b] to-[#22272e] rounded-lg p-6 border border-gray-700">
+      <div className="bg-gradient-to-r from-dark-card to-dark-surface rounded-lg p-6 border border-gray-700">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
@@ -196,7 +196,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
             <select
               value={tradeFilter}
               onChange={(e) => setTradeFilter(e.target.value)}
-              className="bg-[#22272e] border border-gray-600 rounded-lg px-3 py-2 text-sm text-white"
+              className="bg-dark-surface border border-gray-600 rounded-lg px-3 py-2 text-sm text-white"
             >
               <option value="all">All Trades</option>
               {Object.entries(TRADE_LABELS).map(([value, label]) => (
@@ -276,7 +276,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
             </div>
             
             {/* Stats Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-[#22272e]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-dark-surface">
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">{analysis.gaps.length}</div>
                 <div className="text-xs text-gray-400">Total Gaps</div>
@@ -339,7 +339,14 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
                     {/* Gap Header */}
                     <button
                       onClick={() => toggleGap(gap.id)}
-                      className="w-full p-4 flex items-start justify-between text-left hover:bg-[#22272e] transition-colors"
+                      aria-expanded={isExpanded}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleGap(gap.id);
+                        }
+                      }}
+                      className="w-full p-4 flex items-start justify-between text-left hover:bg-dark-surface transition-colors"
                     >
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5">{categoryConfig.icon}</div>
@@ -382,7 +389,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
                           </div>
                         )}
                         
-                        <div className="bg-[#22272e] rounded-lg p-3">
+                        <div className="bg-dark-surface rounded-lg p-3">
                           <div className="flex items-center gap-2 text-green-400 mb-2">
                             <Lightbulb className="h-4 w-4" />
                             <span className="text-sm font-medium">Recommendation</span>
@@ -402,7 +409,14 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
             <div className="bg-dark-card rounded-lg border border-gray-700">
               <button
                 onClick={() => setShowCovered(!showCovered)}
-                className="w-full p-4 flex items-center justify-between text-left hover:bg-[#22272e] transition-colors"
+                aria-expanded={showCovered}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setShowCovered(!showCovered);
+                  }
+                }}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-dark-surface transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-400" />

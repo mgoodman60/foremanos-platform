@@ -4,9 +4,6 @@
  * Centralized color palette and design system values for consistent theming.
  * This file standardizes all color values used across the application.
  *
- * DO NOT import this file into components yet - it's a reference document.
- * Future refactoring will replace hardcoded values with these tokens.
- *
  * @see app/globals.css for CSS custom properties
  * @see tailwind.config.ts for Tailwind theme configuration
  */

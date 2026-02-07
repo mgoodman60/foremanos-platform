@@ -598,9 +598,9 @@ export function InteractivePlanViewer({
   };
 
   return (
-    <div className="flex h-full flex-col bg-dark-surface text-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-dark-surface text-slate-50">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-700 p-3">
+      <div className="flex items-center justify-between border-b border-dark-hover p-3">
         <div className="flex items-center gap-3">
           <Layers className="h-5 w-5 text-blue-500" />
           <div>
@@ -623,7 +623,7 @@ export function InteractivePlanViewer({
         {/* Main Viewer */}
         <div className="flex flex-1 flex-col">
           {/* Toolbar */}
-          <div className="flex items-center justify-between border-b border-gray-700 p-2">
+          <div className="flex items-center justify-between border-b border-dark-hover p-2">
             {/* Zoom Controls */}
             <div className="flex items-center gap-1">
               <WithTooltip tooltip="Zoom out">
@@ -631,7 +631,7 @@ export function InteractivePlanViewer({
                   variant="outline"
                   size="sm"
                   onClick={handleZoomOut}
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card"
                 >
                   <ZoomOut className="h-4 w-4" />
                 </Button>
@@ -644,7 +644,7 @@ export function InteractivePlanViewer({
                   variant="outline"
                   size="sm"
                   onClick={handleZoomIn}
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card"
                 >
                   <ZoomIn className="h-4 w-4" />
                 </Button>
@@ -655,7 +655,7 @@ export function InteractivePlanViewer({
                   variant="outline"
                   size="sm"
                   onClick={handleResetView}
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </Button>
@@ -665,7 +665,7 @@ export function InteractivePlanViewer({
                   variant="outline"
                   size="sm"
                   onClick={handleFitToScreen}
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card"
                 >
                   <Maximize className="h-4 w-4" />
                 </Button>
@@ -680,7 +680,7 @@ export function InteractivePlanViewer({
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card"
                 >
                   Previous
                 </Button>
@@ -688,7 +688,7 @@ export function InteractivePlanViewer({
                   value={currentPage.toString()}
                   onValueChange={(val) => setCurrentPage(parseInt(val, 10))}
                 >
-                  <SelectTrigger className="w-[100px] bg-dark-card border-gray-600 text-[#F8FAFC]">
+                  <SelectTrigger className="w-[100px] bg-dark-card border-dark-hover text-slate-50">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -704,7 +704,7 @@ export function InteractivePlanViewer({
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="border-gray-600 text-gray-300 hover:bg-dark-card"
+                  className="border-dark-hover text-gray-300 hover:bg-dark-card"
                 >
                   Next
                 </Button>
@@ -718,7 +718,7 @@ export function InteractivePlanViewer({
                   variant={showGrid ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setShowGrid(!showGrid)}
-                  className={showGrid ? 'bg-blue-500 hover:bg-blue-600' : 'border-gray-600 text-gray-300 hover:bg-dark-card'}
+                  className={showGrid ? 'bg-blue-500 hover:bg-blue-600' : 'border-dark-hover text-gray-300 hover:bg-dark-card'}
                 >
                   <Grid3x3 className="h-4 w-4" />
                 </Button>
@@ -728,7 +728,7 @@ export function InteractivePlanViewer({
                   variant={showRooms ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setShowRooms(!showRooms)}
-                  className={showRooms ? 'bg-green-500 hover:bg-green-600' : 'border-gray-600 text-gray-300 hover:bg-dark-card'}
+                  className={showRooms ? 'bg-green-500 hover:bg-green-600' : 'border-dark-hover text-gray-300 hover:bg-dark-card'}
                 >
                   <Home className="h-4 w-4" />
                 </Button>
@@ -738,7 +738,7 @@ export function InteractivePlanViewer({
                   variant={showEquipment ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setShowEquipment(!showEquipment)}
-                  className={showEquipment ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-card'}
+                  className={showEquipment ? 'bg-orange-500 hover:bg-orange-600' : 'border-dark-hover text-gray-300 hover:bg-dark-card'}
                 >
                   <Zap className="h-4 w-4" />
                 </Button>
@@ -748,7 +748,7 @@ export function InteractivePlanViewer({
                   variant={showTakeoff ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setShowTakeoff(!showTakeoff)}
-                  className={showTakeoff ? 'bg-purple-500 hover:bg-purple-600' : 'border-gray-600 text-gray-300 hover:bg-dark-card'}
+                  className={showTakeoff ? 'bg-purple-500 hover:bg-purple-600' : 'border-dark-hover text-gray-300 hover:bg-dark-card'}
                 >
                   <Package className="h-4 w-4" />
                 </Button>
@@ -836,9 +836,9 @@ export function InteractivePlanViewer({
 
         {/* Annotation Details Panel */}
         {selectedAnnotation && (
-          <div className="w-96 flex flex-col border-l border-gray-700 bg-dark-surface overflow-hidden">
+          <div className="w-96 flex flex-col border-l border-dark-hover bg-dark-surface overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-700 p-3">
+            <div className="flex items-center justify-between border-b border-dark-hover p-3">
               <h3 className="text-sm font-semibold">Details</h3>
               <Button
                 variant="ghost"
@@ -925,10 +925,10 @@ export function InteractivePlanViewer({
                                   {/* Categories Accordion */}
                                   <div className="space-y-1">
                                     {Object.entries(roomTakeoffs.summary.categories).map(([category, data]) => (
-                                      <div key={category} className="rounded-md border border-gray-700 bg-[#161b22]">
+                                      <div key={category} className="rounded-md border border-dark-hover bg-dark-subtle">
                                         <button
                                           onClick={() => toggleCategory(category)}
-                                          className="flex w-full items-center justify-between p-2 text-left hover:bg-[#21262d]"
+                                          className="flex w-full items-center justify-between p-2 text-left hover:bg-dark-hover"
                                         >
                                           <div className="flex items-center gap-2">
                                             {expandedCategories.has(category) ? (
@@ -947,7 +947,7 @@ export function InteractivePlanViewer({
                                         </button>
 
                                         {expandedCategories.has(category) && (
-                                          <div className="border-t border-gray-700 p-2">
+                                          <div className="border-t border-dark-hover p-2">
                                             {roomTakeoffs.takeoffItems
                                               .filter((item) => item.category === category)
                                               .map((item) => (
@@ -1052,7 +1052,7 @@ export function InteractivePlanViewer({
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center justify-between border-t border-gray-700 bg-dark-surface px-4 py-2 text-xs text-gray-400">
+      <div className="flex items-center justify-between border-t border-dark-hover bg-dark-surface px-4 py-2 text-xs text-gray-400">
         <div className="flex items-center gap-4">
           <span>
             {annotations.length} annotation{annotations.length !== 1 ? 's' : ''}

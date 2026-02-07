@@ -32,6 +32,7 @@ import {
   Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { semanticColors, neutralColors } from '@/lib/design-tokens';
 
 // Types for resource data
 export interface LaborEntry {
@@ -95,19 +96,19 @@ interface WeeklyResourceData {
 
 // Trade colors for consistent visualization
 const TRADE_COLORS: Record<string, string> = {
-  'Electrical': '#3B82F6', // blue
-  'Plumbing': '#10B981', // emerald
-  'HVAC': '#8B5CF6', // violet
-  'Framing': '#F59E0B', // amber
-  'Concrete': '#6B7280', // gray
+  'Electrical': semanticColors.info[500],
+  'Plumbing': semanticColors.success[500],
+  'HVAC': '#8B5CF6', // purple/violet
+  'Framing': semanticColors.warning[500],
+  'Concrete': neutralColors.gray[500],
   'Drywall': '#EC4899', // pink
   'Painting': '#14B8A6', // teal
-  'Roofing': '#EF4444', // red
+  'Roofing': semanticColors.error[500],
   'Masonry': '#78350F', // brown
   'Flooring': '#84CC16', // lime
-  'General Labor': '#64748B', // slate
+  'General Labor': neutralColors.slate[600],
   'Superintendent': '#0EA5E9', // sky
-  'default': '#94A3B8' // slate-400
+  'default': neutralColors.slate[400]
 };
 
 function getTradeColor(tradeName: string): string {

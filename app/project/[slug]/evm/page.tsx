@@ -184,7 +184,7 @@ export default function EVMPage() {
                 {project.name}
               </button>
               <ChevronRight className="w-4 h-4 mx-2 flex-shrink-0" />
-              <span className="text-[#F8FAFC] font-medium">EVM Dashboard</span>
+              <span className="text-slate-50 font-medium">EVM Dashboard</span>
             </nav>
 
             {/* Action Buttons */}
@@ -216,7 +216,7 @@ export default function EVMPage() {
               <Button
                 onClick={() => setShowBudgetImport(true)}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:border-[#F97316] hover:text-[#F97316]"
+                className="border-gray-600 text-gray-300 hover:border-orange-500 hover:text-orange-500"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Import from PDF
@@ -250,19 +250,19 @@ export default function EVMPage() {
             <TabsList className="bg-dark-surface border border-gray-700 p-1">
               <TabsTrigger 
                 value="dashboard" 
-                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
+                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-orange-500 data-[state=active]:shadow-sm"
               >
                 EVM Dashboard
               </TabsTrigger>
               <TabsTrigger 
                 value="trades"
-                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
+                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-orange-500 data-[state=active]:shadow-sm"
               >
                 Cost by Trade
               </TabsTrigger>
               <TabsTrigger 
                 value="items"
-                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-[#F97316] data-[state=active]:shadow-sm"
+                className="text-gray-300 data-[state=active]:bg-dark-card data-[state=active]:text-orange-500 data-[state=active]:shadow-sm"
               >
                 Budget Items
               </TabsTrigger>
@@ -301,9 +301,9 @@ export default function EVMPage() {
 
       {/* Budget Edit Dialog */}
       <Dialog open={showBudgetEdit} onOpenChange={setShowBudgetEdit}>
-        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC]">
+        <DialogContent className="bg-dark-card border-gray-700 text-slate-50">
           <DialogHeader>
-            <DialogTitle className="text-[#F8FAFC]">Update Budget Total</DialogTitle>
+            <DialogTitle className="text-slate-50">Update Budget Total</DialogTitle>
             <DialogDescription className="text-gray-400">
               Enter the correct total budget amount from your budget document.
               Current: ${currentBudgetTotal.toLocaleString()}
@@ -320,7 +320,7 @@ export default function EVMPage() {
                   placeholder="2,985,000"
                   value={newBudgetTotal}
                   onChange={(e) => setNewBudgetTotal(e.target.value)}
-                  className="pl-9 bg-dark-surface border-gray-600 text-[#F8FAFC] placeholder-gray-500"
+                  className="pl-9 bg-dark-surface border-gray-600 text-slate-50 placeholder-gray-500"
                 />
               </div>
               <p className="text-xs text-gray-500">

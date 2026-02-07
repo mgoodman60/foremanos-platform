@@ -179,7 +179,7 @@ export function Phase3Dashboard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F8FAFC] flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-50 flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-blue-500" />
             Project Intelligence Dashboard
           </h1>
@@ -201,7 +201,7 @@ export function Phase3Dashboard({
       {/* Overview KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Documents */}
-        <Card className="bg-dark-card border-gray-700 p-4">
+        <Card className="bg-dark-card border-dark-hover p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-blue-500/20">
@@ -214,7 +214,7 @@ export function Phase3Dashboard({
             </Badge>
           </div>
           <div className="space-y-1">
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {analytics.overview.totalDocuments}
             </div>
             <div className="text-xs text-gray-400">
@@ -224,7 +224,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Rooms */}
-        <Card className="bg-dark-card border-gray-700 p-4">
+        <Card className="bg-dark-card border-dark-hover p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-green-500/20">
@@ -239,7 +239,7 @@ export function Phase3Dashboard({
             )}
           </div>
           <div className="space-y-1">
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {analytics.overview.totalRooms}
             </div>
             <div className="text-xs text-gray-400">
@@ -249,7 +249,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* MEP Equipment */}
-        <Card className="bg-dark-card border-gray-700 p-4">
+        <Card className="bg-dark-card border-dark-hover p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-orange-500/20">
@@ -262,7 +262,7 @@ export function Phase3Dashboard({
             </Badge>
           </div>
           <div className="space-y-1">
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {analytics.overview.totalMEP}
             </div>
             <div className="text-xs text-gray-400">
@@ -272,7 +272,7 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Materials */}
-        <Card className="bg-dark-card border-gray-700 p-4">
+        <Card className="bg-dark-card border-dark-hover p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-purple-500/20">
@@ -285,7 +285,7 @@ export function Phase3Dashboard({
             </Badge>
           </div>
           <div className="space-y-1">
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(analytics.overview.totalMaterialCost)}
             </div>
             <div className="text-xs text-gray-400">
@@ -297,7 +297,7 @@ export function Phase3Dashboard({
 
       {/* Quick Access Tiles */}
       <div>
-        <h2 className="text-lg font-semibold text-[#F8FAFC] mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-slate-50 mb-4 flex items-center gap-2">
           <Map className="h-5 w-5 text-blue-500" />
           Quick Access
         </h2>
@@ -305,12 +305,12 @@ export function Phase3Dashboard({
           {/* Room Browser */}
           <button
             onClick={onOpenRoom}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-green-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-dark-hover bg-dark-card p-4 text-left hover:border-green-500 hover:bg-dark-hover transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-all"></div>
             <div className="relative">
               <Home className="h-6 w-6 text-green-400 mb-2" />
-              <h3 className="font-semibold text-[#F8FAFC] mb-1">Room Browser</h3>
+              <h3 className="font-semibold text-slate-50 mb-1">Room Browser</h3>
               <p className="text-xs text-gray-400 mb-2">View {analytics.rooms.total} rooms</p>
               <ArrowUpRight className="h-4 w-4 text-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -319,12 +319,12 @@ export function Phase3Dashboard({
           {/* Material Takeoff */}
           <button
             onClick={onOpenMaterials}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-purple-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-dark-hover bg-dark-card p-4 text-left hover:border-purple-500 hover:bg-dark-hover transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
             <div className="relative">
               <Package className="h-6 w-6 text-purple-400 mb-2" />
-              <h3 className="font-semibold text-[#F8FAFC] mb-1">Material Takeoff</h3>
+              <h3 className="font-semibold text-slate-50 mb-1">Material Takeoff</h3>
               <p className="text-xs text-gray-400 mb-2">{formatCurrency(analytics.materials.totalCost)} total</p>
               <ArrowUpRight className="h-4 w-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -333,12 +333,12 @@ export function Phase3Dashboard({
           {/* MEP Equipment */}
           <button
             onClick={onOpenMEP}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-orange-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-dark-hover bg-dark-card p-4 text-left hover:border-orange-500 hover:bg-dark-hover transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all"></div>
             <div className="relative">
               <Zap className="h-6 w-6 text-orange-400 mb-2" />
-              <h3 className="font-semibold text-[#F8FAFC] mb-1">MEP Equipment</h3>
+              <h3 className="font-semibold text-slate-50 mb-1">MEP Equipment</h3>
               <p className="text-xs text-gray-400 mb-2">{analytics.mep.total} items</p>
               <ArrowUpRight className="h-4 w-4 text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -347,12 +347,12 @@ export function Phase3Dashboard({
           {/* Document Viewer */}
           <button
             onClick={onOpenPlans}
-            className="group relative overflow-hidden rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-blue-500 hover:bg-[#383e47] transition-all"
+            className="group relative overflow-hidden rounded-lg border border-dark-hover bg-dark-card p-4 text-left hover:border-blue-500 hover:bg-dark-hover transition-all"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
             <div className="relative">
               <Layers className="h-6 w-6 text-blue-400 mb-2" />
-              <h3 className="font-semibold text-[#F8FAFC] mb-1">Document Viewer</h3>
+              <h3 className="font-semibold text-slate-50 mb-1">Document Viewer</h3>
               <p className="text-xs text-gray-400 mb-2">{analytics.documents.pdf} plans</p>
               <ArrowUpRight className="h-4 w-4 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -364,9 +364,9 @@ export function Phase3Dashboard({
       {/* Detailed Analytics Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* MEP Distribution */}
-        <Card className="bg-dark-card border-gray-700 p-5">
+        <Card className="bg-dark-card border-dark-hover p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <PieChart className="h-4 w-4 text-orange-500" />
               MEP Trade Distribution
             </h3>
@@ -379,7 +379,7 @@ export function Phase3Dashboard({
               <div key={trade} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-400">{trade}</span>
-                  <span className="font-medium text-[#F8FAFC]">{percentage}%</span>
+                  <span className="font-medium text-slate-50">{percentage}%</span>
                 </div>
                 <Progress
                   value={percentage}
@@ -394,9 +394,9 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Material Categories */}
-        <Card className="bg-dark-card border-gray-700 p-5">
+        <Card className="bg-dark-card border-dark-hover p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-purple-500" />
               Top Material Categories
             </h3>
@@ -409,10 +409,10 @@ export function Phase3Dashboard({
               {analytics.materials.categoryBreakdown.slice(0, 5).map((category) => (
                 <div
                   key={category.name}
-                  className="flex items-center justify-between p-2 rounded-lg bg-dark-surface hover:bg-[#383e47] transition-colors"
+                  className="flex items-center justify-between p-2 rounded-lg bg-dark-surface hover:bg-dark-hover transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-[#F8FAFC] truncate">
+                    <div className="text-xs font-medium text-slate-50 truncate">
                       {category.name}
                     </div>
                     <div className="text-xs text-gray-400">
@@ -434,9 +434,9 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Health Metrics */}
-        <Card className="bg-dark-card border-gray-700 p-5">
+        <Card className="bg-dark-card border-dark-hover p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-500" />
               Data Health
             </h3>
@@ -493,9 +493,9 @@ export function Phase3Dashboard({
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-dark-card border-gray-700 p-5">
+        <Card className="bg-dark-card border-dark-hover p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <Activity className="h-4 w-4 text-blue-500" />
               Recent Activity
             </h3>
@@ -507,7 +507,7 @@ export function Phase3Dashboard({
                 <FileText className="h-4 w-4 text-blue-400" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-[#F8FAFC]">
+                <div className="text-sm font-medium text-slate-50">
                   {analytics.activity.last7Days.documents} documents added
                 </div>
                 <div className="text-xs text-gray-400">New uploads</div>
@@ -525,7 +525,7 @@ export function Phase3Dashboard({
                 <Home className="h-4 w-4 text-green-400" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-[#F8FAFC]">
+                <div className="text-sm font-medium text-slate-50">
                   {analytics.activity.last7Days.rooms} rooms created
                 </div>
                 <div className="text-xs text-gray-400">Space tracking</div>

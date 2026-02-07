@@ -149,9 +149,9 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
   };
 
   return (
-    <div className="bg-[#161B22] rounded-lg border border-gray-700 max-h-[80vh] overflow-hidden flex flex-col">
+    <div className="bg-dark-subtle rounded-lg border border-dark-hover max-h-[80vh] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+      <div className="p-4 border-b border-dark-hover flex items-center justify-between">
         <div className="flex items-center gap-3">
           <DollarSign className="w-5 h-5 text-green-400" />
           <h2 className="text-lg font-semibold text-white">Unit Price Manager</h2>
@@ -163,7 +163,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
             <select
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              className="bg-[#21262D] border border-gray-600 rounded px-2 py-1 text-sm text-white"
+              className="bg-dark-card border border-dark-hover rounded px-2 py-1 text-sm text-white"
             >
               {regions.map(r => (
                 <option key={r} value={r}>
@@ -202,13 +202,13 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
           <div className="space-y-2">
             {/* Add Price Form */}
             {showAddForm && (
-              <div className="bg-[#21262D] rounded-lg p-4 mb-4 border border-blue-500">
+              <div className="bg-dark-card rounded-lg p-4 mb-4 border border-blue-500">
                 <h3 className="text-sm font-medium text-white mb-3">Add Custom Price</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <select
                     value={newPrice.category}
                     onChange={(e) => setNewPrice({ ...newPrice, category: e.target.value, subCategory: '' })}
-                    className="bg-[#161B22] border border-gray-600 rounded px-2 py-1.5 text-sm text-white"
+                    className="bg-dark-subtle border border-dark-hover rounded px-2 py-1.5 text-sm text-white"
                   >
                     <option value="">Select Category</option>
                     {TAKEOFF_CATEGORIES.map(cat => (
@@ -219,7 +219,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                   <select
                     value={newPrice.subCategory}
                     onChange={(e) => setNewPrice({ ...newPrice, subCategory: e.target.value })}
-                    className="bg-[#161B22] border border-gray-600 rounded px-2 py-1.5 text-sm text-white"
+                    className="bg-dark-subtle border border-dark-hover rounded px-2 py-1.5 text-sm text-white"
                     disabled={!newPrice.category}
                   >
                     <option value="">Select Sub-Category</option>
@@ -233,7 +233,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                     placeholder="Unit (e.g., CY, SF)"
                     value={newPrice.unit}
                     onChange={(e) => setNewPrice({ ...newPrice, unit: e.target.value.toUpperCase() })}
-                    className="bg-[#161B22] border border-gray-600 rounded px-2 py-1.5 text-sm text-white"
+                    className="bg-dark-subtle border border-dark-hover rounded px-2 py-1.5 text-sm text-white"
                   />
                   
                   <input
@@ -241,7 +241,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                     placeholder="Unit Cost"
                     value={newPrice.unitCost || ''}
                     onChange={(e) => setNewPrice({ ...newPrice, unitCost: parseFloat(e.target.value) || 0 })}
-                    className="bg-[#161B22] border border-gray-600 rounded px-2 py-1.5 text-sm text-white"
+                    className="bg-dark-subtle border border-dark-hover rounded px-2 py-1.5 text-sm text-white"
                   />
                   
                   <input
@@ -249,7 +249,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                     placeholder="Labor Rate/hr"
                     value={newPrice.laborRate || ''}
                     onChange={(e) => setNewPrice({ ...newPrice, laborRate: parseFloat(e.target.value) || 65 })}
-                    className="bg-[#161B22] border border-gray-600 rounded px-2 py-1.5 text-sm text-white"
+                    className="bg-dark-subtle border border-dark-hover rounded px-2 py-1.5 text-sm text-white"
                   />
                   
                   <input
@@ -257,7 +257,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                     placeholder="Supplier (optional)"
                     value={newPrice.supplier}
                     onChange={(e) => setNewPrice({ ...newPrice, supplier: e.target.value })}
-                    className="bg-[#161B22] border border-gray-600 rounded px-2 py-1.5 text-sm text-white"
+                    className="bg-dark-subtle border border-dark-hover rounded px-2 py-1.5 text-sm text-white"
                   />
                   
                   <div className="col-span-2 flex gap-2">
@@ -282,10 +282,10 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
 
             {/* Price Categories */}
             {Object.entries(pricesByCategory).map(([category, prices]) => (
-              <div key={category} className="border border-gray-700 rounded-lg overflow-hidden">
+              <div key={category} className="border border-dark-hover rounded-lg overflow-hidden">
                 <button
                   onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center justify-between p-3 bg-[#21262D] hover:bg-[#2D333B] transition-colors"
+                  className="w-full flex items-center justify-between p-3 bg-dark-card hover:bg-dark-card transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     {expandedCategories.has(category) ? (
@@ -311,7 +311,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                       <div
                         key={price.id}
                         className={`p-3 flex items-center justify-between ${
-                          price.isProjectSpecific ? 'bg-blue-500/5' : 'bg-[#161B22]'
+                          price.isProjectSpecific ? 'bg-blue-500/5' : 'bg-dark-subtle'
                         }`}
                       >
                         <div className="flex-1">
@@ -413,7 +413,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-700 bg-[#21262D]">
+      <div className="p-4 border-t border-dark-hover bg-dark-card">
         <p className="text-xs text-gray-500">
           💡 Project-specific prices override default rates. Default prices are based on 2024 national averages.
         </p>

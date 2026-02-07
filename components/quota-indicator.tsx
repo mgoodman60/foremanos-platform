@@ -72,7 +72,7 @@ export function QuotaIndicator() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-gray-300" />
-            <CardTitle className="text-lg text-[#F8FAFC]">Document Processing Quota</CardTitle>
+            <CardTitle className="text-lg text-slate-50">Document Processing Quota</CardTitle>
           </div>
           <div className="text-sm font-medium text-gray-400">
             {quota.tier} Plan

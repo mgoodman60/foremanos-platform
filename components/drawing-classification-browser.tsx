@@ -195,7 +195,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-[#F8FAFC] flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-slate-50 flex items-center gap-2">
               <Layers className="h-8 w-8 text-blue-400" />
               Drawing Classification
             </h1>
@@ -224,7 +224,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
               <div className="text-gray-400 text-sm mb-1">Total Drawings</div>
-              <div className="text-3xl font-bold text-[#F8FAFC]">{stats.total}</div>
+              <div className="text-3xl font-bold text-slate-50">{stats.total}</div>
             </div>
             <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
               <div className="text-gray-400 text-sm mb-1">Avg Confidence</div>
@@ -353,7 +353,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <div className={`w-3 h-3 rounded-full ${typeColor}`} />
-                      <h3 className="font-semibold text-[#F8FAFC]">
+                      <h3 className="font-semibold text-slate-50">
                         {result.sheetNumber}
                       </h3>
                     </div>
@@ -370,7 +370,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
                 <div className="space-y-2">
                   <div>
                     <div className="text-xs text-gray-500 mb-1">Type</div>
-                    <div className="text-sm font-medium text-[#F8FAFC]">
+                    <div className="text-sm font-medium text-slate-50">
                       {DRAWING_TYPE_LABELS[classification.type] || classification.type}
                     </div>
                   </div>

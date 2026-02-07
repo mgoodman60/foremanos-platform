@@ -68,7 +68,7 @@ export function TakeoffTable({
             type="checkbox"
             checked={selectedItems.has(item.id)}
             onChange={() => {}}
-            className="h-4 w-4 rounded border-gray-600 bg-[#2D333B] text-orange-500 focus:ring-orange-500 cursor-pointer"
+            className="h-4 w-4 rounded border-gray-600 bg-dark-card text-orange-500 focus:ring-orange-500 cursor-pointer"
           />
         </div>
       )}
@@ -85,7 +85,7 @@ export function TakeoffTable({
       {/* Item Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-medium text-[#F8FAFC] truncate">{item.itemName}</h4>
+          <h4 className="font-medium text-slate-50 truncate">{item.itemName}</h4>
           {item.verified && (
             <Badge variant="outline" className="text-xs text-green-400 border-green-700">
               Verified
@@ -163,7 +163,7 @@ export function TakeoffTable({
             <div className="rounded-lg px-3 py-2 bg-dark-card">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-orange-500" />
-                <span className="font-medium text-[#F8FAFC]">
+                <span className="font-medium text-slate-50">
                   Division {String(division.number).padStart(2, '0')} - {division.name}
                 </span>
                 <Badge variant="secondary" className="ml-auto">
@@ -181,7 +181,14 @@ export function TakeoffTable({
                 <div key={catSummary.category}>
                   <button
                     onClick={() => onToggleCategory(catSummary.category)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-dark-card transition-colors border bg-dark-surface border-gray-700"
+                    aria-expanded={expandedCategories.has(catSummary.category)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onToggleCategory(catSummary.category);
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-dark-card transition-colors border bg-dark-surface border-gray-700"
                   >
                     {expandedCategories.has(catSummary.category) ? (
                       <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -189,7 +196,7 @@ export function TakeoffTable({
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     )}
                     <Package className="h-4 w-4 text-blue-400" />
-                    <span className="font-medium text-[#F8FAFC] capitalize">{catSummary.category}</span>
+                    <span className="font-medium text-slate-50 capitalize">{catSummary.category}</span>
                     <div className="ml-auto flex items-center gap-3 text-xs text-gray-400">
                       <span>{catSummary.itemCount} items</span>
                       {catSummary.totalCost > 0 && (
@@ -221,7 +228,14 @@ export function TakeoffTable({
           {/* Category Header */}
           <button
             onClick={() => onToggleCategory(catSummary.category)}
-            className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+            aria-expanded={expandedCategories.has(catSummary.category)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onToggleCategory(catSummary.category);
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-dark-hover transition-colors"
           >
             {expandedCategories.has(catSummary.category) ? (
               <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -229,7 +243,7 @@ export function TakeoffTable({
               <ChevronRight className="h-4 w-4 text-gray-400" />
             )}
             <Package className="h-4 w-4 text-orange-500" />
-            <span className="font-medium text-[#F8FAFC] capitalize">{catSummary.category}</span>
+            <span className="font-medium text-slate-50 capitalize">{catSummary.category}</span>
             <div className="ml-auto flex items-center gap-3 text-xs text-gray-400">
               <span>{catSummary.itemCount} items</span>
               {catSummary.totalCost > 0 && (

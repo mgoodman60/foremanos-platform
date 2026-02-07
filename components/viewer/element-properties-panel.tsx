@@ -108,7 +108,7 @@ export default function ElementPropertiesPanel({
 
   if (selectedIds.length === 0) {
     return (
-      <div className={`bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden ${className}`}>
+      <div className={`bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden ${className}`}>
         <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-2">
           <Info className="w-4 h-4 text-blue-400" />
           <span className="text-sm font-medium text-white">Element Properties</span>
@@ -122,7 +122,7 @@ export default function ElementPropertiesPanel({
 
   if (loading) {
     return (
-      <div className={`bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden ${className}`}>
+      <div className={`bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden ${className}`}>
         <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-2">
           <Info className="w-4 h-4 text-blue-400" />
           <span className="text-sm font-medium text-white">Element Properties</span>
@@ -135,7 +135,7 @@ export default function ElementPropertiesPanel({
   }
 
   return (
-    <div className={`bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden flex flex-col ${className}`}>
+    <div className={`bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden flex flex-col ${className}`}>
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700">
         <div className="flex items-center gap-2">

@@ -21,7 +21,7 @@ export default function ReportTemplatesPage() {
   return (
     <div className="min-h-screen bg-dark-base">
       {/* Header */}
-      <div className="border-b border-gray-800 bg-[#161b22]">
+      <div className="border-b border-gray-800 bg-dark-subtle">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <Link
             href={`/project/${slug}/reports`}

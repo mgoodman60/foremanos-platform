@@ -335,7 +335,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
 
   if (loading) {
     return (
-      <Card className="p-6 bg-[#252A31] border-2 border-gray-600/50 animate-pulse">
+      <Card className="p-6 bg-dark-card border-2 border-dark-hover/50 animate-pulse">
         <div className="h-24 bg-dark-surface rounded"></div>
       </Card>
     );
@@ -347,7 +347,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
     const noSourceMessage = metrics?.message || 'Upload a schedule document and parse it to see progress tracking.';
     
     return (
-      <Card className="p-6 bg-[#252A31] border-2 border-gray-600/50">
+      <Card className="p-6 bg-dark-card border-2 border-dark-hover/50">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -367,7 +367,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               variant="outline"
               size="sm"
               onClick={() => router.push(`/project/${projectSlug}/schedules`)}
-              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
+              className="border-dark-hover text-gray-300 hover:bg-dark-surface"
             >
               Go to Schedules
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -418,7 +418,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
       case 'delayed':
         return 'text-red-400 bg-red-900/40 border border-red-600';
       default:
-        return 'text-gray-300 bg-gray-800 border border-gray-600';
+        return 'text-gray-300 bg-gray-800 border border-dark-hover';
     }
   };
 
@@ -476,7 +476,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
   const renderHealthWidget = () => {
     if (healthLoading) {
       return (
-        <div className="bg-dark-surface rounded-lg p-3 border border-gray-600/50 flex items-center justify-center min-w-[120px]">
+        <div className="bg-dark-surface rounded-lg p-3 border border-dark-hover/50 flex items-center justify-center min-w-[120px]">
           <RefreshCw className="w-4 h-4 text-gray-400 animate-spin" />
         </div>
       );
@@ -484,7 +484,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
 
     if (!health) {
       return (
-        <div className="bg-dark-surface rounded-lg p-3 border border-gray-600/50 min-w-[120px]">
+        <div className="bg-dark-surface rounded-lg p-3 border border-dark-hover/50 min-w-[120px]">
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-4 h-4 text-gray-500" />
             <span className="text-xs text-gray-400">Health</span>
@@ -522,12 +522,12 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
 
   if (compact) {
     return (
-      <Card className="p-4 bg-[#252A31] border-2 border-orange-500/30 hover:shadow-md transition-shadow shadow-orange-900/10">
+      <Card className="p-4 bg-dark-card border-2 border-orange-500/30 hover:shadow-md transition-shadow shadow-orange-900/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-orange-500" />
-              <span className="font-semibold text-[#F8FAFC]">Schedule Progress</span>
+              <span className="font-semibold text-slate-50">Schedule Progress</span>
             </div>
             <Badge variant="outline" className={getStatusColor(metrics.criticalPathStatus)}>
               {metrics.criticalPathStatus === 'healthy' ? 'On Track' : 
@@ -580,7 +580,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               variant="outline"
               size="sm"
               onClick={() => router.push(`/project/${projectSlug}/schedules`)}
-              className="border-gray-600 text-gray-300 hover:bg-dark-surface"
+              className="border-dark-hover text-gray-300 hover:bg-dark-surface"
             >
               View Details
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -592,10 +592,10 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
   }
 
   return (
-    <Card className="bg-[#252A31] border-2 border-orange-500/30 shadow-lg shadow-orange-900/10 overflow-hidden">
+    <Card className="bg-dark-card border-2 border-orange-500/30 shadow-lg shadow-orange-900/10 overflow-hidden">
       {/* Collapsible Header - Always visible */}
       <div 
-        className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#2a2f38] transition-colors"
+        className="flex items-center justify-between p-4 cursor-pointer hover:bg-dark-hover transition-colors"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <div className="flex items-center gap-3 flex-1">
@@ -603,7 +603,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
             <Activity className="h-6 w-6 text-white" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-lg font-semibold text-[#F8FAFC]">Schedule Progress</h3>
+            <h3 className="text-lg font-semibold text-slate-50">Schedule Progress</h3>
             <p className="text-sm text-gray-300">Real-time project schedule tracking</p>
           </div>
           {pendingUpdatesCount > 0 && (
@@ -656,7 +656,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
             variant="outline"
             size="sm"
             onClick={handleExport}
-            className="hidden sm:flex items-center gap-1.5 border-gray-600 text-gray-300 hover:bg-dark-surface h-8 px-2 text-xs"
+            className="hidden sm:flex items-center gap-1.5 border-dark-hover text-gray-300 hover:bg-dark-surface h-8 px-2 text-xs"
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden md:inline">Export</span>
@@ -691,13 +691,13 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           {renderHealthWidget()}
           
           {/* Overall Progress */}
-          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
+          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Overall Progress</span>
               <CheckCircle2 className="h-4 w-4 text-orange-500" />
             </div>
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-[#F8FAFC]">{metrics.overallProgress}%</div>
+              <div className="text-2xl font-bold text-slate-50">{metrics.overallProgress}%</div>
               <div className="text-[10px] text-gray-400">
                 {metrics.tasksCompleted} of {metrics.totalTasks} tasks completed
               </div>
@@ -705,7 +705,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           </div>
 
           {/* Schedule Variance */}
-          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
+          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Schedule Variance</span>
               {metrics.daysAheadBehind >= 0 ? (
@@ -727,7 +727,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           </div>
 
           {/* Critical Path Status */}
-          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
+          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Critical Path</span>
               <AlertTriangle className={`h-4 w-4 ${
@@ -749,14 +749,14 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           </div>
 
           {/* Next Milestone */}
-          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
+          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Next Milestone</span>
               <Calendar className="h-4 w-4 text-orange-500" />
             </div>
             {metrics.upcomingMilestones.length > 0 ? (
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-[#F8FAFC] truncate">
+                <div className="text-sm font-semibold text-slate-50 truncate">
                   {metrics.upcomingMilestones[0].name}
                 </div>
                 <div className="flex items-center gap-1">
@@ -774,7 +774,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           {/* Budget / Cost Tracking - Clickable to EVM */}
           <div 
             onClick={() => router.push(`/project/${projectSlug}/evm`)}
-            className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50 cursor-pointer hover:border-orange-500 hover:bg-[#262c34] transition-all group"
+            className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50 cursor-pointer hover:border-orange-500 hover:bg-dark-hover transition-all group"
             title="Click to view detailed cost dashboard"
           >
             <div className="flex items-center justify-between mb-1">
@@ -813,7 +813,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           {budgetMetrics?.hasBudget && (
             <div 
               onClick={() => router.push(`/project/${projectSlug}/evm`)}
-              className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50 cursor-pointer hover:border-orange-500 hover:bg-[#262c34] transition-all group"
+              className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50 cursor-pointer hover:border-orange-500 hover:bg-dark-hover transition-all group"
               title="Estimate at Completion - Click for details"
             >
               <div className="flex items-center justify-between mb-1">
@@ -840,7 +840,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           )}
 
           {/* Weather Delays */}
-          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
+          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Weather Delays</span>
               <CloudRain className="h-4 w-4 text-orange-500" />
@@ -858,13 +858,13 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           </div>
 
           {/* Average Crew Size */}
-          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
+          <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-dark-hover/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Avg Crew Size</span>
               <Users className="h-4 w-4 text-orange-500" />
             </div>
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-[#F8FAFC]">
+              <div className="text-2xl font-bold text-slate-50">
                 {metrics.averageCrewSize || 0}
               </div>
               <div className="text-[10px] text-gray-400">
@@ -877,7 +877,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
         {/* Key Dates Timeline Ribbon */}
         {metrics.keyDates && metrics.keyDates.length > 0 && (
           <div className="bg-dark-surface rounded-lg p-4 shadow-sm border border-gray-700">
-            <h4 className="text-sm font-semibold text-[#F8FAFC] mb-3 flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-slate-50 mb-3 flex items-center gap-2">
               <CalendarCheck className="h-4 w-4 text-orange-500" />
               Key Dates
             </h4>
@@ -908,7 +908,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
                     if (keyDate.daysUntil <= 30) {
                       return 'border-orange-600/50 bg-orange-900/20';
                     }
-                    return 'border-gray-600 bg-dark-card';
+                    return 'border-dark-hover bg-dark-card';
                   };
 
                   const formatDate = (dateStr: string) => {
@@ -929,7 +929,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
                           {getDateIcon()}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs font-medium text-[#F8FAFC] truncate" title={keyDate.label}>
+                          <div className="text-xs font-medium text-slate-50 truncate" title={keyDate.label}>
                             {keyDate.label}
                           </div>
                           <div className="flex items-center gap-1.5 text-xs mt-0.5">
@@ -973,7 +973,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
         {/* Recent Updates from Daily Reports */}
         {metrics.recentUpdates && metrics.recentUpdates.length > 0 && (
           <div className="bg-dark-surface rounded-lg p-4 shadow-sm border border-gray-700">
-            <h4 className="text-sm font-semibold text-[#F8FAFC] mb-3 flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-slate-50 mb-3 flex items-center gap-2">
               <Activity className="h-4 w-4 text-orange-500" />
               Recent Schedule Updates from Daily Reports
             </h4>
@@ -981,7 +981,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               {metrics.recentUpdates.slice(0, 3).map((update, index) => (
                 <div key={index} className="flex items-center justify-between text-sm border-l-2 border-orange-500 pl-3 py-1">
                   <div className="flex-1">
-                    <span className="font-medium text-[#F8FAFC]">{update.taskName}</span>
+                    <span className="font-medium text-slate-50">{update.taskName}</span>
                     <span className="text-gray-400 mx-2">•</span>
                     <span className="text-gray-300">{update.status}</span>
                   </div>

@@ -227,7 +227,7 @@ export default function RoomsPage() {
   return (
     <div className="min-h-screen bg-dark-base">
       {/* Header */}
-      <div className="bg-[#161b22] border-b border-gray-800">
+      <div className="bg-dark-subtle border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -263,26 +263,26 @@ export default function RoomsPage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
             <div className="text-2xl font-bold text-white">{stats.total}</div>
             <div className="text-sm text-gray-400">Total Rooms</div>
           </div>
-          <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
             <div className="text-2xl font-bold text-green-400">{stats.completed}</div>
             <div className="text-sm text-gray-400">Completed</div>
           </div>
-          <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
             <div className="text-2xl font-bold text-blue-400">{stats.inProgress}</div>
             <div className="text-sm text-gray-400">In Progress</div>
           </div>
-          <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800">
+          <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800">
             <div className="text-2xl font-bold text-gray-400">{stats.pending}</div>
             <div className="text-sm text-gray-400">Pending</div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-[#161b22] rounded-lg p-4 border border-gray-800 mb-6">
+        <div className="bg-dark-subtle rounded-lg p-4 border border-gray-800 mb-6">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1 min-w-[200px]">
               <div className="relative">
@@ -382,7 +382,7 @@ export default function RoomsPage() {
             {filteredRooms.map((room) => (
               <div
                 key={room.id}
-                className={`bg-[#161b22] rounded-lg border-2 overflow-hidden hover:border-orange-500/50 transition-all cursor-pointer ${getTypeColor(room.type)}`}
+                className={`bg-dark-subtle rounded-lg border-2 overflow-hidden hover:border-orange-500/50 transition-all cursor-pointer ${getTypeColor(room.type)}`}
                 onClick={() => setSelectedRoom(room)}
               >
                 <div className="p-4">
@@ -423,7 +423,7 @@ export default function RoomsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-[#161b22] rounded-lg border border-gray-800 overflow-hidden">
+          <div className="bg-dark-subtle rounded-lg border border-gray-800 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700 bg-dark-base">
@@ -439,7 +439,7 @@ export default function RoomsPage() {
                 {filteredRooms.map((room) => (
                   <tr
                     key={room.id}
-                    className="border-b border-gray-800 hover:bg-[#1c2128] cursor-pointer"
+                    className="border-b border-gray-800 hover:bg-dark-hover cursor-pointer"
                     onClick={() => setSelectedRoom(room)}
                   >
                     <td className="px-4 py-3">
@@ -486,7 +486,7 @@ export default function RoomsPage() {
 
       {/* Room Detail Sidebar */}
       {selectedRoom && (
-        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-[#161b22] border-l border-gray-800 shadow-xl z-50 overflow-y-auto">
+        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-dark-subtle border-l border-gray-800 shadow-xl z-50 overflow-y-auto">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-white">Room {selectedRoom.roomNumber}</h2>

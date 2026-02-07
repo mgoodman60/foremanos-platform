@@ -337,9 +337,9 @@ export default function TakeoffLearningPanel({
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="learning-panel-title" className="bg-[#1a1d21] rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-700">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="learning-panel-title" className="bg-dark-active rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-dark-hover">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-dark-hover">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-500/20 rounded-lg">
               <Brain className="w-6 h-6 text-purple-400" />
@@ -374,7 +374,7 @@ export default function TakeoffLearningPanel({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-700">
+        <div className="flex border-b border-dark-hover">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -404,19 +404,19 @@ export default function TakeoffLearningPanel({
                 <div className="space-y-6">
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <div className="text-2xl font-bold text-white">{stats.totalFeedback}</div>
                       <div className="text-sm text-gray-400">Total Feedback</div>
                     </div>
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <div className="text-2xl font-bold text-white">{stats.totalCorrections}</div>
                       <div className="text-sm text-gray-400">Corrections Made</div>
                     </div>
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <div className="text-2xl font-bold text-green-400">{stats.approvedCorrections}</div>
                       <div className="text-sm text-gray-400">Approved</div>
                     </div>
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <div className="text-2xl font-bold text-yellow-400">{stats.pendingCorrections}</div>
                       <div className="text-sm text-gray-400">Pending Review</div>
                     </div>
@@ -424,7 +424,7 @@ export default function TakeoffLearningPanel({
 
                   {/* Rating & Patterns */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <h3 className="text-lg font-semibold text-white mb-3">Average Rating</h3>
                       <div className="flex items-center gap-2">
                         {[1, 2, 3, 4, 5].map(star => (
@@ -440,7 +440,7 @@ export default function TakeoffLearningPanel({
                         <span className="text-white ml-2">{stats.averageRating.toFixed(1)}/5</span>
                       </div>
                     </div>
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <h3 className="text-lg font-semibold text-white mb-3">Learned Patterns</h3>
                       <div className="text-3xl font-bold text-purple-400">{stats.learnedPatterns}</div>
                       <p className="text-sm text-gray-400 mt-1">Patterns learned from corrections</p>
@@ -449,13 +449,13 @@ export default function TakeoffLearningPanel({
 
                   {/* Feedback Breakdown */}
                   {Object.keys(stats.feedbackByType).length > 0 && (
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <h3 className="text-lg font-semibold text-white mb-3">Feedback Breakdown</h3>
                       <div className="flex flex-wrap gap-3">
                         {Object.entries(stats.feedbackByType).map(([type, count]) => {
                           const display = getFeedbackTypeDisplay(type);
                           return (
-                            <div key={type} className="flex items-center gap-2 bg-[#1a1d21] px-3 py-2 rounded-lg">
+                            <div key={type} className="flex items-center gap-2 bg-dark-active px-3 py-2 rounded-lg">
                               <span className={display.color}>{display.icon}</span>
                               <span className="text-white">{display.label}</span>
                               <span className="text-gray-400">({count})</span>
@@ -468,7 +468,7 @@ export default function TakeoffLearningPanel({
 
                   {/* Top Suggestions Preview */}
                   {suggestions.length > 0 && (
-                    <div className="bg-[#22272b] rounded-lg p-4">
+                    <div className="bg-dark-subtle rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="text-lg font-semibold text-white">AI Suggestions</h3>
                         <button
@@ -480,7 +480,7 @@ export default function TakeoffLearningPanel({
                       </div>
                       <div className="space-y-2">
                         {suggestions.slice(0, 3).map(s => (
-                          <div key={s.lineItemId} className="flex items-center justify-between bg-[#1a1d21] p-3 rounded-lg">
+                          <div key={s.lineItemId} className="flex items-center justify-between bg-dark-active p-3 rounded-lg">
                             <div>
                               <span className="text-white">{s.itemName}</span>
                               <span className="text-gray-400 text-sm ml-2">
@@ -508,7 +508,7 @@ export default function TakeoffLearningPanel({
                     </div>
                   ) : (
                     corrections.map(correction => (
-                      <div key={correction.id} className="bg-[#22272b] rounded-lg p-4">
+                      <div key={correction.id} className="bg-dark-subtle rounded-lg p-4">
                         <div className="flex items-start justify-between">
                           <div>
                             <div className="flex items-center gap-2 mb-2">
@@ -610,7 +610,7 @@ export default function TakeoffLearningPanel({
                       {suggestions.map(suggestion => (
                         <div
                           key={suggestion.lineItemId}
-                          className={`bg-[#22272b] rounded-lg p-4 border-2 transition-colors cursor-pointer ${
+                          className={`bg-dark-subtle rounded-lg p-4 border-2 transition-colors cursor-pointer ${
                             selectedSuggestions.has(suggestion.lineItemId)
                               ? 'border-purple-500'
                               : 'border-transparent hover:border-gray-600'
@@ -669,7 +669,7 @@ export default function TakeoffLearningPanel({
                     </div>
                   ) : (
                     patterns.map(pattern => (
-                      <div key={pattern.id} className="bg-[#22272b] rounded-lg p-4">
+                      <div key={pattern.id} className="bg-dark-subtle rounded-lg p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
@@ -702,7 +702,7 @@ export default function TakeoffLearningPanel({
                               <span>Key: {pattern.patternKey}</span>
                             </button>
                             {expandedPatterns.has(pattern.id) && (
-                              <div className="mt-2 text-sm bg-[#1a1d21] p-3 rounded">
+                              <div className="mt-2 text-sm bg-dark-active p-3 rounded">
                                 <pre className="text-gray-300 overflow-x-auto">
                                   {JSON.stringify(pattern.patternValue, null, 2)}
                                 </pre>
@@ -751,7 +751,7 @@ export default function TakeoffLearningPanel({
                     feedback.map(fb => {
                       const display = getFeedbackTypeDisplay(fb.feedbackType);
                       return (
-                        <div key={fb.id} className="bg-[#22272b] rounded-lg p-4">
+                        <div key={fb.id} className="bg-dark-subtle rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex items-start gap-3">
                               <div className={`p-2 rounded-lg ${display.color} bg-opacity-20`}>
@@ -806,7 +806,7 @@ export default function TakeoffLearningPanel({
         {/* Feedback Form Modal */}
         {showFeedbackForm && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10">
-            <div className="bg-[#22272b] rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="bg-dark-subtle rounded-xl p-6 max-w-md w-full mx-4">
               <h3 className="text-lg font-semibold text-white mb-4">Submit Feedback</h3>
               
               <div className="space-y-4">
@@ -815,7 +815,7 @@ export default function TakeoffLearningPanel({
                   <select
                     value={feedbackType}
                     onChange={e => setFeedbackType(e.target.value)}
-                    className="w-full bg-[#1a1d21] border border-gray-700 rounded-lg px-3 py-2 text-white"
+                    className="w-full bg-dark-active border border-dark-hover rounded-lg px-3 py-2 text-white"
                   >
                     <option value="helpful">Helpful - Takeoff was accurate</option>
                     <option value="unhelpful">Unhelpful - Takeoff was not useful</option>
@@ -854,7 +854,7 @@ export default function TakeoffLearningPanel({
                     value={feedbackComment}
                     onChange={e => setFeedbackComment(e.target.value)}
                     placeholder="Share specific details about your experience..."
-                    className="w-full bg-[#1a1d21] border border-gray-700 rounded-lg px-3 py-2 text-white h-24 resize-none"
+                    className="w-full bg-dark-active border border-dark-hover rounded-lg px-3 py-2 text-white h-24 resize-none"
                   />
                 </div>
               </div>

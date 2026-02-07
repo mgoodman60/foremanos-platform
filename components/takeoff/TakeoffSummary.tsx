@@ -75,7 +75,7 @@ export function TakeoffSummary({
             {mepData.electrical && mepData.electrical.itemCount > 0 && (
               <div className="p-2 bg-dark-card rounded">
                 <span className="text-yellow-400">⚡ Electrical</span>
-                <div className="text-[#F8FAFC]">{mepData.electrical.itemCount} items</div>
+                <div className="text-slate-50">{mepData.electrical.itemCount} items</div>
                 <div className="text-green-400">
                   ${(mepData.electrical.total || 0).toLocaleString()}
                 </div>
@@ -84,7 +84,7 @@ export function TakeoffSummary({
             {mepData.plumbing && mepData.plumbing.itemCount > 0 && (
               <div className="p-2 bg-dark-card rounded">
                 <span className="text-blue-400">💧 Plumbing</span>
-                <div className="text-[#F8FAFC]">{mepData.plumbing.itemCount} items</div>
+                <div className="text-slate-50">{mepData.plumbing.itemCount} items</div>
                 <div className="text-green-400">
                   ${(mepData.plumbing.total || 0).toLocaleString()}
                 </div>
@@ -93,7 +93,7 @@ export function TakeoffSummary({
             {mepData.hvac && mepData.hvac.itemCount > 0 && (
               <div className="p-2 bg-dark-card rounded">
                 <span className="text-cyan-400">🌬️ HVAC</span>
-                <div className="text-[#F8FAFC]">{mepData.hvac.itemCount} items</div>
+                <div className="text-slate-50">{mepData.hvac.itemCount} items</div>
                 <div className="text-green-400">
                   ${(mepData.hvac.total || 0).toLocaleString()}
                 </div>

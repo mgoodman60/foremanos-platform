@@ -171,7 +171,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
 
   if (loading) {
     return (
-      <Card className="p-8 bg-[#161B22] border-gray-700">
+      <Card className="p-8 bg-dark-subtle border-gray-700">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
           <span className="ml-3 text-gray-400">Analyzing schedule health...</span>
@@ -182,7 +182,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
 
   if (!report) {
     return (
-      <Card className="p-8 bg-[#161B22] border-gray-700">
+      <Card className="p-8 bg-dark-subtle border-gray-700">
         <div className="text-center text-gray-400">
           <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-500" />
           <p>Unable to generate health report</p>
@@ -197,7 +197,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
   return (
     <div className="space-y-6">
       {/* Overall Health Score */}
-      <Card className="p-6 bg-[#161B22] border-gray-700">
+      <Card className="p-6 bg-dark-subtle border-gray-700">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
             {/* Score Circle */}
@@ -208,7 +208,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                   <div className="text-xs opacity-70">{report.overallScore}%</div>
                 </div>
               </div>
-              <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status)} bg-[#0D1117]`}>
+              <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status)} bg-dark-base`}>
                 {report.status}
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {report.metrics.map((metric, idx) => (
-          <Card key={idx} className="p-4 bg-[#161B22] border-gray-700">
+          <Card key={idx} className="p-4 bg-dark-subtle border-gray-700">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-gray-400 uppercase tracking-wide">{metric.name}</span>
               {getTrendIcon(metric.trend)}
@@ -254,8 +254,8 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
               <span className="text-xs text-gray-500 mb-1">/ {metric.target}%</span>
             </div>
             <div className="mt-2">
-              <Progress 
-                value={Math.min(metric.value, 100)} 
+              <Progress
+                value={Math.min(metric.value, 100)}
                 className="h-1.5 bg-gray-700"
               />
             </div>
@@ -270,7 +270,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
 
       {/* Issues Section */}
       {report.issues.length > 0 && (
-        <Card className="bg-[#161B22] border-gray-700">
+        <Card className="bg-dark-subtle border-gray-700">
           <div className="p-4 border-b border-gray-700">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-400" />
@@ -286,7 +286,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                     <div>
                       <h4 className="font-medium text-white">{issue.title}</h4>
                       <p className="text-sm text-gray-400 mt-1">{issue.description}</p>
-                      
+
                       {issue.affectedTasks.length > 0 && (
                         <div className="mt-2">
                           <span className="text-xs text-gray-500">Affected: </span>
@@ -296,9 +296,9 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                           </span>
                         </div>
                       )}
-                      
+
                       {issue.suggestedFix && (
-                        <div className="mt-2 p-2 bg-[#0D1117] rounded text-sm">
+                        <div className="mt-2 p-2 bg-dark-base rounded text-sm">
                           <span className="text-orange-400 flex items-center gap-1">
                             <Lightbulb className="h-3 w-3" /> Suggestion:
                           </span>
@@ -336,7 +336,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
       {/* Recommendations & Benchmarks */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Recommendations */}
-        <Card className="p-4 bg-[#161B22] border-gray-700">
+        <Card className="p-4 bg-dark-subtle border-gray-700">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
             <Lightbulb className="h-5 w-5 text-yellow-400" />
             Recommendations
@@ -352,7 +352,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
         </Card>
 
         {/* Industry Benchmarks */}
-        <Card className="p-4 bg-[#161B22] border-gray-700">
+        <Card className="p-4 bg-dark-subtle border-gray-700">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
             <BarChart3 className="h-5 w-5 text-blue-400" />
             Industry Benchmarks

@@ -203,7 +203,7 @@ export default function BIMDataPanel({
 
   if (!modelId) {
     return (
-      <div className="bg-[#161B22] border border-gray-700 rounded-xl p-6 text-center">
+      <div className="bg-dark-subtle border border-gray-700 rounded-xl p-6 text-center">
         <Database className="w-10 h-10 text-gray-500 mx-auto mb-3" />
         <p className="text-gray-400">Select a model to view BIM data</p>
       </div>
@@ -211,7 +211,7 @@ export default function BIMDataPanel({
   }
 
   return (
-    <div className="bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden">
+    <div className="bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">

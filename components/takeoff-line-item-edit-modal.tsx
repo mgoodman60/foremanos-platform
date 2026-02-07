@@ -224,7 +224,7 @@ export function TakeoffLineItemEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-dark-surface border-gray-700 text-[#F8FAFC]">
+      <DialogContent className="max-w-2xl bg-dark-surface border-dark-hover text-slate-50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-orange-500" />
@@ -234,7 +234,7 @@ export function TakeoffLineItemEditModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
           {/* Confidence & Verification Status */}
-          <div className="flex items-center justify-between p-3 bg-[#2D333B] rounded-lg border border-gray-700">
+          <div className="flex items-center justify-between p-3 bg-dark-card rounded-lg border border-dark-hover">
             <div className="flex items-center gap-4">
               {/* Confidence Score */}
               <div className="flex items-center gap-2">
@@ -285,9 +285,10 @@ export function TakeoffLineItemEditModal({
               <Input
                 id="itemName"
                 {...register('itemName')}
-                className="bg-[#2D333B] border-gray-600"
+                className="bg-dark-card border-dark-hover"
                 aria-invalid={!!errors.itemName}
                 aria-describedby={errors.itemName ? 'itemName-error' : undefined}
+                aria-required="true"
               />
               <FormError error={errors.itemName} fieldName="itemName" />
             </div>
@@ -297,9 +298,10 @@ export function TakeoffLineItemEditModal({
               <Input
                 id="category"
                 {...register('category')}
-                className="bg-[#2D333B] border-gray-600"
+                className="bg-dark-card border-dark-hover"
                 aria-invalid={!!errors.category}
                 aria-describedby={errors.category ? 'category-error' : undefined}
+                aria-required="true"
               />
               <FormError error={errors.category} fieldName="category" />
             </div>
@@ -310,7 +312,7 @@ export function TakeoffLineItemEditModal({
             <Textarea
               id="description"
               {...register('description')}
-              className="bg-[#2D333B] border-gray-600 min-h-[60px]"
+              className="bg-dark-card border-dark-hover min-h-[60px]"
               placeholder="Material specifications, finish, etc."
               aria-describedby={errors.description ? 'description-error' : undefined}
             />
@@ -334,9 +336,10 @@ export function TakeoffLineItemEditModal({
                   type="number"
                   step="0.01"
                   {...register('quantity', { valueAsNumber: true })}
-                  className="bg-[#2D333B] border-gray-600"
+                  className="bg-dark-card border-dark-hover"
                   aria-invalid={!!errors.quantity}
                   aria-describedby={errors.quantity ? 'quantity-error' : undefined}
+                  aria-required="true"
                 />
                 <FormError error={errors.quantity} fieldName="quantity" />
               </div>
@@ -348,7 +351,7 @@ export function TakeoffLineItemEditModal({
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger id="unit" className="bg-[#2D333B] border-gray-600">
+                      <SelectTrigger id="unit" className="bg-dark-card border-dark-hover">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
@@ -372,7 +375,7 @@ export function TakeoffLineItemEditModal({
                   type="number"
                   step="0.01"
                   {...register('unitCost', { valueAsNumber: true })}
-                  className="bg-[#2D333B] border-gray-600"
+                  className="bg-dark-card border-dark-hover"
                   placeholder="0.00"
                   aria-describedby={errors.unitCost ? 'unitCost-error' : undefined}
                 />
@@ -381,7 +384,7 @@ export function TakeoffLineItemEditModal({
 
               <div className="space-y-2">
                 <Label>Total Cost</Label>
-                <div className="flex items-center h-10 px-3 rounded-md bg-[#2D333B] border border-gray-600">
+                <div className="flex items-center h-10 px-3 rounded-md bg-dark-card border border-dark-hover">
                   <DollarSign className="h-4 w-4 text-green-400 mr-1" />
                   <span className="text-green-400 font-medium">
                     {totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}
@@ -392,7 +395,7 @@ export function TakeoffLineItemEditModal({
 
             {/* Suggested Prices */}
             {suggestedPrices && (
-              <div className="mt-4 p-3 bg-[#2D333B]/50 rounded-lg border border-gray-700">
+              <div className="mt-4 p-3 bg-dark-card/50 rounded-lg border border-dark-hover">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="h-4 w-4 text-blue-400" />
                   <span className="text-sm text-gray-400">Suggested Unit Prices (per {suggestedPrices.unit}):</span>
@@ -403,7 +406,7 @@ export function TakeoffLineItemEditModal({
                     variant="outline"
                     size="sm"
                     onClick={() => applySuggestedPrice('low')}
-                    className="border-gray-600 hover:bg-green-900/30 hover:border-green-600"
+                    className="border-dark-hover hover:bg-green-900/30 hover:border-green-600"
                   >
                     Budget: ${suggestedPrices.low.toFixed(2)}
                   </Button>
@@ -412,7 +415,7 @@ export function TakeoffLineItemEditModal({
                     variant="outline"
                     size="sm"
                     onClick={() => applySuggestedPrice('mid')}
-                    className="border-gray-600 hover:bg-blue-900/30 hover:border-blue-600"
+                    className="border-dark-hover hover:bg-blue-900/30 hover:border-blue-600"
                   >
                     Standard: ${suggestedPrices.mid.toFixed(2)}
                   </Button>
@@ -421,7 +424,7 @@ export function TakeoffLineItemEditModal({
                     variant="outline"
                     size="sm"
                     onClick={() => applySuggestedPrice('high')}
-                    className="border-gray-600 hover:bg-purple-900/30 hover:border-purple-600"
+                    className="border-dark-hover hover:bg-purple-900/30 hover:border-purple-600"
                   >
                     Premium: ${suggestedPrices.high.toFixed(2)}
                   </Button>
@@ -445,7 +448,7 @@ export function TakeoffLineItemEditModal({
                 <Input
                   id="location"
                   {...register('location')}
-                  className="bg-[#2D333B] border-gray-600"
+                  className="bg-dark-card border-dark-hover"
                   placeholder="e.g., Conference Room A"
                   aria-describedby={errors.location ? 'location-error' : undefined}
                 />
@@ -457,7 +460,7 @@ export function TakeoffLineItemEditModal({
                 <Input
                   id="sheetNumber"
                   {...register('sheetNumber')}
-                  className="bg-[#2D333B] border-gray-600"
+                  className="bg-dark-card border-dark-hover"
                   placeholder="e.g., A-101"
                   aria-describedby={errors.sheetNumber ? 'sheetNumber-error' : undefined}
                 />
@@ -469,7 +472,7 @@ export function TakeoffLineItemEditModal({
                 <Input
                   id="gridLocation"
                   {...register('gridLocation')}
-                  className="bg-[#2D333B] border-gray-600"
+                  className="bg-dark-card border-dark-hover"
                   placeholder="e.g., C-4"
                   aria-describedby={errors.gridLocation ? 'gridLocation-error' : undefined}
                 />
@@ -484,7 +487,7 @@ export function TakeoffLineItemEditModal({
             <Textarea
               id="notes"
               {...register('notes')}
-              className="bg-[#2D333B] border-gray-600 min-h-[60px]"
+              className="bg-dark-card border-dark-hover min-h-[60px]"
               placeholder="Additional notes, review comments, etc."
               aria-describedby={errors.notes ? 'notes-error' : undefined}
             />
@@ -506,7 +509,7 @@ export function TakeoffLineItemEditModal({
               )}
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onClose} className="border-gray-600">
+              <Button type="button" variant="outline" onClick={onClose} className="border-dark-hover">
                 Cancel
               </Button>
               <Button

@@ -422,7 +422,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
       }}>
         <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[#F8FAFC]">
+            <DialogTitle className="flex items-center gap-2 text-slate-50">
               <Crown className="h-5 w-5 text-purple-400" />
               Change Subscription Tier
             </DialogTitle>
@@ -432,7 +432,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-[#F8FAFC] mb-2">
+              <label className="block text-sm font-medium text-slate-50 mb-2">
                 Subscription Tier
               </label>
               <select
@@ -486,14 +486,14 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-[#F8FAFC]">Create New User</DialogTitle>
+            <DialogTitle className="text-slate-50">Create New User</DialogTitle>
             <DialogDescription className="text-gray-400">
               Create a new user account. A secure password will be auto-generated if not provided.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateUser} className="space-y-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-[#F8FAFC] mb-1">
+              <label className="block text-sm font-medium text-slate-50 mb-1">
                 Email <span className="text-red-400">*</span>
               </label>
               <Input
@@ -507,7 +507,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#F8FAFC] mb-1">
+              <label className="block text-sm font-medium text-slate-50 mb-1">
                 Username <span className="text-gray-500">(optional)</span>
               </label>
               <Input
@@ -520,7 +520,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#F8FAFC] mb-1">
+              <label className="block text-sm font-medium text-slate-50 mb-1">
                 Password <span className="text-gray-500">(optional)</span>
               </label>
               <Input
@@ -534,7 +534,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#F8FAFC] mb-1">
+                <label className="block text-sm font-medium text-slate-50 mb-1">
                   Role
                 </label>
                 <select
@@ -549,7 +549,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#F8FAFC] mb-1">
+                <label className="block text-sm font-medium text-slate-50 mb-1">
                   Subscription Tier
                 </label>
                 <select
@@ -592,7 +592,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
       <Dialog open={showCredentials} onOpenChange={setShowCredentials}>
         <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[#F8FAFC]">
+            <DialogTitle className="flex items-center gap-2 text-slate-50">
               <UserCheck className="h-5 w-5 text-green-400" />
               User Created Successfully
             </DialogTitle>

@@ -505,7 +505,7 @@ export function WorkflowModal({
                 <button
                   key={workflow.id}
                   onClick={() => handleWorkflowSelect(workflow)}
-                  className="w-full text-left p-4 bg-dark-surface hover:bg-[#252c35] border border-gray-700 rounded-lg transition-colors group"
+                  className="w-full text-left p-4 bg-dark-surface hover:bg-dark-surface border border-gray-700 rounded-lg transition-colors group"
                 >
                   <div className="flex items-center justify-between">
                     <div>

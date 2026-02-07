@@ -324,7 +324,7 @@ export default function PunchListDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[#161B22] border-gray-700">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-dark-subtle border-gray-700">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

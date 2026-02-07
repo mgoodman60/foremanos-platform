@@ -31,7 +31,7 @@ export function TakeoffActions({
   }
 
   return (
-    <div className="border-b border-gray-700 p-3 bg-[#2D333B]/50">
+    <div className="border-b border-gray-700 p-3 bg-dark-card/50">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-400">

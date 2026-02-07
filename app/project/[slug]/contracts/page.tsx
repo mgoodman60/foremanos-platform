@@ -472,7 +472,7 @@ export default function ContractsPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-dark-surface flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
@@ -493,14 +493,14 @@ export default function ContractsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                <FileCheck className="w-8 h-8 text-[#F97316]" />
+                <FileCheck className="w-8 h-8 text-orange-500" />
                 Contract Management
               </h1>
               <p className="text-gray-400 mt-1">Manage subcontractor contracts, insurance, and change orders</p>
             </div>
             <Button
               onClick={() => setShowUploadDialog(true)}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Contract
@@ -602,7 +602,7 @@ export default function ContractsPage() {
               <p className="text-gray-400 mb-6">Upload a contract PDF to get started with AI extraction</p>
               <Button
                 onClick={() => setShowUploadDialog(true)}
-                className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+                className="bg-orange-500 hover:bg-orange-600 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Contract
@@ -742,7 +742,7 @@ export default function ContractsPage() {
         <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileCheck className="w-5 h-5 text-[#F97316]" />
+              <FileCheck className="w-5 h-5 text-orange-500" />
               Add Subcontractor Contract
             </DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -773,7 +773,7 @@ export default function ContractsPage() {
               <Button
                 variant={!manualEntry ? 'default' : 'outline'}
                 onClick={() => setManualEntry(false)}
-                className={!manualEntry ? 'bg-[#F97316] hover:bg-[#ea580c]' : 'border-gray-600 text-gray-300'}
+                className={!manualEntry ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300'}
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload PDF
@@ -781,7 +781,7 @@ export default function ContractsPage() {
               <Button
                 variant={manualEntry ? 'default' : 'outline'}
                 onClick={() => setManualEntry(true)}
-                className={manualEntry ? 'bg-[#F97316] hover:bg-[#ea580c]' : 'border-gray-600 text-gray-300'}
+                className={manualEntry ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300'}
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Manual Entry
@@ -791,7 +791,7 @@ export default function ContractsPage() {
             {!manualEntry ? (
               /* PDF Upload */
               <div>
-                <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-[#F97316] transition-colors">
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-orange-500 transition-colors">
                   <input
                     type="file"
                     id="contract-file"
@@ -802,7 +802,7 @@ export default function ContractsPage() {
                   <label htmlFor="contract-file" className="cursor-pointer">
                     <Upload className="w-12 h-12 text-gray-500 mx-auto mb-3" />
                     {uploadFile ? (
-                      <div className="text-[#F97316] font-medium">{uploadFile.name}</div>
+                      <div className="text-orange-500 font-medium">{uploadFile.name}</div>
                     ) : (
                       <>
                         <p className="text-gray-300 mb-1">Click to upload contract PDF</p>
@@ -924,7 +924,7 @@ export default function ContractsPage() {
             <Button
               onClick={handleUploadContract}
               disabled={uploading || !selectedSubcontractorId || (!uploadFile && !manualEntry)}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {uploading ? (
                 <>
@@ -946,7 +946,7 @@ export default function ContractsPage() {
         <DialogContent className="bg-dark-card border-gray-700 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
           {detailLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
             </div>
           ) : selectedContract ? (
             <>
@@ -982,7 +982,7 @@ export default function ContractsPage() {
                     </div>
                     <div className="bg-dark-surface rounded-lg p-4">
                       <p className="text-gray-400 text-sm">% Complete</p>
-                      <p className="text-[#F97316] text-xl font-bold">{selectedContract.financials.percentComplete}%</p>
+                      <p className="text-orange-500 text-xl font-bold">{selectedContract.financials.percentComplete}%</p>
                     </div>
                   </div>
 
@@ -1194,7 +1194,7 @@ export default function ContractsPage() {
         <DialogContent className="bg-dark-card border-gray-600 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#F97316]" />
+              <TrendingUp className="w-5 h-5 text-orange-500" />
               Budget Impact Preview
             </DialogTitle>
             {selectedChangeOrder && (
@@ -1206,7 +1206,7 @@ export default function ContractsPage() {
 
           {impactLoading && !budgetImpact ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
             </div>
           ) : budgetImpact ? (
             <div className="space-y-6">

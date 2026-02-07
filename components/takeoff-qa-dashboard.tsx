@@ -403,7 +403,7 @@ export function TakeoffQADashboard({
                           >
                             <button
                               onClick={() => toggleIssue(issue.itemId)}
-                              className="w-full flex items-center justify-between p-3 hover:bg-[#373e47] transition-colors"
+                              className="w-full flex items-center justify-between p-3 hover:bg-dark-hover transition-colors"
                             >
                               <div className="flex items-center gap-3">
                                 {expandedIssues.has(issue.itemId) ? (

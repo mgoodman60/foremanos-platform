@@ -351,14 +351,14 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center justify-between w-full px-4 py-3 hover:bg-[#383e47] transition-colors"
+        className="flex items-center justify-between w-full px-4 py-3 hover:bg-dark-hover transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-500/20 rounded-lg">
             <CheckCircle2 className="h-5 w-5 text-blue-400" />
           </div>
           <div className="text-left">
-            <h3 className="font-semibold text-[#F8FAFC]">Data Requirements Checklist</h3>
+            <h3 className="font-semibold text-slate-50">Data Requirements Checklist</h3>
             <p className="text-xs text-gray-400">
               {availableCount} of {totalCount} complete • {partialCount} partial
             </p>
@@ -369,7 +369,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
           <div className="w-24">
             <Progress value={completionPercentage} className="h-2" />
           </div>
-          <span className="text-sm font-medium text-[#F8FAFC]">{completionPercentage}%</span>
+          <span className="text-sm font-medium text-slate-50">{completionPercentage}%</span>
           <Button
             variant="ghost"
             size="sm"
@@ -417,7 +417,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
                         <req.icon className="h-4 w-4 text-gray-400" />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[#F8FAFC]">{req.name}</span>
+                            <span className="text-sm font-medium text-slate-50">{req.name}</span>
                             {req.count !== undefined && req.count > 0 && (
                               <Badge variant="outline" className="text-xs">
                                 {req.count}

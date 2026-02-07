@@ -169,9 +169,9 @@ export default function ScheduleUpdateReviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#F8FAFC] text-xl">
+          <DialogTitle className="text-slate-50 text-xl">
             AI-Detected Schedule Impacts
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -240,7 +240,7 @@ export default function ScheduleUpdateReviewModal({
                       <div className="flex items-center gap-3">
                         {getImpactIcon(suggestion.impactType)}
                         <div>
-                          <h4 className="font-semibold text-[#F8FAFC]">
+                          <h4 className="font-semibold text-slate-50">
                             {suggestion.taskName}
                           </h4>
                           <p className="text-sm text-gray-500">

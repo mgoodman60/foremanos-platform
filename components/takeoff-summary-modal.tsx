@@ -115,7 +115,7 @@ export function TakeoffSummaryModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] bg-dark-surface border-gray-700 text-[#F8FAFC]">
+      <DialogContent className="max-w-4xl h-[80vh] bg-dark-surface border-gray-700 text-slate-50">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
@@ -130,15 +130,15 @@ export function TakeoffSummaryModal({
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 my-4">
-          <div className="bg-[#2D333B] rounded-lg p-3 border border-gray-700">
+          <div className="bg-dark-card rounded-lg p-3 border border-gray-700">
             <div className="text-xs text-gray-400 mb-1">Total Line Items</div>
             <div className="text-2xl font-bold text-orange-500">{lineItemCount}</div>
           </div>
-          <div className="bg-[#2D333B] rounded-lg p-3 border border-gray-700">
+          <div className="bg-dark-card rounded-lg p-3 border border-gray-700">
             <div className="text-xs text-gray-400 mb-1">Rooms Calculated</div>
             <div className="text-2xl font-bold text-blue-500">{roomCount}</div>
           </div>
-          <div className="bg-[#2D333B] rounded-lg p-3 border border-gray-700">
+          <div className="bg-dark-card rounded-lg p-3 border border-gray-700">
             <div className="text-xs text-gray-400 mb-1">Unique Materials</div>
             <div className="text-2xl font-bold text-green-500">{summary.length}</div>
           </div>
@@ -165,10 +165,10 @@ export function TakeoffSummaryModal({
                   {items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="bg-[#2D333B] rounded-lg p-3 border border-gray-700 hover:border-orange-500/50 transition-colors"
+                      className="bg-dark-card rounded-lg p-3 border border-gray-700 hover:border-orange-500/50 transition-colors"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="font-medium text-[#F8FAFC]">{item.material}</div>
+                        <div className="font-medium text-slate-50">{item.material}</div>
                         <div className="text-xl font-bold text-orange-500">
                           {item.totalQuantity.toLocaleString()} {item.unit}
                         </div>

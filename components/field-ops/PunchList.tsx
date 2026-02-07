@@ -124,7 +124,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
       </div>
 
       {/* Main List */}
-      <div className="bg-[#161B22] border border-gray-700 rounded-xl overflow-hidden">
+      <div className="bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">

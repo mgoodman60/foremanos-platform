@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Package,
 } from 'lucide-react';
+import { semanticColors, neutralColors, chartColors } from '@/lib/design-tokens';
 
 interface LineItem {
   id: string;
@@ -40,11 +41,11 @@ interface QuantityVarianceChartsProps {
 }
 
 const COLORS = {
-  SUFFICIENT: '#10b981',    // emerald-500
-  INSUFFICIENT: '#ef4444',  // red-500
-  EXCESS: '#f59e0b',        // amber-500
-  NO_REQUIREMENT: '#6b7280', // gray-500
-  UNVERIFIED: '#475569',    // slate-600
+  SUFFICIENT: semanticColors.success[500],
+  INSUFFICIENT: semanticColors.error[500],
+  EXCESS: semanticColors.warning[500],
+  NO_REQUIREMENT: neutralColors.gray[500],
+  UNVERIFIED: neutralColors.slate[600],
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -226,10 +227,10 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 paddingAngle={2}
                 dataKey="value"
                 label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
-                labelLine={{ stroke: '#64748b' }}
+                labelLine={{ stroke: neutralColors.slate[500] }}
               >
                 {complianceDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} stroke="#1e293b" strokeWidth={2} />
+                  <Cell key={`cell-${index}`} fill={entry.color} stroke={neutralColors.slate[800]} strokeWidth={2} />
                 ))}
               </Pie>
               <Tooltip
@@ -259,28 +260,28 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
         {chartType === 'bar' && (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={quantityComparison} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis 
-                dataKey="name" 
-                stroke="#94a3b8" 
-                angle={-45} 
-                textAnchor="end" 
+              <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.slate[700]} />
+              <XAxis
+                dataKey="name"
+                stroke={neutralColors.slate[400]}
+                angle={-45}
+                textAnchor="end"
                 height={60}
                 tick={{ fontSize: 11 }}
               />
-              <YAxis stroke="#94a3b8" />
+              <YAxis stroke={neutralColors.slate[400]} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ paddingTop: 20 }} />
               <Bar 
-                dataKey="submitted" 
-                name="Submitted" 
-                fill="#3b82f6" 
+                dataKey="submitted"
+                name="Submitted"
+                fill={semanticColors.info[500]}
                 radius={[4, 4, 0, 0]}
               />
-              <Bar 
-                dataKey="required" 
-                name="Required" 
-                fill="#8b5cf6" 
+              <Bar
+                dataKey="required"
+                name="Required"
+                fill={chartColors.palette[4]} 
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>
@@ -290,16 +291,16 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
         {chartType === 'variance' && (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={varianceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis 
-                dataKey="name" 
-                stroke="#94a3b8" 
-                angle={-45} 
-                textAnchor="end" 
+              <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.slate[700]} />
+              <XAxis
+                dataKey="name"
+                stroke={neutralColors.slate[400]}
+                angle={-45}
+                textAnchor="end"
                 height={60}
                 tick={{ fontSize: 11 }}
               />
-              <YAxis stroke="#94a3b8" />
+              <YAxis stroke={neutralColors.slate[400]} />
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
@@ -323,9 +324,9 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 radius={[4, 4, 0, 0]}
               >
                 {varianceData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.variance >= 0 ? '#10b981' : '#ef4444'}
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.variance >= 0 ? semanticColors.success[500] : semanticColors.error[500]}
                   />
                 ))}
               </Bar>
@@ -371,9 +372,9 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                   }}
                 />
                 <Legend />
-                <Bar dataKey="sufficient" name="Sufficient" stackId="a" fill="#10b981" />
-                <Bar dataKey="insufficient" name="Shortage" stackId="a" fill="#ef4444" />
-                <Bar dataKey="excess" name="Excess" stackId="a" fill="#f59e0b" />
+                <Bar dataKey="sufficient" name="Sufficient" stackId="a" fill={semanticColors.success[500]} />
+                <Bar dataKey="insufficient" name="Shortage" stackId="a" fill={semanticColors.error[500]} />
+                <Bar dataKey="excess" name="Excess" stackId="a" fill={semanticColors.warning[500]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

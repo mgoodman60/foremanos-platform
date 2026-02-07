@@ -38,7 +38,7 @@ export default function ModelsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-base flex items-center justify-center">
         <div className="text-center">
           <Box className="w-12 h-12 text-blue-500 mx-auto animate-pulse" />
           <p className="text-gray-400 mt-4">Loading 3D Viewer...</p>
@@ -54,7 +54,7 @@ export default function ModelsPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
+      <div className="min-h-screen bg-dark-base flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400">Project not found</p>
         </div>
@@ -63,9 +63,9 @@ export default function ModelsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D1117]">
+    <div className="min-h-screen bg-dark-base">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#161B22] border-b border-gray-700">
+      <header className="sticky top-0 z-50 bg-dark-subtle border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -118,19 +118,19 @@ export default function ModelsPage() {
 
         {/* Help Section */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-4 bg-[#161B22] border border-gray-700 rounded-xl">
+          <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
             <h4 className="text-white font-medium mb-2">Supported Formats</h4>
             <p className="text-gray-400 text-sm">
               DWG, DXF, RVT, RFA, IFC, NWD, 3DS, FBX, OBJ, STL, STEP, SKP, and more.
             </p>
           </div>
-          <div className="p-4 bg-[#161B22] border border-gray-700 rounded-xl">
+          <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
             <h4 className="text-white font-medium mb-2">Processing Time</h4>
             <p className="text-gray-400 text-sm">
               Files are processed in the cloud. Small files take 1-2 minutes, larger BIM models may take 5-10 minutes.
             </p>
           </div>
-          <div className="p-4 bg-[#161B22] border border-gray-700 rounded-xl">
+          <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
             <h4 className="text-white font-medium mb-2">Viewer Controls</h4>
             <p className="text-gray-400 text-sm">
               Left-click to orbit, right-click to pan, scroll to zoom. Use toolbar for fit-to-view and isolation.

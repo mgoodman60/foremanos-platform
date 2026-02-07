@@ -431,7 +431,7 @@ export function ToolsMenu({
               id: 'onedrive',
               label: 'OneDrive Settings',
               icon: <Cloud className="w-4 h-4" />,
-              iconColor: 'text-[#F97316]',
+              iconColor: 'text-orange-500',
               onClick: onOpenOneDriveSettings,
               section: 'admin' as const,
               keywords: ['sync', 'cloud'],
@@ -622,7 +622,7 @@ export function ToolsMenu({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F97316] hover:bg-[#EA580C] active:bg-[#C2410C] text-white rounded-lg transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-medium"
+        className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-lg transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-medium"
         title="Project Tools"
       >
         <MoreVertical className="w-4 h-4" />
@@ -650,7 +650,7 @@ export function ToolsMenu({
                   placeholder="Search tools..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-dark-surface border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:border-[#F97316]"
+                  className="w-full pl-9 pr-3 py-2 text-sm bg-dark-surface border border-gray-600 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500"
                   autoFocus
                 />
               </div>

@@ -150,7 +150,7 @@ export function Hero() {
                     className="flex-1 bg-transparent border-none outline-none text-sm text-[var(--color-text-dark)] placeholder:text-[var(--color-text-muted)]"
                     disabled
                   />
-                  <button className="bg-[var(--color-primary)] p-2 rounded-lg hover:bg-[#ea580c] transition-colors">
+                  <button className="bg-[var(--color-primary)] p-2 rounded-lg hover:bg-orange-600 transition-colors">
                     <Send className="h-4 w-4 text-white" />
                   </button>
                 </div>

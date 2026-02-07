@@ -31,7 +31,9 @@
     --bg-dark-surface: #1F2328;
     --bg-dark-card: #2d333b;
     --bg-dark-hover: #3d444d;
-    
+    --bg-dark-subtle: #161b22;
+    --bg-dark-active: #1a1f24;
+
     /* Border & UI */
     --border-light: #E2E8F0;
     --border-medium: #CBD5E1;

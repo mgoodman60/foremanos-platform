@@ -1258,7 +1258,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   ];
 
   return (
-    <div className="flex h-full flex-col bg-dark-surface text-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-dark-surface text-slate-50">
       {/* Header - Streamlined with Dropdown Menus */}
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -1330,7 +1330,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
               setExpandedCategories(new Set());
             }}
           >
-            <SelectTrigger className="bg-dark-card border-gray-600 text-[#F8FAFC]">
+            <SelectTrigger className="bg-dark-card border-gray-600 text-slate-50">
               <SelectValue placeholder="Select takeoff" />
             </SelectTrigger>
             <SelectContent>
@@ -1529,7 +1529,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
 
       {/* Cost Summary Banner */}
       {costSummary && selectedTakeoff && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#21262D] border-t border-gray-700 p-3">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-dark-surface border-t border-gray-700 p-3">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">

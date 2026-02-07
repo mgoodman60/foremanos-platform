@@ -9,8 +9,8 @@ export default function MEPLayout({
   params: { slug: string };
 }) {
   return (
-    <div className="min-h-screen bg-[#0D1117]">
-      <header className="border-b border-gray-700 bg-[#161B22] px-6 py-4">
+    <div className="min-h-screen bg-dark-base">
+      <header className="border-b border-gray-700 bg-dark-subtle px-6 py-4">
         <h1 className="text-xl font-semibold text-white">MEP Tracking</h1>
         <p className="text-sm text-gray-400">Mechanical, Electrical, Plumbing & Fire Protection</p>
       </header>

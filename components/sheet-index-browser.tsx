@@ -307,7 +307,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
                 {filteredSheets.map((sheet) => (
                   <div
                     key={`${sheet.documentId}-${sheet.sheetNumber}`}
-                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-[#252a31] transition-colors cursor-pointer"
+                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:bg-dark-surface transition-colors cursor-pointer"
                     onClick={() => onSheetSelect?.(sheet)}
                   >
                     <div className="flex items-start justify-between">

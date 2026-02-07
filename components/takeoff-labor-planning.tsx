@@ -329,7 +329,7 @@ export function TakeoffLaborPlanning({
                       <div key={trade} className="bg-dark-card rounded-lg overflow-hidden">
                         <button
                           onClick={() => toggleTrade(trade)}
-                          className="w-full flex items-center justify-between p-3 hover:bg-[#373e47] transition-colors"
+                          className="w-full flex items-center justify-between p-3 hover:bg-dark-hover transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             {expandedTrades.has(trade) ? (
@@ -359,7 +359,7 @@ export function TakeoffLaborPlanning({
                               </thead>
                               <tbody>
                                 {tradeItems.map((req) => (
-                                  <tr key={req.takeoffItemId} className="border-t border-gray-800 hover:bg-[#373e47]">
+                                  <tr key={req.takeoffItemId} className="border-t border-gray-800 hover:bg-dark-hover">
                                     <td className="p-2 pl-10 text-white">
                                       <div className="truncate max-w-[200px]">{req.itemName}</div>
                                       <div className="text-xs text-gray-500">{req.category}</div>
