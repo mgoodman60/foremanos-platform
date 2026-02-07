@@ -128,7 +128,7 @@ export function FloatingActionButton({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all transform active:scale-95 ${isOpen ? 'bg-gray-700 rotate-45' : 'bg-[#F97316]'}`}
+        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all transform active:scale-95 ${isOpen ? 'bg-gray-700 rotate-45' : 'bg-orange-500'}`}
       >
         {isOpen ? (
           <X className="w-6 h-6 text-white" />

@@ -127,7 +127,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
             ) : (
               <ChevronRight className="h-4 w-4 text-gray-400" />
             )}
-            <FileText className="h-4 w-4 text-[#F97316]" />
+            <FileText className="h-4 w-4 text-orange-500" />
             <span className="text-sm font-semibold text-[#F8FAFC]">Documents</span>
             <span className="text-xs text-gray-500">({documents.length})</span>
           </div>
@@ -138,7 +138,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
           <div className="max-h-64 overflow-y-auto">
             {loading ? (
               <div className="p-4 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#F97316] mx-auto"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
                 <p className="text-xs text-gray-500 mt-2">Loading documents...</p>
               </div>
             ) : documents.length === 0 ? (
@@ -175,7 +175,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                           onClick={() => handlePreview(doc)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-[#F97316] hover:bg-dark-surface"
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-orange-500 hover:bg-dark-surface"
                           title="Preview"
                         >
                           <Eye className="h-3 w-3" />
@@ -184,7 +184,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                           onClick={() => handleDownload(doc)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-[#F97316] hover:bg-dark-surface"
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-orange-500 hover:bg-dark-surface"
                           title="Download"
                         >
                           <Download className="h-3 w-3" />

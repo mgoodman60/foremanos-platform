@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface LaborRequirement {
   takeoffItemId: string;
@@ -86,6 +87,7 @@ export function TakeoffLaborPlanning({
 }: TakeoffLaborPlanningProps) {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'requirements' | 'schedule' | 'suggestions'>('overview');
+  const trapRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
   const [summary, setSummary] = useState<LaborSummary | null>(null);
   const [requirements, setRequirements] = useState<LaborRequirement[]>([]);
   const [links, setLinks] = useState<ScheduleLink[]>([]);
@@ -198,7 +200,7 @@ export function TakeoffLaborPlanning({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-5xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="labor-planning-title" className="w-full max-w-5xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -206,7 +208,7 @@ export function TakeoffLaborPlanning({
               <HardHat className="h-5 w-5 text-orange-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Labor Planning</h2>
+              <h2 id="labor-planning-title" className="text-lg font-semibold text-white">Labor Planning</h2>
               <p className="text-sm text-gray-400">{takeoffName}</p>
             </div>
           </div>

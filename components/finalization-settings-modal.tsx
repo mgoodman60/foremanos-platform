@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Clock, Globe, Folder, Save, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { finalizationSettingsSchema, type FinalizationSettingsFormData, COMMON_TIMEZONES } from '@/lib/schemas';
 import { FormError } from '@/components/ui/form-error';
 

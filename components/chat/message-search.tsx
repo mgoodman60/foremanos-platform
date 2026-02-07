@@ -171,7 +171,7 @@ export function MessageSearch({
           className="flex-1 bg-transparent text-sm text-white placeholder-gray-400 focus:outline-none"
           aria-label="Search messages"
         />
-        {isSearching && <Loader2 className="w-4 h-4 text-[#F97316] animate-spin flex-shrink-0" />}
+        {isSearching && <Loader2 className="w-4 h-4 text-orange-500 animate-spin flex-shrink-0" />}
       </div>
 
       {/* Results counter and navigation */}
@@ -185,7 +185,7 @@ export function MessageSearch({
               <button
                 onClick={navigatePrevious}
                 disabled={results.length === 0}
-                className="p-1.5 hover:bg-dark-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                className="p-1.5 hover:bg-dark-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 aria-label="Previous match"
                 title="Previous match (↑)"
               >
@@ -194,7 +194,7 @@ export function MessageSearch({
               <button
                 onClick={navigateNext}
                 disabled={results.length === 0}
-                className="p-1.5 hover:bg-dark-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                className="p-1.5 hover:bg-dark-surface rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 aria-label="Next match"
                 title="Next match (↓)"
               >
@@ -210,7 +210,7 @@ export function MessageSearch({
 
         <button
           onClick={onClose}
-          className="p-1.5 hover:bg-dark-surface rounded transition-colors focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+          className="p-1.5 hover:bg-dark-surface rounded transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
           aria-label="Close search"
           title="Close search (Esc)"
         >

@@ -19,20 +19,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Guest username is required' }, { status: 400 });
     }
 
-    // Find project by guest username
-    const project = await prisma.project.findUnique({
-      where: { guestUsername },
+    // Find project by guest username (supports namespaced PINs)
+    const projects = await prisma.project.findMany({
+      where: { guestUsername: { endsWith: `_${guestUsername}` } },
       select: {
         id: true,
         name: true,
       },
     });
 
-    if (!project) {
+    let project: { id: string; name: string } | null = null;
+
+    if (projects.length === 0) {
+      // Also try exact match for legacy un-namespaced PINs
+      const legacyProject = await prisma.project.findUnique({
+        where: { guestUsername },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      if (!legacyProject) {
+        return NextResponse.json(
+          { error: 'No project found with this guest username' },
+          { status: 404 }
+        );
+      }
+      project = legacyProject;
+    } else if (projects.length > 1) {
       return NextResponse.json(
-        { error: 'No project found with this guest username' },
-        { status: 404 }
+        { error: 'Multiple projects use this PIN. Ask your PM for the project code.' },
+        { status: 409 }
       );
+    } else {
+      project = projects[0];
     }
 
     // Check if user already has access

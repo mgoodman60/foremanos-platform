@@ -179,7 +179,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
               type="text"
               className={`w-full pl-12 pr-4 py-4 text-lg border-2 ${
                 errors.username ? 'border-red-500' : 'border-gray-600'
-              } bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation`}
+              } bg-dark-surface rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-100 placeholder-gray-500 touch-manipulation`}
               placeholder="Enter your username"
               autoComplete="username"
               aria-required="true"
@@ -202,7 +202,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
               type={showPassword ? "text" : "password"}
               className={`w-full pl-12 pr-14 py-4 text-lg border-2 ${
                 errors.password ? 'border-red-500' : 'border-gray-600'
-              } bg-dark-surface rounded-xl focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 placeholder-gray-500 touch-manipulation`}
+              } bg-dark-surface rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-100 placeholder-gray-500 touch-manipulation`}
               placeholder="Enter your password"
               autoComplete="current-password"
               aria-required="true"
@@ -212,7 +212,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F97316] rounded p-1"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 rounded p-1"
               aria-label={showPassword ? "Hide password" : "Show password"}
               tabIndex={0}
             >
@@ -223,7 +223,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
           <div className="text-right mt-2">
             <Link
               href="/forgot-password"
-              className="text-[#F97316] hover:text-[#ea580c] text-sm font-medium transition-colors underline"
+              className="text-orange-500 hover:text-orange-600 text-sm font-medium transition-colors underline"
             >
               Forgot Password?
             </Link>
@@ -244,7 +244,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-[#F97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-bold py-5 px-6 rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none touch-manipulation text-lg"
+          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-5 px-6 rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none touch-manipulation text-lg"
           aria-label={loading ? 'Signing in, please wait' : 'Sign in to full access'}
         >
           {loading ? (
@@ -266,7 +266,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
         <div className="bg-dark-surface rounded-xl p-6 md:p-8 border-2 border-gray-700 shadow-sm">
           {/* Guest Access Header */}
           <div className="flex items-center justify-center gap-3 mb-4">
-            <HardHat className="w-8 h-8 text-[#F97316]" />
+            <HardHat className="w-8 h-8 text-orange-500" />
             <h3 className="text-2xl font-bold text-gray-100">Guest Access</h3>
           </div>
           
@@ -288,7 +288,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
                   type="text"
                   className={`w-full pl-11 pr-4 py-3 text-base border-2 ${
                     guestErrors.jobPin ? 'border-red-500' : 'border-gray-600'
-                  } rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] transition-all text-gray-100 bg-dark-card placeholder-gray-500 touch-manipulation`}
+                  } rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-gray-100 bg-dark-card placeholder-gray-500 touch-manipulation`}
                   placeholder="Enter your Job Pin"
                   autoComplete="off"
                   aria-required="true"
@@ -302,7 +302,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#F97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-semibold py-4 px-6 rounded-lg transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md hover:shadow-lg focus:ring-4 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none touch-manipulation text-base"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-4 px-6 rounded-lg transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md hover:shadow-lg focus:ring-4 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none touch-manipulation text-base"
               aria-label={loading ? 'Signing in as guest, please wait' : 'Sign in as guest'}
             >
               {loading ? (

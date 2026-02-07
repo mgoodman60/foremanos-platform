@@ -20,6 +20,7 @@ import {
   Filter,
   Search
 } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface SourceReference {
   takeoffId: string;
@@ -103,6 +104,7 @@ export default function TakeoffAggregation() {
   
   // New aggregation form
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const createModalTrapRef = useFocusTrap({ isActive: showCreateModal, onEscape: () => setShowCreateModal(false) });
   const [availableSheets, setAvailableSheets] = useState<AvailableSheet[]>([]);
   const [availableTakeoffs, setAvailableTakeoffs] = useState<AvailableTakeoff[]>([]);
   const [newName, setNewName] = useState('');
@@ -602,9 +604,9 @@ export default function TakeoffAggregation() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-          <div className="bg-dark-surface rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 border border-gray-700">
+          <div ref={createModalTrapRef} role="dialog" aria-modal="true" aria-labelledby="create-aggregation-title" className="bg-dark-surface rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4 border border-gray-700">
             <div className="p-6 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-white">Create New Aggregation</h3>
+              <h3 id="create-aggregation-title" className="text-lg font-semibold text-white">Create New Aggregation</h3>
               <p className="text-sm text-gray-400 mt-1">Consolidate takeoffs from multiple sheets into a unified list</p>
             </div>
             

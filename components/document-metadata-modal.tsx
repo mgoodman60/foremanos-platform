@@ -96,7 +96,7 @@ export function DocumentMetadataModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="document-metadata-modal-title"
-        className="bg-white rounded-lg shadow-2xl max-w-2xl w-full"
+        className="bg-dark-card border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full"
       >
         <div className="bg-[#003B71] text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
@@ -116,13 +116,13 @@ export function DocumentMetadataModal({
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6" noValidate>
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
               Description
             </label>
             <textarea
               id="description"
               {...register('description')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent resize-none"
               rows={4}
               placeholder="Add a description for this document..."
               aria-invalid={!!errors.description}
@@ -133,7 +133,7 @@ export function DocumentMetadataModal({
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               <Tag className="w-4 h-4 inline mr-1" />
               Tags
             </label>
@@ -144,13 +144,13 @@ export function DocumentMetadataModal({
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="hover:text-blue-900"
+                      className="hover:text-blue-200"
                       aria-label={`Remove tag ${tag}`}
                     >
                       <X className="w-3 h-3" />
@@ -172,7 +172,7 @@ export function DocumentMetadataModal({
                     addTag();
                   }
                 }}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
+                className="flex-1 px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
                 placeholder="Add a tag..."
                 aria-label="Add a tag"
               />
@@ -184,7 +184,7 @@ export function DocumentMetadataModal({
                 Add
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Press Enter or click Add to add a tag
             </p>
             {errors.tags?.root && (

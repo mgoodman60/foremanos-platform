@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertTriangle, Ruler, Search, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Ruler, Search, TrendingUp, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface Dimension {
   value: number;
@@ -168,7 +168,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <Loader2 className="animate-spin text-orange-500 h-8 w-8" />
           </div>
         </CardContent>
       </Card>

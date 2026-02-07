@@ -184,7 +184,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
       <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5 text-[#F97316]" />
+            <FileSpreadsheet className="h-5 w-5 text-orange-500" />
             Import Budget from Document
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -222,13 +222,13 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                     }}
                     className={`w-full p-3 rounded-lg border text-left transition-colors ${
                       selectedDoc === doc.id
-                        ? 'border-[#F97316] bg-[#F97316]/10'
+                        ? 'border-orange-500 bg-orange-500/10'
                         : 'border-gray-600 hover:border-gray-500 bg-dark-surface'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <FileText className={`h-5 w-5 ${
-                        selectedDoc === doc.id ? 'text-[#F97316]' : 'text-gray-400'
+                        selectedDoc === doc.id ? 'text-orange-500' : 'text-gray-400'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{doc.name}</div>
@@ -237,7 +237,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                         </div>
                       </div>
                       {selectedDoc === doc.id && (
-                        <CheckCircle2 className="h-5 w-5 text-[#F97316]" />
+                        <CheckCircle2 className="h-5 w-5 text-orange-500" />
                       )}
                     </div>
                   </button>
@@ -251,7 +251,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
             <Button
               onClick={handleExtract}
               disabled={extracting}
-              className="w-full bg-[#F97316] hover:bg-[#EA580C]"
+              className="w-full bg-orange-500 hover:bg-orange-600"
             >
               {extracting ? (
                 <>

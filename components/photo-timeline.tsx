@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { X, Calendar, MapPin, Briefcase, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { getFileUrl } from '@/lib/s3';
@@ -37,6 +38,7 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  const trapRef = useFocusTrap({ isActive: true, onEscape: onClose });
 
   // Fetch all photos for the project
   useEffect(() => {
@@ -126,11 +128,11 @@ export function PhotoTimeline({ projectSlug, onClose }: PhotoTimelineProps) {
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="photo-timeline-title" className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
-            <h2 className="text-2xl font-bold text-[#F8FAFC]">Photo Timeline</h2>
+            <h2 id="photo-timeline-title" className="text-2xl font-bold text-[#F8FAFC]">Photo Timeline</h2>
             <p className="text-sm text-gray-400 mt-1">
               {photos.length} photo{photos.length !== 1 ? 's' : ''} across {groupedPhotos.length} day{groupedPhotos.length !== 1 ? 's' : ''}
             </p>

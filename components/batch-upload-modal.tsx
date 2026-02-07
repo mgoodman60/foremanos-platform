@@ -131,7 +131,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
         role="dialog"
         aria-modal="true"
         aria-labelledby="batch-upload-modal-title"
-        className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-dark-card border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="sticky top-0 bg-[#003B71] text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
@@ -154,7 +154,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
           {/* File Input */}
           {files.length === 0 && (
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center"
+              className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center"
               role="region"
               aria-label="File selection area"
             >
@@ -172,7 +172,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
                   aria-label="Select files to upload"
                 />
               </label>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-400 mt-2">
                 PDF and DOCX files only
               </p>
             </div>
@@ -187,10 +187,10 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
                     <div className="flex items-center gap-3 flex-1">
                       <FileText className="w-5 h-5 text-[#003B71] flex-shrink-0" aria-hidden="true" />
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-white truncate">
                           {uploadFile.file.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {(uploadFile.file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>

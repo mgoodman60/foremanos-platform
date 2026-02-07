@@ -101,13 +101,13 @@ export function FeatureTip({
 
   const variantClasses = {
     default: 'bg-blue-500/10 border-blue-500/30 text-blue-100',
-    highlight: 'bg-[#F97316]/10 border-[#F97316]/30 text-orange-100',
+    highlight: 'bg-orange-500/10 border-orange-500/30 text-orange-100',
     minimal: 'bg-dark-surface border-gray-700 text-gray-300',
   };
 
   const iconColor = {
     default: 'text-blue-400',
-    highlight: 'text-[#F97316]',
+    highlight: 'text-orange-500',
     minimal: 'text-gray-500',
   };
 
@@ -150,7 +150,7 @@ export function FeatureTip({
               rel="noopener noreferrer"
               className={cn(
                 'inline-flex items-center gap-1 mt-2 text-xs font-medium transition-colors',
-                variant === 'highlight' ? 'text-[#F97316] hover:text-[#EA580C]' : 'text-blue-400 hover:text-blue-300'
+                variant === 'highlight' ? 'text-orange-500 hover:text-orange-600' : 'text-blue-400 hover:text-blue-300'
               )}
             >
               Learn more
@@ -248,12 +248,12 @@ export function FeatureTipTour({
   return (
     <div
       className={cn(
-        'bg-[#F97316]/10 border border-[#F97316]/30 rounded-lg p-4',
+        'bg-orange-500/10 border border-orange-500/30 rounded-lg p-4',
         className
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 mt-0.5 text-[#F97316]">
+        <div className="flex-shrink-0 mt-0.5 text-orange-500">
           <Lightbulb className="w-5 h-5" />
         </div>
 
@@ -269,7 +269,7 @@ export function FeatureTipTour({
                   key={i}
                   className={cn(
                     'w-2 h-2 rounded-full transition-colors',
-                    i === currentStep ? 'bg-[#F97316]' : 'bg-gray-600'
+                    i === currentStep ? 'bg-orange-500' : 'bg-gray-600'
                   )}
                 />
               ))}
@@ -283,7 +283,7 @@ export function FeatureTipTour({
               href={step.docsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-[#F97316] hover:text-[#EA580C] transition-colors"
+              className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors"
             >
               Learn more
               <ExternalLink className="w-3 h-3" />
@@ -302,7 +302,7 @@ export function FeatureTipTour({
             <button
               type="button"
               onClick={handleNext}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-medium rounded-lg transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-lg transition-colors"
             >
               {currentStep < steps.length - 1 ? (
                 <>

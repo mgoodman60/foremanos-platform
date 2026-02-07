@@ -5,7 +5,8 @@ import { MessageSquare, Plus, Trash2, Edit2, Check, X, Menu, ChevronLeft, Shield
 import { Button } from './ui/button';
 import { WithTooltip } from './ui/icon-button';
 import { format } from 'date-fns';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
+import { ConfirmDialog } from './confirm-dialog';
 import { useSession } from 'next-auth/react';
 import { DocumentLibraryRibbon } from './document-library-ribbon';
 import { Phase3DashboardRibbon } from './phase3-dashboard-ribbon';
@@ -74,6 +75,8 @@ export function ConversationSidebar({
   const [showQuickCapture, setShowQuickCapture] = useState(false);
   const [dashboardExpanded, setDashboardExpanded] = useState(true);
   const [historyExpanded, setHistoryExpanded] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteConv, setPendingDeleteConv] = useState<{ id: string; conv: Conversation } | null>(null);
 
   // Check if user has access to daily reports (Pro tier or higher)
   const eligibleTiers = ['pro', 'team', 'business', 'enterprise'];
@@ -181,14 +184,21 @@ export function ConversationSidebar({
     }
   };
 
-  const handleDelete = async (conversationId: string, conv: Conversation) => {
+  const handleDelete = (conversationId: string, conv: Conversation) => {
     // Prevent deleting system-managed chats
     if (conv.isSystemManaged) {
       toast.error('System-managed chats cannot be deleted');
       return;
     }
+    setPendingDeleteConv({ id: conversationId, conv });
+    setShowDeleteConfirm(true);
+  };
 
-    if (!confirm('Delete this conversation? This cannot be undone.')) return;
+  const doDeleteConversation = async () => {
+    setShowDeleteConfirm(false);
+    if (!pendingDeleteConv) return;
+    const { id: conversationId } = pendingDeleteConv;
+    setPendingDeleteConv(null);
 
     try {
       const response = await fetch(`/api/conversations/${conversationId}`, {
@@ -664,6 +674,17 @@ export function ConversationSidebar({
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onConfirm={doDeleteConversation}
+        onCancel={() => { setShowDeleteConfirm(false); setPendingDeleteConv(null); }}
+        title="Delete Conversation"
+        description="Delete this conversation? This cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+      />
       </>
     );
   }

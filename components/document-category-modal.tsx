@@ -130,11 +130,11 @@ export function DocumentCategoryModal({
               /* Category-First Mode - Prominent Step Indicator */
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex items-center gap-2 px-3 py-1 bg-[#F97316]/20 border border-[#F97316] rounded-full">
-                    <div className="w-6 h-6 rounded-full bg-[#F97316] flex items-center justify-center text-white text-sm font-bold">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-orange-500/20 border border-orange-500 rounded-full">
+                    <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
                       1
                     </div>
-                    <span className="text-sm font-semibold text-[#F97316]">Step 1 of 2</span>
+                    <span className="text-sm font-semibold text-orange-500">Step 1 of 2</span>
                   </div>
                 </div>
                 <h2 id="document-category-modal-title" className="text-xl font-bold text-[#F8FAFC]">
@@ -169,7 +169,7 @@ export function DocumentCategoryModal({
               <div className="px-6 py-4 bg-dark-surface border-b border-gray-700">
                 <div className="flex items-center gap-3 text-sm">
                   <div className="relative">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#F97316]" />
+                    <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
                   </div>
                   <div>
                     <p className="text-gray-300 font-medium">Analyzing document...</p>
@@ -211,7 +211,7 @@ export function DocumentCategoryModal({
                           setAutoAccepted(false);
                           setShowChangeCategory(true);
                         }}
-                        className="mt-2 text-xs text-[#F97316] hover:text-[#EA580C] font-medium transition-colors"
+                        className="mt-2 text-xs text-orange-500 hover:text-orange-600 font-medium transition-colors"
                       >
                         Change category
                       </button>
@@ -226,7 +226,7 @@ export function DocumentCategoryModal({
         {/* Category Options */}
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-3" noValidate>
           {!fileName && (
-            <div className="mb-4 p-4 bg-dark-surface border border-[#F97316]/30 rounded-lg">
+            <div className="mb-4 p-4 bg-dark-surface border border-orange-500/30 rounded-lg">
               <p className="text-sm text-[#F8FAFC] font-medium mb-1">
                 Why categorize first?
               </p>
@@ -255,8 +255,8 @@ export function DocumentCategoryModal({
                     className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                       field.value === category.value
                         ? fileName
-                          ? 'border-[#F97316] bg-[#F97316]/10 text-[#F8FAFC]'
-                          : 'border-[#F97316] bg-[#F97316]/20 text-[#F8FAFC] shadow-lg ring-2 ring-[#F97316]/30'
+                          ? 'border-orange-500 bg-orange-500/10 text-[#F8FAFC]'
+                          : 'border-orange-500 bg-orange-500/20 text-[#F8FAFC] shadow-lg ring-2 ring-orange-500/30'
                         : 'border-gray-700 bg-dark-surface text-gray-300 hover:border-gray-600 hover:bg-dark-surface/80'
                     }`}
                   >
@@ -268,7 +268,7 @@ export function DocumentCategoryModal({
                         <p className="text-sm text-gray-400 mt-0.5">{category.description}</p>
                       </div>
                       {field.value === category.value && (
-                        <CheckCircle2 className={`w-5 h-5 text-[#F97316] flex-shrink-0 ml-2 ${!fileName ? 'w-6 h-6' : ''}`} />
+                        <CheckCircle2 className={`w-5 h-5 text-orange-500 flex-shrink-0 ml-2 ${!fileName ? 'w-6 h-6' : ''}`} />
                       )}
                     </div>
                   </button>
@@ -296,10 +296,10 @@ export function DocumentCategoryModal({
               disabled={isUploading}
               className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
                 isUploading
-                  ? 'bg-[#F97316] text-white opacity-75 cursor-not-allowed'
+                  ? 'bg-orange-500 text-white opacity-75 cursor-not-allowed'
                   : fileName
-                  ? 'bg-[#F97316] text-white hover:bg-[#ea580c]'
-                  : 'bg-[#F97316] text-white hover:bg-[#ea580c] shadow-lg ring-2 ring-[#F97316]/50'
+                  ? 'bg-orange-500 text-white hover:bg-orange-600'
+                  : 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg ring-2 ring-orange-500/50'
               }`}
             >
               {isUploading ? (

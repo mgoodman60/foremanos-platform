@@ -1361,7 +1361,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                 size="sm"
                                 onClick={() => exportRoomToPDF(room)}
                                 disabled={exportingRoomId === room.id || exportingDocxRoomId === room.id}
-                                className="bg-[#F97316] hover:bg-[#ea6a0a] text-white"
+                                className="bg-orange-500 hover:bg-orange-600 text-white"
                               >
                                 {exportingRoomId === room.id ? (
                                   <>

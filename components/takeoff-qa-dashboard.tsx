@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface QAMetrics {
   totalItems: number;
@@ -69,6 +70,7 @@ export function TakeoffQADashboard({
   const [loading, setLoading] = useState(false);
   const [metrics, setMetrics] = useState<QAMetrics | null>(null);
   const [issues, setIssues] = useState<QAIssue[]>([]);
+  const trapRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
   const [activeTab, setActiveTab] = useState<'overview' | 'issues' | 'verification'>('overview');
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [bulkThreshold, setBulkThreshold] = useState<string>('85');
@@ -211,7 +213,7 @@ export function TakeoffQADashboard({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-4xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="qa-dashboard-title" className="w-full max-w-4xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -219,7 +221,7 @@ export function TakeoffQADashboard({
               <ShieldCheck className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Quality Assurance</h2>
+              <h2 id="qa-dashboard-title" className="text-lg font-semibold text-white">Quality Assurance</h2>
               <p className="text-sm text-gray-400">{takeoffName}</p>
             </div>
           </div>

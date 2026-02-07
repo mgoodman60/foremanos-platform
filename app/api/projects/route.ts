@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { initializeRegulatoryDocumentsForProject } from '@/lib/regulatory-documents';
+import { namespacePIN } from '@/lib/guest-pin-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,9 +56,12 @@ export async function POST(request: Request) {
       counter++;
     }
 
-    // Check if guest username already exists
+    // Namespace the guest PIN with the owner's ID to prevent cross-user collisions
+    const namespacedPin = namespacePIN(session.user.id, guestUsername);
+
+    // Check if namespaced guest username already exists
     const existingGuestUsername = await prisma.project.findUnique({
-      where: { guestUsername },
+      where: { guestUsername: namespacedPin },
     });
 
     if (existingGuestUsername) {
@@ -78,7 +82,7 @@ export async function POST(request: Request) {
         name,
         slug,
         ownerId: session.user.id,
-        guestUsername,
+        guestUsername: namespacedPin,
         guestPassword: hashedGuestPassword,
       },
     });
@@ -94,13 +98,13 @@ export async function POST(request: Request) {
 
     // Create guest user account
     const existingGuestUser = await prisma.user.findUnique({
-      where: { username: guestUsername },
+      where: { username: namespacedPin },
     });
 
     if (!existingGuestUser) {
       const guestUser = await prisma.user.create({
         data: {
-          username: guestUsername,
+          username: namespacedPin,
           password: hashedGuestPassword,
           email: null,
           role: 'guest',
@@ -142,7 +146,7 @@ export async function POST(request: Request) {
           id: project.id,
           name: project.name,
           slug: project.slug,
-          guestUsername: project.guestUsername,
+          guestUsername,
         },
       },
       { status: 201 }

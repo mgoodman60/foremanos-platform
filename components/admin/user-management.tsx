@@ -230,7 +230,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
             <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-[#F97316] hover:bg-[#EA580C] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
               size="sm"
             >
               <UserPlus className="h-4 w-4 mr-2" />
@@ -540,7 +540,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 <select
                   value={newUserRole}
                   onChange={(e) => setNewUserRole(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-dark-surface text-gray-300 focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-dark-surface text-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 >
                   <option value="client">Client</option>
                   <option value="guest">Guest</option>
@@ -555,7 +555,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 <select
                   value={newUserTier}
                   onChange={(e) => setNewUserTier(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-dark-surface text-gray-300 focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-md text-sm bg-dark-surface text-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 >
                   <option value="free">Free</option>
                   <option value="starter">Starter</option>
@@ -578,7 +578,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
               </Button>
               <Button
                 type="submit"
-                className="bg-[#F97316] hover:bg-[#EA580C] text-white"
+                className="bg-orange-500 hover:bg-orange-600 text-white"
                 disabled={loading}
               >
                 {loading ? 'Creating...' : 'Create User'}
@@ -667,7 +667,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 setShowCredentials(false);
                 setCreatedCredentials(null);
               }}
-              className="bg-[#F97316] hover:bg-[#EA580C] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               Done
             </Button>

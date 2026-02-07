@@ -94,7 +94,7 @@ export default function IntegrationsPage() {
       </div>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'weather' && (
           <div className="space-y-6">
             <div className="bg-[#161B22] rounded-lg p-4 border border-gray-800">

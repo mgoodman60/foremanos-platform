@@ -550,8 +550,17 @@ export function ToolsMenu({
           </span>
         )}
       </div>
-      <button
+      <span
+        role="button"
+        tabIndex={0}
         onClick={(e) => toggleFavorite(tool.id, e)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(tool.id, e as unknown as React.MouseEvent);
+          }
+        }}
         className={cn(
           'p-1 rounded transition-colors',
           favorites.includes(tool.id)
@@ -568,7 +577,7 @@ export function ToolsMenu({
           className="w-3.5 h-3.5"
           fill={favorites.includes(tool.id) ? 'currentColor' : 'none'}
         />
-      </button>
+      </span>
     </button>
   );
 

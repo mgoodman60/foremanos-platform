@@ -119,7 +119,7 @@ describe('FeatureTip', () => {
       });
 
       const tip = screen.getByRole('note');
-      expect(tip).toHaveClass('bg-[#F97316]/10', 'border-[#F97316]/30');
+      expect(tip).toHaveClass('bg-orange-500/10', 'border-orange-500/30');
     });
 
     it('should render with minimal variant', () => {
@@ -354,7 +354,7 @@ describe('FeatureTip', () => {
       );
 
       const dots = container.querySelectorAll('.w-2.h-2.rounded-full');
-      expect(dots[0]).toHaveClass('bg-[#F97316]');
+      expect(dots[0]).toHaveClass('bg-orange-500');
       expect(dots[1]).toHaveClass('bg-gray-600');
     });
   });

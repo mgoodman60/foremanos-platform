@@ -15,6 +15,7 @@ import {
   Download,
   RefreshCw,
   Calculator,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -196,7 +197,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <Loader2 className="animate-spin text-orange-500 h-12 w-12" />
       </div>
     );
   }

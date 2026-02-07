@@ -206,7 +206,7 @@ export function PhotoAnnotationModal({
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className="bg-[#F97316]/20 text-[#F97316] hover:bg-[#F97316]/30"
+                  className="bg-orange-500/20 text-orange-500 hover:bg-orange-500/30"
                 >
                   {tag}
                   <button
@@ -254,7 +254,7 @@ export function PhotoAnnotationModal({
                     type="button"
                     onClick={() => handleAddTag(tag)}
                     disabled={tags.includes(tag)}
-                    className="px-2 py-1 text-xs rounded bg-dark-surface text-gray-300 hover:bg-[#F97316]/20 hover:text-[#F97316] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2 py-1 text-xs rounded bg-dark-surface text-gray-300 hover:bg-orange-500/20 hover:text-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {tag}
                   </button>
@@ -282,7 +282,7 @@ export function PhotoAnnotationModal({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {isSubmitting ? 'Saving...' : 'Save'}
             </Button>

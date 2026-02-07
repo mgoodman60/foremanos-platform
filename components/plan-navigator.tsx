@@ -28,7 +28,8 @@ import {
   Layout,
   FileStack,
   Hash,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -913,7 +914,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
         {loading && activeTab === 'references' ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <div className="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+              <Loader2 className="animate-spin text-orange-500 h-8 w-8 mb-2 inline-block" />
               <p className="text-sm text-gray-400">Loading cross-references...</p>
             </div>
           </div>
@@ -1237,7 +1238,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                             <div className="p-3">
                               {loadingPreviews.has(ref.sourceDocumentId) ? (
                                 <div className="h-32 flex items-center justify-center">
-                                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-r-transparent" />
+                                  <Loader2 className="animate-spin text-orange-500 h-6 w-6" />
                                 </div>
                               ) : sheetPreviews[ref.sourceDocumentId] ? (
                                 <img 

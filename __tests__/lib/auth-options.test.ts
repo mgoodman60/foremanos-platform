@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockPrisma = vi.hoisted(() => ({
   user: {
     findFirst: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
     update: vi.fn(),
   },
 }));

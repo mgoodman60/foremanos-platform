@@ -260,7 +260,7 @@ export function SyncStatusBanner({
               'px-3 py-1 text-xs font-medium rounded-lg transition-colors',
               retrying
                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                : 'bg-[#F97316]/20 text-[#F97316] hover:bg-[#F97316]/30'
+                : 'bg-orange-500/20 text-orange-500 hover:bg-orange-500/30'
             )}
           >
             {retrying ? (

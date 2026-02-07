@@ -10,6 +10,7 @@ import { TakeoffQADashboard } from '../takeoff-qa-dashboard';
 import { TakeoffLaborPlanning } from '../takeoff-labor-planning';
 import TakeoffLearningPanel from '../takeoff-learning-panel';
 import { PriceUpdateModal } from '../price-update-modal';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface TakeoffModalsProps {
   takeoff: MaterialTakeoff | null;
@@ -75,6 +76,7 @@ export function TakeoffModals({
   showPriceUpdate,
   onClosePriceUpdate,
 }: TakeoffModalsProps) {
+  const priceManagerTrapRef = useFocusTrap({ isActive: showPriceManager, onEscape: onClosePriceManager });
   return (
     <>
       {/* Edit Item Modal */}
@@ -101,7 +103,7 @@ export function TakeoffModals({
       {/* Unit Price Manager Modal */}
       {showPriceManager && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-          <div className="w-full max-w-4xl mx-4">
+          <div ref={priceManagerTrapRef} role="dialog" aria-modal="true" aria-labelledby="price-manager-title" className="w-full max-w-4xl mx-4">
             <UnitPriceManager
               projectSlug={projectSlug}
               onClose={onClosePriceManager}

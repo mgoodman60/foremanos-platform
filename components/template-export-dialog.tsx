@@ -143,7 +143,7 @@ export default function TemplateExportDialog({
       <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-[#F97316]" />
+            <FileText className="h-5 w-5 text-orange-500" />
             Export with Template
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -154,7 +154,7 @@ export default function TemplateExportDialog({
         <div className="space-y-4 py-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-[#F97316]" />
+              <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
             </div>
           ) : error ? (
             <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
@@ -196,7 +196,7 @@ export default function TemplateExportDialog({
                 <Card className="bg-dark-surface border-gray-700">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <FileText className="h-5 w-5 text-[#F97316] mt-0.5" />
+                      <FileText className="h-5 w-5 text-orange-500 mt-0.5" />
                       <div className="flex-1">
                         <p className="font-medium text-[#F8FAFC]">
                           {selectedTemplate.name}
@@ -238,7 +238,7 @@ export default function TemplateExportDialog({
           <Button
             onClick={handleExport}
             disabled={exporting || !selectedTemplateId || templates.length === 0}
-            className="bg-[#F97316] hover:bg-[#ea6d0a]"
+            className="bg-orange-500 hover:bg-orange-600"
           >
             {exporting ? (
               <>

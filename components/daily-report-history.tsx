@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, CheckCircle, Clock, Download, Eye, TrendingUp, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { format } from 'date-fns';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 interface DailyReportHistoryProps {

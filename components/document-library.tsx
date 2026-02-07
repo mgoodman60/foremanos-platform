@@ -12,6 +12,7 @@ import { getAllCategories, getCategoryLabel } from '@/lib/document-categorizer';
 import DocumentPreviewModal from './document-preview-modal';
 import { DocumentCategoryModal } from './document-category-modal';
 import { useOptimisticDocuments } from '@/hooks/useOptimisticDocuments';
+import { ConfirmDialog } from './confirm-dialog';
 
 // CAD file extensions supported by Autodesk
 const CAD_EXTENSIONS = ['.dwg', '.dxf', '.dwf', '.dwfx', '.rvt', '.rfa', '.ifc', '.nwd', '.nwc', '.3ds', '.fbx', '.obj', '.stl', '.stp', '.step', '.iges', '.igs', '.f3d', '.skp'];
@@ -63,6 +64,10 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [preSelectedCategory, setPreSelectedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cadFileInputRef = useRef<HTMLInputElement>(null);
+  const [showViewModelConfirm, setShowViewModelConfirm] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
 
   const categories = getAllCategories();
 
@@ -142,11 +147,9 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       }
 
       toast.success('CAD file uploaded! Processing will take a few minutes. View in Models page.', { id: toastId });
-      
+
       // Optionally navigate to models page
-      if (confirm('Would you like to view the model in the 3D viewer?')) {
-        router.push(`/project/${projectSlug}/models`);
-      }
+      setShowViewModelConfirm(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       toast.error(message, { id: toastId });
@@ -502,12 +505,13 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     toast.success(`✓ Downloaded ${successCount} of ${selectedDocs.size} documents`);
   };
 
-  const bulkDelete = async () => {
+  const bulkDelete = () => {
     if (selectedDocs.size === 0) return;
+    setShowBulkDeleteConfirm(true);
+  };
 
-    const confirmMsg = `Delete ${selectedDocs.size} selected document${selectedDocs.size > 1 ? 's' : ''}? This action cannot be undone.`;
-    if (!confirm(confirmMsg)) return;
-
+  const doBulkDelete = async () => {
+    setShowBulkDeleteConfirm(false);
     setBulkActionLoading(true);
     const docCount = selectedDocs.size;
     const success = await optimisticDelete(Array.from(selectedDocs));
@@ -536,10 +540,16 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     }
   };
 
-  const handleDelete = async (doc: Document) => {
-    if (!confirm(`Are you sure you want to delete "${doc.name}"? This action cannot be undone.`)) {
-      return;
-    }
+  const handleDelete = (doc: Document) => {
+    setPendingDeleteDoc(doc);
+    setShowDeleteConfirm(true);
+  };
+
+  const doDelete = async () => {
+    setShowDeleteConfirm(false);
+    const doc = pendingDeleteDoc;
+    setPendingDeleteDoc(null);
+    if (!doc) return;
 
     try {
       const response = await fetch(`/api/documents/${doc.id}`, {
@@ -1467,6 +1477,38 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={showViewModelConfirm}
+        onConfirm={() => { setShowViewModelConfirm(false); router.push(`/project/${projectSlug}/models`); }}
+        onCancel={() => setShowViewModelConfirm(false)}
+        title="View 3D Model"
+        description="Would you like to view the model in the 3D viewer?"
+        confirmLabel="View Model"
+        cancelLabel="Not Now"
+      />
+
+      <ConfirmDialog
+        open={showBulkDeleteConfirm}
+        onConfirm={doBulkDelete}
+        onCancel={() => setShowBulkDeleteConfirm(false)}
+        title="Delete Documents"
+        description={`Delete ${selectedDocs.size} selected document${selectedDocs.size > 1 ? 's' : ''}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onConfirm={doDelete}
+        onCancel={() => { setShowDeleteConfirm(false); setPendingDeleteDoc(null); }}
+        title="Delete Document"
+        description={`Are you sure you want to delete "${pendingDeleteDoc?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

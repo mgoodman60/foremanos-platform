@@ -18,7 +18,12 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const userRole = session?.user?.role || 'guest';
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userRole = session.user.role;
     const documentId = params.id;
 
     // Fetch the document

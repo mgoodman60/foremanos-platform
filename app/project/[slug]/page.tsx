@@ -995,7 +995,7 @@ export default function ProjectPage() {
       </div>
 
       {/* Chat Interface */}
-      <main className="flex-1 pb-16 md:pb-0">
+      <main id="main-content" className="flex-1 pb-16 md:pb-0">
         {/* Prerequisites Banner - Show when no documents uploaded */}
         {project.documentCount === 0 && (
           <div className="mx-3 sm:mx-6 mt-4 mb-4">

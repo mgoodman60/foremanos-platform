@@ -21,6 +21,18 @@ const nextConfig = {
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      {
+        key: 'Content-Security-Policy',
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' unpkg.com developer.api.autodesk.com js.stripe.com apps.abacus.ai",
+          "style-src 'self' 'unsafe-inline' unpkg.com developer.api.autodesk.com",
+          "img-src 'self' data: blob: *.amazonaws.com",
+          "connect-src 'self' *.amazonaws.com developer.api.autodesk.com js.stripe.com apps.abacus.ai",
+          "frame-src 'self' js.stripe.com",
+          "font-src 'self'",
+        ].join('; '),
+      },
     ]
   }],
 };

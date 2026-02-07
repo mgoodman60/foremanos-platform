@@ -608,7 +608,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
         {loading ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <div className="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+              <Loader2 className="animate-spin text-orange-500 h-8 w-8 mb-2 inline-block" />
               <p className="text-sm text-gray-400">Loading MEP equipment...</p>
             </div>
           </div>

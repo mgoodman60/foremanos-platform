@@ -384,7 +384,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
                   size="sm"
                   onClick={() => handleParseSchedule(doc.id)}
                   disabled={parsing}
-                  className="bg-[#F97316] hover:bg-[#EA580C] text-white"
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   {parsing ? (
                     <>
@@ -522,11 +522,11 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
 
   if (compact) {
     return (
-      <Card className="p-4 bg-[#252A31] border-2 border-[#F97316]/30 hover:shadow-md transition-shadow shadow-orange-900/10">
+      <Card className="p-4 bg-[#252A31] border-2 border-orange-500/30 hover:shadow-md transition-shadow shadow-orange-900/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-[#F97316]" />
+              <Activity className="h-5 w-5 text-orange-500" />
               <span className="font-semibold text-[#F8FAFC]">Schedule Progress</span>
             </div>
             <Badge variant="outline" className={getStatusColor(metrics.criticalPathStatus)}>
@@ -563,7 +563,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-2xl font-bold text-[#F97316]">{metrics.overallProgress}%</div>
+              <div className="text-2xl font-bold text-orange-500">{metrics.overallProgress}%</div>
               <div className="text-xs text-gray-400">{metrics.tasksCompleted}/{metrics.totalTasks} tasks</div>
             </div>
             <Button
@@ -571,7 +571,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               size="sm"
               onClick={handleManualRefresh}
               disabled={refreshing}
-              className="text-gray-400 hover:text-[#F97316] hover:bg-dark-surface"
+              className="text-gray-400 hover:text-orange-500 hover:bg-dark-surface"
               title="Refresh schedule data"
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -592,14 +592,14 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
   }
 
   return (
-    <Card className="bg-[#252A31] border-2 border-[#F97316]/30 shadow-lg shadow-orange-900/10 overflow-hidden">
+    <Card className="bg-[#252A31] border-2 border-orange-500/30 shadow-lg shadow-orange-900/10 overflow-hidden">
       {/* Collapsible Header - Always visible */}
       <div 
         className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#2a2f38] transition-colors"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <div className="flex items-center gap-3 flex-1">
-          <div className="h-10 w-10 rounded-full bg-[#F97316] flex items-center justify-center shadow-md shadow-orange-500/30 flex-shrink-0">
+          <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center shadow-md shadow-orange-500/30 flex-shrink-0">
             <Activity className="h-6 w-6 text-white" />
           </div>
           <div className="min-w-0">
@@ -621,7 +621,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           {isCollapsed && (
             <div className="hidden sm:flex items-center gap-3 ml-4">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-surface rounded-lg">
-                <span className="text-2xl font-bold text-[#F97316]">{metrics.overallProgress}%</span>
+                <span className="text-2xl font-bold text-orange-500">{metrics.overallProgress}%</span>
                 <span className="text-xs text-gray-400">{metrics.tasksCompleted}/{metrics.totalTasks}</span>
               </div>
               <Badge className={`${getStatusColor(metrics.criticalPathStatus)} text-xs px-2 py-0.5`}>
@@ -647,7 +647,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
             size="sm"
             onClick={handleManualRefresh}
             disabled={refreshing}
-            className="text-gray-400 hover:text-[#F97316] hover:bg-dark-surface h-8 w-8 p-0"
+            className="text-gray-400 hover:text-orange-500 hover:bg-dark-surface h-8 w-8 p-0"
             title="Refresh schedule data"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -664,7 +664,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           <Button
             size="sm"
             onClick={() => router.push(`/project/${projectSlug}/schedules`)}
-              className="bg-[#F97316] hover:bg-[#ea6d0a] flex items-center gap-1 h-8 px-2.5 text-xs"
+              className="bg-orange-500 hover:bg-orange-600 flex items-center gap-1 h-8 px-2.5 text-xs"
             >
               <span className="hidden sm:inline">Full</span> Schedule
               <ChevronRight className="h-3.5 w-3.5" />
@@ -674,7 +674,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-gray-400 hover:text-[#F97316] hover:bg-dark-surface h-8 w-8 p-0"
+            className="text-gray-400 hover:text-orange-500 hover:bg-dark-surface h-8 w-8 p-0"
             title={isCollapsed ? "Expand" : "Collapse"}
           >
             {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
@@ -694,7 +694,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Overall Progress</span>
-              <CheckCircle2 className="h-4 w-4 text-[#F97316]" />
+              <CheckCircle2 className="h-4 w-4 text-orange-500" />
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-[#F8FAFC]">{metrics.overallProgress}%</div>
@@ -752,7 +752,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Next Milestone</span>
-              <Calendar className="h-4 w-4 text-[#F97316]" />
+              <Calendar className="h-4 w-4 text-orange-500" />
             </div>
             {metrics.upcomingMilestones.length > 0 ? (
               <div className="space-y-1">
@@ -774,14 +774,14 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           {/* Budget / Cost Tracking - Clickable to EVM */}
           <div 
             onClick={() => router.push(`/project/${projectSlug}/evm`)}
-            className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50 cursor-pointer hover:border-[#F97316] hover:bg-[#262c34] transition-all group"
+            className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50 cursor-pointer hover:border-orange-500 hover:bg-[#262c34] transition-all group"
             title="Click to view detailed cost dashboard"
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-gray-300 group-hover:text-[#F97316] transition-colors">Budget Status</span>
+              <span className="text-xs font-medium text-gray-300 group-hover:text-orange-500 transition-colors">Budget Status</span>
               <div className="flex items-center gap-1">
                 <DollarSign className="h-4 w-4 text-green-500" />
-                <ChevronRight className="h-3 w-3 text-gray-500 group-hover:text-[#F97316] transition-colors" />
+                <ChevronRight className="h-3 w-3 text-gray-500 group-hover:text-orange-500 transition-colors" />
               </div>
             </div>
             {budgetMetrics?.hasBudget ? (
@@ -813,11 +813,11 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           {budgetMetrics?.hasBudget && (
             <div 
               onClick={() => router.push(`/project/${projectSlug}/evm`)}
-              className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50 cursor-pointer hover:border-[#F97316] hover:bg-[#262c34] transition-all group"
+              className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50 cursor-pointer hover:border-orange-500 hover:bg-[#262c34] transition-all group"
               title="Estimate at Completion - Click for details"
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-gray-300 group-hover:text-[#F97316] transition-colors">Cost Forecast</span>
+                <span className="text-xs font-medium text-gray-300 group-hover:text-orange-500 transition-colors">Cost Forecast</span>
                 <Calculator className="h-4 w-4 text-blue-400" />
               </div>
               <div className="space-y-1">
@@ -861,7 +861,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
           <div className="bg-dark-surface rounded-lg p-3 shadow-sm border border-gray-600/50">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-300">Avg Crew Size</span>
-              <Users className="h-4 w-4 text-[#F97316]" />
+              <Users className="h-4 w-4 text-orange-500" />
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-[#F8FAFC]">
@@ -878,7 +878,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
         {metrics.keyDates && metrics.keyDates.length > 0 && (
           <div className="bg-dark-surface rounded-lg p-4 shadow-sm border border-gray-700">
             <h4 className="text-sm font-semibold text-[#F8FAFC] mb-3 flex items-center gap-2">
-              <CalendarCheck className="h-4 w-4 text-[#F97316]" />
+              <CalendarCheck className="h-4 w-4 text-orange-500" />
               Key Dates
             </h4>
             {/* Scrollable timeline */}
@@ -892,7 +892,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
                       case 'end':
                         return <Target className="h-4 w-4 text-blue-500" />;
                       case 'milestone':
-                        return <Flag className="h-4 w-4 text-[#F97316]" />;
+                        return <Flag className="h-4 w-4 text-orange-500" />;
                       default:
                         return <Calendar className="h-4 w-4 text-gray-400" />;
                     }
@@ -974,12 +974,12 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
         {metrics.recentUpdates && metrics.recentUpdates.length > 0 && (
           <div className="bg-dark-surface rounded-lg p-4 shadow-sm border border-gray-700">
             <h4 className="text-sm font-semibold text-[#F8FAFC] mb-3 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-[#F97316]" />
+              <Activity className="h-4 w-4 text-orange-500" />
               Recent Schedule Updates from Daily Reports
             </h4>
             <div className="space-y-2">
               {metrics.recentUpdates.slice(0, 3).map((update, index) => (
-                <div key={index} className="flex items-center justify-between text-sm border-l-2 border-[#F97316] pl-3 py-1">
+                <div key={index} className="flex items-center justify-between text-sm border-l-2 border-orange-500 pl-3 py-1">
                   <div className="flex-1">
                     <span className="font-medium text-[#F8FAFC]">{update.taskName}</span>
                     <span className="text-gray-400 mx-2">•</span>

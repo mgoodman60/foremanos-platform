@@ -37,7 +37,7 @@ interface HeaderActionMenuProps {
 
 const variantStyles = {
   default: 'bg-dark-card border-gray-600 text-gray-200 hover:bg-[#3d434b] hover:text-white',
-  primary: 'bg-[#F97316] border-orange-600 text-white hover:bg-[#ea6a0a]',
+  primary: 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600',
   outline: 'bg-transparent border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white',
 };
 

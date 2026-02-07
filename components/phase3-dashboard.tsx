@@ -19,7 +19,8 @@ import {
   Search,
   BarChart3,
   PieChart,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -155,7 +156,7 @@ export function Phase3Dashboard({
     return (
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
-          <div className="mb-3 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+          <Loader2 className="animate-spin text-orange-500 h-8 w-8 mb-3 inline-block" />
           <p className="text-sm text-gray-400">Loading dashboard...</p>
         </div>
       </div>

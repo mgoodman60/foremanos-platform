@@ -121,7 +121,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
             {/* Download Button */}
             <button
               onClick={handleDownload}
-              className="p-2 hover:bg-[#F97316] hover:text-white rounded-lg transition-all text-gray-400"
+              className="p-2 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-gray-400"
               aria-label="Download document"
               title="Download"
             >
@@ -144,7 +144,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
         <div className="flex-1 overflow-hidden bg-dark-surface flex items-center justify-center">
           {loading && !error && (
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-[#F97316]" />
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
               <p className="text-gray-400">Loading preview...</p>
             </div>
           )}
@@ -160,7 +160,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
               </p>
               <button
                 onClick={handleDownload}
-                className="mt-4 px-6 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors"
+                className="mt-4 px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
               >
                 Download Document
               </button>

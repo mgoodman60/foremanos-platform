@@ -237,7 +237,7 @@ export function UploadErrorDialog({
             <button
               type="button"
               onClick={onRetry}
-              className="flex items-center gap-2 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white text-sm font-medium rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               {canResume ? 'Resume Upload' : 'Try Again'}

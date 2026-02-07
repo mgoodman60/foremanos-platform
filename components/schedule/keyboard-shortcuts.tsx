@@ -158,7 +158,7 @@ export function KeyboardShortcutsHelp({ open, onOpenChange }: KeyboardShortcutsH
       <DialogContent className="bg-dark-card border-gray-700 text-gray-100 max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
-            <Keyboard className="h-5 w-5 text-[#F97316]" />
+            <Keyboard className="h-5 w-5 text-orange-500" />
             Keyboard Shortcuts
           </DialogTitle>
         </DialogHeader>

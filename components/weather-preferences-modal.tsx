@@ -121,14 +121,14 @@ export default function WeatherPreferencesModal({
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6" noValidate>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
             </div>
           ) : (
             <>
               {/* Alert Types */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-[#F8FAFC] flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-[#F97316]" />
+                  <Bell className="w-5 h-5 text-orange-500" />
                   Alert Types
                 </h3>
                 <p className="text-sm text-gray-400">
@@ -155,7 +155,7 @@ export default function WeatherPreferencesModal({
                           onChange={field.onChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     )}
                   />
@@ -181,7 +181,7 @@ export default function WeatherPreferencesModal({
                           onChange={field.onChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     )}
                   />
@@ -207,7 +207,7 @@ export default function WeatherPreferencesModal({
                           onChange={field.onChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     )}
                   />
@@ -233,7 +233,7 @@ export default function WeatherPreferencesModal({
                           onChange={field.onChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     )}
                   />
@@ -243,7 +243,7 @@ export default function WeatherPreferencesModal({
               {/* Morning Briefing */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-[#F8FAFC] flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-[#F97316]" />
+                  <Clock className="w-5 h-5 text-orange-500" />
                   Morning Briefing
                 </h3>
                 <p className="text-sm text-gray-400">
@@ -266,7 +266,7 @@ export default function WeatherPreferencesModal({
                           onChange={field.onChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#F97316] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F97316]"></div>
+                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                       </label>
                     )}
                   />
@@ -286,7 +286,7 @@ export default function WeatherPreferencesModal({
                           type="time"
                           value={field.value}
                           onChange={field.onChange}
-                          className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-[#F8FAFC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                          className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-[#F8FAFC] rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
                       )}
                     />
@@ -313,7 +313,7 @@ export default function WeatherPreferencesModal({
                           value="in_app"
                           checked={field.value === 'in_app'}
                           onChange={() => field.onChange('in_app')}
-                          className="w-4 h-4 text-[#F97316] focus:ring-[#F97316]"
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <div>
                           <p className="font-medium text-[#F8FAFC]">In-App Only</p>
@@ -327,7 +327,7 @@ export default function WeatherPreferencesModal({
                           name="notificationMethod"
                           value="email"
                           disabled
-                          className="w-4 h-4 text-[#F97316] focus:ring-[#F97316]"
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <div>
                           <p className="font-medium text-[#F8FAFC]">Email (Coming Soon)</p>
@@ -354,7 +354,7 @@ export default function WeatherPreferencesModal({
             <button
               type="submit"
               disabled={saving || loading}
-              className="px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {saving ? (
                 <>

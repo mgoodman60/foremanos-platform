@@ -30,7 +30,7 @@ export default async function Home() {
 
   // Show landing page for non-authenticated users
   return (
-    <main className="min-h-screen">
+    <main id="main-content" className="min-h-screen">
       <LandingHeader />
       <Hero />
       <Features />

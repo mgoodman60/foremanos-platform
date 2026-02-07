@@ -13,7 +13,12 @@ export async function GET(
   try {
     // Get user session
     const session = await getServerSession(authOptions);
-    const userRole = session?.user?.role || 'guest';
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userRole = session.user.role;
 
     // Get document from database
     const document = await prisma.document.findUnique({

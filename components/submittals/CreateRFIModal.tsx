@@ -9,6 +9,7 @@ import {
   Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface Shortage {
   lineItemId: string;
@@ -33,6 +34,7 @@ interface CreateRFIModalProps {
 
 export default function CreateRFIModal({ projectSlug, shortage, onClose, onCreated }: CreateRFIModalProps) {
   const [submitting, setSubmitting] = useState(false);
+  const trapRef = useFocusTrap({ isActive: true, onEscape: onClose });
   const [form, setForm] = useState({
     title: `Quantity Discrepancy - ${shortage.productName}`,
     question: `Submittal ${shortage.submittalNumber} shows a quantity discrepancy for "${shortage.productName}".\n\nSubmitted: ${shortage.submitted} ${shortage.unit}\nRequired: ${shortage.required} ${shortage.unit}\nShortage: ${Math.abs(shortage.variance)} ${shortage.unit} (${Math.abs(shortage.variancePercent).toFixed(1)}% under)\n\nPlease advise on one of the following:\n1. Confirm the reduced quantity is acceptable\n2. Submit additional quantities to meet the requirement\n3. Provide alternative product substitution`,
@@ -79,13 +81,13 @@ export default function CreateRFIModal({ projectSlug, shortage, onClose, onCreat
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="create-rfi-title" className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800">
           <div className="flex items-center gap-3">
             <FileQuestion className="w-5 h-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-white">Create RFI from Shortage</h2>
+            <h2 id="create-rfi-title" className="text-lg font-semibold text-white">Create RFI from Shortage</h2>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-700 rounded">
             <X className="w-5 h-5 text-slate-400" />

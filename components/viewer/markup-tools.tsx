@@ -7,6 +7,7 @@ import {
   CheckCircle2, Pin
 } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface Markup {
   id: string;
@@ -59,6 +60,7 @@ export default function MarkupTools({
   const [isLoading, setIsLoading] = useState(false);
   const [textInput, setTextInput] = useState('');
   const [showTextDialog, setShowTextDialog] = useState(false);
+  const textDialogTrapRef = useFocusTrap({ isActive: showTextDialog, onEscape: () => setShowTextDialog(false) });
 
   // Load markup extension
   useEffect(() => {
@@ -381,9 +383,9 @@ export default function MarkupTools({
 
       {/* Text Input Dialog */}
       {showTextDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-dark-surface border border-gray-700 rounded-xl p-4 w-96">
-            <h4 className="text-white font-medium mb-3">Add Text Annotation</h4>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
+          <div ref={textDialogTrapRef} role="dialog" aria-modal="true" aria-labelledby="text-annotation-title" className="bg-dark-surface border border-gray-700 rounded-xl p-4 w-96">
+            <h4 id="text-annotation-title" className="text-white font-medium mb-3">Add Text Annotation</h4>
             <textarea
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}

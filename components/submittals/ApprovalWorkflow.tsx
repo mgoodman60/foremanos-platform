@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 type ApprovalAction = 'SUBMITTED' | 'REVIEWED' | 'APPROVED' | 'REJECTED' | 'RESUBMITTED' | 'REVISION_REQUESTED';
 
@@ -70,6 +71,7 @@ export default function ApprovalWorkflow({
   const [expandedHistory, setExpandedHistory] = useState(true);
   const [showCommentModal, setShowCommentModal] = useState<ApprovalAction | null>(null);
   const [comment, setComment] = useState('');
+  const commentTrapRef = useFocusTrap({ isActive: !!showCommentModal, onEscape: () => { setShowCommentModal(null); setComment(''); } });
 
   useEffect(() => {
     fetchApprovalData();
@@ -248,9 +250,9 @@ export default function ApprovalWorkflow({
 
       {/* Comment Modal */}
       {showCommentModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-6 w-full max-w-md mx-4">
-            <h4 className="text-lg font-semibold text-white mb-4">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
+          <div ref={commentTrapRef} role="dialog" aria-modal="true" aria-labelledby="approval-comment-title" className="bg-slate-900 border-2 border-slate-600 rounded-xl p-6 w-full max-w-md mx-4">
+            <h4 id="approval-comment-title" className="text-lg font-semibold text-white mb-4">
               {ACTION_CONFIG[showCommentModal].label}
             </h4>
             <div className="mb-4">

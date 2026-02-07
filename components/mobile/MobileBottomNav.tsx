@@ -170,7 +170,7 @@ export function MobileBottomNav({
                   aria-label={showQuickMenu ? "Close quick actions menu" : "Open quick actions menu"}
                   aria-expanded={showQuickMenu}
                   aria-controls="quick-actions-menu"
-                  className={`relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 ${showQuickMenu ? 'bg-red-500 rotate-45' : 'bg-[#F97316]'}`}
+                  className={`relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 ${showQuickMenu ? 'bg-red-500 rotate-45' : 'bg-orange-500'}`}
                 >
                   {showQuickMenu ? (
                     <X className="w-6 h-6 text-white" />
@@ -186,7 +186,7 @@ export function MobileBottomNav({
                 key={item.id}
                 onClick={item.onClick}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-colors relative ${isActive ? 'text-[#F97316]' : 'text-gray-400'}`}
+                className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-colors relative ${isActive ? 'text-orange-500' : 'text-gray-400'}`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs mt-1 font-medium">{item.label}</span>

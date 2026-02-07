@@ -243,7 +243,7 @@ export default function TradeClarificationPanel({
                 <Button
                   size="sm"
                   onClick={() => openEditDialog(task)}
-                  className="bg-[#F97316] hover:bg-[#EA580C] text-white ml-3"
+                  className="bg-orange-500 hover:bg-orange-600 text-white ml-3"
                 >
                   Assign Trade
                 </Button>
@@ -258,7 +258,7 @@ export default function TradeClarificationPanel({
         <DialogContent className="bg-dark-card border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <HardHat className="h-5 w-5 text-[#F97316]" />
+              <HardHat className="h-5 w-5 text-orange-500" />
               Assign Trade to Task
             </DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -343,7 +343,7 @@ export default function TradeClarificationPanel({
             <Button
               onClick={saveTradeAssignment}
               disabled={!selectedTrade}
-              className="bg-[#F97316] hover:bg-[#EA580C] text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Save Assignment

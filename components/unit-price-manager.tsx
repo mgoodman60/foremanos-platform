@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   DollarSign, Save, Trash2, Plus, Calculator, MapPin,
-  ChevronDown, ChevronRight, AlertCircle, Check, X
+  ChevronDown, ChevronRight, AlertCircle, Check, X, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TAKEOFF_CATEGORIES } from '@/lib/takeoff-categories';
@@ -196,7 +196,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
       <div className="flex-1 overflow-y-auto p-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
+            <Loader2 className="animate-spin text-orange-500 h-8 w-8" />
           </div>
         ) : (
           <div className="space-y-2">

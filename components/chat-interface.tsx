@@ -19,6 +19,7 @@ import { WithTooltip } from '@/components/ui/icon-button';
 import { SourceCitations, Citation } from './chat/source-citations';
 import { FollowUpSuggestions } from './chat/follow-up-suggestions';
 import { MessageSearch } from './chat/message-search';
+import { ConfirmDialog } from './confirm-dialog';
 
 interface Message {
   id: string;
@@ -74,7 +75,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   const [showMEPEquipment, setShowMEPEquipment] = useState(false);
   const [showPlanViewer, setShowPlanViewer] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession() || {};
@@ -132,6 +133,8 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   const [analyzingSchedule, setAnalyzingSchedule] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchHighlight, setSearchHighlight] = useState<{ messageId: string; text: string } | null>(null);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [showNewConversationConfirm, setShowNewConversationConfirm] = useState(false);
 
   // Check if user has full access (admin or client/owner)
   const hasFullAccess = userRole === 'admin' || userRole === 'client';
@@ -169,9 +172,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         const response = await fetchWithRetry(`/api/documents?projectId=${projectSlug}`, {
           retryOptions: {
             maxRetries: 2,
-            onRetry: (attempt) => {
-              console.log(`[Suggestions] Retrying document fetch (${attempt}/2)...`);
-            }
+            onRetry: () => {}
           }
         });
         if (!response.ok) return;
@@ -269,8 +270,6 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       if (file.size > 500 * 1024) {
         try {
           processedFile = await imageCompression(file, options);
-          const compressionRatio = ((1 - processedFile.size / file.size) * 100).toFixed(0);
-          console.log(`Compressed image by ${compressionRatio}%`);
         } catch (compressionError) {
           console.warn('Compression failed, using original file:', compressionError);
         }
@@ -460,9 +459,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       const response = await fetchWithRetry(`/api/conversations/${conversationId}/finalize`, {
         retryOptions: {
           maxRetries: 2,
-          onRetry: (attempt) => {
-            console.log(`[FINALIZATION] Retrying status fetch (${attempt}/2)...`);
-          }
+          onRetry: () => {}
         }
       });
       if (response.ok) {
@@ -553,13 +550,14 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   };
 
   // Handle manual report finalization
-  const handleFinalizeReport = async () => {
+  const handleFinalizeReport = () => {
     if (!activeConversationId) return;
+    setShowSubmitConfirm(true);
+  };
 
-    // Confirm finalization
-    if (!confirm('Submit this daily report? Once submitted, the report cannot be edited. A PDF will be generated and saved to the project.')) {
-      return;
-    }
+  const doFinalizeReport = async () => {
+    setShowSubmitConfirm(false);
+    if (!activeConversationId) return;
 
     setIsFinalizingReport(true);
     const toastId = toast.loading('Submitting daily report...');
@@ -603,12 +601,10 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   const loadConversationMessages = async (conversationId: string) => {
     const toastId = toast.loading('Loading conversation...');
     try {
-      console.log('[LOAD MESSAGES] Loading conversation:', conversationId);
       const response = await fetchWithRetry(`/api/conversations/${conversationId}/messages`, {
         retryOptions: {
           maxRetries: 3,
           onRetry: (attempt) => {
-            console.log(`[LOAD MESSAGES] Retrying (${attempt}/3)...`);
             toast.loading(`Loading conversation... (attempt ${attempt}/3)`, { id: toastId });
           }
         }
@@ -623,8 +619,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       toast.dismiss(toastId);
       
       const data = await response.json();
-      console.log('[LOAD MESSAGES] Received data:', data);
-      
+
       // Map messages from database format (message + response) to UI format
       const loadedMessages: Message[] = [];
       data.messages.forEach((msg: { id: string; message: string; response: string; createdAt: string; hasImage?: boolean }) => {
@@ -650,13 +645,11 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         }
       });
       
-      console.log('[LOAD MESSAGES] Loaded messages:', loadedMessages.length);
       setMessages(loadedMessages);
-      
+
       // Set conversation metadata
       if (data.conversation) {
         setCurrentConversation(data.conversation);
-        console.log('[LOAD MESSAGES] Conversation type:', data.conversation.conversationType);
         
         // Fetch finalization status for daily reports
         if (data.conversation.conversationType === 'daily_report') {
@@ -804,7 +797,6 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             }
           }
         }
-        toast.success('Response received');
       } else {
         // Handle non-streaming response (e.g., access denial)
         const data = await response.json();
@@ -955,9 +947,13 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
 
   const clearChat = () => {
     if (messages.length === 0) return;
-    if (confirm('Start a new conversation? Current conversation will be saved in history.')) {
-      handleNewConversation();
-    }
+    setShowNewConversationConfirm(true);
+  };
+
+  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
   };
 
   const copyMessage = async (content: string, id: string) => {
@@ -1503,13 +1499,20 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         )}
 
         <div className="flex gap-1.5 sm:gap-2">
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
+            rows={1}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleTextareaInput}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                (e.target as HTMLTextAreaElement).form?.requestSubmit();
+              }
+            }}
             placeholder={isReadOnly ? "This conversation is read-only" : (uploadedImage ? "Add a message..." : "Ask about your project...")}
             className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-sm sm:text-base border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-card text-[#F8FAFC] placeholder-gray-400 transition-all touch-manipulation"
+            style={{ resize: 'none', overflow: 'hidden' }}
             disabled={loading || isReadOnly}
             aria-label="Message input"
           />
@@ -1622,6 +1625,26 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           <span className="text-sm text-gray-300">Analyzing schedule impacts...</span>
         </div>
       )}
+
+      <ConfirmDialog
+        open={showSubmitConfirm}
+        onConfirm={doFinalizeReport}
+        onCancel={() => setShowSubmitConfirm(false)}
+        title="Submit Daily Report"
+        description="Submit this daily report? Once submitted, the report cannot be edited. A PDF will be generated and saved to the project."
+        confirmLabel="Submit"
+        cancelLabel="Cancel"
+      />
+
+      <ConfirmDialog
+        open={showNewConversationConfirm}
+        onConfirm={() => { setShowNewConversationConfirm(false); handleNewConversation(); }}
+        onCancel={() => setShowNewConversationConfirm(false)}
+        title="New Conversation"
+        description="Start a new conversation? Current conversation will be saved in history."
+        confirmLabel="Start New"
+        cancelLabel="Cancel"
+      />
     </div>
   );
 }

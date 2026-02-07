@@ -189,7 +189,7 @@ export function RegulatoryDocumentsModal({
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-100 rounded-lg">
-              <Book className="w-6 h-6 text-[#F97316]" />
+              <Book className="w-6 h-6 text-orange-500" />
             </div>
             <div>
               <DialogTitle className="text-2xl">Regulatory Documents</DialogTitle>
@@ -278,7 +278,7 @@ export function RegulatoryDocumentsModal({
                 <Button
                   onClick={fetchAvailableCodes}
                   disabled={loadingAvailable}
-                  className="w-full bg-[#F97316] hover:bg-[#ea580c]"
+                  className="w-full bg-orange-500 hover:bg-orange-600"
                 >
                   {loadingAvailable ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -317,7 +317,7 @@ export function RegulatoryDocumentsModal({
                           isAlreadyAdded
                             ? 'bg-gray-50 border-gray-300 cursor-not-allowed'
                             : isSelected
-                            ? 'bg-orange-50 border-[#F97316]'
+                            ? 'bg-orange-50 border-orange-500'
                             : 'hover:bg-gray-50'
                         }`}
                         onClick={() =>
@@ -343,7 +343,7 @@ export function RegulatoryDocumentsModal({
                           {isAlreadyAdded ? (
                             <Badge variant="outline">Already Added</Badge>
                           ) : isSelected ? (
-                            <CheckCircle2 className="w-6 h-6 text-[#F97316]" />
+                            <CheckCircle2 className="w-6 h-6 text-orange-500" />
                           ) : (
                             <div className="w-6 h-6 border-2 border-gray-300 rounded-full" />
                           )}
@@ -371,7 +371,7 @@ export function RegulatoryDocumentsModal({
             <Button
               onClick={handleAddCodes}
               disabled={selectedCodes.length === 0 || loading}
-              className="bg-[#F97316] hover:bg-[#ea580c]"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               {loading ? (
                 <>

@@ -34,6 +34,7 @@ import { RequirementAutoImport } from './RequirementAutoImport';
 import ApprovalWorkflow from './ApprovalWorkflow';
 import SpecSectionLinker from './SpecSectionLinker';
 import { FileSpreadsheet, ClipboardCheck, Library } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface LineItem {
   id: string;
@@ -692,12 +693,13 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
 function AddLineItemModal({
   onClose,
   onSubmit,
-  projectSlug
+  projectSlug,
 }: {
   onClose: () => void;
   onSubmit: (data: any) => void;
   projectSlug: string;
 }) {
+  const trapRef = useFocusTrap({ isActive: true, onEscape: onClose });
   const [formData, setFormData] = useState({
     productName: '',
     manufacturer: '',
@@ -718,10 +720,10 @@ function AddLineItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border-2 border-slate-600 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="add-line-item-title" className="bg-slate-900 border-2 border-slate-600 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b-2 border-slate-600">
-          <h3 className="text-lg font-semibold text-white">Add Line Item</h3>
+          <h3 id="add-line-item-title" className="text-lg font-semibold text-white">Add Line Item</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1">
             <X className="w-5 h-5" />
           </button>

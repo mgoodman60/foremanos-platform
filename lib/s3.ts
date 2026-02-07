@@ -2,6 +2,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createS3Client, getBucketConfig } from "./aws-config";
@@ -9,7 +10,14 @@ import { createS3Client, getBucketConfig } from "./aws-config";
 // Re-export for use by other modules
 export { createS3Client, getBucketConfig };
 
-const s3Client = createS3Client();
+let _s3Client: S3Client | null = null;
+
+function getS3Client(): S3Client {
+  if (!_s3Client) {
+    _s3Client = createS3Client();
+  }
+  return _s3Client;
+}
 const AWS_REGION = process.env.AWS_REGION || "us-east-1";
 
 /**
@@ -60,7 +68,7 @@ export async function uploadFile(
 
       // Race between upload and timeout
       await Promise.race([
-        s3Client.send(command),
+        getS3Client().send(command),
         timeoutPromise,
       ]);
 
@@ -106,7 +114,7 @@ export async function getFileUrl(
       Bucket: bucketName,
       Key: cloud_storage_path,
     });
-    return await getSignedUrl(s3Client, command, { expiresIn });
+    return await getSignedUrl(getS3Client(), command, { expiresIn });
   }
 }
 
@@ -139,7 +147,7 @@ export async function generatePresignedUploadUrl(
     ContentType: contentType,
   });
 
-  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn });
+  const uploadUrl = await getSignedUrl(getS3Client(), command, { expiresIn });
 
   return { uploadUrl, cloud_storage_path };
 }
@@ -156,7 +164,7 @@ export async function deleteFile(cloud_storage_path: string): Promise<void> {
     Key: cloud_storage_path,
   });
 
-  await s3Client.send(command);
+  await getS3Client().send(command);
 }
 
 /**
@@ -172,7 +180,7 @@ export async function downloadFile(cloud_storage_path: string): Promise<Buffer> 
     Key: cloud_storage_path,
   });
 
-  const response = await s3Client.send(command);
+  const response = await getS3Client().send(command);
   
   if (!response.Body) {
     throw new Error('Empty response body from S3');

@@ -179,7 +179,7 @@ export function MobilePhotoCapture({
             <div className="flex flex-col gap-4 py-8">
               <Button
                 onClick={startCamera}
-                className="bg-[#F97316] hover:bg-[#ea580c] text-white h-16 text-lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white h-16 text-lg"
               >
                 <Camera className="w-6 h-6 mr-3" />
                 Take Photo with Camera
@@ -229,7 +229,7 @@ export function MobilePhotoCapture({
                 <Button
                   onClick={capturePhoto}
                   size="lg"
-                  className="bg-[#F97316] hover:bg-[#ea580c] text-white rounded-full w-16 h-16"
+                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-full w-16 h-16"
                 >
                   <Camera className="w-6 h-6" />
                 </Button>
@@ -270,7 +270,7 @@ export function MobilePhotoCapture({
                 <Button
                   onClick={uploadPhoto}
                   disabled={uploading}
-                  className="flex-1 bg-[#F97316] hover:bg-[#ea580c] text-white"
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   {uploading ? 'Uploading...' : 'Upload Photo'}
                 </Button>

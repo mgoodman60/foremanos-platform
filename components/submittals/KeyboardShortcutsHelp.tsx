@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Keyboard, X } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface ShortcutAction {
   key: string;
@@ -15,6 +16,7 @@ interface KeyboardShortcutsHelpProps {
 
 export default function KeyboardShortcutsHelp({ shortcuts }: KeyboardShortcutsHelpProps) {
   const [showHelp, setShowHelp] = useState(false);
+  const helpTrapRef = useFocusTrap({ isActive: showHelp, onEscape: () => setShowHelp(false) });
 
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
     // Ignore if typing in an input
@@ -75,10 +77,10 @@ export default function KeyboardShortcutsHelp({ shortcuts }: KeyboardShortcutsHe
 
       {/* Help Modal */}
       {showHelp && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-md overflow-hidden">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
+          <div ref={helpTrapRef} role="dialog" aria-modal="true" aria-labelledby="keyboard-shortcuts-title" className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-md overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h3 id="keyboard-shortcuts-title" className="text-lg font-semibold text-white flex items-center gap-2">
                 <Keyboard className="w-5 h-5 text-blue-400" />
                 Keyboard Shortcuts
               </h3>

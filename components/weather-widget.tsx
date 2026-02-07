@@ -160,7 +160,7 @@ export default function WeatherWidget({
     return (
       <div className="bg-dark-card border border-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
         </div>
       </div>
     );
@@ -183,7 +183,7 @@ export default function WeatherWidget({
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sun className="w-5 h-5 text-[#F97316]" />
+          <Sun className="w-5 h-5 text-orange-500" />
           <h3 className="text-lg font-semibold text-[#F8FAFC]">Weather Intelligence</h3>
         </div>
         <div className="flex items-center gap-2">
@@ -237,8 +237,8 @@ export default function WeatherWidget({
       <div className="px-6 py-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#F97316]/10 rounded-xl">
-              <WeatherIcon className="w-10 h-10 text-[#F97316]" />
+            <div className="p-3 bg-orange-500/10 rounded-xl">
+              <WeatherIcon className="w-10 h-10 text-orange-500" />
             </div>
             <div>
               <div className="text-4xl font-bold text-[#F8FAFC]">
@@ -319,7 +319,7 @@ export default function WeatherWidget({
                   <p className="text-xs text-gray-400 mb-2">
                     {getDayName(snapshot.snapshotTime)}
                   </p>
-                  <DayIcon className="w-6 h-6 mx-auto mb-2 text-[#F97316]" />
+                  <DayIcon className="w-6 h-6 mx-auto mb-2 text-orange-500" />
                   <p className="text-sm font-semibold text-[#F8FAFC]">
                     {Math.round(snapshot.temperature)}°
                   </p>

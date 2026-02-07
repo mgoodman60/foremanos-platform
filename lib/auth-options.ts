@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Find user by username or email (case-insensitive)
-        const user = await prisma.user.findFirst({
+        let user = await prisma.user.findFirst({
           where: {
             OR: [
               { username: { equals: identifier, mode: 'insensitive' } },
@@ -35,6 +35,20 @@ export const authOptions: NextAuthOptions = {
             Project_User_assignedProjectIdToProject: true,
           },
         });
+
+        // Fallback: try namespaced PIN lookup (user types "Job123", stored as "{ownerId}_Job123")
+        if (!user) {
+          const namespacedUsers = await prisma.user.findMany({
+            where: { username: { endsWith: `_${identifier}` } },
+            include: {
+              Project_User_assignedProjectIdToProject: true,
+            },
+          });
+          if (namespacedUsers.length === 1) {
+            user = namespacedUsers[0];
+          }
+          // If 0 or 2+ matches, user stays null (handled below)
+        }
 
         if (!user) {
           return null;

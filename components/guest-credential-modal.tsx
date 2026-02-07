@@ -178,7 +178,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
         role="dialog"
         aria-modal="true"
         aria-labelledby="guest-credential-modal-title"
-        className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-dark-card border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="sticky top-0 bg-[#003B71] text-white p-6 rounded-t-lg">
@@ -204,27 +204,27 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
         {loading ? (
           <div className="p-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#003B71] mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading guest credentials...</p>
+            <p className="mt-4 text-gray-400">Loading guest credentials...</p>
           </div>
         ) : (
           <div className="p-6 space-y-6">
             {/* Current Credentials */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+              <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
                 <Key className="w-5 h-5 text-[#003B71]" />
                 Current Guest Credentials
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Job Pin:</span>
+                  <span className="text-gray-400">Job Pin:</span>
                   <div className="flex items-center gap-2">
-                    <code className="bg-white px-3 py-1 rounded font-mono text-[#003B71] font-semibold">
+                    <code className="bg-gray-800 px-3 py-1 rounded font-mono text-[#003B71] font-semibold">
                       {guestData?.guestUsername}
                     </code>
                     <button
                       type="button"
                       onClick={() => copyToClipboard(guestData?.guestUsername || '', 'Job Pin')}
-                      className="p-1.5 hover:bg-blue-100 rounded transition-colors"
+                      className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
                       title="Copy Job Pin"
                     >
                       <Copy className="w-4 h-4 text-[#003B71]" />
@@ -232,9 +232,9 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Password:</span>
+                  <span className="text-gray-400">Password:</span>
                   <div className="flex items-center gap-2">
-                    <code className="bg-white px-3 py-1 rounded font-mono text-gray-700">
+                    <code className="bg-gray-800 px-3 py-1 rounded font-mono text-gray-300">
                       {guestData?.hasPassword ? (showPassword ? (guestData?.guestPassword || '') : '') : 'None (password-less)'}
                     </code>
                     {guestData?.hasPassword && (
@@ -242,7 +242,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="p-1.5 hover:bg-blue-100 rounded transition-colors"
+                          className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
                           title={showPassword ? 'Hide password' : 'Show password'}
                         >
                           <Key className="w-4 h-4 text-[#003B71]" />
@@ -251,7 +251,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                           <button
                             type="button"
                             onClick={() => copyToClipboard(guestData?.guestPassword || '', 'Password')}
-                            className="p-1.5 hover:bg-blue-100 rounded transition-colors"
+                            className="p-1.5 hover:bg-blue-500/20 rounded transition-colors"
                             title="Copy password"
                           >
                             <Copy className="w-4 h-4 text-[#003B71]" />
@@ -262,7 +262,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                   </div>
                 </div>
                 {guestData?.lastLogin && (
-                  <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t">
+                  <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t">
                     <span>Last Login:</span>
                     <span>{new Date(guestData.lastLogin).toLocaleString()}</span>
                   </div>
@@ -272,17 +272,17 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
 
             {/* Update Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-              <h3 className="font-semibold text-gray-900">Update Credentials</h3>
+              <h3 className="font-semibold text-white">Update Credentials</h3>
 
               <div>
-                <label htmlFor="guestUsername" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="guestUsername" className="block text-sm font-medium text-gray-300 mb-1">
                   Job Pin
                 </label>
                 <input
                   id="guestUsername"
                   type="text"
                   {...register('guestUsername')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
                   placeholder="Enter Job Pin"
                   aria-invalid={!!errors.guestUsername}
                   aria-describedby={errors.guestUsername ? 'guestUsername-error' : undefined}
@@ -291,7 +291,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
               </div>
 
               <div>
-                <label htmlFor="guestPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="guestPassword" className="block text-sm font-medium text-gray-300 mb-1">
                   Guest Password (Optional)
                 </label>
                 <div className="flex gap-2">
@@ -299,7 +299,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                     id="guestPassword"
                     type="text"
                     {...register('guestPassword')}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
+                    className="flex-1 px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
                     placeholder="Leave blank for password-less access"
                     aria-invalid={!!errors.guestPassword}
                     aria-describedby={errors.guestPassword ? 'guestPassword-error' : 'guestPassword-help'}
@@ -316,7 +316,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                 </div>
                 <FormError error={errors.guestPassword} fieldName="guestPassword" />
                 {!errors.guestPassword && (
-                  <p id="guestPassword-help" className="text-xs text-gray-500 mt-1">
+                  <p id="guestPassword-help" className="text-xs text-gray-400 mt-1">
                     Leave blank to allow login with Job Pin only
                   </p>
                 )}
@@ -336,17 +336,17 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
             {/* Activity Log */}
             {guestData?.activityLogs && guestData.activityLogs.length > 0 && (
               <div className="border-t pt-6">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[#003B71]" />
                   Recent Guest Login Activity
                 </h3>
                 <div className="space-y-2">
                   {guestData.activityLogs.map((log) => (
                     <div key={log.id} className="flex items-center justify-between text-sm bg-gray-50 p-3 rounded-lg">
-                      <span className="text-gray-600">
+                      <span className="text-gray-400">
                         {new Date(log.timestamp).toLocaleString()}
                       </span>
-                      <span className="text-gray-500 text-xs font-mono">
+                      <span className="text-gray-400 text-xs font-mono">
                         {log.ipAddress || 'N/A'}
                       </span>
                     </div>

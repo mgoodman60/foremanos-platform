@@ -48,13 +48,15 @@ export default function ForgeViewer({ urn, onViewerReady, onError, className = '
       // Load CSS
       const css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = 'https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css';
+      // Pinned version - do not use wildcard (7.*) for security. Update manually after testing.
+      css.href = 'https://developer.api.autodesk.com/modelderivative/v2/viewers/7.99.1/style.min.css';
       document.head.appendChild(css);
 
       // Load JS
       return new Promise<boolean>((resolve) => {
         const script = document.createElement('script');
-        script.src = 'https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js';
+        // Pinned version - do not use wildcard (7.*) for security. Update manually after testing.
+        script.src = 'https://developer.api.autodesk.com/modelderivative/v2/viewers/7.99.1/viewer3D.min.js';
         script.onload = () => resolve(true);
         script.onerror = () => resolve(false);
         document.head.appendChild(script);

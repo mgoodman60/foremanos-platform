@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock S3Client constructor
-const mockS3ClientInstance = {
-  config: {},
-  send: vi.fn(),
-};
-
-const mockS3Client = vi.fn(() => mockS3ClientInstance);
+// Mock S3Client constructor - must use vi.hoisted() since vi.mock is hoisted above variable declarations
+const mockS3Client = vi.hoisted(() => {
+  class S3Client {
+    config: Record<string, unknown>;
+    send: ReturnType<typeof vi.fn>;
+    middlewareStack: Record<string, unknown>;
+    constructor() {
+      this.config = { region: 'us-east-1', serviceId: 'S3' };
+      this.send = vi.fn();
+      this.middlewareStack = {};
+    }
+  }
+  return S3Client;
+});
 
 vi.mock('@aws-sdk/client-s3', () => ({
   S3Client: mockS3Client,

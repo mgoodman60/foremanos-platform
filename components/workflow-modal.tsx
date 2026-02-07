@@ -350,7 +350,7 @@ export function WorkflowModal({
             type={step.stepType}
             value={value}
             onChange={(e) => handleResponseChange(step.id, e.target.value)}
-            className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+            className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
             placeholder={step.helpText || `Enter ${step.question.toLowerCase()}`}
           />
         );
@@ -361,7 +361,7 @@ export function WorkflowModal({
             value={value}
             onChange={(e) => handleResponseChange(step.id, e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#F97316] focus:outline-none resize-none"
+            className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:outline-none resize-none"
             placeholder={step.helpText || `Enter ${step.question.toLowerCase()}`}
           />
         );
@@ -371,7 +371,7 @@ export function WorkflowModal({
           <select
             value={value}
             onChange={(e) => handleResponseChange(step.id, e.target.value)}
-            className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+            className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
           >
             <option value="">Select an option</option>
             {step.options?.map((option: string) => (
@@ -397,7 +397,7 @@ export function WorkflowModal({
                       : currentValues.filter((v) => v !== option);
                     handleResponseChange(step.id, newValues);
                   }}
-                  className="w-4 h-4 text-[#F97316] bg-dark-surface border-gray-600 rounded focus:ring-[#F97316]"
+                  className="w-4 h-4 text-orange-500 bg-dark-surface border-gray-600 rounded focus:ring-orange-500"
                 />
                 {option}
               </label>
@@ -443,7 +443,7 @@ export function WorkflowModal({
               value={value}
               onChange={(e) => handleResponseChange(step.id, e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#F97316] focus:outline-none resize-none"
+              className="w-full px-3 py-2 bg-dark-surface border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:outline-none resize-none"
               placeholder="Note: Photos can be attached to this conversation and will be included in the daily report"
             />
           </div>
@@ -468,7 +468,7 @@ export function WorkflowModal({
         {/* Header */}
         <div className="bg-dark-surface px-6 py-4 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Target className="w-6 h-6 text-[#F97316]" />
+            <Target className="w-6 h-6 text-orange-500" />
             <div>
               <h2 id="workflow-modal-title" className="text-xl font-bold text-white">
                 {selectedWorkflow ? selectedWorkflow.name : 'Daily Report Workflows'}
@@ -493,7 +493,7 @@ export function WorkflowModal({
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-[#F97316] animate-spin" />
+              <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
             </div>
           ) : !selectedWorkflow ? (
             /* Workflow Selection */
@@ -509,14 +509,14 @@ export function WorkflowModal({
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-white group-hover:text-[#F97316] transition-colors">
+                      <h3 className="text-lg font-semibold text-white group-hover:text-orange-500 transition-colors">
                         {workflow.name}
                       </h3>
                       <p className="text-sm text-gray-400 mt-1">
                         {workflow.description}
                       </p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-[#F97316] transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" />
                   </div>
                 </button>
               ))}
@@ -597,7 +597,7 @@ export function WorkflowModal({
               <div className="mt-6">
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#F97316] transition-all duration-300"
+                    className="h-full bg-orange-500 transition-all duration-300"
                     style={{ width: `${getCompletionPercentage()}%` }}
                   />
                 </div>
@@ -621,7 +621,7 @@ export function WorkflowModal({
             <button
               onClick={handleSave}
               disabled={saving || currentSteps.length === 0}
-              className="px-6 py-2 bg-[#F97316] hover:bg-[#ea580c] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {saving ? (
                 <>

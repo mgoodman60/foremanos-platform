@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
 import bcrypt from 'bcryptjs';
+import { namespacePIN, stripPINPrefix } from '@/lib/guest-pin-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,7 +56,7 @@ export async function GET(
     }) : [];
 
     return NextResponse.json({
-      guestUsername: project.guestUsername,
+      guestUsername: stripPINPrefix(project.guestUsername),
       guestPassword: project.guestPassword,
       hasPassword: !!project.guestPassword,
       lastLogin: guestUser?.lastLoginAt,
@@ -106,9 +107,14 @@ export async function PATCH(
       newPassword = Math.random().toString(36).slice(-8);
     }
 
+    // Namespace the new guest PIN if provided
+    const namespacedNewPin = guestUsername
+      ? namespacePIN(session.user.id, guestUsername)
+      : undefined;
+
     // Update project guest credentials
     const updateData: any = {};
-    if (guestUsername) updateData.guestUsername = guestUsername;
+    if (namespacedNewPin) updateData.guestUsername = namespacedNewPin;
     if (newPassword !== undefined) updateData.guestPassword = newPassword;
 
     const updatedProject = await prisma.project.update({
@@ -117,7 +123,7 @@ export async function PATCH(
     });
 
     // Update guest user if username changed
-    if (guestUsername && guestUsername !== project.guestUsername) {
+    if (namespacedNewPin && namespacedNewPin !== project.guestUsername) {
       // Find old guest user
       const oldGuestUser = await prisma.user.findUnique({
         where: { username: project.guestUsername },
@@ -127,7 +133,7 @@ export async function PATCH(
         // Update username
         await prisma.user.update({
           where: { id: oldGuestUser.id },
-          data: { username: guestUsername },
+          data: { username: namespacedNewPin },
         });
       }
     }
@@ -161,7 +167,7 @@ export async function PATCH(
 
     return NextResponse.json({
       success: true,
-      guestUsername: updatedProject.guestUsername,
+      guestUsername: stripPINPrefix(updatedProject.guestUsername),
       guestPassword: newPassword,
       generatedPassword: generatePassword ? newPassword : undefined,
     });

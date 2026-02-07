@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Sparkles, Image as ImageIcon, Loader2, Download, RefreshCw, Settings2, Palette, TreePine, Building2, Car, Sun, Moon, CloudRain, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface AIRenderPanelProps {
   modelId: string;
@@ -82,6 +83,7 @@ export default function AIRenderPanel({
   const [generating, setGenerating] = useState(false);
   const [renders, setRenders] = useState<GeneratedRender[]>([]);
   const [selectedRender, setSelectedRender] = useState<GeneratedRender | null>(null);
+  const renderPreviewTrapRef = useFocusTrap({ isActive: !!selectedRender, onEscape: () => setSelectedRender(null) });
   const [showSettings, setShowSettings] = useState(true);
   const [customPrompt, setCustomPrompt] = useState('');
 
@@ -479,11 +481,11 @@ export default function AIRenderPanel({
       {/* Selected Render Preview Modal */}
       {selectedRender && (
         <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedRender(null)}
         >
           <div
-            className="relative max-w-4xl max-h-[90vh] bg-gray-900 rounded-lg overflow-hidden"
+            ref={renderPreviewTrapRef} role="dialog" aria-modal="true" aria-label="Render preview" className="relative max-w-4xl max-h-[90vh] bg-gray-900 rounded-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative aspect-video">

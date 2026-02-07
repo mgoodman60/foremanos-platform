@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Network, ArrowRight, FileText, Layers } from 'lucide-react';
+import { Search, Network, ArrowRight, FileText, Layers, Loader2 } from 'lucide-react';
 
 interface CrossReference {
   sourceSheet: string;
@@ -125,7 +125,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <Loader2 className="animate-spin text-orange-500 h-8 w-8" />
           </div>
         </CardContent>
       </Card>

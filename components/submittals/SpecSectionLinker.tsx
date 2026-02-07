@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CSI_DIVISIONS, parseSpecSection } from '@/lib/spec-section-service';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface SpecReference {
   id: string;
@@ -387,12 +388,13 @@ function SpecSectionPickerModal({
   searchTerm: string;
   setSearchTerm: (term: string) => void;
 }) {
+  const trapRef = useFocusTrap({ isActive: true, onEscape: onClose });
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-slate-900 border-2 border-purple-600 rounded-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="spec-picker-title" className="bg-slate-900 border-2 border-purple-600 rounded-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h3 className="text-lg font-semibold text-white">Select Specification Section</h3>
+          <h3 id="spec-picker-title" className="text-lg font-semibold text-white">Select Specification Section</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>

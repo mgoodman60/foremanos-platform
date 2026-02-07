@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, subDays, subWeeks } from 'date-fns';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface ReportTemplate {
   id: string;
@@ -187,6 +188,7 @@ export default function ReportTemplatesLibrary({ projectSlug, projectName }: Rep
   const [selectedTemplate, setSelectedTemplate] = useState<ReportTemplate | null>(null);
   const [generating, setGenerating] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const previewTrapRef = useFocusTrap({ isActive: previewMode, onEscape: () => setPreviewMode(false) });
   const [config, setConfig] = useState<ReportConfig>({
     templateId: '',
     dateRange: {
@@ -512,10 +514,10 @@ export default function ReportTemplatesLibrary({ projectSlug, projectName }: Rep
 
       {/* Preview Modal */}
       {previewMode && generatedReport && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div ref={previewTrapRef} role="dialog" aria-modal="true" aria-labelledby="report-preview-title" className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-4 border-b flex items-center justify-between bg-gray-100">
-              <h3 className="font-semibold text-gray-900">{selectedTemplate?.name}</h3>
+              <h3 id="report-preview-title" className="font-semibold text-gray-900">{selectedTemplate?.name}</h3>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => window.print()}

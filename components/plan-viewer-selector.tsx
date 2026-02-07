@@ -9,7 +9,8 @@ import {
   X,
   FileCheck,
   AlertCircle,
-  Layers
+  Layers,
+  Loader2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -163,7 +164,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
         {loading ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <div className="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+              <Loader2 className="animate-spin text-orange-500 h-8 w-8 mb-2 inline-block" />
               <p className="text-sm text-gray-400">Loading plan documents...</p>
             </div>
           </div>

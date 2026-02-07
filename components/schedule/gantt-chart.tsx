@@ -16,6 +16,7 @@ import { TradeFilter, TradeOption } from './trade-filter';
 import { DependencyLines, DependencyTypeSelector } from './dependency-lines';
 import { InlineTaskEditor } from './inline-task-editor';
 import { WhatIfScenarios, TaskChange, WhatIfScenario, useWhatIfScenarios } from './what-if-scenarios';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 // Task categorization for color coding
 type TaskCategory = 'critical' | 'whats-next' | 'at-risk' | 'behind' | 'on-track' | 'completed';
@@ -163,6 +164,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [taskPositions, setTaskPositions] = useState<Map<string, { left: number; width: number; top: number; height: number }>>(new Map());
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const taskEditorTrapRef = useFocusTrap({ isActive: !!editingTaskId, onEscape: () => setEditingTaskId(null) });
   const [progressEditingTaskId, setProgressEditingTaskId] = useState<string | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -1455,8 +1457,8 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
 
                     {/* Inline Task Editor (shown on double-click) */}
                     {editingTaskId === task.taskId && (
-                      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setEditingTaskId(null)}>
-                        <div onClick={(e) => e.stopPropagation()}>
+                      <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center" onClick={() => setEditingTaskId(null)}>
+                        <div ref={taskEditorTrapRef} role="dialog" aria-modal="true" aria-label="Edit Task" onClick={(e) => e.stopPropagation()}>
                           <InlineTaskEditor
                             task={task}
                             onSave={handleTaskSave}

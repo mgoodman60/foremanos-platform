@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, 
   DollarSign, Calendar, Users, FileText, Activity, Briefcase,
-  ArrowUp, ArrowDown, Minus, RefreshCw
+  ArrowUp, ArrowDown, Minus, RefreshCw, Loader2
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { toast } from 'sonner';
@@ -108,7 +108,7 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader2 className="animate-spin text-orange-500 h-12 w-12" />
       </div>
     );
   }

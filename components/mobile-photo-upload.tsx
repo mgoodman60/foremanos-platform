@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Camera, X, Upload, CheckCircle, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import Image from 'next/image';
 
 interface MobilePhotoUploadProps {

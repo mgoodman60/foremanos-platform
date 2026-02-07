@@ -22,6 +22,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface LearningStats {
   totalFeedback: number;
@@ -98,6 +99,7 @@ export default function TakeoffLearningPanel({
 }: TakeoffLearningPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [loading, setLoading] = useState(true);
+  const trapRef = useFocusTrap({ isActive: true, onEscape: onClose });
   const [stats, setStats] = useState<LearningStats | null>(null);
   const [corrections, setCorrections] = useState<PendingCorrection[]>([]);
   const [suggestions, setSuggestions] = useState<CorrectionSuggestion[]>([]);
@@ -335,7 +337,7 @@ export default function TakeoffLearningPanel({
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1a1d21] rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-700">
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby="learning-panel-title" className="bg-[#1a1d21] rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-700">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -343,7 +345,7 @@ export default function TakeoffLearningPanel({
               <Brain className="w-6 h-6 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-white">Learning System</h2>
+              <h2 id="learning-panel-title" className="text-xl font-semibold text-white">Learning System</h2>
               <p className="text-sm text-gray-400">{takeoffName}</p>
             </div>
           </div>
