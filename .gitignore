@@ -17,6 +17,7 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.vercel
 
 # Debug logs
 npm-debug.log*
@@ -34,10 +35,12 @@ logs/
 .claude/*
 !.claude/agents/
 !.claude/skills/
+!.claude/plans/
 
 # OS
 .DS_Store
 Thumbs.db
+nul
 
 # Prisma
 prisma/migrations/*_migration_lock.toml
