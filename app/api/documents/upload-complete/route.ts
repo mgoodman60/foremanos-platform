@@ -40,6 +40,15 @@ export async function POST(request: Request) {
     const body: CompleteUploadRequest = await request.json();
     const { uploadId, fileName, fileSize, totalChunks, projectId, category = 'other' } = body;
 
+    // Check S3 configuration before attempting upload
+    const { bucketName } = getBucketConfig();
+    if (!bucketName) {
+      return NextResponse.json(
+        { error: 'Document storage is not configured. Please contact your administrator to set up file storage.' },
+        { status: 503 }
+      );
+    }
+
     // Verify project access
     const project = await prisma.project.findUnique({
       where: { id: projectId },

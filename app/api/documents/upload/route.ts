@@ -13,6 +13,7 @@ import { withDatabaseRetry } from '@/lib/retry-util';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
+import { getBucketConfig } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
 
 export const dynamic = 'force-dynamic';
@@ -64,6 +65,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'File and project ID are required' },
         { status: 400 }
+      );
+    }
+
+    // Check S3 configuration before attempting upload
+    const { bucketName } = getBucketConfig();
+    if (!bucketName) {
+      return NextResponse.json(
+        { error: 'Document storage is not configured. Please contact your administrator to set up file storage.' },
+        { status: 503 }
       );
     }
 
