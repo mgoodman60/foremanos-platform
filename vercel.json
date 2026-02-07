@@ -18,6 +18,15 @@
     },
     "app/api/admin/finalize-reports/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/documents/upload/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/documents/retry-failed/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/projects/[slug]/documents/[id]/reprocess/route.ts": {
+      "maxDuration": 300
     }
   },
   "env": {
