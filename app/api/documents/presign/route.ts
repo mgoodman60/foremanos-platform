@@ -27,7 +27,9 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'image/tiff',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain',
+  'application/octet-stream',
 ];
 
 const MAX_FILE_SIZE = 209715200; // 200MB

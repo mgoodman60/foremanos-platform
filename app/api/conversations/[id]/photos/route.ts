@@ -142,67 +142,99 @@ export async function POST(
       );
     }
 
-    // Parse form data
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const userCaption = formData.get('caption') as string | null;
-    const location = formData.get('location') as string | null;
-    const userHint = formData.get('hint') as string | null;
+    // Determine if this is a presigned URL confirmation (JSON) or legacy FormData upload
+    const contentTypeHeader = request.headers.get('content-type') || '';
+    const isPresignedConfirm = contentTypeHeader.includes('application/json');
 
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
+    let cloudStoragePath: string;
+    let fileName: string;
+    let fileSize: number;
+    let fileContentType: string;
+    let userCaption: string | null = null;
+    let location: string | null = null;
+
+    if (isPresignedConfirm) {
+      // Presigned URL flow: file already uploaded to R2, just confirm
+      const body = await request.json();
+      if (!body.cloudStoragePath || !body.fileName) {
+        return NextResponse.json(
+          { error: 'Missing cloudStoragePath or fileName' },
+          { status: 400 }
+        );
+      }
+      cloudStoragePath = body.cloudStoragePath;
+      fileName = body.fileName;
+      fileSize = body.fileSize || 0;
+      fileContentType = body.contentType || 'image/jpeg';
+      userCaption = body.caption || null;
+      location = body.location || null;
+
+      // Validate file type
+      if (!isValidImageType(fileName)) {
+        return NextResponse.json(
+          { error: 'Invalid file type. Please upload a JPG, PNG, or HEIC image.' },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Legacy FormData flow (kept for backward compatibility)
+      const formData = await request.formData();
+      const file = (formData.get('file') || formData.get('photo')) as File | null;
+      userCaption = formData.get('caption') as string | null;
+      location = formData.get('location') as string | null;
+
+      if (!file) {
+        return NextResponse.json(
+          { error: 'No file provided' },
+          { status: 400 }
+        );
+      }
+
+      // Validate file type
+      if (!isValidImageType(file.name)) {
+        return NextResponse.json(
+          { error: 'Invalid file type. Please upload a JPG, PNG, or HEIC image.' },
+          { status: 400 }
+        );
+      }
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: 'File too large. Maximum size is 10MB.' },
+          { status: 400 }
+        );
+      }
+
+      // Read file buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Generate filename with date and sequence
+      const reportDate = conversation.dailyReportDate || new Date();
+      const sequence = conversation.photoSequence + 1;
+      const extension = getFileExtension(file.name);
+      const reportDateStr = reportDate.toISOString().split('T')[0];
+      const generatedName = generatePhotoFileName(reportDateStr, sequence, extension);
+
+      // Upload to S3
+      const s3Client = createS3Client();
+      const { bucketName, folderPrefix } = getBucketConfig();
+      cloudStoragePath = `${folderPrefix}daily-reports/${conversation.projectId}/${id}/${generatedName}`;
+
+      await s3Client.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: cloudStoragePath,
+          Body: buffer,
+          ContentType: file.type,
+        })
       );
+
+      fileName = file.name;
+      fileSize = file.size;
+      fileContentType = file.type;
     }
-
-    // Validate file type
-    if (!isValidImageType(file.name)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Please upload a JPG, PNG, or HEIC image.' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 10MB.' },
-        { status: 400 }
-      );
-    }
-
-    // Read file buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Extract image dimensions
-    const dimensions = getImageDimensions(buffer);
-
-    // Extract EXIF metadata
-    const exif = extractBasicExif(buffer);
-
-    // Convert to base64 for analysis
-    // Generate filename with date and sequence
-    const reportDate = conversation.dailyReportDate || new Date();
-    const sequence = conversation.photoSequence + 1;
-    const extension = getFileExtension(file.name);
-    const reportDateStr = reportDate.toISOString().split('T')[0];
-    const fileName = generatePhotoFileName(reportDateStr, sequence, extension);
-
-    // Upload to S3
-    const s3Client = createS3Client();
-    const { bucketName, folderPrefix } = getBucketConfig();
-    const cloudStoragePath = `${folderPrefix}daily-reports/${conversation.projectId}/${id}/${fileName}`;
-
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: cloudStoragePath,
-        Body: buffer,
-        ContentType: file.type,
-      })
-    );
 
     console.log('[PHOTOS_API] Photo uploaded to S3:', cloudStoragePath);
 
@@ -210,15 +242,13 @@ export async function POST(
     const photoId = randomUUID();
     const photoMetadata = createPhotoMetadata(
       photoId,
-      file.name,
-      file.size,
-      file.type,
+      fileName,
+      fileSize,
+      fileContentType,
       {
         cloudStoragePath,
         caption: userCaption,
-        location,
-        dimensions: dimensions || undefined,
-        exif: exif || undefined,
+        location: location || undefined,
       }
     );
 
@@ -227,12 +257,13 @@ export async function POST(
     currentPhotos.push(photoMetadata);
 
     // Update conversation
+    const nextSequence = conversation.photoSequence + 1;
     await prisma.conversation.update({
       where: { id },
       data: {
         photos: currentPhotos as any,
         photoCount: currentPhotos.length,
-        photoSequence: sequence,
+        photoSequence: nextSequence,
       },
     });
 

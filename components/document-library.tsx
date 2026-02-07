@@ -121,7 +121,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     fetchProjectSlug();
   }, [projectId]);
 
-  // Handle CAD file upload to Autodesk
+  // Handle CAD file upload to Autodesk via presigned URL
   const handleCADUpload = async (file: File) => {
     if (!projectSlug) {
       toast.error('Project not found');
@@ -132,13 +132,49 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     const toastId = toast.loading(`Uploading ${file.name} to CAD viewer...`);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('projectSlug', projectSlug);
+      // Step 1: Get presigned URL
+      const presignRes = await fetch('/api/autodesk/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type || 'application/octet-stream',
+          projectSlug,
+        }),
+      });
 
+      if (!presignRes.ok) {
+        const data = await presignRes.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to prepare upload');
+      }
+
+      const { uploadUrl, cloudStoragePath } = await presignRes.json();
+
+      // Step 2: Upload file directly to R2
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      });
+
+      if (!putRes.ok) {
+        throw new Error(putRes.status === 403
+          ? 'Upload URL expired. Please try again.'
+          : `Upload to storage failed (${putRes.status})`);
+      }
+
+      // Step 3: Tell the server to process the uploaded file
       const response = await fetch('/api/autodesk/upload', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cloudStoragePath,
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type || 'application/octet-stream',
+          projectSlug,
+        }),
       });
 
       if (!response.ok) {

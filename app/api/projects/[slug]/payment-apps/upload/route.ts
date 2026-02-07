@@ -8,8 +8,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { parsePayAppDocument, matchItemsToBudget } from '@/lib/pay-app-parser';
-import { uploadFile } from '@/lib/s3';
+import { uploadFile, downloadFile } from '@/lib/s3';
 import { validateS3Config } from '@/lib/aws-config';
+import { logger } from '@/lib/logger';
 
 export const maxDuration = 60; // Allow up to 60 seconds for processing
 
@@ -47,35 +48,59 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       }
     });
 
-    // Parse form data
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    // Determine if this is a presigned URL confirmation (JSON) or legacy FormData upload
+    const contentTypeHeader = request.headers.get('content-type') || '';
+    const isPresignedConfirm = contentTypeHeader.includes('application/json');
+
+    let buffer: Buffer;
+    let fileName: string;
+    let fileType: string;
+    let cloudStoragePath: string | undefined;
+
+    if (isPresignedConfirm) {
+      // Presigned URL flow: file already in R2, download for parsing
+      const body = await request.json();
+      if (!body.cloudStoragePath || !body.fileName) {
+        return NextResponse.json({ error: 'Missing cloudStoragePath or fileName' }, { status: 400 });
+      }
+      cloudStoragePath = body.cloudStoragePath;
+      fileName = body.fileName;
+      fileType = body.contentType || 'application/octet-stream';
+
+      logger.info('PAY_APP_UPLOAD', `Downloading file from R2 for parsing: ${fileName}`, { cloudStoragePath });
+      buffer = await downloadFile(cloudStoragePath);
+    } else {
+      // Legacy FormData flow
+      const formData = await request.formData();
+      const file = formData.get('file') as File;
+
+      if (!file) {
+        return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      }
+
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg',
+                            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            'text/csv'];
+      if (!allowedTypes.some(t => file.type.includes(t) || t.includes(file.type))) {
+        return NextResponse.json({
+          error: 'Invalid file type. Supported: PDF, Images, Excel, CSV'
+        }, { status: 400 });
+      }
+
+      // Read file buffer
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      fileName = file.name;
+      fileType = file.type;
     }
 
-    // Validate file type
-    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 
-                          'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                          'text/csv'];
-    if (!allowedTypes.some(t => file.type.includes(t) || t.includes(file.type))) {
-      return NextResponse.json({ 
-        error: 'Invalid file type. Supported: PDF, Images, Excel, CSV' 
-      }, { status: 400 });
-    }
-
-    // Read file buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    console.log(`[PayAppUpload] Processing file: ${file.name}, type: ${file.type}, size: ${buffer.length}`);
+    logger.info('PAY_APP_UPLOAD', `Processing file: ${fileName}, type: ${fileType}, size: ${buffer.length}`);
 
     // Parse with AI
-    const parsed = await parsePayAppDocument(buffer, file.name, file.type);
-    
-    console.log(`[PayAppUpload] Parsed: App #${parsed.applicationNumber}, ` +
-                `${parsed.items.length} items, confidence: ${parsed.confidence}`);
+    const parsed = await parsePayAppDocument(buffer, fileName, fileType);
+
+    logger.info('PAY_APP_UPLOAD', `Parsed: App #${parsed.applicationNumber}, ${parsed.items.length} items, confidence: ${parsed.confidence}`);
 
     // Check if application number already exists
     const existing = await prisma.paymentApplication.findUnique({
@@ -95,15 +120,20 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       }, { status: 409 });
     }
 
-    // Upload supporting document to S3
+    // Upload supporting document to S3 (skip if already uploaded via presigned URL)
     let supportingDocUrl: string | undefined;
-    try {
-      const s3Key = `projects/${project.id}/pay-apps/${Date.now()}-${file.name}`;
-      await uploadFile(buffer, s3Key, false); // private file
-      supportingDocUrl = s3Key;
-    } catch (uploadError) {
-      console.error('[PayAppUpload] S3 upload failed:', uploadError);
-      // Continue without supporting doc
+    if (cloudStoragePath) {
+      // File already in R2 from presigned URL flow
+      supportingDocUrl = cloudStoragePath;
+    } else {
+      try {
+        const s3Key = `projects/${project.id}/pay-apps/${Date.now()}-${fileName}`;
+        await uploadFile(buffer, s3Key, false); // private file
+        supportingDocUrl = s3Key;
+      } catch (uploadError) {
+        logger.error('PAY_APP_UPLOAD', 'S3 upload failed', uploadError as Error);
+        // Continue without supporting doc
+      }
     }
 
     // Match items to budget if budget exists
@@ -234,7 +264,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     });
 
   } catch (error) {
-    console.error('[PayAppUpload] Error:', error);
+    logger.error('PAY_APP_UPLOAD', 'Error processing payment application', error as Error);
     return NextResponse.json({
       error: 'Failed to process payment application',
       details: error instanceof Error ? error.message : 'Unknown error'

@@ -180,22 +180,59 @@ export default function PaymentApplications() {
     }
   };
 
-  // Handle file upload for pay application parsing
+  // Handle file upload for pay application parsing via presigned URL
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     setUploadResult(null);
-    const uploadToast = toast.loading('Parsing pay application document...');
+    const uploadToast = toast.loading('Uploading pay application document...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      // Step 1: Get presigned URL for the pay app file
+      const presignRes = await fetch(`/api/projects/${slug}/payment-apps/presign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type || 'application/octet-stream',
+        }),
+      });
 
+      if (!presignRes.ok) {
+        const data = await presignRes.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to prepare upload');
+      }
+
+      const { uploadUrl, cloudStoragePath } = await presignRes.json();
+
+      // Step 2: Upload file directly to R2 via presigned URL
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      });
+
+      if (!putRes.ok) {
+        throw new Error(putRes.status === 403
+          ? 'Upload URL expired. Please try again.'
+          : `Upload to storage failed (${putRes.status})`);
+      }
+
+      toast.loading('Parsing pay application document...', { id: uploadToast });
+
+      // Step 3: Tell the server to process the uploaded file
       const res = await fetch(`/api/projects/${slug}/payment-apps/upload`, {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cloudStoragePath,
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type || 'application/octet-stream',
+        }),
       });
 
       const data = await res.json();
@@ -218,7 +255,7 @@ export default function PaymentApplications() {
       toast.success(`Pay App #${data.paymentApplication.applicationNumber} created`, {
         description: `${data.paymentApplication.itemCount} line items extracted`
       });
-      
+
       fetchPayApps();
 
     } catch (err) {

@@ -110,44 +110,92 @@ export function BulkUploadModal({
     setUploading(true);
     setProgress(0);
 
+    let uploadedCount = 0;
+    let failedCount = 0;
+
     try {
-      const formData = new FormData();
-      files.forEach((file, index) => {
-        formData.append(`file${index}`, file);
-      });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
-      const response = await fetch(
-        `/api/conversations/${conversationId}/photos-bulk`,
-        {
-          method: 'POST',
-          body: formData,
+        try {
+          // Step 1: Get presigned URL
+          const presignRes = await fetch(
+            `/api/conversations/${conversationId}/photos/presigned`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fileName: file.name,
+                contentType: file.type || 'image/jpeg',
+              }),
+            }
+          );
+
+          if (!presignRes.ok) {
+            const data = await presignRes.json().catch(() => ({}));
+            throw new Error(data.error || 'Failed to prepare upload');
+          }
+
+          const { uploadUrl, cloud_storage_path } = await presignRes.json();
+
+          // Step 2: Upload file directly to R2
+          const putRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type || 'image/jpeg' },
+          });
+
+          if (!putRes.ok) {
+            throw new Error(`Upload to storage failed (${putRes.status})`);
+          }
+
+          // Step 3: Confirm upload
+          const confirmRes = await fetch(
+            `/api/conversations/${conversationId}/photos`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                cloudStoragePath: cloud_storage_path,
+                fileName: file.name,
+                fileSize: file.size,
+                contentType: file.type || 'image/jpeg',
+              }),
+            }
+          );
+
+          if (!confirmRes.ok) {
+            const data = await confirmRes.json().catch(() => ({}));
+            throw new Error(data.error || 'Failed to confirm upload');
+          }
+
+          uploadedCount++;
+        } catch (error) {
+          console.error('Upload error for file:', file.name, error);
+          failedCount++;
         }
-      );
 
-      if (!response.ok) {
-        const errorMessage = await getErrorMessage(response, 'Upload failed');
-        throw new Error(errorMessage);
+        // Update progress
+        setProgress(Math.round(((i + 1) / files.length) * 100));
       }
 
-      const data = await response.json();
-
       setResults({
-        uploaded: data.uploaded.length,
-        failed: data.failed.length,
-        total: data.totalCount,
+        uploaded: uploadedCount,
+        failed: failedCount,
+        total: uploadedCount + failedCount,
       });
 
-      if (data.uploaded.length > 0) {
-        toast.success(`${data.uploaded.length} photos uploaded successfully`);
+      if (uploadedCount > 0) {
+        toast.success(`${uploadedCount} photos uploaded successfully`);
         onUploadComplete?.();
       }
 
-      if (data.failed.length > 0) {
-        toast.error(`${data.failed.length} photos failed to upload`);
+      if (failedCount > 0) {
+        toast.error(`${failedCount} photos failed to upload`);
       }
 
       // Clear files after successful upload
-      if (data.failed.length === 0) {
+      if (failedCount === 0) {
         setFiles([]);
       }
     } catch (error) {
@@ -155,7 +203,6 @@ export function BulkUploadModal({
       toast.error('Failed to upload photos');
     } finally {
       setUploading(false);
-      setProgress(100);
     }
   };
 

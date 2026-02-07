@@ -10,6 +10,8 @@ import { uploadFile } from '@/lib/autodesk-oss';
 import { startTranslation, isSupportedFormat, SUPPORTED_FORMATS } from '@/lib/autodesk-model-derivative';
 import { prisma } from '@/lib/db';
 import { validateS3Config } from '@/lib/aws-config';
+import { downloadFile } from '@/lib/s3';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,27 +29,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const projectSlug = formData.get('projectSlug') as string | null;
+    // Determine if this is a presigned URL confirmation (JSON) or legacy FormData upload
+    const contentTypeHeader = request.headers.get('content-type') || '';
+    const isPresignedConfirm = contentTypeHeader.includes('application/json');
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
+    let buffer: Buffer;
+    let fileName: string;
+    let fileType: string;
+    let projectSlug: string;
 
-    if (!projectSlug) {
-      return NextResponse.json({ error: 'Project slug required' }, { status: 400 });
-    }
+    if (isPresignedConfirm) {
+      // Presigned URL flow: file already in R2, download for Autodesk upload
+      const body = await request.json();
+      if (!body.cloudStoragePath || !body.fileName || !body.projectSlug) {
+        return NextResponse.json(
+          { error: 'Missing cloudStoragePath, fileName, or projectSlug' },
+          { status: 400 }
+        );
+      }
 
-    // Validate file format
-    if (!isSupportedFormat(file.name)) {
-      return NextResponse.json(
-        { 
-          error: 'Unsupported file format', 
-          supported: SUPPORTED_FORMATS 
-        },
-        { status: 400 }
-      );
+      fileName = body.fileName;
+      fileType = body.contentType || 'application/octet-stream';
+      projectSlug = body.projectSlug;
+
+      // Validate file format
+      if (!isSupportedFormat(fileName)) {
+        return NextResponse.json(
+          { error: 'Unsupported file format', supported: SUPPORTED_FORMATS },
+          { status: 400 }
+        );
+      }
+
+      logger.info('AUTODESK_UPLOAD', `Downloading file from R2 for Autodesk: ${fileName}`, {
+        cloudStoragePath: body.cloudStoragePath,
+      });
+      buffer = await downloadFile(body.cloudStoragePath);
+    } else {
+      // Legacy FormData flow
+      const formData = await request.formData();
+      const file = formData.get('file') as File | null;
+      const slug = formData.get('projectSlug') as string | null;
+
+      if (!file) {
+        return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      }
+
+      if (!slug) {
+        return NextResponse.json({ error: 'Project slug required' }, { status: 400 });
+      }
+
+      // Validate file format
+      if (!isSupportedFormat(file.name)) {
+        return NextResponse.json(
+          { error: 'Unsupported file format', supported: SUPPORTED_FORMATS },
+          { status: 400 }
+        );
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      fileName = file.name;
+      fileType = file.type || 'application/octet-stream';
+      projectSlug = slug;
     }
 
     // Get project
@@ -59,27 +102,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
     // Upload to Autodesk OSS
-    console.log('[Autodesk Upload] Uploading file:', file.name);
-    const uploadResult = await uploadFile(file.name, buffer, file.type || 'application/octet-stream');
+    logger.info('AUTODESK_UPLOAD', `Uploading file: ${fileName}`);
+    const uploadResult = await uploadFile(fileName, buffer, fileType);
 
     // Start translation job
-    console.log('[Autodesk Upload] Starting translation for:', uploadResult.objectId);
+    logger.info('AUTODESK_UPLOAD', `Starting translation for: ${uploadResult.objectId}`);
     const translation = await startTranslation(uploadResult.objectId);
 
     // Determine file type
-    const fileExt = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    const fileExt = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
     const is2DFile = ['.dwg', '.dxf', '.dwf', '.dwfx'].includes(fileExt);
-    
+
     // Save model record to database
     const model = await prisma.autodeskModel.create({
       data: {
         projectId: project.id,
-        fileName: file.name,
+        fileName: fileName,
         objectId: uploadResult.objectId,
         objectKey: uploadResult.objectKey,
         urn: translation.urn,
@@ -106,7 +145,7 @@ export async function POST(request: NextRequest) {
       message: 'File uploaded. Processing will complete automatically.',
     });
   } catch (error) {
-    console.error('[Autodesk Upload] Error:', error);
+    logger.error('AUTODESK_UPLOAD', 'Upload error', error as Error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

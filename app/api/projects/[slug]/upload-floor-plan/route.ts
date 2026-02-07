@@ -56,60 +56,78 @@ export async function POST(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Parse form data
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const isPublic = formData.get('isPublic') === 'true';
+    // Determine if this is a presigned URL confirmation (JSON) or legacy FormData upload
+    const contentTypeHeader = request.headers.get('content-type') || '';
+    const isPresignedConfirm = contentTypeHeader.includes('application/json');
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-
-    // Validate file type
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Only PNG, JPG, and PDF are allowed' },
-        { status: 400 }
-      );
-    }
-
-    // Get file buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Get image dimensions (if not PDF)
+    let cloud_storage_path: string;
     let imageWidth: number | null = null;
     let imageHeight: number | null = null;
 
-    if (file.type.startsWith('image/')) {
-      try {
-        const dimensions = sizeOf(buffer);
-        imageWidth = dimensions.width || null;
-        imageHeight = dimensions.height || null;
-      } catch (error) {
-        console.error('Error getting image dimensions:', error);
+    if (isPresignedConfirm) {
+      // Presigned URL flow: file already uploaded to R2
+      const body = await request.json();
+      if (!body.cloudStoragePath) {
+        return NextResponse.json({ error: 'Missing cloudStoragePath' }, { status: 400 });
       }
-    }
+      cloud_storage_path = body.cloudStoragePath;
+      imageWidth = body.imageWidth || null;
+      imageHeight = body.imageHeight || null;
+    } else {
+      // Legacy FormData flow
+      const formData = await request.formData();
+      const file = formData.get('file') as File;
+      const isPublic = formData.get('isPublic') === 'true';
 
-    // Generate S3 presigned URL
-    const fileName = `floor-plans/${project.id}/${Date.now()}-${file.name}`;
-    const { uploadUrl, cloud_storage_path } = await generatePresignedUploadUrl(
-      fileName,
-      file.type,
-      isPublic
-    );
-
-    // Upload to S3
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: buffer,
-      headers: {
-        'Content-Type': file.type
+      if (!file) {
+        return NextResponse.json({ error: 'No file provided' }, { status: 400 });
       }
-    });
 
-    if (!uploadResponse.ok) {
-      throw new Error('Failed to upload to S3');
+      // Validate file type
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        return NextResponse.json(
+          { error: 'Invalid file type. Only PNG, JPG, and PDF are allowed' },
+          { status: 400 }
+        );
+      }
+
+      // Get file buffer
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      // Get image dimensions (if not PDF)
+      if (file.type.startsWith('image/')) {
+        try {
+          const dimensions = sizeOf(buffer);
+          imageWidth = dimensions.width || null;
+          imageHeight = dimensions.height || null;
+        } catch (error) {
+          console.error('Error getting image dimensions:', error);
+        }
+      }
+
+      // Generate S3 presigned URL
+      const fileName = `floor-plans/${project.id}/${Date.now()}-${file.name}`;
+      const result = await generatePresignedUploadUrl(
+        fileName,
+        file.type,
+        isPublic
+      );
+
+      // Upload to S3
+      const uploadResponse = await fetch(result.uploadUrl, {
+        method: 'PUT',
+        body: buffer,
+        headers: {
+          'Content-Type': file.type
+        }
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload to S3');
+      }
+
+      cloud_storage_path = result.cloud_storage_path;
     }
 
     return NextResponse.json({

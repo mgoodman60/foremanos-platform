@@ -17,6 +17,7 @@ interface UploadFile {
   status: 'pending' | 'uploading' | 'success' | 'error';
   progress: number;
   error?: string;
+  cloudStoragePath?: string;
 }
 
 const ALLOWED_TYPES = [
@@ -62,31 +63,89 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
   const uploadFiles = async () => {
     setUploading(true);
 
+    // First, resolve projectSlug to projectId
+    let projectId: string;
+    try {
+      const projectRes = await fetch(`/api/projects/${projectSlug}`);
+      if (!projectRes.ok) throw new Error('Failed to resolve project');
+      const projectData = await projectRes.json();
+      projectId = projectData.id || projectData.project?.id;
+      if (!projectId) throw new Error('Project ID not found');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resolve project');
+      setUploading(false);
+      return;
+    }
+
     for (let i = 0; i < files.length; i++) {
       const uploadFile = files[i];
 
       // Update status to uploading
       setFiles(prev => prev.map((f, idx) =>
-        idx === i ? { ...f, status: 'uploading' as const } : f
+        idx === i ? { ...f, status: 'uploading' as const, progress: 5 } : f
       ));
 
       try {
-        const formData = new FormData();
-        formData.append('file', uploadFile.file);
-
-        const res = await fetch(`/api/documents/upload?projectSlug=${projectSlug}`, {
+        // Step 1: Get presigned URL
+        const presignRes = await fetch('/api/documents/presign', {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: uploadFile.file.name,
+            fileSize: uploadFile.file.size,
+            contentType: uploadFile.file.type || 'application/octet-stream',
+            projectId,
+          }),
         });
 
-        if (res.ok) {
-          setFiles(prev => prev.map((f, idx) =>
-            idx === i ? { ...f, status: 'success' as const, progress: 100 } : f
-          ));
-        } else {
-          const data = await res.json();
-          throw new Error(data.error || 'Upload failed');
+        if (!presignRes.ok) {
+          const data = await presignRes.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to prepare upload');
         }
+
+        const { uploadUrl, cloudStoragePath } = await presignRes.json();
+
+        setFiles(prev => prev.map((f, idx) =>
+          idx === i ? { ...f, progress: 15 } : f
+        ));
+
+        // Step 2: Upload file directly to R2 via presigned URL
+        const putRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: uploadFile.file,
+          headers: { 'Content-Type': uploadFile.file.type || 'application/octet-stream' },
+        });
+
+        if (!putRes.ok) {
+          throw new Error(putRes.status === 403
+            ? 'Upload URL expired. Please try again.'
+            : `Upload to storage failed (${putRes.status})`);
+        }
+
+        setFiles(prev => prev.map((f, idx) =>
+          idx === i ? { ...f, progress: 80 } : f
+        ));
+
+        // Step 3: Confirm upload
+        const confirmRes = await fetch('/api/documents/confirm-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cloudStoragePath,
+            fileName: uploadFile.file.name,
+            fileSize: uploadFile.file.size,
+            projectId,
+          }),
+        });
+
+        if (!confirmRes.ok) {
+          const data = await confirmRes.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to confirm upload');
+        }
+
+        setFiles(prev => prev.map((f, idx) =>
+          idx === i ? { ...f, status: 'success' as const, progress: 100, cloudStoragePath } : f
+        ));
       } catch (error: any) {
         setFiles(prev => prev.map((f, idx) =>
           idx === i ? { ...f, status: 'error' as const, error: error.message } : f

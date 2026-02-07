@@ -82,7 +82,7 @@ export function MobilePhotoUpload({
     });
   };
 
-  // Upload single photo
+  // Upload single photo via presigned URL
   const uploadPhoto = async (photo: PhotoPreview): Promise<boolean> => {
     try {
       // Update photo status
@@ -92,16 +92,56 @@ export function MobilePhotoUpload({
         )
       );
 
-      const formData = new FormData();
-      formData.append('photo', photo.file);
+      // Step 1: Get presigned URL
+      const presignRes = await fetch(
+        `/api/conversations/${conversationId}/photos/presigned`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: photo.file.name,
+            contentType: photo.file.type || 'image/jpeg',
+          }),
+        }
+      );
 
-      const response = await fetch(`/api/conversations/${conversationId}/photos`, {
-        method: 'POST',
-        body: formData,
+      if (!presignRes.ok) {
+        const data = await presignRes.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to prepare upload');
+      }
+
+      const { uploadUrl, cloud_storage_path } = await presignRes.json();
+
+      // Step 2: Upload file directly to R2 via presigned URL
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: photo.file,
+        headers: { 'Content-Type': photo.file.type || 'image/jpeg' },
       });
 
-      if (!response.ok) {
-        const error = await response.json();
+      if (!putRes.ok) {
+        throw new Error(putRes.status === 403
+          ? 'Upload URL expired. Please try again.'
+          : `Upload to storage failed (${putRes.status})`);
+      }
+
+      // Step 3: Confirm upload by sending metadata to the photos endpoint
+      const confirmRes = await fetch(
+        `/api/conversations/${conversationId}/photos`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cloudStoragePath: cloud_storage_path,
+            fileName: photo.file.name,
+            fileSize: photo.file.size,
+            contentType: photo.file.type || 'image/jpeg',
+          }),
+        }
+      );
+
+      if (!confirmRes.ok) {
+        const error = await confirmRes.json().catch(() => ({}));
         throw new Error(error.error || 'Upload failed');
       }
 
@@ -117,7 +157,7 @@ export function MobilePhotoUpload({
       return true;
     } catch (error: any) {
       console.error('Error uploading photo:', error);
-      
+
       // Update photo status with error
       setPhotos((prev) =>
         prev.map((p) =>
