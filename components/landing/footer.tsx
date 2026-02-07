@@ -9,7 +9,7 @@ export function Footer() {
           <div>
             <h3 className="text-xl font-bold text-white mb-4">ForemanOS</h3>
             <p className="text-sm text-gray-400">
-              Document-based AI for construction teams.
+              AI-powered project management for construction teams. Upload plans, get answers, manage your build — starting at $15/mo.
             </p>
             <div className="mt-4">
               <a 

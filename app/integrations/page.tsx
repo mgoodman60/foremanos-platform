@@ -1,15 +1,18 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Plug, ArrowRight } from 'lucide-react';
+import { LandingHeader } from '@/components/landing/header';
+import { Footer } from '@/components/landing/footer';
 
 export const metadata: Metadata = {
   title: 'Integrations | ForemanOS',
-  description: 'Connect ForemanOS with your existing tools. Integrations coming soon.',
+  description: 'Connect ForemanOS with OneDrive, QuickBooks, Procore, and the tools your construction team already uses. OneDrive integration live now.',
 };
 
 export default function IntegrationsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+      <LandingHeader />
       {/* Hero */}
       <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -17,10 +20,10 @@ export default function IntegrationsPage() {
             <Plug className="w-8 h-8" />
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-            Integrations
+            Connect Your Existing Tools
           </h1>
           <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-            Connect ForemanOS with the tools you already use.
+            ForemanOS works alongside the tools your team already uses. OneDrive integration is live today. More integrations are coming based on what our customers need most.
           </p>
         </div>
       </section>
@@ -29,9 +32,9 @@ export default function IntegrationsPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-gray-800/50 rounded-lg p-12 border border-gray-700 text-center">
-            <h2 className="text-3xl font-bold mb-6">Integrations Coming Soon</h2>
+            <h2 className="text-3xl font-bold mb-6">Current and Planned Integrations</h2>
             <p className="text-xl text-gray-300 mb-8">
-              We're working on integrations with popular construction tools including:
+              OneDrive sync is live. We're building integrations with popular construction and accounting tools based on customer requests:
             </p>
             
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
@@ -47,9 +50,9 @@ export default function IntegrationsPage() {
                 <h3 className="font-semibold mb-2">BuilderTrend</h3>
                 <p className="text-sm text-gray-400">Construction software</p>
               </div>
-              <div className="bg-gray-900/50 rounded-lg p-6 border border-gray-700">
+              <div className="bg-gray-900/50 rounded-lg p-6 border border-purple-500/50">
                 <h3 className="font-semibold mb-2">OneDrive</h3>
-                <p className="text-sm text-gray-400">File storage</p>
+                <p className="text-sm text-purple-400">Live now -- document sync</p>
               </div>
               <div className="bg-gray-900/50 rounded-lg p-6 border border-gray-700">
                 <h3 className="font-semibold mb-2">Dropbox</h3>
@@ -64,7 +67,7 @@ export default function IntegrationsPage() {
             <div className="bg-purple-900/20 rounded-lg p-6 border border-purple-700/50 mb-8">
               <h3 className="text-lg font-semibold mb-3">Need a Specific Integration?</h3>
               <p className="text-gray-300">
-                Let us know what tools you use. We prioritize integrations based on customer needs.
+                Tell us what tools your team uses daily. We build integrations based on what our customers actually need -- not a feature list for a sales deck.
               </p>
             </div>
 
@@ -78,6 +81,7 @@ export default function IntegrationsPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

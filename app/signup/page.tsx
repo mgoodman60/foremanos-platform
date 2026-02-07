@@ -32,7 +32,7 @@ const TIER_OPTIONS: TierOption[] = [
     id: 'free',
     name: 'Free',
     price: 0,
-    description: 'Perfect for trying out ForemanOS',
+    description: 'Try AI document chat on one project',
     features: [
       '1 project',
       '50 queries/month',
@@ -47,7 +47,7 @@ const TIER_OPTIONS: TierOption[] = [
     name: 'Starter',
     price: 19,
     priceAnnual: 15,
-    description: 'For independent contractors',
+    description: 'For small crews and independent contractors',
     features: [
       '5 projects',
       '500 queries/month',
@@ -62,7 +62,7 @@ const TIER_OPTIONS: TierOption[] = [
     name: 'Pro',
     price: 49,
     priceAnnual: 39,
-    description: 'For professionals',
+    description: 'For PMs running multiple active jobs',
     features: [
       'Unlimited projects',
       '2,000 queries/month',
@@ -241,12 +241,12 @@ export default function SignupPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Create Your Account
+            Start Managing Your Projects with AI
           </h1>
           <p className="text-gray-600">
-            {step === 1 
-              ? 'Get started with ForemanOS in minutes'
-              : 'Choose the perfect plan for your needs'}
+            {step === 1
+              ? 'Upload your first plan set and ask it anything in under 5 minutes'
+              : 'Choose the plan that fits your team'}
           </p>
         </div>
 

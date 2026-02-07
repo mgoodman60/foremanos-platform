@@ -152,13 +152,13 @@ export function LoginForm({ onClose }: LoginFormProps) {
           className="h-20 w-auto object-contain mb-6"
         />
         <div className="text-center mb-6">
-          <p className="text-lg text-gray-300 mt-2">Construction Project Intelligence</p>
+          <p className="text-lg text-gray-300 mt-2">AI-Powered Construction Plan Intelligence</p>
         </div>
         <h2 id="login-modal-title" className="text-3xl font-bold text-center text-[#F8FAFC]">
           Sign In to Your Account
         </h2>
         <p className="text-gray-400 mt-2 text-center max-w-md">
-          Access your projects and collaborate with your team
+          Your plans, specs, budgets, and schedules are waiting
         </p>
       </div>
       

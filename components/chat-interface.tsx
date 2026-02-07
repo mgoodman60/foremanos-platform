@@ -1222,7 +1222,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           <div className="text-center text-gray-400 mt-8">
             <div className="w-16 h-16 mx-auto mb-4 relative bg-dark-card rounded-lg p-2 shadow-sm" aria-hidden="true">
               <Image 
-                src="/foremanos-logo.png" 
+                src="/foremanos-new-logo.png"
                 alt="ForemanOS Logo" 
                 fill
                 className="object-contain"
@@ -1295,8 +1295,8 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-dark-card flex items-center justify-center p-1 shadow-sm" aria-hidden="true">
                 <div className="relative w-full h-full">
                   <Image 
-                    src="/foremanos-logo.png" 
-                    alt="AI Assistant" 
+                    src="/foremanos-new-logo.png"
+                    alt="AI Assistant"
                     fill
                     className="object-contain"
                   />
@@ -1421,9 +1421,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           <div className="flex gap-3 justify-start animate-in slide-in-from-bottom">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-dark-card flex items-center justify-center p-1 shadow-sm">
               <div className="relative w-full h-full">
-                <Image 
-                  src="/foremanos-logo.png" 
-                  alt="AI Assistant" 
+                <Image
+                  src="/foremanos-new-logo.png"
+                  alt="AI Assistant"
                   fill
                   className="object-contain"
                 />

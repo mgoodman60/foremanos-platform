@@ -28,11 +28,10 @@ export default function AboutPage() {
             className="max-w-4xl mx-auto text-center"
           >
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              About <span className="text-[#003B71]">ForemanOS</span>
+              Built by Builders, <span className="text-[#003B71]">for Builders</span>
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed mb-8">
-              The first AI that truly understands construction plans. Our Plan Intelligence Engine automatically extracts 
-              dimensions, symbols, MEP systems, and code compliance from your drawings—saving thousands of hours and reducing costly errors.
+              ForemanOS exists because construction teams deserve better than generic project management tools. Our Plan Intelligence Engine reads your drawings the way an experienced PM would -- extracting dimensions, tracing MEP systems, checking code compliance, and answering questions with cited sources. All in seconds, not hours.
             </p>
             <div className="flex items-center justify-center gap-6 text-sm text-gray-700">
               <div className="flex items-center gap-2">
@@ -69,28 +68,28 @@ export default function AboutPage() {
                 </span>
               </div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Construction Teams Waste Hours Searching Documents
+                Your Team Is Losing 10+ Hours a Week to Document Searches
               </h2>
               <div className="space-y-4 text-gray-600">
                 <div className="flex items-start gap-3">
                   <Clock className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-900">Time Lost Daily</p>
-                    <p>Project managers spend 2-3 hours per day searching through plans, specs, and reports for basic information like dimensions, materials, and requirements.</p>
+                    <p className="font-semibold text-gray-900">2-3 Hours Lost Every Day</p>
+                    <p>Your PM is flipping through 200-page drawing sets to find one dimension, one spec note, one detail callout. That's $150+ in billable time burned daily on manual searching.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <DollarSign className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-900">Expensive Delays</p>
-                    <p>Incomplete information leads to costly delays, rework, and miscommunication between teams, contractors, and stakeholders.</p>
+                    <p className="font-semibold text-gray-900">Missed Details Cost Real Money</p>
+                    <p>A missed dimension triggers an RFI. An overlooked spec note causes rework. A code violation fails inspection. Each one costs days and thousands of dollars.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <FileText className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-900">Document Chaos</p>
-                    <p>Critical project information is scattered across hundreds of pages in multiple file formats, making it nearly impossible to find answers quickly.</p>
+                    <p className="font-semibold text-gray-900">Information Scattered Everywhere</p>
+                    <p>Answers are buried across architectural plans, structural sheets, MEP drawings, specs, and submittals. Your team wastes time calling the office, texting the PM, or guessing in the field.</p>
                   </div>
                 </div>
               </div>
@@ -109,28 +108,28 @@ export default function AboutPage() {
                 </span>
               </div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                AI-Powered Instant Answers from Your Project Documents
+                Ask a Question. Get the Answer with the Source.
               </h2>
               <div className="space-y-4 text-gray-600">
                 <div className="flex items-start gap-3">
                   <Brain className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
                   <div>
                     <p className="font-semibold text-gray-900">Plan Intelligence Engine</p>
-                    <p>AI automatically extracts title blocks, scales, symbols, dimensions, detail callouts, and cross-references from construction drawings. Navigate complex drawing sets instantly.</p>
+                    <p>Upload your drawings and AI automatically extracts title blocks, scales, symbols, dimensions, and cross-references. A 200-sheet drawing set becomes fully searchable in minutes.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Zap className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-900">MEP System Analysis</p>
-                    <p>Trace mechanical, electrical, and plumbing systems in 3D. Detect hard clashes, clearance violations, and get automated resolution suggestions before construction starts.</p>
+                    <p className="font-semibold text-gray-900">MEP Clash Detection</p>
+                    <p>Traces HVAC, plumbing, and electrical paths in 3D to find hard clashes and clearance violations between trades. Catch coordination issues on screen, not in the ceiling.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Shield className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-gray-900">Code Compliance Verification</p>
-                    <p>Automatic checking against ADA 2010, IBC 2021, and NFPA standards. Get exact code citations and compliance status with every answer—catch violations before inspections.</p>
+                    <p className="font-semibold text-gray-900">Code Compliance Checking</p>
+                    <p>Ask about ADA, IBC, or NFPA requirements and get the exact code section, the calculation, and a pass/fail status against your plans. Stop Googling building codes.</p>
                   </div>
                 </div>
               </div>
@@ -151,7 +150,7 @@ export default function AboutPage() {
           >
             <div className="text-center mb-12">
               <span className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold mb-4">
-                NEW: AI-Powered Compliance
+                AI-Powered Compliance
               </span>
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
                 Catch Code Violations Before Inspections
@@ -244,10 +243,10 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Construction Teams Choose ForemanOS
+              Measurable ROI from Day One
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We deliver measurable ROI through AI-powered project intelligence that transforms how teams work.
+              ForemanOS pays for itself within the first week. Here's how teams measure the impact.
             </p>
           </motion.div>
 
@@ -263,9 +262,9 @@ export default function AboutPage() {
               <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
                 <Clock className="h-7 w-7 text-[#003B71]" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Save Time</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Reclaim Your Day</h3>
               <p className="text-gray-600 mb-4">
-                Reduce document search time from hours to seconds. Get instant answers to questions about dimensions, specs, schedules, and requirements.
+                Stop flipping through drawing sets. Ask any question about dimensions, specs, or requirements and get a cited answer in seconds -- from the field or the office.
               </p>
               <div className="bg-blue-50 rounded-lg p-4">
                 <p className="text-sm font-semibold text-[#003B71] mb-1">Average Time Savings</p>
@@ -285,9 +284,9 @@ export default function AboutPage() {
               <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mb-6">
                 <DollarSign className="h-7 w-7 text-green-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Reduce Costs</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Prevent Costly Rework</h3>
               <p className="text-gray-600 mb-4">
-                Prevent costly delays and rework by ensuring everyone has instant access to accurate project information and code compliance.
+                Catch MEP clashes, code violations, and missing details before they become change orders. One prevented rework issue can save more than a year of subscription costs.
               </p>
               <div className="bg-green-50 rounded-lg p-4">
                 <p className="text-sm font-semibold text-green-700 mb-1">Annual Savings</p>
@@ -307,9 +306,9 @@ export default function AboutPage() {
               <div className="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
                 <Target className="h-7 w-7 text-purple-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Improve Accuracy</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Trust Every Answer</h3>
               <p className="text-gray-600 mb-4">
-                Every answer includes source citations from your actual documents. Eliminate errors from manual searches and ensure code compliance.
+                Every response cites the exact sheet, page, and section it came from. Your team verifies answers against the source, not against someone's memory.
               </p>
               <div className="bg-purple-50 rounded-lg p-4">
                 <p className="text-sm font-semibold text-purple-700 mb-1">Accuracy Rate</p>
@@ -416,10 +415,10 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Built for Construction Professionals
+              Built for Every Role on the Jobsite
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              ForemanOS is designed for teams that need fast, accurate access to project information.
+              From the trailer to the field, ForemanOS gives every team member the information they need, when they need it.
             </p>
           </motion.div>
 
@@ -434,7 +433,7 @@ export default function AboutPage() {
               <Users className="h-10 w-10 text-[#003B71] mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Project Managers</h3>
               <p className="text-sm text-gray-600">
-                Spend less time searching documents and more time managing projects effectively.
+                Answer owner questions instantly, track budget variance in real time, and keep every subcontractor aligned on the latest revision.
               </p>
             </motion.div>
 
@@ -448,7 +447,7 @@ export default function AboutPage() {
               <Users className="h-10 w-10 text-[#003B71] mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">General Contractors</h3>
               <p className="text-sm text-gray-600">
-                Keep your team aligned with instant access to plans, specs, and requirements.
+                Coordinate trades with AI-detected MEP clashes, manage RFIs and submittals, and run multi-project dashboards from one platform.
               </p>
             </motion.div>
 
@@ -462,7 +461,7 @@ export default function AboutPage() {
               <Users className="h-10 w-10 text-[#003B71] mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Field Supervisors</h3>
               <p className="text-sm text-gray-600">
-                Get quick answers on-site without digging through physical plans or making calls.
+                Pull up any dimension, spec, or detail on your phone during walk-throughs. No more calling the office to check a sheet reference.
               </p>
             </motion.div>
 
@@ -476,7 +475,7 @@ export default function AboutPage() {
               <Users className="h-10 w-10 text-[#003B71] mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Estimators</h3>
               <p className="text-sm text-gray-600">
-                Extract quantities and specifications faster for more accurate bids.
+                Run AI-powered takeoffs that count symbols, calculate material quantities, and apply waste factors. Export to Excel for your bid package.
               </p>
             </motion.div>
           </div>
@@ -494,11 +493,10 @@ export default function AboutPage() {
             className="max-w-4xl mx-auto text-center"
           >
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-              Ready to Save 10+ Hours Weekly?
+              Stop Searching. Start Building.
             </h2>
             <p className="text-xl text-white/90 mb-8 leading-relaxed">
-              Join construction teams who are transforming their workflows with AI-powered document intelligence. 
-              See our flexible pricing plans and start saving time and money today.
+              Upload your plans, ask a question, and see what AI-powered plan intelligence can do for your next project. Free plan available -- no credit card, no sales call required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/pricing">

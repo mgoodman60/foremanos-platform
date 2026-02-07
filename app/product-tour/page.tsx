@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Play, MessageSquare, FolderOpen, Scan, Cloud, Shield, Users, FileCheck, Smartphone, Brain, Ruler, Grid3x3, Network, Lightbulb, Pin, Eye, BarChart } from 'lucide-react';
 import { LandingHeader } from '@/components/landing/header';
+import { Footer } from '@/components/landing/footer';
 
 export const metadata: Metadata = {
   title: 'Features | ForemanOS',
@@ -18,10 +19,10 @@ export default function FeaturesPage() {
       <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-            AI That Truly Understands Construction Plans
+            Upload Plans. Ask Questions. Get Cited Answers.
           </h1>
           <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-            Our Plan Intelligence Engine automatically extracts dimensions, symbols, MEP systems, and code compliance from your drawings—no manual data entry required.
+            ForemanOS reads construction drawings the way your best PM would -- extracting dimensions, tracing MEP systems, checking code compliance, and answering questions with exact sheet references. Here's how it works.
           </p>
         </div>
       </section>
@@ -37,7 +38,7 @@ export default function FeaturesPage() {
               Plan Intelligence Engine
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Industry-first AI that automatically analyzes construction drawings to extract critical data—dimensions, symbols, MEP systems, grid coordinates, and more.
+              While traditional OCR just reads text, our Plan Intelligence Engine understands construction drawings -- extracting structured data from title blocks, dimensions, symbols, and MEP layouts automatically.
             </p>
           </div>
           
@@ -48,7 +49,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Title Blocks & Scales</h3>
               <p className="text-gray-300 text-sm">
-                Automatically extracts sheet numbers, drawing scales, and title block metadata. Validates scale accuracy across all plans and detects scale inconsistencies.
+                Reads sheet numbers, drawing scales, and title block data from every page. Flags scale inconsistencies across sheets so your takeoff quantities stay accurate.
               </p>
             </div>
             
@@ -58,7 +59,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Symbol Recognition</h3>
               <p className="text-gray-300 text-sm">
-                Identifies construction symbols against CSI, ASHRAE, IEEE, and IBC standards. AI learns project-specific custom symbols and continuously improves accuracy.
+                Identifies 230+ construction symbols across CSI, ASHRAE, IEEE, and IBC standards. The AI learns your project's custom symbols and improves with every drawing set.
               </p>
             </div>
             
@@ -66,9 +67,9 @@ export default function FeaturesPage() {
               <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center mb-4">
                 <FileCheck className="w-6 h-6 text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Detail Callouts</h3>
+              <h3 className="text-xl font-semibold mb-3">Detail Callouts & Cross-References</h3>
               <p className="text-gray-300 text-sm">
-                Extracts detail callouts and creates bidirectional links between sheets. Navigate complex drawing sets instantly with cross-reference mapping.
+                Maps every detail callout to its source sheet with bidirectional links. Ask about Detail 3/A-401 and get taken straight to the referenced section.
               </p>
             </div>
             
@@ -78,7 +79,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Dimension Intelligence</h3>
               <p className="text-gray-300 text-sm">
-                Parses feet-inches, metric, and decimal dimensions. Validates dimension chains and performs automatic quantity calculations for takeoffs.
+                Parses feet-inches, metric, and decimal dimensions from any drawing convention. Validates dimension chains for consistency and feeds directly into takeoff calculations.
               </p>
             </div>
             
@@ -88,7 +89,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Spatial Correlation</h3>
               <p className="text-gray-300 text-sm">
-                Maps grid coordinates across architectural, structural, and MEP sheets. Find matching locations across all disciplines instantly.
+                Ask "What's at Grid B-3?" and get results from architectural, structural, and MEP sheets simultaneously. Grid coordinates are mapped across every discipline in the set.
               </p>
             </div>
             
@@ -98,20 +99,20 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">MEP Path Tracing</h3>
               <p className="text-gray-300 text-sm">
-                Traces mechanical, electrical, and plumbing systems in 3D. Detects hard clashes, clearance violations, and suggests resolutions before construction.
+                Traces ductwork, piping, and conduit in 3D across all MEP sheets. Detects hard clashes and clearance violations between trades, with suggested reroutes.
               </p>
             </div>
           </div>
           
           <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-8 border border-blue-700/30">
-            <h3 className="text-2xl font-bold mb-4 text-blue-400">What Makes This Different?</h3>
+            <h3 className="text-2xl font-bold mb-4 text-blue-400">This Is Not Just OCR</h3>
             <div className="grid md:grid-cols-2 gap-6 text-gray-300">
               <div>
                 <p className="mb-3">
-                  <strong className="text-white">Traditional OCR</strong> just reads text character-by-character. It can't understand what a dimension means, what a symbol represents, or how different sheets relate to each other.
+                  <strong className="text-white">Traditional OCR</strong> reads text character-by-character. It has no idea that "3/A-401" is a detail callout, that the 12" label refers to duct size, or that Sheet M-101 and Sheet S-101 share the same grid system.
                 </p>
                 <p>
-                  <strong className="text-white">ForemanOS Plan Intelligence</strong> uses advanced computer vision trained specifically on construction documents. It understands drawing conventions, interprets spatial relationships, and extracts structured data automatically.
+                  <strong className="text-white">ForemanOS Plan Intelligence</strong> uses computer vision trained on construction documents. It understands drawing conventions, interprets spatial relationships between disciplines, and builds a structured data model of your entire drawing set.
                 </p>
               </div>
               <div className="bg-gray-900/50 rounded-lg p-6">
@@ -141,9 +142,9 @@ export default function FeaturesPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-semibold mb-4 text-[#F97316]">Ask Questions, Get Answers</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-[#F97316]">Your Entire Drawing Set, Searchable by Question</h3>
               <p className="text-gray-300 mb-4">
-                No more flipping through hundreds of pages. Ask questions in plain English and get instant answers from your entire document library—with citations showing exactly where the information came from.
+                Type a question in plain English and get an answer pulled from your plans, specs, and submittals -- with the exact sheet number and section cited. No more flipping through 200 pages to find one dimension.
               </p>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start gap-3">
@@ -191,9 +192,9 @@ export default function FeaturesPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-semibold mb-4 text-[#F97316]">Catch Issues Before Construction</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-[#F97316]">Find Coordination Issues on Screen, Not in the Ceiling</h3>
               <p className="text-gray-300 mb-4">
-                ForemanOS automatically traces mechanical, electrical, and plumbing systems in 3D and detects conflicts between trades. Find hard clashes, clearance violations, and coordination issues before they become costly field problems.
+                ForemanOS traces HVAC, plumbing, and electrical systems in 3D from your MEP drawings and flags conflicts between trades. Hard clashes, clearance violations, and routing conflicts surface during preconstruction -- not during rough-in.
               </p>
               <div className="space-y-4">
                 <div className="bg-red-900/20 rounded-lg p-4 border border-red-700/30">
@@ -252,10 +253,10 @@ export default function FeaturesPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Advanced Drawing Intelligence
+              Beyond Document Search
             </h2>
             <p className="text-xl text-gray-300">
-              Additional AI-powered features that understand construction drawings like an expert engineer
+              ForemanOS doesn't just find information -- it interprets drawings, manages collaboration, and tracks project health
             </p>
           </div>
           
@@ -266,7 +267,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold">Isometric View Interpretation</h3>
               </div>
               <p className="text-gray-300 mb-4">
-                Converts 2D isometric shop drawings into 3D spatial data. Reconstructs piping and ductwork paths from complex MEP isometrics, understanding depth and elevation relationships.
+                Reads 2D isometric shop drawings and reconstructs 3D spatial data. The AI understands projection angles, elevation relationships, and routing paths from MEP isometrics that would take an engineer hours to trace manually.
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>• Detects isometric projection angles (30-60°, 45-45°, custom)</li>
@@ -282,7 +283,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold">Visual Annotations</h3>
               </div>
               <p className="text-gray-300 mb-4">
-                Click to pin collaborative notes directly on drawings. Track RFIs, issues, and markups with priority levels, status tracking, and multi-user reply threads.
+                Pin notes, RFIs, and markups directly on drawings at exact coordinates. Assign to team members, track status from open to resolved, and keep a full thread of replies tied to the exact location on the sheet.
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>• Pin annotations at exact x/y coordinates or grid locations</li>
@@ -314,7 +315,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold">Intelligence Dashboard</h3>
               </div>
               <p className="text-gray-300 mb-4">
-                Real-time system health monitoring with AI-generated insights about your project. Track data quality, integration status, and get automated recommendations for improvement.
+                A single view of your project's data quality, extraction completeness, and coordination status. AI-generated insights flag missing information and recommend actions before they become issues.
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>• Overall intelligence score with health status indicators</li>
@@ -338,13 +339,13 @@ export default function FeaturesPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <h3 className="text-xl font-semibold mb-3">Project Workspaces</h3>
               <p className="text-gray-300">
-                Each job gets its own workspace with dedicated document library, conversation history, and team access. Keep everything organized without mixing projects.
+                Every job gets its own workspace with separate document libraries, conversation histories, and team access. Running five jobs? Switch between them instantly without mixing up drawings.
               </p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <h3 className="text-xl font-semibold mb-3">Document Library</h3>
               <p className="text-gray-300">
-                Upload plans, specs, schedules, RFIs, submittals—any PDF or Word doc. Search across all documents or filter by project for laser-focused answers.
+                Upload plans, specs, schedules, RFIs, submittals -- any PDF or Word doc. The AI indexes everything so you can search across all documents or drill into a single sheet.
               </p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
@@ -366,7 +367,7 @@ export default function FeaturesPage() {
           </div>
           <div className="max-w-4xl mx-auto">
             <p className="text-xl text-gray-300 text-center mb-8">
-              Connect your OneDrive folder and ForemanOS automatically syncs new documents. No more manual uploads—new plans and specs appear in your project library automatically.
+              Point ForemanOS at your OneDrive folder and every new document syncs automatically. When the architect issues a revision, your team sees it in ForemanOS within minutes -- no manual uploads.
             </p>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
@@ -409,7 +410,7 @@ export default function FeaturesPage() {
           </div>
           <div className="max-w-4xl mx-auto">
             <p className="text-xl text-gray-300 text-center mb-8">
-              Stop searching the web for code requirements. ForemanOS includes cached building codes and accessibility standards you can query instantly—with cited code sections.
+              Building codes are built into ForemanOS. Ask about parking requirements, corridor widths, or fire separation distances and get the exact code section, calculation, and compliance status -- no separate code lookup needed.
             </p>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700 text-center">
@@ -511,9 +512,9 @@ export default function FeaturesPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-semibold mb-4 text-[#F97316]">Share Projects with Anyone</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-[#F97316]">Everyone on the Same Page -- Literally</h3>
               <p className="text-gray-300 mb-4">
-                Invite owners, architects, engineers, trade contractors, and field crews to your projects. Everyone sees the same up-to-date information—no more version control headaches.
+                Invite owners, architects, engineers, subs, and field crews to your projects. Role-based access ensures everyone sees exactly what they need, and no one works off outdated plans.
               </p>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start gap-3">
@@ -533,7 +534,7 @@ export default function FeaturesPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <h4 className="text-lg font-semibold mb-4 text-[#F97316]">Mobile Access</h4>
               <p className="text-gray-300 mb-4">
-                Field crews can pull up any document on their phone during inspections or walk-throughs. No more "I'll get back to you"—answer owner questions on the spot.
+                Field crews pull up any document on their phone during inspections or walk-throughs. When the owner asks about a detail, the answer is 10 seconds away -- not a phone call.
               </p>
               <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700/30">
                 <p className="text-gray-300 text-sm">
@@ -604,7 +605,7 @@ export default function FeaturesPage() {
                 controls
                 preload="metadata"
                 className="absolute inset-0 w-full h-full"
-                poster="/foremanos-logo.png"
+                poster="/foremanos-new-logo.png"
               >
                 <source src="/foremanos-tour.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
@@ -618,29 +619,32 @@ export default function FeaturesPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[#F97316] to-[#EA580C]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-            Experience the Future of Construction Plan Analysis
+            Try It on Your Own Plans
           </h2>
           <p className="text-xl text-orange-100 mb-8">
-            Join teams using AI that truly understands construction drawings—automatic extraction of dimensions, MEP systems, clashes, and code compliance.
+            Upload a drawing set, ask a question, and see the Plan Intelligence Engine work on your actual project documents. Free plan available -- no credit card required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#F97316] rounded-lg font-semibold hover:bg-gray-100 transition-all text-lg min-h-[56px]"
             >
-              Start Free Trial
+              Upload Your First Plans Free
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
             <Link
               href="/demo"
               className="inline-flex items-center justify-center px-8 py-4 bg-dark-surface text-white rounded-lg font-semibold hover:bg-black transition-all text-lg border-2 border-white/20 min-h-[56px]"
             >
-              See Plan Intelligence in Action
+              Request a Live Walkthrough
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

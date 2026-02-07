@@ -73,7 +73,7 @@ export function LandingHeader() {
                   className="bg-[var(--color-primary)] hover:bg-[#ea580c] text-white min-h-[var(--touch-target)] shadow-lg"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Sign Up
+                  Start Free
                 </Button>
               </Link>
             </div>
@@ -130,7 +130,7 @@ export function LandingHeader() {
                   <Link href="/signup" className="block" onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-[var(--color-primary)] hover:bg-[#ea580c] text-white min-h-[var(--touch-target)]">
                       <UserPlus className="w-4 h-4 mr-2" />
-                      Sign Up
+                      Start Free
                     </Button>
                   </Link>
                 </div>

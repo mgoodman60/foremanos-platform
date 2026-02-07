@@ -8,6 +8,8 @@ import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { loadStripe } from '@stripe/stripe-js';
+import { LandingHeader } from '@/components/landing/header';
+import { Footer } from '@/components/landing/footer';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -16,12 +18,12 @@ const pricingTiers = [
     name: 'Free',
     price: '$0',
     period: 'forever',
-    description: 'Perfect for trying out ForemanOS',
+    description: 'Try AI-powered plan analysis on a real project',
     badge: 'Try it out',
     features: [
       { text: '1 Project', included: true },
       { text: '50 AI Queries/month', included: true },
-      { text: 'GPT-4o-mini AI Model', included: true },
+      { text: 'Standard AI Model', included: true },
       { text: 'ADA 2010 Compliance Checking', included: true },
       { text: 'Basic Document Chat', included: true },
       { text: 'Up to 10 Documents', included: true },
@@ -43,12 +45,12 @@ const pricingTiers = [
     originalPrice: '$19',
     period: 'per month',
     billing: 'Billed annually',
-    description: 'For solo contractors and small projects',
+    description: 'Built for solo contractors managing up to 5 active jobs',
     badge: 'Best Value',
     features: [
       { text: '5 Projects', included: true },
       { text: '500 AI Queries/month', included: true },
-      { text: 'GPT-4o-mini + Claude 3.5 AI', included: true },
+      { text: 'Standard AI with Vision', included: true },
       { text: 'ADA 2010 Compliance Checking', included: true },
       { text: 'Automatic Code Citations', included: true },
       { text: 'Unlimited Documents', included: true },
@@ -71,12 +73,12 @@ const pricingTiers = [
     originalPrice: '$49',
     period: 'per month',
     billing: 'Billed annually',
-    description: 'For growing teams and multiple projects',
+    description: 'Unlimited projects with full compliance and analytics',
     badge: 'Most Popular',
     features: [
       { text: 'Unlimited Projects', included: true },
       { text: '2,000 AI Queries/month', included: true },
-      { text: 'All AI Models (GPT-5.2 included)', included: true },
+      { text: 'Advanced AI with Priority Processing', included: true },
       { text: 'ADA 2010 + IBC 2021 Codes', included: true },
       { text: 'Advanced Compliance Reports', included: true },
       { text: 'Unlimited Documents', included: true },
@@ -100,7 +102,7 @@ const pricingTiers = [
     price: '$99',
     period: 'per month',
     billing: '3-10 users',
-    description: 'For established construction teams',
+    description: 'Shared AI intelligence across your entire crew',
     badge: 'Team Plan',
     features: [
       { text: 'Everything in Pro, plus:', included: true },
@@ -126,7 +128,7 @@ const pricingTiers = [
     price: '$249',
     period: 'per month',
     billing: '11-25 users',
-    description: 'For larger organizations and firms',
+    description: 'Multi-team coordination with SSO and custom workflows',
     badge: 'Business Plan',
     features: [
       { text: 'Everything in Team, plus:', included: true },
@@ -152,7 +154,7 @@ const pricingTiers = [
     price: '$499+',
     period: 'per month',
     billing: '26+ users',
-    description: 'Custom solutions for large organizations',
+    description: 'Dedicated infrastructure, unlimited everything, white-label available',
     badge: 'Custom Plan',
     features: [
       { text: 'Everything in Business, plus:', included: true },
@@ -240,41 +242,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-dark-surface border-b border-gray-700 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <img 
-                src="/foremanos-new-logo.png" 
-                alt="ForemanOS Logo" 
-                className="h-10 w-auto sm:h-12"
-              />
-            </Link>
-            <div className="flex items-center space-x-4">
-              {session ? (
-                <Link href="/dashboard">
-                  <Button size="sm" className="bg-[#F97316] hover:bg-[#EA580C] text-white">
-                    Dashboard
-                  </Button>
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button variant="outline" size="sm" className="border-gray-600 text-white hover:bg-white/10">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/signup">
-                    <Button size="sm" className="bg-[#F97316] hover:bg-[#EA580C] text-white">
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* Hero Section */}
       <section className="py-20">
@@ -286,11 +254,11 @@ export default function PricingPage() {
             className="text-center mb-16"
           >
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Simple, Transparent
-              <span className="block text-[#003B71]">Pricing</span>
+              One Price. Every Feature.
+              <span className="block text-[#003B71]">No Per-User Fees.</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-              Professional AI-powered construction management starting at just $15/month. Save 10+ hours and reduce costs weekly.
+              AI-powered plan analysis, MEP clash detection, and compliance checking starting at $15/month. Stop paying per seat for tools your field crew won't open.
             </p>
             <p className="text-lg text-[#003B71] font-semibold max-w-2xl mx-auto mb-8">
               2.6x cheaper than Fieldwire • 7.9x cheaper than Handoff AI • 25x cheaper than Procore
@@ -409,7 +377,7 @@ export default function PricingPage() {
                   What's the difference between monthly and annual billing?
                 </h3>
                 <p className="text-gray-600">
-                  Annual billing saves you money! Starter saves $48/year ($15/mo vs $19/mo) and Pro saves $120/year ($39/mo vs $49/mo). You get the same features either way.
+                  Annual billing locks in a lower rate. Starter drops from $19/mo to $15/mo (save $48/year), and Pro drops from $49/mo to $39/mo (save $120/year). Same features, same support, lower cost.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -417,7 +385,7 @@ export default function PricingPage() {
                   Can I change my plan later?
                 </h3>
                 <p className="text-gray-600">
-                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate the charges.
+                  Absolutely. Upgrade or downgrade anytime from your dashboard. Changes take effect immediately with prorated charges -- no waiting for the next billing cycle.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -425,7 +393,7 @@ export default function PricingPage() {
                   What happens when I reach my AI query limit?
                 </h3>
                 <p className="text-gray-600">
-                  You'll receive a notification when you're approaching 80% of your limit. You can upgrade your plan or purchase additional query packs. Your existing work remains fully accessible.
+                  You'll get a heads-up at 80% usage so there are no surprises. If you hit the limit, upgrade your plan instantly or purchase additional query packs. All your projects, documents, and conversation history stay fully accessible regardless.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -433,7 +401,7 @@ export default function PricingPage() {
                   Is there a free trial?
                 </h3>
                 <p className="text-gray-600">
-                  Yes! The Free plan is available forever with 1 project and 50 AI queries per month. Paid plans come with a 14-day money-back guarantee.
+                  The Free plan is yours forever -- 1 project, 50 AI queries per month, no credit card required. Upload real plans and see AI-powered analysis on your own documents before committing. All paid plans include a 14-day money-back guarantee.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -441,7 +409,7 @@ export default function PricingPage() {
                   How do Team and Business plans work?
                 </h3>
                 <p className="text-gray-600">
-                  Team (3-10 users) and Business (11-25 users) plans include all Pro features plus team collaboration, role-based access, and dedicated support. Pricing is per account, not per user.
+                  Team ($99/mo for 3-10 users) and Business ($249/mo for 11-25 users) include everything in Pro, plus role-based access control, dedicated support, and team analytics. Pricing is per account, not per seat -- add your whole crew without per-user fees.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -449,7 +417,7 @@ export default function PricingPage() {
                   What payment methods do you accept?
                 </h3>
                 <p className="text-gray-600">
-                  We accept all major credit cards (Visa, Mastercard, Amex). Team, Business, and Enterprise customers can arrange for invoicing and payment by wire transfer or ACH.
+                  All major credit cards (Visa, Mastercard, Amex) for instant activation. Team, Business, and Enterprise customers can also pay by invoice, wire transfer, or ACH -- whatever works for your accounting department.
                 </p>
               </div>
             </div>
@@ -463,9 +431,9 @@ export default function PricingPage() {
             className="mt-24 text-center bg-dark-surface rounded-3xl p-12 text-white"
           >
             <Users className="h-16 w-16 mx-auto mb-6 text-[#F97316]" />
-            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Workflow?</h2>
+            <h2 className="text-3xl font-bold mb-4">Your Next Project Starts Faster with ForemanOS</h2>
             <p className="text-xl mb-8 text-gray-300 max-w-2xl mx-auto">
-              Join construction professionals who are saving hours every day with AI-powered document intelligence.
+              Upload your first set of plans and get AI-powered analysis in minutes. Free plan, no credit card, no commitment.
             </p>
             <div className="flex justify-center gap-4">
               <Link href="/signup">
@@ -473,7 +441,7 @@ export default function PricingPage() {
                   size="lg"
                   className="bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold"
                 >
-                  Start Free
+                  Upload Your First Plans Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -489,6 +457,9 @@ export default function PricingPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

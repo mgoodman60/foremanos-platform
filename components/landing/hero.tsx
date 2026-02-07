@@ -34,14 +34,14 @@ export function Hero() {
               
               {/* Headline */}
               <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-headline font-bold mb-6 text-balance">
-                AI That Understands
+                Stop Searching Plans.
                 <br />
-                <span className="gradient-text">Construction Plans</span>
+                <span className="gradient-text">Start Getting Answers.</span>
               </h1>
               
               {/* Subheadline */}
               <p className="text-lg md:text-xl text-[var(--color-text-light)] mb-8 text-balance">
-                Extract dimensions, symbols, MEP systems, and code compliance from your drawings—automatically. Get instant answers with exact citations.
+                Upload your drawings. Ask any question. Get cited answers in under 5 seconds—dimensions, MEP clashes, code violations, and material quantities pulled straight from your plans.
               </p>
               
               {/* Key Benefits */}
@@ -49,19 +49,19 @@ export function Hero() {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-6 w-6 text-[var(--color-primary)] flex-shrink-0 mt-0.5" />
                   <p className="text-[var(--color-text-light)] text-left">
-                    <strong className="text-white">Plan Intelligence Engine</strong>—extracts title blocks, scales, symbols, dimensions, and cross-references
+                    <strong className="text-white">Plan Intelligence Engine</strong> — auto-extracts title blocks, scales, symbols, dimensions, and cross-references from every sheet
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-6 w-6 text-[var(--color-primary)] flex-shrink-0 mt-0.5" />
                   <p className="text-[var(--color-text-light)] text-left">
-                    <strong className="text-white">MEP clash detection</strong> with 3D path tracing across mechanical, electrical, and plumbing systems
+                    <strong className="text-white">MEP clash detection</strong> — 3D path tracing finds conflicts across mechanical, electrical, and plumbing before they cost you in the field
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-6 w-6 text-[var(--color-primary)] flex-shrink-0 mt-0.5" />
                   <p className="text-[var(--color-text-light)] text-left">
-                    <strong className="text-white">Code compliance checking</strong> against ADA, IBC, and NFPA with instant violation detection
+                    <strong className="text-white">Code compliance checking</strong> — catch ADA, IBC, and NFPA violations before the inspector does
                   </p>
                 </div>
               </div>
@@ -70,7 +70,7 @@ export function Hero() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/demo">
                   <Button className="btn-ribbon text-white font-bold text-lg px-8 py-4 w-full sm:w-auto min-h-[var(--touch-target)] shadow-2xl border-2 border-yellow-300">
-                    ✨ Try AI Plan Analysis
+                    ✨ Analyze Your First Plan — Free
                   </Button>
                 </Link>
                 <Link href="/pricing">
@@ -78,7 +78,7 @@ export function Hero() {
                     variant="outline"
                     className="text-lg px-8 py-4 w-full sm:w-auto bg-white/10 border-2 border-white text-white hover:bg-white/20 hover:border-[var(--color-primary)] transition-all min-h-[var(--touch-target)]"
                   >
-                    View Plans & Pricing
+                    See Plans — Starting at $15/mo
                   </Button>
                 </Link>
               </div>
@@ -94,7 +94,7 @@ export function Hero() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-[var(--color-text-dark)]">Project Assistant</h3>
-                    <p className="text-xs text-[var(--color-text-muted)]">Always ready to help</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">Answers from your plans, instantly</p>
                   </div>
                 </div>
 
@@ -175,10 +175,10 @@ export function Hero() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-text-dark)] mb-4">
-              Simple. Fast. Intelligent.
+              From Upload to Answers in 60 Seconds
             </h2>
             <p className="text-xl text-[var(--color-text-muted)]">
-              AI analyzes your plans automatically. Get answers in seconds, not hours.
+              No training. No setup calls. Upload your plans and start asking questions.
             </p>
           </div>
           
@@ -187,9 +187,9 @@ export function Hero() {
               <div className="bg-[var(--color-primary)] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-headline font-bold mx-auto mb-4">
                 1
               </div>
-              <h3 className="text-2xl font-headline font-semibold mb-3">Upload Plans</h3>
+              <h3 className="text-2xl font-headline font-semibold mb-3">Upload Your Drawings</h3>
               <p className="text-[var(--color-text-muted)]">
-                Upload PDFs, CAD drawings, specs, and schedules. AI extracts dimensions, symbols, scales, and MEP systems automatically.
+                Drop in PDFs, CAD files, specs, or schedules. AI instantly reads every sheet — extracting dimensions, symbols, scales, and MEP routing.
               </p>
             </div>
             
@@ -197,9 +197,9 @@ export function Hero() {
               <div className="bg-[var(--color-primary)] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-headline font-bold mx-auto mb-4">
                 2
               </div>
-              <h3 className="text-2xl font-headline font-semibold mb-3">AI Analyzes Everything</h3>
+              <h3 className="text-2xl font-headline font-semibold mb-3">AI Maps Your Entire Project</h3>
               <p className="text-[var(--color-text-muted)]">
-                Our intelligence engine maps grid coordinates, traces MEP paths, detects clashes, and validates code compliance—all in real-time.
+                The Plan Intelligence Engine cross-references sheets, traces MEP paths in 3D, detects clashes, and checks code compliance — automatically.
               </p>
             </div>
             
@@ -207,9 +207,9 @@ export function Hero() {
               <div className="bg-[var(--color-primary)] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-headline font-bold mx-auto mb-4">
                 3
               </div>
-              <h3 className="text-2xl font-headline font-semibold mb-3">Get Instant Answers</h3>
+              <h3 className="text-2xl font-headline font-semibold mb-3">Ask Anything, Get Citations</h3>
               <p className="text-[var(--color-text-muted)]">
-                Ask questions in plain English. Receive accurate answers with exact citations from your drawings, specs, and code standards.
+                Ask in plain English. Get accurate answers with exact page and section citations — from your drawings, specs, and code standards.
               </p>
             </div>
           </div>
@@ -221,21 +221,21 @@ export function Hero() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-headline font-bold text-center text-[var(--color-text-dark)] mb-12">
-              Trusted by Construction Professionals
+              Built for the Way Construction Teams Actually Work
             </h2>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-primary)] mb-2">1000+</div>
-                <div className="text-[var(--color-text-muted)]">Documents Processed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-primary)] mb-2">10,000+</div>
-                <div className="text-[var(--color-text-muted)]">Questions Answered</div>
-              </div>
-              <div className="text-center">
                 <div className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-primary)] mb-2">&lt; 5 sec</div>
-                <div className="text-[var(--color-text-muted)]">Average Response Time</div>
+                <div className="text-[var(--color-text-muted)]">Average answer time — with citations</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-primary)] mb-2">112</div>
+                <div className="text-[var(--color-text-muted)]">Data models purpose-built for construction</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-primary)] mb-2">$15/mo</div>
+                <div className="text-[var(--color-text-muted)]">Starter plan — a fraction of Procore or Fieldwire</div>
               </div>
             </div>
           </div>

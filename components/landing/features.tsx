@@ -12,10 +12,10 @@ export function Features() {
         {/* Features Header */}
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-text-dark)] mb-4">
-            Advanced Intelligence for Construction Plans
+            Every Detail in Your Plans, Unlocked by AI
           </h2>
           <p className="text-xl text-[var(--color-text-muted)]">
-            AI-powered plan analysis that extracts dimensions, symbols, callouts, MEP systems, and code compliance—automatically.
+            Dimensions, symbols, MEP routing, code violations, material quantities — extracted and cross-referenced across every sheet in your drawing set.
           </p>
         </div>
         
@@ -26,7 +26,7 @@ export function Features() {
               🧠 Plan Intelligence Engine
             </h3>
             <p className="text-[var(--color-text-muted)]">
-              Our AI automatically analyzes your construction drawings to extract critical data
+              Three phases of AI analysis turn static PDFs into a searchable, cross-referenced project knowledge base
             </p>
           </div>
           
@@ -35,10 +35,10 @@ export function Features() {
               <Ruler className="h-10 w-10 text-blue-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Title Blocks & Scales</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Automatically extracts sheet numbers, drawing scales, and title block metadata. Validates scale accuracy across all plans.
+                Never manually log sheet numbers again. AI reads every title block, extracts drawing scales, and validates scale accuracy across your entire plan set.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Upload Plans →
               </Link>
             </div>
             
@@ -46,10 +46,10 @@ export function Features() {
               <Lightbulb className="h-10 w-10 text-purple-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Symbol Recognition</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Identifies construction symbols against CSI, ASHRAE, IEEE, and IBC standards. AI learns project-specific custom symbols.
+                Identifies 230+ construction symbols across CSI, ASHRAE, IEEE, and IBC standards — and learns your project-specific custom symbols over time.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                See It in Action →
               </Link>
             </div>
             
@@ -57,10 +57,10 @@ export function Features() {
               <FileText className="h-10 w-10 text-green-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Detail Callouts & Cross-References</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Extracts detail callouts and creates bidirectional links between sheets. Navigate complex drawing sets instantly.
+                Stop flipping between sheets. AI maps every detail callout into bidirectional links so you jump from a plan reference to its detail in one click.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Try It Free →
               </Link>
             </div>
             
@@ -68,10 +68,10 @@ export function Features() {
               <Ruler className="h-10 w-10 text-orange-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Dimension Intelligence</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Parses feet-inches, metric, and decimal dimensions. Validates dimension chains and performs automatic quantity calculations.
+                Reads feet-inches, metric, and decimal dimensions from any sheet. Validates dimension chains and flags discrepancies before they reach the field.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Try It Free →
               </Link>
             </div>
             
@@ -79,10 +79,10 @@ export function Features() {
               <Grid3x3 className="h-10 w-10 text-red-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Multi-Sheet Spatial Correlation</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Maps grid coordinates across architectural, structural, and MEP sheets. Find matching locations across all disciplines.
+                Ask about grid line C-4 and get results from architectural, structural, and MEP sheets together. AI maps coordinates across every discipline in your set.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Try It Free →
               </Link>
             </div>
             
@@ -90,10 +90,10 @@ export function Features() {
               <Network className="h-10 w-10 text-indigo-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">MEP Path Tracing & Clash Detection</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Traces mechanical, electrical, and plumbing systems in 3D. Detects hard clashes, clearance violations, and suggests resolutions.
+                Find the duct-to-pipe conflict on paper, not on the jobsite. AI traces M, E, and P systems in 3D, flags hard clashes and clearance violations, and suggests resolutions.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Detect Clashes Now →
               </Link>
             </div>
             
@@ -101,10 +101,10 @@ export function Features() {
               <Eye className="h-10 w-10 text-teal-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Isometric View Interpretation</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Converts 2D isometric drawings into 3D spatial data. Reconstructs piping and ductwork paths from shop drawings.
+                Turn 2D isometric shop drawings into 3D spatial data. AI reconstructs piping and ductwork paths so you can verify routing without a BIM model.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Try It Free →
               </Link>
             </div>
             
@@ -112,10 +112,10 @@ export function Features() {
               <Pin className="h-10 w-10 text-pink-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Visual Annotations</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Click to pin notes directly on drawings. Track RFIs, issues, and markups with priority levels and status tracking.
+                Pin notes, RFIs, and markups directly on your drawings. Every annotation tracks priority, status, and owner — so nothing falls through the cracks.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Try It Free →
               </Link>
             </div>
             
@@ -123,10 +123,10 @@ export function Features() {
               <BarChart className="h-10 w-10 text-amber-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Intelligence Dashboard</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Real-time system health monitoring with AI-generated insights. Track data quality, integration status, and project metrics.
+                See your project's pulse at a glance. Track extraction quality, data completeness, and AI confidence scores — so you know exactly what the system has covered.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                View the Dashboard →
               </Link>
             </div>
           </div>
@@ -139,7 +139,7 @@ export function Features() {
               📋 Complete Project Management
             </h3>
             <p className="text-[var(--color-text-muted)]">
-              Everything you need to manage construction projects efficiently
+              RFIs, submittals, daily reports, budgets, schedules, and field photos — managed in one place, powered by AI
             </p>
           </div>
           
@@ -148,10 +148,10 @@ export function Features() {
               <Search className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">AI Document Search</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Ask questions in plain English. Get instant answers with citations from your plans, specs, and schedules.
+                "What's the slab thickness at grid B-3?" Ask in plain English, get the answer with the exact sheet and section cited. No more digging through 200-page plan sets.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Ask Your First Question →
               </Link>
             </div>
             
@@ -159,10 +159,10 @@ export function Features() {
               <Shield className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Code Compliance Checking</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Automatic verification against ADA 2010, IBC 2021, and NFPA standards. Catch violations before inspections.
+                Check your plans against ADA 2010 standards automatically. Flag accessibility violations, parking requirements, and clearance issues before the inspector arrives.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Run a Compliance Check →
               </Link>
             </div>
             
@@ -170,10 +170,10 @@ export function Features() {
               <Zap className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Quantity Takeoffs</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Extract room dimensions and material quantities from plans. Export to Excel for estimating and procurement.
+                Extract material quantities directly from your drawings — counts, linear footage, square footage — with waste factors applied. Export to Excel for estimating and procurement.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Run a Takeoff →
               </Link>
             </div>
             
@@ -181,10 +181,10 @@ export function Features() {
               <Users className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Team Collaboration</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Role-based permissions for admins, clients, and guests. Manage crews, subcontractors, and project access securely.
+                Give your PM full access, your client view-only dashboards, and your subs exactly the documents they need. Role-based permissions keep every project locked down.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Invite Your Team →
               </Link>
             </div>
             
@@ -192,10 +192,10 @@ export function Features() {
               <Cloud className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">OneDrive Integration</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Connect your OneDrive folder for automatic document sync. New files are processed and indexed instantly.
+                Connect your OneDrive and every new drawing is automatically processed and searchable. No manual uploads — your project folder stays in sync.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Connect OneDrive →
               </Link>
             </div>
             
@@ -203,10 +203,10 @@ export function Features() {
               <BarChart className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Schedule & Cost Tracking</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                Parse MS Project schedules, track progress, and monitor earned value. Weather impact analysis included.
+                Import schedules, track earned value, and spot cost variance early. Built-in weather delay analysis shows you exactly how storms are impacting your timeline.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
-                Get Started →
+                Track Your Project →
               </Link>
             </div>
           </div>
@@ -216,10 +216,10 @@ export function Features() {
         <div className="bg-[var(--bg-secondary)] -mx-4 sm:-mx-6 px-4 sm:px-6 py-20 mt-20">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-headline font-bold text-[var(--color-text-dark)] mb-4">
-              Built for Construction Teams
+              Your Trade. Your Workflows. Your AI.
             </h2>
             <p className="text-xl text-[var(--color-text-muted)]">
-              Whether you're a GC, specialty contractor, or owner's rep.
+              ForemanOS speaks your discipline's language — whether you're coordinating 20 subs or pulling wire on the third floor.
             </p>
           </div>
           
@@ -229,7 +229,7 @@ export function Features() {
                 General Contractors
               </h3>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Coordinate trades and keep everyone aligned on documents.
+                Coordinate subs, track RFIs, manage change orders, and get instant answers from the latest plan set — all in one place.
               </p>
             </Link>
             
@@ -238,7 +238,7 @@ export function Features() {
                 Construction Managers
               </h3>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Complete project oversight with instant document access.
+                Track schedule variance, earned value, and budget burn rate. Daily reports and field photos flow in from every crew automatically.
               </p>
             </Link>
             
@@ -247,7 +247,7 @@ export function Features() {
                 Electrical Contractors
               </h3>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Find load schedules, panel specs, and circuit details.
+                Pull load schedules, panel specs, and circuit details from E-sheets in seconds. AI traces conduit paths and flags clashes with other trades.
               </p>
             </Link>
             
@@ -256,7 +256,7 @@ export function Features() {
                 Plumbing & HVAC
               </h3>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Quick access to fixture counts and equipment specs.
+                Get fixture counts, equipment specs, and pipe sizing from M and P sheets. 3D clash detection catches conflicts with electrical and structural before rough-in.
               </p>
             </Link>
             
@@ -265,7 +265,7 @@ export function Features() {
                 Concrete & Masons
               </h3>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Quick access to foundation details and rebar schedules.
+                Extract foundation details, rebar schedules, and concrete mix specs from structural drawings. Quantity takeoffs calculate CY and tonnage with waste factors.
               </p>
             </Link>
             
@@ -274,7 +274,7 @@ export function Features() {
                 Site Work Contractors
               </h3>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Instant answers from grading plans and utility layouts.
+                Read grading plans, utility layouts, and stormwater details. AI extracts cut/fill quantities, pipe inverts, and setback dimensions from civil sheets.
               </p>
             </Link>
           </div>
@@ -284,23 +284,23 @@ export function Features() {
         <div className="dark-bg -mx-4 sm:-mx-6 px-4 sm:px-6 py-20 mt-20 rounded-xl">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-headline font-bold text-white mb-6">
-              Ready to Bring Clarity to Your Projects?
+              Your Plans Have the Answers. Let AI Find Them.
             </h2>
             <p className="text-xl text-[var(--color-text-light)] mb-8">
-              Start with our Free plan. Upgrade anytime as your needs grow.
+              Free plan includes 50 queries/month and 1 project. No credit card required. Upgrade when you're ready.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/signup">
                 <Button className="btn-ribbon text-white font-bold text-lg px-8 py-4 w-full sm:w-auto min-h-[var(--touch-target)] shadow-2xl border-2 border-yellow-300">
-                  🎉 Get Started Free
+                  🎉 Upload Your First Plan — Free
                 </Button>
               </Link>
               <Link href="/pricing">
-                <Button 
+                <Button
                   variant="outline"
                   className="text-lg px-8 py-4 w-full sm:w-auto bg-white/10 border-2 border-white text-white hover:bg-white/20 hover:border-[var(--color-primary)] transition-all min-h-[var(--touch-target)]"
                 >
-                  View Pricing
+                  Compare Plans — Starting at $15/mo
                 </Button>
               </Link>
             </div>

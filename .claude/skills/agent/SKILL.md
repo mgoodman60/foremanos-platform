@@ -21,6 +21,7 @@ Manage and invoke ForemanOS specialized agents.
 | `tester` | Run tests, generate tests, improve coverage |
 | `fixer` | Fix build errors, bugs, dependency issues |
 | `documenter` | Generate documentation for code, APIs, features |
+| `content-writer` | Marketing copy, feature descriptions, landing pages, changelogs |
 | `database` | Prisma schema, migrations, query optimization |
 | `ui` | React components, design system, accessibility |
 | `ux-design` | User research, design specs, accessibility audits, user flows |

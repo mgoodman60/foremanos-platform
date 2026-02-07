@@ -329,7 +329,7 @@ const Header: React.FC<{ data: DailyReportData }> = ({ data }) => (
         {data.companyLogo ? (
           <Image src={data.companyLogo} style={styles.logo} />
         ) : (
-          <Image src="/foremanos-logo.png" style={styles.logo} />
+          <Image src="/foremanos-new-logo.png" style={styles.logo} />
         )}
       </View>
       <View style={styles.headerText}>
