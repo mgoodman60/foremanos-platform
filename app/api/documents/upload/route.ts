@@ -15,6 +15,7 @@ import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from
 import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 import { getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max for upload
@@ -412,10 +413,13 @@ export async function POST(request: Request) {
     );
   } catch (error: any) {
     const totalTime = Date.now() - startTime;
-    console.error(`[UPLOAD ERROR] Failed after ${totalTime}ms:`, error);
-    console.error('[UPLOAD ERROR] Stack:', error.stack);
-    console.error('[UPLOAD ERROR] Error name:', error.name);
-    console.error('[UPLOAD ERROR] Error code:', error.code);
+    const s3Meta = error.$metadata;
+    logger.error('UPLOAD', `Failed after ${totalTime}ms`, error, {
+      errorName: error.name,
+      errorCode: error.code || error.Code,
+      httpStatus: s3Meta?.httpStatusCode,
+      requestId: s3Meta?.requestId,
+    });
     
     // Return more specific error messages
     let errorMessage = 'Upload failed. Please try again.';
@@ -427,6 +431,9 @@ export async function POST(request: Request) {
     } else if (error.message?.includes('S3') || error.message?.includes('upload')) {
       errorMessage = 'Storage upload failed. Please check your network connection and try again.';
       statusCode = 503; // Service Unavailable
+    } else if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch' || error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+      errorMessage = 'Storage authentication failed. Please contact your administrator to verify storage credentials.';
+      statusCode = 503;
     } else if (error.message?.includes('Prisma') || error.message?.includes('database')) {
       errorMessage = 'Database error while saving document. Please try again.';
       statusCode = 503;

@@ -1,31 +1,34 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock S3Client constructor - must use vi.hoisted() since vi.mock is hoisted above variable declarations
-const mockS3Client = vi.hoisted(() => {
-  class S3Client {
+// Mock S3Client constructor - capture constructor args for credential verification
+const mockS3ClientArgs = vi.hoisted(() => [] as any[]);
+const mockSend = vi.hoisted(() => vi.fn());
+const MockS3Client = vi.hoisted(() => {
+  return class S3Client {
     config: Record<string, unknown>;
-    send: ReturnType<typeof vi.fn>;
+    send = mockSend;
     middlewareStack: Record<string, unknown>;
-    constructor() {
-      this.config = { region: 'us-east-1', serviceId: 'S3' };
-      this.send = vi.fn();
+    constructor(config: any) {
+      mockS3ClientArgs.push(config);
+      this.config = { ...config, serviceId: 'S3' };
       this.middlewareStack = {};
     }
-  }
-  return S3Client;
+  };
 });
 
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: mockS3Client,
+  S3Client: MockS3Client,
+  HeadBucketCommand: vi.fn().mockImplementation((input: any) => ({ input })),
 }));
 
-import { getBucketConfig, createS3Client } from '@/lib/aws-config';
+import { getBucketConfig, createS3Client, validateS3Config, testS3Connectivity } from '@/lib/aws-config';
 
 describe('AWS Config', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockS3ClientArgs.length = 0;
     // Create a fresh copy of environment variables for each test
     process.env = { ...originalEnv };
   });
@@ -195,7 +198,6 @@ describe('AWS Config', () => {
       // Verify the client has the expected send method for operations
       expect(typeof client.send).toBe('function');
       expect(client.config).toBeDefined();
-      expect(client.config).toHaveProperty('region');
     });
 
     it('should create client with default configuration', () => {
@@ -214,6 +216,216 @@ describe('AWS Config', () => {
       expect(client).toHaveProperty('send');
       expect(client).toHaveProperty('config');
       expect(client).toHaveProperty('middlewareStack');
+    });
+
+    it('passes explicit credentials when both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set', () => {
+      process.env.AWS_ACCESS_KEY_ID = 'test-access-key';
+      process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key';
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0]).toHaveProperty('credentials');
+      expect(mockS3ClientArgs[0].credentials).toEqual({
+        accessKeyId: 'test-access-key',
+        secretAccessKey: 'test-secret-key',
+      });
+    });
+
+    it('does not pass credentials when neither env var is set', () => {
+      delete process.env.AWS_ACCESS_KEY_ID;
+      delete process.env.AWS_SECRET_ACCESS_KEY;
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0]).not.toHaveProperty('credentials');
+    });
+
+    it('does not pass credentials when only AWS_ACCESS_KEY_ID is set', () => {
+      process.env.AWS_ACCESS_KEY_ID = 'test-access-key';
+      delete process.env.AWS_SECRET_ACCESS_KEY;
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0]).not.toHaveProperty('credentials');
+    });
+
+    it('does not pass credentials when only AWS_SECRET_ACCESS_KEY is set', () => {
+      delete process.env.AWS_ACCESS_KEY_ID;
+      process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key';
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0]).not.toHaveProperty('credentials');
+    });
+
+    it('sets endpoint and forcePathStyle when S3_ENDPOINT is set', () => {
+      process.env.S3_ENDPOINT = 'https://account-id.r2.cloudflarestorage.com';
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0].endpoint).toBe('https://account-id.r2.cloudflarestorage.com');
+      expect(mockS3ClientArgs[0].forcePathStyle).toBe(true);
+    });
+
+    it('does not set endpoint or forcePathStyle when S3_ENDPOINT is not set', () => {
+      delete process.env.S3_ENDPOINT;
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0]).not.toHaveProperty('endpoint');
+      expect(mockS3ClientArgs[0]).not.toHaveProperty('forcePathStyle');
+    });
+
+    it('uses region from AWS_REGION env var', () => {
+      process.env.AWS_REGION = 'us-west-2';
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0].region).toBe('us-west-2');
+    });
+
+    it("defaults region to 'auto' when AWS_REGION is not set", () => {
+      delete process.env.AWS_REGION;
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      expect(mockS3ClientArgs[0].region).toBe('auto');
+    });
+
+    it('passes full R2 configuration with endpoint, credentials, and region', () => {
+      process.env.S3_ENDPOINT = 'https://account-id.r2.cloudflarestorage.com';
+      process.env.AWS_ACCESS_KEY_ID = 'r2-access-key';
+      process.env.AWS_SECRET_ACCESS_KEY = 'r2-secret-key';
+      process.env.AWS_REGION = 'auto';
+
+      createS3Client();
+
+      expect(mockS3ClientArgs).toHaveLength(1);
+      const config = mockS3ClientArgs[0];
+      expect(config.region).toBe('auto');
+      expect(config.endpoint).toBe('https://account-id.r2.cloudflarestorage.com');
+      expect(config.forcePathStyle).toBe(true);
+      expect(config.credentials).toEqual({
+        accessKeyId: 'r2-access-key',
+        secretAccessKey: 'r2-secret-key',
+      });
+    });
+  });
+
+  describe('validateS3Config', () => {
+    it('returns valid when all required vars are set', () => {
+      process.env.S3_ENDPOINT = 'https://account-id.r2.cloudflarestorage.com';
+      process.env.AWS_ACCESS_KEY_ID = 'test-access-key';
+      process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key';
+      process.env.AWS_BUCKET_NAME = 'test-bucket';
+
+      const result = validateS3Config();
+
+      expect(result.valid).toBe(true);
+      expect(result.missing).toEqual([]);
+    });
+
+    it('returns invalid with missing vars listed when S3_ENDPOINT is not set', () => {
+      delete process.env.S3_ENDPOINT;
+      process.env.AWS_ACCESS_KEY_ID = 'test-access-key';
+      process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key';
+      process.env.AWS_BUCKET_NAME = 'test-bucket';
+
+      const result = validateS3Config();
+
+      expect(result.valid).toBe(false);
+      expect(result.missing).toContain('S3_ENDPOINT');
+    });
+
+    it('returns invalid with all missing vars when none are set', () => {
+      delete process.env.S3_ENDPOINT;
+      delete process.env.AWS_ACCESS_KEY_ID;
+      delete process.env.AWS_SECRET_ACCESS_KEY;
+      delete process.env.AWS_BUCKET_NAME;
+
+      const result = validateS3Config();
+
+      expect(result.valid).toBe(false);
+      expect(result.missing).toEqual([
+        'S3_ENDPOINT',
+        'AWS_ACCESS_KEY_ID',
+        'AWS_SECRET_ACCESS_KEY',
+        'AWS_BUCKET_NAME',
+      ]);
+    });
+
+    it('returns invalid when only some vars are missing', () => {
+      process.env.S3_ENDPOINT = 'https://account-id.r2.cloudflarestorage.com';
+      delete process.env.AWS_ACCESS_KEY_ID;
+      process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key';
+      delete process.env.AWS_BUCKET_NAME;
+
+      const result = validateS3Config();
+
+      expect(result.valid).toBe(false);
+      expect(result.missing).toContain('AWS_ACCESS_KEY_ID');
+      expect(result.missing).toContain('AWS_BUCKET_NAME');
+      expect(result.missing).not.toContain('S3_ENDPOINT');
+      expect(result.missing).not.toContain('AWS_SECRET_ACCESS_KEY');
+    });
+  });
+
+  describe('testS3Connectivity', () => {
+    it('returns ok when HeadBucket succeeds', async () => {
+      process.env.AWS_BUCKET_NAME = 'test-bucket';
+      mockSend.mockResolvedValueOnce({});
+
+      const result = await testS3Connectivity();
+
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('returns error details when HeadBucket fails', async () => {
+      process.env.AWS_BUCKET_NAME = 'test-bucket';
+      const s3Error = Object.assign(new Error('Access Denied'), {
+        name: 'AccessDenied',
+        Code: 'AccessDenied',
+        $metadata: { httpStatusCode: 403 },
+      });
+      mockSend.mockRejectedValueOnce(s3Error);
+
+      const result = await testS3Connectivity();
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe('Access Denied');
+      expect(result.errorCode).toBe('AccessDenied');
+      expect(result.httpStatus).toBe(403);
+    });
+
+    it('returns not configured when bucket name is empty', async () => {
+      delete process.env.AWS_BUCKET_NAME;
+
+      const result = await testS3Connectivity();
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe('AWS_BUCKET_NAME not configured');
+    });
+
+    it('returns error when HeadBucket throws a network error', async () => {
+      process.env.AWS_BUCKET_NAME = 'test-bucket';
+      const networkError = Object.assign(new Error('getaddrinfo ENOTFOUND'), {
+        name: 'NetworkingError',
+      });
+      mockSend.mockRejectedValueOnce(networkError);
+
+      const result = await testS3Connectivity();
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe('getaddrinfo ENOTFOUND');
+      expect(result.errorCode).toBe('NetworkingError');
     });
   });
 

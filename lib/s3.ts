@@ -6,6 +6,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createS3Client, getBucketConfig } from "./aws-config";
+import { logger } from './logger';
 
 // Re-export for use by other modules
 export { createS3Client, getBucketConfig };
@@ -18,6 +19,18 @@ function getS3Client(): S3Client {
   }
   return _s3Client;
 }
+
+/** Reset the cached S3 client (e.g., after auth failure). */
+export function resetS3Client(): void {
+  _s3Client = null;
+}
+
+function isS3AuthError(error: unknown): boolean {
+  const err = error as Error & { name?: string; Code?: string; $metadata?: { httpStatusCode?: number } };
+  const authNames = ['InvalidAccessKeyId', 'SignatureDoesNotMatch', 'AccessDenied', 'InvalidSecurity'];
+  return authNames.includes(err.name || '') || authNames.includes(err.Code || '') || err.$metadata?.httpStatusCode === 403;
+}
+
 const AWS_REGION = process.env.AWS_REGION || "us-east-1";
 
 /**
@@ -49,7 +62,7 @@ export async function uploadFile(
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      console.log(`[S3 UPLOAD] Attempt ${attempt + 1}/${retries + 1} for ${fileName} (${(buffer.length / 1024 / 1024).toFixed(2)}MB)`);
+      logger.info('S3_UPLOAD', `Attempt ${attempt + 1}/${retries + 1} for ${fileName} (${(buffer.length / 1024 / 1024).toFixed(2)}MB)`);
       
       // Upload to S3 with timeout protection
       const command = new PutObjectCommand({
@@ -72,16 +85,27 @@ export async function uploadFile(
         timeoutPromise,
       ]);
 
-      console.log(`[S3 UPLOAD] Successfully uploaded ${fileName} to ${cloud_storage_path}`);
+      logger.info('S3_UPLOAD', `Successfully uploaded ${fileName} to ${cloud_storage_path}`);
       return cloud_storage_path;
     } catch (error: unknown) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      console.error(`[S3 UPLOAD ERROR] Attempt ${attempt + 1} failed for ${fileName}:`, lastError.message);
-      
-      // If this is not the last attempt, wait before retrying
+      const s3Error = error as Error & { name?: string; Code?: string; $metadata?: { httpStatusCode?: number; requestId?: string }; $fault?: string };
+      logger.error('S3_UPLOAD', `Attempt ${attempt + 1}/${retries + 1} failed for ${fileName}`, lastError, {
+        bucket: bucketName,
+        key: cloud_storage_path,
+        errorCode: s3Error.Code || s3Error.name,
+        httpStatus: s3Error.$metadata?.httpStatusCode,
+        requestId: s3Error.$metadata?.requestId,
+      });
+
+      if (isS3AuthError(error)) {
+        logger.warn('S3_UPLOAD', 'Auth error detected, resetting S3 client');
+        resetS3Client();
+      }
+
       if (attempt < retries) {
-        const waitTime = (attempt + 1) * 1000; // Exponential backoff: 1s, 2s
-        console.log(`[S3 UPLOAD] Retrying in ${waitTime}ms...`);
+        const waitTime = (attempt + 1) * 1000;
+        logger.info('S3_UPLOAD', `Retrying in ${waitTime}ms...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }

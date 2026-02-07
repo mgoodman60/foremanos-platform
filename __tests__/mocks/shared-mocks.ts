@@ -388,3 +388,18 @@ export const shouldBlockMacroFileMock = vi.fn().mockReturnValue(false);
 vi.mock('@/lib/macro-detector', () => ({
   shouldBlockMacroFile: shouldBlockMacroFileMock,
 }));
+
+// ============================================
+// Logger Mocks
+// ============================================
+export const mockLogger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+  createScopedLogger: vi.fn().mockReturnValue(mockLogger),
+}));

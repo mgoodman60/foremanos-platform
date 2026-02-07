@@ -10,6 +10,7 @@ import { canProcessDocument, getProcessingLimits } from '@/lib/processing-limits
 import { classifyDocument } from '@/lib/document-classifier';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { processDocument } from '@/lib/document-processor';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -73,13 +74,6 @@ export async function POST(request: Request) {
     // Retrieve and combine all chunks from S3
     const s3Client = createS3Client();
     const { bucketName, folderPrefix } = getBucketConfig();
-
-    if (!bucketName) {
-      return NextResponse.json(
-        { error: 'Document storage is not configured. Please contact your administrator to set up file storage.' },
-        { status: 503 }
-      );
-    }
 
     console.log(`[COMPLETE] Retrieving ${totalChunks} chunks...`);
     const chunkBuffers: Buffer[] = [];
@@ -243,10 +237,24 @@ export async function POST(request: Request) {
         : 'Document uploaded but quota exceeded - document will not be processed',
     });
   } catch (error: any) {
-    console.error('[COMPLETE ERROR]', error);
+    const s3Meta = error.$metadata;
+    logger.error('UPLOAD_COMPLETE', 'Failed to complete upload', error, {
+      errorCode: error.Code || error.name,
+      httpStatus: s3Meta?.httpStatusCode,
+      requestId: s3Meta?.requestId,
+    });
+
+    let statusCode = 500;
+    let errorMessage = 'Failed to complete upload';
+
+    if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch' || error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+      errorMessage = 'Storage authentication failed. Please contact your administrator.';
+      statusCode = 503;
+    }
+
     return NextResponse.json(
-      { error: 'Failed to complete upload', details: error.message },
-      { status: 500 }
+      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      { status: statusCode }
     );
   }
 }

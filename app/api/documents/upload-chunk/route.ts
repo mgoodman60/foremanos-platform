@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -65,10 +66,24 @@ export async function POST(request: Request) {
       message: `Chunk ${chunkIndex + 1}/${totalChunks} uploaded`,
     });
   } catch (error: any) {
-    console.error('[CHUNK ERROR]', error);
+    const s3Meta = error.$metadata;
+    logger.error('CHUNK_UPLOAD', 'Failed to upload chunk', error, {
+      errorCode: error.Code || error.name,
+      httpStatus: s3Meta?.httpStatusCode,
+      requestId: s3Meta?.requestId,
+    });
+
+    let statusCode = 500;
+    let errorMessage = 'Failed to upload chunk';
+
+    if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch' || error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+      errorMessage = 'Storage authentication failed. Please contact your administrator.';
+      statusCode = 503;
+    }
+
     return NextResponse.json(
-      { error: 'Failed to upload chunk', details: error.message },
-      { status: 500 }
+      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      { status: statusCode }
     );
   }
 }
