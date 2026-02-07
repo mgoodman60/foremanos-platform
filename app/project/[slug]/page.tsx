@@ -401,9 +401,13 @@ export default function ProjectPage() {
     if (!res.ok) {
       // Try to parse as JSON, but handle plain text errors
       let errorMessage = 'Failed to upload document';
+      let errorCode: string | undefined;
+      let retryAdvice: string | undefined;
       try {
         const data = await res.json();
         errorMessage = data.error || errorMessage;
+        errorCode = data.errorCode;
+        retryAdvice = data.retryAdvice;
       } catch (jsonError) {
         // Response is not JSON, try to get text
         try {
@@ -414,7 +418,14 @@ export default function ProjectPage() {
           errorMessage = `Upload failed: ${res.statusText}`;
         }
       }
-      throw new Error(errorMessage);
+      const parts = [errorMessage];
+      if (errorCode) {
+        parts[0] = `[${errorCode}] ${parts[0]}`;
+      }
+      if (retryAdvice) {
+        parts.push(retryAdvice);
+      }
+      throw new Error(parts.join(' — '));
     }
   };
 

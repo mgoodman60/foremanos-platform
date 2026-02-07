@@ -225,17 +225,38 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
+            let errorMessage = 'Failed to upload document';
+            let errorCode: string | undefined;
+            let retryAdvice: string | undefined;
             try {
               const data = JSON.parse(xhr.responseText);
-              reject(new Error(data.error || 'Failed to upload document'));
+              errorMessage = data.error || errorMessage;
+              errorCode = data.errorCode;
+              retryAdvice = data.retryAdvice;
             } catch {
-              reject(new Error('Failed to upload document'));
+              // JSON parse failed — use raw response text as fallback
+              const rawText = xhr.responseText?.trim();
+              if (rawText) {
+                errorMessage = rawText;
+              } else if (xhr.statusText) {
+                errorMessage = `Upload failed: ${xhr.statusText}`;
+              }
             }
+
+            // Build a detailed error message with errorCode and retryAdvice
+            const parts = [errorMessage];
+            if (errorCode) {
+              parts[0] = `[${errorCode}] ${parts[0]}`;
+            }
+            if (retryAdvice) {
+              parts.push(retryAdvice);
+            }
+            reject(new Error(parts.join(' — ')));
           }
         });
 
         xhr.addEventListener('error', () => {
-          reject(new Error('Network error during upload'));
+          reject(new Error('Network error — check your connection and try again'));
         });
 
         xhr.open('POST', '/api/documents/upload');

@@ -111,8 +111,15 @@ export async function uploadFile(
     }
   }
 
-  // All retries failed
-  throw new Error(`S3 upload failed after ${retries + 1} attempts: ${lastError?.message}`);
+  // All retries failed — attach structured info for upstream error handling
+  const s3Err = lastError as Error & { name?: string; Code?: string; $metadata?: { httpStatusCode?: number } };
+  const errorCode = s3Err?.Code || s3Err?.name || 'UNKNOWN';
+  const uploadError = new Error(`S3 upload failed after ${retries + 1} attempts: ${lastError?.message}`);
+  (uploadError as any).code = errorCode;
+  (uploadError as any).isTimeout = lastError?.message?.includes('timeout') ?? false;
+  (uploadError as any).isAuthError = isS3AuthError(lastError);
+  (uploadError as any).httpStatus = s3Err?.$metadata?.httpStatusCode;
+  throw uploadError;
 }
 
 /**

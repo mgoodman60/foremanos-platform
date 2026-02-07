@@ -594,3 +594,262 @@ describe('S3 Module - uploadFile operation', () => {
     );
   });
 });
+
+// ============================================
+// New Tests: uploadFile error property propagation
+// ============================================
+
+describe('S3 Module - uploadFile error details', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetS3Client();
+    mockCreateS3Client.mockReturnValue(mockClientInstance);
+    mockGetBucketConfig.mockReturnValue({
+      bucketName: 'test-bucket',
+      folderPrefix: 'foremanos/',
+    });
+  });
+
+  it('should include original error message in thrown error', async () => {
+    const s3Error = Object.assign(new Error('NoSuchBucket: bucket not found'), {
+      name: 'NoSuchBucket',
+      Code: 'NoSuchBucket',
+      $metadata: { httpStatusCode: 404 },
+    });
+    mockSend.mockRejectedValue(s3Error);
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 0)
+    ).rejects.toThrow(/NoSuchBucket/);
+  });
+
+  it('should throw error that includes attempt count in message', async () => {
+    mockSend.mockRejectedValue(new Error('Connection refused'));
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 2)
+    ).rejects.toThrow('S3 upload failed after 3 attempts');
+  });
+
+  it('should throw error with timeout message preserved', async () => {
+    // Simulate a timeout scenario — send hangs forever, timeout fires
+    mockSend.mockImplementation(() => new Promise(() => {})); // Never resolves
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 50, 0)
+    ).rejects.toThrow(/timeout/i);
+  });
+
+  it('should log S3 error metadata on each failed attempt', async () => {
+    const s3Error = Object.assign(new Error('Access denied'), {
+      name: 'AccessDenied',
+      Code: 'AccessDenied',
+      $metadata: { httpStatusCode: 403, requestId: 'req-abc' },
+    });
+    mockSend.mockRejectedValue(s3Error);
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 1)
+    ).rejects.toThrow();
+
+    // Should have logged error metadata for each attempt (2 attempts: 0 and 1)
+    expect(mockLogger.error).toHaveBeenCalledTimes(2);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.stringContaining('Attempt 1/2 failed'),
+      expect.any(Error),
+      expect.objectContaining({
+        bucket: 'test-bucket',
+        errorCode: 'AccessDenied',
+        httpStatus: 403,
+        requestId: 'req-abc',
+      })
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.stringContaining('Attempt 2/2 failed'),
+      expect.any(Error),
+      expect.objectContaining({
+        errorCode: 'AccessDenied',
+        httpStatus: 403,
+      })
+    );
+  });
+
+  it('should handle non-Error objects thrown by S3 client', async () => {
+    mockSend.mockRejectedValue('string error');
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 0)
+    ).rejects.toThrow('S3 upload failed after 1 attempts: string error');
+  });
+
+  it('should handle errors without Code or $metadata properties', async () => {
+    const bareError = new Error('Something broke');
+    mockSend.mockRejectedValue(bareError);
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 0)
+    ).rejects.toThrow('S3 upload failed after 1 attempts: Something broke');
+
+    // Logger should still be called; bare Error has .name = 'Error' (no Code)
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.any(String),
+      expect.any(Error),
+      expect.objectContaining({
+        bucket: 'test-bucket',
+        errorCode: 'Error', // plain Error's .name is 'Error'
+        httpStatus: undefined,
+        requestId: undefined,
+      })
+    );
+  });
+
+  it('should prefer Code over name for error code in logs', async () => {
+    const s3Error = Object.assign(new Error('test'), {
+      name: 'S3ServiceException',
+      Code: 'SlowDown',
+      $metadata: { httpStatusCode: 503, requestId: 'req-xyz' },
+    });
+    mockSend.mockRejectedValue(s3Error);
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 0)
+    ).rejects.toThrow();
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.any(String),
+      expect.any(Error),
+      expect.objectContaining({
+        errorCode: 'SlowDown',
+      })
+    );
+  });
+
+  it('should use name when Code is not available', async () => {
+    const s3Error = Object.assign(new Error('test'), {
+      name: 'NetworkingError',
+      $metadata: {},
+    });
+    mockSend.mockRejectedValue(s3Error);
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 0)
+    ).rejects.toThrow();
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.any(String),
+      expect.any(Error),
+      expect.objectContaining({
+        errorCode: 'NetworkingError',
+      })
+    );
+  });
+});
+
+// ============================================
+// New Tests: uploadFile retry exhaustion with different error types
+// ============================================
+
+describe('S3 Module - uploadFile retry with mixed errors', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetS3Client();
+    mockCreateS3Client.mockReturnValue(mockClientInstance);
+    mockGetBucketConfig.mockReturnValue({
+      bucketName: 'test-bucket',
+      folderPrefix: 'foremanos/',
+    });
+  });
+
+  it('should reset client on auth error then retry with new client', async () => {
+    const authError = Object.assign(new Error('Invalid key'), {
+      name: 'InvalidAccessKeyId',
+      $metadata: { httpStatusCode: 403 },
+    });
+    // First attempt: auth error, second attempt: success
+    mockSend.mockRejectedValueOnce(authError).mockResolvedValueOnce({});
+
+    const result = await uploadFile(Buffer.from('test'), 'file.pdf', false, 120000, 1);
+
+    expect(result).toMatch(/file\.pdf$/);
+    // Auth error should have triggered client reset
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      'Auth error detected, resetting S3 client'
+    );
+    // Should have created a new client after reset
+    expect(mockCreateS3Client.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should not reset client on non-auth 500 errors', async () => {
+    const serverError = Object.assign(new Error('Internal Server Error'), {
+      name: 'InternalError',
+      Code: 'InternalError',
+      $metadata: { httpStatusCode: 500 },
+    });
+    mockSend.mockRejectedValue(serverError);
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 0)
+    ).rejects.toThrow();
+
+    expect(mockLogger.warn).not.toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      'Auth error detected, resetting S3 client'
+    );
+  });
+
+  it('should count all attempts including retries in error message', async () => {
+    mockSend.mockRejectedValue(new Error('fail'));
+
+    try {
+      await uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 4);
+    } catch (error: any) {
+      expect(error.message).toBe('S3 upload failed after 5 attempts: fail');
+    }
+  });
+
+  it('should handle timeout on first attempt and succeed on retry', async () => {
+    // First attempt: hangs (timeout after 50ms), second attempt: succeeds
+    let callCount = 0;
+    mockSend.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return new Promise(() => {}); // Never resolves → triggers timeout
+      }
+      return Promise.resolve({});
+    });
+
+    const result = await uploadFile(Buffer.from('test'), 'file.pdf', false, 50, 1);
+
+    expect(result).toMatch(/file\.pdf$/);
+    expect(callCount).toBe(2);
+  });
+
+  it('should log each retry attempt with incrementing attempt numbers', async () => {
+    mockSend.mockRejectedValue(new Error('flaky'));
+
+    await expect(
+      uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 2)
+    ).rejects.toThrow();
+
+    // 3 attempts total (0, 1, 2)
+    expect(mockLogger.error).toHaveBeenCalledTimes(3);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.stringContaining('Attempt 1/3')
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.stringContaining('Attempt 2/3')
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'S3_UPLOAD',
+      expect.stringContaining('Attempt 3/3')
+    );
+  });
+});

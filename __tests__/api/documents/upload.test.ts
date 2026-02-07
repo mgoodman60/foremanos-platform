@@ -22,6 +22,389 @@ import {
 } from '../../helpers/test-utils';
 import { POST } from '@/app/api/documents/upload/route';
 
+// ============================================
+// Upload Error Classification Tests (NOT skipped)
+// These test the error classification logic that the catch block uses,
+// independent of the FormData limitation.
+// ============================================
+
+/**
+ * Replicates the error classification logic from the upload route's catch block.
+ * This allows us to test the classification independently of FormData.
+ */
+function classifyUploadError(error: any): {
+  errorCode: string;
+  statusCode: number;
+  retryAdvice: string;
+  errorMessage: string;
+} {
+  const s3Meta = error.$metadata;
+
+  const isTimeout = error.isTimeout
+    || error.message?.includes('timeout')
+    || error.message?.includes('timed out')
+    || error.code === 'ETIMEDOUT';
+  const isAuthError = error.isAuthError
+    || error.name === 'InvalidAccessKeyId'
+    || error.name === 'SignatureDoesNotMatch'
+    || error.name === 'AccessDenied'
+    || error.$metadata?.httpStatusCode === 403;
+  const isNetworkError = error.code === 'ECONNRESET'
+    || error.code === 'ECONNREFUSED'
+    || error.code === 'ENOTFOUND'
+    || error.message?.includes('network')
+    || error.message?.includes('ECONNREFUSED');
+  const isDbError = error.message?.includes('Prisma')
+    || error.message?.includes('database');
+  const isS3Error = error.message?.includes('S3')
+    || error.message?.includes('upload')
+    || error.code === 'NoSuchBucket'
+    || !!error.httpStatus
+    || !!s3Meta;
+
+  let errorMessage: string;
+  let errorCode: string;
+  let statusCode: number;
+  let retryAdvice: string;
+
+  if (isAuthError) {
+    errorCode = 'S3_AUTH_ERROR';
+    errorMessage = 'Storage authentication failed. Please contact your administrator to verify storage credentials.';
+    statusCode = 503;
+    retryAdvice = 'Contact your administrator — storage credentials may need updating.';
+  } else if (isTimeout) {
+    errorCode = 'S3_TIMEOUT';
+    errorMessage = 'Upload timed out. The file may be too large or the connection is slow.';
+    statusCode = 504;
+    retryAdvice = 'The file may be too large or the connection is slow. Try again or use a smaller file.';
+  } else if (isDbError) {
+    errorCode = 'DB_ERROR';
+    errorMessage = 'Database error while saving document. Please try again.';
+    statusCode = 503;
+    retryAdvice = 'A temporary database error occurred. Please try again in a few moments.';
+  } else if (isNetworkError) {
+    errorCode = 'NETWORK_ERROR';
+    errorMessage = 'Network connection error. Please check your internet connection and try again.';
+    statusCode = 503;
+    retryAdvice = 'Check your internet connection and try again.';
+  } else if (isS3Error) {
+    errorCode = 'S3_ERROR';
+    errorMessage = 'Storage upload failed. Please check your network connection and try again.';
+    statusCode = 503;
+    retryAdvice = 'If the issue persists, try uploading a smaller file or contact support.';
+  } else {
+    errorCode = 'UPLOAD_ERROR';
+    errorMessage = 'Upload failed. Please try again.';
+    statusCode = 500;
+    retryAdvice = 'If the issue persists, try uploading a smaller file or contact support.';
+  }
+
+  return { errorCode, statusCode, retryAdvice, errorMessage };
+}
+
+describe('Upload Error Classification', () => {
+  describe('S3 Auth Errors', () => {
+    it('should classify InvalidAccessKeyId as S3_AUTH_ERROR', () => {
+      const error = Object.assign(new Error('Invalid access key'), {
+        name: 'InvalidAccessKeyId',
+        $metadata: { httpStatusCode: 403 },
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_AUTH_ERROR');
+      expect(result.statusCode).toBe(503);
+      expect(result.retryAdvice).toContain('administrator');
+    });
+
+    it('should classify SignatureDoesNotMatch as S3_AUTH_ERROR', () => {
+      const error = Object.assign(new Error('Sig mismatch'), {
+        name: 'SignatureDoesNotMatch',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_AUTH_ERROR');
+      expect(result.statusCode).toBe(503);
+    });
+
+    it('should classify AccessDenied as S3_AUTH_ERROR', () => {
+      const error = Object.assign(new Error('Access denied'), {
+        name: 'AccessDenied',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_AUTH_ERROR');
+    });
+
+    it('should classify HTTP 403 without named error as S3_AUTH_ERROR', () => {
+      const error = Object.assign(new Error('Forbidden'), {
+        name: 'S3ServiceException',
+        $metadata: { httpStatusCode: 403 },
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_AUTH_ERROR');
+      expect(result.statusCode).toBe(503);
+    });
+
+    it('should classify error with isAuthError=true as S3_AUTH_ERROR', () => {
+      const error = Object.assign(new Error('Auth failed'), {
+        isAuthError: true,
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_AUTH_ERROR');
+    });
+  });
+
+  describe('Timeout Errors', () => {
+    it('should classify "timeout" in message as S3_TIMEOUT', () => {
+      const error = new Error('S3 upload timeout after 120000ms');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_TIMEOUT');
+      expect(result.statusCode).toBe(504);
+    });
+
+    it('should classify "timed out" in message as S3_TIMEOUT', () => {
+      const error = new Error('Request timed out');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_TIMEOUT');
+      expect(result.statusCode).toBe(504);
+    });
+
+    it('should classify ETIMEDOUT code as S3_TIMEOUT', () => {
+      const error = Object.assign(new Error('Connection timed out'), {
+        code: 'ETIMEDOUT',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_TIMEOUT');
+      expect(result.statusCode).toBe(504);
+    });
+
+    it('should classify error with isTimeout=true as S3_TIMEOUT', () => {
+      const error = Object.assign(new Error('Upload failed'), {
+        isTimeout: true,
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_TIMEOUT');
+    });
+
+    it('should include retry advice about file size for timeouts', () => {
+      const error = new Error('Request timed out');
+      const result = classifyUploadError(error);
+      expect(result.retryAdvice).toContain('smaller file');
+    });
+  });
+
+  describe('Database Errors', () => {
+    it('should classify Prisma errors as DB_ERROR', () => {
+      const error = new Error('Prisma client connection failed');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('DB_ERROR');
+      expect(result.statusCode).toBe(503);
+    });
+
+    it('should classify "database" in message as DB_ERROR', () => {
+      const error = new Error('database connection reset');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('DB_ERROR');
+      expect(result.statusCode).toBe(503);
+      expect(result.retryAdvice).toContain('try again');
+    });
+  });
+
+  describe('Network Errors', () => {
+    it('should classify ECONNRESET as NETWORK_ERROR', () => {
+      const error = Object.assign(new Error('Connection reset'), {
+        code: 'ECONNRESET',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('NETWORK_ERROR');
+      expect(result.statusCode).toBe(503);
+    });
+
+    it('should classify ECONNREFUSED code as NETWORK_ERROR', () => {
+      const error = Object.assign(new Error('Connection refused'), {
+        code: 'ECONNREFUSED',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('NETWORK_ERROR');
+    });
+
+    it('should classify ENOTFOUND as NETWORK_ERROR', () => {
+      const error = Object.assign(new Error('DNS lookup failed'), {
+        code: 'ENOTFOUND',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('NETWORK_ERROR');
+    });
+
+    it('should classify "network" in message as NETWORK_ERROR', () => {
+      const error = new Error('network error occurred');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('NETWORK_ERROR');
+      expect(result.retryAdvice).toContain('internet connection');
+    });
+
+    it('should classify "ECONNREFUSED" in message as NETWORK_ERROR', () => {
+      const error = new Error('connect ECONNREFUSED 127.0.0.1:5432');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('NETWORK_ERROR');
+    });
+  });
+
+  describe('S3 Errors', () => {
+    it('should classify "S3" in message as S3_ERROR', () => {
+      const error = new Error('S3 upload failed after 3 attempts');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_ERROR');
+      expect(result.statusCode).toBe(503);
+    });
+
+    it('should classify "upload" in message as S3_ERROR', () => {
+      const error = new Error('upload stream interrupted');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_ERROR');
+      expect(result.statusCode).toBe(503);
+    });
+
+    it('should classify NoSuchBucket code as S3_ERROR', () => {
+      const error = Object.assign(new Error('Bucket not found'), {
+        code: 'NoSuchBucket',
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_ERROR');
+    });
+
+    it('should classify errors with $metadata as S3_ERROR', () => {
+      const error = Object.assign(new Error('S3 service error'), {
+        $metadata: { httpStatusCode: 500 },
+      });
+      const result = classifyUploadError(error);
+      // Note: 500 without auth patterns -> S3_ERROR (has $metadata)
+      expect(result.errorCode).toBe('S3_ERROR');
+    });
+
+    it('should classify errors with httpStatus property as S3_ERROR', () => {
+      const error = Object.assign(new Error('Storage error'), {
+        httpStatus: 500,
+      });
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('S3_ERROR');
+    });
+  });
+
+  describe('Generic Errors', () => {
+    it('should classify unknown errors as UPLOAD_ERROR', () => {
+      const error = new Error('Something unexpected happened');
+      const result = classifyUploadError(error);
+      expect(result.errorCode).toBe('UPLOAD_ERROR');
+      expect(result.statusCode).toBe(500);
+    });
+
+    it('should return generic retry advice for unknown errors', () => {
+      const error = new Error('Unknown');
+      const result = classifyUploadError(error);
+      expect(result.retryAdvice).toContain('contact support');
+    });
+  });
+
+  describe('Priority Order', () => {
+    it('should prioritize auth over timeout when both match', () => {
+      // Error that matches both auth and timeout patterns
+      const error = Object.assign(new Error('Request timed out'), {
+        name: 'AccessDenied',
+      });
+      const result = classifyUploadError(error);
+      // Auth is checked first in the if/else chain
+      expect(result.errorCode).toBe('S3_AUTH_ERROR');
+    });
+
+    it('should prioritize timeout over DB when both match', () => {
+      const error = new Error('database operation timed out');
+      const result = classifyUploadError(error);
+      // timeout is checked before DB in the if/else chain
+      expect(result.errorCode).toBe('S3_TIMEOUT');
+    });
+
+    it('should prioritize DB over network when both match', () => {
+      const error = Object.assign(new Error('Prisma client error'), {
+        code: 'ECONNREFUSED',
+      });
+      const result = classifyUploadError(error);
+      // DB is checked before network in the if/else chain
+      expect(result.errorCode).toBe('DB_ERROR');
+    });
+  });
+
+  describe('Technical Details Construction', () => {
+    it('should build technicalDetails from error.code', () => {
+      const error = Object.assign(new Error('test'), {
+        code: 'NoSuchBucket',
+      });
+      // Replicate the technicalDetails construction from the route
+      const s3Meta = error.$metadata;
+      const technicalDetails: Record<string, string | number | undefined> = {
+        errorCode: (error as any).code || (error as any).Code || error.name || undefined,
+        httpStatus: s3Meta?.httpStatusCode || (error as any).httpStatus || undefined,
+        attempts: (error as any).attempts || undefined,
+      };
+      for (const key of Object.keys(technicalDetails)) {
+        if (technicalDetails[key] === undefined) delete technicalDetails[key];
+      }
+
+      expect(technicalDetails).toEqual({ errorCode: 'NoSuchBucket' });
+    });
+
+    it('should build technicalDetails from error.Code (S3 style)', () => {
+      const error = Object.assign(new Error('test'), {
+        Code: 'SlowDown',
+        $metadata: { httpStatusCode: 503 },
+      });
+      const s3Meta = (error as any).$metadata;
+      const technicalDetails: Record<string, string | number | undefined> = {
+        errorCode: (error as any).code || (error as any).Code || error.name || undefined,
+        httpStatus: s3Meta?.httpStatusCode || (error as any).httpStatus || undefined,
+        attempts: (error as any).attempts || undefined,
+      };
+      for (const key of Object.keys(technicalDetails)) {
+        if (technicalDetails[key] === undefined) delete technicalDetails[key];
+      }
+
+      expect(technicalDetails).toEqual({ errorCode: 'SlowDown', httpStatus: 503 });
+    });
+
+    it('should include attempts when present on error', () => {
+      const error = Object.assign(new Error('S3 upload failed after 3 attempts'), {
+        attempts: 3,
+      });
+      const s3Meta = (error as any).$metadata;
+      const technicalDetails: Record<string, string | number | undefined> = {
+        errorCode: (error as any).code || (error as any).Code || error.name || undefined,
+        httpStatus: s3Meta?.httpStatusCode || (error as any).httpStatus || undefined,
+        attempts: (error as any).attempts || undefined,
+      };
+      for (const key of Object.keys(technicalDetails)) {
+        if (technicalDetails[key] === undefined) delete technicalDetails[key];
+      }
+
+      expect(technicalDetails).toEqual({ errorCode: 'Error', attempts: 3 });
+    });
+
+    it('should omit all undefined keys', () => {
+      const error = new Error('basic error');
+      const s3Meta = (error as any).$metadata;
+      const technicalDetails: Record<string, string | number | undefined> = {
+        errorCode: (error as any).code || (error as any).Code || error.name || undefined,
+        httpStatus: s3Meta?.httpStatusCode || (error as any).httpStatus || undefined,
+        attempts: (error as any).attempts || undefined,
+      };
+      for (const key of Object.keys(technicalDetails)) {
+        if (technicalDetails[key] === undefined) delete technicalDetails[key];
+      }
+
+      // Only errorCode should remain (from error.name = 'Error')
+      expect(technicalDetails).toEqual({ errorCode: 'Error' });
+      expect(technicalDetails).not.toHaveProperty('httpStatus');
+      expect(technicalDetails).not.toHaveProperty('attempts');
+    });
+  });
+});
+
 // Helper to create upload request with FormData
 function createUploadRequest(
   file: File | null,

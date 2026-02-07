@@ -417,39 +417,88 @@ export async function POST(request: Request) {
     logger.error('UPLOAD', `Failed after ${totalTime}ms`, error, {
       errorName: error.name,
       errorCode: error.code || error.Code,
-      httpStatus: s3Meta?.httpStatusCode,
+      httpStatus: s3Meta?.httpStatusCode || error.httpStatus,
       requestId: s3Meta?.requestId,
+      attempts: error.attempts,
     });
-    
-    // Return more specific error messages
-    let errorMessage = 'Upload failed. Please try again.';
-    let statusCode = 500;
-    
-    if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
-      errorMessage = 'Upload timed out. The file may be too large or network connection is slow. Please try again or contact support.';
-      statusCode = 504; // Gateway Timeout
-    } else if (error.message?.includes('S3') || error.message?.includes('upload')) {
-      errorMessage = 'Storage upload failed. Please check your network connection and try again.';
-      statusCode = 503; // Service Unavailable
-    } else if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch' || error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+
+    // Classify the error using structured S3 properties (from Task #1) or fallback heuristics
+    const isTimeout = error.isTimeout
+      || error.message?.includes('timeout')
+      || error.message?.includes('timed out')
+      || error.code === 'ETIMEDOUT';
+    const isAuthError = error.isAuthError
+      || error.name === 'InvalidAccessKeyId'
+      || error.name === 'SignatureDoesNotMatch'
+      || error.name === 'AccessDenied'
+      || error.$metadata?.httpStatusCode === 403;
+    const isNetworkError = error.code === 'ECONNRESET'
+      || error.code === 'ECONNREFUSED'
+      || error.code === 'ENOTFOUND'
+      || error.message?.includes('network')
+      || error.message?.includes('ECONNREFUSED');
+    const isDbError = error.message?.includes('Prisma')
+      || error.message?.includes('database');
+    const isS3Error = error.message?.includes('S3')
+      || error.message?.includes('upload')
+      || error.code === 'NoSuchBucket'
+      || !!error.httpStatus
+      || !!s3Meta;
+
+    let errorMessage: string;
+    let errorCode: string;
+    let statusCode: number;
+    let retryAdvice: string;
+
+    if (isAuthError) {
+      errorCode = 'S3_AUTH_ERROR';
       errorMessage = 'Storage authentication failed. Please contact your administrator to verify storage credentials.';
       statusCode = 503;
-    } else if (error.message?.includes('Prisma') || error.message?.includes('database')) {
+      retryAdvice = 'Contact your administrator — storage credentials may need updating.';
+    } else if (isTimeout) {
+      errorCode = 'S3_TIMEOUT';
+      errorMessage = 'Upload timed out. The file may be too large or the connection is slow.';
+      statusCode = 504;
+      retryAdvice = 'The file may be too large or the connection is slow. Try again or use a smaller file.';
+    } else if (isDbError) {
+      errorCode = 'DB_ERROR';
       errorMessage = 'Database error while saving document. Please try again.';
       statusCode = 503;
-    } else if (error.message?.includes('network') || error.message?.includes('ECONNREFUSED')) {
+      retryAdvice = 'A temporary database error occurred. Please try again in a few moments.';
+    } else if (isNetworkError) {
+      errorCode = 'NETWORK_ERROR';
       errorMessage = 'Network connection error. Please check your internet connection and try again.';
       statusCode = 503;
-    } else if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
-      errorMessage = 'Connection lost during upload. Please try again with a stable network connection.';
+      retryAdvice = 'Check your internet connection and try again.';
+    } else if (isS3Error) {
+      errorCode = 'S3_ERROR';
+      errorMessage = 'Storage upload failed. Please check your network connection and try again.';
       statusCode = 503;
+      retryAdvice = 'If the issue persists, try uploading a smaller file or contact support.';
+    } else {
+      errorCode = 'UPLOAD_ERROR';
+      errorMessage = 'Upload failed. Please try again.';
+      statusCode = 500;
+      retryAdvice = 'If the issue persists, try uploading a smaller file or contact support.';
     }
-    
-    return NextResponse.json({ 
+
+    // Build sanitized technical details safe for production (no stack traces or internal paths)
+    const technicalDetails: Record<string, string | number | undefined> = {
+      errorCode: error.code || error.Code || error.name || undefined,
+      httpStatus: s3Meta?.httpStatusCode || error.httpStatus || undefined,
+      attempts: error.attempts || undefined,
+    };
+    // Remove undefined keys
+    for (const key of Object.keys(technicalDetails)) {
+      if (technicalDetails[key] === undefined) delete technicalDetails[key];
+    }
+
+    return NextResponse.json({
       error: errorMessage,
-      technicalDetails: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      errorCode,
+      technicalDetails: Object.keys(technicalDetails).length > 0 ? technicalDetails : undefined,
       uploadTime: `${totalTime}ms`,
-      retryAdvice: 'If the issue persists, try uploading a smaller file or contact support.'
+      retryAdvice,
     }, { status: statusCode });
   }
 }
