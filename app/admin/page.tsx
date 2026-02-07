@@ -149,7 +149,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#003B71] mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 animate-spin text-client-primary mx-auto mb-4" />
           <p className="text-gray-600">Loading admin dashboard...</p>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-600 hover:text-[#003B71] transition-colors">
+              <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-600 hover:text-client-primary transition-colors">
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to Dashboard
               </Link>
@@ -188,8 +188,8 @@ export default function AdminDashboard() {
                   className="h-10 w-auto object-contain"
                 />
                 <div>
-                  <h1 className="text-xl font-bold text-[#0F172A]">Admin Dashboard</h1>
-                  <p className="text-sm text-[#475569]">Platform Management</p>
+                  <h1 className="text-xl font-bold text-slate-900">Admin Dashboard</h1>
+                  <p className="text-sm text-slate-600">Platform Management</p>
                 </div>
               </div>
             </div>

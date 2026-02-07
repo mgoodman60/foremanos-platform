@@ -87,9 +87,9 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-lg">
+      <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-[#F8FAFC] flex items-center gap-2">
+          <DialogTitle className="text-slate-50 flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-amber-400" />
             Create Project Budget
           </DialogTitle>
@@ -114,7 +114,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 min="0"
                 {...register('totalBudget', { valueAsNumber: true })}
                 placeholder="0.00"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
+                className="bg-dark-surface border-gray-700 text-slate-50 pl-7"
                 aria-invalid={!!errors.totalBudget}
                 aria-describedby={errors.totalBudget ? 'totalBudget-error' : 'totalBudget-help'}
               />
@@ -142,7 +142,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 min="0"
                 {...register('contingency', { valueAsNumber: true })}
                 placeholder="0.00"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
+                className="bg-dark-surface border-gray-700 text-slate-50 pl-7"
                 aria-describedby={errors.contingency ? 'contingency-error' : 'contingency-help'}
               />
             </div>
@@ -164,7 +164,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
                 id="baselineDate"
                 type="date"
                 {...register('baselineDate')}
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-10"
+                className="bg-dark-surface border-gray-700 text-slate-50 pl-10"
                 aria-invalid={!!errors.baselineDate}
                 aria-describedby={errors.baselineDate ? 'baselineDate-error' : 'baselineDate-help'}
               />
@@ -185,7 +185,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
               id="currency"
               type="text"
               {...register('currency')}
-              className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+              className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
               disabled
               aria-describedby="currency-help"
             />

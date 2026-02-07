@@ -184,7 +184,7 @@ export default function WeatherWidget({
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sun className="w-5 h-5 text-orange-500" />
-          <h3 className="text-lg font-semibold text-[#F8FAFC]">Weather Intelligence</h3>
+          <h3 className="text-lg font-semibold text-slate-50">Weather Intelligence</h3>
         </div>
         <div className="flex items-center gap-2">
           {alerts.length > 0 && (
@@ -241,7 +241,7 @@ export default function WeatherWidget({
               <WeatherIcon className="w-10 h-10 text-orange-500" />
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#F8FAFC]">
+              <div className="text-4xl font-bold text-slate-50">
                 {Math.round(currentWeather.temperature)}°F
               </div>
               <p className="text-sm text-gray-400 mt-1">
@@ -250,7 +250,7 @@ export default function WeatherWidget({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-lg font-medium text-[#F8FAFC] capitalize">
+            <p className="text-lg font-medium text-slate-50 capitalize">
               {currentWeather.description}
             </p>
             <p className="text-sm text-gray-400 mt-1">
@@ -269,7 +269,7 @@ export default function WeatherWidget({
               <Wind className="w-4 h-4 text-cyan-400" />
               <span className="text-xs text-gray-400">Wind</span>
             </div>
-            <p className="text-lg font-semibold text-[#F8FAFC]">
+            <p className="text-lg font-semibold text-slate-50">
               {Math.round(currentWeather.windSpeed)} mph
             </p>
           </div>
@@ -279,7 +279,7 @@ export default function WeatherWidget({
               <Droplets className="w-4 h-4 text-blue-400" />
               <span className="text-xs text-gray-400">Humidity</span>
             </div>
-            <p className="text-lg font-semibold text-[#F8FAFC]">
+            <p className="text-lg font-semibold text-slate-50">
               {currentWeather.humidity}%
             </p>
           </div>
@@ -289,7 +289,7 @@ export default function WeatherWidget({
               <CloudRain className="w-4 h-4 text-indigo-400" />
               <span className="text-xs text-gray-400">Precip</span>
             </div>
-            <p className="text-lg font-semibold text-[#F8FAFC]">
+            <p className="text-lg font-semibold text-slate-50">
               {currentWeather.precipitation > 0
                 ? `${currentWeather.precipitation.toFixed(2)}"` 
                 : 'None'
@@ -314,13 +314,13 @@ export default function WeatherWidget({
               return (
                 <div
                   key={snapshot.id}
-                  className="text-center p-3 bg-dark-surface rounded-lg hover:bg-[#252a31] transition-colors"
+                  className="text-center p-3 bg-dark-surface rounded-lg hover:bg-dark-hover transition-colors"
                 >
                   <p className="text-xs text-gray-400 mb-2">
                     {getDayName(snapshot.snapshotTime)}
                   </p>
                   <DayIcon className="w-6 h-6 mx-auto mb-2 text-orange-500" />
-                  <p className="text-sm font-semibold text-[#F8FAFC]">
+                  <p className="text-sm font-semibold text-slate-50">
                     {Math.round(snapshot.temperature)}°
                   </p>
                 </div>

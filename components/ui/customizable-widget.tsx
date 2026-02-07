@@ -168,7 +168,7 @@ export function CustomizableWidget({
       >
         <div className="flex items-center gap-2">
           {isEditing && (
-            <GripVertical className="h-4 w-4 text-gray-500" />
+            <GripVertical className="h-4 w-4 text-gray-400" />
           )}
           <span className="text-sm font-medium text-gray-200">{config.title}</span>
         </div>
@@ -177,7 +177,7 @@ export function CustomizableWidget({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+              className="h-6 w-6 p-0 text-gray-300 hover:text-white"
               onClick={() => onToggleCollapse(config.id)}
             >
               {config.isCollapsed ? (
@@ -191,7 +191,7 @@ export function CustomizableWidget({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 text-gray-400 hover:text-red-400"
+              className="h-6 w-6 p-0 text-gray-300 hover:text-red-400"
               onClick={() => onRemove(config.id)}
             >
               <X className="h-3 w-3" />
@@ -214,7 +214,7 @@ export function CustomizableWidget({
           onMouseDown={handleResizeStart}
         >
           <svg
-            className="w-4 h-4 text-gray-500"
+            className="w-4 h-4 text-gray-400"
             viewBox="0 0 24 24"
             fill="currentColor"
           >

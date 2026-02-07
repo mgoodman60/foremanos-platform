@@ -545,11 +545,11 @@ export default function DashboardPage() {
   const renderProjectCard = (project: Project, showSharedBy = false) => (
     <div
       key={project.id}
-      className="border-2 border-gray-600 rounded-xl p-5 hover:shadow-xl hover:border-[#F97316] transition-all duration-200 bg-dark-card"
+      className="border-2 border-gray-600 rounded-xl p-5 hover:shadow-xl hover:border-orange-500 transition-all duration-200 bg-dark-card"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h4 className="font-bold text-[#F8FAFC] text-lg mb-2">{project.name}</h4>
+          <h4 className="font-bold text-slate-50 text-lg mb-2">{project.name}</h4>
           <div className="flex flex-wrap gap-2">
             {getRoleBadge(project.memberRole || (project.isOwner ? 'owner' : undefined))}
             {showSharedBy && (
@@ -564,14 +564,14 @@ export default function DashboardPage() {
       <div className="space-y-2.5 text-sm text-gray-300 mb-4 bg-dark-surface rounded-lg p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#F97316]" />
+            <FileText className="w-4 h-4 text-orange-500" />
             <span className="font-medium">{project.documentCount} document{project.documentCount !== 1 ? 's' : ''}</span>
           </div>
         </div>
         <div className="flex items-center justify-between">
           <button
             onClick={() => openMembersModal(project)}
-            className="flex items-center gap-2 text-[#F97316] hover:text-[#EA580C] transition-colors"
+            className="flex items-center gap-2 text-orange-500 hover:text-orange-600 transition-colors"
           >
             <Users className="w-4 h-4" />
             <span className="text-xs font-medium">{project.memberCount} {project.memberCount === 1 ? 'person' : 'people'}</span>
@@ -582,7 +582,7 @@ export default function DashboardPage() {
       <div className="space-y-2">
         <button
           onClick={() => router.push(`/project/${project.slug}`)}
-          className="w-full bg-[#F97316] hover:bg-[#EA580C] text-white py-2.5 px-4 rounded-lg transition-all duration-200 font-semibold focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02]"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-4 rounded-lg transition-all duration-200 font-semibold focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none transform hover:scale-[1.02]"
         >
           Open Project →
         </button>
@@ -641,7 +641,7 @@ export default function DashboardPage() {
               <NotificationCenter />
               <button
                 onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-[#F8FAFC] hover:bg-[#3d434b] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-slate-50 hover:bg-dark-hover rounded-lg transition-colors"
                 data-testid="logout-button"
               >
                 Sign Out
@@ -653,21 +653,21 @@ export default function DashboardPage() {
 
       {/* Share Login Link Ribbon - Only for Clients */}
       {session?.user.role === 'client' && (
-        <div className="bg-dark-surface text-white py-4 px-4 shadow-lg border-b-4 border-[#F97316]">
+        <div className="bg-dark-surface text-white py-4 px-4 shadow-lg border-b-4 border-orange-500">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="bg-[#F97316]/20 p-2 rounded-lg">
+                <div className="bg-orange-500/20 p-2 rounded-lg">
                   <Share2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-[#F8FAFC]">Share Your Project Login</h3>
-                  <p className="text-[#F8FAFC]/80 text-sm">Copy the login link to share with team members</p>
+                  <h3 className="font-bold text-lg text-slate-50">Share Your Project Login</h3>
+                  <p className="text-slate-50/80 text-sm">Copy the login link to share with team members</p>
                 </div>
               </div>
               <button
                 onClick={handleCopyLoginLink}
-                className="bg-[#F97316] hover:bg-[#EA580C] text-white px-6 py-3 rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
               >
                 {linkCopied ? (
                   <>
@@ -690,7 +690,7 @@ export default function DashboardPage() {
       <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Message */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-[#F8FAFC]">
+          <h2 className="text-3xl font-bold text-slate-50">
             Welcome back, {session?.user.username}
           </h2>
           <p className="mt-2 text-gray-300">
@@ -708,7 +708,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg shadow-md p-6 text-left transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none"
+              className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-md p-6 text-left transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none"
             >
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-white/10 rounded-lg">
@@ -725,14 +725,14 @@ export default function DashboardPage() {
 
             <button
               onClick={() => setShowGuestLoginModal(true)}
-              className="bg-dark-card hover:bg-[#3d434b] text-[#F8FAFC] border-2 border-gray-600 rounded-lg shadow-md p-6 text-left transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none"
+              className="bg-dark-card hover:bg-dark-hover text-slate-50 border-2 border-gray-600 rounded-lg shadow-md p-6 text-left transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none"
             >
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-dark-surface rounded-lg">
                   <Users className="w-8 h-8 text-gray-300" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#F8FAFC]">Add Project via Guest Login</h3>
+                  <h3 className="text-lg font-semibold text-slate-50">Add Project via Guest Login</h3>
                   <p className="text-sm text-gray-300 mt-1">
                     Access a project using guest credentials
                   </p>
@@ -745,13 +745,13 @@ export default function DashboardPage() {
         {/* Your Projects Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-[#F8FAFC]">
+            <h3 className="text-2xl font-bold text-slate-50">
               Your Projects ({ownedProjects.length})
             </h3>
             {ownedProjects.length > 0 && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg font-medium text-sm flex items-center gap-2 transition-colors"
+                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium text-sm flex items-center gap-2 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 New Project
@@ -766,7 +766,7 @@ export default function DashboardPage() {
               <p className="text-gray-400 text-sm mb-6">Create your first project to get started</p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg font-semibold inline-flex items-center gap-2 transition-colors"
+                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold inline-flex items-center gap-2 transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Create Project
@@ -782,7 +782,7 @@ export default function DashboardPage() {
         {/* Shared With You Section */}
         {sharedProjects.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-2xl font-bold text-[#F8FAFC] mb-4">
+            <h3 className="text-2xl font-bold text-slate-50 mb-4">
               Shared With You ({sharedProjects.length})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -803,7 +803,7 @@ export default function DashboardPage() {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-            <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">Create New Project</h3>
+            <h3 className="text-xl font-bold text-slate-50 mb-4">Create New Project</h3>
             <form onSubmit={handleCreateProject} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -813,7 +813,7 @@ export default function DashboardPage() {
                   type="text"
                   value={newProjectData.name}
                   onChange={(e) => setNewProjectData({ ...newProjectData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="e.g., Downtown Office Building"
                   required
                 />
@@ -826,7 +826,7 @@ export default function DashboardPage() {
                   type="text"
                   value={newProjectData.guestUsername}
                   onChange={(e) => setNewProjectData({ ...newProjectData, guestUsername: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="e.g., downtown-2024"
                   required
                 />
@@ -839,7 +839,7 @@ export default function DashboardPage() {
                   type="password"
                   value={newProjectData.guestPassword}
                   onChange={(e) => setNewProjectData({ ...newProjectData, guestPassword: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="Leave blank for no password"
                 />
               </div>
@@ -856,7 +856,7 @@ export default function DashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors font-medium"
+                  className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"
                 >
                   Create Project
                 </button>
@@ -870,7 +870,7 @@ export default function DashboardPage() {
       {renameModalOpen && renameProject && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-            <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Project</h3>
+            <h3 className="text-xl font-bold text-slate-50 mb-4">Rename Project</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -880,7 +880,7 @@ export default function DashboardPage() {
                   type="text"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="Enter new name"
                 />
               </div>
@@ -912,7 +912,7 @@ export default function DashboardPage() {
       {inviteModalOpen && inviteProject && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-            <h3 className="text-xl font-bold text-[#F8FAFC] mb-2">Invite to {inviteProject.name}</h3>
+            <h3 className="text-xl font-bold text-slate-50 mb-2">Invite to {inviteProject.name}</h3>
             <p className="text-sm text-gray-300 mb-4">Invite team members to collaborate on this project</p>
             <form onSubmit={handleSendInvite} className="space-y-4">
               <div>
@@ -923,7 +923,7 @@ export default function DashboardPage() {
                   type="text"
                   value={inviteData.emailOrUsername}
                   onChange={(e) => setInviteData({ ...inviteData, emailOrUsername: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC] placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="e.g., john@example.com or john123"
                   required
                   disabled={sendingInvite}
@@ -936,7 +936,7 @@ export default function DashboardPage() {
                 <select
                   value={inviteData.role}
                   onChange={(e) => setInviteData({ ...inviteData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-surface text-[#F8FAFC]"
+                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50"
                   disabled={sendingInvite}
                 >
                   <option value="viewer">Viewer - Can view and chat</option>
@@ -972,13 +972,13 @@ export default function DashboardPage() {
       {membersModalOpen && membersProject && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
           <div className="bg-dark-card rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto border border-gray-700">
-            <h3 className="text-xl font-bold text-[#F8FAFC] mb-4">
+            <h3 className="text-xl font-bold text-slate-50 mb-4">
               Project Members - {membersProject.name}
             </h3>
             
             {loadingMembers ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316] mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
                 <p className="mt-2 text-gray-300">Loading members...</p>
               </div>
             ) : projectMembers.length === 0 ? (
@@ -988,11 +988,11 @@ export default function DashboardPage() {
                 {projectMembers.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-4 border border-gray-600 rounded-lg hover:border-[#F97316] transition-colors bg-dark-surface"
+                    className="flex items-center justify-between p-4 border border-gray-600 rounded-lg hover:border-orange-500 transition-colors bg-dark-surface"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-[#F8FAFC]">{member.username}</p>
+                        <p className="font-medium text-slate-50">{member.username}</p>
                         {getRoleBadge(member.projectRole)}
                         {member.isOwner && (
                           <span className="text-xs text-gray-400">(Project Owner)</span>

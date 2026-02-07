@@ -278,7 +278,7 @@ export function UploadProgress({
             const retryInfo = getRetryInfo();
             if (detailedProgress || retryInfo) {
               return (
-                <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-400">
+                <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-300">
                   {retryInfo && (
                     <span className="text-yellow-400">{retryInfo}</span>
                   )}
@@ -302,7 +302,7 @@ export function UploadProgress({
             {status === 'uploading' && onCancel && (
               <button
                 onClick={onCancel}
-                className="px-3 py-1 text-xs font-medium text-gray-400 hover:text-white border border-gray-600 hover:border-gray-500 rounded transition-colors"
+                className="px-3 py-1 text-xs font-medium text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 rounded transition-colors"
               >
                 Cancel
               </button>
@@ -322,7 +322,7 @@ export function UploadProgress({
             {(status === 'success' || status === 'error') && onDismiss && (
               <button
                 onClick={onDismiss}
-                className="px-3 py-1 text-xs font-medium text-gray-400 hover:text-white transition-colors"
+                className="px-3 py-1 text-xs font-medium text-gray-300 hover:text-white transition-colors"
               >
                 Dismiss
               </button>
@@ -334,7 +334,7 @@ export function UploadProgress({
         {(status === 'success' || status === 'error') && onDismiss && (
           <button
             onClick={onDismiss}
-            className="flex-shrink-0 p-1 text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-300 transition-colors"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />

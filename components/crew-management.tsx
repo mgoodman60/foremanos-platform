@@ -253,7 +253,7 @@ export default function CrewManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[#F8FAFC]">Crew Management</h2>
+          <h2 className="text-2xl font-bold text-slate-50">Crew Management</h2>
           <p className="text-gray-400 mt-1">Manage work crews and track performance</p>
         </div>
         <Button
@@ -272,11 +272,11 @@ export default function CrewManagement() {
             placeholder="Search crews..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-dark-card border-gray-700 text-[#F8FAFC]"
+            className="bg-dark-card border-gray-700 text-slate-50"
           />
         </div>
         <Select value={filterTrade} onValueChange={setFilterTrade}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-dark-card border-gray-700 text-[#F8FAFC]">
+          <SelectTrigger className="w-full sm:w-[200px] bg-dark-card border-gray-700 text-slate-50">
             <SelectValue placeholder="Filter by trade" />
           </SelectTrigger>
           <SelectContent>
@@ -313,7 +313,7 @@ export default function CrewManagement() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-[#F8FAFC] text-lg">
+                    <CardTitle className="text-slate-50 text-lg">
                       {crew.name}
                     </CardTitle>
                     <p className="text-sm text-gray-400 mt-1">
@@ -424,9 +424,9 @@ export default function CrewManagement() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-2xl">
+        <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-[#F8FAFC]">
+            <DialogTitle className="text-slate-50">
               {selectedCrew ? 'Edit Crew' : 'Create New Crew'}
             </DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -448,7 +448,7 @@ export default function CrewManagement() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Concrete Crew A"
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-slate-50"
                 />
               </div>
 
@@ -460,7 +460,7 @@ export default function CrewManagement() {
                   value={formData.tradeType}
                   onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
                 >
-                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-slate-50">
                     <SelectValue placeholder="Select trade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -481,7 +481,7 @@ export default function CrewManagement() {
                   value={formData.subcontractorId}
                   onValueChange={(value) => setFormData({ ...formData, subcontractorId: value })}
                 >
-                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC]">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-slate-50">
                     <SelectValue placeholder="Select subcontractor" />
                   </SelectTrigger>
                   <SelectContent>
@@ -506,7 +506,7 @@ export default function CrewManagement() {
                   value={formData.foremanName}
                   onChange={(e) => setFormData({ ...formData, foremanName: e.target.value })}
                   placeholder="e.g., John Smith"
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-slate-50"
                 />
               </div>
 
@@ -519,7 +519,7 @@ export default function CrewManagement() {
                   value={formData.foremanPhone}
                   onChange={(e) => setFormData({ ...formData, foremanPhone: e.target.value })}
                   placeholder="e.g., (555) 123-4567"
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-slate-50"
                 />
               </div>
 
@@ -533,7 +533,7 @@ export default function CrewManagement() {
                   min="1"
                   value={formData.averageSize}
                   onChange={(e) => setFormData({ ...formData, averageSize: parseInt(e.target.value) || 1 })}
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC]"
+                  className="bg-dark-surface border-gray-700 text-slate-50"
                 />
               </div>
 

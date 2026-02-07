@@ -157,7 +157,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-[#F8FAFC]">Budget Line Items</h3>
+          <h3 className="text-xl font-bold text-slate-50">Budget Line Items</h3>
           <p className="text-gray-400 mt-1">Manage budget breakdown by cost code or trade</p>
         </div>
         <Button
@@ -196,7 +196,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-lg font-semibold text-[#F8FAFC]">
+                        <h4 className="text-lg font-semibold text-slate-50">
                           {item.name}
                         </h4>
                         {item.costCode && (
@@ -219,13 +219,13 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Budgeted</p>
-                      <p className="text-lg font-semibold text-[#F8FAFC]">
+                      <p className="text-lg font-semibold text-slate-50">
                         {formatCurrency(item.budgetedAmount)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Actual Cost</p>
-                      <p className="text-lg font-semibold text-[#F8FAFC]">
+                      <p className="text-lg font-semibold text-slate-50">
                         {formatCurrency(item.actualCost)}
                       </p>
                     </div>
@@ -251,9 +251,9 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
 
       {/* Create Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-lg">
+        <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-[#F8FAFC]">Create Budget Item</DialogTitle>
+            <DialogTitle className="text-slate-50">Create Budget Item</DialogTitle>
             <DialogDescription className="text-gray-400">
               Add a new line item to the project budget
             </DialogDescription>
@@ -269,7 +269,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., Foundation Work"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
               />
             </div>
 
@@ -282,7 +282,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Optional description"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
                 rows={2}
               />
             </div>
@@ -297,7 +297,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   value={formData.costCode}
                   onChange={(e) => setFormData({ ...formData, costCode: e.target.value })}
                   placeholder="e.g., 03-100"
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
                 />
               </div>
 
@@ -309,7 +309,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   value={formData.tradeType}
                   onValueChange={(value) => setFormData({ ...formData, tradeType: value })}
                 >
-                  <SelectTrigger className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1">
+                  <SelectTrigger className="bg-dark-surface border-gray-700 text-slate-50 mt-1">
                     <SelectValue placeholder="Select trade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -339,7 +339,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
                   value={formData.budgetedAmount}
                   onChange={(e) => setFormData({ ...formData, budgetedAmount: e.target.value })}
                   placeholder="0.00"
-                  className="bg-dark-surface border-gray-700 text-[#F8FAFC] pl-7"
+                  className="bg-dark-surface border-gray-700 text-slate-50 pl-7"
                 />
               </div>
             </div>

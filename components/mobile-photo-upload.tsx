@@ -196,7 +196,7 @@ export function MobilePhotoUpload({
         <button
           onClick={() => cameraInputRef.current?.click()}
           disabled={isUploading}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-[#F97316] hover:bg-[#ea580c] text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
           <Camera className="h-6 w-6" />
           <span>Take Photo</span>
@@ -214,7 +214,7 @@ export function MobilePhotoUpload({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-dark-card hover:bg-[#3d434b] text-[#F8FAFC] border border-gray-600 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-dark-card hover:bg-dark-hover text-slate-50 border border-gray-600 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
           <ImageIcon className="h-6 w-6" />
           <span>Choose Photos</span>
@@ -232,7 +232,7 @@ export function MobilePhotoUpload({
               <Button
                 onClick={handleUploadAll}
                 disabled={isUploading || photos.every((p) => p.uploaded)}
-                className="bg-[#F97316] hover:bg-[#ea580c] text-white text-sm"
+                className="bg-orange-500 hover:bg-orange-600 text-white text-sm"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload All ({photos.filter((p) => !p.uploaded && !p.uploading).length})

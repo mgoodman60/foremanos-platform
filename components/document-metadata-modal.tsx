@@ -98,7 +98,7 @@ export function DocumentMetadataModal({
         aria-labelledby="document-metadata-modal-title"
         className="bg-dark-card border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full"
       >
-        <div className="bg-[#003B71] text-white p-6 rounded-t-lg">
+        <div className="bg-client-primary text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <FileText className="w-6 h-6" />
@@ -122,7 +122,7 @@ export function DocumentMetadataModal({
             <textarea
               id="description"
               {...register('description')}
-              className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-client-primary focus:border-transparent resize-none"
               rows={4}
               placeholder="Add a description for this document..."
               aria-invalid={!!errors.description}
@@ -172,7 +172,7 @@ export function DocumentMetadataModal({
                     addTag();
                   }
                 }}
-                className="flex-1 px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#003B71] focus:border-transparent"
+                className="flex-1 px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-client-primary focus:border-transparent"
                 placeholder="Add a tag..."
                 aria-label="Add a tag"
               />
@@ -209,7 +209,7 @@ export function DocumentMetadataModal({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-[#003B71] hover:bg-[#002855]"
+              className="flex-1 bg-client-primary hover:bg-client-primary-dark"
             >
               {isSubmitting ? (
                 'Saving...'

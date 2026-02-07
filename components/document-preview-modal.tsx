@@ -83,7 +83,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex-1 min-w-0">
-            <h3 id="preview-dialog-title" className="text-lg font-semibold text-[#F8FAFC] truncate">
+            <h3 id="preview-dialog-title" className="text-lg font-semibold text-slate-50 truncate">
               {doc.name}
             </h3>
             <p className="text-sm text-gray-400">
@@ -154,7 +154,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
               <div className="w-16 h-16 bg-dark-card rounded-full flex items-center justify-center border-2 border-gray-700">
                 <X className="w-8 h-8 text-red-500" />
               </div>
-              <h4 className="text-lg font-semibold text-[#F8FAFC]">Preview Unavailable</h4>
+              <h4 className="text-lg font-semibold text-slate-50">Preview Unavailable</h4>
               <p className="text-sm text-gray-400">
                 Unable to load preview for this document. You can still download it to view the contents.
               </p>

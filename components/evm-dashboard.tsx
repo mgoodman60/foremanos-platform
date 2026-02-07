@@ -135,7 +135,7 @@ export default function EVMDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[#F8FAFC]">Earned Value Management</h2>
+          <h2 className="text-2xl font-bold text-slate-50">Earned Value Management</h2>
           <p className="text-gray-400 mt-1">Track project cost and schedule performance</p>
         </div>
         <Badge className={`${status.color} text-white flex items-center gap-2 px-3 py-1`}>
@@ -155,7 +155,7 @@ export default function EVMDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.plannedValue)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -173,7 +173,7 @@ export default function EVMDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.earnedValue)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -191,7 +191,7 @@ export default function EVMDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.actualCost)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -209,7 +209,7 @@ export default function EVMDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(budget.total)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -224,7 +224,7 @@ export default function EVMDashboard() {
         {/* Cost Performance Index */}
         <Card className="bg-dark-card border-gray-700">
           <CardHeader>
-            <CardTitle className="text-[#F8FAFC]">Cost Performance Index (CPI)</CardTitle>
+            <CardTitle className="text-slate-50">Cost Performance Index (CPI)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
@@ -266,7 +266,7 @@ export default function EVMDashboard() {
         {/* Schedule Performance Index */}
         <Card className="bg-dark-card border-gray-700">
           <CardHeader>
-            <CardTitle className="text-[#F8FAFC]">Schedule Performance Index (SPI)</CardTitle>
+            <CardTitle className="text-slate-50">Schedule Performance Index (SPI)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
@@ -317,7 +317,7 @@ export default function EVMDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.estimateAtCompletion)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -335,7 +335,7 @@ export default function EVMDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#F8FAFC]">
+            <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.estimateToComplete)}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -369,13 +369,13 @@ export default function EVMDashboard() {
       {/* Progress */}
       <Card className="bg-dark-card border-gray-700">
         <CardHeader>
-          <CardTitle className="text-[#F8FAFC]">Project Progress</CardTitle>
+          <CardTitle className="text-slate-50">Project Progress</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Work Completed</span>
-              <span className="text-[#F8FAFC] font-semibold">{current.percentComplete.toFixed(1)}%</span>
+              <span className="text-slate-50 font-semibold">{current.percentComplete.toFixed(1)}%</span>
             </div>
             <Progress value={current.percentComplete} className="h-3" />
           </div>
@@ -383,7 +383,7 @@ export default function EVMDashboard() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Budget Spent</span>
-              <span className="text-[#F8FAFC] font-semibold">{current.percentSpent.toFixed(1)}%</span>
+              <span className="text-slate-50 font-semibold">{current.percentSpent.toFixed(1)}%</span>
             </div>
             <Progress value={current.percentSpent} className="h-3" />
           </div>
@@ -391,11 +391,11 @@ export default function EVMDashboard() {
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
             <div>
               <p className="text-xs text-gray-500">Actual Cost to Date</p>
-              <p className="text-lg font-semibold text-[#F8FAFC]">{formatCurrency(current.actualCost)}</p>
+              <p className="text-lg font-semibold text-slate-50">{formatCurrency(current.actualCost)}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Remaining Budget</p>
-              <p className="text-lg font-semibold text-[#F8FAFC]">
+              <p className="text-lg font-semibold text-slate-50">
                 {formatCurrency(budget.total - current.actualCost)}
               </p>
             </div>

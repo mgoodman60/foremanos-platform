@@ -123,7 +123,7 @@ export function DailyReportHistory({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
-            <h2 id="daily-report-history-dialog-title" className="text-xl font-bold text-[#F8FAFC]">Daily Report History</h2>
+            <h2 id="daily-report-history-dialog-title" className="text-xl font-bold text-slate-50">Daily Report History</h2>
             <p className="text-sm text-gray-400 mt-1">
               {projectName}
             </p>
@@ -132,7 +132,7 @@ export function DailyReportHistory({
             onClick={onClose}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
+            className="text-gray-400 hover:text-slate-50 hover:bg-dark-card"
             aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
@@ -143,7 +143,7 @@ export function DailyReportHistory({
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
             </div>
           ) : (
             <>
@@ -155,7 +155,7 @@ export function DailyReportHistory({
                       <FileText className="h-5 w-5 text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-[#F8FAFC]">{stats.total}</p>
+                      <p className="text-2xl font-bold text-slate-50">{stats.total}</p>
                       <p className="text-sm text-gray-400">Total Reports</p>
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export function DailyReportHistory({
                       <CheckCircle className="h-5 w-5 text-green-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-[#F8FAFC]">{stats.finalized}</p>
+                      <p className="text-2xl font-bold text-slate-50">{stats.finalized}</p>
                       <p className="text-sm text-gray-400">Finalized</p>
                     </div>
                   </div>
@@ -179,7 +179,7 @@ export function DailyReportHistory({
                       <Clock className="h-5 w-5 text-orange-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-[#F8FAFC]">{stats.inProgress}</p>
+                      <p className="text-2xl font-bold text-slate-50">{stats.inProgress}</p>
                       <p className="text-sm text-gray-400">In Progress</p>
                     </div>
                   </div>
@@ -192,7 +192,7 @@ export function DailyReportHistory({
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-blue-500/30">
                     <Calendar className="w-10 h-10 text-blue-400" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#F8FAFC] mb-2">
+                  <h3 className="text-xl font-bold text-slate-50 mb-2">
                     No Daily Reports Yet
                   </h3>
                   <p className="text-base text-gray-300 text-center max-w-md mb-4">
@@ -211,8 +211,8 @@ export function DailyReportHistory({
                     <div key={group.monthKey}>
                       {/* Month Header */}
                       <div className="flex items-center gap-2 mb-4">
-                        <Calendar className="h-5 w-5 text-[#F97316]" />
-                        <h3 className="text-lg font-bold text-[#F8FAFC]">{group.monthLabel}</h3>
+                        <Calendar className="h-5 w-5 text-orange-500" />
+                        <h3 className="text-lg font-bold text-slate-50">{group.monthLabel}</h3>
                         <div className="flex-1 h-px bg-gray-700"></div>
                       </div>
 
@@ -227,7 +227,7 @@ export function DailyReportHistory({
                               <div className="flex-1 min-w-0">
                                 {/* Date and Status */}
                                 <div className="flex items-center gap-2 mb-2">
-                                  <p className="text-sm font-medium text-[#F8FAFC]">
+                                  <p className="text-sm font-medium text-slate-50">
                                     {report.dailyReportDate
                                       ? format(new Date(report.dailyReportDate), 'EEEE, MMMM d, yyyy')
                                       : 'No date'}
@@ -274,7 +274,7 @@ export function DailyReportHistory({
                                   onClick={() => handleDownloadPDF(report)}
                                   variant="ghost"
                                   size="sm"
-                                  className="text-[#F97316] hover:text-[#ea580c] hover:bg-orange-900/20"
+                                  className="text-orange-500 hover:text-orange-600 hover:bg-orange-900/20"
                                   title={report.documentUrl ? "Download Finalized PDF" : "Generate PDF"}
                                 >
                                   <Download className="h-4 w-4" />
@@ -300,7 +300,7 @@ export function DailyReportHistory({
           </div>
           <Button
             onClick={onClose}
-            className="bg-[#F97316] hover:bg-[#ea580c] text-white"
+            className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             Close
           </Button>

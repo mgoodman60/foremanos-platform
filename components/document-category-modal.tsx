@@ -137,7 +137,7 @@ export function DocumentCategoryModal({
                     <span className="text-sm font-semibold text-orange-500">Step 1 of 2</span>
                   </div>
                 </div>
-                <h2 id="document-category-modal-title" className="text-xl font-bold text-[#F8FAFC]">
+                <h2 id="document-category-modal-title" className="text-xl font-bold text-slate-50">
                   Choose Document Category
                 </h2>
                 <p className="text-sm text-gray-400 mt-1">Select the category first, then youll choose your file</p>
@@ -145,7 +145,7 @@ export function DocumentCategoryModal({
             ) : (
               /* File-First Mode - Standard Header */
               <div>
-                <h2 id="document-category-modal-title" className="text-lg font-semibold text-[#F8FAFC]">
+                <h2 id="document-category-modal-title" className="text-lg font-semibold text-slate-50">
                   Select Document Category
                 </h2>
                 <p className="text-sm text-gray-400 mt-1">File: {fileName}</p>
@@ -155,7 +155,7 @@ export function DocumentCategoryModal({
           <button
             type="button"
             onClick={onCancel}
-            className="text-gray-400 hover:text-[#F8FAFC] transition-colors ml-4"
+            className="text-gray-400 hover:text-slate-50 transition-colors ml-4"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -189,7 +189,7 @@ export function DocumentCategoryModal({
                   }`} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-[#F8FAFC]">
+                      <p className="text-sm font-medium text-slate-50">
                         {autoAccepted ? 'Auto-selected: ' : 'AI Suggestion: '}
                         {getCategoryLabel(aiSuggestion.category)}
                       </p>
@@ -227,7 +227,7 @@ export function DocumentCategoryModal({
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-4 space-y-3" noValidate>
           {!fileName && (
             <div className="mb-4 p-4 bg-dark-surface border border-orange-500/30 rounded-lg">
-              <p className="text-sm text-[#F8FAFC] font-medium mb-1">
+              <p className="text-sm text-slate-50 font-medium mb-1">
                 Why categorize first?
               </p>
               <p className="text-xs text-gray-400">
@@ -255,8 +255,8 @@ export function DocumentCategoryModal({
                     className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                       field.value === category.value
                         ? fileName
-                          ? 'border-orange-500 bg-orange-500/10 text-[#F8FAFC]'
-                          : 'border-orange-500 bg-orange-500/20 text-[#F8FAFC] shadow-lg ring-2 ring-orange-500/30'
+                          ? 'border-orange-500 bg-orange-500/10 text-slate-50'
+                          : 'border-orange-500 bg-orange-500/20 text-slate-50 shadow-lg ring-2 ring-orange-500/30'
                         : 'border-gray-700 bg-dark-surface text-gray-300 hover:border-gray-600 hover:bg-dark-surface/80'
                     }`}
                   >
@@ -286,7 +286,7 @@ export function DocumentCategoryModal({
               className={`px-4 py-2 text-sm transition-colors ${
                 isUploading
                   ? 'text-gray-500 cursor-not-allowed'
-                  : 'text-gray-400 hover:text-[#F8FAFC]'
+                  : 'text-gray-400 hover:text-slate-50'
               }`}
             >
               Cancel

@@ -292,7 +292,7 @@ export default function DailyReportTemplate({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-dark-card border-gray-700 text-gray-100">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-[#F8FAFC] flex items-center gap-2">
+          <DialogTitle className="text-xl font-bold text-slate-50 flex items-center gap-2">
             <Calendar className="h-6 w-6 text-blue-400" />
             Daily Report Template
           </DialogTitle>

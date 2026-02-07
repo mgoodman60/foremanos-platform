@@ -96,7 +96,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2 text-[#F8FAFC]">
+            <CardTitle className="flex items-center gap-2 text-slate-50">
               <CreditCard className="w-5 h-5 text-gray-300" />
               Subscription & Billing
             </CardTitle>
@@ -108,10 +108,10 @@ export function BillingCard({ subscription }: BillingCardProps) {
       <CardContent className="space-y-6">
         {/* Current Plan */}
         <div>
-          <h3 className="text-sm font-medium mb-2 text-[#F8FAFC]">Current Plan</h3>
+          <h3 className="text-sm font-medium mb-2 text-slate-50">Current Plan</h3>
           <div className="flex items-center justify-between p-4 bg-dark-surface border border-gray-600 rounded-lg">
             <div>
-              <p className="font-semibold text-lg text-[#F8FAFC]">{getTierDisplay()} Plan</p>
+              <p className="font-semibold text-lg text-slate-50">{getTierDisplay()} Plan</p>
               {subscription.billing.cancelAtPeriodEnd && (
                 <p className="text-sm text-yellow-400 mt-1">
                   <AlertCircle className="w-3 h-3 inline mr-1" />
@@ -134,7 +134,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
 
         {/* Usage Stats */}
         <div>
-          <h3 className="text-sm font-medium mb-2 text-[#F8FAFC]">Usage This Month</h3>
+          <h3 className="text-sm font-medium mb-2 text-slate-50">Usage This Month</h3>
           <div className="space-y-4">
             {/* Queries */}
             <div>
@@ -164,7 +164,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
 
         {/* Plan Limits */}
         <div>
-          <h3 className="text-sm font-medium mb-2 text-[#F8FAFC]">Plan Limits</h3>
+          <h3 className="text-sm font-medium mb-2 text-slate-50">Plan Limits</h3>
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-gray-400">Projects</span>

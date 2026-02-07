@@ -312,7 +312,7 @@ export function ConversationSidebar({
       <>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <h2 className="text-lg font-semibold text-[#F8FAFC]">Project Assistant</h2>
+        <h2 className="text-lg font-semibold text-slate-50">Project Assistant</h2>
         <div className="flex gap-1">
           {isMobile && (
             <Button
@@ -336,8 +336,8 @@ export function ConversationSidebar({
             className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors focus:outline-none focus:bg-dark-card"
           >
             <div className="flex items-center gap-2">
-              <LayoutDashboard className="h-4 w-4 text-[#F97316]" />
-              <span className="text-sm font-semibold text-[#F8FAFC]">Project Dashboard</span>
+              <LayoutDashboard className="h-4 w-4 text-orange-500" />
+              <span className="text-sm font-semibold text-slate-50">Project Dashboard</span>
             </div>
             <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${dashboardExpanded ? '' : '-rotate-90'}`} />
           </button>
@@ -412,8 +412,8 @@ export function ConversationSidebar({
             className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors focus:outline-none focus:bg-dark-card"
           >
             <div className="flex items-center gap-2">
-              <History className="h-4 w-4 text-[#F97316]" />
-              <span className="text-sm font-semibold text-[#F8FAFC]">Chat History</span>
+              <History className="h-4 w-4 text-orange-500" />
+              <span className="text-sm font-semibold text-slate-50">Chat History</span>
             </div>
             <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${historyExpanded ? '' : '-rotate-90'}`} />
           </button>
@@ -467,7 +467,7 @@ export function ConversationSidebar({
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-orange-500/30">
                       <MessageSquare className="w-8 h-8 text-orange-400" />
                     </div>
-                    <h3 className="text-base font-bold text-[#F8FAFC] mb-2">
+                    <h3 className="text-base font-bold text-slate-50 mb-2">
                       No Conversations Yet
                     </h3>
                     <p className="text-sm text-gray-400 leading-relaxed mb-4">
@@ -475,7 +475,7 @@ export function ConversationSidebar({
                     </p>
                     <Button
                       onClick={onNewConversation}
-                      className="bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Start First Conversation
@@ -492,7 +492,7 @@ export function ConversationSidebar({
               aria-current={activeConversationId === conv.id ? 'true' : 'false'}
               className={`group relative rounded-lg p-3 cursor-pointer transition-all ${
                 activeConversationId === conv.id
-                  ? 'bg-[#F97316]/20 border border-[#F97316] shadow-md'
+                  ? 'bg-orange-500/20 border border-orange-500 shadow-md'
                   : 'hover:bg-dark-card hover:shadow-sm border border-transparent hover:border-gray-600'
               }`}
               onClick={() => {
@@ -519,7 +519,7 @@ export function ConversationSidebar({
                       if (e.key === 'Enter') handleRename(conv.id);
                       if (e.key === 'Escape') cancelEditing();
                     }}
-                    className="flex-1 px-2 py-1 text-sm bg-dark-surface border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+                    className="flex-1 px-2 py-1 text-sm bg-dark-surface border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     autoFocus
                   />
                   <Button
@@ -547,20 +547,20 @@ export function ConversationSidebar({
                       {conv.conversationType === 'daily_report' ? (
                         <Calendar className={`h-4 w-4 mt-0.5 flex-shrink-0 ${conv.finalized ? 'text-green-500' : 'text-blue-400'}`} />
                       ) : conv.isSystemManaged ? (
-                        <Shield className="h-4 w-4 text-[#F97316] mt-0.5 flex-shrink-0" />
+                        <Shield className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
                       ) : (
                         <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <p className="text-sm font-medium text-[#F8FAFC] truncate">
+                        <p className="text-sm font-medium text-slate-50 truncate">
                           {conv.title}
                         </p>
                         {/* Pinned indicator */}
                         {conv.isPinned && (
                           <div className="flex-shrink-0">
-                            <Pin className="h-3 w-3 text-[#F97316]" />
+                            <Pin className="h-3 w-3 text-orange-500" />
                           </div>
                         )}
                         {/* Read-only indicator */}
@@ -613,7 +613,7 @@ export function ConversationSidebar({
                           onClick={() => startEditing(conv)}
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:bg-dark-surface hover:text-[#F97316]"
+                          className="h-6 w-6 p-0 text-gray-400 hover:bg-dark-surface hover:text-orange-500"
                         >
                           <Edit2 className="h-3 w-3" />
                         </Button>

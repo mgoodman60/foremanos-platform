@@ -700,7 +700,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
   const disciplineOrder = ['General', 'Architectural', 'Structural', 'Civil', 'Electrical', 'Plumbing', 'Mechanical', 'Fire Protection', 'Other'];
 
   return (
-    <div className="flex flex-col bg-dark-surface text-[#F8FAFC]" style={{ height: '80vh', maxHeight: '800px' }}>
+    <div className="flex flex-col bg-dark-surface text-slate-50" style={{ height: '80vh', maxHeight: '800px' }}>
       {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -787,7 +787,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               placeholder="Search by sheet number (A101), name, or discipline..."
               value={sheetSearch}
               onChange={(e) => setSheetSearch(e.target.value)}
-              className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-500"
             />
           </div>
           {/* Quick Stats */}
@@ -855,14 +855,14 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               placeholder="Search references, documents, locations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-500"
             />
           </div>
 
           {/* Filters */}
           <div className="flex gap-2">
             <Select value={selectedDoc} onValueChange={setSelectedDoc}>
-              <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
+              <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-slate-50">
                 <SelectValue placeholder="All Documents" />
               </SelectTrigger>
               <SelectContent>
@@ -876,7 +876,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
             </Select>
 
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-[#F8FAFC]">
+              <SelectTrigger className="flex-1 bg-dark-card border-gray-600 text-slate-50">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
@@ -944,7 +944,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                       {/* Discipline Header */}
                       <button
                         onClick={() => toggleDiscipline(discipline)}
-                        className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                        className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-dark-hover transition-colors"
                       >
                         {expandedDisciplines.has(discipline) ? (
                           <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -952,7 +952,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                           <ChevronRight className="h-4 w-4 text-gray-400" />
                         )}
                         <Icon className={`h-4 w-4 ${config.color}`} />
-                        <span className="flex-1 font-medium text-[#F8FAFC]">{discipline}</span>
+                        <span className="flex-1 font-medium text-slate-50">{discipline}</span>
                         <Badge variant="secondary" className="text-xs">
                           {docs.length} sheets
                         </Badge>
@@ -980,7 +980,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                               
                               {/* Sheet Name & Summary */}
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-[#F8FAFC] truncate">{doc.name}</p>
+                                <p className="text-sm font-medium text-slate-50 truncate">{doc.name}</p>
                                 <p className="text-xs text-gray-400 mt-0.5">{doc.summary}</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">{doc.category}</p>
                               </div>
@@ -1000,7 +1000,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               <div>
                 <button
                   onClick={() => toggleDiscipline('Other')}
-                  className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-dark-hover transition-colors"
                 >
                   {expandedDisciplines.has('Other') ? (
                     <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -1008,7 +1008,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   )}
                   <FolderOpen className="h-4 w-4 text-gray-400" />
-                  <span className="flex-1 font-medium text-[#F8FAFC]">Other Documents</span>
+                  <span className="flex-1 font-medium text-slate-50">Other Documents</span>
                   <Badge variant="secondary" className="text-xs">
                     {documentsByDiscipline['Other'].length}
                   </Badge>
@@ -1023,7 +1023,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                       >
                         <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#F8FAFC] truncate">{doc.name}</p>
+                          <p className="text-sm font-medium text-slate-50 truncate">{doc.name}</p>
                           <p className="text-xs text-gray-400 mt-0.5">{doc.summary}</p>
                           <p className="text-[10px] text-gray-500 mt-0.5">{doc.category}</p>
                         </div>
@@ -1085,7 +1085,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                     {/* Document Header */}
                     <button
                       onClick={() => toggleDoc(node.id)}
-                      className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-[#383e47] transition-colors"
+                      className="flex w-full items-center gap-2 rounded-lg bg-dark-card px-3 py-2 text-left hover:bg-dark-hover transition-colors"
                     >
                       {expandedDocs.has(node.id) ? (
                         <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -1093,7 +1093,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                         <ChevronRight className="h-4 w-4 text-gray-400" />
                       )}
                       <FileText className="h-4 w-4 text-blue-500" />
-                      <span className="flex-1 font-medium text-[#F8FAFC]">{node.name}</span>
+                      <span className="flex-1 font-medium text-slate-50">{node.name}</span>
                       <div className="flex items-center gap-2 text-xs">
                         <Badge variant="secondary" className="text-green-400">
                           {node.outgoingRefs} out
@@ -1166,7 +1166,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                   {/* Reference Header - Clickable to expand */}
                   <button
                     onClick={() => toggleRefExpansion(refKey, ref.sourceDocumentId, ref.targetDocumentId)}
-                    className="flex items-center justify-between w-full px-4 py-3 bg-dark-surface border-b border-gray-700 hover:bg-[#262b31] transition-colors text-left"
+                    className="flex items-center justify-between w-full px-4 py-3 bg-dark-surface border-b border-gray-700 hover:bg-dark-hover transition-colors text-left"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {isExpanded ? (

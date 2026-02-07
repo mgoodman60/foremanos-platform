@@ -733,7 +733,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
   return (
     <div 
-      className={`flex flex-col h-full bg-dark-surface ${isDragging ? 'ring-2 ring-[#F97316] ring-inset' : ''}`}
+      className={`flex flex-col h-full bg-dark-surface ${isDragging ? 'ring-2 ring-orange-500 ring-inset' : ''}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -750,12 +750,12 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       
       {/* Drag overlay */}
       {isDragging && userRole !== 'guest' && (
-        <div className="absolute inset-0 z-50 bg-[#F97316]/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-          <div className="bg-dark-card border-2 border-dashed border-[#F97316] rounded-lg p-8 text-center max-w-md">
-            <Upload className="w-16 h-16 text-[#F97316] mx-auto mb-4 animate-bounce" />
-            <p className="text-xl font-semibold text-[#F8FAFC] mb-2">Drop file here to upload</p>
+        <div className="absolute inset-0 z-50 bg-orange-500/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+          <div className="bg-dark-card border-2 border-dashed border-orange-500 rounded-lg p-8 text-center max-w-md">
+            <Upload className="w-16 h-16 text-orange-500 mx-auto mb-4 animate-bounce" />
+            <p className="text-xl font-semibold text-slate-50 mb-2">Drop file here to upload</p>
             {preSelectedCategory && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F97316] text-white rounded-lg font-semibold mb-3">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold mb-3">
                 <CheckCircle2 className="w-5 h-5" />
                 <span>{getCategoryLabel(preSelectedCategory as DocumentCategory)}</span>
               </div>
@@ -785,7 +785,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 </button>
               </WithTooltip>
               <div>
-                <h3 className="text-lg font-semibold text-[#F8FAFC]">
+                <h3 className="text-lg font-semibold text-slate-50">
                   {selectedDocs.size} Selected
                 </h3>
                 <p className="text-sm text-gray-400">
@@ -799,7 +799,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               <button
                 onClick={bulkDownload}
                 disabled={bulkActionLoading}
-                className="flex items-center gap-2 px-3 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {bulkActionLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -877,7 +877,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           <div>
             <div className="flex items-center justify-between">
               <div>
-                <h2 id="document-library-title" className="text-lg lg:text-2xl font-bold text-[#F8FAFC]">Documents</h2>
+                <h2 id="document-library-title" className="text-lg lg:text-2xl font-bold text-slate-50">Documents</h2>
                 <p className="text-gray-400 text-xs lg:text-sm mt-1">
                   {filteredDocuments.length} document{filteredDocuments.length !== 1 ? 's' : ''} 
                   {selectedCategory !== 'all' && ` in ${getCategoryLabel(selectedCategory as DocumentCategory)}`}
@@ -887,7 +887,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               <div className="flex items-center gap-2">
                 {/* Category Pre-Selection Badge */}
                 {preSelectedCategory && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F97316] text-white border-2 border-[#F97316] rounded-lg text-sm font-semibold shadow-lg animate-in fade-in zoom-in-95 duration-200">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white border-2 border-orange-500 rounded-lg text-sm font-semibold shadow-lg animate-in fade-in zoom-in-95 duration-200">
                     <CheckCircle2 className="w-5 h-5" />
                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                       <span className="text-xs sm:text-sm">Selected:</span>
@@ -927,7 +927,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       }}
                       disabled={uploading}
                       aria-label="Upload document"
-                      className="flex items-center gap-2 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:ring-offset-[#1c2128]"
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-base"
                     >
                       {uploading ? (
                         <>
@@ -962,7 +962,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 {documents.length > 0 && canDeleteDocuments && (
                   <button
                     onClick={selectAllDocs}
-                    className="text-sm text-gray-300 hover:text-[#F97316] transition-colors flex items-center gap-2"
+                    className="text-sm text-gray-300 hover:text-orange-500 transition-colors flex items-center gap-2"
                   >
                     <CheckSquare className="w-4 h-4" />
                     <span className="hidden sm:inline">Select All</span>
@@ -992,7 +992,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         }}
                         className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                           selectedCategory === 'all' 
-                            ? 'bg-[#F97316] text-white' 
+                            ? 'bg-orange-500 text-white' 
                             : 'text-gray-300 hover:bg-dark-surface'
                         }`}
                       >
@@ -1007,7 +1007,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           }}
                           className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                             selectedCategory === cat.value 
-                              ? 'bg-[#F97316] text-white' 
+                              ? 'bg-orange-500 text-white' 
                               : 'text-gray-300 hover:bg-dark-surface'
                           }`}
                         >
@@ -1021,7 +1021,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 {selectedCategory !== 'all' && (
                   <button
                     onClick={() => setSelectedCategory('all')}
-                    className="text-xs text-gray-400 hover:text-[#F97316] transition-colors"
+                    className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
                   >
                     Clear filter
                   </button>
@@ -1056,7 +1056,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 <div className="w-24 h-24 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-orange-500/30">
                   <FileText className="w-12 h-12 text-orange-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-[#F8FAFC] mb-3">
+                <h3 className="text-2xl font-bold text-slate-50 mb-3">
                   {userRole === 'guest' ? 'No Documents Available' : 'No Documents Yet'}
                 </h3>
                 <p className="text-gray-300 mb-6 leading-relaxed text-base">
@@ -1068,27 +1068,27 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                   <>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="mb-6 px-6 py-3 bg-[#F97316] hover:bg-[#EA580C] active:bg-[#C2410C] text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-base"
+                      className="mb-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-base"
                     >
                       <Upload className="w-5 h-5 inline mr-2" />
                       Upload Your First Document
                     </button>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-gray-400">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
-                          <FileText className="w-4 h-4 text-[#F97316]" />
+                        <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                          <FileText className="w-4 h-4 text-orange-500" />
                         </div>
                         <span>PDF & DOCX</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
-                          <Upload className="w-4 h-4 text-[#F97316]" />
+                        <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                          <Upload className="w-4 h-4 text-orange-500" />
                         </div>
                         <span>Up to 200MB</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-[#F97316]/10 flex items-center justify-center">
-                          <Shield className="w-4 h-4 text-[#F97316]" />
+                        <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                          <Shield className="w-4 h-4 text-orange-500" />
                         </div>
                         <span>Secure Storage</span>
                       </div>
@@ -1105,7 +1105,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-dark-card border border-gray-700 rounded-lg p-3 lg:p-4 hover:border-[#F97316] hover:shadow-lg hover:bg-dark-surface transition-all group"
+                  className="bg-dark-card border border-gray-700 rounded-lg p-3 lg:p-4 hover:border-orange-500 hover:shadow-lg hover:bg-dark-surface transition-all group"
                 >
                   {/* Mobile & Tablet Simple View (< 1024px) */}
                   <div className="lg:hidden">
@@ -1121,7 +1121,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           aria-label={`Select ${doc.name}`}
                         >
                           {selectedDocs.has(doc.id) ? (
-                            <CheckSquare className="w-5 h-5 text-[#F97316]" />
+                            <CheckSquare className="w-5 h-5 text-orange-500" />
                           ) : (
                             <Square className="w-5 h-5 text-gray-500" />
                           )}
@@ -1143,7 +1143,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       
                       {/* Document Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm text-[#F8FAFC] truncate">
+                        <h3 className="font-semibold text-sm text-slate-50 truncate">
                           {doc.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
@@ -1159,7 +1159,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       {/* Preview Button */}
                       <button
                         type="button"
-                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-[#F97316] rounded-lg transition-all active:scale-95"
+                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-orange-500 rounded-lg transition-all active:scale-95"
                         aria-label={`Preview ${doc.name}`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -1173,7 +1173,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       {/* Download Button */}
                       <button
                         type="button"
-                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all active:scale-95"
+                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all active:scale-95"
                         aria-label={`Download ${doc.name}`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -1202,7 +1202,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             aria-label={`Select ${doc.name}`}
                           >
                             {selectedDocs.has(doc.id) ? (
-                              <CheckSquare className="w-6 h-6 text-[#F97316]" />
+                              <CheckSquare className="w-6 h-6 text-orange-500" />
                             ) : (
                               <Square className="w-6 h-6 text-gray-500" />
                             )}
@@ -1218,7 +1218,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         {/* Document Details */}
                         <div className="flex-1 min-w-0 py-1">
                           <div className="flex items-start gap-2 mb-2">
-                            <h3 className="font-bold text-[#F8FAFC] truncate text-lg flex-1">
+                            <h3 className="font-bold text-slate-50 truncate text-lg flex-1">
                               {doc.name}
                             </h3>
                             {isRecentlyUpdated(doc.updatedAt) && (
@@ -1308,7 +1308,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           type="button"
-                          className="flex items-center gap-2 px-4 py-2 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-[#F97316] rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:ring-offset-[#1F2328] focus:outline-none"
+                          className="flex items-center gap-2 px-4 py-2 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-orange-500 rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
                           aria-label={`Preview ${doc.name}`}
                           title="Preview document"
                           onClick={(e) => {
@@ -1323,7 +1323,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         
                         <button
                           type="button"
-                          className="flex items-center gap-2 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:ring-offset-[#1F2328] focus:outline-none"
+                          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
                           aria-label={`Download ${doc.name}`}
                           title="Download document"
                           onClick={(e) => {
@@ -1340,7 +1340,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           <>
                             <button
                               type="button"
-                              className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-[#1F2328] focus:outline-none"
+                              className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
                               aria-label={`Rename ${doc.name}`}
                               title="Rename document"
                               onClick={(e) => {
@@ -1354,7 +1354,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             </button>
                             <button
                               type="button"
-                              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-[#1F2328] focus:outline-none"
+                              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
                               aria-label={`Delete ${doc.name}`}
                               title="Delete document"
                               onClick={(e) => {
@@ -1395,7 +1395,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           aria-labelledby="document-library-rename-dialog-title"
         >
           <div className="bg-dark-card border border-gray-700 rounded-lg shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
-            <h3 id="document-library-rename-dialog-title" className="text-xl font-bold text-[#F8FAFC] mb-4">Rename Document</h3>
+            <h3 id="document-library-rename-dialog-title" className="text-xl font-bold text-slate-50 mb-4">Rename Document</h3>
             <p className="text-sm text-gray-400 mb-4">
               Enter a new name for "{renameDocument?.name}"
             </p>
@@ -1414,7 +1414,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                     setNewDocumentName('');
                   }
                 }}
-                className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 bg-dark-surface border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
                 placeholder="Enter document name"
                 aria-label="New document name"
                 aria-describedby="name-requirements"
@@ -1444,7 +1444,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               <button
                 onClick={handleRename}
                 disabled={!newDocumentName.trim() || newDocumentName.length < 3}
-                className="flex-1 px-4 py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 Rename
               </button>

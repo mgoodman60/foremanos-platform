@@ -128,7 +128,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
               <ChevronRight className="h-4 w-4 text-gray-400" />
             )}
             <FileText className="h-4 w-4 text-orange-500" />
-            <span className="text-sm font-semibold text-[#F8FAFC]">Documents</span>
+            <span className="text-sm font-semibold text-slate-50">Documents</span>
             <span className="text-xs text-gray-500">({documents.length})</span>
           </div>
         </button>
@@ -159,7 +159,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1">
-                          <p className="text-xs font-medium text-[#F8FAFC] truncate">
+                          <p className="text-xs font-medium text-slate-50 truncate">
                             {doc.name}
                           </p>
                           {getAccessIcon(doc.accessLevel)}

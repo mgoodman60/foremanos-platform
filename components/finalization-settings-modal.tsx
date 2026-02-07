@@ -142,7 +142,7 @@ export function FinalizationSettingsModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
-            <h2 id="finalization-settings-modal-title" className="text-xl font-bold text-[#F8FAFC]">Daily Report Finalization Settings</h2>
+            <h2 id="finalization-settings-modal-title" className="text-xl font-bold text-slate-50">Daily Report Finalization Settings</h2>
             <p className="text-sm text-gray-400 mt-1">
               Configure when and how daily reports are automatically finalized
             </p>
@@ -152,7 +152,7 @@ export function FinalizationSettingsModal({
             onClick={onClose}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
+            className="text-gray-400 hover:text-slate-50 hover:bg-dark-card"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -163,7 +163,7 @@ export function FinalizationSettingsModal({
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-6 space-y-6" noValidate>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F97316]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
             </div>
           ) : (
             <>
@@ -182,8 +182,8 @@ export function FinalizationSettingsModal({
 
               {/* Timezone Setting */}
               <div className="space-y-2">
-                <label htmlFor="timezone" className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
-                  <Globe className="h-4 w-4 text-[#F97316]" />
+                <label htmlFor="timezone" className="flex items-center gap-2 text-sm font-medium text-slate-50">
+                  <Globe className="h-4 w-4 text-orange-500" />
                   Project Timezone
                 </label>
                 <Controller
@@ -197,7 +197,7 @@ export function FinalizationSettingsModal({
                         field.onChange(e);
                         setHasChanges(true);
                       }}
-                      className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                      className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       aria-invalid={!!errors.timezone}
                       aria-describedby={errors.timezone ? 'timezone-error' : 'timezone-help'}
                     >
@@ -219,8 +219,8 @@ export function FinalizationSettingsModal({
 
               {/* Finalization Time Setting */}
               <div className="space-y-2">
-                <label htmlFor="finalizationTime" className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
-                  <Clock className="h-4 w-4 text-[#F97316]" />
+                <label htmlFor="finalizationTime" className="flex items-center gap-2 text-sm font-medium text-slate-50">
+                  <Clock className="h-4 w-4 text-orange-500" />
                   Auto-Finalize Time
                 </label>
                 <Controller
@@ -234,7 +234,7 @@ export function FinalizationSettingsModal({
                         field.onChange(e);
                         setHasChanges(true);
                       }}
-                      className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                      className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       aria-invalid={!!errors.finalizationTime}
                       aria-describedby={errors.finalizationTime ? 'finalizationTime-error' : 'finalizationTime-help'}
                     >
@@ -256,8 +256,8 @@ export function FinalizationSettingsModal({
 
               {/* Daily Reports Folder ID Setting */}
               <div className="space-y-2">
-                <label htmlFor="dailyReportsFolderId" className="flex items-center gap-2 text-sm font-medium text-[#F8FAFC]">
-                  <Folder className="h-4 w-4 text-[#F97316]" />
+                <label htmlFor="dailyReportsFolderId" className="flex items-center gap-2 text-sm font-medium text-slate-50">
+                  <Folder className="h-4 w-4 text-orange-500" />
                   Document Library Folder (Optional)
                 </label>
                 <input
@@ -267,7 +267,7 @@ export function FinalizationSettingsModal({
                     onChange: () => setHasChanges(true),
                   })}
                   placeholder="Leave blank to auto-create 'Daily Reports' folder"
-                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-[#F8FAFC] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-transparent"
+                  className="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-slate-50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   aria-invalid={!!errors.dailyReportsFolderId}
                   aria-describedby={errors.dailyReportsFolderId ? 'dailyReportsFolderId-error' : 'dailyReportsFolderId-help'}
                 />
@@ -281,7 +281,7 @@ export function FinalizationSettingsModal({
 
               {/* Preview */}
               <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-[#F8FAFC] mb-3">Preview</h3>
+                <h3 className="text-sm font-medium text-slate-50 mb-3">Preview</h3>
                 <div className="space-y-2 text-sm text-gray-300">
                   <p>
                     <span className="text-gray-500">Timezone:</span>{' '}
@@ -312,7 +312,7 @@ export function FinalizationSettingsModal({
               type="button"
               onClick={onClose}
               variant="ghost"
-              className="text-gray-400 hover:text-[#F8FAFC] hover:bg-dark-card"
+              className="text-gray-400 hover:text-slate-50 hover:bg-dark-card"
               disabled={saving}
             >
               Cancel
@@ -320,7 +320,7 @@ export function FinalizationSettingsModal({
             <Button
               type="submit"
               disabled={!hasChanges || saving}
-              className="bg-[#F97316] hover:bg-[#ea580c] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <>

@@ -120,7 +120,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
 
   // Otherwise, show the document selector
   return (
-    <div className="flex h-full flex-col bg-dark-surface text-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-dark-surface text-slate-50">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
             placeholder="Search plan documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-dark-card border-gray-600 pl-10 text-[#F8FAFC] placeholder:text-gray-500"
+            className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-500"
           />
         </div>
 
@@ -190,7 +190,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
               <button
                 key={doc.id}
                 onClick={() => handleViewPlan(doc)}
-                className="flex w-full items-start gap-3 rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-blue-500 hover:bg-[#383e47] transition-all"
+                className="flex w-full items-start gap-3 rounded-lg border border-gray-700 bg-dark-card p-4 text-left hover:border-blue-500 hover:bg-dark-hover transition-all"
               >
                 {/* Icon */}
                 <div className="mt-1">
@@ -204,7 +204,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
                 {/* Document Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-medium text-[#F8FAFC] truncate">{doc.name}</h3>
+                    <h3 className="font-medium text-slate-50 truncate">{doc.name}</h3>
                     <Badge variant="outline" className="text-xs shrink-0">
                       {doc.fileType.toUpperCase()}
                     </Badge>

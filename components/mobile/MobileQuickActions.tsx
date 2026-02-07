@@ -51,7 +51,7 @@ export function MobileQuickActions({ actions, className = '' }: MobileQuickActio
   };
 
   const variantClasses = {
-    default: 'bg-dark-card border-gray-600 text-gray-200 active:bg-[#3d434b]',
+    default: 'bg-dark-card border-gray-600 text-gray-200 active:bg-dark-hover',
     primary: 'bg-orange-500 border-orange-600 text-white active:bg-orange-600',
     success: 'bg-green-600 border-green-700 text-white active:bg-green-700',
     warning: 'bg-yellow-600 border-yellow-700 text-white active:bg-yellow-700',
@@ -97,10 +97,10 @@ export function MobileQuickActions({ actions, className = '' }: MobileQuickActio
 
       {/* Gradient fade indicators */}
       {canScrollLeft && (
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#1F2328] to-transparent pointer-events-none sm:hidden" />
+        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-dark-surface to-transparent pointer-events-none sm:hidden" />
       )}
       {canScrollRight && (
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#1F2328] to-transparent pointer-events-none sm:hidden" />
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-dark-surface to-transparent pointer-events-none sm:hidden" />
       )}
     </div>
   );

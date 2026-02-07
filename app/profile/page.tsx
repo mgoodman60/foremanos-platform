@@ -188,14 +188,14 @@ export default function ProfilePage() {
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#F8FAFC] mb-2">User Profile</h1>
+          <h1 className="text-3xl font-bold text-slate-50 mb-2">User Profile</h1>
           <p className="text-gray-400">Manage your account settings and preferences</p>
         </div>
 
         {/* User Info Card */}
         <Card className="bg-dark-card border-gray-700 mb-6">
           <CardHeader>
-            <CardTitle className="text-[#F8FAFC] flex items-center gap-2">
+            <CardTitle className="text-slate-50 flex items-center gap-2">
               <User className="h-5 w-5" />
               Account Information
             </CardTitle>
@@ -203,11 +203,11 @@ export default function ProfilePage() {
           <CardContent className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-400">Email</label>
-              <p className="text-[#F8FAFC] mt-1">{session.user.email}</p>
+              <p className="text-slate-50 mt-1">{session.user.email}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-400">Username</label>
-              <p className="text-[#F8FAFC] mt-1">{(session.user as any).username || 'Not set'}</p>
+              <p className="text-slate-50 mt-1">{(session.user as any).username || 'Not set'}</p>
             </div>
           </CardContent>
         </Card>
@@ -215,7 +215,7 @@ export default function ProfilePage() {
         {/* Company Logo Card */}
         <Card className="bg-dark-card border-gray-700">
           <CardHeader>
-            <CardTitle className="text-[#F8FAFC]">Company Logo</CardTitle>
+            <CardTitle className="text-slate-50">Company Logo</CardTitle>
             <CardDescription className="text-gray-400">
               Upload your company logo to use in daily report PDFs. Recommended size: 200x80px (PNG or JPG, max 5MB)
             </CardDescription>
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                 {logoInfo.companyLogoUploadedAt && (
                   <div className="text-sm text-gray-400">
                     <p>Uploaded on:</p>
-                    <p className="text-[#F8FAFC] font-medium">
+                    <p className="text-slate-50 font-medium">
                       {new Date(logoInfo.companyLogoUploadedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -304,7 +304,7 @@ export default function ProfilePage() {
             {/* Info Text */}
             <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
               <p className="text-sm text-gray-400">
-                <strong className="text-[#F8FAFC]">Note:</strong> Your company logo will appear in the header of all daily report PDFs generated for your projects. If no logo is uploaded, the ForemanOS logo will be used as default.
+                <strong className="text-slate-50">Note:</strong> Your company logo will appear in the header of all daily report PDFs generated for your projects. If no logo is uploaded, the ForemanOS logo will be used as default.
               </p>
             </div>
           </CardContent>

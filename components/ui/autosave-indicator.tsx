@@ -103,7 +103,7 @@ export function AutosaveIndicator({
       case 'error':
         return 'text-red-400';
       default:
-        return 'text-gray-400';
+        return 'text-gray-300';
     }
   };
 

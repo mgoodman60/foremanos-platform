@@ -121,9 +121,9 @@ export default function CrewPerformanceForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-dark-card border-gray-700 text-[#F8FAFC] max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#F8FAFC]">
+          <DialogTitle className="text-slate-50">
             Record Daily Performance - {crewName}
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -143,7 +143,7 @@ export default function CrewPerformanceForm({
                 id="date"
                 type="date"
                 {...register('date')}
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
                 aria-invalid={!!errors.date}
                 aria-describedby={errors.date ? 'date-error' : undefined}
               />
@@ -160,7 +160,7 @@ export default function CrewPerformanceForm({
                 min="1"
                 {...register('crewSize', { valueAsNumber: true })}
                 placeholder="Number of workers"
-                className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+                className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
                 aria-invalid={!!errors.crewSize}
                 aria-describedby={errors.crewSize ? 'crewSize-error' : undefined}
               />
@@ -170,7 +170,7 @@ export default function CrewPerformanceForm({
 
           {/* Productivity Metrics */}
           <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-400" />
               Productivity Metrics
             </h3>
@@ -187,7 +187,7 @@ export default function CrewPerformanceForm({
                   min="0"
                   {...register('hoursWorked', { valueAsNumber: true })}
                   placeholder="8.0"
-                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-slate-50 mt-1"
                   aria-invalid={!!errors.hoursWorked}
                   aria-describedby={errors.hoursWorked ? 'hoursWorked-error' : undefined}
                 />
@@ -204,7 +204,7 @@ export default function CrewPerformanceForm({
                   min="0"
                   {...register('tasksCompleted', { valueAsNumber: true })}
                   placeholder="0"
-                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-slate-50 mt-1"
                   aria-describedby={errors.tasksCompleted ? 'tasksCompleted-error' : undefined}
                 />
                 <FormError error={errors.tasksCompleted} fieldName="tasksCompleted" />
@@ -221,7 +221,7 @@ export default function CrewPerformanceForm({
                   min="0"
                   {...register('unitsProduced', { valueAsNumber: true })}
                   placeholder="SF, LF, etc"
-                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-slate-50 mt-1"
                   aria-describedby={errors.unitsProduced ? 'unitsProduced-error' : undefined}
                 />
                 <FormError error={errors.unitsProduced} fieldName="unitsProduced" />
@@ -231,7 +231,7 @@ export default function CrewPerformanceForm({
 
           {/* Safety & Quality */}
           <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <Shield className="w-4 h-4 text-blue-400" />
               Safety & Quality
             </h3>
@@ -246,7 +246,7 @@ export default function CrewPerformanceForm({
                   type="number"
                   min="0"
                   {...register('safetyIncidents', { valueAsNumber: true })}
-                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-slate-50 mt-1"
                   aria-describedby={errors.safetyIncidents ? 'safetyIncidents-error' : undefined}
                 />
                 <FormError error={errors.safetyIncidents} fieldName="safetyIncidents" />
@@ -261,7 +261,7 @@ export default function CrewPerformanceForm({
                   type="number"
                   min="0"
                   {...register('qualityIssues', { valueAsNumber: true })}
-                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-slate-50 mt-1"
                   aria-describedby={errors.qualityIssues ? 'qualityIssues-error' : undefined}
                 />
                 <FormError error={errors.qualityIssues} fieldName="qualityIssues" />
@@ -283,7 +283,7 @@ export default function CrewPerformanceForm({
 
           {/* Weather Impact */}
           <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
-            <h3 className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-50 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-yellow-400" />
               Weather Impact
             </h3>
@@ -309,7 +309,7 @@ export default function CrewPerformanceForm({
                   id="weatherNotes"
                   {...register('weatherNotes')}
                   placeholder="Describe weather conditions and impact..."
-                  className="bg-dark-card border-gray-700 text-[#F8FAFC] mt-1"
+                  className="bg-dark-card border-gray-700 text-slate-50 mt-1"
                   rows={2}
                   aria-describedby={errors.weatherNotes ? 'weatherNotes-error' : undefined}
                 />
@@ -327,7 +327,7 @@ export default function CrewPerformanceForm({
               id="notes"
               {...register('notes')}
               placeholder="Any additional observations or comments..."
-              className="bg-dark-surface border-gray-700 text-[#F8FAFC] mt-1"
+              className="bg-dark-surface border-gray-700 text-slate-50 mt-1"
               rows={3}
               aria-describedby={errors.notes ? 'notes-error' : undefined}
             />

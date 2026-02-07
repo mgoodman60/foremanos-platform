@@ -36,13 +36,13 @@ interface HeaderActionMenuProps {
 }
 
 const variantStyles = {
-  default: 'bg-dark-card border-gray-600 text-gray-200 hover:bg-[#3d434b] hover:text-white',
+  default: 'bg-dark-card border-gray-600 text-gray-100 hover:bg-dark-hover hover:text-white',
   primary: 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600',
   outline: 'bg-transparent border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white',
 };
 
 const itemVariantStyles = {
-  default: 'text-gray-200 hover:bg-[#3d434b]',
+  default: 'text-gray-100 hover:bg-dark-hover',
   destructive: 'text-red-400 hover:bg-red-500/10 hover:text-red-300',
   success: 'text-green-400 hover:bg-green-500/10 hover:text-green-300',
   warning: 'text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300',
@@ -89,7 +89,7 @@ export function HeaderActionMenu({ groups, className }: HeaderActionMenuProps) {
                   <div className="flex flex-col">
                     <span>{item.label}</span>
                     {item.description && (
-                      <span className="text-xs text-gray-500">{item.description}</span>
+                      <span className="text-xs text-gray-400">{item.description}</span>
                     )}
                   </div>
                 </DropdownMenuItem>
@@ -159,7 +159,7 @@ export function QuickActionMenu({
               <div className="flex flex-col">
                 <span>{item.label}</span>
                 {item.description && (
-                  <span className="text-xs text-gray-500">{item.description}</span>
+                  <span className="text-xs text-gray-400">{item.description}</span>
                 )}
               </div>
             </DropdownMenuItem>

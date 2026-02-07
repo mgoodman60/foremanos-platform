@@ -70,6 +70,8 @@ const config: Config = {
         'dark-surface': 'var(--bg-dark-surface)',
         'dark-card': 'var(--bg-dark-card)',
         'dark-hover': 'var(--bg-dark-hover)',
+        'client-primary': 'var(--client-primary)',
+        'client-primary-dark': 'var(--client-primary-dark)',
       },
       keyframes: {
         'accordion-down': {

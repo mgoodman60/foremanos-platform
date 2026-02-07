@@ -48,21 +48,21 @@ const steps = [
         <h3 className="text-xl font-bold text-white">What You Can Do</h3>
         <div className="space-y-3">
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <FolderPlus className="w-5 h-5 text-[#003B71] mt-0.5" />
+            <FolderPlus className="w-5 h-5 text-client-primary mt-0.5" />
             <div>
               <h4 className="font-semibold text-white">Manage Projects</h4>
               <p className="text-sm text-gray-300">Create and organize multiple construction projects</p>
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <FileUp className="w-5 h-5 text-[#003B71] mt-0.5" />
+            <FileUp className="w-5 h-5 text-client-primary mt-0.5" />
             <div>
               <h4 className="font-semibold text-white">Upload Documents</h4>
               <p className="text-sm text-gray-300">Store plans, specs, schedules, and more</p>
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <MessageSquare className="w-5 h-5 text-[#003B71] mt-0.5" />
+            <MessageSquare className="w-5 h-5 text-client-primary mt-0.5" />
             <div>
               <h4 className="font-semibold text-white">AI-Powered Chat</h4>
               <p className="text-sm text-gray-300">Ask questions and get instant answers from your documents</p>
@@ -168,7 +168,7 @@ const steps = [
         <p className="text-gray-300 leading-relaxed">
           You now know the basics of ForemanOS. Start creating projects, uploading documents, and asking questions.
         </p>
-        <div className="bg-gradient-to-r from-[#003B71] to-[#0052a3] text-white rounded-lg p-6 mt-6">
+        <div className="bg-gradient-to-r from-client-primary to-blue-700 text-white rounded-lg p-6 mt-6">
           <p className="font-semibold mb-2">Need Help?</p>
           <p className="text-sm text-blue-100">
             Contact your administrator or explore the dashboard to discover more features.
@@ -208,8 +208,8 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col bg-dark-card border-gray-700 text-white">
         <DialogHeader className="sticky top-0 z-10 bg-dark-card pb-4 border-b border-gray-700">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-[#003B71] bg-opacity-10 rounded-lg">
-              <Icon className="w-6 h-6 text-[#003B71]" />
+            <div className="p-2 bg-client-primary bg-opacity-10 rounded-lg">
+              <Icon className="w-6 h-6 text-client-primary" />
             </div>
             <DialogTitle className="text-xl">{step.title}</DialogTitle>
           </div>
@@ -242,7 +242,7 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
             )}
             <Button
               onClick={handleNext}
-              className="bg-[#003B71] hover:bg-[#002851] text-white"
+              className="bg-client-primary hover:bg-client-primary-dark text-white"
             >
               {currentStep === steps.length - 1 ? (
                 'Get Started'

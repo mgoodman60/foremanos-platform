@@ -133,7 +133,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
         aria-labelledby="batch-upload-modal-title"
         className="bg-dark-card border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
-        <div className="sticky top-0 bg-[#003B71] text-white p-6 rounded-t-lg">
+        <div className="sticky top-0 bg-client-primary text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Upload className="w-6 h-6" aria-hidden="true" />
@@ -160,7 +160,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
             >
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
               <label className="cursor-pointer">
-                <span className="text-[#003B71] font-semibold hover:underline">
+                <span className="text-client-primary font-semibold hover:underline">
                   Click to select files
                 </span>
                 <input
@@ -185,7 +185,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
                 <div key={index} className="border rounded-lg p-4" role="listitem">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1">
-                      <FileText className="w-5 h-5 text-[#003B71] flex-shrink-0" aria-hidden="true" />
+                      <FileText className="w-5 h-5 text-client-primary flex-shrink-0" aria-hidden="true" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-white truncate">
                           {uploadFile.file.name}
@@ -250,7 +250,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
                 type="button"
                 onClick={uploadFiles}
                 disabled={uploading || files.length === 0}
-                className="flex-1 bg-[#003B71] hover:bg-[#002855]"
+                className="flex-1 bg-client-primary hover:bg-client-primary-dark"
               >
                 {uploading ? (
                   <>

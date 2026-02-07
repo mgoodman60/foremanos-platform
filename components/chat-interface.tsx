@@ -1026,7 +1026,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" aria-hidden="true" />
             <div>
-              <h2 className="text-base sm:text-lg lg:text-2xl font-bold text-[#F8FAFC]">Project Assistant</h2>
+              <h2 className="text-base sm:text-lg lg:text-2xl font-bold text-slate-50">Project Assistant</h2>
               <div className="flex items-center gap-2">
                 <p className="text-xs sm:text-sm lg:text-base text-gray-300">
                   {hasFullAccess ? 'Full Access' : 'Guest Access'}
@@ -1045,8 +1045,8 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             {activeConversationId && messages.length > 0 && (
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className={`p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none ${
-                  showSearch ? 'bg-dark-card text-[#F97316]' : ''
+                className={`p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-orange-500 focus:outline-none ${
+                  showSearch ? 'bg-dark-card text-orange-500' : ''
                 }`}
                 aria-label="Search messages"
                 title="Search messages (Ctrl/Cmd+F)"
@@ -1056,7 +1056,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             )}
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+              className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 focus:ring-2 focus:ring-orange-500 focus:outline-none"
               aria-label="Toggle help"
               title="Quick help"
             >
@@ -1075,11 +1075,11 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 <button
                   onClick={() => setShowWorkflowModal(true)}
                   disabled={!activeConversationId}
-                  className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                  className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-orange-500 focus:outline-none"
                   aria-label="Daily Report"
                   title="Start daily report"
                 >
-                  <Target className="w-4 h-4 sm:w-5 sm:h-5 text-[#F97316]" />
+                  <Target className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                 </button>
               </>
             )}
@@ -1119,7 +1119,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 </div>
                 <button
                   onClick={() => setShowTemplateExportDialog(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#F97316] hover:bg-[#ea6d0a] text-white rounded-lg text-xs sm:text-sm font-medium transition-all transform hover:scale-105"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-all transform hover:scale-105"
                   title="Export using template"
                 >
                   <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -1131,7 +1131,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
                 disabled={messages.length === 0}
-                className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+                className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 aria-label="Export chat"
                 title="Download chat transcript"
               >
@@ -1165,7 +1165,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             <button
               onClick={clearChat}
               disabled={messages.length === 0}
-              className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-[#F97316] focus:outline-none"
+              className="p-1.5 sm:p-2 hover:bg-dark-card rounded-lg transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-orange-500 focus:outline-none"
               aria-label="Clear chat"
               title="Clear chat history"
             >
@@ -1177,7 +1177,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         {/* Help Panel - Compact on Mobile */}
         {showHelp && (
           <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-dark-card rounded-lg text-xs sm:text-sm animate-in slide-in-from-top border border-gray-700">
-            <p className="font-semibold mb-1 sm:mb-2 text-[#F8FAFC]">Tips for effective queries:</p>
+            <p className="font-semibold mb-1 sm:mb-2 text-slate-50">Tips for effective queries:</p>
             <ul className="space-y-0.5 sm:space-y-1 text-gray-300">
               <li>• Be specific about what you need</li>
               <li>• Reference document names when needed</li>
@@ -1210,7 +1210,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       >
         {/* Drag and Drop Overlay */}
         {isDragging && (
-          <div className="absolute inset-0 bg-[#F97316] bg-opacity-90 z-50 flex items-center justify-center animate-in fade-in">
+          <div className="absolute inset-0 bg-orange-500 bg-opacity-90 z-50 flex items-center justify-center animate-in fade-in">
             <div className="text-center text-white">
               <ImagePlus className="w-16 h-16 mx-auto mb-4 animate-bounce" />
               <p className="text-2xl font-bold uppercase tracking-wider">Drop Image Here</p>
@@ -1228,7 +1228,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 className="object-contain"
               />
             </div>
-            <p className="text-lg font-medium text-[#F8FAFC]">How can I help with your project?</p>
+            <p className="text-lg font-medium text-slate-50">How can I help with your project?</p>
             <p className="text-sm mt-2 mb-6 text-gray-300">Ask me about schedules, plans, specifications, or troubleshooting.</p>
             
             {/* Smart Suggestions or Sample Questions */}
@@ -1246,11 +1246,11 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                       <button
                         key={index}
                         onClick={() => handleSampleQuestion(question)}
-                        className="p-3 text-left text-sm bg-gradient-to-br from-[#2d333b] to-[#3d434b] border-2 border-gray-600 rounded-lg hover:border-[#F97316] hover:shadow-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:outline-none group"
+                        className="p-3 text-left text-sm bg-gradient-to-br from-dark-card to-dark-hover border-2 border-gray-600 rounded-lg hover:border-orange-500 hover:shadow-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:outline-none group"
                         aria-label={`Use smart suggestion: ${question}`}
                       >
-                        <span className="text-gray-200 group-hover:text-[#F97316] font-medium flex items-start gap-2">
-                          <span className="text-[#F97316] text-xs mt-0.5">✨</span>
+                        <span className="text-gray-200 group-hover:text-orange-500 font-medium flex items-start gap-2">
+                          <span className="text-orange-500 text-xs mt-0.5">✨</span>
                           {question}
                         </span>
                       </button>
@@ -1265,10 +1265,10 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                       <button
                         key={index}
                         onClick={() => handleSampleQuestion(question)}
-                        className="p-3 text-left text-sm bg-dark-card border-2 border-gray-600 rounded-lg hover:border-[#F97316] hover:shadow-md transition-all transform hover:scale-105 focus:ring-2 focus:ring-[#F97316] focus:outline-none group"
+                        className="p-3 text-left text-sm bg-dark-card border-2 border-gray-600 rounded-lg hover:border-orange-500 hover:shadow-md transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:outline-none group"
                         aria-label={`Use sample question: ${question}`}
                       >
-                        <span className="text-gray-200 group-hover:text-[#F97316] font-medium">{question}</span>
+                        <span className="text-gray-200 group-hover:text-orange-500 font-medium">{question}</span>
                       </button>
                     ))}
                   </div>
@@ -1307,9 +1307,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               <div
                 className={`rounded-lg p-3 ${
                   message.role === 'user'
-                    ? 'bg-[#F97316] text-white'
-                    : 'bg-dark-card text-[#F8FAFC] shadow-md border border-gray-700'
-                } ${isHighlighted ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-[#1F2328]' : ''}`}
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-dark-card text-slate-50 shadow-md border border-gray-700'
+                } ${isHighlighted ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-dark-surface' : ''}`}
               >
                 {message.image && (
                   <div className="mb-3">
@@ -1364,7 +1364,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                     <WithTooltip tooltip={copiedId === message.id ? "Copied!" : "Copy to clipboard"}>
                       <button
                         onClick={() => copyMessage(message.content, message.id)}
-                        className="text-gray-500 hover:text-[#F97316] transition-colors p-1 focus:ring-2 focus:ring-[#F97316] focus:outline-none rounded"
+                        className="text-gray-500 hover:text-orange-500 transition-colors p-1 focus:ring-2 focus:ring-orange-500 focus:outline-none rounded"
                         aria-label="Copy message"
                       >
                         {copiedId === message.id ? (
@@ -1379,7 +1379,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                       <button
                         onClick={() => submitFeedback(message.id, 1)}
                         disabled={feedbackGiven[message.id] !== undefined}
-                        className={`p-1 transition-colors focus:ring-2 focus:ring-[#F97316] focus:outline-none rounded ${
+                        className={`p-1 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none rounded ${
                           feedbackGiven[message.id] === 1
                             ? 'text-green-500'
                             : 'text-gray-500 hover:text-green-500'
@@ -1393,7 +1393,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                       <button
                         onClick={() => submitFeedback(message.id, -1)}
                         disabled={feedbackGiven[message.id] !== undefined}
-                        className={`p-1 transition-colors focus:ring-2 focus:ring-[#F97316] focus:outline-none rounded ${
+                        className={`p-1 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none rounded ${
                           feedbackGiven[message.id] === -1
                             ? 'text-red-500'
                             : 'text-gray-500 hover:text-red-500'
@@ -1408,7 +1408,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               </div>
             </div>
             {message.role === 'user' && (
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#F97316] flex items-center justify-center" aria-hidden="true">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" aria-hidden="true">
                 <User className="w-5 h-5 text-white" />
               </div>
             )}
@@ -1429,9 +1429,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 />
               </div>
             </div>
-            <div className="bg-dark-card text-[#F8FAFC] shadow-md rounded-lg p-3 border border-gray-700">
+            <div className="bg-dark-card text-slate-50 shadow-md rounded-lg p-3 border border-gray-700">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-[#F97316]" />
+                <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
                 <span className="text-sm text-gray-300">AI is thinking...</span>
               </div>
             </div>
@@ -1449,7 +1449,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             <button
               type="button"
               onClick={retryLastMessage}
-              className="text-xs sm:text-sm text-[#F97316] hover:underline flex items-center gap-1 focus:ring-2 focus:ring-[#F97316] focus:outline-none rounded px-1.5 sm:px-2 py-1"
+              className="text-xs sm:text-sm text-orange-500 hover:underline flex items-center gap-1 focus:ring-2 focus:ring-orange-500 focus:outline-none rounded px-1.5 sm:px-2 py-1"
               aria-label="Retry sending message"
             >
               <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1481,7 +1481,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-[#F8FAFC] truncate">{uploadedImageName}</p>
+                <p className="text-xs sm:text-sm font-medium text-slate-50 truncate">{uploadedImageName}</p>
                 <p className="text-xs text-gray-400">Image ready to send</p>
               </div>
               <WithTooltip tooltip="Remove image">
@@ -1511,7 +1511,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               }
             }}
             placeholder={isReadOnly ? "This conversation is read-only" : (uploadedImage ? "Add a message..." : "Ask about your project...")}
-            className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-sm sm:text-base border border-gray-600 rounded-lg focus:ring-2 focus:ring-[#F97316] focus:border-transparent bg-dark-card text-[#F8FAFC] placeholder-gray-400 transition-all touch-manipulation"
+            className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-sm sm:text-base border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-card text-slate-50 placeholder-gray-400 transition-all touch-manipulation"
             style={{ resize: 'none', overflow: 'hidden' }}
             disabled={loading || isReadOnly}
             aria-label="Message input"
@@ -1534,7 +1534,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || isReadOnly}
-              className="bg-dark-card hover:bg-[#3d434b] text-gray-300 p-1.5 sm:p-2 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none touch-manipulation border border-gray-600"
+              className="bg-dark-card hover:bg-dark-hover text-gray-300 p-1.5 sm:p-2 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none touch-manipulation border border-gray-600"
               aria-label="Upload image"
             >
               <ImagePlus className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -1563,7 +1563,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             <button
               type="submit"
               disabled={loading || (!input.trim() && !uploadedImage) || isReadOnly || !isOnline}
-              className="bg-[#F97316] hover:bg-[#EA580C] text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2 focus:outline-none touch-manipulation"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-2 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none touch-manipulation"
               aria-label="Send message"
             >
               <Send className="w-4 h-4 sm:w-5 sm:h-5" />

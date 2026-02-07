@@ -27,8 +27,8 @@ const iconSizeClasses = {
 };
 
 const variantClasses = {
-  default: 'bg-gray-700 text-gray-200 hover:bg-gray-600 hover:text-white',
-  ghost: 'text-gray-400 hover:bg-gray-700 hover:text-white',
+  default: 'bg-gray-700 text-gray-100 hover:bg-gray-600 hover:text-white',
+  ghost: 'text-gray-300 hover:bg-gray-700 hover:text-white',
   outline: 'border border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white',
 };
 
@@ -49,6 +49,7 @@ export function IconButton({
         <TooltipTrigger asChild>
           <button
             type="button"
+            aria-label={tooltip}
             className={cn(
               'rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900',
               sizeClasses[size],

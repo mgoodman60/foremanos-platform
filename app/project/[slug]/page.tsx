@@ -578,12 +578,12 @@ export default function ProjectPage() {
             <nav className="flex items-center text-xs sm:text-sm text-gray-400 flex-1 min-w-0">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center hover:text-[#F97316] transition-colors flex-shrink-0"
+                className="flex items-center hover:text-orange-500 transition-colors flex-shrink-0"
               >
                 <Home className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
               <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 mx-1 flex-shrink-0" />
-              <span className="text-[#F8FAFC] font-medium truncate">{project.name}</span>
+              <span className="text-slate-50 font-medium truncate">{project.name}</span>
               {/* Last synced indicator */}
               {lastSynced && (
                 <span className="hidden lg:flex items-center gap-1.5 ml-4 text-xs text-gray-500">
@@ -599,7 +599,7 @@ export default function ProjectPage() {
               <div className="relative">
                 <button
                   onClick={() => setShowToolsMenu(!showToolsMenu)}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors font-medium"
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"
                   title="Project Tools"
                 >
                   <MoreVertical className="w-4 h-4" />
@@ -864,7 +864,7 @@ export default function ProjectPage() {
                                 onClick={() => { setShowOneDriveSettings(true); setShowToolsMenu(false); }}
                                 className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface rounded transition-colors"
                               >
-                                <Cloud className="w-4 h-4 text-[#F97316]" />
+                                <Cloud className="w-4 h-4 text-orange-500" />
                                 <span>OneDrive Settings</span>
                               </button>
                               <button
@@ -941,7 +941,7 @@ export default function ProjectPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="p-1.5 sm:p-2 bg-[#F97316] hover:bg-[#EA580C] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 sm:p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title={uploading ? `Uploading... ${uploadProgress}%` : 'Upload Document (PDF/DOCX)'}
               >
                 <Upload className="w-4 h-4" />
@@ -1059,7 +1059,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-[#F8FAFC]">Project Documents</h2>
+              <h2 className="text-xl font-bold text-slate-50">Project Documents</h2>
               <button
                 onClick={() => setShowDocumentLibrary(false)}
                 className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
@@ -1083,7 +1083,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-md border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-[#F8FAFC]">Upload Company Logo</h2>
+              <h2 className="text-xl font-bold text-slate-50">Upload Company Logo</h2>
               <button
                 onClick={() => {
                   setShowLogoUpload(false);
@@ -1155,7 +1155,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-[#F8FAFC]">OneDrive Sync Settings</h2>
+              <h2 className="text-xl font-bold text-slate-50">OneDrive Sync Settings</h2>
               <button
                 onClick={() => setShowOneDriveSettings(false)}
                 className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
@@ -1203,7 +1203,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-dark-surface rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-[#F8FAFC]">Weather Intelligence</h2>
+              <h2 className="text-xl font-bold text-slate-50">Weather Intelligence</h2>
               <button
                 onClick={() => setShowWeatherWidget(false)}
                 className="p-2 hover:bg-dark-card text-gray-400 hover:text-white rounded-lg transition-colors"
@@ -1270,7 +1270,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
           <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-xl font-bold text-[#F8FAFC]">Document Processing Status</h2>
+              <h2 className="text-xl font-bold text-slate-50">Document Processing Status</h2>
               <button
                 onClick={() => setShowProcessingMonitor(false)}
                 className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
