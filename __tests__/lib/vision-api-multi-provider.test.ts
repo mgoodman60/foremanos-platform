@@ -235,6 +235,125 @@ describe('Vision API Multi-Provider', () => {
     });
   });
 
+  describe('Timeout handling', () => {
+    it('should timeout and fallback when Claude Opus hangs', async () => {
+      // Mock a fetch that rejects with AbortError (simulating controller.abort())
+      fetchMock.mockImplementationOnce(() => {
+        const error = new Error('The operation was aborted');
+        error.name = 'AbortError';
+        return Promise.reject(error);
+      });
+
+      // GPT-5.2 fallback should succeed
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          choices: [{ message: { content: 'Sheet A-101\nFallback content with structured data: key=value' } }],
+        }),
+      });
+
+      const result = await analyzeWithMultiProvider('base64image', 'Extract data');
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('gpt-5.2');
+    });
+
+    it('should timeout and fallback when Claude Sonnet hangs', async () => {
+      // Claude Opus fails normally
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'Internal Server Error',
+      });
+      // Claude Opus retries exhaust (maxRetries=3, so 3 more retries)
+      for (let i = 0; i < 3; i++) {
+        fetchMock.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Internal Server Error',
+        });
+      }
+
+      // GPT-5.2 also fails
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'Internal Server Error',
+      });
+      for (let i = 0; i < 3; i++) {
+        fetchMock.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Internal Server Error',
+        });
+      }
+
+      // Claude Sonnet times out (AbortError)
+      fetchMock.mockImplementationOnce(() => {
+        const error = new Error('The operation was aborted');
+        error.name = 'AbortError';
+        return Promise.reject(error);
+      });
+
+      const result = await analyzeWithMultiProvider('base64image', 'Extract data');
+
+      // All providers failed
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('All providers failed');
+    }, 60000);
+
+    it('should return TIMEOUT error for Claude Opus without retrying', async () => {
+      // Claude Opus times out
+      fetchMock.mockImplementationOnce(() => {
+        const error = new Error('The operation was aborted');
+        error.name = 'AbortError';
+        return Promise.reject(error);
+      });
+
+      // GPT-5.2 also times out
+      fetchMock.mockImplementationOnce(() => {
+        const error = new Error('The operation was aborted');
+        error.name = 'AbortError';
+        return Promise.reject(error);
+      });
+
+      // Claude Sonnet succeeds
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nContent from Sonnet with structured data: key=value' }],
+        }),
+      });
+
+      const result = await analyzeWithMultiProvider('base64image', 'Extract data');
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-sonnet-4-5');
+      // Only 3 fetch calls: Opus timeout (no retries) + GPT timeout (no retries) + Sonnet success
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('should timeout on direct PDF analysis and return failure', async () => {
+      // Direct PDF fetch times out
+      fetchMock.mockImplementationOnce(() => {
+        const error = new Error('The operation was aborted');
+        error.name = 'AbortError';
+        return Promise.reject(error);
+      });
+
+      const pdfBase64 = 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nPj4KZW5kb2Jq';
+      const result = await analyzeWithDirectPdf(pdfBase64, 'Extract content');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('TIMEOUT');
+      expect(result.provider).toBe('claude-sonnet-4-5');
+      // Only 1 fetch call — no retries on timeout
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // Note: API key validation tests that require module reloads are skipped
   // as vi.resetModules() doesn't preserve the fetch mock properly
 

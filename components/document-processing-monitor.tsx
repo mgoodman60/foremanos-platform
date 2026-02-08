@@ -87,6 +87,7 @@ export default function DocumentProcessingMonitor({
     switch (status) {
       case 'completed':
         return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+      case 'pending':
       case 'processing':
       case 'queued':
         return <Clock className="w-5 h-5 text-blue-500 animate-pulse" />;
@@ -103,6 +104,7 @@ export default function DocumentProcessingMonitor({
     switch (status) {
       case 'completed':
         return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'pending':
       case 'processing':
       case 'queued':
         return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
@@ -221,12 +223,12 @@ export default function DocumentProcessingMonitor({
                     <span className={`text-xs px-2 py-1 rounded border ${getStatusColor(doc.queueStatus)}`}>
                       {getStatusLabel(doc.queueStatus)}
                     </span>
-                    {doc.queueStatus === 'none' && (
+                    {doc.queueStatus === 'failed' && (
                       <button
                         onClick={() => handleProcessDocument(doc.id)}
-                        className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
+                        className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
                       >
-                        Process Now
+                        Retry
                       </button>
                     )}
                   </div>
@@ -261,7 +263,13 @@ export default function DocumentProcessingMonitor({
                         </div>
                       </div>
                     )}
-                    
+
+                    {doc.queueStatus === 'pending' && (
+                      <div className="mt-2 text-xs text-blue-400">
+                        Preparing to process...
+                      </div>
+                    )}
+
                     {/* Queue Information for completed docs */}
                     {doc.queueStatus === 'completed' && (
                       <div className="mt-2 text-xs text-green-400">

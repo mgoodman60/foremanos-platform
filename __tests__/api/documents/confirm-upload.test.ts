@@ -512,6 +512,7 @@ describe('Confirm Upload Route', () => {
             projectId: 'project-1',
             cloud_storage_path: 'uploads/abc123/test-plan.pdf',
             processed: false,
+            queueStatus: 'pending',
             virusStatus: 'clean',
           }),
         })

@@ -162,6 +162,9 @@ async function callClaudeOpusVision(
     };
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 180000); // 180s - Opus is slow but thorough on construction drawings
+
   try {
     // Detect content type - PDF or image
     const isPdf = isPdfContent(imageBase64);
@@ -196,6 +199,21 @@ async function callClaudeOpusVision(
       text: prompt,
     });
 
+    const requestBody = JSON.stringify({
+      model: VISION_MODEL,
+      max_tokens: 4000,
+      temperature: 0.1,
+      messages: [
+        {
+          role: 'user',
+          content: contentArray,
+        },
+      ],
+    });
+    const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
+    logger.info('VISION_API', `${config.displayName}: Sending request`, { payloadSizeMB, model: VISION_MODEL });
+
+    const fetchStart = Date.now();
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -203,18 +221,11 @@ async function callClaudeOpusVision(
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({
-        model: VISION_MODEL,
-        max_tokens: 4000,
-        temperature: 0.1,
-        messages: [
-          {
-            role: 'user',
-            content: contentArray,
-          },
-        ],
-      }),
+      body: requestBody,
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
 
     const responseText = await response.text();
 
@@ -241,6 +252,9 @@ async function callClaudeOpusVision(
       throw new Error('Empty response from API');
     }
 
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('VISION_API', `${config.displayName}: Response received`, { elapsedMs, status: response.status, contentLength: content.length });
+
     return {
       success: true,
       content,
@@ -248,7 +262,21 @@ async function callClaudeOpusVision(
       attempts: retryCount + 1,
     };
   } catch (error: any) {
-    // Retry on errors
+    clearTimeout(timeout);
+
+    // Don't retry on timeout — immediately fall through to next provider
+    if (error.name === 'AbortError') {
+      logger.info('VISION_API', `${config.displayName}: timeout after 180s, switching provider`);
+      return {
+        success: false,
+        content: '',
+        provider: 'claude-opus-4-6',
+        attempts: retryCount + 1,
+        error: 'TIMEOUT',
+      };
+    }
+
+    // Retry on other errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
@@ -286,7 +314,38 @@ async function callClaudeSonnetVision(
     };
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000); // 60s for construction PDFs
+
   try {
+    const requestBody = JSON.stringify({
+      model: DEFAULT_MODEL,
+      max_tokens: 4000,
+      temperature: 0.1,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/jpeg',
+                data: imageBase64,
+              },
+            },
+            {
+              type: 'text',
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    });
+    const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
+    logger.info('VISION_API', `${config.displayName}: Sending request`, { payloadSizeMB, model: DEFAULT_MODEL });
+
+    const fetchStart = Date.now();
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -294,31 +353,11 @@ async function callClaudeSonnetVision(
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({
-        model: DEFAULT_MODEL,
-        max_tokens: 4000,
-        temperature: 0.1,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: 'image/jpeg',
-                  data: imageBase64,
-                },
-              },
-              {
-                type: 'text',
-                text: prompt,
-              },
-            ],
-          },
-        ],
-      }),
+      body: requestBody,
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
 
     const responseText = await response.text();
 
@@ -333,6 +372,9 @@ async function callClaudeSonnetVision(
       throw new Error('Empty response from API');
     }
 
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('VISION_API', `${config.displayName}: Response received`, { elapsedMs, status: response.status, contentLength: content.length });
+
     return {
       success: true,
       content,
@@ -340,7 +382,21 @@ async function callClaudeSonnetVision(
       attempts: retryCount + 1,
     };
   } catch (error: any) {
-    // Retry on errors
+    clearTimeout(timeout);
+
+    // Don't retry on timeout — immediately fall through to next provider
+    if (error.name === 'AbortError') {
+      logger.info('VISION_API', `${config.displayName}: timeout after 60s, switching provider`);
+      return {
+        success: false,
+        content: '',
+        provider: 'claude-sonnet-4-5',
+        attempts: retryCount + 1,
+        error: 'TIMEOUT',
+      };
+    }
+
+    // Retry on other errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
@@ -382,29 +438,34 @@ async function callGPT52Vision(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
+    const requestBody = JSON.stringify({
+      model: FALLBACK_MODEL,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+            },
+          ],
+        },
+      ],
+      max_tokens: 4000,
+      temperature: 0.1,
+    });
+    const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
+    logger.info('VISION_API', `${config.displayName}: Sending request`, { payloadSizeMB, model: FALLBACK_MODEL });
+
+    const fetchStart = Date.now();
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: FALLBACK_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              {
-                type: 'image_url',
-                image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
-              },
-            ],
-          },
-        ],
-        max_tokens: 4000,
-        temperature: 0.1,
-      }),
+      body: requestBody,
       signal: controller.signal,
     });
 
@@ -427,6 +488,9 @@ async function callGPT52Vision(
     if (!content) {
       throw new Error('Empty response from API');
     }
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('VISION_API', `${config.displayName}: Response received`, { elapsedMs, status: response.status, contentLength: content.length });
 
     return {
       success: true,
@@ -618,7 +682,7 @@ export async function analyzeWithMultiProvider(
       totalAttempts += result.attempts;
 
       if (result.success && result.content) {
-        // Validate quality
+        // Validate quality (logged for diagnostics, not used as a gate)
         const quality = validateQuality(result.content);
         result.confidenceScore = quality.score;
 
@@ -630,14 +694,8 @@ export async function analyzeWithMultiProvider(
           hasStructuredData: quality.hasStructuredData,
         });
 
-        // Check if quality meets threshold
-        if (quality.score >= minQualityScore) {
-          logger.info('VISION_API', `Quality check passed, using ${config.displayName} response - Analysis Complete`);
-          return result;
-        } else {
-          logger.warn('VISION_API', `Quality score ${quality.score} below threshold ${minQualityScore}, trying next provider`);
-          lastError = `Low quality response (score: ${quality.score})`;
-        }
+        logger.info('VISION_API', `Using ${config.displayName} response - Analysis Complete`);
+        return result;
       } else {
         logger.warn('VISION_API', `${config.displayName} failed`, { error: result.error });
         lastError = result.error || 'Unknown error';
@@ -734,15 +792,46 @@ export async function analyzeWithDirectPdf(
   }
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000); // 120s - Sonnet is faster but dense PDFs need time
+
     try {
       logger.info('DIRECT_PDF', `Attempt ${attempt + 1}/${maxRetries} using Claude Sonnet 4`);
-      
+
       // Enhanced page instruction
       let pageInstruction = '';
       if (startPage !== undefined && endPage !== undefined && startPage !== endPage) {
         pageInstruction = `\n\nFocus specifically on page ${startPage} to ${endPage} of this document.`;
       }
 
+      const requestBody = JSON.stringify({
+        model: DEFAULT_MODEL,
+        max_tokens: 8000,
+        temperature: 0.1,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'document',
+                source: {
+                  type: 'base64',
+                  media_type: 'application/pdf',
+                  data: pdfBase64,
+                },
+              },
+              {
+                type: 'text',
+                text: prompt + pageInstruction,
+              },
+            ],
+          },
+        ],
+      });
+      const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
+      logger.info('DIRECT_PDF', `Sending request`, { payloadSizeMB, model: DEFAULT_MODEL, attempt: attempt + 1 });
+
+      const fetchStart = Date.now();
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -750,31 +839,11 @@ export async function analyzeWithDirectPdf(
           'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
         },
-        body: JSON.stringify({
-          model: DEFAULT_MODEL,
-          max_tokens: 8000,
-          temperature: 0.1,
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'document',
-                  source: {
-                    type: 'base64',
-                    media_type: 'application/pdf',
-                    data: pdfBase64,
-                  },
-                },
-                {
-                  type: 'text',
-                  text: prompt + pageInstruction,
-                },
-              ],
-            },
-          ],
-        }),
+        body: requestBody,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       const responseText = await response.text();
 
@@ -798,7 +867,8 @@ export async function analyzeWithDirectPdf(
       // Validate quality
       const quality = validateQuality(content);
 
-      logger.info('DIRECT_PDF', `Analysis succeeded - Direct PDF Analysis Complete`, { confidence: quality.score });
+      const elapsedMs = Date.now() - fetchStart;
+      logger.info('DIRECT_PDF', `Analysis succeeded - Direct PDF Analysis Complete`, { confidence: quality.score, elapsedMs, contentLength: content.length });
 
       return {
         success: true,
@@ -808,7 +878,22 @@ export async function analyzeWithDirectPdf(
         confidenceScore: quality.score,
       };
     } catch (error: any) {
+      clearTimeout(timeout);
       lastError = error.message;
+
+      // Don't retry on timeout — immediately return failure
+      if (error.name === 'AbortError') {
+        logger.info('DIRECT_PDF', `timeout after 120s on attempt ${attempt + 1}`);
+        return {
+          success: false,
+          content: '',
+          provider: 'claude-sonnet-4-5',
+          attempts: attempt + 1,
+          error: 'TIMEOUT',
+          confidenceScore: 0,
+        };
+      }
+
       logger.error('DIRECT_PDF', `Attempt ${attempt + 1} failed`, error);
 
       // Check if this is an unrecoverable error
@@ -881,13 +966,13 @@ export async function analyzeDocumentSmart(
   
   const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
   
-  if (directResult.success && (directResult.confidenceScore || 0) >= minQualityScore) {
+  if (directResult.success && directResult.content) {
     logger.info('SMART_ANALYSIS', `Direct PDF succeeded`, { quality: directResult.confidenceScore });
     return directResult;
   }
 
-  // If direct PDF failed or low quality, fall back to true image rasterization
-  logger.info('SMART_ANALYSIS', 'Direct PDF failed or low quality, falling back to image rasterization');
+  // If direct PDF failed, fall back to true image rasterization
+  logger.info('SMART_ANALYSIS', 'Direct PDF failed, falling back to image rasterization');
   
   // Use true image rasterization for better vision AI compatibility
   try {
@@ -930,13 +1015,13 @@ export async function analyzeWithSmartRouting(
 
     const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
 
-    if (directResult.success && (directResult.confidenceScore || 0) >= minQualityScore) {
+    if (directResult.success && directResult.content) {
       logger.info('SMART_ROUTING', 'Direct PDF succeeded', { quality: directResult.confidenceScore });
       return directResult;
     }
 
-    // Fallback to image if direct PDF fails - use true image rasterization
-    logger.warn('SMART_ROUTING', 'Direct PDF failed/low quality, falling back to image rasterization');
+    // Fallback to image if direct PDF fails
+    logger.warn('SMART_ROUTING', 'Direct PDF failed, falling back to image rasterization');
     try {
       const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
       const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
@@ -958,13 +1043,13 @@ export async function analyzeWithSmartRouting(
 
       const imageResult = await analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
 
-      if (imageResult.success && (imageResult.confidenceScore || 0) >= minQualityScore) {
+      if (imageResult.success && imageResult.content) {
         logger.info('SMART_ROUTING', 'Image processing succeeded', { quality: imageResult.confidenceScore });
         return imageResult;
       }
 
       // Fallback to direct PDF if image processing fails
-      logger.warn('SMART_ROUTING', 'Image processing failed/low quality, trying direct PDF');
+      logger.warn('SMART_ROUTING', 'Image processing failed, trying direct PDF');
       return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
     } catch (rasterError: any) {
       // Canvas/native module not available (common in production/serverless)
@@ -979,13 +1064,13 @@ export async function analyzeWithSmartRouting(
     // Try direct PDF first (faster, lower cost)
     const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
 
-    if (directResult.success && (directResult.confidenceScore || 0) >= minQualityScore) {
+    if (directResult.success && directResult.content) {
       logger.info('SMART_ROUTING', 'Direct PDF succeeded', { quality: directResult.confidenceScore });
       return directResult;
     }
 
-    // Try image-based processing with true rasterization
-    logger.warn('SMART_ROUTING', 'Direct PDF insufficient, trying image rasterization');
+    // Direct PDF failed, try image-based processing with true rasterization
+    logger.warn('SMART_ROUTING', 'Direct PDF failed, trying image rasterization');
     try {
       const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
       const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });

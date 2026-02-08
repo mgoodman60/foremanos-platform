@@ -342,6 +342,7 @@ export async function POST(request: Request) {
           processorType: classification.processorType,
           pagesProcessed: 0,
           processingCost: 0,
+          queueStatus: 'pending',
           virusStatus,
           virusScanAt: new Date(),
           virusScanProvider,
