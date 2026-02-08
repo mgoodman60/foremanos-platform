@@ -332,13 +332,13 @@ export function PhotoGallery({
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {filteredPhotos.map((photo) => {
           const url = photoUrls[photo.id];
           return (
             <div
               key={photo.id}
-              className="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 hover:ring-orange-500 transition-all"
+              className="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 hover:ring-orange-500 transition-all touch-manipulation"
               onClick={() => setSelectedPhoto(photo)}
             >
               {url ? (
@@ -372,7 +372,7 @@ export function PhotoGallery({
               {/* Analyze button */}
               {!readOnly && (
                 <button
-                  className="absolute top-2 right-2 p-1.5 rounded-md bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 disabled:opacity-50"
+                  className="absolute top-2 right-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 p-3 sm:p-1.5 rounded-md bg-black/50 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-black/70 disabled:opacity-50 touch-manipulation"
                   onClick={(e) => handleAnalyze(e, photo)}
                   disabled={analyzingPhotoId === photo.id}
                   aria-label={`Analyze photo ${photo.fileName}`}
@@ -418,7 +418,7 @@ export function PhotoGallery({
                           setSelectedPhoto(null);
                           handleEdit(selectedPhoto);
                         }}
-                        className="text-blue-600 hover:text-blue-700"
+                        className="text-blue-600 hover:text-blue-700 min-h-[44px] min-w-[44px]"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -427,6 +427,7 @@ export function PhotoGallery({
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDownload(selectedPhoto)}
+                      className="min-h-[44px] min-w-[44px]"
                     >
                       <Download className="h-4 w-4" />
                     </Button>
@@ -435,7 +436,7 @@ export function PhotoGallery({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(selectedPhoto.id)}
-                        className="text-red-500 hover:text-red-600"
+                        className="text-red-500 hover:text-red-600 min-h-[44px] min-w-[44px]"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

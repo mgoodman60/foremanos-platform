@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import Link from 'next/link';
+import OneDriveSyncBadge from '@/components/daily-reports/OneDriveSyncBadge';
 
 interface DailyReport {
   id: string;
@@ -22,6 +24,9 @@ interface DailyReport {
   delayHours: number | null;
   rejectionReason: string | null;
   rejectionNotes: string | null;
+  onedriveExported?: boolean;
+  onedriveExportedAt?: string | null;
+  onedriveExportPath?: string | null;
   createdByUser: { id: string; username: string };
   laborEntries: Array<{ tradeName: string; workerCount: number; regularHours: number }>;
 }
@@ -178,8 +183,23 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-white font-medium">Report #{report.reportNumber}</span>
+                    <Link
+                      href={`/project/${projectSlug}/field-ops/daily-reports/${report.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-white font-medium hover:text-blue-400 transition-colors"
+                    >
+                      Report #{report.reportNumber}
+                    </Link>
                     <StatusBadge status={report.status} />
+                    {report.status === 'APPROVED' && (
+                      <OneDriveSyncBadge
+                        onedriveExported={report.onedriveExported ?? false}
+                        onedriveExportedAt={report.onedriveExportedAt}
+                        onedriveExportPath={report.onedriveExportPath}
+                        reportId={report.id}
+                        projectSlug={projectSlug}
+                      />
+                    )}
                     <span className="text-gray-400 text-sm flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
                       {format(new Date(report.reportDate), 'MMM d, yyyy')}

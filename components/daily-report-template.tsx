@@ -26,6 +26,8 @@ import { format } from 'date-fns';
 import { createScopedLogger } from '@/lib/logger';
 import VoiceRecorder from '@/components/daily-reports/VoiceRecorder';
 import CrewTemplateSelector from '@/components/daily-reports/CrewTemplateSelector';
+import SyncStatusIndicator from '@/components/daily-reports/SyncStatusIndicator';
+import { saveDraft, isOnline } from '@/lib/offline-store';
 
 const log = createScopedLogger('DAILY_REPORT_TEMPLATE');
 
@@ -90,7 +92,8 @@ export default function DailyReportTemplate({
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [currentWeather, setCurrentWeather] = useState<string>('');
   const [carryoverAvailable, setCarryoverAvailable] = useState(false);
-  
+  const [syncStatus, setSyncStatus] = useState<'online' | 'offline' | 'syncing' | 'saved-locally'>('online');
+
   // Form state
   const [reportDate, setReportDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [crewSize, setCrewSize] = useState<number>(0);
@@ -111,6 +114,18 @@ export default function DailyReportTemplate({
       fetchCarryover();
     }
   }, [isOpen, projectSlug]);
+
+  useEffect(() => {
+    const handleOnline = () => setSyncStatus('online');
+    const handleOffline = () => setSyncStatus('offline');
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setSyncStatus(navigator.onLine ? 'online' : 'offline');
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Fetch yesterday's carryover data
   const fetchCarryover = async () => {
@@ -163,6 +178,24 @@ export default function DailyReportTemplate({
       toast.error('Failed to load yesterday\'s report');
     } finally {
       setLoadingCarryover(false);
+    }
+  };
+
+  // Quick entry — load yesterday's data into the form
+  const handleQuickEntry = async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectSlug}/daily-reports/carryover`);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.carryover) {
+        setCrewSize(data.carryover.crewSize || crewSize);
+        setNotes(data.carryover.notes || notes);
+        setWorkPerformed(data.carryover.workPlanned || '');
+        setWeatherCondition(data.carryover.weatherCondition || weatherCondition);
+        toast.success('Loaded yesterday\'s data — review and submit');
+      }
+    } catch {
+      toast.error('Failed to load carryover data');
     }
   };
 
@@ -286,7 +319,7 @@ export default function DailyReportTemplate({
     setDelays(delays.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (crewSize <= 0) {
       toast.error('Please enter crew size');
       return;
@@ -310,6 +343,26 @@ export default function DailyReportTemplate({
       tomorrowPlan
     };
 
+    // If offline, save draft locally
+    if (!isOnline()) {
+      try {
+        await saveDraft({
+          id: `${projectSlug}-${reportDate}`,
+          projectId: projectSlug,
+          projectSlug,
+          date: reportDate,
+          data: reportData as unknown as Record<string, unknown>,
+        });
+        setSyncStatus('saved-locally');
+        toast.success('Saved locally — will sync when online');
+        onClose();
+        return;
+      } catch {
+        toast.error('Failed to save draft locally');
+        return;
+      }
+    }
+
     onSubmit(reportData);
     resetForm();
     onClose();
@@ -330,19 +383,33 @@ export default function DailyReportTemplate({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-dark-card border-gray-700 text-gray-100">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-dark-card border-gray-700 text-gray-100">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-slate-50 flex items-center gap-2">
             <Calendar className="h-6 w-6 text-blue-400" />
             Daily Report Template
+            <SyncStatusIndicator status={syncStatus} className="ml-2" />
           </DialogTitle>
           <DialogDescription className="text-gray-400">
             Fill out today's progress report with structured data
           </DialogDescription>
         </DialogHeader>
 
+        {/* Quick Entry Button */}
+        {carryoverAvailable && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full sm:w-auto min-h-[44px] border-gray-700 text-gray-300 hover:bg-dark-surface"
+            onClick={handleQuickEntry}
+          >
+            <ClipboardCopy className="w-4 h-4 mr-2" />
+            Same as yesterday
+          </Button>
+        )}
+
         {/* Voice Recorder & Carryover Indicator */}
-        <div className="flex items-center justify-between mt-2 mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mt-2 mb-4">
           <VoiceRecorder
             projectSlug={projectSlug}
             onTranscription={handleVoiceTranscription}
@@ -364,7 +431,7 @@ export default function DailyReportTemplate({
 
         <div className="space-y-6 mt-4">
           {/* Date & Crew */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label className="text-gray-300">Report Date</Label>
               <Input
@@ -398,7 +465,7 @@ export default function DailyReportTemplate({
               size="sm"
               onClick={handleSameAsYesterday}
               disabled={loadingCarryover}
-              className="border-gray-700 text-gray-300 hover:bg-dark-surface"
+              className="border-gray-700 text-gray-300 hover:bg-dark-surface min-h-[44px] p-3 sm:p-2 sm:min-h-0"
             >
               {loadingCarryover ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -525,7 +592,7 @@ export default function DailyReportTemplate({
                 variant="outline"
                 size="sm"
                 onClick={addDelay}
-                className="border-gray-700 text-gray-300 hover:bg-dark-surface"
+                className="border-gray-700 text-gray-300 hover:bg-dark-surface min-h-[44px] min-w-[44px] p-3 sm:p-2 sm:min-h-0 sm:min-w-0"
               >
                 Add Delay
               </Button>
@@ -554,7 +621,7 @@ export default function DailyReportTemplate({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeDelay(index)}
-                    className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                    className="text-red-500 hover:text-red-400 hover:bg-red-500/10 min-h-[44px] min-w-[44px] p-3 sm:p-2 sm:min-h-0 sm:min-w-0"
                   >
                     Remove
                   </Button>
@@ -600,13 +667,13 @@ export default function DailyReportTemplate({
           <Button
             variant="outline"
             onClick={onClose}
-            className="border-gray-700 text-gray-300 hover:bg-dark-surface"
+            className="border-gray-700 text-gray-300 hover:bg-dark-surface min-h-[44px] p-3 sm:p-2 sm:min-h-0"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 min-h-[44px] p-3 sm:p-2 sm:min-h-0"
           >
             <Send className="h-4 w-4" />
             Submit Report

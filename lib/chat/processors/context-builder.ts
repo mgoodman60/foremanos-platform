@@ -268,6 +268,27 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   // Retrieve admin corrections
   const adminCorrections = await retrieveRelevantCorrections(message || '', projectSlug, 3);
 
+  // Daily report chunk retrieval (best-effort)
+  let dailyReportContext = '';
+  try {
+    const { searchDailyReportChunks } = await import('@/lib/daily-report-indexer');
+    const project = await prisma.project.findUnique({
+      where: { slug: projectSlug },
+      select: { id: true },
+    });
+    if (project) {
+      const reportChunks = await searchDailyReportChunks(project.id, message || '', { limit: 5 });
+      if (reportChunks.length > 0) {
+        dailyReportContext = '\n\n=== DAILY REPORT DATA ===\n' + reportChunks.map(c =>
+          `[Report ${c.reportDate.toISOString().split('T')[0]} - ${c.section}]: ${c.content}`
+        ).join('\n---\n');
+        logger.info('DAILY_REPORTS', 'Added daily report chunks to context', { count: reportChunks.length });
+      }
+    }
+  } catch (err) {
+    logger.warn('DAILY_REPORTS', 'Failed to retrieve daily report chunks (non-blocking)');
+  }
+
   // Generate enhanced context
   logger.info('CONTEXT_GENERATION', 'Generating enhanced context with validation markers');
   const enhancedContext = generateEnhancedContext(enrichedChunks, message || '');
@@ -276,7 +297,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   const documentContext = await generateContextWithPhase3(chunks, adminCorrections, message || '', projectSlug);
 
   // Combine contexts
-  const combinedContext = `${enhancedContext}\n\n=== ADMIN CORRECTIONS (Priority Teaching) ===\n${
+  const combinedContext = `${enhancedContext}${dailyReportContext}\n\n=== ADMIN CORRECTIONS (Priority Teaching) ===\n${
     adminCorrections.length > 0
       ? adminCorrections
           .map(

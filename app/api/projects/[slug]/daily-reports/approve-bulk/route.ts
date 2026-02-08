@@ -99,6 +99,8 @@ export async function POST(
             projectId: true,
             status: true,
             reportNumber: true,
+            reportDate: true,
+            createdBy: true,
             deletedAt: true,
           },
         });
@@ -144,6 +146,48 @@ export async function POST(
             },
           },
         });
+
+        // Downstream triggers (best-effort)
+        try {
+          if (action === 'APPROVED') {
+            // RAG indexing
+            const { indexDailyReport } = await import('@/lib/daily-report-indexer');
+            await indexDailyReport(reportId);
+
+            // Budget/schedule sync
+            const { syncDailyReportFull } = await import('@/lib/daily-report-sync-service');
+            await syncDailyReportFull(reportId);
+
+            // OneDrive archival
+            const { syncDailyReportToOneDrive } = await import('@/lib/daily-report-onedrive-sync');
+            await syncDailyReportToOneDrive(reportId);
+          }
+
+          // Email notification for both APPROVED and REJECTED
+          const { sendDailyReportStatusEmail } = await import('@/lib/email-service');
+          const creator = await prisma.user.findUnique({
+            where: { id: report.createdBy || '' },
+            select: { email: true, username: true },
+          });
+          const proj = await prisma.project.findUnique({
+            where: { id: project.id },
+            select: { name: true },
+          });
+          if (creator?.email) {
+            await sendDailyReportStatusEmail(
+              creator.email,
+              creator.username || 'User',
+              proj?.name || 'Project',
+              report.reportNumber,
+              report.reportDate ? new Date(report.reportDate).toLocaleDateString() : 'N/A',
+              action as 'APPROVED' | 'REJECTED',
+              action === 'REJECTED' ? (rejectionReason || undefined) : undefined,
+              action === 'REJECTED' ? (rejectionNotes || undefined) : undefined,
+            );
+          }
+        } catch (triggerError) {
+          log.warn('Downstream trigger failed (non-blocking)', { reportId, error: triggerError });
+        }
 
         updated++;
       } catch (err) {

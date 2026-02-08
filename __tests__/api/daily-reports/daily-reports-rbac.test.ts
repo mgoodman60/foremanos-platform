@@ -18,6 +18,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
   dailyReportLabor: { deleteMany: vi.fn(), createMany: vi.fn() },
   activityLog: { create: vi.fn() },
+  user: { findUnique: vi.fn() },
 }));
 
 vi.mock('next-auth', () => ({
@@ -27,6 +28,21 @@ vi.mock('@/lib/auth-options', () => ({
   authOptions: {},
 }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
+
+// Mock downstream triggers (dynamically imported in PATCH/bulk-approve on status changes)
+vi.mock('@/lib/daily-report-indexer', () => ({
+  indexDailyReport: vi.fn().mockResolvedValue({ success: true, errors: [] }),
+}));
+vi.mock('@/lib/daily-report-sync-service', () => ({
+  syncDailyReportFull: vi.fn().mockResolvedValue({ success: true }),
+}));
+vi.mock('@/lib/daily-report-onedrive-sync', () => ({
+  syncDailyReportToOneDrive: vi.fn().mockResolvedValue({ success: true }),
+}));
+vi.mock('@/lib/email-service', () => ({
+  sendDailyReportStatusEmail: vi.fn().mockResolvedValue(true),
+}));
+
 vi.mock('@/lib/logger', () => ({
   createScopedLogger: () => ({
     info: vi.fn(),
@@ -99,7 +115,7 @@ const mockSanitizeText = sanitizeText as ReturnType<typeof vi.fn>;
 
 // --- Helpers ---
 
-const PROJECT = { id: 'project-1' };
+const PROJECT = { id: 'project-1', name: 'Test Project' };
 const PARAMS_SLUG = { params: { slug: 'test-project' } };
 const PARAMS_SLUG_ID = { params: { slug: 'test-project', id: 'report-1' } };
 
@@ -132,6 +148,10 @@ describe('Daily Reports API - RBAC', () => {
     vi.clearAllMocks();
     // Default: project exists, user is a member with REPORTER role
     mockPrisma.project.findUnique.mockResolvedValue(PROJECT);
+    mockPrisma.user.findUnique.mockResolvedValue({
+      email: 'creator@example.com',
+      username: 'creator',
+    });
     mockGetDailyReportRole.mockResolvedValue('REPORTER');
     mockCanCreateReport.mockReturnValue(true);
     mockCanEditReport.mockReturnValue(true);
@@ -626,6 +646,8 @@ describe('Daily Reports API - RBAC', () => {
         projectId: 'project-1',
         status: 'SUBMITTED',
         reportNumber: 1,
+        reportDate: new Date('2024-01-15'),
+        createdBy: 'user-1',
         deletedAt: null,
       });
 
@@ -662,6 +684,8 @@ describe('Daily Reports API - RBAC', () => {
           projectId: 'project-1',
           status: 'SUBMITTED',
           reportNumber: 1,
+          reportDate: new Date('2024-01-15'),
+          createdBy: 'user-1',
           deletedAt: null,
         })
         .mockResolvedValueOnce({
@@ -669,6 +693,8 @@ describe('Daily Reports API - RBAC', () => {
           projectId: 'project-1',
           status: 'DRAFT',
           reportNumber: 2,
+          reportDate: new Date('2024-01-16'),
+          createdBy: 'user-1',
           deletedAt: null,
         });
 
@@ -761,6 +787,8 @@ describe('Daily Reports API - RBAC', () => {
         projectId: 'project-1',
         status: 'SUBMITTED',
         reportNumber: 1,
+        reportDate: new Date('2024-01-15'),
+        createdBy: 'user-1',
         deletedAt: null,
       });
 

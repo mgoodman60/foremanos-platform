@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { Settings as SettingsIcon, Save, RefreshCw, ChevronLeft } from 'lucide-react';
+import { Settings as SettingsIcon, Save, RefreshCw, ChevronLeft, MessageSquare } from 'lucide-react';
+import SMSConfigPanel from '@/components/daily-reports/SMSConfigPanel';
 
 interface ProjectSettings {
   projectId: string;
@@ -343,6 +344,22 @@ export default function ProjectSettingsPage() {
               these updates can be automatically applied or held for manual review.
             </p>
           </div>
+        </div>
+
+        {/* SMS Reporting Section */}
+        <div className="mt-6 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-blue-400" />
+                SMS Reporting
+              </h2>
+              <p className="text-sm text-gray-400 mt-1">
+                Configure SMS-based daily report submission for field workers
+              </p>
+            </div>
+          </div>
+          <SMSConfigPanel projectSlug={slug as string} />
         </div>
 
         {/* Info about pending updates */}

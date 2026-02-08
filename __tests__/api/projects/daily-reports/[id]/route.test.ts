@@ -12,6 +12,11 @@ const mockCanViewReport = vi.hoisted(() => vi.fn());
 const mockIsValidTransition = vi.hoisted(() => vi.fn());
 const mockSanitizeText = vi.hoisted(() => vi.fn());
 
+// Hoisted mocks for downstream triggers (dynamically imported in PATCH)
+const mockSyncDailyReportFull = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true }));
+const mockSyncDailyReportToOneDrive = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true }));
+const mockSendDailyReportStatusEmail = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+
 // Hoisted mocks for rate-limiter
 const mockCheckRateLimit = vi.hoisted(() => vi.fn());
 
@@ -46,6 +51,19 @@ vi.mock('@/lib/rate-limiter', () => ({
 // Mock daily-report-indexer (dynamically imported in PATCH when status=APPROVED)
 vi.mock('@/lib/daily-report-indexer', () => ({
   indexDailyReport: vi.fn().mockResolvedValue({ success: true, errors: [] }),
+}));
+
+// Mock downstream triggers (dynamically imported in PATCH on status changes)
+vi.mock('@/lib/daily-report-sync-service', () => ({
+  syncDailyReportFull: mockSyncDailyReportFull,
+}));
+
+vi.mock('@/lib/daily-report-onedrive-sync', () => ({
+  syncDailyReportToOneDrive: mockSyncDailyReportToOneDrive,
+}));
+
+vi.mock('@/lib/email-service', () => ({
+  sendDailyReportStatusEmail: mockSendDailyReportStatusEmail,
 }));
 
 // Mock session data
@@ -110,6 +128,9 @@ const prismaMock = {
   },
   activityLog: {
     create: vi.fn(),
+  },
+  user: {
+    findUnique: vi.fn(),
   },
 };
 
@@ -203,12 +224,16 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getServerSessionMock.mockResolvedValue(mockSession);
-    prismaMock.project.findUnique.mockResolvedValue({ id: 'project-1' });
+    prismaMock.project.findUnique.mockResolvedValue({ id: 'project-1', name: 'Test Project' });
     prismaMock.dailyReport.findUnique.mockResolvedValue(mockDailyReport);
     prismaMock.dailyReport.update.mockResolvedValue(mockDailyReport);
     prismaMock.dailyReportLabor.deleteMany.mockResolvedValue({ count: 1 });
     prismaMock.dailyReportLabor.createMany.mockResolvedValue({ count: 2 });
     prismaMock.activityLog.create.mockResolvedValue({});
+    prismaMock.user.findUnique.mockResolvedValue({
+      email: 'creator@example.com',
+      username: 'creator',
+    });
 
     // Default RBAC mocks - ADMIN role has all permissions
     mockGetDailyReportRole.mockResolvedValue('ADMIN');
@@ -263,7 +288,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
     );
   });
 
-  it('should transition status to SUBMITTED with timestamps', async () => {
+  it('should transition status to SUBMITTED with timestamps and send email', async () => {
     const { PATCH } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1', {
       method: 'PATCH',
@@ -281,9 +306,15 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
         }),
       })
     );
+
+    // Verify email notification on SUBMITTED
+    expect(mockSendDailyReportStatusEmail).toHaveBeenCalled();
+    // Sync and OneDrive should NOT be called for SUBMITTED (only APPROVED)
+    expect(mockSyncDailyReportFull).not.toHaveBeenCalled();
+    expect(mockSyncDailyReportToOneDrive).not.toHaveBeenCalled();
   });
 
-  it('should transition status to APPROVED with timestamps', async () => {
+  it('should transition status to APPROVED with timestamps and trigger downstream services', async () => {
     const { PATCH } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1', {
       method: 'PATCH',
@@ -301,6 +332,11 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
         }),
       })
     );
+
+    // Verify downstream triggers for APPROVED status
+    expect(mockSyncDailyReportFull).toHaveBeenCalledWith('report-1');
+    expect(mockSyncDailyReportToOneDrive).toHaveBeenCalledWith('report-1');
+    expect(mockSendDailyReportStatusEmail).toHaveBeenCalled();
   });
 
   it('should replace labor entries on update', async () => {
@@ -348,6 +384,34 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
         }),
       ]),
     });
+  });
+
+  it('should send email notification on REJECTED status', async () => {
+    // Set up a SUBMITTED report that can be rejected
+    prismaMock.dailyReport.findUnique.mockResolvedValue({
+      ...mockDailyReport,
+      status: 'SUBMITTED',
+    });
+    prismaMock.dailyReport.update.mockResolvedValue({
+      ...mockDailyReport,
+      status: 'REJECTED',
+    });
+
+    const { PATCH } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
+    const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: 'REJECTED',
+        rejectionReason: 'Missing labor entries',
+      }),
+    });
+    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+
+    expect(response.status).toBe(200);
+    expect(mockSendDailyReportStatusEmail).toHaveBeenCalled();
+    // Sync and OneDrive should NOT be called for REJECTED
+    expect(mockSyncDailyReportFull).not.toHaveBeenCalled();
+    expect(mockSyncDailyReportToOneDrive).not.toHaveBeenCalled();
   });
 
   it('should handle database errors', async () => {

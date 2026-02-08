@@ -501,6 +501,32 @@ export async function recordWeatherDelay(
     });
   }
   
+  // Create WeatherDay record for the delay ledger
+  if (delayHours > 0) {
+    try {
+      const report = await prisma.dailyReport.findUnique({
+        where: { id: reportId },
+        select: { reportDate: true, createdBy: true },
+      });
+
+      await prisma.weatherDay.create({
+        data: {
+          projectId,
+          reportId,
+          date: report?.reportDate || new Date(),
+          hoursLost: delayHours,
+          reason: delayReason,
+          weatherCondition,
+          flaggedBy: report?.createdBy || '',
+          affectedTaskIds: activeTasks.map(t => t.id),
+          notes: `Weather delay: ${weatherCondition} - ${delayHours} hours lost`,
+        },
+      });
+    } catch (weatherDayError) {
+      console.error('[DailyReportSync] WeatherDay creation failed:', weatherDayError);
+    }
+  }
+
   return { recorded: true, impactedTasks: activeTasks.length };
 }
 

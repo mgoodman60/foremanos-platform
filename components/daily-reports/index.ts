@@ -4,6 +4,8 @@ export { default as OneDriveSyncBadge } from './OneDriveSyncBadge';
 export { default as ProgressDetectionPanel } from './ProgressDetectionPanel';
 export { default as RejectionModal } from './RejectionModal';
 export { default as ReportAnalyticsDashboard } from './ReportAnalyticsDashboard';
+export { default as ReportComparison } from './ReportComparison';
 export { default as SMSConfigPanel } from './SMSConfigPanel';
+export { default as SyncStatusIndicator } from './SyncStatusIndicator';
 export { default as VoiceRecorder } from './VoiceRecorder';
 export { default as WeatherDayWidget } from './WeatherDayWidget';

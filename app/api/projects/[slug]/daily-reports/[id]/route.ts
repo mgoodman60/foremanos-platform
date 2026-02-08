@@ -121,6 +121,7 @@ export async function PATCH(
         status: true,
         createdBy: true,
         reportNumber: true,
+        reportDate: true,
         deletedAt: true,
       },
     });
@@ -293,6 +294,52 @@ export async function PATCH(
         }
       } catch (indexError) {
         log.error('RAG indexing failed (non-blocking)', indexError as Error, { reportId: params.id });
+      }
+
+      // Budget/schedule sync (best-effort)
+      try {
+        const { syncDailyReportFull } = await import('@/lib/daily-report-sync-service');
+        await syncDailyReportFull(params.id);
+      } catch (syncError) {
+        log.error('Budget/schedule sync failed (non-blocking)', syncError as Error, { reportId: params.id });
+      }
+
+      // OneDrive archival (best-effort)
+      try {
+        const { syncDailyReportToOneDrive } = await import('@/lib/daily-report-onedrive-sync');
+        await syncDailyReportToOneDrive(params.id);
+      } catch (onedriveError) {
+        log.error('OneDrive sync failed (non-blocking)', onedriveError as Error, { reportId: params.id });
+      }
+    }
+
+    // Email notification on any status change (best-effort)
+    if (status === 'APPROVED' || status === 'REJECTED' || status === 'SUBMITTED') {
+      try {
+        const { sendDailyReportStatusEmail } = await import('@/lib/email-service');
+        // Look up creator's email for notification
+        const creator = await prisma.user.findUnique({
+          where: { id: existingReport.createdBy },
+          select: { email: true, username: true },
+        });
+        const proj = await prisma.project.findUnique({
+          where: { id: project.id },
+          select: { name: true },
+        });
+        if (creator?.email) {
+          await sendDailyReportStatusEmail(
+            creator.email,
+            creator.username || 'User',
+            proj?.name || 'Project',
+            existingReport.reportNumber,
+            existingReport.reportDate ? new Date(existingReport.reportDate).toLocaleDateString() : 'N/A',
+            status as 'APPROVED' | 'REJECTED' | 'SUBMITTED',
+            status === 'REJECTED' ? (rejectionReason || undefined) : undefined,
+            status === 'REJECTED' ? (rejectionNotes || undefined) : undefined,
+          );
+        }
+      } catch (emailError) {
+        log.error('Email notification failed (non-blocking)', emailError as Error, { reportId: params.id });
       }
     }
 
