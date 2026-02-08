@@ -107,6 +107,9 @@ export async function GET(request: Request) {
     // Check if this is a Vercel cron invocation
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+      logger.warn('PROCESS_QUEUE', 'CRON_SECRET not set — cron queue processing disabled');
+    }
     const isCronRequest = cronSecret && authHeader === `Bearer ${cronSecret}`;
 
     if (isCronRequest) {

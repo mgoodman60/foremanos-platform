@@ -86,10 +86,21 @@ export async function processDocumentBatch(
       try {
         logger.info('BATCH_PROCESSOR', `Processing page ${pageNum}`);
 
+        // Extract single page to avoid sending full PDF to vision API (OOM/oversized request)
+        let pageBuffer = buffer;
+        try {
+          const { extractPageAsPdf } = await import('./pdf-to-image-serverless');
+          const { base64: singlePageBase64 } = await extractPageAsPdf(buffer, pageNum);
+          pageBuffer = Buffer.from(singlePageBase64, 'base64');
+          logger.info('BATCH_PROCESSOR', `Extracted page ${pageNum} (${(pageBuffer.length / 1024 / 1024).toFixed(1)}MB)`);
+        } catch (extractErr: any) {
+          logger.warn('BATCH_PROCESSOR', `Page extraction failed for page ${pageNum}, using full PDF`, { error: extractErr.message });
+        }
+
         // Use smart routing based on document classification
         const startTime = Date.now();
         const visionResult = await analyzeWithSmartRouting(
-          buffer,
+          pageBuffer,
           getVisionPrompt(document.fileName, pageNum),
           effectiveProcessorType,
           pageNum,

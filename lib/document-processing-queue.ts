@@ -312,7 +312,8 @@ export async function resumeFailedProcessing(documentId: string): Promise<void> 
  * Process all batches for a specific document
  * This is called after a document is queued to actually process it
  */
-export async function processQueuedDocument(documentId: string): Promise<void> {
+export async function processQueuedDocument(documentId: string, maxDurationMs: number = 270000): Promise<void> {
+  const startTime = Date.now();
   logger.info('PROCESS_QUEUE', `Starting full processing for document ${documentId}`);
   
   // Find the queue entry for this document
@@ -337,6 +338,12 @@ export async function processQueuedDocument(documentId: string): Promise<void> {
   const maxConsecutiveFailures = 3;
 
   while (hasMoreBatches && consecutiveFailures < maxConsecutiveFailures) {
+    // Check if approaching Vercel function timeout
+    if (Date.now() - startTime > maxDurationMs) {
+      logger.info('PROCESS_QUEUE', `Approaching timeout after ${Math.round((Date.now() - startTime) / 1000)}s, yielding to cron`, { documentId });
+      break;
+    }
+
     // Get current status
     const currentEntry = await prisma.processingQueue.findFirst({
       where: { documentId },
@@ -412,6 +419,12 @@ export async function processQueuedDocument(documentId: string): Promise<void> {
         queueStatus: 'failed',
         lastProcessingError: finalEntry?.lastError || 'Max retries exceeded',
       },
+    });
+  } else {
+    // Timed out but not failed — leave in processing state for cron to pick up
+    logger.info('PROCESS_QUEUE', `Document ${documentId} processing paused (timeout), cron will resume`, {
+      pagesProcessed: finalEntry?.pagesProcessed,
+      totalPages: finalEntry?.totalPages,
     });
   }
 }

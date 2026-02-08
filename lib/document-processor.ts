@@ -331,15 +331,17 @@ async function processWithVision(
         },
       });
       
-      // Start processing the queue in background (don't await - let it run async)
-      logger.info('PROCESS', `Starting async queue processing for document ${documentId}`);
-      processQueuedDocument(documentId).catch(async (err) => {
+      // Process the queue (awaited so it stays within waitUntil promise chain)
+      logger.info('PROCESS', `Starting queue processing for document ${documentId}`);
+      try {
+        await processQueuedDocument(documentId);
+      } catch (err: any) {
         logger.error('PROCESS', `Queue processing failed for ${documentId}`, err);
         await prisma.document.update({
           where: { id: documentId },
           data: { queueStatus: 'failed', lastProcessingError: err?.message || 'Queue processing failed' },
         }).catch(() => {}); // Don't throw if status update also fails
-      });
+      }
       
       // Return 0 - actual values will be updated as queue processes
       return { pages: 0, cost: 0 };
