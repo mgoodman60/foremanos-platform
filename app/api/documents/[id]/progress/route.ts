@@ -59,8 +59,8 @@ export async function GET(
     });
 
     // Calculate progress
-    const totalPages = queueEntry?.totalPages || 0;
-    const pagesProcessed = queueEntry?.pagesProcessed || document.pagesProcessed || 0;
+    const totalPages = queueEntry?.totalPages ?? 0;
+    const pagesProcessed = queueEntry?.pagesProcessed ?? document.pagesProcessed ?? 0;
     const percentComplete = totalPages > 0 ? Math.round((pagesProcessed / totalPages) * 100) : 0;
 
     // Determine current phase
@@ -105,6 +105,8 @@ export async function GET(
       currentPhase,
       estimatedTimeRemaining,
       queuePosition,
+      currentBatch: queueEntry?.currentBatch ?? null,
+      totalBatches: queueEntry?.totalBatches ?? null,
       error: queueEntry?.lastError || null,
     });
   } catch (error) {

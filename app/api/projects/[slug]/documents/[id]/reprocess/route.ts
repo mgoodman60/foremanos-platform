@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { processDocument } from '@/lib/document-processor';
+import { waitUntil } from '@vercel/functions';
+import { logger } from '@/lib/logger';
 
 /**
  * API endpoint to reprocess a document
@@ -57,13 +59,30 @@ export async function POST(
       return NextResponse.json({ error: 'Document has no file' }, { status: 400 });
     }
 
-    console.log(`[Reprocess] Starting reprocessing for document: ${document.name} (${id})`);
+    // 60-minute reprocessing cooldown to prevent duplicate processing and wasted API credits
+    if (document.processedAt) {
+      const cooldownMs = 60 * 60 * 1000; // 60 minutes
+      const timeSinceProcessed = Date.now() - new Date(document.processedAt).getTime();
+      if (timeSinceProcessed < cooldownMs) {
+        const minutesRemaining = Math.ceil((cooldownMs - timeSinceProcessed) / 60000);
+        return NextResponse.json(
+          { error: `Document was recently processed. Please wait ${minutesRemaining} minutes before reprocessing.` },
+          { status: 429 }
+        );
+      }
+    }
+
+    logger.info('REPROCESS', `Starting reprocessing for document: ${document.name} (${id})`);
 
     // Delete existing chunks
     await prisma.documentChunk.deleteMany({
       where: { documentId: id },
     });
-    console.log(`[Reprocess] Deleted existing chunks`);
+
+    // Clean up old ProcessingQueue entries
+    await prisma.processingQueue.deleteMany({
+      where: { documentId: id },
+    });
 
     // Reset document processing status
     await prisma.document.update({
@@ -71,13 +90,27 @@ export async function POST(
       data: {
         processed: false,
         pagesProcessed: 0,
+        queueStatus: 'queued',
       },
     });
-    console.log(`[Reprocess] Reset processing status`);
 
-    // Trigger reprocessing (processDocument handles fetching from S3)
-    await processDocument(id);
-    console.log(`[Reprocess] Document reprocessing initiated`);
+    // Trigger reprocessing asynchronously to avoid Vercel timeout for large docs
+    waitUntil(
+      processDocument(id)
+        .then(() => {
+          logger.info('REPROCESS', `Document ${id} reprocessing completed`);
+        })
+        .catch(async (error) => {
+          logger.error('REPROCESS', `Document ${id} reprocessing failed`, error);
+          await prisma.document.update({
+            where: { id },
+            data: {
+              queueStatus: 'failed',
+              lastProcessingError: error?.message || 'Reprocessing failed',
+            },
+          }).catch(() => {});
+        })
+    );
 
     return NextResponse.json({
       success: true,
@@ -85,7 +118,7 @@ export async function POST(
       documentId: id,
     });
   } catch (error: any) {
-    console.error('[Reprocess] Error:', error);
+    logger.error('REPROCESS', 'Error initiating reprocess', error);
     return NextResponse.json(
       { error: error.message || 'Failed to reprocess document' },
       { status: 500 }

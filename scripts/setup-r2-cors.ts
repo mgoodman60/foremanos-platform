@@ -16,7 +16,9 @@
  *   - CORS_EXTRA_ORIGINS (optional, comma-separated)
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 import { PutBucketCorsCommand, GetBucketCorsCommand } from '@aws-sdk/client-s3';
 import { createS3Client, getBucketConfig, validateS3Config } from '../lib/aws-config';
 

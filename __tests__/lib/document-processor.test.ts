@@ -283,7 +283,7 @@ describe('Document Processor - PDF Processing', () => {
         where: { id: 'doc-1' },
         data: expect.objectContaining({
           queueStatus: 'queued',
-          pagesProcessed: 25,
+          pagesProcessed: 0,
           processorType: 'claude-haiku-ocr',
         }),
       })
@@ -686,6 +686,50 @@ describe('Document Processor - Error Handling', () => {
           queueStatus: 'failed',
           processed: false,
           lastProcessingError: 'Network timeout',
+        }),
+      })
+    );
+  });
+
+  // C6: Fire-and-forget error handling for queued documents
+  it('should update document status to failed when queue processing fails (C6)', async () => {
+    const pdfBuffer = await createSimplePDF(25);
+    const mockDoc = createMockDocument({ fileName: 'large-plan.pdf' });
+
+    mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
+    mockClassifyDocument.mockResolvedValue({
+      processorType: 'vision-ai',
+      confidence: 0.95,
+    });
+
+    mockGetFileUrl.mockResolvedValue('https://s3.example.com/test.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => pdfBuffer,
+    });
+
+    mockGetPdfPageCount.mockResolvedValue(25);
+    mockPrisma.document.update.mockResolvedValue(mockDoc);
+
+    // Make processQueuedDocument throw
+    const { processQueuedDocument } = await import('@/lib/document-processing-queue');
+    vi.mocked(processQueuedDocument).mockRejectedValue(new Error('Queue crash'));
+
+    await processDocument('doc-1');
+
+    // Wait for the async catch handler to execute
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Verify processQueuedDocument was called
+    expect(processQueuedDocument).toHaveBeenCalledWith('doc-1');
+
+    // Verify document was updated with failed status in the catch handler
+    expect(mockPrisma.document.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'doc-1' },
+        data: expect.objectContaining({
+          queueStatus: 'failed',
+          lastProcessingError: 'Queue crash',
         }),
       })
     );

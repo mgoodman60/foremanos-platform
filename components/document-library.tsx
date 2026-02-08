@@ -37,6 +37,8 @@ interface DocumentProgress {
   estimatedTimeRemaining: number;
   queuePosition: number | null;
   error: string | null;
+  currentBatch: number | null;
+  totalBatches: number | null;
 }
 
 interface Document {
@@ -1279,19 +1281,20 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         {/* Inline Processing Progress - Mobile */}
                         {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
                           const progress = progressMap[doc.id];
-                          const percent = progress?.percentComplete || 0;
+                          const percent = progress?.percentComplete ?? 0;
                           const phase = progress?.currentPhase || doc.queueStatus || 'queued';
+                          const hasBatch = progress?.currentBatch !== null && progress?.currentBatch !== undefined && progress?.totalBatches !== null && progress?.totalBatches !== undefined;
                           return (
                             <div className="mt-2">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span>
-                                  {phase === 'queued' && (progress?.queuePosition ? `Queue position ${progress.queuePosition}` : 'Waiting in queue...')}
-                                  {phase === 'extracting' && 'Extracting...'}
-                                  {phase === 'analyzing' && `Page ${progress?.pagesProcessed || 0} of ${progress?.totalPages || '?'}`}
+                                  {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition}) — ${progress?.totalPages ?? '?'} pages to process` : 'Waiting in queue...')}
+                                  {phase === 'extracting' && (`Extracting content...${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}`)}
+                                  {phase === 'analyzing' && (`Analyzing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}`)}
                                   {phase === 'indexing' && 'Indexing...'}
                                   {phase === 'failed' && 'Failed'}
                                   {phase === 'pending' && 'Preparing...'}
-                                  {phase === 'processing' && `Processing ${progress?.pagesProcessed || 0}/${progress?.totalPages || '?'}`}
+                                  {phase === 'processing' && (hasBatch ? `Processing batch ${progress.currentBatch} of ${progress.totalBatches} (page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'})` : `Processing ${progress?.pagesProcessed ?? 0}/${progress?.totalPages ?? '?'}`)}
                                 </span>
                                 {percent > 0 && <span>{percent}%</span>}
                               </div>
@@ -1405,20 +1408,21 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           {/* Inline Processing Progress - Desktop */}
                           {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
                             const progress = progressMap[doc.id];
-                            const percent = progress?.percentComplete || 0;
+                            const percent = progress?.percentComplete ?? 0;
                             const phase = progress?.currentPhase || doc.queueStatus || 'queued';
-                            const timeLeft = progress?.estimatedTimeRemaining || 0;
+                            const timeLeft = progress?.estimatedTimeRemaining ?? 0;
+                            const hasBatch = progress?.currentBatch !== null && progress?.currentBatch !== undefined && progress?.totalBatches !== null && progress?.totalBatches !== undefined;
                             return (
                               <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
                                 <div className="flex justify-between text-xs text-gray-400 mb-1.5">
                                   <span className="font-medium">
-                                    {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition})...` : 'Waiting in queue...')}
-                                    {phase === 'extracting' && 'Extracting content from pages...'}
-                                    {phase === 'analyzing' && `Analyzing page ${progress?.pagesProcessed || 0} of ${progress?.totalPages || '?'}...`}
+                                    {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition}) — ${progress?.totalPages ?? '?'} pages to process` : 'Waiting in queue...')}
+                                    {phase === 'extracting' && (`Extracting content...${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}`)}
+                                    {phase === 'analyzing' && (`Analyzing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}...`)}
                                     {phase === 'indexing' && 'Indexing content for search...'}
                                     {phase === 'failed' && 'Processing failed'}
                                     {phase === 'pending' && 'Preparing to process...'}
-                                    {phase === 'processing' && `Processing page ${progress?.pagesProcessed || 0} of ${progress?.totalPages || '?'}...`}
+                                    {phase === 'processing' && (hasBatch ? `Processing batch ${progress.currentBatch} of ${progress.totalBatches} (page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'})...` : `Processing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}...`)}
                                   </span>
                                   <span className="flex items-center gap-2">
                                     {percent > 0 && <span>{percent}%</span>}

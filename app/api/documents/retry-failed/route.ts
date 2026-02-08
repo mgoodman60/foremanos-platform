@@ -75,6 +75,9 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`[RETRY] Retrying document ${doc.id} (${doc.name}) - attempt ${doc.processingRetries + 1}`);
 
+        // Clean up old ProcessingQueue entries to prevent conflicts
+        await prisma.processingQueue.deleteMany({ where: { documentId: doc.id } });
+
         // Reset status and increment retry counter
         await prisma.document.update({
           where: { id: doc.id },

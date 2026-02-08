@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { processNextQueuedBatch } from '@/lib/document-processing-queue';
 import { recoverAllOrphanedDocuments } from '@/lib/orphaned-document-recovery';
 import { prisma } from '@/lib/db';
+import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -55,6 +56,17 @@ export async function POST(request: Request) {
       if (staleReset.count > 0) {
         logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
       }
+
+      // Also reset stale ProcessingQueue entries to resume from where they left off
+      await prisma.processingQueue.updateMany({
+        where: {
+          status: ProcessingQueueStatus.processing,
+          updatedAt: { lt: thirtyMinutesAgo },
+        },
+        data: {
+          status: ProcessingQueueStatus.queued,
+        },
+      });
     } catch (staleError) {
       logger.error('PROCESS_QUEUE', 'Stale reset error (non-blocking)', staleError as Error);
     }
@@ -126,6 +138,17 @@ export async function GET(request: Request) {
         if (staleReset.count > 0) {
           logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
         }
+
+        // Also reset stale ProcessingQueue entries to resume from where they left off
+        await prisma.processingQueue.updateMany({
+          where: {
+            status: ProcessingQueueStatus.processing,
+            updatedAt: { lt: thirtyMinutesAgo },
+          },
+          data: {
+            status: ProcessingQueueStatus.queued,
+          },
+        });
       } catch (staleError) {
         logger.error('PROCESS_QUEUE', 'Stale reset error (non-blocking)', staleError as Error);
       }

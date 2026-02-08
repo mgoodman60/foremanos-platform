@@ -5,7 +5,6 @@
 
 import { prisma } from './db';
 import { processDocumentBatch } from './document-processor-batch';
-import { triggerAutoTakeoffAfterProcessing } from './auto-takeoff-generator';
 import { triggerEnhancementAfterProcessing } from './project-data-enhancer';
 import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
@@ -65,12 +64,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
   // Note: We need to find entries where currentBatch < totalBatches
   // Since Prisma doesn't support column comparison, we fetch and filter
   const entries = await prisma.processingQueue.findMany({
-    where: {
-      OR: [
-        { status: ProcessingQueueStatus.queued },
-        { status: ProcessingQueueStatus.processing },
-      ],
-    },
+    where: { status: ProcessingQueueStatus.queued },
     orderBy: { createdAt: 'asc' },
     take: 10, // Get first 10 to check
   });
@@ -84,14 +78,15 @@ export async function processNextQueuedBatch(): Promise<boolean> {
   }
 
   try {
-    // Mark as processing
-    await prisma.processingQueue.update({
-      where: { id: entry.id },
-      data: { 
-        status: ProcessingQueueStatus.processing,
-        updatedAt: new Date(),
-      },
+    // Atomic claim guard: prevent duplicate processing by concurrent workers
+    const claimed = await prisma.processingQueue.updateMany({
+      where: { id: entry.id, status: { not: ProcessingQueueStatus.processing } },
+      data: { status: ProcessingQueueStatus.processing, updatedAt: new Date() },
     });
+    if (claimed.count === 0) {
+      logger.info('PROCESS_QUEUE', `Entry ${entry.id} already claimed by another process`);
+      return false;
+    }
 
     const metadata = entry.metadata as any;
     const batchSize = metadata?.batchSize || 5;
@@ -152,7 +147,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
         data: {
           pagesProcessed: newPagesProcessed,
           currentBatch: newCurrentBatch,
-          status: isComplete ? ProcessingQueueStatus.completed : ProcessingQueueStatus.processing,
+          status: isComplete ? ProcessingQueueStatus.completed : ProcessingQueueStatus.queued,
           updatedAt: new Date(),
           metadata: {
             ...metadata,
@@ -165,70 +160,70 @@ export async function processNextQueuedBatch(): Promise<boolean> {
       if (isComplete) {
         logger.info('PROCESS_QUEUE', `Document ${entry.documentId} completed`, { pagesProcessed: newPagesProcessed, totalPages: entry.totalPages });
 
-        // Run intelligence extraction BEFORE marking as processed
-        try {
-          const document = await prisma.document.findUnique({
-            where: { id: entry.documentId },
-            include: { Project: true },
-          });
-
-          if (document?.Project?.slug) {
-            const projectSlug = document.Project.slug;
-
-            // 1. Intelligence extraction (Phase A, B, C)
-            try {
-              logger.info('PROCESS_QUEUE', `Starting intelligence extraction for ${entry.documentId}`);
-              const { runIntelligenceExtraction } = await import('./intelligence-orchestrator');
-              const extractionResult = await runIntelligenceExtraction({
-                documentId: entry.documentId,
-                projectSlug,
-                phases: ['A', 'B', 'C'],
-              });
-              logger.info('PROCESS_QUEUE', 'Intelligence extraction completed', { phasesRun: extractionResult.phasesRun });
-            } catch (error) {
-              logger.error('PROCESS_QUEUE', 'Intelligence extraction failed', error as Error, { documentId: entry.documentId });
-            }
-
-            // 2. Room extraction
-            try {
-              logger.info('PROCESS_QUEUE', 'Starting room extraction');
-              const { extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
-              const roomResult = await extractRoomsFromDocuments(projectSlug);
-              if (roomResult.rooms.length > 0) {
-                const saveResult = await saveExtractedRooms(projectSlug, roomResult.rooms);
-                logger.info('PROCESS_QUEUE', 'Room extraction complete', { created: saveResult.created });
-              }
-            } catch (error) {
-              logger.error('PROCESS_QUEUE', 'Room extraction failed', error as Error, { documentId: entry.documentId });
-            }
-
-            // 3. Auto-extract takeoffs
-            try {
-              logger.info('PROCESS_QUEUE', 'Starting auto takeoff extraction');
-              const { autoExtractTakeoffs } = await import('./takeoff-extractor');
-              const proj = await prisma.project.findUnique({ where: { slug: projectSlug }, select: { id: true } });
-              if (proj) {
-                const takeoffResult = await autoExtractTakeoffs(proj.id, projectSlug);
-                if (takeoffResult.itemCount > 0) {
-                  logger.info('PROCESS_QUEUE', 'Takeoff extraction complete', { itemCount: takeoffResult.itemCount });
-                }
-              }
-            } catch (error) {
-              logger.error('PROCESS_QUEUE', 'Takeoff extraction failed', error as Error, { documentId: entry.documentId });
-            }
-          }
-        } catch (extractionError) {
-          logger.error('PROCESS_QUEUE', 'Post-processing failed', extractionError as Error, { documentId: entry.documentId });
-        }
-
-        // Mark document as processed AFTER intelligence extraction
-        await prisma.document.update({
-          where: { id: entry.documentId },
-          data: {
-            processed: true,
-            pagesProcessed: newPagesProcessed,
-          },
+        // Atomic compare-and-swap: claim processing rights and prevent duplicate extraction
+        const claimed = await prisma.document.updateMany({
+          where: { id: entry.documentId, processed: false },
+          data: { processed: true, pagesProcessed: newPagesProcessed },
         });
+        if (claimed.count === 0) {
+          logger.info('PROCESS_QUEUE', `Already processed, skipping intelligence extraction for ${entry.documentId}`);
+        } else {
+          // Run intelligence extraction after atomically claiming the document
+          try {
+            const document = await prisma.document.findUnique({
+              where: { id: entry.documentId },
+              include: { Project: true },
+            });
+
+            if (document?.Project?.slug) {
+              const projectSlug = document.Project.slug;
+
+              // 1. Intelligence extraction (Phase A, B, C)
+              try {
+                logger.info('PROCESS_QUEUE', `Starting intelligence extraction for ${entry.documentId}`);
+                const { runIntelligenceExtraction } = await import('./intelligence-orchestrator');
+                const extractionResult = await runIntelligenceExtraction({
+                  documentId: entry.documentId,
+                  projectSlug,
+                  phases: ['A', 'B', 'C'],
+                });
+                logger.info('PROCESS_QUEUE', 'Intelligence extraction completed', { phasesRun: extractionResult.phasesRun });
+              } catch (error) {
+                logger.error('PROCESS_QUEUE', 'Intelligence extraction failed', error as Error, { documentId: entry.documentId });
+              }
+
+              // 2. Room extraction
+              try {
+                logger.info('PROCESS_QUEUE', 'Starting room extraction');
+                const { extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
+                const roomResult = await extractRoomsFromDocuments(projectSlug);
+                if (roomResult.rooms.length > 0) {
+                  const saveResult = await saveExtractedRooms(projectSlug, roomResult.rooms);
+                  logger.info('PROCESS_QUEUE', 'Room extraction complete', { created: saveResult.created });
+                }
+              } catch (error) {
+                logger.error('PROCESS_QUEUE', 'Room extraction failed', error as Error, { documentId: entry.documentId });
+              }
+
+              // 3. Auto-extract takeoffs
+              try {
+                logger.info('PROCESS_QUEUE', 'Starting auto takeoff extraction');
+                const { autoExtractTakeoffs } = await import('./takeoff-extractor');
+                const proj = await prisma.project.findUnique({ where: { slug: projectSlug }, select: { id: true } });
+                if (proj) {
+                  const takeoffResult = await autoExtractTakeoffs(proj.id, projectSlug);
+                  if (takeoffResult.itemCount > 0) {
+                    logger.info('PROCESS_QUEUE', 'Takeoff extraction complete', { itemCount: takeoffResult.itemCount });
+                  }
+                }
+              } catch (error) {
+                logger.error('PROCESS_QUEUE', 'Takeoff extraction failed', error as Error, { documentId: entry.documentId });
+              }
+            }
+          } catch (extractionError) {
+            logger.error('PROCESS_QUEUE', 'Post-processing failed', extractionError as Error, { documentId: entry.documentId });
+          }
+        }
       }
 
       return true; // Continue processing
@@ -398,12 +393,6 @@ export async function processQueuedDocument(documentId: string): Promise<void> {
       },
     });
 
-    // Trigger automatic takeoff generation after document processing completes
-    logger.info('PROCESS_QUEUE', `Triggering auto-takeoff generation for document ${documentId}`);
-    triggerAutoTakeoffAfterProcessing(documentId).catch(err => {
-      logger.error('PROCESS_QUEUE', 'Auto-takeoff trigger failed', err, { documentId });
-    });
-
     // Trigger project-wide data enhancement after document processing
     const processedDoc = await prisma.document.findUnique({
       where: { id: documentId },
@@ -441,14 +430,15 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
   }
 
   try {
-    // Mark as processing
-    await prisma.processingQueue.update({
-      where: { id: entry.id },
-      data: { 
-        status: ProcessingQueueStatus.processing,
-        updatedAt: new Date(),
-      },
+    // Atomic claim guard: prevent duplicate processing by concurrent workers
+    const claimed = await prisma.processingQueue.updateMany({
+      where: { id: entry.id, status: { not: ProcessingQueueStatus.processing } },
+      data: { status: ProcessingQueueStatus.processing, updatedAt: new Date() },
     });
+    if (claimed.count === 0) {
+      logger.info('PROCESS_QUEUE', `Entry ${entry.id} already claimed by another process`);
+      return false;
+    }
 
     const metadata = entry.metadata as any;
     const batchSize = metadata?.batchSize || 5;
@@ -471,7 +461,7 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
         data: {
           pagesProcessed: newPagesProcessed,
           currentBatch: newCurrentBatch,
-          status: isComplete ? ProcessingQueueStatus.completed : ProcessingQueueStatus.processing,
+          status: isComplete ? ProcessingQueueStatus.completed : ProcessingQueueStatus.queued,
           updatedAt: new Date(),
           metadata: {
             ...metadata,
@@ -491,74 +481,74 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
       if (isComplete) {
         logger.info('PROCESS_QUEUE', `All batches complete for ${documentId}`);
 
-        // Run intelligence extraction BEFORE marking as processed
-        try {
-          const document = await prisma.document.findUnique({
-            where: { id: documentId },
-            include: { Project: true },
-          });
-
-          if (document?.Project?.slug) {
-            const projectSlug = document.Project.slug;
-
-            // 1. Intelligence extraction (Phase A, B, C)
-            try {
-              logger.info('PROCESS_QUEUE', 'Starting intelligence extraction', { documentId });
-              const { runIntelligenceExtraction } = await import('./intelligence-orchestrator');
-              await runIntelligenceExtraction({
-                documentId,
-                projectSlug,
-                phases: ['A', 'B', 'C'],
-              });
-              logger.info('PROCESS_QUEUE', 'Intelligence extraction completed', { documentId });
-            } catch (error) {
-              logger.error('PROCESS_QUEUE', 'Intelligence extraction failed', error as Error, { documentId });
-            }
-
-            // 2. Room extraction
-            try {
-              logger.info('PROCESS_QUEUE', 'Starting room extraction', { projectSlug });
-              const { extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
-              const roomResult = await extractRoomsFromDocuments(projectSlug);
-              if (roomResult.rooms.length > 0) {
-                const saveResult = await saveExtractedRooms(projectSlug, roomResult.rooms);
-                logger.info('PROCESS_QUEUE', 'Room extraction complete', { created: saveResult.created, updated: saveResult.updated });
-              } else {
-                logger.info('PROCESS_QUEUE', 'No rooms found in documents');
-              }
-            } catch (error) {
-              logger.error('PROCESS_QUEUE', 'Room extraction failed', error as Error, { documentId });
-            }
-
-            // 3. Auto-extract material takeoffs
-            try {
-              logger.info('PROCESS_QUEUE', 'Starting auto takeoff extraction');
-              const { autoExtractTakeoffs } = await import('./takeoff-extractor');
-              const proj = await prisma.project.findUnique({ where: { slug: projectSlug }, select: { id: true } });
-              if (proj) {
-                const takeoffResult = await autoExtractTakeoffs(proj.id, projectSlug);
-                if (takeoffResult.success && takeoffResult.itemCount > 0) {
-                  logger.info('PROCESS_QUEUE', 'Takeoff extraction complete', { itemCount: takeoffResult.itemCount });
-                } else {
-                  logger.info('PROCESS_QUEUE', 'No takeoff quantities extracted');
-                }
-              }
-            } catch (error) {
-              logger.error('PROCESS_QUEUE', 'Takeoff extraction failed', error as Error, { documentId });
-            }
-          }
-        } catch (err) {
-          logger.error('PROCESS_QUEUE', 'Post-processing failed', err as Error, { documentId });
-        }
-
-        // Mark document as processed AFTER intelligence extraction
-        await prisma.document.update({
-          where: { id: documentId },
-          data: {
-            processed: true,
-            pagesProcessed: newPagesProcessed,
-          },
+        // Atomic compare-and-swap: claim processing rights and prevent duplicate extraction
+        const claimed = await prisma.document.updateMany({
+          where: { id: documentId, processed: false },
+          data: { processed: true, pagesProcessed: newPagesProcessed },
         });
+        if (claimed.count === 0) {
+          logger.info('PROCESS_QUEUE', `Already processed, skipping intelligence extraction for ${documentId}`);
+        } else {
+          // Run intelligence extraction after atomically claiming the document
+          try {
+            const document = await prisma.document.findUnique({
+              where: { id: documentId },
+              include: { Project: true },
+            });
+
+            if (document?.Project?.slug) {
+              const projectSlug = document.Project.slug;
+
+              // 1. Intelligence extraction (Phase A, B, C)
+              try {
+                logger.info('PROCESS_QUEUE', 'Starting intelligence extraction', { documentId });
+                const { runIntelligenceExtraction } = await import('./intelligence-orchestrator');
+                await runIntelligenceExtraction({
+                  documentId,
+                  projectSlug,
+                  phases: ['A', 'B', 'C'],
+                });
+                logger.info('PROCESS_QUEUE', 'Intelligence extraction completed', { documentId });
+              } catch (error) {
+                logger.error('PROCESS_QUEUE', 'Intelligence extraction failed', error as Error, { documentId });
+              }
+
+              // 2. Room extraction
+              try {
+                logger.info('PROCESS_QUEUE', 'Starting room extraction', { projectSlug });
+                const { extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
+                const roomResult = await extractRoomsFromDocuments(projectSlug);
+                if (roomResult.rooms.length > 0) {
+                  const saveResult = await saveExtractedRooms(projectSlug, roomResult.rooms);
+                  logger.info('PROCESS_QUEUE', 'Room extraction complete', { created: saveResult.created, updated: saveResult.updated });
+                } else {
+                  logger.info('PROCESS_QUEUE', 'No rooms found in documents');
+                }
+              } catch (error) {
+                logger.error('PROCESS_QUEUE', 'Room extraction failed', error as Error, { documentId });
+              }
+
+              // 3. Auto-extract material takeoffs
+              try {
+                logger.info('PROCESS_QUEUE', 'Starting auto takeoff extraction');
+                const { autoExtractTakeoffs } = await import('./takeoff-extractor');
+                const proj = await prisma.project.findUnique({ where: { slug: projectSlug }, select: { id: true } });
+                if (proj) {
+                  const takeoffResult = await autoExtractTakeoffs(proj.id, projectSlug);
+                  if (takeoffResult.success && takeoffResult.itemCount > 0) {
+                    logger.info('PROCESS_QUEUE', 'Takeoff extraction complete', { itemCount: takeoffResult.itemCount });
+                  } else {
+                    logger.info('PROCESS_QUEUE', 'No takeoff quantities extracted');
+                  }
+                }
+              } catch (error) {
+                logger.error('PROCESS_QUEUE', 'Takeoff extraction failed', error as Error, { documentId });
+              }
+            }
+          } catch (err) {
+            logger.error('PROCESS_QUEUE', 'Post-processing failed', err as Error, { documentId });
+          }
+        }
       }
 
       return true;
