@@ -77,10 +77,10 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 
 ```
 app/api/          # 389 API routes organized by feature domain
-lib/              # 213 service modules (RAG, S3, Stripe, auth, etc.)
-components/       # 299 React components (Shadcn/Radix UI primitives)
+lib/              # 214 service modules (RAG, S3, Stripe, auth, offline-store, etc.)
+components/       # 305 React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (178 test files: 145 lib + 26 API + 3 smoke + 1 hooks + 3 coverage gaps)
+__tests__/        # Vitest tests (179 test files: 146 lib + 26 API + 3 smoke + 1 hooks + 3 coverage gaps)
 e2e/              # Playwright E2E tests (23 spec files)
 .claude/agents/   # 24 custom Claude Code agents
 .claude/skills/   # 13 project slash commands + 24 installed skills (see below)
@@ -126,6 +126,8 @@ e2e/              # Playwright E2E tests (23 spec files)
 | `lib/daily-report-indexer.ts` | RAG chunking/indexing for daily reports |
 | `lib/sms-daily-report-service.ts` | SMS-based daily log entry via Twilio |
 | `lib/crew-templates-smart-defaults.ts` | Reusable crew templates with smart defaults |
+| `lib/offline-store.ts` | IndexedDB wrapper (idb) for offline draft storage + sync queue |
+| `lib/daily-report-sync-service.ts` | Daily report cost/schedule sync with WeatherDay creation |
 
 ### Type Helper Files
 
@@ -157,7 +159,7 @@ Processors: Conversation → RestrictedCheck → RAG → Cache → LLM Stream
 
 - `lib/chat/middleware/` - Request validation and auth
 - `lib/chat/processors/` - Business logic and streaming
-  - `context-builder.ts` - RAG retrieval, Phase A/3A/3C enrichment, web search
+  - `context-builder.ts` - RAG retrieval, Phase A/3A/3C enrichment, daily report chunks, web search
 - `lib/chat/utils/` - Helpers (restricted query check, query classifier)
 
 ### Database Models (Prisma)
@@ -194,9 +196,9 @@ Key model groups in `prisma/schema.prisma`:
 
 ### Daily Report Feature Architecture
 
-**Phases 1-6A: Complete Field Operations Workflow**
+**Phases 1-6B: Complete Field Operations Workflow (ALL PHASES COMPLETE)**
 
-ForemanOS includes a comprehensive daily report system with enterprise-grade permissions, archival, search, and mobile entry capabilities.
+ForemanOS includes a comprehensive daily report system with enterprise-grade permissions, archival, search, mobile entry, offline support, and a unified detail view.
 
 **Core Features**:
 - **RBAC (Phase 1)**: 4-role hierarchy (VIEWER, REPORTER, SUPERVISOR, ADMIN) with status-based permissions
@@ -205,29 +207,51 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
   - XSS sanitization for user input
 - **Weather Day Tracking (Phase 2)**: Ledger system with automatic schedule push-out for outdoor tasks
   - Rain/snow/wind delays tracked per project
+  - WeatherDay records auto-created from daily report delays
   - Schedule integration for critical path impact
-- **OneDrive Archival (Phase 3)**: Auto-upload on approval
+- **OneDrive Archival (Phase 3)**: Auto-upload triggered on APPROVED status
   - PDF + DOCX report generation
   - Photo bundling with metadata
   - Tiered retention: thumbnails forever, full-res deleted after OneDrive sync
 - **RAG Search (Phase 4)**: Daily reports indexed for chat queries
   - Chunking strategy: summary + sections + crew + weather
   - Query routing: "yesterday's progress" → DailyReportChunk
+  - Daily report chunks wired into `context-builder.ts` for chat context
 - **SMS Entry (Phase 5)**: Text-based log submission via Twilio
   - Phone-to-user mapping (SMSMapping model)
+  - SMSConfigPanel accessible in project settings page
   - Structured parsing: crew, hours, notes, weather
   - Smart defaults from crew templates
 - **Crew Templates (Phase 5)**: Reusable crew compositions
   - Trade-specific defaults
   - Auto-populate from recent reports
-- **On-Demand Photo Analysis (Phase 6)**: Haiku default, Opus on request
+- **On-Demand Photo Analysis (Phase 6A)**: Haiku default, Opus on request
   - Safety/progress/quality checks
   - Async analysis with status tracking
+- **Unified View + Mobile (Phase 6B)**: Detail page, offline support, mobile responsive
+  - Detail page at `/project/[slug]/field-ops/daily-reports/[id]`
+  - Inline editing for all report sections (weather, labor, equipment, progress, delays, safety, notes)
+  - Activity timeline showing status changes, edits, and sync events
+  - Side-by-side comparison (today vs yesterday) with diff highlighting
+  - PWA offline support: IndexedDB drafts, service worker caching, background sync queue
+  - SyncStatusIndicator badge (online/offline/syncing/saved-locally)
+  - Mobile responsive: 375px minimum, grid stacking at `sm:`, 44px tap targets
+  - Quick Entry: one-tap "Same as yesterday" carryover
+
+**Downstream Triggers on Status Change**:
+- **APPROVED**: RAG indexing → budget/schedule sync → OneDrive archival → email notification
+- **REJECTED**: email notification with rejection reason/notes
+- **SUBMITTED**: email notification to reviewers
+- **Bulk approve**: same triggers applied per-report in the loop
+- All triggers are best-effort (try/catch, non-blocking) using dynamic imports
+
+**Cron Jobs**:
+- Photo cleanup: `0 3 * * *` → `/api/cron/photo-cleanup` (registered in `vercel.json`)
 
 ## Testing
 
-- **Vitest**: 178 test files, 7527 tests total
-  - 145 lib tests (`__tests__/lib/`)
+- **Vitest**: 179 test files, 7555 tests total (7516 passing, 39 skipped)
+  - 146 lib tests (`__tests__/lib/`)
   - 26 API tests (`__tests__/api/`)
   - 3 smoke tests (`__tests__/smoke/`)
   - 1 hooks test (`__tests__/hooks/`)
@@ -238,9 +262,9 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
 
 ### Test Coverage
 
-145 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+146 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
 
-**Daily Report Test Files** (Phases 1-6A):
+**Daily Report Test Files** (Phases 1-6B):
 | File | Coverage | Tests |
 |------|----------|-------|
 | `__tests__/lib/daily-report-permissions.test.ts` | Role-based permissions, status transitions, sanitization | Phase 1 |
@@ -252,8 +276,10 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
 | `__tests__/lib/crew-templates-smart-defaults.test.ts` | Crew templates, smart defaults | Phase 5 |
 | `__tests__/lib/sms-daily-report-service.test.ts` | SMS parsing, phone lookup | Phase 5 |
 | `__tests__/lib/daily-report-coverage-gaps.test.ts` | Coverage gap scenarios | Phase 6A |
+| `__tests__/lib/offline-store.test.ts` | IndexedDB drafts, sync queue operations | Phase 6B |
 | `__tests__/api/projects/daily-reports/route.test.ts` | Daily report API CRUD (updated for RBAC) | Updated |
-| `__tests__/api/projects/daily-reports/[id]/route.test.ts` | Single report operations (updated for RBAC) | Updated |
+| `__tests__/api/projects/daily-reports/[id]/route.test.ts` | Single report ops + downstream trigger mocks | Updated |
+| `__tests__/api/daily-reports/daily-reports-rbac.test.ts` | RBAC enforcement + trigger verification | Updated |
 
 ### API Test Suites
 | Directory | Coverage |
