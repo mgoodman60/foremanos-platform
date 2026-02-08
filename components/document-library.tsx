@@ -39,6 +39,10 @@ interface DocumentProgress {
   error: string | null;
   currentBatch: number | null;
   totalBatches: number | null;
+  startedAt?: string;
+  lastActivityAt?: string;
+  secondsPerPage?: number;
+  elapsedSeconds?: number;
 }
 
 interface Document {
@@ -84,6 +88,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
   const [progressMap, setProgressMap] = useState<Record<string, DocumentProgress>>({});
+  const [lastPollTimes, setLastPollTimes] = useState<Record<string, number>>({});
 
   const categories = getAllCategories();
 
@@ -152,6 +157,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           if (res.ok) {
             const data: DocumentProgress = await res.json();
             setProgressMap(prev => ({ ...prev, [doc.id]: data }));
+            setLastPollTimes(prev => ({ ...prev, [doc.id]: Date.now() }));
             // If completed, refresh the document list
             if (data.currentPhase === 'completed') {
               fetchDocuments();
@@ -486,6 +492,61 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     }
     const mb = bytes / 1024 / 1024;
     return `${mb.toFixed(2)} MB`;
+  };
+
+  const formatElapsed = (seconds: number): string => {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (minutes < 60) return `${minutes}m ${secs}s`;
+    const hours = Math.floor(minutes / 60);
+    const remainMins = minutes % 60;
+    return `${hours}h ${remainMins}m`;
+  };
+
+  const formatETA = (seconds: number): string => {
+    if (seconds <= 0) return 'finishing up...';
+    if (seconds < 30) return 'almost done...';
+    if (seconds < 60) return `~${seconds}s left`;
+    const minutes = Math.ceil(seconds / 60);
+    if (minutes === 1) return '~1 minute left';
+    return `~${minutes} minutes left`;
+  };
+
+  const getPhaseExplanation = (phase: string, category: string): string => {
+    if (phase === 'queued') return 'Your document is in the processing queue.';
+    if (phase === 'extracting') return 'Converting pages to images for AI analysis...';
+    if (phase === 'indexing') return 'Building search index for AI chat queries...';
+    if (phase === 'analyzing') {
+      const cat = category?.toLowerCase() || '';
+      if (cat.includes('plan') || cat.includes('drawing') || cat.includes('architectural') || cat.includes('structural') || cat.includes('mechanical') || cat.includes('electrical') || cat.includes('plumbing') || cat.includes('civil'))
+        return 'AI is reading each page for dimensions, room names, door schedules, and symbols.';
+      if (cat.includes('spec') || cat.includes('specification'))
+        return 'AI is extracting material specs, product data, and technical requirements.';
+      if (cat.includes('budget') || cat.includes('cost') || cat.includes('estimate') || cat.includes('pay'))
+        return 'AI is reading line items, costs, and budget breakdowns.';
+      if (cat.includes('schedule') || cat.includes('gantt') || cat.includes('timeline'))
+        return 'AI is extracting tasks, milestones, and timeline data.';
+      return 'AI is analyzing each page individually for construction details.';
+    }
+    return '';
+  };
+
+  const isStalled = (progress: DocumentProgress | undefined, lastPollTime: number | undefined): boolean => {
+    if (!progress || !progress.lastActivityAt) return false;
+    const lastActivity = new Date(progress.lastActivityAt).getTime();
+    const now = Date.now();
+    return (now - lastActivity) > 120000;
+  };
+
+  const formatLastUpdate = (lastActivityAt: string | undefined): string => {
+    if (!lastActivityAt) return '';
+    const seconds = Math.round((Date.now() - new Date(lastActivityAt).getTime()) / 1000);
+    if (seconds < 5) return 'just now';
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    return `${Math.floor(minutes / 60)}h ago`;
   };
 
   const handleDownload = async (doc: Document) => {
@@ -1283,21 +1344,30 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           const progress = progressMap[doc.id];
                           const percent = progress?.percentComplete ?? 0;
                           const phase = progress?.currentPhase || doc.queueStatus || 'queued';
-                          const hasBatch = progress?.currentBatch !== null && progress?.currentBatch !== undefined && progress?.totalBatches !== null && progress?.totalBatches !== undefined;
+                          const hasBatch = progress?.currentBatch != null && progress?.totalBatches != null;
+                          const stalled = isStalled(progress, lastPollTimes[doc.id]);
+                          const eta = progress?.estimatedTimeRemaining ?? 0;
                           return (
                             <div className="mt-2">
-                              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span>
-                                  {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition}) — ${progress?.totalPages ?? '?'} pages to process` : 'Waiting in queue...')}
-                                  {phase === 'extracting' && (`Extracting content...${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}`)}
-                                  {phase === 'analyzing' && (`Analyzing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}`)}
+                              <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                                <span className="flex items-center gap-1.5">
+                                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${stalled ? 'bg-yellow-500' : 'bg-blue-500 animate-pulse'}`} />
+                                  {phase === 'queued' && (progress?.queuePosition ? `Queue position ${progress.queuePosition}` : 'In queue...')}
+                                  {phase === 'extracting' && 'Extracting...'}
+                                  {phase === 'analyzing' && `Page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}`}
                                   {phase === 'indexing' && 'Indexing...'}
                                   {phase === 'failed' && 'Failed'}
                                   {phase === 'pending' && 'Preparing...'}
-                                  {phase === 'processing' && (hasBatch ? `Processing batch ${progress.currentBatch} of ${progress.totalBatches} (page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'})` : `Processing ${progress?.pagesProcessed ?? 0}/${progress?.totalPages ?? '?'}`)}
+                                  {phase === 'processing' && `${progress?.pagesProcessed ?? 0}/${progress?.totalPages ?? '?'}`}
                                 </span>
-                                {percent > 0 && <span>{percent}%</span>}
+                                <span className="flex items-center gap-1.5">
+                                  {percent > 0 && <span>{percent}%</span>}
+                                  {eta > 0 && phase !== 'queued' && phase !== 'failed' && <span className="text-gray-500">{formatETA(eta)}</span>}
+                                </span>
                               </div>
+                              {stalled && (
+                                <p className="text-xs text-yellow-500/80 mb-1">May be paused -- will resume automatically</p>
+                              )}
                               <div
                                 className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
                                 role="progressbar"
@@ -1307,7 +1377,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                 aria-label={`Processing: ${percent}%`}
                               >
                                 <div
-                                  className={`h-1.5 rounded-full transition-all duration-500 ${phase === 'queued' ? 'bg-yellow-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' ? 'animate-pulse' : ''}`}
+                                  className={`h-1.5 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : phase === 'queued' ? 'bg-yellow-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' && !stalled ? 'animate-pulse' : ''}`}
                                   style={{ width: `${Math.max(2, percent)}%` }}
                                 />
                               </div>
@@ -1410,25 +1480,43 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             const progress = progressMap[doc.id];
                             const percent = progress?.percentComplete ?? 0;
                             const phase = progress?.currentPhase || doc.queueStatus || 'queued';
-                            const timeLeft = progress?.estimatedTimeRemaining ?? 0;
-                            const hasBatch = progress?.currentBatch !== null && progress?.currentBatch !== undefined && progress?.totalBatches !== null && progress?.totalBatches !== undefined;
+                            const hasBatch = progress?.currentBatch != null && progress?.totalBatches != null;
+                            const stalled = isStalled(progress, lastPollTimes[doc.id]);
+                            const eta = progress?.estimatedTimeRemaining ?? 0;
+                            const explanation = getPhaseExplanation(phase, doc.category);
                             return (
-                              <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
-                                <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                                  <span className="font-medium">
-                                    {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition}) — ${progress?.totalPages ?? '?'} pages to process` : 'Waiting in queue...')}
-                                    {phase === 'extracting' && (`Extracting content...${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}`)}
-                                    {phase === 'analyzing' && (`Analyzing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}${hasBatch ? ` (batch ${progress.currentBatch} of ${progress.totalBatches})` : ''}...`)}
+                              <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg space-y-2">
+                                {/* Phase label + percentage */}
+                                <div className="flex justify-between text-xs text-gray-400">
+                                  <span className="flex items-center gap-1.5 font-medium">
+                                    <span className={`inline-block w-2 h-2 rounded-full ${stalled ? 'bg-yellow-500' : 'bg-blue-500 animate-pulse'}`} />
+                                    {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition})` : 'Waiting in queue...')}
+                                    {phase === 'extracting' && (`Extracting content...${hasBatch ? ` (batch ${progress!.currentBatch} of ${progress!.totalBatches})` : ''}`)}
+                                    {phase === 'analyzing' && (`Analyzing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}${hasBatch ? ` (batch ${progress!.currentBatch} of ${progress!.totalBatches})` : ''}...`)}
                                     {phase === 'indexing' && 'Indexing content for search...'}
                                     {phase === 'failed' && 'Processing failed'}
                                     {phase === 'pending' && 'Preparing to process...'}
-                                    {phase === 'processing' && (hasBatch ? `Processing batch ${progress.currentBatch} of ${progress.totalBatches} (page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'})...` : `Processing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}...`)}
+                                    {phase === 'processing' && (hasBatch ? `Processing batch ${progress!.currentBatch} of ${progress!.totalBatches}...` : `Processing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}...`)}
                                   </span>
                                   <span className="flex items-center gap-2">
                                     {percent > 0 && <span>{percent}%</span>}
-                                    {timeLeft > 0 && <span className="text-gray-500">{timeLeft < 60 ? `~${timeLeft}s` : `~${Math.ceil(timeLeft / 60)}m`}</span>}
+                                    {eta > 0 && phase !== 'queued' && phase !== 'failed' && (
+                                      <span className="text-gray-500">{formatETA(eta)}</span>
+                                    )}
                                   </span>
                                 </div>
+
+                                {/* Explanatory sub-text */}
+                                {explanation && (
+                                  <p className="text-xs text-gray-500 pl-3.5">{explanation}</p>
+                                )}
+
+                                {/* Stalled warning */}
+                                {stalled && (
+                                  <p className="text-xs text-yellow-500/80 pl-3.5">Processing may be paused -- will resume automatically</p>
+                                )}
+
+                                {/* Progress bar */}
                                 <div
                                   className="w-full bg-gray-700 rounded-full h-2 overflow-hidden"
                                   role="progressbar"
@@ -1438,10 +1526,37 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                   aria-label={`Document processing: ${percent}%`}
                                 >
                                   <div
-                                    className={`h-2 rounded-full transition-all duration-500 ${phase === 'queued' ? 'bg-yellow-500' : phase === 'indexing' ? 'bg-green-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' ? 'animate-pulse' : ''}`}
+                                    className={`h-2 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : phase === 'queued' ? 'bg-yellow-500' : phase === 'indexing' ? 'bg-green-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' && !stalled ? 'animate-pulse' : ''}`}
                                     style={{ width: `${Math.max(2, percent)}%` }}
                                   />
                                 </div>
+
+                                {/* Bottom row: elapsed, rate, last update */}
+                                {phase !== 'queued' && phase !== 'failed' && (
+                                  <div className="flex items-center gap-2 text-[10px] text-gray-500 pl-3.5">
+                                    {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && (
+                                      <span>Elapsed: {formatElapsed(progress.elapsedSeconds)}</span>
+                                    )}
+                                    {progress?.secondsPerPage != null && progress.secondsPerPage > 0 && (
+                                      <>
+                                        <span className="text-gray-600">·</span>
+                                        <span>{progress.secondsPerPage}s/page</span>
+                                      </>
+                                    )}
+                                    {hasBatch && (
+                                      <>
+                                        <span className="text-gray-600">·</span>
+                                        <span>Batch {progress!.currentBatch}/{progress!.totalBatches}</span>
+                                      </>
+                                    )}
+                                    {progress?.lastActivityAt && (
+                                      <>
+                                        <span className="text-gray-600">·</span>
+                                        <span>Last update: {formatLastUpdate(progress.lastActivityAt)}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             );
                           })()}

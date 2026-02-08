@@ -55,6 +55,8 @@ export async function GET(
         totalBatches: true,
         createdAt: true,
         lastError: true,
+        updatedAt: true,
+        metadata: true,
       }
     });
 
@@ -81,9 +83,38 @@ export async function GET(
       currentPhase = 'completed';
     }
 
-    // Estimate time remaining (~3s per page for vision processing)
+    // Parse metadata for timing data
+    const metadata = (queueEntry?.metadata as Record<string, unknown>) ?? {};
+    const queuedAt = metadata.queuedAt as string | undefined;
+    const providerBreakdown = metadata.providerBreakdown as Record<string, { avgTimePerPage?: number; pagesProcessed?: number }> | undefined;
+
+    // Calculate elapsed time
+    const startTime = queuedAt ? new Date(queuedAt) : queueEntry?.createdAt;
+    const elapsedMs = startTime ? Date.now() - new Date(startTime).getTime() : 0;
+    const elapsedSeconds = Math.round(elapsedMs / 1000);
+
+    // Calculate seconds per page using available data
+    let secondsPerPage = 8; // default
+    if (providerBreakdown) {
+      // Weighted average from provider breakdown
+      let totalWeightedTime = 0;
+      let totalProviderPages = 0;
+      for (const provider of Object.values(providerBreakdown)) {
+        if (provider.avgTimePerPage && provider.pagesProcessed) {
+          totalWeightedTime += provider.avgTimePerPage * provider.pagesProcessed;
+          totalProviderPages += provider.pagesProcessed;
+        }
+      }
+      if (totalProviderPages > 0) {
+        secondsPerPage = Math.max(3, Math.min(30, totalWeightedTime / totalProviderPages));
+      }
+    } else if (pagesProcessed > 0 && elapsedSeconds > 0) {
+      // Fall back to wall-clock measurement
+      secondsPerPage = Math.max(3, Math.min(30, elapsedSeconds / pagesProcessed));
+    }
+
     const remainingPages = totalPages - pagesProcessed;
-    const estimatedTimeRemaining = remainingPages > 0 ? remainingPages * 3 : 0;
+    const estimatedTimeRemaining = remainingPages > 0 ? Math.round(remainingPages * secondsPerPage) : 0;
 
     // Queue position (count docs ahead of this one)
     let queuePosition: number | null = null;
@@ -108,6 +139,10 @@ export async function GET(
       currentBatch: queueEntry?.currentBatch ?? null,
       totalBatches: queueEntry?.totalBatches ?? null,
       error: queueEntry?.lastError || null,
+      startedAt: startTime ? new Date(startTime).toISOString() : null,
+      lastActivityAt: queueEntry?.updatedAt ? new Date(queueEntry.updatedAt).toISOString() : null,
+      secondsPerPage: Math.round(secondsPerPage * 10) / 10,
+      elapsedSeconds,
     });
   } catch (error) {
     console.error('[DOCUMENT PROGRESS] Error:', error);
