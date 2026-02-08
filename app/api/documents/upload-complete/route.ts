@@ -11,6 +11,7 @@ import { classifyDocument } from '@/lib/document-classifier';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { processDocument } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
+import { waitUntil } from '@vercel/functions';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -201,24 +202,26 @@ export async function POST(request: Request) {
     // Trigger document processing if allowed
     if (canProcessResult.allowed) {
       console.log(`[COMPLETE] Starting document processing for ${document.id}...`);
-      processDocument(document.id, classification)
-        .then(() => {
-          console.log(`[COMPLETE] ✅ Processing started successfully for document ${document.id}`);
-        })
-        .catch(async (error) => {
-          console.error(`[COMPLETE ERROR] ❌ Processing failed for document ${document.id}:`, error);
-          
-          // Mark document as failed
-          await prisma.document.update({
-            where: { id: document.id },
-            data: {
-              queueStatus: 'failed',
-              lastProcessingError: error.message || 'Processing initialization failed',
-            },
-          }).catch((updateError: any) => {
-            console.error('[COMPLETE ERROR] Failed to update document status:', updateError);
-          });
-        });
+      waitUntil(
+        processDocument(document.id, classification)
+          .then(() => {
+            console.log(`[COMPLETE] ✅ Processing completed for document ${document.id}`);
+          })
+          .catch(async (error) => {
+            console.error(`[COMPLETE ERROR] ❌ Processing failed for document ${document.id}:`, error);
+
+            // Mark document as failed
+            await prisma.document.update({
+              where: { id: document.id },
+              data: {
+                queueStatus: 'failed',
+                lastProcessingError: error.message || 'Processing initialization failed',
+              },
+            }).catch((updateError: any) => {
+              console.error('[COMPLETE ERROR] Failed to update document status:', updateError);
+            });
+          })
+      );
     } else {
       console.log(`[COMPLETE] Document ${document.id} not processed - quota exceeded`);
     }

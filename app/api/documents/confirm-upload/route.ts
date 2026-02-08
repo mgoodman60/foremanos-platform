@@ -16,6 +16,7 @@ import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
 import { logger } from '@/lib/logger';
+import { waitUntil } from '@vercel/functions';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for security scanning
@@ -351,32 +352,34 @@ export async function POST(request: Request) {
       'Create document record'
     );
 
-    // 10. Trigger async processing
+    // 10. Trigger async processing (waitUntil keeps function alive after response)
     logger.info('CONFIRM_UPLOAD', 'Triggering async document processing', { documentId: document.id });
-    processDocument(document.id, classification)
-      .then(() => {
-        logger.info('CONFIRM_UPLOAD', `Processing started for document ${document.id}`);
-      })
-      .catch(async (error) => {
-        logger.error('CONFIRM_UPLOAD', `Processing failed for document ${document.id}`, error);
+    waitUntil(
+      processDocument(document.id, classification)
+        .then(() => {
+          logger.info('CONFIRM_UPLOAD', `Processing completed for document ${document.id}`);
+        })
+        .catch(async (error) => {
+          logger.error('CONFIRM_UPLOAD', `Processing failed for document ${document.id}`, error);
 
-        try {
-          await withDatabaseRetry(
-            () => prisma.document.update({
-              where: { id: document.id },
-              data: {
-                queueStatus: 'failed',
-                processed: false,
-                lastProcessingError: error?.message || String(error),
-                processingRetries: 0,
-              },
-            }),
-            'Mark document as failed'
-          );
-        } catch (updateError) {
-          logger.error('CONFIRM_UPLOAD', 'Failed to update document status', updateError);
-        }
-      });
+          try {
+            await withDatabaseRetry(
+              () => prisma.document.update({
+                where: { id: document.id },
+                data: {
+                  queueStatus: 'failed',
+                  processed: false,
+                  lastProcessingError: error?.message || String(error),
+                  processingRetries: 0,
+                },
+              }),
+              'Mark document as failed'
+            );
+          } catch (updateError) {
+            logger.error('CONFIRM_UPLOAD', 'Failed to update document status', updateError);
+          }
+        })
+    );
 
     // 11. Send notifications (async, don't wait)
     sendDocumentUploadNotification(

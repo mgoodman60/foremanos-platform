@@ -30,6 +30,9 @@
     },
     "app/api/documents/confirm-upload/route.ts": {
       "maxDuration": 300
+    },
+    "app/api/admin/process-queue/route.ts": {
+      "maxDuration": 300
     }
   },
   "env": {

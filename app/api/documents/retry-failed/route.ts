@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { processDocument } from '@/lib/document-processor';
 import { classifyDocument } from '@/lib/document-classifier';
+import { waitUntil } from '@vercel/functions';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -89,22 +90,24 @@ export async function POST(req: NextRequest) {
         const classification = await classifyDocument(doc.fileName, fileExtension);
 
         // Start processing asynchronously
-        processDocument(doc.id, classification)
-          .then(() => {
-            console.log(`[RETRY] ✅ Document ${doc.id} processing started successfully`);
-          })
-          .catch(async (error) => {
-            console.error(`[RETRY] ❌ Document ${doc.id} retry failed:`, error);
-            
-            // Update with new error
-            await prisma.document.update({
-              where: { id: doc.id },
-              data: {
-                queueStatus: 'failed',
-                lastProcessingError: `Retry ${doc.processingRetries + 1} failed: ${error?.message || String(error)}`,
-              },
-            }).catch((e: any) => console.error('Failed to update document:', e));
-          });
+        waitUntil(
+          processDocument(doc.id, classification)
+            .then(() => {
+              console.log(`[RETRY] ✅ Document ${doc.id} processing completed successfully`);
+            })
+            .catch(async (error) => {
+              console.error(`[RETRY] ❌ Document ${doc.id} retry failed:`, error);
+
+              // Update with new error
+              await prisma.document.update({
+                where: { id: doc.id },
+                data: {
+                  queueStatus: 'failed',
+                  lastProcessingError: `Retry ${doc.processingRetries + 1} failed: ${error?.message || String(error)}`,
+                },
+              }).catch((e: any) => console.error('Failed to update document:', e));
+            })
+        );
 
         results.push({
           id: doc.id,

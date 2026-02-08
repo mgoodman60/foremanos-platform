@@ -266,7 +266,26 @@ export default function DocumentProcessingMonitor({
 
                     {doc.queueStatus === 'pending' && (
                       <div className="mt-2 text-xs text-blue-400">
-                        Preparing to process...
+                        {new Date(doc.createdAt).getTime() < Date.now() - 5 * 60 * 1000 ? (
+                          <>
+                            <span className="text-yellow-400">Processing delayed — retrying automatically...</span>
+                            <button
+                              onClick={() => handleProcessDocument(doc.id)}
+                              className="ml-2 text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors"
+                            >
+                              Retry Now
+                            </button>
+                          </>
+                        ) : (
+                          'Preparing to process...'
+                        )}
+                      </div>
+                    )}
+
+                    {(doc.queueStatus === 'processing' || doc.queueStatus === 'queued') &&
+                     new Date(doc.updatedAt).getTime() < Date.now() - 10 * 60 * 1000 && (
+                      <div className="mt-1 text-xs text-yellow-400">
+                        Processing appears stalled — will retry automatically
                       </div>
                     )}
 

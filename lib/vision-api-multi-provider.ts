@@ -248,8 +248,11 @@ async function callClaudeOpusVision(
     const data = JSON.parse(responseText);
     const content = data.content?.[0]?.text || '';
 
-    if (!content) {
-      throw new Error('Empty response from API');
+    // Detect error responses that masquerade as success
+    const errorPatterns = ['error:terminated', 'error: terminated', 'internal error', 'service unavailable'];
+    const isErrorResponse = errorPatterns.some(p => content.toLowerCase().startsWith(p));
+    if (!content || isErrorResponse) {
+      throw new Error(isErrorResponse ? `API returned error response: ${content.substring(0, 100)}` : 'Empty response from API');
     }
 
     const elapsedMs = Date.now() - fetchStart;
@@ -368,8 +371,11 @@ async function callClaudeSonnetVision(
     const data = JSON.parse(responseText);
     const content = data.content?.[0]?.text || '';
 
-    if (!content) {
-      throw new Error('Empty response from API');
+    // Detect error responses that masquerade as success
+    const errorPatterns = ['error:terminated', 'error: terminated', 'internal error', 'service unavailable'];
+    const isErrorResponse = errorPatterns.some(p => content.toLowerCase().startsWith(p));
+    if (!content || isErrorResponse) {
+      throw new Error(isErrorResponse ? `API returned error response: ${content.substring(0, 100)}` : 'Empty response from API');
     }
 
     const elapsedMs = Date.now() - fetchStart;
@@ -485,8 +491,11 @@ async function callGPT52Vision(
     const data = JSON.parse(responseText);
     const content = data.choices?.[0]?.message?.content || '';
 
-    if (!content) {
-      throw new Error('Empty response from API');
+    // Detect error responses that masquerade as success
+    const errorPatterns = ['error:terminated', 'error: terminated', 'internal error', 'service unavailable'];
+    const isErrorResponse = errorPatterns.some(p => content.toLowerCase().startsWith(p));
+    if (!content || isErrorResponse) {
+      throw new Error(isErrorResponse ? `API returned error response: ${content.substring(0, 100)}` : 'Empty response from API');
     }
 
     const elapsedMs = Date.now() - fetchStart;
@@ -860,8 +869,11 @@ export async function analyzeWithDirectPdf(
       const data = JSON.parse(responseText);
       const content = data.content?.[0]?.text || '';
 
-      if (!content) {
-        throw new Error('Empty response from API');
+      // Detect error responses that masquerade as success
+      const errorPatterns = ['error:terminated', 'error: terminated', 'internal error', 'service unavailable'];
+      const isErrorResponse = errorPatterns.some(p => content.toLowerCase().startsWith(p));
+      if (!content || isErrorResponse) {
+        throw new Error(isErrorResponse ? `API returned error response: ${content.substring(0, 100)}` : 'Empty response from API');
       }
 
       // Validate quality

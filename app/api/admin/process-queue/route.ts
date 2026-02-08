@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { processNextQueuedBatch } from '@/lib/document-processing-queue';
+import { recoverAllOrphanedDocuments } from '@/lib/orphaned-document-recovery';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes
@@ -26,6 +28,34 @@ export async function POST(request: Request) {
     }
 
     console.log('[QUEUE] Manual queue processing triggered');
+
+    // Recover stuck/orphaned documents first
+    try {
+      const recovered = await recoverAllOrphanedDocuments();
+      if (recovered > 0) {
+        console.log(`[QUEUE] Recovered ${recovered} orphaned documents`);
+      }
+    } catch (recoveryError) {
+      console.error('[QUEUE] Orphan recovery error (non-blocking):', recoveryError);
+    }
+
+    // Reset stale 'processing' documents (stuck for >10 min)
+    try {
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const staleReset = await prisma.document.updateMany({
+        where: {
+          queueStatus: 'processing',
+          processed: false,
+          updatedAt: { lt: tenMinutesAgo },
+        },
+        data: { queueStatus: 'pending' },
+      });
+      if (staleReset.count > 0) {
+        console.log(`[QUEUE] Reset ${staleReset.count} stale processing documents`);
+      }
+    } catch (staleError) {
+      console.error('[QUEUE] Stale reset error (non-blocking):', staleError);
+    }
 
     // Process batches until queue is empty or error occurs
     let totalProcessed = 0;
@@ -69,6 +99,34 @@ export async function GET(request: Request) {
       // Cron invocation: process the queue
       console.log('[QUEUE] Cron-triggered queue processing');
 
+      // Recover stuck/orphaned documents first
+      try {
+        const recovered = await recoverAllOrphanedDocuments();
+        if (recovered > 0) {
+          console.log(`[QUEUE] Recovered ${recovered} orphaned documents`);
+        }
+      } catch (recoveryError) {
+        console.error('[QUEUE] Orphan recovery error (non-blocking):', recoveryError);
+      }
+
+      // Reset stale 'processing' documents (stuck for >10 min)
+      try {
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const staleReset = await prisma.document.updateMany({
+          where: {
+            queueStatus: 'processing',
+            processed: false,
+            updatedAt: { lt: tenMinutesAgo },
+          },
+          data: { queueStatus: 'pending' },
+        });
+        if (staleReset.count > 0) {
+          console.log(`[QUEUE] Reset ${staleReset.count} stale processing documents`);
+        }
+      } catch (staleError) {
+        console.error('[QUEUE] Stale reset error (non-blocking):', staleError);
+      }
+
       let totalProcessed = 0;
       let continueProcessing = true;
       const maxIterations = 10;
@@ -95,8 +153,6 @@ export async function GET(request: Request) {
     if (session?.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const { prisma } = await import('@/lib/db');
 
     const stats = await prisma.processingQueue.groupBy({
       by: ['status'],

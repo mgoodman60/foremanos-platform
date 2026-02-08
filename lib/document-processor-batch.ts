@@ -75,6 +75,14 @@ export async function processDocumentBatch(
     await writeFile(tempPdfPath, buffer);
     tempFiles.push(tempPdfPath);
 
+    // Clean up any existing chunks for this page range to prevent duplicates on retry/recovery
+    await prisma.documentChunk.deleteMany({
+      where: {
+        documentId,
+        pageNumber: { gte: startPage, lte: endPage },
+      },
+    });
+
     // Process each page in the batch
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
