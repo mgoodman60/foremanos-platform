@@ -23,7 +23,6 @@ import {
   createPhotoMetadata,
   formatAutoCaption,
   validatePhotoCount,
-  generateAIPhotoDescription,
   PhotoMetadata,
 } from '@/lib/photo-analyzer';
 import { randomUUID } from 'crypto';
@@ -267,15 +266,8 @@ export async function POST(
       },
     });
 
-    // Generate AI description in background if no user caption
-    let aiDescription = 'Construction progress photo';
-    if (!userCaption) {
-      try {
-        aiDescription = await generateAIPhotoDescription(cloudStoragePath);
-      } catch (error) {
-        console.error('[PHOTOS_API] Error generating AI description:', error);
-      }
-    }
+    // Default description (analysis is now on-demand via /photos/[photoId]/analyze)
+    const aiDescription = userCaption || 'Construction progress photo';
 
     const responseMessage = userCaption 
       ? formatAutoCaption(userCaption)

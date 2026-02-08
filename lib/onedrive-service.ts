@@ -63,14 +63,13 @@ export class OneDriveService {
   }
 
   // Static method to generate OAuth authorization URL
-  // NOTE: Update scope to 'Files.ReadWrite Files.ReadWrite.All offline_access' for upload functionality
   static getAuthUrl(projectSlug: string): string {
     const params = new URLSearchParams({
       client_id: OneDriveService.CLIENT_ID,
       response_type: 'code',
       redirect_uri: OneDriveService.REDIRECT_URI,
       response_mode: 'query',
-      scope: 'Files.Read Files.Read.All offline_access',
+      scope: 'Files.ReadWrite Files.ReadWrite.All offline_access',
       state: projectSlug, // Pass project slug in state
     });
 
@@ -158,7 +157,7 @@ export class OneDriveService {
         client_secret: OneDriveService.CLIENT_SECRET,
         refresh_token: this.refreshToken,
         grant_type: 'refresh_token',
-        scope: 'Files.Read Files.Read.All offline_access',
+        scope: 'Files.ReadWrite Files.ReadWrite.All offline_access',
       }),
     });
 

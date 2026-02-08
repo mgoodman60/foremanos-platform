@@ -15,7 +15,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -25,6 +25,13 @@ export async function POST(
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Check membership — REPORTER+ can use voice
+    const { getDailyReportRole, canCreateReport } = await import('@/lib/daily-report-permissions');
+    const role = await getDailyReportRole(session.user.id, project.id);
+    if (!role || !canCreateReport(role)) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     const body = await request.json();

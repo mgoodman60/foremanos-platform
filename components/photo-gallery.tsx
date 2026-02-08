@@ -9,14 +9,17 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Download, Trash2, Camera, ZoomIn, MapPin, Briefcase, Calendar, Edit, Filter, Tag, ArrowUpDown } from 'lucide-react';
+import { Download, Trash2, Camera, ZoomIn, MapPin, Briefcase, Calendar, Edit, Filter, ArrowUpDown, Sparkles, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PhotoMetadata } from '@/lib/photo-analyzer';
+import { createScopedLogger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { PhotoAnnotationModal } from './photo-annotation-modal';
+
+const log = createScopedLogger('PHOTO_GALLERY');
 
 interface PhotoGalleryProps {
   conversationId: string;
@@ -48,6 +51,10 @@ export function PhotoGallery({
   const [showAnnotationModal, setShowAnnotationModal] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<PhotoMetadata | null>(null);
 
+  // Analyze state
+  const [analyzingPhotoId, setAnalyzingPhotoId] = useState<string | null>(null);
+  const [localCaptions, setLocalCaptions] = useState<Record<string, string>>({});
+
   // Fetch signed URLs for all photos
   useEffect(() => {
     if (photos.length === 0) return;
@@ -74,7 +81,7 @@ export function PhotoGallery({
 
         setPhotoUrls(urls);
       } catch (error) {
-        console.error('Error fetching photo URLs:', error);
+        log.error('Failed to fetch photo URLs', error as Error);
         toast.error('Failed to load photos');
       } finally {
         setLoading(false);
@@ -90,11 +97,11 @@ export function PhotoGallery({
 
     // Apply filters
     if (filterTrade !== 'all') {
-      filtered = filtered.filter((p: any) => p.trade === filterTrade);
+      filtered = filtered.filter((p) => p.trade === filterTrade);
     }
 
     if (filterLocation !== 'all') {
-      filtered = filtered.filter((p: any) => p.location === filterLocation);
+      filtered = filtered.filter((p) => p.location === filterLocation);
     }
 
     if (filterDate !== 'all') {
@@ -108,7 +115,7 @@ export function PhotoGallery({
     }
 
     // Apply sorting
-    const sorted = [...filtered].sort((a: any, b: any) => {
+    const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'date-desc':
           return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
@@ -131,13 +138,41 @@ export function PhotoGallery({
   }, [photos, filterTrade, filterLocation, filterDate, sortBy]);
 
   // Get unique filter values
-  const uniqueTrades = Array.from(new Set(photos.map((p: any) => p.trade).filter(Boolean)));
-  const uniqueLocations = Array.from(new Set(photos.map((p: any) => p.location).filter(Boolean)));
+  const uniqueTrades = Array.from(new Set(photos.map((p) => p.trade).filter(Boolean)));
+  const uniqueLocations = Array.from(new Set(photos.map((p) => p.location).filter(Boolean)));
   const uniqueDates = Array.from(new Set(photos.map((p) => {
     if (!p.uploadedAt) return '';
     const uploadedAtStr = typeof p.uploadedAt === 'string' ? p.uploadedAt : p.uploadedAt.toISOString();
     return uploadedAtStr.split('T')[0];
   }).filter(Boolean)));
+
+  const handleAnalyze = async (e: React.MouseEvent, photo: PhotoMetadata) => {
+    e.stopPropagation();
+    setAnalyzingPhotoId(photo.id);
+    try {
+      const response = await fetch(
+        `/api/conversations/${conversationId}/photos/${photo.id}/analyze`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'haiku' }),
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to analyze photo');
+
+      const data = await response.json();
+      if (data.description) {
+        setLocalCaptions((prev) => ({ ...prev, [photo.id]: data.description }));
+        toast.success('Photo analyzed');
+      }
+    } catch (error) {
+      log.error('Photo analysis failed', error as Error);
+      toast.error('Failed to analyze photo');
+    } finally {
+      setAnalyzingPhotoId(null);
+    }
+  };
 
   const handleEdit = (photo: PhotoMetadata) => {
     setEditingPhoto(photo);
@@ -171,7 +206,7 @@ export function PhotoGallery({
       
       toast.success('Photo downloaded');
     } catch (error) {
-      console.error('Error downloading photo:', error);
+      log.error('Failed to download photo', error as Error);
       toast.error('Failed to download photo');
     }
   };
@@ -195,7 +230,7 @@ export function PhotoGallery({
       onPhotoDeleted?.(photoId);
       setSelectedPhoto(null);
     } catch (error) {
-      console.error('Error deleting photo:', error);
+      log.error('Failed to delete photo', error as Error);
       toast.error('Failed to delete photo');
     }
   };
@@ -331,6 +366,32 @@ export function PhotoGallery({
                   <Badge variant="secondary" className="text-xs bg-blue-500 text-white">
                     AI
                   </Badge>
+                </div>
+              )}
+
+              {/* Analyze button */}
+              {!readOnly && (
+                <button
+                  className="absolute top-2 right-2 p-1.5 rounded-md bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 disabled:opacity-50"
+                  onClick={(e) => handleAnalyze(e, photo)}
+                  disabled={analyzingPhotoId === photo.id}
+                  aria-label={`Analyze photo ${photo.fileName}`}
+                  title="Analyze with AI"
+                >
+                  {analyzingPhotoId === photo.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              )}
+
+              {/* AI caption preview */}
+              {localCaptions[photo.id] && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1">
+                  <p className="text-xs text-white truncate">
+                    {localCaptions[photo.id]}
+                  </p>
                 </div>
               )}
             </div>

@@ -406,6 +406,41 @@ export async function sendNewSignupNotification(
 }
 
 /**
+ * Send daily report status notification email
+ */
+export async function sendDailyReportStatusEmail(
+  to: string,
+  username: string,
+  projectName: string,
+  reportNumber: number,
+  reportDate: string,
+  newStatus: 'APPROVED' | 'REJECTED' | 'SUBMITTED',
+  rejectionReason?: string,
+  rejectionNotes?: string,
+): Promise<boolean> {
+  let subject: string;
+  let body: string;
+
+  switch (newStatus) {
+    case 'SUBMITTED':
+      subject = `Daily Report #${reportNumber} submitted for review — ${projectName}`;
+      body = `Hi ${username},\n\nA daily report has been submitted for your review.\n\nProject: ${projectName}\nReport #${reportNumber}\nDate: ${reportDate}\n\nPlease log in to ForemanOS to review and approve or reject this report.`;
+      break;
+    case 'APPROVED':
+      subject = `Daily Report #${reportNumber} approved — ${projectName}`;
+      body = `Hi ${username},\n\nYour daily report has been approved.\n\nProject: ${projectName}\nReport #${reportNumber}\nDate: ${reportDate}\n\nNo further action is needed.`;
+      break;
+    case 'REJECTED':
+      subject = `Daily Report #${reportNumber} needs revision — ${projectName}`;
+      body = `Hi ${username},\n\nYour daily report has been returned for revision.\n\nProject: ${projectName}\nReport #${reportNumber}\nDate: ${reportDate}\n\nReason: ${rejectionReason || 'Not specified'}${rejectionNotes ? `\n\nNotes: ${rejectionNotes}` : ''}\n\nPlease log in to ForemanOS to review the feedback and re-submit.`;
+      break;
+  }
+
+  const result = await sendEmail({ to, subject, body });
+  return result.success;
+}
+
+/**
  * Send email verification link to new users
  */
 export async function sendEmailVerification(

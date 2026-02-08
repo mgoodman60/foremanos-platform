@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
+import {
   FileText, Plus, Calendar, Sun, Cloud, CloudRain, CloudSnow, Wind,
-  Users, Clock, AlertTriangle, Check, X, ChevronRight, RefreshCw
+  Users, Clock, AlertTriangle, Check, X, ChevronRight, RefreshCw,
+  CheckCircle, XCircle, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -19,6 +20,8 @@ interface DailyReport {
   workPerformed: string | null;
   safetyIncidents: number;
   delayHours: number | null;
+  rejectionReason: string | null;
+  rejectionNotes: string | null;
   createdByUser: { id: string; username: string };
   laborEntries: Array<{ tradeName: string; workerCount: number; regularHours: number }>;
 }
@@ -33,6 +36,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReports();
@@ -56,6 +60,25 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
     }
   };
 
+  const handleInlineAction = async (reportId: string, action: 'approve' | 'reject', e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActionLoading(reportId);
+    try {
+      const res = await fetch(`/api/projects/${projectSlug}/daily-reports/approve-bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportIds: [reportId], action }),
+      });
+      if (!res.ok) throw new Error(`Failed to ${action} report`);
+      toast.success(`Report ${action === 'approve' ? 'approved' : 'rejected'}`);
+      fetchReports();
+    } catch (error) {
+      toast.error(`Failed to ${action} report`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const WeatherIcon = ({ condition }: { condition: string | null }) => {
     switch (condition?.toLowerCase()) {
       case 'sunny': case 'clear': return <Sun className="w-4 h-4 text-yellow-400" />;
@@ -69,14 +92,14 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
 
   const StatusBadge = ({ status }: { status: string }) => {
     const styles: Record<string, string> = {
-      DRAFT: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-      SUBMITTED: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      APPROVED: 'bg-green-500/20 text-green-400 border-green-500/30',
-      REJECTED: 'bg-red-500/20 text-red-400 border-red-500/30',
+      DRAFT: 'bg-gray-100 text-gray-600',
+      SUBMITTED: 'bg-yellow-100 text-yellow-700',
+      APPROVED: 'bg-green-100 text-green-700',
+      REJECTED: 'bg-red-100 text-red-700',
     };
 
     return (
-      <span className={`px-2 py-0.5 text-xs rounded-full border ${styles[status] || styles.DRAFT}`}>
+      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${styles[status] || styles.DRAFT}`}>
         {status}
       </span>
     );
@@ -206,9 +229,48 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
                       {report.workPerformed}
                     </p>
                   )}
+
+                  {/* Rejection details for rejected reports */}
+                  {report.status === 'REJECTED' && (report.rejectionReason || report.rejectionNotes) && (
+                    <div className="mt-2 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                      {report.rejectionReason && (
+                        <p className="text-sm font-medium text-red-400">{report.rejectionReason}</p>
+                      )}
+                      {report.rejectionNotes && (
+                        <p className="text-sm text-red-300/80 mt-1">{report.rejectionNotes}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                
-                <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+
+                <div className="flex items-center gap-2">
+                  {/* Inline approve/reject for SUBMITTED reports */}
+                  {report.status === 'SUBMITTED' && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleInlineAction(report.id, 'approve', e)}
+                        disabled={actionLoading === report.id}
+                        aria-label={`Approve Report #${report.reportNumber}`}
+                        className="p-1.5 rounded-lg text-green-400 hover:bg-green-500/20 transition-colors disabled:opacity-50"
+                      >
+                        {actionLoading === report.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4" />
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => handleInlineAction(report.id, 'reject', e)}
+                        disabled={actionLoading === report.id}
+                        aria-label={`Reject Report #${report.reportNumber}`}
+                        className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+                </div>
               </div>
             </div>
           ))

@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FileText, BarChart3, TrendingUp, Plus, ChevronLeft } from 'lucide-react';
+import { FileText, BarChart3, TrendingUp, Plus, ChevronLeft, ClipboardCheck } from 'lucide-react';
 import DailyReportsList from '@/components/field-ops/DailyReportsList';
 import ProjectHealthWidget from '@/components/field-ops/ProjectHealthWidget';
 import ProgressDetectionPanel from '@/components/daily-reports/ProgressDetectionPanel';
 import ReportAnalyticsDashboard from '@/components/daily-reports/ReportAnalyticsDashboard';
+import ApprovalDashboard from '@/components/daily-reports/ApprovalDashboard';
 
-type TabType = 'reports' | 'analytics' | 'progress';
+type TabType = 'reports' | 'analytics' | 'progress' | 'approval';
 
 export default function DailyReportsPage({ params }: { params: { slug: string } }) {
   const [activeTab, setActiveTab] = useState<TabType>('reports');
@@ -18,6 +19,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
     { id: 'reports' as TabType, label: 'Reports', icon: FileText },
     { id: 'analytics' as TabType, label: 'Analytics', icon: BarChart3 },
     { id: 'progress' as TabType, label: 'Progress Detection', icon: TrendingUp },
+    { id: 'approval' as TabType, label: 'Approval', icon: ClipboardCheck },
   ];
 
   return (
@@ -177,6 +179,10 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === 'approval' && (
+        <ApprovalDashboard projectSlug={params.slug} />
       )}
       </div>
     </div>

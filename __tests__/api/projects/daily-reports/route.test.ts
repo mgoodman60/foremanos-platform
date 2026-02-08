@@ -1,6 +1,48 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// Hoisted mocks for daily-report-permissions
+const mockGetDailyReportRole = vi.hoisted(() => vi.fn());
+const mockCanCreateReport = vi.hoisted(() => vi.fn());
+const mockCanEditReport = vi.hoisted(() => vi.fn());
+const mockCanSubmitReport = vi.hoisted(() => vi.fn());
+const mockCanApproveReport = vi.hoisted(() => vi.fn());
+const mockCanDeleteReport = vi.hoisted(() => vi.fn());
+const mockCanViewReport = vi.hoisted(() => vi.fn());
+const mockIsValidTransition = vi.hoisted(() => vi.fn());
+const mockSanitizeText = vi.hoisted(() => vi.fn());
+
+// Hoisted mocks for rate-limiter
+const mockCheckRateLimit = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/daily-report-permissions', () => ({
+  getDailyReportRole: mockGetDailyReportRole,
+  canCreateReport: mockCanCreateReport,
+  canEditReport: mockCanEditReport,
+  canSubmitReport: mockCanSubmitReport,
+  canApproveReport: mockCanApproveReport,
+  canDeleteReport: mockCanDeleteReport,
+  canViewReport: mockCanViewReport,
+  isValidTransition: mockIsValidTransition,
+  sanitizeText: mockSanitizeText,
+  VALID_STATUS_TRANSITIONS: {
+    DRAFT: ['SUBMITTED'],
+    SUBMITTED: ['APPROVED', 'REJECTED'],
+    APPROVED: [],
+    REJECTED: ['DRAFT'],
+  },
+}));
+
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: mockCheckRateLimit,
+  RATE_LIMITS: {
+    DAILY_REPORT_READ: { max: 60, window: 60000 },
+    DAILY_REPORT_WRITE: { max: 20, window: 60000 },
+  },
+  getRateLimitIdentifier: vi.fn((userId: string) => `user:${userId}`),
+  createRateLimitHeaders: vi.fn(() => ({})),
+}));
+
 // Mock session data
 const mockSession = {
   user: {
@@ -97,6 +139,20 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     vi.clearAllMocks();
     getServerSessionMock.mockResolvedValue(mockSession);
     prismaMock.project.findUnique.mockResolvedValue(mockProject);
+
+    // Default RBAC mocks - ADMIN role has all permissions
+    mockGetDailyReportRole.mockResolvedValue('ADMIN');
+    mockCanCreateReport.mockReturnValue(true);
+    mockCanEditReport.mockReturnValue(true);
+    mockCanSubmitReport.mockReturnValue(true);
+    mockCanApproveReport.mockReturnValue(true);
+    mockCanDeleteReport.mockReturnValue(true);
+    mockCanViewReport.mockReturnValue(true);
+    mockIsValidTransition.mockReturnValue(true);
+    mockSanitizeText.mockImplementation((text: string) => text);
+
+    // Default rate limit mock - success
+    mockCheckRateLimit.mockResolvedValue({ success: true, remaining: 10 });
   });
 
   it('should return 401 when not authenticated', async () => {
@@ -135,12 +191,13 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     expect(data.reports).toHaveLength(1);
     expect(data.reports[0].id).toBe('report-1');
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith({
-      where: { projectId: 'project-1' },
+      where: { projectId: 'project-1', deletedAt: null },
       include: {
         createdByUser: { select: { id: true, username: true } },
         laborEntries: true,
       },
       orderBy: { reportDate: 'desc' },
+      take: 21, // limit + 1 for pagination
     });
   });
 
@@ -157,6 +214,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
+          deletedAt: null,
           reportDate: expect.objectContaining({
             gte: new Date('2024-01-01'),
           }),
@@ -178,6 +236,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
+          deletedAt: null,
           reportDate: expect.objectContaining({
             lte: new Date('2024-01-31'),
           }),
@@ -199,6 +258,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
+          deletedAt: null,
           status: 'SUBMITTED',
         }),
       })
@@ -225,6 +285,20 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
     prismaMock.project.findUnique.mockResolvedValue(mockProject);
     prismaMock.dailyReport.findFirst.mockResolvedValue(null);
     prismaMock.dailyReport.create.mockResolvedValue(mockDailyReport);
+
+    // Default RBAC mocks - ADMIN role has all permissions
+    mockGetDailyReportRole.mockResolvedValue('ADMIN');
+    mockCanCreateReport.mockReturnValue(true);
+    mockCanEditReport.mockReturnValue(true);
+    mockCanSubmitReport.mockReturnValue(true);
+    mockCanApproveReport.mockReturnValue(true);
+    mockCanDeleteReport.mockReturnValue(true);
+    mockCanViewReport.mockReturnValue(true);
+    mockIsValidTransition.mockReturnValue(true);
+    mockSanitizeText.mockImplementation((text: string) => text);
+
+    // Default rate limit mock - success
+    mockCheckRateLimit.mockResolvedValue({ success: true, remaining: 10 });
   });
 
   it('should return 401 when not authenticated', async () => {

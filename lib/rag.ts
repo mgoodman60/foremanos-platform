@@ -1899,6 +1899,51 @@ export async function generateContextWithPhase3(
     logger.error('RAG', 'Error getting window schedule context', error as Error);
   }
 
+  // Add daily report context for field/temporal queries
+  try {
+    const { classifyQueryIntent } = await import('./rag-enhancements');
+    const intent = classifyQueryIntent(query);
+
+    if (intent.type === 'daily_report') {
+      const { searchDailyReportChunks } = await import('./daily-report-indexer');
+      const project = await prisma.project.findUnique({
+        where: { slug: projectSlug },
+        select: { id: true },
+      });
+
+      if (project) {
+        const dailyReportResults = await searchDailyReportChunks(project.id, query, {
+          limit: 10,
+        });
+
+        if (dailyReportResults.length > 0) {
+          prompt += '\n\n=== DAILY REPORT DATA ===\n';
+          prompt += 'The following daily/field report entries are relevant to your query:\n\n';
+
+          for (const chunk of dailyReportResults) {
+            const metadata = chunk.metadata || {};
+            const dateStr = new Date(chunk.reportDate).toLocaleDateString();
+            const reportNum = (metadata.reportNumber as string | number) || '?';
+
+            prompt += `--- Daily Report #${reportNum} (${dateStr}) [${chunk.section}] ---\n`;
+            prompt += `${chunk.content}\n\n`;
+          }
+
+          prompt += '\n📋 DAILY REPORT QUERY GUIDANCE:\n';
+          prompt += '• Reference specific report numbers and dates when citing field data\n';
+          prompt += '• For labor questions, mention trade names, crew counts, and hours\n';
+          prompt += '• For weather questions, include temperature, conditions, and any impact on work\n';
+          prompt += '• For delay questions, cite delay reasons and hours lost\n';
+          prompt += '• For safety questions, note incident counts and any corrective actions\n';
+
+          logger.info('RAG', `Added ${dailyReportResults.length} daily report chunks to context`);
+        }
+      }
+    }
+  } catch (error) {
+    logger.warn('RAG', 'Failed to retrieve daily report chunks', { error });
+  }
+
   // Add scale context for dimension-related queries (Phase A.3)
   if (isScaleQuery(query)) {
     try {

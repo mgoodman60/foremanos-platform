@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { generateAIPhotoDescription } from '@/lib/photo-analyzer';
 
 // POST - Quick capture photo upload (mobile optimized)
 export async function POST(
@@ -44,8 +43,8 @@ export async function POST(
       );
     }
 
-    // Generate AI description in background (don't wait)
-    const aiDescription = await generateAIPhotoDescription(cloud_storage_path);
+    // Default description (analysis is now on-demand via /photos/[photoId]/analyze)
+    const aiDescription = caption || 'Construction progress photo';
 
     // Prepare photo data
     const photoId = `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

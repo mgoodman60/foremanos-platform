@@ -948,6 +948,8 @@ model Project {
   dailyPageLimit                       Int                            @default(100)
   emailOnLimitReached                  Boolean                        @default(true)
   monthlyPageLimit                     Int                            @default(1500)
+  photoRetentionDays                   Int                            @default(7)
+  smsEnabled                           Boolean                        @default(false)
   queueEnabled                         Boolean                        @default(true)
   scheduleAutoUpdateEnabled            Boolean                        @default(false)
   exportSettings                       Json?
@@ -967,6 +969,9 @@ model Project {
   Crew                                 Crew[]
   CustomSymbol                         CustomSymbol[]
   DailyReport                          DailyReport[]
+  DailyReportChunk                     DailyReportChunk[]
+  CrewTemplate                         CrewTemplate[]
+  SMSMapping                           SMSMapping[]
   DetailCallout                        DetailCallout[]
   DimensionAnnotation                  DimensionAnnotation[]
   Document                             Document[]
@@ -1026,6 +1031,7 @@ model Project {
   WeatherPreferences                   WeatherPreferences?
   WeatherSnapshot                      WeatherSnapshot[]
   WeatherThreshold                     WeatherThreshold[]
+  weatherDays                          WeatherDay[]
   WeeklyCostReport                     WeeklyCostReport[]
   WindowScheduleItem                   WindowScheduleItem[]
 
@@ -1291,6 +1297,7 @@ model ScheduleTask {
   tradeInferenceSource     String?
   tradeNeedsClarification  Boolean              @default(false)
   tradeClarificationNote   String?
+  isOutdoorTask            Boolean              @default(false)
   CrewAssignment           CrewAssignment[]
   ResourceAllocation       ResourceAllocation[]
   Schedule                 Schedule             @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
@@ -1732,6 +1739,7 @@ model User {
   totalProcessingCost                                 Float                      @default(0)
   companyLogo                                         String?
   companyLogoUploadedAt                               DateTime?
+  phoneNumber                                         String?
   Account                                             Account[]
   ActivityLog                                         ActivityLog[]
   AdminCorrection                                     AdminCorrection[]
@@ -1786,6 +1794,9 @@ model User {
   WeatherAlert                                        WeatherAlert[]
   WeatherPreferences                                  WeatherPreferences[]
   WeatherThreshold                                    WeatherThreshold[]
+  WeatherDay                                          WeatherDay[]
+  CrewTemplate_createdBy                              CrewTemplate[]             @relation("CrewTemplateCreatedBy")
+  SMSMapping_user                                     SMSMapping[]               @relation("SMSMappingUser")
 }
 
 model UserReportingPattern {
@@ -2230,6 +2241,13 @@ model DailyReport {
   submittedBy       String?
   approvedAt        DateTime?
   approvedBy        String?
+  rejectionReason   String?
+  rejectionNotes    String?
+  deletedAt         DateTime?
+  photos              Json?
+  onedriveExported    Boolean                @default(false)
+  onedriveExportedAt  DateTime?
+  onedriveExportPath  String?
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
   createdByUser     User                   @relation("DailyReportCreatedBy", fields: [createdBy], references: [id])
@@ -2237,12 +2255,15 @@ model DailyReport {
   equipmentEntries  DailyReportEquipment[]
   laborEntries      DailyReportLabor[]
   progressEntries   DailyReportProgress[]
+  weatherDays       WeatherDay[]
+  dailyReportChunks DailyReportChunk[]
 
   @@unique([projectId, reportDate])
   @@index([projectId])
   @@index([status])
   @@index([reportDate])
   @@index([createdBy])
+  @@index([deletedAt])
 }
 
 model DailyReportLabor {
@@ -2312,6 +2333,34 @@ model DailyReportProgress {
   @@index([reportId])
   @@index([scheduleTaskId])
   @@index([budgetItemId])
+}
+
+model WeatherDay {
+  id               String       @id @default(cuid())
+  projectId        String
+  reportId         String?
+  date             DateTime
+  hoursLost        Float
+  reason           String
+  weatherCondition String?
+  temperature      Float?
+  precipitation    Float?
+  windSpeed        Float?
+  flaggedBy        String
+  confirmedAt      DateTime     @default(now())
+  affectedTaskIds  String[]
+  costImpact       Float?
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  dailyReport      DailyReport? @relation(fields: [reportId], references: [id])
+  flaggedByUser    User         @relation(fields: [flaggedBy], references: [id])
+
+  @@unique([projectId, date])
+  @@index([projectId])
+  @@index([date])
+  @@index([flaggedBy])
 }
 
 model RFI {
@@ -3749,4 +3798,54 @@ enum ComplianceStatus {
   NON_COMPLIANT
   PARTIAL
   REQUIRES_REVIEW
+}
+
+model DailyReportChunk {
+  id             String      @id @default(cuid())
+  dailyReportId  String
+  projectId      String
+  content        String
+  chunkIndex     Int
+  section        String
+  reportDate     DateTime
+  metadata       Json?
+  createdAt      DateTime    @default(now())
+  dailyReport    DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  project        Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([dailyReportId])
+  @@index([projectId])
+  @@index([section])
+  @@index([reportDate])
+}
+
+model CrewTemplate {
+  id          String    @id @default(cuid())
+  projectId   String
+  name        String
+  entries     Json
+  createdBy   String
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User      @relation("CrewTemplateCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([projectId])
+  @@index([createdBy])
+}
+
+model SMSMapping {
+  id          String   @id @default(cuid())
+  projectId   String
+  userId      String
+  phoneNumber String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User     @relation("SMSMappingUser", fields: [userId], references: [id])
+
+  @@unique([projectId, phoneNumber])
+  @@index([phoneNumber])
+  @@index([projectId])
 }

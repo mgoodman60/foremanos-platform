@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
 import { syncDailyReportFull } from '@/lib/daily-report-sync-service';
 
 export async function POST(
@@ -15,12 +16,28 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const project = await prisma.project.findUnique({
+      where: { slug: params.slug },
+      select: { id: true },
+    });
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Check membership — SUPERVISOR or ADMIN only for sync
+    const { getDailyReportRole, canApproveReport } = await import('@/lib/daily-report-permissions');
+    const role = await getDailyReportRole(session.user.id, project.id);
+    if (!role || !canApproveReport(role)) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
     const { id } = params;
-    
+
     // Perform full sync
     const result = await syncDailyReportFull(id);
 

@@ -79,10 +79,10 @@ async function applyCorsRules(): Promise<boolean> {
       CORSConfiguration: {
         CORSRules: [
           {
-            AllowedMethods: ['PUT'],
-            AllowedHeaders: ['Content-Type'],
+            AllowedMethods: ['GET', 'PUT', 'HEAD'],
+            AllowedHeaders: ['*'],
             AllowedOrigins: origins,
-            ExposeHeaders: ['ETag'],
+            ExposeHeaders: ['ETag', 'Content-Length', 'Content-Type'],
             MaxAgeSeconds: 3600,
           },
         ],

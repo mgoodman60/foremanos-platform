@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
+import { useState, useEffect, useCallback } from 'react';
+import {
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, Shield,
-  Cloud, Wrench, Clock, Users, ChevronRight, RefreshCw
+  Cloud, Wrench, Users, RefreshCw, CloudRain
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { semanticColors, neutralColors } from '@/lib/design-tokens';
+import WeatherDayWidget from '@/components/daily-reports/WeatherDayWidget';
 
 interface TrendAnalytics {
   delayAnalysis: {
@@ -66,11 +68,7 @@ export default function ReportAnalyticsDashboard({ projectSlug }: ReportAnalytic
   const [equipment, setEquipment] = useState<EquipmentSummary | null>(null);
   const [days, setDays] = useState(30);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [projectSlug, days]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -87,7 +85,11 @@ export default function ReportAnalyticsDashboard({ projectSlug }: ReportAnalytic
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectSlug, days]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   if (loading) {
     return (
@@ -189,6 +191,15 @@ export default function ReportAnalyticsDashboard({ projectSlug }: ReportAnalytic
         )}
       </div>
 
+      {/* Weather Day Tracking */}
+      <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+        <h4 className="text-white font-medium mb-4 flex items-center gap-2">
+          <CloudRain className="w-4 h-4 text-blue-400" />
+          Weather Day Tracking
+        </h4>
+        <WeatherDayWidget projectSlug={projectSlug} />
+      </div>
+
       {/* Delay Analysis */}
       {analytics && analytics.delayAnalysis.topReasons.length > 0 && (
         <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
@@ -234,7 +245,7 @@ export default function ReportAnalyticsDashboard({ projectSlug }: ReportAnalytic
                       cy="32"
                       r="28"
                       fill="none"
-                      stroke="#374151"
+                      stroke={neutralColors.gray[700]}
                       strokeWidth="6"
                     />
                     <circle
@@ -242,7 +253,7 @@ export default function ReportAnalyticsDashboard({ projectSlug }: ReportAnalytic
                       cy="32"
                       r="28"
                       fill="none"
-                      stroke={section.score >= 80 ? '#10B981' : section.score >= 50 ? '#F59E0B' : '#EF4444'}
+                      stroke={section.score >= 80 ? semanticColors.success[500] : section.score >= 50 ? semanticColors.warning[500] : semanticColors.error[500]}
                       strokeWidth="6"
                       strokeDasharray={`${(section.score / 100) * 176} 176`}
                       strokeLinecap="round"

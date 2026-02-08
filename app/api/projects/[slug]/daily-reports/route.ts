@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createScopedLogger } from '@/lib/logger';
+import {
+  getDailyReportRole,
+  canCreateReport,
+  sanitizeText,
+} from '@/lib/daily-report-permissions';
+import {
+  checkRateLimit,
+  RATE_LIMITS,
+  getRateLimitIdentifier,
+  createRateLimitHeaders,
+} from '@/lib/rate-limiter';
+
+const log = createScopedLogger('DAILY_REPORTS_API');
 
 export async function GET(
   request: NextRequest,
@@ -13,6 +27,18 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(
+      getRateLimitIdentifier(session.user.id, null),
+      RATE_LIMITS.DAILY_REPORT_READ
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },
       select: { id: true },
@@ -22,13 +48,24 @@ export async function GET(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
+    // Check membership
+    const role = await getDailyReportRole(session.user.id, project.id);
+    if (!role) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const status = searchParams.get('status');
+    const cursor = searchParams.get('cursor');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
 
-    const where: any = { projectId: project.id };
-    
+    const where: any = {
+      projectId: project.id,
+      deletedAt: null, // Filter out soft-deleted reports
+    };
+
     if (startDate) {
       where.reportDate = { ...where.reportDate, gte: new Date(startDate) };
     }
@@ -46,11 +83,21 @@ export async function GET(
         laborEntries: true,
       },
       orderBy: { reportDate: 'desc' },
+      take: limit + 1, // Fetch one extra to determine if there are more
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
 
-    return NextResponse.json({ reports });
+    const hasMore = reports.length > limit;
+    const results = hasMore ? reports.slice(0, limit) : reports;
+    const nextCursor = hasMore ? results[results.length - 1]?.id : undefined;
+
+    return NextResponse.json({
+      reports: results,
+      nextCursor,
+      hasMore,
+    });
   } catch (error) {
-    console.error('[Daily Reports API] Error:', error);
+    log.error('Failed to fetch daily reports', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch daily reports' },
       { status: 500 }
@@ -68,6 +115,18 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(
+      getRateLimitIdentifier(session.user.id, null),
+      RATE_LIMITS.DAILY_REPORT_WRITE
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },
       select: { id: true },
@@ -75,6 +134,12 @@ export async function POST(
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Check membership and role
+    const role = await getDailyReportRole(session.user.id, project.id);
+    if (!role || !canCreateReport(role)) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -119,14 +184,14 @@ export async function POST(
         humidity,
         precipitation,
         windSpeed,
-        weatherNotes,
-        workPerformed,
-        workPlanned,
-        delaysEncountered,
+        weatherNotes: weatherNotes ? sanitizeText(weatherNotes) : undefined,
+        workPerformed: workPerformed ? sanitizeText(workPerformed) : undefined,
+        workPlanned: workPlanned ? sanitizeText(workPlanned) : undefined,
+        delaysEncountered: delaysEncountered ? sanitizeText(delaysEncountered) : undefined,
         delayHours,
-        delayReason,
+        delayReason: delayReason ? sanitizeText(delayReason) : undefined,
         safetyIncidents: safetyIncidents || 0,
-        safetyNotes,
+        safetyNotes: safetyNotes ? sanitizeText(safetyNotes) : undefined,
         visitors,
         equipmentOnSite,
         materialsReceived,
@@ -151,13 +216,13 @@ export async function POST(
 
     return NextResponse.json({ report });
   } catch (error: any) {
-    console.error('[Daily Reports API] Create error:', error);
     if (error.code === 'P2002') {
       return NextResponse.json(
         { error: 'A report for this date already exists' },
         { status: 400 }
       );
     }
+    log.error('Failed to create daily report', error as Error);
     return NextResponse.json(
       { error: 'Failed to create daily report' },
       { status: 500 }

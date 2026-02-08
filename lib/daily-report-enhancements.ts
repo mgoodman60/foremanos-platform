@@ -7,8 +7,11 @@
  */
 
 import { prisma } from '@/lib/db';
+import { createScopedLogger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+
+const log = createScopedLogger('DAILY_REPORT_ENHANCEMENTS');
 
 let openaiInstance: OpenAI | null = null;
 
@@ -129,7 +132,7 @@ export async function getYesterdayCarryover(projectId: string): Promise<Carryove
         })),
     };
   } catch (error) {
-    console.error('[Carryover] Error:', error);
+    log.error('Failed to get yesterday carryover', error as Error);
     return null;
   }
 }
@@ -368,7 +371,7 @@ export async function getCompletenessTrend(
       };
     });
   } catch (error) {
-    console.error('[Completeness Trend] Error:', error);
+    log.error('Failed to get completeness trend', error as Error);
     return [];
   }
 }
@@ -529,7 +532,7 @@ export async function getTrendAnalytics(
       },
     };
   } catch (error) {
-    console.error('[Trend Analytics] Error:', error);
+    log.error('Failed to get trend analytics', error as Error);
     return {
       delayAnalysis: { byReason: {}, topReasons: [], totalDelayDays: 0 },
       productivityTrend: [],
@@ -626,7 +629,7 @@ Append new information to existing content where appropriate. Return JSON format
       structured,
     };
   } catch (error) {
-    console.error('[Voice Transcription] Error:', error);
+    log.error('Voice transcription failed', error as Error);
     return {
       transcription: '',
       structured: {},
@@ -744,7 +747,7 @@ export async function getEquipmentSummary(
       utilizationRate,
     };
   } catch (error) {
-    console.error('[Equipment Summary] Error:', error);
+    log.error('Failed to get equipment summary', error as Error);
     return {
       totalEquipment: 0,
       activeCount: 0,
@@ -753,5 +756,134 @@ export async function getEquipmentSummary(
       maintenanceAlerts: [],
       utilizationRate: 0,
     };
+  }
+}
+
+// ============================================
+// SMART DEFAULTS (PHASE 5)
+// ============================================
+
+export interface SmartDefaults {
+  crewTemplates: Array<{ id: string; name: string; entries: any[]; lastUsedAt: Date | null }>;
+  yesterdayReport: { laborEntries: any[]; equipmentEntries: any[]; workPlanned: string | null } | null;
+  recurringDelays: Array<{ reason: string; consecutiveDays: number }>;
+  lastUsedRates: Record<string, number>;
+}
+
+/**
+ * Get smart defaults for daily report creation
+ */
+export async function getSmartDefaults(projectId: string): Promise<SmartDefaults> {
+  try {
+    // 1. Fetch crew templates (limit 10, sorted by lastUsedAt desc)
+    const crewTemplates = await prisma.crewTemplate.findMany({
+      where: { projectId },
+      orderBy: { lastUsedAt: 'desc' },
+      take: 10,
+      select: { id: true, name: true, entries: true, lastUsedAt: true },
+    });
+
+    // 2. Fetch yesterday's report
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    const yesterdayEnd = new Date(yesterday);
+    yesterdayEnd.setHours(23, 59, 59, 999);
+
+    const yesterdayReport = await prisma.dailyReport.findFirst({
+      where: {
+        projectId,
+        reportDate: { gte: yesterday, lte: yesterdayEnd },
+        deletedAt: null,
+      },
+      include: { laborEntries: true, equipmentEntries: true },
+      orderBy: { reportDate: 'desc' },
+    });
+
+    // 3. Get recurring delays
+    const recurringDelays = await getRecurringDelays(projectId);
+
+    // 4. Build lastUsedRates from most recent report's labor entries
+    const lastUsedRates: Record<string, number> = {};
+    const recentReport = await prisma.dailyReport.findFirst({
+      where: { projectId, deletedAt: null },
+      include: { laborEntries: true },
+      orderBy: { reportDate: 'desc' },
+    });
+    if (recentReport) {
+      for (const entry of recentReport.laborEntries) {
+        if (entry.tradeName && entry.hourlyRate) {
+          lastUsedRates[entry.tradeName] = entry.hourlyRate;
+        }
+      }
+    }
+
+    return {
+      crewTemplates: crewTemplates.map(t => ({
+        id: t.id,
+        name: t.name,
+        entries: t.entries as any[],
+        lastUsedAt: t.lastUsedAt,
+      })),
+      yesterdayReport: yesterdayReport ? {
+        laborEntries: yesterdayReport.laborEntries,
+        equipmentEntries: yesterdayReport.equipmentEntries,
+        workPlanned: yesterdayReport.workPlanned,
+      } : null,
+      recurringDelays,
+      lastUsedRates,
+    };
+  } catch (error) {
+    log.error('Failed to get smart defaults', error as Error);
+    return {
+      crewTemplates: [],
+      yesterdayReport: null,
+      recurringDelays: [],
+      lastUsedRates: {},
+    };
+  }
+}
+
+/**
+ * Get recurring delays from recent reports
+ */
+export async function getRecurringDelays(
+  projectId: string,
+  lookbackDays: number = 5
+): Promise<Array<{ reason: string; consecutiveDays: number }>> {
+  try {
+    const reports = await prisma.dailyReport.findMany({
+      where: {
+        projectId,
+        deletedAt: null,
+        delaysEncountered: { not: null },
+      },
+      orderBy: { reportDate: 'desc' },
+      take: lookbackDays,
+      select: { reportDate: true, delaysEncountered: true, delayReason: true },
+    });
+
+    if (reports.length < 3) return [];
+
+    // Count consecutive appearances of each delay reason
+    const reasonCounts: Record<string, number> = {};
+    for (const report of reports) {
+      const reason = (report.delayReason || report.delaysEncountered || '').toLowerCase().trim();
+      if (!reason) continue;
+
+      // Simple: count consecutive from most recent
+      if (reasonCounts[reason] === undefined) {
+        reasonCounts[reason] = 1;
+      } else {
+        reasonCounts[reason]++;
+      }
+    }
+
+    return Object.entries(reasonCounts)
+      .filter(([, count]) => count >= 3)
+      .map(([reason, consecutiveDays]) => ({ reason, consecutiveDays }));
+  } catch (error) {
+    log.error('Failed to get recurring delays', error as Error);
+    return [];
   }
 }

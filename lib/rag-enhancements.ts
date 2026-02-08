@@ -211,7 +211,7 @@ export const MEP_ENTITIES = {
  * Identify query type to determine retrieval strategy
  */
 export function classifyQueryIntent(query: string): {
-  type: 'requirement' | 'measurement' | 'counting' | 'location' | 'room_specific' | 'mep' | 'takeoff' | 'general';
+  type: 'requirement' | 'measurement' | 'counting' | 'location' | 'room_specific' | 'mep' | 'takeoff' | 'daily_report' | 'general';
   requiresNotes: boolean;
   requiresCrossRef: boolean;
   requiresRegulatory: boolean;
@@ -221,7 +221,46 @@ export function classifyQueryIntent(query: string): {
   takeoffScope?: string;
 } {
   const queryLower = query.toLowerCase();
-  
+
+  // Daily report / field report queries
+  const dailyReportPatterns = [
+    'what did we do',
+    'what happened',
+    'work performed',
+    'work done',
+    'what work',
+    'crew size',
+    'how many workers',
+    'labor on',
+    'weather on',
+    'weather last',
+    'weather conditions on',
+    'delays on',
+    'what delays',
+    'delay reason',
+    'equipment on site',
+    'equipment used',
+    'safety incident',
+    'safety on',
+    'daily report',
+    'field report',
+    'yesterday',
+    'last monday',
+    'last tuesday',
+    'last wednesday',
+    'last thursday',
+    'last friday',
+    'last saturday',
+    'last sunday',
+    'last week',
+    'this week',
+  ];
+
+  // Also check for date patterns like "on 2/5", "on january 5", "on the 5th"
+  const datePatterns = /\b(?:on|for|from)\s+(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2}|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?|the\s+\d{1,2}(?:st|nd|rd|th))\b/i;
+
+  const isDailyReport = dailyReportPatterns.some(p => queryLower.includes(p)) || datePatterns.test(query);
+
   // Takeoff queries (material takeoffs, estimates, quantities)
   const takeoffPatterns = [
     'takeoff',
@@ -389,12 +428,14 @@ export function classifyQueryIntent(query: string): {
   const needsCrossRef = crossRefIndicators.some(p => queryLower.includes(p)) || isRoomSpecific || isMEP;
   
   // Determine primary type
-  let type: 'requirement' | 'measurement' | 'counting' | 'location' | 'room_specific' | 'mep' | 'takeoff' | 'general' = 'general';
-  
+  let type: 'requirement' | 'measurement' | 'counting' | 'location' | 'room_specific' | 'mep' | 'takeoff' | 'daily_report' | 'general' = 'general';
+
   if (isTakeoff) {
     type = 'takeoff';
   } else if (isMEP) {
     type = 'mep';
+  } else if (isDailyReport) {
+    type = 'daily_report';
   } else if (isRoomSpecific) {
     type = 'room_specific';
   } else if (isRequirement) {
@@ -406,11 +447,11 @@ export function classifyQueryIntent(query: string): {
   } else if (isLocation) {
     type = 'location';
   }
-  
+
   return {
     type,
-    requiresNotes: isRequirement || isMEP || isTakeoff, // Takeoffs also need notes and schedules
-    requiresCrossRef: needsCrossRef || isTakeoff, // Takeoffs always need cross-refs
+    requiresNotes: type === 'daily_report' ? false : (isRequirement || isMEP || isTakeoff),
+    requiresCrossRef: type === 'daily_report' ? false : (needsCrossRef || isTakeoff),
     requiresRegulatory: hasRegulatoryRef,
     mepTrade,
     roomNumber,

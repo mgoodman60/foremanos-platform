@@ -296,8 +296,19 @@ export async function fetchCurrentWeather(lat: number, lon: number): Promise<Wea
 
 // Get weather for a specific project
 export async function getProjectWeather(projectSlug: string): Promise<WeatherForecast[]> {
-  // Default to a reasonable location if project location is not set
-  return getWeatherForecast(38.2085, -85.7585, 7);
+  try {
+    const { prisma } = await import('@/lib/db');
+    const project = await prisma.project.findUnique({
+      where: { slug: projectSlug },
+      select: { locationLat: true, locationLon: true },
+    });
+
+    const lat = project?.locationLat ?? 38.2085; // Default: Louisville, KY
+    const lon = project?.locationLon ?? -85.7585;
+    return getWeatherForecast(lat, lon, 7);
+  } catch {
+    return getWeatherForecast(38.2085, -85.7585, 7);
+  }
 }
 
 // Auto-populate daily report weather

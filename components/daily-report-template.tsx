@@ -9,20 +9,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Calendar, 
-  Users, 
-  CloudRain, 
+import {
+  Calendar,
+  Users,
+  CloudRain,
   AlertTriangle,
   CheckCircle2,
   Clock,
   Send,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  ClipboardCopy
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { createScopedLogger } from '@/lib/logger';
 import VoiceRecorder from '@/components/daily-reports/VoiceRecorder';
+import CrewTemplateSelector from '@/components/daily-reports/CrewTemplateSelector';
+
+const log = createScopedLogger('DAILY_REPORT_TEMPLATE');
 
 interface Task {
   id: string;
@@ -126,10 +131,45 @@ export default function DailyReportTemplate({
         }
       }
     } catch (error) {
-      console.error('Error fetching carryover:', error);
+      log.error('Failed to fetch carryover', error as Error);
     } finally {
       setLoadingCarryover(false);
     }
+  };
+
+  // Explicit "Same as Yesterday" — fetch and fill all fields
+  const handleSameAsYesterday = async () => {
+    setLoadingCarryover(true);
+    try {
+      const response = await fetch(`/api/projects/${projectSlug}/daily-reports/carryover`);
+      if (!response.ok) {
+        toast.error('No previous report found');
+        return;
+      }
+      const data = await response.json();
+      if (!data.carryover) {
+        toast.error('No previous report found');
+        return;
+      }
+      const c = data.carryover;
+      if (c.crewSize) setCrewSize(c.crewSize);
+      if (c.weatherCondition) setWeatherCondition(c.weatherCondition);
+      if (c.workPerformed) setWorkPerformed(c.workPerformed);
+      if (c.workPlanned) setTomorrowPlan(c.workPlanned);
+      if (c.notes) setNotes(c.notes);
+      if (c.delays && Array.isArray(c.delays)) setDelays(c.delays);
+      toast.success('Pre-filled from yesterday\'s report');
+    } catch (error) {
+      toast.error('Failed to load yesterday\'s report');
+    } finally {
+      setLoadingCarryover(false);
+    }
+  };
+
+  // Handle crew template selection
+  const handleCrewTemplateSelect = (entries: Array<{ tradeName: string; workerCount: number; hourlyRate?: number }>) => {
+    const totalWorkers = entries.reduce((sum, e) => sum + e.workerCount, 0);
+    setCrewSize(totalWorkers);
   };
 
   // Handle voice transcription results
@@ -181,7 +221,7 @@ export default function DailyReportTemplate({
         setTodayTasks(data.tasks || []);
       }
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      log.error('Failed to fetch today tasks', error as Error);
     }
   };
 
@@ -196,7 +236,7 @@ export default function DailyReportTemplate({
         }
       }
     } catch (error) {
-      console.error('Error fetching weather:', error);
+      log.error('Failed to fetch current weather', error as Error);
     }
   };
 
@@ -346,6 +386,32 @@ export default function DailyReportTemplate({
                 onChange={(e) => setCrewSize(parseInt(e.target.value) || 0)}
                 placeholder="Enter number of workers"
                 className="bg-dark-surface border-gray-700 text-gray-100 mt-1"
+              />
+            </div>
+          </div>
+
+          {/* Same as Yesterday & Crew Template */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleSameAsYesterday}
+              disabled={loadingCarryover}
+              className="border-gray-700 text-gray-300 hover:bg-dark-surface"
+            >
+              {loadingCarryover ? (
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <ClipboardCopy className="w-4 h-4 mr-2" />
+              )}
+              Same as Yesterday
+            </Button>
+            <div className="flex-1 min-w-[200px]">
+              <CrewTemplateSelector
+                projectSlug={projectSlug}
+                onSelect={handleCrewTemplateSelect}
+                currentEntries={crewSize > 0 ? [{ tradeName: 'General', workerCount: crewSize }] : []}
               />
             </div>
           </div>

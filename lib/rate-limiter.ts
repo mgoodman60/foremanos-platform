@@ -59,6 +59,16 @@ export const RATE_LIMITS = {
     maxRequests: 5,       // 5 login attempts per 5 minutes
     windowSeconds: 300,
   },
+  // Daily report write operations
+  DAILY_REPORT_WRITE: {
+    maxRequests: 10,      // 10 write ops per minute
+    windowSeconds: 60,
+  },
+  // Daily report read operations
+  DAILY_REPORT_READ: {
+    maxRequests: 60,      // 60 reads per minute
+    windowSeconds: 60,
+  },
 } as const;
 
 /**

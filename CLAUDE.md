@@ -80,7 +80,7 @@ app/api/          # 389 API routes organized by feature domain
 lib/              # 213 service modules (RAG, S3, Stripe, auth, etc.)
 components/       # 299 React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (163 test files: 133 lib + 24 API + 3 smoke + 1 hooks)
+__tests__/        # Vitest tests (178 test files: 145 lib + 26 API + 3 smoke + 1 hooks + 3 coverage gaps)
 e2e/              # Playwright E2E tests (23 spec files)
 .claude/agents/   # 24 custom Claude Code agents
 .claude/skills/   # 13 project slash commands + 24 installed skills (see below)
@@ -119,6 +119,13 @@ e2e/              # Playwright E2E tests (23 spec files)
 | `lib/logger.ts` | Structured logging utility with context and metadata |
 | `lib/intelligence-orchestrator.ts` | Phase A/B/C intelligence extraction orchestration |
 | `lib/schedule-extractor-ai.ts` | AI-powered schedule/Gantt chart extraction |
+| `lib/daily-report-permissions.ts` | Role-based access control for daily reports (VIEWER, REPORTER, SUPERVISOR, ADMIN) |
+| `lib/weather-day-tracker.ts` | Weather day tracking with schedule push-out for outdoor tasks |
+| `lib/daily-report-onedrive-sync.ts` | Auto-upload to OneDrive on report approval (PDF + DOCX + Photos) |
+| `lib/photo-retention-service.ts` | 7-day tiered retention with OneDrive archival |
+| `lib/daily-report-indexer.ts` | RAG chunking/indexing for daily reports |
+| `lib/sms-daily-report-service.ts` | SMS-based daily log entry via Twilio |
+| `lib/crew-templates-smart-defaults.ts` | Reusable crew templates with smart defaults |
 
 ### Type Helper Files
 
@@ -161,9 +168,16 @@ Key model groups in `prisma/schema.prisma`:
 - **Budget**: ProjectBudget, BudgetItem, Invoice, ChangeOrder, CostAlert
 - **Schedule**: Schedule, ScheduleTask, Milestone, LookAheadSchedule
 - **MEP**: MEPSubmittal, MEPEquipment, MEPSchedule
-- **Field Ops**: DailyReport, FieldPhoto, PunchList, RFI
+- **Field Ops**: DailyReport, FieldPhoto, PunchList, RFI, WeatherDay, CrewTemplate, SMSMapping, DailyReportChunk
 
 **Required Fields**: `Document.projectId` and `User.email` are required (non-nullable).
+
+**Daily Report Models**:
+- `DailyReport` — Now includes soft delete (`deletedAt`), rejection fields, OneDrive sync fields, photos JSON
+- `DailyReportChunk` — RAG chunks for daily report search
+- `WeatherDay` — Weather day ledger with schedule impact tracking
+- `CrewTemplate` — Reusable crew compositions with smart defaults
+- `SMSMapping` — Phone-to-user mapping for SMS entry
 
 ### External Services
 
@@ -176,17 +190,70 @@ Key model groups in `prisma/schema.prisma`:
 | Stripe | No | Features disabled |
 | OneDrive | No | Upload disabled |
 | Resend | No | Email disabled |
+| Twilio | No | SMS entry disabled |
+
+### Daily Report Feature Architecture
+
+**Phases 1-6A: Complete Field Operations Workflow**
+
+ForemanOS includes a comprehensive daily report system with enterprise-grade permissions, archival, search, and mobile entry capabilities.
+
+**Core Features**:
+- **RBAC (Phase 1)**: 4-role hierarchy (VIEWER, REPORTER, SUPERVISOR, ADMIN) with status-based permissions
+  - Status state machine: DRAFT → SUBMITTED → APPROVED/REJECTED
+  - Soft delete with audit trail
+  - XSS sanitization for user input
+- **Weather Day Tracking (Phase 2)**: Ledger system with automatic schedule push-out for outdoor tasks
+  - Rain/snow/wind delays tracked per project
+  - Schedule integration for critical path impact
+- **OneDrive Archival (Phase 3)**: Auto-upload on approval
+  - PDF + DOCX report generation
+  - Photo bundling with metadata
+  - Tiered retention: thumbnails forever, full-res deleted after OneDrive sync
+- **RAG Search (Phase 4)**: Daily reports indexed for chat queries
+  - Chunking strategy: summary + sections + crew + weather
+  - Query routing: "yesterday's progress" → DailyReportChunk
+- **SMS Entry (Phase 5)**: Text-based log submission via Twilio
+  - Phone-to-user mapping (SMSMapping model)
+  - Structured parsing: crew, hours, notes, weather
+  - Smart defaults from crew templates
+- **Crew Templates (Phase 5)**: Reusable crew compositions
+  - Trade-specific defaults
+  - Auto-populate from recent reports
+- **On-Demand Photo Analysis (Phase 6)**: Haiku default, Opus on request
+  - Safety/progress/quality checks
+  - Async analysis with status tracking
 
 ## Testing
 
-- **Vitest**: 163 test files in `__tests__/` (133 lib + 24 API + 3 smoke + 1 hooks)
+- **Vitest**: 178 test files, 7527 tests total
+  - 145 lib tests (`__tests__/lib/`)
+  - 26 API tests (`__tests__/api/`)
+  - 3 smoke tests (`__tests__/smoke/`)
+  - 1 hooks test (`__tests__/hooks/`)
+  - 3 coverage gap tests
 - **Playwright**: 23 E2E spec files in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 - **Comprehensive lib coverage**: All major lib modules have dedicated test files
 
 ### Test Coverage
 
-133 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+145 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+
+**Daily Report Test Files** (Phases 1-6A):
+| File | Coverage | Tests |
+|------|----------|-------|
+| `__tests__/lib/daily-report-permissions.test.ts` | Role-based permissions, status transitions, sanitization | Phase 1 |
+| `__tests__/lib/weather-day-tracker.test.ts` | Weather day CRUD, schedule push-out | Phase 2 |
+| `__tests__/lib/daily-report-onedrive-sync.test.ts` | OneDrive upload orchestration | Phase 3 |
+| `__tests__/lib/photo-retention-service.test.ts` | Photo retention, tiered cleanup | Phase 3 |
+| `__tests__/lib/daily-report-indexer.test.ts` | Report chunking, RAG indexing | Phase 4 |
+| `__tests__/lib/rag-enhancements-daily-report.test.ts` | Query routing for reports | Phase 4 |
+| `__tests__/lib/crew-templates-smart-defaults.test.ts` | Crew templates, smart defaults | Phase 5 |
+| `__tests__/lib/sms-daily-report-service.test.ts` | SMS parsing, phone lookup | Phase 5 |
+| `__tests__/lib/daily-report-coverage-gaps.test.ts` | Coverage gap scenarios | Phase 6A |
+| `__tests__/api/projects/daily-reports/route.test.ts` | Daily report API CRUD (updated for RBAC) | Updated |
+| `__tests__/api/projects/daily-reports/[id]/route.test.ts` | Single report operations (updated for RBAC) | Updated |
 
 ### API Test Suites
 | Directory | Coverage |
@@ -196,6 +263,7 @@ Key model groups in `prisma/schema.prisma`:
 | `__tests__/api/documents/` | Document CRUD operations |
 | `__tests__/api/projects/` | Project management endpoints |
 | `__tests__/api/stripe/` | Stripe webhook and checkout |
+| `__tests__/api/projects/daily-reports/` | Daily report CRUD with RBAC enforcement |
 
 ### Smoke Tests
 | File | Coverage |
@@ -434,6 +502,7 @@ Defined in `lib/rate-limiter.ts`:
 - UPLOAD: 10 uploads/minute
 - API: 60 requests/minute
 - AUTH: 5 login attempts/5 minutes
+- DAILY_REPORT: 30 submissions/hour (SMS and web)
 
 ### Subscription Tiers
 Six tiers (Free → Enterprise) with query limits and model access configured in Stripe price IDs. Tier enforcement via `getEffectiveModel()` in `lib/stripe.ts` automatically downgrades models based on subscription level. Model constants centralized in `lib/model-config.ts`.
@@ -487,6 +556,8 @@ Optional:
 - `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_SECRET` - OneDrive integration
 - `ONEDRIVE_TENANT_ID`, `ONEDRIVE_REDIRECT_URI` - OneDrive OAuth
 - `RESEND_API_KEY` - Email service
+- `TWILIO_AUTH_TOKEN` - SMS daily report entry
+- `TWILIO_WEBHOOK_URL` - Twilio webhook endpoint (optional, defaults to `/api/webhooks/twilio`)
 
 **Note:** See `S3_SETUP_GUIDE.md` for comprehensive Cloudflare R2 (recommended) or AWS S3 bucket configuration. R2 offers zero egress fees and simpler setup without IAM policies or CORS configuration.
 
