@@ -283,7 +283,7 @@ describe('Document Processor - PDF Processing', () => {
         where: { id: 'doc-1' },
         data: expect.objectContaining({
           queueStatus: 'queued',
-          pagesProcessed: 0,
+          pagesProcessed: 25,
           processorType: 'claude-haiku-ocr',
         }),
       })
