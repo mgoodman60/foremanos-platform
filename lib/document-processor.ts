@@ -317,10 +317,10 @@ async function processWithVision(
       logger.info('PROCESS', `Large document detected, using queue system`, { pages, classification: processorType });
       
       // Import queue functions dynamically to avoid circular dependencies
-      const { queueDocumentForProcessing, processQueuedDocument } = await import('./document-processing-queue');
-      
+      const { queueDocumentForProcessing } = await import('./document-processing-queue');
+
       await queueDocumentForProcessing(documentId, pages, 5, processorType); // 5 pages per batch with classification
-      
+
       // Mark as queued (not completed yet!)
       await prisma.document.update({
         where: { id: documentId },
@@ -330,18 +330,11 @@ async function processWithVision(
           processorType, // Store processor type for reference
         },
       });
-      
-      // Process the queue (awaited so it stays within waitUntil promise chain)
-      logger.info('PROCESS', `Starting queue processing for document ${documentId}`);
-      try {
-        await processQueuedDocument(documentId);
-      } catch (err: any) {
-        logger.error('PROCESS', `Queue processing failed for ${documentId}`, err);
-        await prisma.document.update({
-          where: { id: documentId },
-          data: { queueStatus: 'failed', lastProcessingError: err?.message || 'Queue processing failed' },
-        }).catch(() => {}); // Don't throw if status update also fails
-      }
+
+      // Don't process inline — the cron job (/api/admin/process-queue) picks up
+      // queued documents every 5 minutes with a 300s timeout, which is far more
+      // reliable than trying to process inside waitUntil() with a 60s function timeout.
+      logger.info('PROCESS', `Document ${documentId} queued for cron processing`, { pages, batches: Math.ceil(pages / 5) });
       
       // Return 0 - actual values will be updated as queue processes
       return { pages: 0, cost: 0 };

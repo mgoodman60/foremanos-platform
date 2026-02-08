@@ -488,8 +488,13 @@ export async function processQueuedDocument(
         data: { updatedAt: new Date() },
       });
       logger.info('PROCESS_QUEUE', `Heartbeat for ${documentId}`, { elapsed: Math.round((Date.now() - startTime) / 1000) });
-    } catch {
+    } catch (heartbeatError) {
       // Non-fatal: heartbeat failure shouldn't stop processing
+      logger.warn('PROCESS_QUEUE', 'Heartbeat update failed', {
+        documentId,
+        error: (heartbeatError as Error).message,
+        elapsed: Math.round((Date.now() - startTime) / 1000),
+      });
     }
   }, heartbeatIntervalMs);
 
@@ -512,7 +517,7 @@ export async function processQueuedDocument(
       batchRanges: batchRanges.map(b => `${b.startPage}-${b.endPage}`),
     });
 
-    // Create task functions for each batch
+    // Create task functions for each batch, with incremental progress updates
     const batchTasks = batchRanges.map((range) => {
       return async (): Promise<{ batchIndex: number; result: BatchResult }> => {
         // Check timeout before starting each batch
@@ -527,6 +532,34 @@ export async function processQueuedDocument(
           processorType,
           pdfBuffer
         );
+
+        // Incremental progress update: write pagesProcessed to DB as each batch completes
+        // This prevents the UI from showing "Scanning 0 pages" during long concurrent runs
+        if (result.success && result.pagesProcessed > 0) {
+          try {
+            await prisma.$executeRawUnsafe(
+              `UPDATE "ProcessingQueue" SET "pagesProcessed" = "pagesProcessed" + $1, "updatedAt" = NOW() WHERE id = $2`,
+              result.pagesProcessed,
+              entry.id
+            );
+            await prisma.document.update({
+              where: { id: documentId },
+              data: { pagesProcessed: { increment: result.pagesProcessed } },
+            });
+            logger.info('PROCESS_QUEUE', `Batch ${range.batchIndex + 1} progress saved`, {
+              documentId,
+              batchPages: result.pagesProcessed,
+              pageRange: `${range.startPage}-${range.endPage}`,
+            });
+          } catch (progressError) {
+            logger.warn('PROCESS_QUEUE', 'Incremental progress update failed', {
+              documentId,
+              batchIndex: range.batchIndex,
+              error: (progressError as Error).message,
+            });
+          }
+        }
+
         return { batchIndex: range.batchIndex, result };
       };
     });

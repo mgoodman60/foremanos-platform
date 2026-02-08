@@ -188,8 +188,9 @@ function isArchitecturalPlan(fileName: string): boolean {
     /\bmechanical\b/i,
     /\belectrical\b/i,
     /\bplumbing\b/i,
+    /\bconformance\b/i,
   ];
-  
+
   return planPatterns.some(pattern => pattern.test(fileName));
 }
 

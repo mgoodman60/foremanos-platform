@@ -163,7 +163,7 @@ async function callClaudeOpusVision(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 180000); // 180s - Opus is slow but thorough on construction drawings
+  const timeout = setTimeout(() => controller.abort(), 90000); // 90s - reduced from 180s to limit stall time per page
 
   try {
     // Detect content type - PDF or image
@@ -269,7 +269,7 @@ async function callClaudeOpusVision(
 
     // Don't retry on timeout — immediately fall through to next provider
     if (error.name === 'AbortError') {
-      logger.info('VISION_API', `${config.displayName}: timeout after 180s, switching provider`);
+      logger.info('VISION_API', `${config.displayName}: timeout after 90s, switching provider`);
       return {
         success: false,
         content: '',
@@ -318,7 +318,7 @@ async function callClaudeSonnetVision(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60s for construction PDFs
+  const timeout = setTimeout(() => controller.abort(), 45000); // 45s - reduced from 60s to limit stall time per page
 
   try {
     const requestBody = JSON.stringify({
@@ -392,7 +392,7 @@ async function callClaudeSonnetVision(
 
     // Don't retry on timeout — immediately fall through to next provider
     if (error.name === 'AbortError') {
-      logger.info('VISION_API', `${config.displayName}: timeout after 60s, switching provider`);
+      logger.info('VISION_API', `${config.displayName}: timeout after 45s, switching provider`);
       return {
         success: false,
         content: '',

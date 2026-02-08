@@ -691,8 +691,8 @@ describe('Document Processor - Error Handling', () => {
     );
   });
 
-  // C6: Fire-and-forget error handling for queued documents
-  it('should update document status to failed when queue processing fails (C6)', async () => {
+  // Large documents are queued for cron processing — processQueuedDocument is NOT called inline
+  it('should queue large documents without calling processQueuedDocument inline', async () => {
     const pdfBuffer = await createSimplePDF(25);
     const mockDoc = createMockDocument({ fileName: 'large-plan.pdf' });
 
@@ -711,25 +711,23 @@ describe('Document Processor - Error Handling', () => {
     mockGetPdfPageCount.mockResolvedValue(25);
     mockPrisma.document.update.mockResolvedValue(mockDoc);
 
-    // Make processQueuedDocument throw
-    const { processQueuedDocument } = await import('@/lib/document-processing-queue');
-    vi.mocked(processQueuedDocument).mockRejectedValue(new Error('Queue crash'));
+    const { queueDocumentForProcessing, processQueuedDocument } = await import('@/lib/document-processing-queue');
 
     await processDocument('doc-1');
 
-    // Wait for the async catch handler to execute
-    await new Promise(resolve => setTimeout(resolve, 50));
+    // Verify document was queued
+    expect(queueDocumentForProcessing).toHaveBeenCalledWith('doc-1', 25, 5, 'vision-ai');
 
-    // Verify processQueuedDocument was called
-    expect(processQueuedDocument).toHaveBeenCalledWith('doc-1');
+    // Verify processQueuedDocument was NOT called inline (cron handles it)
+    expect(processQueuedDocument).not.toHaveBeenCalled();
 
-    // Verify document was updated with failed status in the catch handler
+    // Verify document status set to queued
     expect(mockPrisma.document.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'doc-1' },
         data: expect.objectContaining({
-          queueStatus: 'failed',
-          lastProcessingError: 'Queue crash',
+          queueStatus: 'queued',
+          pagesProcessed: 0,
         }),
       })
     );

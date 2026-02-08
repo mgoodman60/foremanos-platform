@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { processNextQueuedBatch } from '@/lib/document-processing-queue';
+import { processQueuedDocument } from '@/lib/document-processing-queue';
 import { recoverAllOrphanedDocuments } from '@/lib/orphaned-document-recovery';
 import { prisma } from '@/lib/db';
 import { ProcessingQueueStatus } from '@prisma/client';
@@ -10,6 +10,94 @@ import { logger } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes
 
+const STALE_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes — reduced from 8 to recover faster
+
+/**
+ * Reset stale documents and queue entries stuck in 'processing' state.
+ * Returns count of reset documents.
+ */
+async function resetStaleEntries(): Promise<number> {
+  const staleThreshold = new Date(Date.now() - STALE_THRESHOLD_MS);
+  let resetCount = 0;
+
+  // Reset stale Document records
+  const staleReset = await prisma.document.updateMany({
+    where: {
+      queueStatus: 'processing',
+      processed: false,
+      updatedAt: { lt: staleThreshold },
+    },
+    data: { queueStatus: 'queued' },
+  });
+  resetCount += staleReset.count;
+  if (staleReset.count > 0) {
+    logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
+  }
+
+  // Reset stale ProcessingQueue entries to resume from where they left off
+  const queueReset = await prisma.processingQueue.updateMany({
+    where: {
+      status: ProcessingQueueStatus.processing,
+      updatedAt: { lt: staleThreshold },
+    },
+    data: {
+      status: ProcessingQueueStatus.queued,
+      updatedAt: new Date(),
+    },
+  });
+  if (queueReset.count > 0) {
+    logger.info('PROCESS_QUEUE', `Reset ${queueReset.count} stale queue entries`);
+  }
+
+  return resetCount;
+}
+
+/**
+ * Process all queued documents using concurrent batch dispatch.
+ * Returns total documents processed.
+ */
+async function processQueuedDocuments(): Promise<number> {
+  // Find all queued documents (not already processing)
+  const queuedEntries = await prisma.processingQueue.findMany({
+    where: {
+      status: ProcessingQueueStatus.queued,
+    },
+    orderBy: { createdAt: 'asc' },
+    take: 5, // Process up to 5 documents per cron invocation
+    select: { documentId: true, id: true, currentBatch: true, totalBatches: true },
+  });
+
+  // Filter to entries with pending batches
+  const pendingEntries = queuedEntries.filter(e => e.currentBatch < e.totalBatches);
+
+  if (pendingEntries.length === 0) {
+    logger.info('PROCESS_QUEUE', 'No documents in queue');
+    return 0;
+  }
+
+  logger.info('PROCESS_QUEUE', `Processing ${pendingEntries.length} queued document(s)`, {
+    documentIds: pendingEntries.map(e => e.documentId),
+  });
+
+  let processed = 0;
+
+  // Process documents sequentially (each one uses concurrent batches internally)
+  // Sequential across documents prevents overloading the vision API
+  for (const entry of pendingEntries) {
+    try {
+      // processQueuedDocument uses concurrent batch dispatch (3 at a time)
+      // with a 270s max duration and built-in heartbeat
+      await processQueuedDocument(entry.documentId);
+      processed++;
+    } catch (error) {
+      logger.error('PROCESS_QUEUE', `Failed to process document ${entry.documentId}`, error as Error);
+      // Continue with next document
+    }
+  }
+
+  return processed;
+}
+
 /**
  * Admin endpoint to manually trigger queue processing
  * Can be called by cron job or manually
@@ -17,14 +105,14 @@ export const maxDuration = 300; // 5 minutes
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     // Allow admin users or check for internal cron secret
     const { searchParams } = new URL(request.url);
     const cronSecret = searchParams.get('secret');
-    
+
     const isAdmin = session?.user?.role === 'admin';
     const isValidCron = cronSecret === process.env.CRON_SECRET;
-    
+
     if (!isAdmin && !isValidCron) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -41,54 +129,20 @@ export async function POST(request: Request) {
       logger.error('PROCESS_QUEUE', 'Orphan recovery error (non-blocking)', recoveryError as Error);
     }
 
-    // Reset stale 'processing' documents (stuck for >8 min)
-    // Reduced from 30 min to align with concurrent batch processing recovery
+    // Reset stale entries
     try {
-      const eightMinutesAgo = new Date(Date.now() - 8 * 60 * 1000);
-      const staleReset = await prisma.document.updateMany({
-        where: {
-          queueStatus: 'processing',
-          processed: false,
-          updatedAt: { lt: eightMinutesAgo },
-        },
-        data: { queueStatus: 'pending' },
-      });
-      if (staleReset.count > 0) {
-        logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
-      }
-
-      // Also reset stale ProcessingQueue entries to resume from where they left off
-      await prisma.processingQueue.updateMany({
-        where: {
-          status: ProcessingQueueStatus.processing,
-          updatedAt: { lt: eightMinutesAgo },
-        },
-        data: {
-          status: ProcessingQueueStatus.queued,
-        },
-      });
+      await resetStaleEntries();
     } catch (staleError) {
       logger.error('PROCESS_QUEUE', 'Stale reset error (non-blocking)', staleError as Error);
     }
 
-    // Process batches until queue is empty or error occurs
-    let totalProcessed = 0;
-    let continueProcessing = true;
-    const maxIterations = 10; // Process max 10 batches per call
-    let iterations = 0;
-
-    while (continueProcessing && iterations < maxIterations) {
-      continueProcessing = await processNextQueuedBatch();
-      if (continueProcessing) {
-        totalProcessed++;
-      }
-      iterations++;
-    }
+    // Process queued documents with concurrent batch dispatch
+    const totalProcessed = await processQueuedDocuments();
 
     return NextResponse.json({
       success: true,
-      batchesProcessed: totalProcessed,
-      message: `Processed ${totalProcessed} batches`,
+      documentsProcessed: totalProcessed,
+      message: `Processed ${totalProcessed} document(s)`,
     });
   } catch (error: any) {
     logger.error('PROCESS_QUEUE', 'Queue processing error', error);
@@ -126,53 +180,20 @@ export async function GET(request: Request) {
         logger.error('PROCESS_QUEUE', 'Orphan recovery error (non-blocking)', recoveryError as Error);
       }
 
-      // Reset stale 'processing' documents (stuck for >8 min)
-      // Reduced from 30 min to align with concurrent batch processing recovery
+      // Reset stale entries
       try {
-        const eightMinutesAgo = new Date(Date.now() - 8 * 60 * 1000);
-        const staleReset = await prisma.document.updateMany({
-          where: {
-            queueStatus: 'processing',
-            processed: false,
-            updatedAt: { lt: eightMinutesAgo },
-          },
-          data: { queueStatus: 'pending' },
-        });
-        if (staleReset.count > 0) {
-          logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
-        }
-
-        // Also reset stale ProcessingQueue entries to resume from where they left off
-        await prisma.processingQueue.updateMany({
-          where: {
-            status: ProcessingQueueStatus.processing,
-            updatedAt: { lt: eightMinutesAgo },
-          },
-          data: {
-            status: ProcessingQueueStatus.queued,
-          },
-        });
+        await resetStaleEntries();
       } catch (staleError) {
         logger.error('PROCESS_QUEUE', 'Stale reset error (non-blocking)', staleError as Error);
       }
 
-      let totalProcessed = 0;
-      let continueProcessing = true;
-      const maxIterations = 10;
-      let iterations = 0;
-
-      while (continueProcessing && iterations < maxIterations) {
-        continueProcessing = await processNextQueuedBatch();
-        if (continueProcessing) {
-          totalProcessed++;
-        }
-        iterations++;
-      }
+      // Process queued documents with concurrent batch dispatch
+      const totalProcessed = await processQueuedDocuments();
 
       return NextResponse.json({
         success: true,
-        batchesProcessed: totalProcessed,
-        message: `Cron processed ${totalProcessed} batches`,
+        documentsProcessed: totalProcessed,
+        message: `Cron processed ${totalProcessed} document(s)`,
       });
     }
 

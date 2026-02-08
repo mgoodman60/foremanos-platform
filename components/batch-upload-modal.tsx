@@ -40,7 +40,7 @@ const ALLOWED_TYPES = [
 
 /** Category keywords mirrored from lib/document-categorizer.ts CATEGORY_INFO */
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  plans_drawings: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan', 'conformance'],
+  plans_drawings: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan', 'conformance set', 'conformance'],
   budget_cost: ['budget', 'cost', 'estimate', 'pricing', 'invoice', 'payment', 'bid', 'quote', 'financial', 'expense'],
   schedule: ['schedule', 'timeline', 'gantt', 'critical path', 'milestone', 'deadline', 'calendar', 'duration', 'phase'],
   specifications: ['spec', 'specification', 'datasheet', 'technical', 'material', 'product', 'standard', 'requirement'],

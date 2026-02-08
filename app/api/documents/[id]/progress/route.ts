@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -157,7 +158,7 @@ export async function GET(
       processingMode,
     });
   } catch (error) {
-    console.error('[DOCUMENT PROGRESS] Error:', error);
+    logger.error('DOCUMENT_PROGRESS', 'Error fetching document progress', error as Error);
     return NextResponse.json(
       { error: 'Failed to get document progress' },
       { status: 500 }

@@ -24,7 +24,7 @@ export const CATEGORY_INFO: Record<DocumentCategory, { label: string; descriptio
   plans_drawings: {
     label: 'Plans & Drawings',
     description: 'Architectural, structural, MEP drawings and plans',
-    keywords: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan', 'conformance']
+    keywords: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan', 'conformance set', 'conformance']
   },
   specifications: {
     label: 'Specifications',

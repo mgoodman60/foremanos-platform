@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { requireProjectPermission } from '@/lib/project-permissions';
 import { canProcessDocument, getProcessingLimits } from '@/lib/processing-limits';
 import { classifyDocument } from '@/lib/document-classifier';
+import { suggestDocumentCategory } from '@/lib/document-categorizer';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { processDocument } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
@@ -57,12 +58,31 @@ export async function POST(request: Request) {
     const { uploadId, fileName, fileSize, totalChunks, projectId, category } = body;
 
     // Validate category against Prisma enum
-    const validatedCategory: DocumentCategory = VALID_CATEGORIES.includes(category as string)
+    let validatedCategory: DocumentCategory = VALID_CATEGORIES.includes(category as string)
       ? (category as DocumentCategory)
       : DocumentCategory.other;
 
     if (!category || !VALID_CATEGORIES.includes(category as string)) {
       logger.warn('UPLOAD_COMPLETE', 'Category defaulted to other', { provided: category, fileName });
+    }
+
+    // Auto-categorize if category resolved to 'other'
+    if (validatedCategory === DocumentCategory.other) {
+      try {
+        const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'pdf';
+        const suggestion = await suggestDocumentCategory(fileName, fileExtension);
+        if (suggestion.confidence >= 0.8) {
+          logger.info('UPLOAD_COMPLETE', 'Auto-categorized document', {
+            fileName,
+            from: 'other',
+            to: suggestion.suggestedCategory,
+            confidence: suggestion.confidence,
+          });
+          validatedCategory = suggestion.suggestedCategory as DocumentCategory;
+        }
+      } catch (error) {
+        logger.warn('UPLOAD_COMPLETE', 'Auto-categorization failed, keeping other', { fileName });
+      }
     }
 
     // Verify project access
