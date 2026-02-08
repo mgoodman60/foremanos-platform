@@ -61,6 +61,8 @@ npx prisma studio        # Open database GUI
 npx prisma db push       # Sync schema to database
 npx prisma generate      # Regenerate Prisma client
 npm run seed:test-user   # Seed test user for development
+npx tsx scripts/test-upload-pipeline.ts                        # E2E upload pipeline verification (production)
+npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E upload pipeline verification (local)
 ```
 
 ## Architecture Overview
