@@ -89,12 +89,21 @@ AWS_FOLDER_PREFIX=foremanos/
 - Set `AWS_REGION=auto` (R2 doesn't use traditional AWS regions)
 - Use your R2 API token credentials, not AWS credentials
 
-#### 6. No CORS, IAM, or Bucket Policies Needed
+#### 6. CORS Setup (Required for Browser Uploads)
 
-Unlike AWS S3, Cloudflare R2:
-- **Automatically handles presigned URLs** - No CORS configuration required
-- **No IAM policies** - API tokens handle permissions
-- **No bucket policies** - Access control is managed through API tokens
+Browser-direct uploads via presigned URLs require CORS rules on the R2 bucket. Run the setup script after configuring your environment variables:
+
+```bash
+npx tsx scripts/setup-r2-cors.ts
+```
+
+This applies a minimal CORS policy (PUT + Content-Type header) for `https://foremanos.vercel.app` and `http://localhost:3000`. To allow additional origins (e.g., Vercel preview URLs), set `CORS_EXTRA_ORIGINS`:
+
+```bash
+CORS_EXTRA_ORIGINS=https://my-preview.vercel.app,https://staging.example.com npx tsx scripts/setup-r2-cors.ts
+```
+
+**No IAM policies or bucket policies are needed** — R2 API tokens handle permissions.
 
 #### 7. Deploy to Vercel
 
@@ -113,6 +122,13 @@ Test upload flow:
    - Go to R2 dashboard → `foremanos-documents` bucket
    - Navigate to `foremanos/uploads/` folder
    - File should appear with timestamped name
+
+#### Troubleshooting
+
+**"Upload blocked — likely a CORS issue on the storage bucket"**
+- Run `npx tsx scripts/setup-r2-cors.ts` to apply CORS rules
+- Verify in browser Network tab: the OPTIONS preflight should return 200 with `Access-Control-Allow-Origin`
+- If using a Vercel preview URL, add it via `CORS_EXTRA_ORIGINS` env var
 
 ### R2 Cost Comparison
 

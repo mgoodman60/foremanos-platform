@@ -286,7 +286,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
         });
 
         xhr.addEventListener('error', () => {
-          reject(new Error('Network error during upload — check your connection and try again'));
+          reject(new Error('Upload blocked — likely a CORS issue on the storage bucket. Run `npx tsx scripts/setup-r2-cors.ts` to fix.'));
         });
 
         xhr.open('PUT', uploadUrl);

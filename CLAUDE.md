@@ -557,7 +557,7 @@ AWS_FOLDER_PREFIX=foremanos/  # Optional
 1. Create Cloudflare account and R2 bucket
 2. Generate R2 API token with Object Read & Write permissions
 3. Add credentials to Vercel environment variables
-4. No CORS, IAM policies, or bucket policies needed
+4. Run `npx tsx scripts/setup-r2-cors.ts` to configure CORS (required for browser uploads)
 
 See `S3_SETUP_GUIDE.md` for detailed setup instructions (Option B: Cloudflare R2).
 

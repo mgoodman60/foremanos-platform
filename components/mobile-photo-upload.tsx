@@ -113,11 +113,16 @@ export function MobilePhotoUpload({
       const { uploadUrl, cloud_storage_path } = await presignRes.json();
 
       // Step 2: Upload file directly to R2 via presigned URL
-      const putRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: photo.file,
-        headers: { 'Content-Type': photo.file.type || 'image/jpeg' },
-      });
+      let putRes: Response;
+      try {
+        putRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: photo.file,
+          headers: { 'Content-Type': photo.file.type || 'image/jpeg' },
+        });
+      } catch {
+        throw new Error('Upload blocked — likely a CORS issue on the storage bucket. Run `npx tsx scripts/setup-r2-cors.ts` to fix.');
+      }
 
       if (!putRes.ok) {
         throw new Error(putRes.status === 403
