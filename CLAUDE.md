@@ -78,7 +78,7 @@ app/api/          # 389 API routes organized by feature domain
 lib/              # 213 service modules (RAG, S3, Stripe, auth, etc.)
 components/       # 299 React components (Shadcn/Radix UI primitives)
 prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (153 test files: lib, API, smoke, hooks)
+__tests__/        # Vitest tests (163 test files: 133 lib + 24 API + 3 smoke + 1 hooks)
 e2e/              # Playwright E2E tests (23 spec files)
 .claude/agents/   # 24 custom Claude Code agents
 .claude/skills/   # 13 project slash commands + 24 installed skills (see below)
@@ -177,14 +177,14 @@ Key model groups in `prisma/schema.prisma`:
 
 ## Testing
 
-- **Vitest**: 153 test files in `__tests__/` (128 lib + 17 API + 3 smoke + 1 hooks)
+- **Vitest**: 163 test files in `__tests__/` (133 lib + 24 API + 3 smoke + 1 hooks)
 - **Playwright**: 23 E2E spec files in `e2e/`
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 - **Comprehensive lib coverage**: All major lib modules have dedicated test files
 
 ### Test Coverage
 
-128 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+133 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
 
 ### API Test Suites
 | Directory | Coverage |

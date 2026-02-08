@@ -211,10 +211,62 @@ npx tsx scripts/recover-orphaned-documents.ts
 4. **Quota management**: Ensure users have sufficient processing quota
 5. **S3 health**: Monitor S3 connectivity and bucket access
 
+## Phase 2: Reliability Fixes (February 2026)
+
+Phase 2 addressed six reliability issues (C1-C6) that caused duplicate processing, stuck documents, and redundant work.
+
+### C1: Batch Sequencing
+
+**Problem**: Documents uploaded between batch cycles could be picked up by multiple workers, causing duplicate processing.
+
+**Fix**: Documents queued between batches are now sequenced with batch-aware ordering. The batch processor checks for in-flight documents before starting a new batch, preventing overlapping processing windows.
+
+### C2: Reprocess Cooldown
+
+**Problem**: Users or automated systems could trigger reprocessing on documents that were recently processed, wasting resources.
+
+**Fix**: A 60-minute cooldown prevents re-processing of recently processed documents. Reprocess requests within the cooldown window return HTTP 429 (Too Many Requests) with a message indicating when the document can be reprocessed.
+
+### C3: Atomic Dedup
+
+**Problem**: Race conditions allowed multiple workers to extract the same chunk simultaneously, creating duplicate entries.
+
+**Fix**: Uses `updateMany` with a `count === 0` check as an atomic guard. If another worker has already claimed the chunk (count > 0), the current worker skips extraction for that chunk. This eliminates duplicate chunk creation without requiring distributed locks.
+
+### C4: Takeoff Dedup
+
+**Problem**: `triggerAutoTakeoff` was called redundantly during reprocessing, creating duplicate takeoff entries.
+
+**Fix**: `triggerAutoTakeoff` is no longer invoked during document reprocessing. Takeoffs are only triggered on initial processing, preventing duplicate material quantity records.
+
+### C5: Retry-Failed Cleanup
+
+**Problem**: When re-queuing failed documents, stale chunks from the previous failed attempt remained in the database, causing data inconsistency.
+
+**Fix**: `deleteMany` clears all existing chunks for the document before re-queuing failed documents. This ensures a clean slate for the retry attempt.
+
+### C6: Fire-and-Forget Error Handling
+
+**Problem**: Unhandled errors in background processing (fire-and-forget `processDocument()` calls) left documents stuck in "processing" status indefinitely.
+
+**Fix**: All fire-and-forget processing calls now wrap execution in try/catch blocks that set `document.queueStatus = 'failed'` and record the error in `lastProcessingError` on any unhandled exception. Documents no longer get permanently stuck.
+
+### Summary of Changes
+
+| Fix | File(s) Modified | Impact |
+|-----|------------------|--------|
+| C1 | `lib/document-processor-batch.ts` | Eliminates duplicate batch processing |
+| C2 | `app/api/documents/[id]/reprocess/route.ts` | 60-min cooldown on reprocessing |
+| C3 | `lib/document-processor-batch.ts` | Atomic chunk deduplication |
+| C4 | `lib/document-processor.ts` | No redundant takeoff triggers |
+| C5 | `lib/document-processor.ts` | Clean retry for failed documents |
+| C6 | `app/api/documents/upload-complete/route.ts` | Failed status on background errors |
+
 ## Future Improvements
 
 - [ ] Add email notifications for failed processing
 - [ ] Create admin dashboard widget for orphaned documents
-- [ ] Add retry limits to prevent infinite recovery loops
+- [x] ~~Add retry limits to prevent infinite recovery loops~~ (addressed by C2 cooldown)
 - [ ] Implement exponential backoff for recovery attempts
 - [ ] Add Slack/webhook notifications for critical failures
+- [x] ~~Handle fire-and-forget error scenarios~~ (addressed by C6)

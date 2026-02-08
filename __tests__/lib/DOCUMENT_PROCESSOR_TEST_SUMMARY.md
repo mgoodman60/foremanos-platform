@@ -6,7 +6,7 @@ Comprehensive integration tests for `lib/document-processor.ts` covering documen
 ## Test File Location
 `c:\Users\msgoo\foremanos\__tests__\lib\document-processor.test.ts`
 
-## Test Coverage (17 tests total)
+## Test Coverage (21 tests total)
 
 ### 1. PDF Processing (5 tests)
 - ✅ **Successfully process small PDFs (≤10 pages)**
@@ -51,17 +51,17 @@ Comprehensive integration tests for `lib/document-processor.ts` covering documen
 ### 3. Classification Pipeline (4 tests)
 - ✅ **Classify architectural plans correctly**
   - Tests classification parameter passing
-  - Verifies `gpt-4o-vision` processor assignment
+  - Verifies Claude Opus 4.6 (`claude-opus-4-6`) processor assignment
 
 - ✅ **Classify specifications as text-heavy documents**
   - Tests CSI specification detection
-  - Verifies `claude-haiku-ocr` processor assignment
+  - Verifies Claude Sonnet 4.5 (`claude-sonnet-4-5`) processor assignment
 
 - ✅ **Assign appropriate processor types based on classification**
   - Batch tests for multiple file types:
-    - Door Schedule → `claude-haiku-ocr`
-    - Site Plan → `gpt-4o-vision`
-    - Equipment Schedule → `claude-haiku-ocr`
+    - Door Schedule → Claude Sonnet 4.5 (`claude-sonnet-4-5`)
+    - Site Plan → Claude Opus 4.6 (`claude-opus-4-6`)
+    - Equipment Schedule → Claude Sonnet 4.5 (`claude-sonnet-4-5`)
 
 - ✅ **Handle unsupported file formats gracefully**
   - Tests XLSX and other unsupported formats
@@ -107,6 +107,25 @@ Comprehensive integration tests for `lib/document-processor.ts` covering documen
   - Tests `classifyDrawingsFromDocument` function
   - Verifies pattern-based classification
   - Validates storage of classification results
+
+### 8. Phase 2 Reliability Tests (4 tests)
+
+- **Fire-and-forget error handling (C6)**
+  - Tests that unhandled errors in background `processDocument()` calls set document status to `failed`
+  - Verifies `lastProcessingError` is populated with the error message
+  - Confirms document does not remain stuck in "processing" status
+
+- **Reprocess cooldown enforcement (C2)**
+  - Tests that reprocessing within 60-minute cooldown returns 429
+  - Verifies cooldown window is respected
+
+- **Atomic chunk deduplication (C3)**
+  - Tests `updateMany` count guard prevents duplicate chunk extraction
+  - Verifies workers skip already-claimed chunks
+
+- **Retry-failed cleanup (C5)**
+  - Tests that `deleteMany` clears stale chunks before re-queuing
+  - Verifies clean state for retry processing
 
 ## Mocked Dependencies
 
