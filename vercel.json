@@ -27,6 +27,9 @@
     },
     "app/api/projects/[slug]/documents/[id]/reprocess/route.ts": {
       "maxDuration": 300
+    },
+    "app/api/documents/confirm-upload/route.ts": {
+      "maxDuration": 300
     }
   },
   "env": {
@@ -36,6 +39,10 @@
     {
       "path": "/api/admin/finalize-reports",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/admin/process-queue",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getFileUrl } from '@/lib/s3';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/files/url - Get signed URL for a file
 export async function GET(request: NextRequest) {
   try {

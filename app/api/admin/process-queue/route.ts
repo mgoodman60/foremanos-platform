@@ -56,12 +56,42 @@ export async function POST(request: Request) {
 }
 
 /**
- * Get queue statistics
+ * Get queue statistics or process queue (when called by Vercel cron)
  */
 export async function GET(request: Request) {
   try {
+    // Check if this is a Vercel cron invocation
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    const isCronRequest = cronSecret && authHeader === `Bearer ${cronSecret}`;
+
+    if (isCronRequest) {
+      // Cron invocation: process the queue
+      console.log('[QUEUE] Cron-triggered queue processing');
+
+      let totalProcessed = 0;
+      let continueProcessing = true;
+      const maxIterations = 10;
+      let iterations = 0;
+
+      while (continueProcessing && iterations < maxIterations) {
+        continueProcessing = await processNextQueuedBatch();
+        if (continueProcessing) {
+          totalProcessed++;
+        }
+        iterations++;
+      }
+
+      return NextResponse.json({
+        success: true,
+        batchesProcessed: totalProcessed,
+        message: `Cron processed ${totalProcessed} batches`,
+      });
+    }
+
+    // Non-cron: return stats (requires admin auth)
     const session = await getServerSession(authOptions);
-    
+
     if (session?.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

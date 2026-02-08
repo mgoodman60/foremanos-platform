@@ -330,7 +330,7 @@ async function processWithVision(
         where: { id: documentId },
         data: {
           queueStatus: 'queued',
-          pagesProcessed: 0,
+          pagesProcessed: pages,
           processorType, // Store processor type for reference
         },
       });

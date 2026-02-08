@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isAutodeskConfigured } from '@/lib/autodesk-auth';
 
+export const dynamic = 'force-dynamic';
+
 const AUTODESK_AUTH_URL = 'https://developer.api.autodesk.com/authentication/v2/token';
 
 export async function GET() {
