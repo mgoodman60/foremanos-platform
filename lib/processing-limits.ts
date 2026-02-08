@@ -334,7 +334,7 @@ export function getNextResetDate(): Date {
 }
 
 export function calculateProcessingCost(pages: number, processorType: string): number {
-  const costPerPage = processorType === 'gpt-4o-vision' ? 0.01 :
+  const costPerPage = processorType === 'vision-ai' ? 0.01 :
                       processorType === 'claude-haiku-ocr' ? 0.001 :
                       0.003; // basic-ocr
   return pages * costPerPage;

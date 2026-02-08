@@ -1,11 +1,13 @@
 /**
- * OpenAI LLM API Helper
+ * LLM API Helper
  *
- * Provides a simple interface for calling OpenAI's API directly.
- * Updated Feb 2026: Switched from Abacus AI proxy to direct OpenAI.
+ * Provides a simple interface for calling LLM APIs.
+ * Routes to the correct provider (Anthropic/OpenAI) via llm-providers.ts.
+ * Updated Feb 2026: Delegates to callLLM for automatic provider routing.
  */
 
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { callLLM, type LLMResponse as ProviderLLMResponse } from '@/lib/llm-providers';
 
 export interface LLMMessageContent {
   type: string;
@@ -47,7 +49,7 @@ export interface LLMResponse {
 }
 
 /**
- * Call OpenAI's API with the given messages
+ * Call LLM API with the given messages
  * @deprecated Use callOpenAILLM instead - this alias kept for backwards compatibility
  */
 export async function callAbacusLLM(
@@ -87,17 +89,13 @@ function convertMessagesForOpenAI(messages: LLMMessage[]): LLMMessage[] {
 }
 
 /**
- * Call OpenAI's API with the given messages
+ * Call LLM API with the given messages.
+ * Routes to the correct provider based on model prefix via callLLM.
  */
 export async function callOpenAILLM(
   messages: LLMMessage[],
   options: LLMOptions = {}
 ): Promise<LLMResponse> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is not set');
-  }
-
   const {
     model = EXTRACTION_MODEL,
     temperature = 0.3,
@@ -105,51 +103,18 @@ export async function callOpenAILLM(
     response_format,
   } = options;
 
-  // Convert document content to OpenAI-compatible format
-  const convertedMessages = convertMessagesForOpenAI(messages);
-
-  const requestBody: {
-    model: string;
-    messages: LLMMessage[];
-    temperature: number;
-    max_tokens: number;
-    response_format?: { type: string };
-  } = {
+  const result = await callLLM(messages as any, {
     model,
-    messages: convertedMessages,
     temperature,
     max_tokens,
-  };
-
-  if (response_format) {
-    requestBody.response_format = response_format;
-  }
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestBody),
+    response_format,
   });
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => 'No error details available');
-    throw new Error(`OpenAI API request failed (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
-
-  return {
-    content: data.choices?.[0]?.message?.content || '',
-    model: data.model || model,
-    usage: data.usage,
-  };
+  return result;
 }
 
 /**
- * Call OpenAI's API with vision (image analysis)
+ * Call LLM API with vision (image analysis)
  * @deprecated Use callOpenAILLMWithVision instead - this alias kept for backwards compatibility
  */
 export async function callAbacusLLMWithVision(
@@ -161,7 +126,7 @@ export async function callAbacusLLMWithVision(
 }
 
 /**
- * Call OpenAI's API with vision (image analysis)
+ * Call LLM API with vision (image analysis)
  */
 export async function callOpenAILLMWithVision(
   textPrompt: string,

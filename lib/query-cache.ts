@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { getCached, setCached, isRedisAvailable } from './redis';
-import { SIMPLE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL } from '@/lib/model-config';
+import { SIMPLE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL, FALLBACK_MODEL } from '@/lib/model-config';
+import { logger } from '@/lib/logger';
 
 /**
  * Query Cache System with Redis Integration
@@ -42,18 +43,18 @@ const MAX_CACHE_SIZE = 2000; // Maximum 2000 entries (increased from 1000)
 const HIGH_VALUE_CACHE_BOOST = 72; // High-value queries cached for 72 hours
 
 // Model pricing (Updated February 2026)
-const MODEL_COSTS = {
-  'gpt-4o-mini': 0.015,       // Simple queries (75% cheaper than GPT-3.5)
-  'gpt-3.5-turbo': 0.03,      // Legacy simple queries (deprecated)
-  'claude-sonnet-4-5-20251101': 0.15, // Legacy (backward compatibility)
-  'claude-sonnet-4-5-20250929': 0.15, // Current default Claude model
-  'claude-opus-4-6': 0.75,            // Premium complex queries (Claude Opus 4.6)
-  'gpt-4o': 0.30,             // Complex queries and images (legacy, deprecated)
-  'gpt-5.2': 0.21,            // OpenAI fallback
-  'gpt-5.2-2025-12-11': 0.21, // Alias for gpt-5.2
-  'gpt-5.2-thinking': 0.30,   // Legacy
-  'o3-mini': 0.08,            // Fast reasoning (alternative to Claude for medium queries)
-} as const;
+// Uses imported model constants where possible for consistency
+const MODEL_COSTS: Record<string, number> = {
+  [SIMPLE_MODEL]: 0.015,                // gpt-4o-mini — Simple queries
+  [DEFAULT_MODEL]: 0.15,                // claude-sonnet-4-5-20250929 — Medium complexity
+  [PREMIUM_MODEL]: 0.75,                // claude-opus-4-6 — Complex queries
+  [FALLBACK_MODEL]: 0.21,               // gpt-5.2 — OpenAI fallback
+  'claude-sonnet-4-5-20251101': 0.15,   // Legacy alias (backward compatibility)
+  'gpt-3.5-turbo': 0.03,                // Legacy (deprecated, kept for existing cache entries)
+  'gpt-4o': 0.30,                       // Legacy (deprecated, kept for existing cache entries)
+  'gpt-5.2-2025-12-11': 0.21,           // Alias for gpt-5.2
+  'o3-mini': 0.08,                      // Fast reasoning
+};
 
 /**
  * Generate cache key from query and context
@@ -424,12 +425,12 @@ export async function getCachedResponse(query: string, projectId: string, docume
           // Update Redis with new hit count
           await setCached(`cache:${key}`, redisEntry, ttl * 3600);
           
-          console.log(`[REDIS CACHE HIT - EXACT] Query: "${query.substring(0, 50)}..."`);
+          logger.info('QUERY_CACHE', 'Redis cache hit (exact)', { query: query.substring(0, 50) });
           return redisEntry.response;
         }
       }
     } catch (error) {
-      console.error('[REDIS CACHE ERROR]', error);
+      logger.error('QUERY_CACHE', 'Redis cache error', error as Error);
       // Fall through to in-memory cache
     }
   }
@@ -457,10 +458,10 @@ export async function getCachedResponse(query: string, projectId: string, docume
     
     if (bestMatch) {
       entry = bestMatch.entry;
-      console.log(`[CACHE HIT - SIMILAR] Query: "${query.substring(0, 50)}..." (${Math.round(bestMatch.similarity * 100)}% match)`);
+      logger.info('QUERY_CACHE', 'Cache hit (similar)', { query: query.substring(0, 50), similarity: Math.round(bestMatch.similarity * 100) });
     }
   } else {
-    console.log(`[CACHE HIT - EXACT] Query: "${query.substring(0, 50)}..."`);
+    logger.info('QUERY_CACHE', 'Cache hit (exact)', { query: query.substring(0, 50) });
   }
   
   if (!entry) {
@@ -476,7 +477,7 @@ export async function getCachedResponse(query: string, projectId: string, docume
   if (ageHours > ttl) {
     cache.delete(key);
     stats.misses++;
-    console.log(`[CACHE EXPIRED] ${isHighValue ? 'High-value' : 'Standard'} entry expired after ${Math.round(ageHours)}h (TTL: ${ttl}h)`);
+    logger.info('QUERY_CACHE', 'Cache expired', { type: isHighValue ? 'high-value' : 'standard', ageHours: Math.round(ageHours), ttl });
     return null;
   }
   
@@ -536,13 +537,13 @@ export async function cacheResponse(
 ): Promise<void> {
   // Don't cache if query is not cacheable
   if (!isCacheable(query)) {
-    console.log(`[CACHE SKIP] Query not cacheable: "${query.substring(0, 50)}..."`);
+    logger.info('QUERY_CACHE', 'Query not cacheable', { query: query.substring(0, 50) });
     return;
   }
   
   // Don't cache very short responses (likely errors or "I don't know" responses)
   if (response.length < 50) {
-    console.log(`[CACHE SKIP] Response too short: "${response}"`);
+    logger.info('QUERY_CACHE', 'Response too short to cache', { length: response.length });
     return;
   }
   
@@ -578,7 +579,7 @@ export async function cacheResponse(
     
     if (oldestKey) {
       cache.delete(oldestKey);
-      console.log(`[CACHE EVICT] Removed ${foundLowValue ? 'low-value' : 'oldest'} entry to make space`);
+      logger.info('QUERY_CACHE', 'Cache eviction', { evictedType: foundLowValue ? 'low-value' : 'oldest' });
     }
   }
   
@@ -602,14 +603,13 @@ export async function cacheResponse(
   if (isRedisAvailable()) {
     try {
       await setCached(`cache:${key}`, cacheEntry, ttl * 3600); // Convert hours to seconds
-      console.log(`[REDIS CACHE SET - ${highValue ? 'HIGH-VALUE' : 'STANDARD'}] ${complexity} query (${model}, TTL: ${ttl}h): "${query.substring(0, 50)}..."`);
+      logger.info('QUERY_CACHE', 'Redis cache set', { type: highValue ? 'high-value' : 'standard', complexity, model, ttl, query: query.substring(0, 50) });
     } catch (error) {
-      console.error('[REDIS CACHE SET ERROR]', error);
+      logger.error('QUERY_CACHE', 'Redis cache set error', error as Error);
       // Continue - in-memory cache is already set
     }
   } else {
-    const cacheType = highValue ? 'HIGH-VALUE' : 'STANDARD';
-    console.log(`[IN-MEMORY CACHE SET - ${cacheType}] ${complexity} query (${model}, TTL: ${ttl}h): "${query.substring(0, 50)}..."`);
+    logger.info('QUERY_CACHE', 'In-memory cache set', { type: highValue ? 'high-value' : 'standard', complexity, model, ttl, query: query.substring(0, 50) });
   }
 }
 
@@ -634,7 +634,7 @@ export function getCacheStats(): CacheStats & {
   let totalHitCount = 0;
 
   for (const entry of cache.values()) {
-    const modelCost = MODEL_COSTS[entry.model as keyof typeof MODEL_COSTS] || 0.15;
+    const modelCost = MODEL_COSTS[entry.model] || 0.15;
     const savingsForEntry = entry.hitCount * modelCost;
     totalSavings += savingsForEntry;
     totalHitCount += entry.hitCount;
@@ -711,7 +711,7 @@ export function clearCache(): void {
   cache.clear();
   stats.hits = 0;
   stats.misses = 0;
-  console.log('[CACHE] Cache cleared');
+  logger.info('QUERY_CACHE', 'Cache cleared');
 }
 
 /**

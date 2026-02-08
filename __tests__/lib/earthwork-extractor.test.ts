@@ -11,14 +11,20 @@ import {
 // Mock the earthwork-calculator dependency
 const mocks = vi.hoisted(() => ({
   parseElevationData: vi.fn(),
+  callLLM: vi.fn(),
 }));
 
 vi.mock('@/lib/earthwork-calculator', () => ({
   parseElevationData: mocks.parseElevationData,
 }));
 
-// Mock fetch for AI extraction tests
-global.fetch = vi.fn();
+vi.mock('@/lib/llm-providers', () => ({
+  callLLM: mocks.callLLM,
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
 describe('Earthwork Extractor', () => {
   beforeEach(() => {
@@ -374,7 +380,7 @@ describe('Earthwork Extractor', () => {
   describe('extractElevationsWithAI', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      (global.fetch as any).mockClear();
+      mocks.callLLM.mockClear();
     });
 
     it('should fall back to pattern matching when no API key provided', async () => {
@@ -382,72 +388,53 @@ describe('Earthwork Extractor', () => {
 
       const result = await extractElevationsWithAI(documentContent, 'survey');
 
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(mocks.callLLM).not.toHaveBeenCalled();
       expect(result.metadata.extractionMethod).toBe('pattern-matching');
       expect(result.existing).toHaveLength(1);
     });
 
-    it('should call AI API with correct parameters', async () => {
-      const mockResponse = {
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              existing_elevations: [{ x: 100, y: 200, elev: 950 }],
-              proposed_elevations: [{ x: 100, y: 200, elev: 955 }],
-              cross_sections: [],
-              datum: 'NAVD88',
-              units: 'feet',
-            }),
-          },
-        }],
-      };
-
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
+    it('should call callLLM with correct parameters', async () => {
+      mocks.callLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          existing_elevations: [{ x: 100, y: 200, elev: 950 }],
+          proposed_elevations: [{ x: 100, y: 200, elev: 955 }],
+          cross_sections: [],
+          datum: 'NAVD88',
+          units: 'feet',
+        }),
+        model: 'claude-sonnet-4-5-20250929',
       });
 
       const documentContent = 'Test document content';
       await extractElevationsWithAI(documentContent, 'grading', 'test-api-key');
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.openai.com/v1/chat/completions',
+      expect(mocks.callLLM).toHaveBeenCalledWith(
+        [{ role: 'user', content: expect.stringContaining('Extract elevation data') }],
         expect.objectContaining({
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer test-api-key',
-          },
-          body: expect.stringContaining('claude-sonnet-4-5-20250929'),
+          model: 'claude-sonnet-4-5-20250929',
+          temperature: 0.1,
+          response_format: { type: 'json_object' },
         })
       );
     });
 
     it('should parse AI response correctly', async () => {
-      const mockResponse = {
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              existing_elevations: [
-                { x: 100, y: 200, elev: 950 },
-                { x: 150, y: 250, elev: 955 },
-              ],
-              proposed_elevations: [
-                { x: 100, y: 200, elev: 960 },
-              ],
-              cross_sections: [
-                { station: 1.0, cut_area_sf: 125, fill_area_sf: 85 },
-              ],
-              datum: 'NAVD88',
-              units: 'feet',
-            }),
-          },
-        }],
-      };
-
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
+      mocks.callLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          existing_elevations: [
+            { x: 100, y: 200, elev: 950 },
+            { x: 150, y: 250, elev: 955 },
+          ],
+          proposed_elevations: [
+            { x: 100, y: 200, elev: 960 },
+          ],
+          cross_sections: [
+            { station: 1.0, cut_area_sf: 125, fill_area_sf: 85 },
+          ],
+          datum: 'NAVD88',
+          units: 'feet',
+        }),
+        model: 'claude-sonnet-4-5-20250929',
       });
 
       const result = await extractElevationsWithAI('Test', 'survey', 'api-key');
@@ -467,17 +454,9 @@ describe('Earthwork Extractor', () => {
     });
 
     it('should handle empty AI response', async () => {
-      const mockResponse = {
-        choices: [{
-          message: {
-            content: JSON.stringify({}),
-          },
-        }],
-      };
-
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
+      mocks.callLLM.mockResolvedValueOnce({
+        content: JSON.stringify({}),
+        model: 'claude-sonnet-4-5-20250929',
       });
 
       const result = await extractElevationsWithAI('Test', 'survey', 'api-key');
@@ -489,21 +468,16 @@ describe('Earthwork Extractor', () => {
 
     it('should truncate long documents to 8000 characters', async () => {
       const longContent = 'x'.repeat(10000);
-      const mockResponse = {
-        choices: [{
-          message: { content: JSON.stringify({}) },
-        }],
-      };
 
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
+      mocks.callLLM.mockResolvedValueOnce({
+        content: JSON.stringify({}),
+        model: 'claude-sonnet-4-5-20250929',
       });
 
       await extractElevationsWithAI(longContent, 'survey', 'api-key');
 
-      const callBody = JSON.parse((global.fetch as any).mock.calls[0][1].body);
-      const promptContent = callBody.messages[0].content;
+      const callArgs = mocks.callLLM.mock.calls[0];
+      const promptContent = callArgs[0][0].content;
       // Document is truncated to 8000 chars, but the full prompt includes template text
       expect(promptContent).toContain('x'.repeat(100)); // Has some of the content
       expect(promptContent.length).toBeGreaterThan(500); // Has template text
@@ -511,10 +485,7 @@ describe('Earthwork Extractor', () => {
     });
 
     it('should fall back to pattern matching on API error', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      mocks.callLLM.mockRejectedValueOnce(new Error('API request failed'));
 
       const documentContent = 'N 100 E 200 ELEV 950';
       const result = await extractElevationsWithAI(documentContent, 'survey', 'api-key');
@@ -524,7 +495,7 @@ describe('Earthwork Extractor', () => {
     });
 
     it('should fall back to pattern matching on network error', async () => {
-      (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
+      mocks.callLLM.mockRejectedValueOnce(new Error('Network error'));
 
       const documentContent = 'N 100 E 200 ELEV 950';
       const result = await extractElevationsWithAI(documentContent, 'survey', 'api-key');
@@ -534,9 +505,9 @@ describe('Earthwork Extractor', () => {
     });
 
     it('should fall back to pattern matching on JSON parse error', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ choices: [{ message: { content: 'invalid json' } }] }),
+      mocks.callLLM.mockResolvedValueOnce({
+        content: 'invalid json',
+        model: 'claude-sonnet-4-5-20250929',
       });
 
       const documentContent = 'N 100 E 200 ELEV 950';

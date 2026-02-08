@@ -17,47 +17,10 @@
 import { PrismaClient } from '@prisma/client';
 import { parseScaleString } from './scale-detector';
 import { classifyDrawingWithPatterns, type DrawingClassification } from './drawing-classifier';
-import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
-
-/**
- * Detect if base64 content is a PDF (starts with %PDF- magic number)
- */
-function isPdfContent(base64: string): boolean {
-  // PDF magic number in base64: "JVBERi" which is %PDF-
-  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
-}
-
-/**
- * Build content array for vision API request, handling both image and PDF input
- */
-function buildVisionContent(prompt: string, base64Data: string): any[] {
-  const isPdf = isPdfContent(base64Data);
-
-  if (isPdf) {
-    // PDF content - use file type for APIs that support it
-    return [
-      { type: 'text', text: prompt },
-      {
-        type: 'file',
-        file: {
-          filename: 'page.pdf',
-          file_data: `data:application/pdf;base64,${base64Data}`,
-        },
-      }
-    ];
-  } else {
-    // Image content
-    return [
-      { type: 'text', text: prompt },
-      {
-        type: 'image_url',
-        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
-      }
-    ];
-  }
-}
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -125,35 +88,13 @@ export async function extractTitleBlockWithVision(
   try {
     const prompt = generateTitleBlockPrompt();
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: buildVisionContent(prompt, base64Data)
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.1 // Low temperature for consistent extraction
-      })
-    });
+    const result = await analyzeWithMultiProvider(base64Data, prompt);
 
-    if (!response.ok) {
-      throw new Error(`Vision API error: ${response.statusText}`);
+    if (!result.success || !result.content) {
+      throw new Error(result.error || 'No content in vision response');
     }
 
-    const result = await response.json();
-    const content = result.choices[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('No content in vision response');
-    }
+    const content = result.content;
 
     // Parse JSON response
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
@@ -171,7 +112,7 @@ export async function extractTitleBlockWithVision(
       extractionMethod: 'vision'
     };
   } catch (error) {
-    console.error('Title block vision extraction error:', error);
+    logger.error('TITLE_BLOCK', 'Title block vision extraction error', error as Error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -294,7 +235,7 @@ export function extractTitleBlockWithPatterns(
       extractionMethod: 'pattern'
     };
   } catch (error) {
-    console.error('Pattern extraction error:', error);
+    logger.error('TITLE_BLOCK', 'Pattern extraction error', error as Error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -512,15 +453,12 @@ export async function storeTitleBlockData(
       }
     });
 
-    console.log(`✅ Title block data stored for sheet ${titleBlockData.sheetNumber}`);
-    if (primaryScale) {
-      console.log(`   Scale: ${primaryScale} (1:${scaleRatio})`);
-    }
-    if (drawingType) {
-      console.log(`   Type: ${drawingType} (${Math.round(drawingTypeConfidence! * 100)}% confidence)`);
-    }
+    logger.info('TITLE_BLOCK', `Title block data stored for sheet ${titleBlockData.sheetNumber}`, {
+      scale: primaryScale ? `${primaryScale} (1:${scaleRatio})` : undefined,
+      drawingType: drawingType ? `${drawingType} (${Math.round(drawingTypeConfidence! * 100)}%)` : undefined,
+    });
   } catch (error) {
-    console.error('Error storing title block data:', error);
+    logger.error('TITLE_BLOCK', 'Error storing title block data', error as Error);
     throw error;
   }
 }
@@ -582,7 +520,7 @@ export async function getSheetIndex(projectSlug: string): Promise<SheetIndexEntr
 
     return sheets;
   } catch (error) {
-    console.error('Error getting sheet index:', error);
+    logger.error('TITLE_BLOCK', 'Error getting sheet index', error as Error);
     throw error;
   }
 }

@@ -9,6 +9,8 @@
  */
 
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { callLLM } from '@/lib/llm-providers';
+import { logger } from '@/lib/logger';
 
 export interface WebSearchResult {
   title: string;
@@ -98,16 +100,10 @@ export function shouldUseWebSearch(query: string, documentChunksFound: number): 
  */
 export async function performWebSearch(query: string): Promise<WebSearchResponse> {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      console.warn('⚠️ Web search skipped: API key not configured');
-      return { results: [], query, hasResults: false };
-    }
-    
     // Enhance query with construction context
     const enhancedQuery = enhanceQueryForConstruction(query);
 
-    console.log('🔍 Performing web search:', enhancedQuery);
+    logger.info('WEB_SEARCH', 'Performing web search', { query: enhancedQuery });
 
     // Determine if we should mention construction in the prompt
     const hasConstructionContext = enhancedQuery.toLowerCase().includes('construction');
@@ -115,39 +111,22 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
       ? `Search the web for: "${enhancedQuery}"`
       : `Search the web for construction-related information: "${enhancedQuery}"`;
 
-    // Perform web search using OpenAI API
-    // Note: OpenAI doesn't have native web search, so we ask GPT-4o to provide
-    // relevant authoritative sources based on its training knowledge
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert in construction codes and standards. Provide authoritative references with real URLs to official sources like ICC, NFPA, ADA.gov, OSHA, and other regulatory bodies. Only provide URLs that are known to exist.'
-          },
-          {
-            role: 'user',
-            content: `${promptPrefix}\n\nProvide 3-5 relevant authoritative sources with:\n1. Title\n2. URL (official source only)\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
-          }
-        ],
-        stream: false,
-        max_tokens: 1500,
-      }),
-    });
-    
-    if (!response.ok) {
-      console.error('❌ Web search API error:', response.status);
-      return { results: [], query, hasResults: false };
-    }
-    
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
+    // Use LLM to provide relevant authoritative sources based on its training knowledge
+    const llmResult = await callLLM(
+      [
+        {
+          role: 'system',
+          content: 'You are an expert in construction codes and standards. Provide authoritative references with real URLs to official sources like ICC, NFPA, ADA.gov, OSHA, and other regulatory bodies. Only provide URLs that are known to exist.'
+        },
+        {
+          role: 'user',
+          content: `${promptPrefix}\n\nProvide 3-5 relevant authoritative sources with:\n1. Title\n2. URL (official source only)\n3. Brief snippet (2-3 sentences)\n4. Source domain\n\nFormat each result clearly with these labels.`
+        }
+      ],
+      { model: EXTRACTION_MODEL, max_tokens: 1500 }
+    );
+
+    const content = llmResult.content || '';
     
     // Extract URLs and create results
     let results: WebSearchResult[] = [];
@@ -223,7 +202,7 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
     // Filter out invalid results
     results = results.filter(r => r.url && r.title);
     
-    console.log(`✅ Found ${results.length} web results`);
+    logger.info('WEB_SEARCH', `Found ${results.length} web results`);
     
     return {
       results: results.slice(0, 5), // Limit to 5 results
@@ -232,7 +211,7 @@ export async function performWebSearch(query: string): Promise<WebSearchResponse
     };
     
   } catch (error) {
-    console.error('❌ Web search error:', error);
+    logger.error('WEB_SEARCH', 'Web search error', error as Error);
     return {
       results: [],
       query,

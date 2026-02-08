@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { callLLM } from '@/lib/llm-providers';
 
 // Valid trade types
 const VALID_TRADE_TYPES = [
@@ -152,26 +153,11 @@ export async function POST(
     }
 
     // Use AI to extract subcontractor information
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'AI API not configured' },
-        { status: 500 }
-      );
-    }
-
-    const apiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert at extracting subcontractor information from construction documents. 
+    const llmResult = await callLLM(
+      [
+        {
+          role: 'system',
+          content: `You are an expert at extracting subcontractor information from construction documents.
 Extract all subcontractor/vendor information from the provided text.
 
 For each subcontractor, extract:
@@ -196,27 +182,16 @@ EXAMPLE OUTPUT:
     }
   ]
 }`
-          },
-          {
-            role: 'user',
-            content: `Extract all subcontractor information from this document:\n\n${extractionContent.substring(0, 15000)}`
-          }
-        ],
-        temperature: 0.1,
-      }),
-    });
+        },
+        {
+          role: 'user',
+          content: `Extract all subcontractor information from this document:\n\n${extractionContent.substring(0, 15000)}`
+        }
+      ],
+      { model: EXTRACTION_MODEL, temperature: 0.1 }
+    );
 
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      console.error('[SUBCONTRACTORS_IMPORT] API error:', errorText);
-      return NextResponse.json(
-        { error: 'Failed to process document with AI' },
-        { status: 500 }
-      );
-    }
-
-    const apiResult = await apiResponse.json();
-    const aiResponse = apiResult.choices?.[0]?.message?.content || '{}';
+    const aiResponse = llmResult.content || '{}';
     let extracted: any[] = [];
     
     try {

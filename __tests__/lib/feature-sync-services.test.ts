@@ -1002,7 +1002,7 @@ describe('Feature Sync - syncScheduleData', () => {
     mockExtractScheduleFromDocument.mockResolvedValue({
       success: true,
       extractedTasks: Array(15).fill({ name: 'Task' }),
-      source: 'gpt-4o-vision',
+      source: 'vision-ai',
     });
 
     mockRecordDataSource.mockResolvedValue(undefined);
@@ -1018,7 +1018,7 @@ describe('Feature Sync - syncScheduleData', () => {
       'xlsx',
       {
         taskCount: 15,
-        source: 'gpt-4o-vision',
+        source: 'vision-ai',
       }
     );
   });
@@ -1043,7 +1043,7 @@ describe('Feature Sync - syncScheduleData', () => {
     mockExtractScheduleFromDocument.mockResolvedValue({
       success: false,
       extractedTasks: [],
-      source: 'gpt-4o-vision',
+      source: 'vision-ai',
     });
 
     const result = await syncScheduleData('project-1', 'doc-1', 'pdf_scan');

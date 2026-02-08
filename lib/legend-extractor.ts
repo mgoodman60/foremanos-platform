@@ -15,45 +15,8 @@
 
 import { DisciplineCode, getDisciplineName } from './title-block-extractor';
 import { prisma } from '@/lib/db';
-import { EXTRACTION_MODEL } from '@/lib/model-config';
-
-/**
- * Detect if base64 content is a PDF (starts with %PDF- magic number)
- */
-function isPdfContent(base64: string): boolean {
-  // PDF magic number in base64: "JVBERi" which is %PDF-
-  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
-}
-
-/**
- * Build content array for vision API request, handling both image and PDF input
- */
-function buildVisionContent(prompt: string, base64Data: string): any[] {
-  const isPdf = isPdfContent(base64Data);
-
-  if (isPdf) {
-    // PDF content - use file type for APIs that support it
-    return [
-      { type: 'text', text: prompt },
-      {
-        type: 'file',
-        file: {
-          filename: 'page.pdf',
-          file_data: `data:application/pdf;base64,${base64Data}`,
-        },
-      }
-    ];
-  } else {
-    // Image content
-    return [
-      { type: 'text', text: prompt },
-      {
-        type: 'image_url',
-        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
-      }
-    ];
-  }
-}
+import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -126,35 +89,13 @@ export async function detectLegendRegion(
   try {
     const prompt = generateLegendDetectionPrompt();
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: buildVisionContent(prompt, base64Data)
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.1
-      })
-    });
+    const result = await analyzeWithMultiProvider(base64Data, prompt);
 
-    if (!response.ok) {
-      throw new Error(`Vision API error: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    const content = result.choices[0]?.message?.content;
-
-    if (!content) {
+    if (!result.success || !result.content) {
       return { found: false, confidence: 0 };
     }
+
+    const content = result.content;
 
     // Parse JSON response
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
@@ -170,7 +111,7 @@ export async function detectLegendRegion(
       confidence: data.confidence || 0
     };
   } catch (error) {
-    console.error('Legend detection error:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Legend detection error', error as Error);
     return { found: false, confidence: 0 };
   }
 }
@@ -187,40 +128,18 @@ export async function extractLegendEntries(
   try {
     const prompt = generateLegendExtractionPrompt(discipline);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: buildVisionContent(prompt, base64Data)
-          }
-        ],
-        max_tokens: 2000,
-        temperature: 0.1
-      })
-    });
+    const result = await analyzeWithMultiProvider(base64Data, prompt);
 
-    if (!response.ok) {
-      throw new Error(`Vision API error: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    const content = result.choices[0]?.message?.content;
-
-    if (!content) {
+    if (!result.success || !result.content) {
       return {
         success: false,
-        error: 'No content in response',
+        error: result.error || 'No content in response',
         confidence: 0,
         method: 'vision'
       };
     }
+
+    const content = result.content;
 
     // Parse JSON response
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
@@ -265,7 +184,7 @@ export async function extractLegendEntries(
       method: 'vision'
     };
   } catch (error) {
-    console.error('Legend extraction error:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Legend extraction error', error as Error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -354,9 +273,9 @@ export async function storeLegend(
       }
     });
 
-    console.log(`✅ Legend stored for sheet ${legend.sheetNumber} (${legend.legendEntries.length} entries)`);
+    logger.info('LEGEND_EXTRACTOR', `Legend stored for sheet ${legend.sheetNumber} (${legend.legendEntries.length} entries)`);
   } catch (error) {
-    console.error('Error storing legend:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Error storing legend', error as Error);
     throw error;
   }
 }
@@ -391,7 +310,7 @@ export async function getProjectLegends(projectSlug: string): Promise<SheetLegen
       discipline: legend.discipline as DisciplineCode
     }));
   } catch (error) {
-    console.error('Error getting project legends:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Error getting project legends', error as Error);
     throw error;
   }
 }
@@ -451,7 +370,7 @@ export async function buildProjectLegendLibrary(projectSlug: string): Promise<Pr
       lastUpdated: new Date()
     };
   } catch (error) {
-    console.error('Error building legend library:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Error building legend library', error as Error);
     throw error;
   }
 }
@@ -474,7 +393,7 @@ export async function searchSymbol(
       );
     });
   } catch (error) {
-    console.error('Error searching symbols:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Error searching symbols', error as Error);
     return [];
   }
 }
@@ -537,7 +456,7 @@ export async function validateSymbolUsage(
       consistentSymbols: symbolMap.size - inconsistencies.length
     };
   } catch (error) {
-    console.error('Error validating symbol usage:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Error validating symbol usage', error as Error);
     return {
       inconsistencies: [],
       totalSymbols: 0,
@@ -562,7 +481,7 @@ export async function mergeLegendWithSymbolLibrary(
     // This would integrate with the existing symbol-learner.ts
     // For now, we'll return statistics
     
-    console.log(`📚 Legend library built: ${library.totalSymbols} symbols`);
+    logger.info('LEGEND_EXTRACTOR', `Legend library built: ${library.totalSymbols} symbols`);
     
     return {
       merged: library.totalSymbols,
@@ -570,7 +489,7 @@ export async function mergeLegendWithSymbolLibrary(
       new: library.totalSymbols
     };
   } catch (error) {
-    console.error('Error merging legend with symbol library:', error);
+    logger.error('LEGEND_EXTRACTOR', 'Error merging legend with symbol library', error as Error);
     return { merged: 0, updated: 0, new: 0 };
   }
 }

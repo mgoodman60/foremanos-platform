@@ -948,7 +948,7 @@ export type DocumentProcessingType = 'visual' | 'text-heavy' | 'mixed';
 export function getProcessingType(processorType: string): DocumentProcessingType {
   switch (processorType) {
     case 'claude-opus-vision':
-    case 'gpt-4o-vision': // Legacy
+    case 'vision-ai':
       // Architectural plans, site photos, drawings - need visual processing
       return 'visual';
     case 'claude-haiku-ocr':

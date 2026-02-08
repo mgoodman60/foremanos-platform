@@ -4,19 +4,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
-// Mock fetch globally
-const fetchMock = vi.fn();
-global.fetch = fetchMock;
+// Mock callLLM
+const mockCallLLM = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/llm-providers', () => ({
+  callLLM: mockCallLLM,
+}));
+
+vi.mock('@/lib/model-config', () => ({
+  SIMPLE_MODEL: 'gpt-4o-mini',
+}));
 
 // Mock lookahead-service
 const mockGenerateLookahead = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/lookahead-service', () => ({
   generateLookahead: mockGenerateLookahead,
 }));
-
-// Set environment variables before importing
-process.env.NEXTAUTH_URL = 'http://localhost:3000';
-process.env.OPENAI_API_KEY = 'test-openai-key';
 
 // Import functions after mocks are set up
 import {
@@ -27,9 +30,8 @@ import {
 describe('Schedule Analyzer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    fetchMock.mockReset();
+    mockCallLLM.mockReset();
     mockGenerateLookahead.mockReset();
-    process.env.OPENAI_API_KEY = 'test-abacus-key';
   });
 
   afterEach(() => {
@@ -86,17 +88,9 @@ describe('Schedule Analyzer', () => {
       mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
       // Mock AI analysis
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockAIResponse),
-              },
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify(mockAIResponse),
+        model: 'gpt-4o-mini',
       });
 
       const reportContent = 'Completed foundation work at Building A. Poured final concrete slab.';
@@ -115,17 +109,9 @@ describe('Schedule Analyzer', () => {
 
       // AI response wrapped in markdown
       const wrappedResponse = '```json\n' + JSON.stringify(mockAIResponse) + '\n```';
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: wrappedResponse,
-              },
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: wrappedResponse,
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('Completed foundation work', 'project-1');
@@ -150,10 +136,7 @@ describe('Schedule Analyzer', () => {
     it('should handle AI API failure and fall back to keyword analysis', async () => {
       mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
-      fetchMock.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      mockCallLLM.mockRejectedValueOnce(new Error('API error'));
 
       const result = await analyzeScheduleImpact('Foundation work completed', 'project-1');
 
@@ -161,36 +144,12 @@ describe('Schedule Analyzer', () => {
       expect(result.hasScheduleImpact).toBeDefined();
     });
 
-    it('should fall back to keyword analysis when OPENAI_API_KEY is missing', async () => {
-      delete process.env.OPENAI_API_KEY;
-
-      mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
-
-      const result = await analyzeScheduleImpact(
-        'Completed foundation work at Building A',
-        'project-1'
-      );
-
-      expect(result).toBeDefined();
-      expect(result.hasScheduleImpact).toBe(true);
-      // May get multiple suggestions if multiple tasks match
-      expect(result.suggestions.length).toBeGreaterThan(0);
-      // Should use keyword-based analysis (no AI fetch call)
-      expect(fetchMock).not.toHaveBeenCalled();
-    });
-
     it('should handle AI response with no content', async () => {
       mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {},
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: '',
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('Some content', 'project-1');
@@ -202,17 +161,9 @@ describe('Schedule Analyzer', () => {
     it('should handle AI response with invalid JSON', async () => {
       mockGenerateLookahead.mockResolvedValueOnce(mockScheduleData);
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: 'This is not valid JSON {broken',
-              },
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: 'This is not valid JSON {broken',
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('Some content', 'project-1');
@@ -225,21 +176,13 @@ describe('Schedule Analyzer', () => {
     it('should handle empty schedule tasks', async () => {
       mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  hasScheduleImpact: false,
-                  suggestions: [],
-                  summary: 'No tasks to analyze',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          hasScheduleImpact: false,
+          suggestions: [],
+          summary: 'No tasks to analyze',
         }),
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('Some report', 'project-1');
@@ -283,11 +226,9 @@ describe('Schedule Analyzer', () => {
         summary: '1 completion and 1 delay detected',
       };
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [{ message: { content: JSON.stringify(multiTaskResponse) } }],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify(multiTaskResponse),
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('Multiple updates', 'project-1');
@@ -314,8 +255,9 @@ describe('Schedule Analyzer', () => {
       ],
     };
 
+    // callLLM throws to force keyword-based fallback
     beforeEach(() => {
-      delete process.env.OPENAI_API_KEY;
+      mockCallLLM.mockRejectedValue(new Error('Force keyword fallback'));
     });
 
     it('should detect delay keywords', async () => {
@@ -771,10 +713,10 @@ describe('Schedule Analyzer', () => {
       expect(result.hasScheduleImpact).toBeDefined();
     });
 
-    it('should handle network timeout on AI fetch', async () => {
+    it('should handle network timeout on AI call', async () => {
       mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
-      fetchMock.mockRejectedValueOnce(new Error('Network timeout'));
+      mockCallLLM.mockRejectedValueOnce(new Error('Network timeout'));
 
       const result = await analyzeScheduleImpact('Some content', 'project-1');
 
@@ -784,6 +726,15 @@ describe('Schedule Analyzer', () => {
     it('should handle malformed schedule data', async () => {
       mockGenerateLookahead.mockResolvedValueOnce({ not_tasks: 'invalid' } as any);
 
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          hasScheduleImpact: false,
+          suggestions: [],
+          summary: 'No tasks',
+        }),
+        model: 'gpt-4o-mini',
+      });
+
       const result = await analyzeScheduleImpact('Some content', 'project-1');
 
       expect(result).toBeDefined();
@@ -792,21 +743,13 @@ describe('Schedule Analyzer', () => {
     it('should handle empty report content', async () => {
       mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  hasScheduleImpact: false,
-                  suggestions: [],
-                  summary: 'No content to analyze',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          hasScheduleImpact: false,
+          suggestions: [],
+          summary: 'No content to analyze',
         }),
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('', 'project-1');
@@ -819,21 +762,13 @@ describe('Schedule Analyzer', () => {
 
       mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  hasScheduleImpact: false,
-                  suggestions: [],
-                  summary: 'Analyzed long content',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          hasScheduleImpact: false,
+          suggestions: [],
+          summary: 'Analyzed long content',
         }),
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact(longContent, 'project-1');
@@ -857,9 +792,8 @@ describe('Schedule Analyzer', () => {
         ],
       };
 
-      delete process.env.OPENAI_API_KEY;
-
       mockGenerateLookahead.mockResolvedValueOnce(specialCharsSchedule);
+      mockCallLLM.mockRejectedValueOnce(new Error('Force keyword fallback'));
 
       const result = await analyzeScheduleImpact(
         'Foundation & Concrete Work (Phase 1) is completed',
@@ -887,9 +821,8 @@ describe('Schedule Analyzer', () => {
         ],
       };
 
-      delete process.env.OPENAI_API_KEY;
-
       mockGenerateLookahead.mockResolvedValueOnce(schedule);
+      mockCallLLM.mockRejectedValueOnce(new Error('Force keyword fallback'));
 
       const result = await analyzeScheduleImpact(
         'foundation work completed at building a',
@@ -901,29 +834,12 @@ describe('Schedule Analyzer', () => {
       expect(result.suggestions[0].taskName).toBe('FOUNDATION WORK');
     });
 
-    it('should handle AI response with empty choices array', async () => {
+    it('should handle AI response with empty content', async () => {
       mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
 
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [],
-        }),
-      });
-
-      const result = await analyzeScheduleImpact('Some content', 'project-1');
-
-      expect(result).toBeDefined();
-    });
-
-    it('should handle AI response with null choices', async () => {
-      mockGenerateLookahead.mockResolvedValueOnce({ tasks: [] });
-
-      fetchMock.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: null,
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: '',
+        model: 'gpt-4o-mini',
       });
 
       const result = await analyzeScheduleImpact('Some content', 'project-1');

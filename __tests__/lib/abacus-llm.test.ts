@@ -5,7 +5,8 @@ const fetchMock = vi.fn();
 global.fetch = fetchMock;
 
 // Store original env
-const originalEnv = process.env.OPENAI_API_KEY;
+const originalOpenAIKey = process.env.OPENAI_API_KEY;
+const originalAnthropicKey = process.env.ANTHROPIC_API_KEY;
 
 // Import after mocking
 import {
@@ -20,36 +21,35 @@ describe('Abacus LLM', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchMock.mockReset();
-    // Set API key for tests
+    // Set API keys for tests (default model is Claude, so Anthropic key is needed)
     process.env.OPENAI_API_KEY = 'test-openai-api-key';
+    process.env.ANTHROPIC_API_KEY = 'test-anthropic-api-key';
   });
 
   afterEach(() => {
     vi.clearAllMocks();
     // Restore original env
-    if (originalEnv !== undefined) {
-      process.env.OPENAI_API_KEY = originalEnv;
+    if (originalOpenAIKey !== undefined) {
+      process.env.OPENAI_API_KEY = originalOpenAIKey;
     } else {
       delete process.env.OPENAI_API_KEY;
+    }
+    if (originalAnthropicKey !== undefined) {
+      process.env.ANTHROPIC_API_KEY = originalAnthropicKey;
+    } else {
+      delete process.env.ANTHROPIC_API_KEY;
     }
   });
 
   describe('callAbacusLLM', () => {
     describe('Success cases', () => {
-      it('should call Abacus API with default options', async () => {
+      it('should route to Anthropic API with default model (Claude)', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: 'This is a test response',
-              },
-            },
-          ],
+          content: [{ text: 'This is a test response' }],
           model: 'claude-sonnet-4-5-20250929',
           usage: {
-            prompt_tokens: 50,
-            completion_tokens: 100,
-            total_tokens: 150,
+            input_tokens: 50,
+            output_tokens: 100,
           },
         };
 
@@ -73,26 +73,24 @@ describe('Abacus LLM', () => {
         });
 
         expect(fetchMock).toHaveBeenCalledWith(
-          'https://api.openai.com/v1/chat/completions',
+          'https://api.anthropic.com/v1/messages',
           expect.objectContaining({
             method: 'POST',
-            headers: {
+            headers: expect.objectContaining({
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer test-openai-api-key',
-            },
+              'x-api-key': 'test-anthropic-api-key',
+              'anthropic-version': '2023-06-01',
+            }),
           })
         );
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody).toEqual({
-          model: 'claude-sonnet-4-5-20250929',
-          messages,
-          temperature: 0.3,
-          max_tokens: 4000,
-        });
+        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
+        expect(callBody.temperature).toBe(0.3);
+        expect(callBody.max_tokens).toBe(4000);
       });
 
-      it('should call Abacus API with custom options', async () => {
+      it('should route to OpenAI API with explicit OpenAI model', async () => {
         const mockResponse = {
           choices: [
             {
@@ -125,24 +123,20 @@ describe('Abacus LLM', () => {
         expect(result.content).toBe('Custom response');
         expect(result.model).toBe('gpt-4-turbo');
 
+        expect(fetchMock).toHaveBeenCalledWith(
+          'https://api.openai.com/v1/chat/completions',
+          expect.any(Object)
+        );
+
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody).toEqual({
-          model: 'gpt-4-turbo',
-          messages,
-          temperature: 0.7,
-          max_tokens: 2000,
-        });
+        expect(callBody.model).toBe('gpt-4-turbo');
+        expect(callBody.temperature).toBe(0.7);
+        expect(callBody.max_tokens).toBe(2000);
       });
 
-      it('should include response_format when provided', async () => {
+      it('should handle response_format with Claude by adding JSON instruction', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: '{"result": "json response"}',
-              },
-            },
-          ],
+          content: [{ text: '{"result": "json response"}' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -162,12 +156,13 @@ describe('Abacus LLM', () => {
         await callAbacusLLM(messages, options);
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.response_format).toEqual({ type: 'json_object' });
+        // Claude doesn't have response_format; instead, JSON instruction is added to system
+        expect(callBody.system).toContain('You must respond with valid JSON only');
       });
 
       it('should not include response_format when not provided', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -184,17 +179,12 @@ describe('Abacus LLM', () => {
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody.response_format).toBeUndefined();
+        expect(callBody.system).toBeUndefined();
       });
 
       it('should handle messages with complex content', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: 'Analyzed image',
-              },
-            },
-          ],
+          content: [{ text: 'Analyzed image' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -216,19 +206,16 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLM(messages);
 
         expect(result.content).toBe('Analyzed image');
+        // Content blocks are converted to Claude format
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages).toEqual(messages);
+        const imageBlock = callBody.messages[0].content.find((b: any) => b.type === 'image');
+        expect(imageBlock).toBeDefined();
+        expect(imageBlock.source.media_type).toBe('image/jpeg');
       });
 
       it('should handle messages with PDF document source', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: 'Analyzed PDF',
-              },
-            },
-          ],
+          content: [{ text: 'Analyzed PDF' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -257,17 +244,16 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLM(messages);
 
         expect(result.content).toBe('Analyzed PDF');
+        // Document/source blocks pass through natively to Claude
+        const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+        const docBlock = callBody.messages[0].content.find((b: any) => b.type === 'document');
+        expect(docBlock).toBeDefined();
+        expect(docBlock.source.media_type).toBe('application/pdf');
       });
 
       it('should handle empty content in response', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: '',
-              },
-            },
-          ],
+          content: [{ text: '' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -285,7 +271,7 @@ describe('Abacus LLM', () => {
         expect(result.content).toBe('');
       });
 
-      it('should handle missing choices array', async () => {
+      it('should handle missing content array', async () => {
         const mockResponse = {
           model: 'claude-sonnet-4-5-20250929',
         };
@@ -307,13 +293,7 @@ describe('Abacus LLM', () => {
 
       it('should handle missing usage data', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: 'response',
-              },
-            },
-          ],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -358,15 +338,15 @@ describe('Abacus LLM', () => {
     });
 
     describe('Error cases', () => {
-      it('should throw error when OPENAI_API_KEY is not set', async () => {
-        delete process.env.OPENAI_API_KEY;
+      it('should throw error when ANTHROPIC_API_KEY is not set for Claude models', async () => {
+        delete process.env.ANTHROPIC_API_KEY;
 
         const messages: LLMMessage[] = [
           { role: 'user', content: 'Hello' },
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'OPENAI_API_KEY environment variable is not set'
+          'ANTHROPIC_API_KEY environment variable is not set'
         );
 
         expect(fetchMock).not.toHaveBeenCalled();
@@ -384,7 +364,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'OpenAI API request failed (400): Bad request - invalid model'
+          'Anthropic API request failed (400): Bad request - invalid model'
         );
       });
 
@@ -400,7 +380,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'OpenAI API request failed (401): Invalid API key'
+          'Anthropic API request failed (401): Invalid API key'
         );
       });
 
@@ -416,7 +396,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'OpenAI API request failed (429): Rate limit exceeded'
+          'Anthropic API request failed (429): Rate limit exceeded'
         );
       });
 
@@ -432,7 +412,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'OpenAI API request failed (500): Internal server error'
+          'Anthropic API request failed (500): Internal server error'
         );
       });
 
@@ -450,7 +430,7 @@ describe('Abacus LLM', () => {
         ];
 
         await expect(callAbacusLLM(messages)).rejects.toThrow(
-          'OpenAI API request failed (503): No error details available'
+          'Anthropic API request failed (503): No error details available'
         );
       });
 
@@ -483,13 +463,7 @@ describe('Abacus LLM', () => {
     describe('Edge cases', () => {
       it('should handle empty messages array', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: 'response',
-              },
-            },
-          ],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -509,7 +483,7 @@ describe('Abacus LLM', () => {
 
       it('should handle temperature of 0', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -530,7 +504,7 @@ describe('Abacus LLM', () => {
 
       it('should handle temperature of 1', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -551,7 +525,7 @@ describe('Abacus LLM', () => {
 
       it('should handle max_tokens of 1', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'x' } }],
+          content: [{ text: 'x' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -572,7 +546,7 @@ describe('Abacus LLM', () => {
 
       it('should handle very large max_tokens', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -593,7 +567,7 @@ describe('Abacus LLM', () => {
 
       it('should handle very long message content', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -616,7 +590,7 @@ describe('Abacus LLM', () => {
 
       it('should handle special characters in content', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -634,9 +608,9 @@ describe('Abacus LLM', () => {
         expect(result.content).toBe('response');
       });
 
-      it('should handle multiple message roles', async () => {
+      it('should handle multiple message roles with system extraction', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -656,27 +630,26 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('response');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages).toEqual(messages);
+        // System message should be extracted for Anthropic format
+        expect(callBody.system).toBe('You are helpful');
+        expect(callBody.messages).toEqual([
+          { role: 'user', content: 'Hello' },
+          { role: 'assistant', content: 'Hi there' },
+          { role: 'user', content: 'How are you?' },
+        ]);
       });
     });
   });
 
   describe('callAbacusLLMWithVision', () => {
     describe('Success cases', () => {
-      it('should call Abacus API with vision format', async () => {
+      it('should call API with vision format', async () => {
         const mockResponse = {
-          choices: [
-            {
-              message: {
-                content: 'I see a construction site',
-              },
-            },
-          ],
+          content: [{ text: 'I see a construction site' }],
           model: 'claude-sonnet-4-5-20250929',
           usage: {
-            prompt_tokens: 100,
-            completion_tokens: 50,
-            total_tokens: 150,
+            input_tokens: 100,
+            output_tokens: 50,
           },
         };
 
@@ -694,20 +667,22 @@ describe('Abacus LLM', () => {
         expect(result.model).toBe('claude-sonnet-4-5-20250929');
         expect(result.usage?.total_tokens).toBe(150);
 
+        // Routed to Anthropic since default model is Claude
+        expect(fetchMock).toHaveBeenCalledWith(
+          'https://api.anthropic.com/v1/messages',
+          expect.any(Object)
+        );
+
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
-        expect(callBody.messages).toEqual([
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: textPrompt },
-              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
-            ],
-          },
-        ]);
+        // Image should be converted to Claude native format
+        const imageBlock = callBody.messages[0].content.find((b: any) => b.type === 'image');
+        expect(imageBlock).toBeDefined();
+        expect(imageBlock.source.type).toBe('base64');
+        expect(imageBlock.source.media_type).toBe('image/jpeg');
       });
 
-      it('should use custom model when provided', async () => {
+      it('should use custom OpenAI model when provided', async () => {
         const mockResponse = {
           choices: [
             {
@@ -734,13 +709,17 @@ describe('Abacus LLM', () => {
         );
 
         expect(result.content).toBe('Analysis result');
+        expect(fetchMock).toHaveBeenCalledWith(
+          'https://api.openai.com/v1/chat/completions',
+          expect.any(Object)
+        );
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody.model).toBe('gpt-4-turbo');
       });
 
       it('should pass through custom options', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'response' } }],
+          content: [{ text: 'response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -768,7 +747,7 @@ describe('Abacus LLM', () => {
 
       it('should handle empty image data', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'No image detected' } }],
+          content: [{ text: 'No image detected' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -780,13 +759,11 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLMWithVision('What is this?', '');
 
         expect(result.content).toBe('No image detected');
-        const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content[1].image_url.url).toBe('data:image/jpeg;base64,');
       });
 
       it('should handle very long image base64 data', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'Large image processed' } }],
+          content: [{ text: 'Large image processed' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -803,12 +780,12 @@ describe('Abacus LLM', () => {
     });
 
     describe('Error cases', () => {
-      it('should throw error when OPENAI_API_KEY is not set', async () => {
-        delete process.env.OPENAI_API_KEY;
+      it('should throw error when ANTHROPIC_API_KEY is not set for default model', async () => {
+        delete process.env.ANTHROPIC_API_KEY;
 
         await expect(
           callAbacusLLMWithVision('What is this?', 'imagedata')
-        ).rejects.toThrow('OPENAI_API_KEY environment variable is not set');
+        ).rejects.toThrow('ANTHROPIC_API_KEY environment variable is not set');
       });
 
       it('should propagate API errors', async () => {
@@ -820,7 +797,7 @@ describe('Abacus LLM', () => {
 
         await expect(
           callAbacusLLMWithVision('Describe', 'badimage')
-        ).rejects.toThrow('OpenAI API request failed (400): Invalid image format');
+        ).rejects.toThrow('Anthropic API request failed (400): Invalid image format');
       });
 
       it('should handle network errors', async () => {
@@ -835,7 +812,7 @@ describe('Abacus LLM', () => {
     describe('Edge cases', () => {
       it('should handle empty text prompt', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'Image analyzed' } }],
+          content: [{ text: 'Image analyzed' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -848,13 +825,13 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('Image analyzed');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content[0].text).toBe('');
-        expect(callBody.messages[0].content[1].image_url.url).toBe('data:image/jpeg;base64,imagedata');
+        const textBlock = callBody.messages[0].content.find((b: any) => b.type === 'text');
+        expect(textBlock.text).toBe('');
       });
 
       it('should handle special characters in text prompt', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'Processed' } }],
+          content: [{ text: 'Processed' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -868,12 +845,13 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('Processed');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content[0].text).toBe(prompt);
+        const textBlock = callBody.messages[0].content.find((b: any) => b.type === 'text');
+        expect(textBlock.text).toBe(prompt);
       });
 
       it('should handle multiline text prompt', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'Response' } }],
+          content: [{ text: 'Response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -887,12 +865,13 @@ describe('Abacus LLM', () => {
 
         expect(result.content).toBe('Response');
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.messages[0].content[0].text).toBe(prompt);
+        const textBlock = callBody.messages[0].content.find((b: any) => b.type === 'text');
+        expect(textBlock.text).toBe(prompt);
       });
 
-      it('should default to gpt-4o when no model specified', async () => {
+      it('should default to EXTRACTION_MODEL (Claude) when no model specified', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'Response' } }],
+          content: [{ text: 'Response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -909,7 +888,7 @@ describe('Abacus LLM', () => {
 
       it('should preserve existing options when merging', async () => {
         const mockResponse = {
-          choices: [{ message: { content: 'Response' } }],
+          content: [{ text: 'Response' }],
           model: 'claude-sonnet-4-5-20250929',
         };
 
@@ -929,7 +908,8 @@ describe('Abacus LLM', () => {
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
         expect(callBody.temperature).toBe(0.5);
-        expect(callBody.response_format).toEqual({ type: 'json_object' });
+        // JSON instruction added to system for Claude
+        expect(callBody.system).toContain('You must respond with valid JSON only');
         expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
       });
     });
@@ -967,12 +947,11 @@ describe('Abacus LLM', () => {
 
     it('should return properly typed LLMResponse', async () => {
       const mockResponse = {
-        choices: [{ message: { content: 'test' } }],
+        content: [{ text: 'test' }],
         model: 'claude-sonnet-4-5-20250929',
         usage: {
-          prompt_tokens: 10,
-          completion_tokens: 20,
-          total_tokens: 30,
+          input_tokens: 10,
+          output_tokens: 20,
         },
       };
 

@@ -9,6 +9,8 @@
 
 import { ElevationGrid, CrossSection, parseElevationData } from './earthwork-calculator';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { callLLM } from '@/lib/llm-providers';
+import { logger } from '@/lib/logger';
 
 export interface ExtractedElevations {
   existing: { x: number; y: number; elev: number }[];
@@ -157,26 +159,11 @@ Focus on:
 Return ONLY valid JSON.`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.1,
-        response_format: { type: 'json_object' },
-      }),
-    });
-    
-    if (!response.ok) {
-      throw new Error('AI extraction failed');
-    }
-    
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '{}';
+    const result = await callLLM(
+      [{ role: 'user', content: prompt }],
+      { model: EXTRACTION_MODEL, temperature: 0.1, response_format: { type: 'json_object' } }
+    );
+    const content = result.content || '{}';
     const parsed = JSON.parse(content);
     
     return {
@@ -196,7 +183,7 @@ Return ONLY valid JSON.`;
       },
     };
   } catch (error) {
-    console.error('[EarthworkExtractor] AI extraction failed:', error);
+    logger.error('EARTHWORK_EXTRACTOR', 'AI extraction failed', error as Error);
     return extractElevationsFromDocument(documentText, documentType as any);
   }
 }

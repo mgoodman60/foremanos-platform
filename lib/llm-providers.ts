@@ -11,9 +11,17 @@
 import { logger } from '@/lib/logger';
 import { SIMPLE_MODEL, DEFAULT_MODEL } from '@/lib/model-config';
 
+export interface LLMMessageContent {
+  type: string;
+  text?: string;
+  image_url?: { url: string };
+  file?: { filename: string; file_data: string };
+  source?: { type: string; media_type: string; data: string };
+}
+
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
-  content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
+  content: string | Array<LLMMessageContent>;
 }
 
 export interface LLMOptions {
@@ -22,6 +30,7 @@ export interface LLMOptions {
   max_tokens?: number;
   stream?: boolean;
   reasoning_effort?: 'light' | 'medium' | 'high' | 'xhigh';
+  response_format?: { type: string };
 }
 
 export interface LLMResponse {
@@ -66,6 +75,10 @@ export async function callOpenAI(
     requestBody.reasoning_effort = options.reasoning_effort;
   }
 
+  if (options.response_format) {
+    requestBody.response_format = options.response_format;
+  }
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -87,6 +100,58 @@ export async function callOpenAI(
     model: data.model || model,
     usage: data.usage,
   };
+}
+
+/**
+ * Convert a content block from OpenAI/generic format to Claude-native format
+ */
+function convertContentBlockForClaude(item: LLMMessageContent): unknown {
+  // image_url with data URL → Claude image or document format
+  if (item.type === 'image_url' && item.image_url?.url) {
+    const url = item.image_url.url;
+    const dataUrlMatch = url.match(/^data:([^;]+);base64,(.+)$/);
+    if (dataUrlMatch) {
+      const mediaType = dataUrlMatch[1];
+      const data = dataUrlMatch[2];
+      // PDF data URLs → Claude document format
+      if (mediaType === 'application/pdf') {
+        return {
+          type: 'document',
+          source: { type: 'base64', media_type: 'application/pdf', data },
+        };
+      }
+      return {
+        type: 'image',
+        source: { type: 'base64', media_type: mediaType, data },
+      };
+    }
+    // Raw base64 (no data: prefix) → default to image/jpeg
+    return {
+      type: 'image',
+      source: { type: 'base64', media_type: 'image/jpeg', data: url },
+    };
+  }
+
+  // file blocks → Claude document format
+  if (item.type === 'file' && item.file) {
+    return {
+      type: 'document',
+      source: { type: 'base64', media_type: 'application/pdf', data: item.file.file_data },
+    };
+  }
+
+  // document/source blocks → pass through natively (Claude supports these)
+  if ((item.type === 'document' || item.type === 'image') && item.source) {
+    return item;
+  }
+
+  // text blocks → pass through as-is
+  if (item.type === 'text') {
+    return { type: 'text', text: item.text || '' };
+  }
+
+  // Unknown types → pass through
+  return item;
 }
 
 /**
@@ -116,10 +181,28 @@ export async function callAnthropic(
     if (msg.role === 'system') {
       systemMessage = typeof msg.content === 'string' ? msg.content : '';
     } else {
+      // Convert content blocks to Claude-native format
+      let convertedContent: string | Array<unknown>;
+      if (Array.isArray(msg.content)) {
+        convertedContent = msg.content.map(convertContentBlockForClaude);
+      } else {
+        convertedContent = msg.content;
+      }
+
       anthropicMessages.push({
         role: msg.role as 'user' | 'assistant',
-        content: msg.content,
+        content: convertedContent,
       });
+    }
+  }
+
+  // Handle response_format: json_object by adding JSON instruction to system prompt
+  if (options.response_format?.type === 'json_object') {
+    const jsonInstruction = 'You must respond with valid JSON only. No markdown, no explanation, no code fences.';
+    if (systemMessage) {
+      systemMessage = `${systemMessage}\n\n${jsonInstruction}`;
+    } else {
+      systemMessage = jsonInstruction;
     }
   }
 

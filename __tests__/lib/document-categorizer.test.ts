@@ -4,11 +4,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
-// Mock fetch globally with vi.hoisted
-const mockFetch = vi.hoisted(() => vi.fn());
+// Mock callLLM with vi.hoisted
+const mockCallLLM = vi.hoisted(() => vi.fn());
 
-// Set environment variables before importing
-process.env.OPENAI_API_KEY = 'test-api-key-12345';
+vi.mock('@/lib/llm-providers', () => ({
+  callLLM: mockCallLLM,
+}));
+
+vi.mock('@/lib/model-config', () => ({
+  SIMPLE_MODEL: 'gpt-4o-mini',
+}));
 
 // Import functions after setting env vars and mocks
 import {
@@ -20,17 +25,12 @@ import {
 } from '@/lib/document-categorizer';
 
 describe('Document Categorizer', () => {
-  let originalFetch: typeof global.fetch;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    originalFetch = global.fetch;
-    global.fetch = mockFetch as any;
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    global.fetch = originalFetch;
   });
 
   // ============================================
@@ -294,21 +294,13 @@ describe('Document Categorizer', () => {
 
   describe('suggestDocumentCategory - LLM fallback', () => {
     it('should use LLM when keyword confidence is below 0.8', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'specifications',
-                  confidence: 0.92,
-                  reasoning: 'Document contains technical specifications for HVAC system',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'specifications',
+          confidence: 0.92,
+          reasoning: 'Document contains technical specifications for HVAC system',
         }),
+        model: 'gpt-4o-mini',
       });
 
       const result = await suggestDocumentCategory(
@@ -320,112 +312,89 @@ describe('Document Categorizer', () => {
       expect(result.suggestedCategory).toBe('specifications');
       expect(result.confidence).toBe(0.92);
       expect(result.reasoning).toContain('technical specifications');
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.openai.com/v1/chat/completions',
+      expect(mockCallLLM).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ role: 'system' }),
+          expect.objectContaining({ role: 'user' }),
+        ]),
         expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer test-api-key-12345',
-          }),
+          model: 'gpt-4o-mini',
+          temperature: 0.1,
+          max_tokens: 150,
         })
       );
     });
 
     it('should include content preview in LLM request when provided', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'contracts',
-                  confidence: 0.88,
-                  reasoning: 'Contract language detected',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'contracts',
+          confidence: 0.88,
+          reasoning: 'Contract language detected',
         }),
+        model: 'gpt-4o-mini',
       });
 
       const contentPreview = 'This agreement is made between...';
       await suggestDocumentCategory('document.pdf', 'pdf', contentPreview);
 
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      expect(callBody.messages[1].content).toContain('Content preview:');
-      expect(callBody.messages[1].content).toContain('This agreement is made between...');
+      const callArgs = mockCallLLM.mock.calls[0];
+      const messages = callArgs[0];
+      const userMessage = messages.find((m: any) => m.role === 'user');
+      expect(userMessage.content).toContain('Content preview:');
+      expect(userMessage.content).toContain('This agreement is made between...');
     });
 
     it('should truncate content preview to 500 characters', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'other',
-                  confidence: 0.6,
-                  reasoning: 'Generic document',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'other',
+          confidence: 0.6,
+          reasoning: 'Generic document',
         }),
+        model: 'gpt-4o-mini',
       });
 
       const longContent = 'A'.repeat(1000);
       await suggestDocumentCategory('document.pdf', 'pdf', longContent);
 
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      const contentInMessage = callBody.messages[1].content;
+      const callArgs = mockCallLLM.mock.calls[0];
+      const messages = callArgs[0];
+      const userMessage = messages.find((m: any) => m.role === 'user');
+      const contentInMessage = userMessage.content;
       // Content preview should be truncated to 500 chars
       const previewMatch = contentInMessage.match(/Content preview: (.+)/);
       expect(previewMatch).toBeTruthy();
       expect(previewMatch[1].length).toBeLessThanOrEqual(500);
     });
 
-    it('should use gpt-4o-mini model', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'budgets',
-                  confidence: 0.85,
-                  reasoning: 'Cost estimate document',
-                }),
-              },
-            },
-          ],
+    it('should use SIMPLE_MODEL model', async () => {
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'budgets',
+          confidence: 0.85,
+          reasoning: 'Cost estimate document',
         }),
+        model: 'gpt-4o-mini',
       });
 
       // Use a filename that won't match keywords (confidence will be < 0.8, triggering LLM)
       await suggestDocumentCategory('xyz-unknown.pdf', 'pdf');
 
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      expect(callBody.model).toBe('gpt-4o-mini');
-      expect(callBody.temperature).toBe(0.1);
-      expect(callBody.max_tokens).toBe(150);
+      expect(mockCallLLM).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({
+          model: 'gpt-4o-mini',
+          temperature: 0.1,
+          max_tokens: 150,
+        })
+      );
     });
 
     it('should parse JSON response with markdown code blocks', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: '```json\n{"category": "schedule", "confidence": 0.87, "reasoning": "Gantt chart"}\n```',
-              },
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: '```json\n{"category": "schedule", "confidence": 0.87, "reasoning": "Gantt chart"}\n```',
+        model: 'gpt-4o-mini',
       });
 
       // Use filename that won't match keywords to trigger LLM
@@ -436,17 +405,9 @@ describe('Document Categorizer', () => {
     });
 
     it('should parse JSON response without code blocks', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: '{"category": "daily_reports", "confidence": 0.91, "reasoning": "Daily log format"}',
-              },
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: '{"category": "daily_reports", "confidence": 0.91, "reasoning": "Daily log format"}',
+        model: 'gpt-4o-mini',
       });
 
       // Use filename that won't match keywords to trigger LLM
@@ -456,10 +417,7 @@ describe('Document Categorizer', () => {
     });
 
     it('should fallback to keyword match on LLM API error', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      mockCallLLM.mockRejectedValueOnce(new Error('API error'));
 
       // Use filename that won't match any keywords
       const result = await suggestDocumentCategory('xyz-misc-file.pdf', 'pdf');
@@ -470,17 +428,9 @@ describe('Document Categorizer', () => {
     });
 
     it('should fallback to keyword match on JSON parse error', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: 'Invalid JSON response',
-              },
-            },
-          ],
-        }),
+      mockCallLLM.mockResolvedValueOnce({
+        content: 'Invalid JSON response',
+        model: 'gpt-4o-mini',
       });
 
       // Use filename that won't match any keywords
@@ -497,27 +447,20 @@ describe('Document Categorizer', () => {
 
   describe('suggestDocumentCategory - LLM system prompt', () => {
     it('should send correct system prompt with categories', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'plans',
-                  confidence: 0.94,
-                  reasoning: 'MEP drawing detected',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'plans',
+          confidence: 0.94,
+          reasoning: 'MEP drawing detected',
         }),
+        model: 'gpt-4o-mini',
       });
 
       await suggestDocumentCategory('document.pdf', 'pdf');
 
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      const systemMessage = callBody.messages.find((m: any) => m.role === 'system');
+      const callArgs = mockCallLLM.mock.calls[0];
+      const messages = callArgs[0];
+      const systemMessage = messages.find((m: any) => m.role === 'system');
       expect(systemMessage).toBeDefined();
       expect(systemMessage.content).toContain('construction document classifier');
       expect(systemMessage.content).toContain('plans_drawings');
@@ -531,27 +474,20 @@ describe('Document Categorizer', () => {
     });
 
     it('should send user message with filename and file type', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'other',
-                  confidence: 0.5,
-                  reasoning: 'Unclear category',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'other',
+          confidence: 0.5,
+          reasoning: 'Unclear category',
         }),
+        model: 'gpt-4o-mini',
       });
 
       await suggestDocumentCategory('test-doc.pdf', 'pdf');
 
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      const userMessage = callBody.messages.find((m: any) => m.role === 'user');
+      const callArgs = mockCallLLM.mock.calls[0];
+      const messages = callArgs[0];
+      const userMessage = messages.find((m: any) => m.role === 'user');
       expect(userMessage).toBeDefined();
       expect(userMessage.content).toContain('Filename: test-doc.pdf');
       expect(userMessage.content).toContain('File type: pdf');
@@ -566,21 +502,13 @@ describe('Document Categorizer', () => {
     it('should handle empty filename', async () => {
       // Empty filename with pdf extension won't match any keywords
       // But we need to avoid triggering LLM, so we mock it
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify({
-                  category: 'other',
-                  confidence: 0.5,
-                  reasoning: 'No clear indicators',
-                }),
-              },
-            },
-          ],
+      mockCallLLM.mockResolvedValueOnce({
+        content: JSON.stringify({
+          category: 'other',
+          confidence: 0.5,
+          reasoning: 'No clear indicators',
         }),
+        model: 'gpt-4o-mini',
       });
       const result = await suggestDocumentCategory('', 'pdf');
       // Empty string won't match keywords, will fall to 'other' with 0.5 confidence
@@ -613,8 +541,8 @@ describe('Document Categorizer', () => {
       const result = await suggestDocumentCategory('site-photo.jpg', 'jpg');
       expect(result.suggestedCategory).toBe('photos');
       expect(result.confidence).toBe(0.95);
-      // Fetch should not be called for high-confidence matches
-      expect(mockFetch).not.toHaveBeenCalled();
+      // callLLM should not be called for high-confidence matches
+      expect(mockCallLLM).not.toHaveBeenCalled();
     });
 
     it('should handle all supported image formats', async () => {

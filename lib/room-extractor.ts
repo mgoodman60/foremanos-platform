@@ -177,11 +177,6 @@ async function extractRoomDataWithLLM(
   chunks: string[],
   projectName: string
 ): Promise<ExtractedRoom[]> {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY not configured');
-  }
-
   // STEP 1: Pattern-based extraction to find all room numbers
   const detectedRoomNumbers = extractRoomNumbersWithPatterns(chunks);
   console.log(`[Room Extractor] Pattern matching found ${detectedRoomNumbers.size} potential room numbers:`, Array.from(detectedRoomNumbers).sort().join(', '));

@@ -28,6 +28,17 @@ interface DocumentLibraryProps {
   onDocumentsChange?: () => void;
 }
 
+interface DocumentProgress {
+  status: string;
+  pagesProcessed: number;
+  totalPages: number;
+  percentComplete: number;
+  currentPhase: string;
+  estimatedTimeRemaining: number;
+  queuePosition: number | null;
+  error: string | null;
+}
+
 interface Document {
   id: string;
   name: string;
@@ -39,6 +50,8 @@ interface Document {
   fileSize: number | null;
   lastModified: string | null;
   updatedAt: string;
+  queueStatus?: string;
+  processed?: boolean;
 }
 
 export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: DocumentLibraryProps) {
@@ -68,6 +81,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<string, DocumentProgress>>({});
 
   const categories = getAllCategories();
 
@@ -120,6 +134,35 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     fetchDocuments();
     fetchProjectSlug();
   }, [projectId]);
+
+  // Poll progress for documents that are processing
+  useEffect(() => {
+    const processingDocs = documents.filter(
+      d => d.queueStatus && d.queueStatus !== 'none' && d.queueStatus !== 'completed' && !d.processed
+    );
+
+    if (processingDocs.length === 0) return;
+
+    const fetchProgress = async () => {
+      for (const doc of processingDocs) {
+        try {
+          const res = await fetch(`/api/documents/${doc.id}/progress`);
+          if (res.ok) {
+            const data: DocumentProgress = await res.json();
+            setProgressMap(prev => ({ ...prev, [doc.id]: data }));
+            // If completed, refresh the document list
+            if (data.currentPhase === 'completed') {
+              fetchDocuments();
+            }
+          }
+        } catch { /* ignore polling errors */ }
+      }
+    };
+
+    fetchProgress();
+    const interval = setInterval(fetchProgress, 5000);
+    return () => clearInterval(interval);
+  }, [documents.map(d => `${d.id}:${d.queueStatus}`).join(',')]);
 
   // Handle CAD file upload to Autodesk via presigned URL
   const handleCADUpload = async (file: File) => {
@@ -1233,8 +1276,43 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         <div className="mt-1.5">
                           {getCategoryBadge(doc.category)}
                         </div>
+                        {/* Inline Processing Progress - Mobile */}
+                        {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
+                          const progress = progressMap[doc.id];
+                          const percent = progress?.percentComplete || 0;
+                          const phase = progress?.currentPhase || doc.queueStatus || 'queued';
+                          return (
+                            <div className="mt-2">
+                              <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>
+                                  {phase === 'queued' && (progress?.queuePosition ? `Queue position ${progress.queuePosition}` : 'Waiting in queue...')}
+                                  {phase === 'extracting' && 'Extracting...'}
+                                  {phase === 'analyzing' && `Page ${progress?.pagesProcessed || 0} of ${progress?.totalPages || '?'}`}
+                                  {phase === 'indexing' && 'Indexing...'}
+                                  {phase === 'failed' && 'Failed'}
+                                  {phase === 'pending' && 'Preparing...'}
+                                  {phase === 'processing' && `Processing ${progress?.pagesProcessed || 0}/${progress?.totalPages || '?'}`}
+                                </span>
+                                {percent > 0 && <span>{percent}%</span>}
+                              </div>
+                              <div
+                                className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
+                                role="progressbar"
+                                aria-valuenow={percent}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label={`Processing: ${percent}%`}
+                              >
+                                <div
+                                  className={`h-1.5 rounded-full transition-all duration-500 ${phase === 'queued' ? 'bg-yellow-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' ? 'animate-pulse' : ''}`}
+                                  style={{ width: `${Math.max(2, percent)}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
-                      
+
                       {/* Preview Button */}
                       <button
                         type="button"
@@ -1323,7 +1401,47 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           <div className="mt-2">
                             {getCategoryBadge(doc.category)}
                           </div>
-                          
+
+                          {/* Inline Processing Progress - Desktop */}
+                          {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
+                            const progress = progressMap[doc.id];
+                            const percent = progress?.percentComplete || 0;
+                            const phase = progress?.currentPhase || doc.queueStatus || 'queued';
+                            const timeLeft = progress?.estimatedTimeRemaining || 0;
+                            return (
+                              <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
+                                <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+                                  <span className="font-medium">
+                                    {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition})...` : 'Waiting in queue...')}
+                                    {phase === 'extracting' && 'Extracting content from pages...'}
+                                    {phase === 'analyzing' && `Analyzing page ${progress?.pagesProcessed || 0} of ${progress?.totalPages || '?'}...`}
+                                    {phase === 'indexing' && 'Indexing content for search...'}
+                                    {phase === 'failed' && 'Processing failed'}
+                                    {phase === 'pending' && 'Preparing to process...'}
+                                    {phase === 'processing' && `Processing page ${progress?.pagesProcessed || 0} of ${progress?.totalPages || '?'}...`}
+                                  </span>
+                                  <span className="flex items-center gap-2">
+                                    {percent > 0 && <span>{percent}%</span>}
+                                    {timeLeft > 0 && <span className="text-gray-500">{timeLeft < 60 ? `~${timeLeft}s` : `~${Math.ceil(timeLeft / 60)}m`}</span>}
+                                  </span>
+                                </div>
+                                <div
+                                  className="w-full bg-gray-700 rounded-full h-2 overflow-hidden"
+                                  role="progressbar"
+                                  aria-valuenow={percent}
+                                  aria-valuemin={0}
+                                  aria-valuemax={100}
+                                  aria-label={`Document processing: ${percent}%`}
+                                >
+                                  <div
+                                    className={`h-2 rounded-full transition-all duration-500 ${phase === 'queued' ? 'bg-yellow-500' : phase === 'indexing' ? 'bg-green-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' ? 'animate-pulse' : ''}`}
+                                    style={{ width: `${Math.max(2, percent)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })()}
+
                           {/* Visibility Controls - Desktop Only */}
                           {canChangeVisibility && (
                             <div className="mt-3 pt-3 border-t border-gray-700">

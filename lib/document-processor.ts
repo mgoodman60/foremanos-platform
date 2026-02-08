@@ -175,7 +175,8 @@ export async function processDocument(
 
     logger.info('DOCUMENT_PROCESSOR', `Document ${documentId} processed successfully`, { processorType: classification.processorType, pages: actualPages, cost: actualCost.toFixed(4) });
 
-    // Trigger intelligence extraction and room extraction in background
+    // Run intelligence extraction BEFORE marking as processed
+    // This ensures chunks are enriched before RAG retrieval uses them
     const doc = await prisma.document.findUnique({
       where: { id: documentId },
       include: { Project: true },
@@ -183,98 +184,93 @@ export async function processDocument(
 
     if (doc?.Project?.slug) {
       const projectSlug = doc.Project.slug;
-      
-      // Run intelligence extraction then room extraction
-      logger.info('PROCESS', `Starting intelligence extraction for ${documentId}`);
-      import('./intelligence-orchestrator').then(({ runIntelligenceExtraction }) => {
-        runIntelligenceExtraction({
+
+      // 1. Intelligence extraction (Phase A, B, C)
+      try {
+        logger.info('DOCUMENT_PROCESSOR', `Starting intelligence extraction for ${documentId}`);
+        const { runIntelligenceExtraction } = await import('./intelligence-orchestrator');
+        await runIntelligenceExtraction({
           documentId,
           projectSlug,
           phases: ['A', 'B', 'C'],
-        })
-          .then(async () => {
-            logger.info('PROCESS', 'Intelligence extraction completed');
+        });
+        logger.info('DOCUMENT_PROCESSOR', 'Intelligence extraction completed');
+      } catch (error) {
+        logger.error('DOCUMENT_PROCESSOR', 'Intelligence extraction failed', error as Error, { documentId });
+      }
 
-            // Room extraction after intelligence is done
-            logger.info('PROCESS', `Starting room extraction for project ${projectSlug}`);
-            import('./room-extractor').then(({ extractRoomsFromDocuments, saveExtractedRooms }) => {
-              extractRoomsFromDocuments(projectSlug)
-                .then(async (result) => {
-                  if (result.rooms.length > 0) {
-                    const saveResult = await saveExtractedRooms(projectSlug, result.rooms);
-                    logger.info('PROCESS', `Room extraction complete`, { created: saveResult.created, updated: saveResult.updated });
-                  } else {
-                    logger.info('PROCESS', 'No rooms found in documents');
-                  }
-                })
-                .catch(err => logger.error('PROCESS', 'Room extraction error', err));
+      // 2. Room extraction (after intelligence is done)
+      try {
+        logger.info('DOCUMENT_PROCESSOR', `Starting room extraction for project ${projectSlug}`);
+        const { extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
+        const roomResult = await extractRoomsFromDocuments(projectSlug);
+        if (roomResult.rooms.length > 0) {
+          const saveResult = await saveExtractedRooms(projectSlug, roomResult.rooms);
+          logger.info('DOCUMENT_PROCESSOR', 'Room extraction complete', { created: saveResult.created, updated: saveResult.updated });
+        } else {
+          logger.info('DOCUMENT_PROCESSOR', 'No rooms found in documents');
+        }
+      } catch (error) {
+        logger.error('DOCUMENT_PROCESSOR', 'Room extraction failed', error as Error, { documentId });
+      }
+
+      // 3. Auto-sync all features from this document
+      const docForSync = await prisma.document.findUnique({
+        where: { id: documentId },
+        select: { id: true, projectId: true, fileName: true, category: true },
+      });
+
+      if (docForSync?.projectId) {
+        try {
+          logger.info('DOCUMENT_PROCESSOR', `Starting feature auto-sync for ${docForSync.fileName}`);
+          const { processDocumentForSync } = await import('./document-auto-sync');
+          const syncResult = await processDocumentForSync(documentId, docForSync.projectId!);
+          logger.info('DOCUMENT_PROCESSOR', 'Auto-sync complete', { featuresProcessed: syncResult.featuresProcessed.length });
+          if (syncResult.featuresProcessed.length > 0) {
+            logger.info('DOCUMENT_PROCESSOR', `Features processed: ${syncResult.featuresProcessed.join(', ')}`);
+          }
+          if (syncResult.featuresSkipped.length > 0) {
+            logger.info('DOCUMENT_PROCESSOR', `Skipped (higher confidence exists): ${syncResult.featuresSkipped.join(', ')}`);
+          }
+          if (syncResult.errors.length > 0) {
+            logger.warn('DOCUMENT_PROCESSOR', `Sync errors: ${syncResult.errors.join(', ')}`);
+          }
+        } catch (error) {
+          logger.error('DOCUMENT_PROCESSOR', 'Auto-sync failed', error as Error, { documentId });
+        }
+
+        // 4. Auto-extract schedule if this is a schedule document
+        const fileName = docForSync.fileName?.toLowerCase() || '';
+        const category = docForSync.category?.toLowerCase() || '';
+        const isScheduleDoc =
+          category === 'schedule' ||
+          fileName.includes('schedule') ||
+          fileName.includes('gantt') ||
+          fileName.includes('timeline') ||
+          fileName.includes('lookahead') ||
+          fileName.includes('critical path') ||
+          fileName.endsWith('.mpp');
+
+        if (isScheduleDoc) {
+          try {
+            logger.info('DOCUMENT_PROCESSOR', 'Detected schedule document, starting automatic schedule extraction');
+            const { extractScheduleWithAI } = await import('./schedule-extractor-ai');
+            const project = await prisma.project.findUnique({
+              where: { id: docForSync.projectId! },
+              select: { ownerId: true }
             });
-            
-            // Auto-sync all features from this document
-            const docForSync = await prisma.document.findUnique({
-              where: { id: documentId },
-              select: { id: true, projectId: true, fileName: true, category: true },
-            });
-            
-            if (docForSync?.projectId) {
-              logger.info('PROCESS', `Starting feature auto-sync for ${docForSync.fileName}`);
-              import('./document-auto-sync').then(({ processDocumentForSync }) => {
-                processDocumentForSync(documentId, docForSync.projectId!)
-                  .then((result) => {
-                    logger.info('PROCESS', `Auto-sync complete`, { featuresProcessed: result.featuresProcessed.length });
-                    if (result.featuresProcessed.length > 0) {
-                      logger.info('PROCESS', `Features processed: ${result.featuresProcessed.join(', ')}`);
-                    }
-                    if (result.featuresSkipped.length > 0) {
-                      logger.info('PROCESS', `Skipped (higher confidence exists): ${result.featuresSkipped.join(', ')}`);
-                    }
-                    if (result.errors.length > 0) {
-                      logger.warn('PROCESS', `Errors: ${result.errors.join(', ')}`);
-                    }
-                  })
-                  .catch(err => logger.error('PROCESS', 'Auto-sync error', err));
-              });
-              
-              // Auto-extract schedule if this is a schedule document
-              const fileName = docForSync.fileName?.toLowerCase() || '';
-              const category = docForSync.category?.toLowerCase() || '';
-              const isScheduleDoc = 
-                category === 'schedule' ||
-                fileName.includes('schedule') ||
-                fileName.includes('gantt') ||
-                fileName.includes('timeline') ||
-                fileName.includes('lookahead') ||
-                fileName.includes('critical path') ||
-                fileName.endsWith('.mpp');
-              
-              if (isScheduleDoc) {
-                logger.info('PROCESS', 'Detected schedule document, starting automatic schedule extraction');
-                import('./schedule-extractor-ai').then(({ extractScheduleWithAI }) => {
-                  // Get user ID for schedule creation
-                  prisma.project.findUnique({
-                    where: { id: docForSync.projectId! },
-                    select: { ownerId: true }
-                  }).then(project => {
-                    if (project?.ownerId) {
-                      extractScheduleWithAI(documentId, docForSync.projectId!, project.ownerId)
-                        .then((result) => {
-                          logger.info('PROCESS', `Schedule extraction complete`, { totalTasks: result.totalTasks });
-                          if (result.criticalPathTasks > 0) {
-                            logger.info('PROCESS', `Critical path tasks identified`, { count: result.criticalPathTasks });
-                          }
-                        })
-                        .catch(err => {
-                          logger.error('PROCESS', 'Schedule extraction error', err);
-                          // Don't fail the overall process - schedule extraction is supplementary
-                        });
-                    }
-                  }).catch(err => logger.error('PROCESS', 'Failed to get project owner for schedule extraction', err));
-                });
+            if (project?.ownerId) {
+              const scheduleResult = await extractScheduleWithAI(documentId, docForSync.projectId!, project.ownerId);
+              logger.info('DOCUMENT_PROCESSOR', 'Schedule extraction complete', { totalTasks: scheduleResult.totalTasks });
+              if (scheduleResult.criticalPathTasks > 0) {
+                logger.info('DOCUMENT_PROCESSOR', 'Critical path tasks identified', { count: scheduleResult.criticalPathTasks });
               }
             }
-          })
-          .catch(err => logger.error('PROCESS', 'Intelligence extraction error', err));
-      });
+          } catch (error) {
+            logger.error('DOCUMENT_PROCESSOR', 'Schedule extraction failed', error as Error, { documentId });
+          }
+        }
+      }
     }
   } catch (error: any) {
     logger.error('DOCUMENT_PROCESSOR', `Error processing document ${documentId}`, error);
@@ -357,7 +353,7 @@ async function processWithVision(
     }
 
     // Calculate actual cost
-    const costPerPage = processorType === 'gpt-4o-vision' ? 0.01 : 
+    const costPerPage = processorType === 'vision-ai' ? 0.01 : 
                         processorType === 'claude-haiku-ocr' ? 0.001 : 
                         0.003;
     const cost = result.pagesProcessed * costPerPage;

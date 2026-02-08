@@ -7,7 +7,16 @@ const mockRedis = vi.hoisted(() => ({
   isRedisAvailable: vi.fn(),
 }));
 
+// Mock logger module with vi.hoisted
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 vi.mock('@/lib/redis', () => mockRedis);
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 
 // Import after mocks
 import {
@@ -21,16 +30,9 @@ import {
 } from '@/lib/query-cache';
 
 describe('Query Cache', () => {
-  let consoleLogSpy: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
     clearCache();
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    consoleLogSpy.mockRestore();
   });
 
   describe('analyzeQueryComplexity', () => {
@@ -253,8 +255,8 @@ describe('Query Cache', () => {
           expect.objectContaining({ hitCount: 4 }),
           expect.any(Number)
         );
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[REDIS CACHE HIT - EXACT]')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Redis cache hit (exact)', expect.any(Object)
         );
       });
 
@@ -358,8 +360,8 @@ describe('Query Cache', () => {
         const result = await getCachedResponse(query, projectId, documentIds);
 
         expect(result).toBe(response);
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[CACHE HIT - EXACT]')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Cache hit (exact)', expect.any(Object)
         );
       });
 
@@ -399,8 +401,8 @@ describe('Query Cache', () => {
         Date.now = originalNow;
 
         expect(result).toBeNull();
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[CACHE EXPIRED]')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Cache expired', expect.any(Object)
         );
       });
 
@@ -426,8 +428,8 @@ describe('Query Cache', () => {
 
         expect(result).toBe(response);
         // Should hit cache (exact match via normalization)
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringMatching(/\[CACHE HIT/)
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', expect.stringMatching(/Cache hit/), expect.any(Object)
         );
       });
 
@@ -606,8 +608,8 @@ describe('Query Cache', () => {
           48 * 3600 // Standard TTL
         );
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[REDIS CACHE SET - STANDARD]')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Redis cache set', expect.objectContaining({ type: 'standard' })
         );
       });
 
@@ -630,8 +632,8 @@ describe('Query Cache', () => {
           72 * 3600 // High-value TTL
         );
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[REDIS CACHE SET - HIGH-VALUE]')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Redis cache set', expect.objectContaining({ type: 'high-value' })
         );
       });
 
@@ -656,8 +658,6 @@ describe('Query Cache', () => {
       });
 
       it('should handle Redis errors gracefully and still cache in-memory', async () => {
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
         mockRedis.isRedisAvailable.mockReturnValue(true);
         mockRedis.setCached.mockRejectedValue(new Error('Redis write failed'));
 
@@ -670,17 +670,14 @@ describe('Query Cache', () => {
           'gpt-4o-mini'
         );
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          '[REDIS CACHE SET ERROR]',
-          expect.any(Error)
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Redis cache set error', expect.any(Error)
         );
 
         // Should still be in-memory
         mockRedis.isRedisAvailable.mockReturnValue(false);
         const result = await getCachedResponse('What is the concrete strength?', projectId, documentIds);
         expect(result).toBe('The concrete strength is 4000 psi as specified in the structural plans.');
-
-        consoleErrorSpy.mockRestore();
       });
     });
 
@@ -697,8 +694,8 @@ describe('Query Cache', () => {
           'gpt-4o-mini'
         );
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[CACHE SKIP] Query not cacheable')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Query not cacheable', expect.any(Object)
         );
 
         const stats = getCacheStats();
@@ -749,8 +746,8 @@ describe('Query Cache', () => {
           'gpt-4o-mini'
         );
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[CACHE SKIP] Response too short')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Response too short to cache', expect.any(Object)
         );
 
         const stats = getCacheStats();
@@ -789,8 +786,8 @@ describe('Query Cache', () => {
 
         const stats2 = getCacheStats();
         expect(stats2.cacheSize).toBe(2000);
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[CACHE EVICT]')
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'QUERY_CACHE', 'Cache eviction', expect.any(Object)
         );
       });
 
@@ -988,7 +985,7 @@ describe('Query Cache', () => {
       expect(stats.cacheSize).toBe(0);
       expect(stats.totalHits).toBe(0);
       expect(stats.totalMisses).toBe(0);
-      expect(consoleLogSpy).toHaveBeenCalledWith('[CACHE] Cache cleared');
+      expect(mockLogger.info).toHaveBeenCalledWith('QUERY_CACHE', 'Cache cleared');
     });
   });
 

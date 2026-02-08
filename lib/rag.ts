@@ -60,6 +60,7 @@ import { getMEPScheduleContext } from './mep-schedule-extractor';
 import { getDoorScheduleContext } from './door-schedule-extractor';
 import { getWindowScheduleContext } from './window-schedule-extractor';
 import { Prisma, type DocumentCategory } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPE DEFINITIONS FOR JSON FIELDS
@@ -432,6 +433,10 @@ export async function retrieveRelevantDocuments(
 
     for (const doc of documents) {
       for (const chunk of doc.DocumentChunk) {
+        // Skip chunks that failed extraction — they contain garbage content
+        const chunkMeta = chunk.metadata as Record<string, unknown> | null;
+        if (chunkMeta?.skipForRag) continue;
+
         let score = calculateRelevanceScore(chunk.content, keywords, query, doc.name);
 
         // Apply category boost based on query intent
@@ -476,7 +481,7 @@ export async function retrieveRelevantDocuments(
       documentNames,
     };
   } catch (error) {
-    console.error('Error retrieving documents:', error);
+    logger.error('RAG', 'Error retrieving documents', error as Error);
     return { chunks: [], documentNames: [] };
   }
 }
@@ -1186,7 +1191,7 @@ export async function retrieveRegulatoryChunks(
         },
       }));
   } catch (error) {
-    console.error('Error retrieving regulatory chunks:', error);
+    logger.error('RAG', 'Error retrieving regulatory chunks', error as Error);
     return [];
   }
 }
@@ -1300,7 +1305,7 @@ export async function retrieveRelevantCorrections(
 
     return relevantCorrections;
   } catch (error) {
-    console.error('Error retrieving admin corrections:', error);
+    logger.error('RAG', 'Error retrieving admin corrections', error as Error);
     return [];
   }
 }
@@ -1630,7 +1635,7 @@ export async function retrievePhase3Context(
         const symbolStats = await getSymbolStatistics(projectSlug);
         phase3Data.symbols = symbolStats.topSymbols;
       } catch (error) {
-        console.error('Symbol learning error:', error);
+        logger.error('RAG', 'Symbol learning error', error as Error);
       }
     }
 
@@ -1647,7 +1652,7 @@ export async function retrievePhase3Context(
         // Future: Integrate directly here for richer context
         phase3Data.isometricViews = [];
       } catch (error) {
-        console.error('Isometric interpretation error:', error);
+        logger.error('RAG', 'Isometric interpretation error', error as Error);
       }
     }
 
@@ -1664,13 +1669,13 @@ export async function retrievePhase3Context(
         // Future: Integrate directly here for richer context
         phase3Data.pathAnalysis = undefined;
       } catch (error) {
-        console.error('Path tracing error:', error);
+        logger.error('RAG', 'Path tracing error', error as Error);
       }
     }
 
     return phase3Data;
   } catch (error) {
-    console.error('Error retrieving Phase 3 context:', error);
+    logger.error('RAG', 'Error retrieving Phase 3 context', error as Error);
     return {};
   }
 }
@@ -1718,7 +1723,7 @@ export async function generateContextWithPhase3(
         prompt += '\n\n' + takeoffContext.formattedContext;
       }
     } catch (error) {
-      console.error('[RAG] Error getting takeoff context:', error);
+      logger.error('RAG', 'Error getting takeoff context', error as Error);
       // Fall back to basic material data if enhanced service fails
       if (phase3Data.materials && phase3Data.materials.length > 0) {
         prompt += '\n\n=== MATERIAL TAKEOFF DATA ===\n';
@@ -1844,7 +1849,7 @@ export async function generateContextWithPhase3(
       prompt += '• For MEP questions, prioritize BIM data over PDF extraction when available\n';
     }
   } catch (error) {
-    console.error('[RAG] Error getting BIM context:', error);
+    logger.error('RAG', 'Error getting BIM context', error as Error);
   }
 
   // Add MEP Schedule context for equipment-related queries
@@ -1861,7 +1866,7 @@ export async function generateContextWithPhase3(
       prompt += '• For equipment questions, always check MEP schedules before giving generic answers\n';
     }
   } catch (error) {
-    console.error('[RAG] Error getting MEP schedule context:', error);
+    logger.error('RAG', 'Error getting MEP schedule context', error as Error);
   }
 
   // Add Door Schedule context
@@ -1876,7 +1881,7 @@ export async function generateContextWithPhase3(
       prompt += '• Mention frame types and materials when relevant\n';
     }
   } catch (error) {
-    console.error('[RAG] Error getting door schedule context:', error);
+    logger.error('RAG', 'Error getting door schedule context', error as Error);
   }
 
   // Add Window Schedule context
@@ -1891,7 +1896,7 @@ export async function generateContextWithPhase3(
       prompt += '• Cite manufacturers and model numbers when available\n';
     }
   } catch (error) {
-    console.error('[RAG] Error getting window schedule context:', error);
+    logger.error('RAG', 'Error getting window schedule context', error as Error);
   }
 
   // Add scale context for dimension-related queries (Phase A.3)
@@ -1900,7 +1905,7 @@ export async function generateContextWithPhase3(
       const scaleContext = await getScaleContext(query, projectSlug);
       prompt += scaleContext;
     } catch (error) {
-      console.error('Error adding scale context:', error);
+      logger.error('RAG', 'Error adding scale context', error as Error);
     }
   }
 
@@ -1912,7 +1917,7 @@ export async function generateContextWithPhase3(
         prompt += drawingTypeContext;
       }
     } catch (error) {
-      console.error('Error adding drawing type context:', error);
+      logger.error('RAG', 'Error adding drawing type context', error as Error);
     }
   }
 
@@ -1930,7 +1935,7 @@ export async function generateContextWithPhase3(
         prompt += '• Note any category or discipline associations\n';
       }
     } catch (error) {
-      console.error('Error adding legend context:', error);
+      logger.error('RAG', 'Error adding legend context', error as Error);
     }
   }
 
@@ -1940,7 +1945,7 @@ export async function generateContextWithPhase3(
       const drawingTypeContext = await getDrawingTypeContext(query, projectSlug);
       prompt += drawingTypeContext;
     } catch (error) {
-      console.error('Error adding drawing type context:', error);
+      logger.error('RAG', 'Error adding drawing type context', error as Error);
     }
   }
 
@@ -1954,7 +1959,7 @@ export async function generateContextWithPhase3(
       prompt += getPhaseBRAGInstructions();
     }
   } catch (error) {
-    console.error('Error adding Phase B context:', error);
+    logger.error('RAG', 'Error adding Phase B context', error as Error);
   }
 
   // Add Phase 3 intelligence data sections
@@ -2053,7 +2058,7 @@ export async function getLegendContext(
 
     return context;
   } catch (error) {
-    console.error('Error getting legend context:', error);
+    logger.error('RAG', 'Error getting legend context', error as Error);
     return '';
   }
 }
@@ -2090,7 +2095,7 @@ export async function getSymbolLibrarySummary(
 
     return summary;
   } catch (error) {
-    console.error('Error getting symbol library summary:', error);
+    logger.error('RAG', 'Error getting symbol library summary', error as Error);
     return '';
   }
 }
@@ -2193,7 +2198,7 @@ export async function getScaleContext(
 
     return context;
   } catch (error) {
-    console.error('Error getting scale context:', error);
+    logger.error('RAG', 'Error getting scale context', error as Error);
     return '';
   }
 }
@@ -2352,7 +2357,7 @@ export async function getDrawingTypeContext(
 
     return context;
   } catch (error) {
-    console.error('Error getting drawing type context:', error);
+    logger.error('RAG', 'Error getting drawing type context', error as Error);
     return '';
   }
 }
@@ -2652,7 +2657,7 @@ export async function retrievePhaseBContext(
 
     return context;
   } catch (error) {
-    console.error('Error retrieving Phase B context:', error);
+    logger.error('RAG', 'Error retrieving Phase B context', error as Error);
     return '';
   }
 }
@@ -2802,7 +2807,7 @@ export async function enrichWithPhaseAMetadata(
       };
     });
   } catch (error) {
-    console.error('Error enriching with Phase A metadata:', error);
+    logger.error('RAG', 'Error enriching with Phase A metadata', error as Error);
     return chunks;
   }
 }
@@ -2942,7 +2947,7 @@ export async function getCalloutContext(query: string, projectSlug: string): Pro
     
     return context;
   } catch (error) {
-    console.error('Error getting callout context:', error);
+    logger.error('RAG', 'Error getting callout context', error as Error);
     return '';
   }
 }
@@ -2995,7 +3000,7 @@ export async function getDimensionContext(query: string, projectSlug: string): P
     
     return context;
   } catch (error) {
-    console.error('Error getting dimension context:', error);
+    logger.error('RAG', 'Error getting dimension context', error as Error);
     return '';
   }
 }
@@ -3052,7 +3057,7 @@ export async function getAnnotationContext(query: string, projectSlug: string): 
     
     return context;
   } catch (error) {
-    console.error('Error getting annotation context:', error);
+    logger.error('RAG', 'Error getting annotation context', error as Error);
     return '';
   }
 }
@@ -3180,7 +3185,7 @@ async function getSpatialIntelligence(
     
     return null;
   } catch (error) {
-    console.error('Error getting spatial intelligence:', error);
+    logger.error('RAG', 'Error getting spatial intelligence', error as Error);
     return null;
   }
 }
@@ -3230,7 +3235,7 @@ async function getMEPIntelligence(
     
     return null;
   } catch (error) {
-    console.error('Error getting MEP intelligence:', error);
+    logger.error('RAG', 'Error getting MEP intelligence', error as Error);
     return null;
   }
 }

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays, parseISO, startOfWeek } from 'date-fns';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { callLLM } from '@/lib/llm-providers';
 
 // POST /api/projects/[slug]/schedule/import-lookahead - Import 3WLA from Excel
 export async function POST(
@@ -58,31 +59,26 @@ export async function POST(
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     
     // Use LLM to extract 3WLA data from Excel
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'document',
-                source: {
-                  type: 'base64',
-                  media_type: file.type.includes('sheet') || file.name.endsWith('.xlsx') 
-                    ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                    : 'text/csv',
-                  data: base64
-                }
-              },
-              {
-                type: 'text',
-                text: `Extract all tasks from this 3-week lookahead schedule Excel file.
+    const mediaType = file.type.includes('sheet') || file.name.endsWith('.xlsx')
+      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      : 'text/csv';
+
+    const llmResult = await callLLM(
+      [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: base64
+              }
+            },
+            {
+              type: 'text',
+              text: `Extract all tasks from this 3-week lookahead schedule Excel file.
 
 The format typically has:
 - Subcontractor/trade headers (e.g., "Olympic", "KHI", "BMV Electric")
@@ -112,20 +108,14 @@ Return as a JSON object with:
 }
 
 Only return the JSON object, no other text.`
-              }
-            ]
-          }
-        ],
-        max_tokens: 8192
-      })
-    });
+            }
+          ] as any
+        }
+      ],
+      { model: EXTRACTION_MODEL, max_tokens: 8192 }
+    );
 
-    if (!response.ok) {
-      throw new Error('Failed to process Excel with LLM');
-    }
-
-    const llmResult = await response.json();
-    const content = llmResult.choices?.[0]?.message?.content || '';
+    const content = llmResult.content || '';
     
     // Parse JSON from LLM response
     let parsedData: {

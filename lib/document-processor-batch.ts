@@ -12,6 +12,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import * as fs from 'fs';
 import { convertSinglePage } from './pdf-to-image';
+import { logger } from '@/lib/logger';
 
 interface ProviderStat {
   pagesProcessed: number;
@@ -44,10 +45,7 @@ export async function processDocumentBatch(
   const providerStats: Record<string, ProviderStat> = {};
 
   try {
-    console.log(`[BATCH] Processing document ${documentId} pages ${startPage}-${endPage}`);
-    if (processorType) {
-      console.log(`[BATCH] Document classification: ${processorType}`);
-    }
+    logger.info('BATCH_PROCESSOR', `Processing document ${documentId} pages ${startPage}-${endPage}`, { processorType: processorType || 'default' });
 
     // Get document
     const document = await prisma.document.findUnique({
@@ -64,7 +62,7 @@ export async function processDocumentBatch(
     }
 
     // Use stored processorType if not provided as parameter
-    const effectiveProcessorType = processorType || document.processorType || 'gpt-4o-vision';
+    const effectiveProcessorType = processorType || document.processorType || 'vision-ai';
 
     // Download PDF
     const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
@@ -86,7 +84,7 @@ export async function processDocumentBatch(
     // Process each page in the batch
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
-        console.log(`[BATCH] Processing page ${pageNum}...`);
+        logger.info('BATCH_PROCESSOR', `Processing page ${pageNum}`);
 
         // Use smart routing based on document classification
         const startTime = Date.now();
@@ -126,7 +124,7 @@ export async function processDocumentBatch(
               const jsonMatch = contentToParse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
               if (jsonMatch) {
                 contentToParse = jsonMatch[1].trim(); // Extract just the JSON content
-                console.log(`[BATCH] 🔧 Stripped markdown wrapper from Claude response (page ${pageNum})`);
+                logger.info('BATCH_PROCESSOR', `Stripped markdown wrapper from Claude response`, { pageNum });
               }
             }
             
@@ -136,11 +134,11 @@ export async function processDocumentBatch(
             
             // Perform quality check
             const qualityCheck = performQualityCheck(parsedData, pageNum);
-            console.log(formatQualityReport(qualityCheck, pageNum));
+            logger.info('BATCH_PROCESSOR', formatQualityReport(qualityCheck, pageNum));
 
             // Check if page is blank
             if (isBlankPage(parsedData)) {
-              console.log(`[BATCH] ⚠️  Page ${pageNum} appears to be blank`);
+              logger.warn('BATCH_PROCESSOR', `Page ${pageNum} appears to be blank`);
             }
             
             chunkContent = formatVisionData(parsedData);
@@ -156,9 +154,9 @@ export async function processDocumentBatch(
               ...extractMetadata(parsedData),
             };
 
-            console.log(`[BATCH] ✅ Page ${pageNum} processed with ${getProviderDisplayName(visionResult.provider)} (quality: ${qualityCheck.score}/100, confidence: ${visionResult.confidenceScore}/100)`);
+            logger.info('BATCH_PROCESSOR', `Page ${pageNum} processed`, { provider: getProviderDisplayName(visionResult.provider), quality: qualityCheck.score, confidence: visionResult.confidenceScore });
           } catch (parseError) {
-            console.error(`Failed to parse vision response for page ${pageNum}:`, parseError);
+            logger.error('BATCH_PROCESSOR', `Failed to parse vision response for page ${pageNum}`, parseError as Error);
             
             // Store raw response if parsing fails
             chunkContent = visionResult.content;
@@ -172,13 +170,15 @@ export async function processDocumentBatch(
           }
         } else {
           // All providers failed - create error chunk
-          console.error(`[BATCH] ❌ All providers failed for page ${pageNum}: ${visionResult.error}`);
+          logger.error('BATCH_PROCESSOR', `All providers failed for page ${pageNum}`, undefined, { error: visionResult.error });
           chunkContent = `PAGE: ${pageNum}\nCHUNK TYPE: PROCESSING FAILED\n\nAll vision providers failed to process this page.\nError: ${visionResult.error}\n\nManual review required.`;
           metadata = {
             page: pageNum,
             source: 'failed-processing',
             error: visionResult.error,
             attempts: visionResult.attempts,
+            skipForRag: true,
+            extractionError: visionResult.error,
           };
         }
 
@@ -194,12 +194,13 @@ export async function processDocumentBatch(
         });
 
         pagesProcessed++;
-        console.log(`[BATCH] ✅ Page ${pageNum} processed successfully`);
+        logger.info('BATCH_PROCESSOR', `Page ${pageNum} stored successfully`);
 
       } catch (pageError: any) {
-        console.error(`[BATCH] Error processing page ${pageNum}:`, pageError.message);
-        
+        logger.error('BATCH_PROCESSOR', `Error processing page ${pageNum}`, pageError);
+
         // Create error chunk so we don't lose track of the page
+        // Mark with skipForRag so RAG won't retrieve garbage content
         await prisma.documentChunk.create({
           data: {
             documentId,
@@ -210,21 +211,24 @@ export async function processDocumentBatch(
               page: pageNum,
               source: 'error',
               error: pageError.message,
+              skipForRag: true,
+              extractionError: pageError.message,
             },
           },
         });
-        
+
         // Still count as processed (we created a chunk, even if with error)
         pagesProcessed++;
       }
     }
 
-    console.log(`\n[BATCH] Provider usage summary:`);
-    Object.entries(providerStats).forEach(([providerName, stats]) => {
-      if (stats.pagesProcessed > 0) {
-        console.log(`  - ${providerName}: ${stats.pagesProcessed} pages @ ${stats.avgTimePerPage.toFixed(1)}s/page`);
-      }
-    });
+    logger.info('BATCH_PROCESSOR', 'Provider usage summary',
+      Object.fromEntries(
+        Object.entries(providerStats)
+          .filter(([, stats]) => stats.pagesProcessed > 0)
+          .map(([name, stats]) => [name, `${stats.pagesProcessed} pages @ ${stats.avgTimePerPage.toFixed(1)}s/page`])
+      )
+    );
 
     return {
       success: true,
@@ -233,7 +237,7 @@ export async function processDocumentBatch(
     };
 
   } catch (error: any) {
-    console.error(`[BATCH] Batch processing failed:`, error);
+    logger.error('BATCH_PROCESSOR', 'Batch processing failed', error);
     return {
       success: false,
       pagesProcessed,
@@ -247,7 +251,7 @@ export async function processDocumentBatch(
           await unlink(file);
         }
       } catch (cleanupError) {
-        console.error(`Failed to cleanup ${file}:`, cleanupError);
+        logger.error('BATCH_PROCESSOR', `Failed to cleanup ${file}`, cleanupError as Error);
       }
     }
   }

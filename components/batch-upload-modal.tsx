@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, FileText, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,25 @@ interface BatchUploadModalProps {
   onSuccess: () => void;
 }
 
+interface DocumentProgress {
+  status: string;
+  pagesProcessed: number;
+  totalPages: number;
+  percentComplete: number;
+  currentPhase: string;
+  estimatedTimeRemaining: number;
+  queuePosition: number | null;
+  error: string | null;
+}
+
 interface UploadFile {
   file: File;
   status: 'pending' | 'uploading' | 'success' | 'error';
   progress: number;
   error?: string;
   cloudStoragePath?: string;
+  documentId?: string;
+  processingProgress?: DocumentProgress;
 }
 
 const ALLOWED_TYPES = [
@@ -34,6 +47,39 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
     isActive: true,
     onEscape: onClose,
   });
+
+  // Poll processing progress for uploaded documents
+  useEffect(() => {
+    const uploadedDocs = files.filter(f => f.status === 'success' && f.documentId);
+    if (uploadedDocs.length === 0) return;
+
+    // Stop polling if all documents have completed processing
+    const allDone = uploadedDocs.every(
+      f => f.processingProgress?.currentPhase === 'completed' || f.processingProgress?.currentPhase === 'failed'
+    );
+    if (allDone) return;
+
+    const fetchProgress = async () => {
+      for (const uploadFile of uploadedDocs) {
+        if (!uploadFile.documentId) continue;
+        if (uploadFile.processingProgress?.currentPhase === 'completed' || uploadFile.processingProgress?.currentPhase === 'failed') continue;
+
+        try {
+          const res = await fetch(`/api/documents/${uploadFile.documentId}/progress`);
+          if (res.ok) {
+            const data: DocumentProgress = await res.json();
+            setFiles(prev => prev.map(f =>
+              f.documentId === uploadFile.documentId ? { ...f, processingProgress: data } : f
+            ));
+          }
+        } catch { /* ignore polling errors */ }
+      }
+    };
+
+    fetchProgress();
+    const interval = setInterval(fetchProgress, 5000);
+    return () => clearInterval(interval);
+  }, [files.filter(f => f.status === 'success').length, files.some(f => f.processingProgress?.currentPhase === 'completed')]);
 
   const validateFile = (file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -148,8 +194,11 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
           throw new Error(data.error || 'Failed to confirm upload');
         }
 
+        const confirmData = await confirmRes.json().catch(() => ({}));
+        const documentId = confirmData.Document?.id || confirmData.documentId || confirmData.id;
+
         setFiles(prev => prev.map((f, idx) =>
-          idx === i ? { ...f, status: 'success' as const, progress: 100, cloudStoragePath } : f
+          idx === i ? { ...f, status: 'success' as const, progress: 100, cloudStoragePath, documentId } : f
         ));
       } catch (error: any) {
         setFiles(prev => prev.map((f, idx) =>
@@ -284,6 +333,39 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
                   {uploadFile.status === 'error' && uploadFile.error && (
                     <p className="text-xs text-red-600 mt-2" role="alert">{uploadFile.error}</p>
                   )}
+                  {/* Processing progress after upload */}
+                  {uploadFile.status === 'success' && uploadFile.documentId && (() => {
+                    const p = uploadFile.processingProgress;
+                    if (!p || p.currentPhase === 'completed') return null;
+                    const phase = p.currentPhase;
+                    return (
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs text-gray-400 mb-1">
+                          <span>
+                            {phase === 'queued' && (p.queuePosition ? `Queue position ${p.queuePosition}` : 'Waiting to process...')}
+                            {phase === 'extracting' && 'Extracting content...'}
+                            {phase === 'analyzing' && `Analyzing page ${p.pagesProcessed} of ${p.totalPages}...`}
+                            {phase === 'indexing' && 'Indexing for search...'}
+                            {phase === 'failed' && 'Processing failed'}
+                          </span>
+                          {p.percentComplete > 0 && <span>{p.percentComplete}%</span>}
+                        </div>
+                        <div
+                          className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
+                          role="progressbar"
+                          aria-valuenow={p.percentComplete}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`Processing: ${p.percentComplete}%`}
+                        >
+                          <div
+                            className={`h-1.5 rounded-full transition-all duration-500 ${phase === 'queued' ? 'bg-yellow-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' ? 'animate-pulse' : ''}`}
+                            style={{ width: `${Math.max(2, p.percentComplete)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>

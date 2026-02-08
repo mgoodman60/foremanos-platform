@@ -5,6 +5,7 @@
 
 import { generateLookahead } from './lookahead-service';
 import { SIMPLE_MODEL } from '@/lib/model-config';
+import { callLLM } from '@/lib/llm-providers';
 
 interface ScheduleUpdateSuggestion {
   taskId: string;
@@ -32,13 +33,14 @@ export async function analyzeScheduleImpact(
   reportContent: string,
   projectId: string
 ): Promise<DailyReportAnalysis> {
+  let scheduleContext: any[] = [];
   try {
     // Get current schedule tasks directly from service (avoid HTTP self-call)
     const scheduleData = await generateLookahead(projectId);
     const tasks = scheduleData.tasks || [];
 
     // Build context for AI
-    const scheduleContext = tasks.map((task: any) => ({
+    scheduleContext = tasks.map((task: any) => ({
       id: task.id,
       taskId: task.taskId,
       name: task.name,
@@ -93,37 +95,12 @@ Return ONLY a JSON object with this structure:
   "summary": "string - brief summary of schedule impacts"
 }`;
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      console.warn('OPENAI_API_KEY not configured, using keyword-based analysis');
-      return keywordBasedAnalysis(reportContent, scheduleContext);
-    }
+    const llmResult = await callLLM(
+      [{ role: 'user', content: analysisPrompt }],
+      { model: SIMPLE_MODEL, temperature: 0.3, max_tokens: 2000 }
+    );
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: SIMPLE_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: analysisPrompt,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('AI analysis failed');
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = llmResult.content;
 
     if (!content) {
       throw new Error('No content in AI response');
@@ -141,8 +118,8 @@ Return ONLY a JSON object with this structure:
     return analysis;
   } catch (error) {
     console.error('Error analyzing schedule impact:', error);
-    // Fallback to keyword-based analysis
-    return keywordBasedAnalysis(reportContent, []);
+    // Fallback to keyword-based analysis with whatever schedule context we have
+    return keywordBasedAnalysis(reportContent, scheduleContext);
   }
 }
 

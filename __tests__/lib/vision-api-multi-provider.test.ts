@@ -52,8 +52,8 @@ describe('Vision API Multi-Provider', () => {
   });
 
   describe('getProcessingType', () => {
-    it('should return visual for gpt-4o-vision processor', () => {
-      expect(getProcessingType('gpt-4o-vision')).toBe('visual');
+    it('should return visual for vision-ai processor', () => {
+      expect(getProcessingType('vision-ai')).toBe('visual');
     });
 
     it('should return text-heavy for claude-haiku-ocr processor', () => {

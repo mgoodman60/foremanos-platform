@@ -8,7 +8,8 @@ import fs from 'fs';
 import path from 'path';
 import { convertSinglePage } from './pdf-to-image';
 import { getFileUrl } from './s3';
-import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -368,7 +369,7 @@ export async function classifyDrawingWithVision(
     
     // Otherwise, use vision for more accuracy
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' });
-    
+
     const prompt = `Analyze this construction drawing and classify it.
 
 Sheet Number: ${sheetNumber}
@@ -407,42 +408,10 @@ Return a JSON object with:
   "features": ["list of visual features that led to classification"],
   "reasoning": "<explanation of classification decision>"
 }`;
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${imageBase64}`
-                }
-              }
-            ]
-          }
-        ],
-        temperature: 0.1,
-        max_tokens: 500
-      })
-    });
-    
-    if (!response.ok) {
-      console.error('Vision API error:', await response.text());
-      return patternClassification;
-    }
-    
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-    
+
+    const data = await analyzeWithMultiProvider(imageBase64, prompt);
+    const content = data.success ? data.content : null;
+
     if (!content) {
       return patternClassification;
     }
@@ -465,7 +434,7 @@ Return a JSON object with:
     };
     
   } catch (error) {
-    console.error('Vision classification error:', error);
+    logger.error('DRAWING_CLASSIFIER', 'Vision classification error', error as Error);
     // Fall back to pattern-based classification
     return classifyDrawingWithPatterns(sheetNumber, sheetTitle);
   }
@@ -546,7 +515,7 @@ export async function classifyProjectDrawings(
             // For now, fall back to pattern-based until we update classifyDrawingWithVision
             classification = classifyDrawingWithPatterns(sheetNumber, sheetTitle);
           } catch (error) {
-            console.error('Vision classification failed:', error);
+            logger.error('DRAWING_CLASSIFIER', 'Vision classification failed', error as Error);
             classification = classifyDrawingWithPatterns(sheetNumber, sheetTitle);
           }
         } else {
@@ -573,7 +542,7 @@ export async function classifyProjectDrawings(
     return results;
     
   } catch (error) {
-    console.error('Error classifying drawings:', error);
+    logger.error('DRAWING_CLASSIFIER', 'Error classifying drawings', error as Error);
     throw error;
   }
 }
@@ -617,7 +586,7 @@ export async function storeDrawingClassification(
       }
     });
   } catch (error) {
-    console.error('Error storing drawing classification:', error);
+    logger.error('DRAWING_CLASSIFIER', 'Error storing drawing classification', error as Error);
     throw error;
   }
 }
@@ -673,7 +642,7 @@ export async function getProjectDrawingTypes(
       extractedAt: c.extractedAt
     }));
   } catch (error) {
-    console.error('Error getting drawing types:', error);
+    logger.error('DRAWING_CLASSIFIER', 'Error getting drawing types', error as Error);
     throw error;
   }
 }
@@ -714,7 +683,7 @@ export async function getDrawingTypeStats(projectSlug: string) {
       lastUpdated: classifications[0]?.extractedAt
     };
   } catch (error) {
-    console.error('Error getting drawing type stats:', error);
+    logger.error('DRAWING_CLASSIFIER', 'Error getting drawing type stats', error as Error);
     throw error;
   }
 }

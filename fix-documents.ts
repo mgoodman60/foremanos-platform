@@ -10,7 +10,7 @@ async function main() {
       data: {
         processed: true,
         pagesProcessed: 8,
-        processingCost: 0.08 // 8 pages * $0.01/page for gpt-4o-vision
+        processingCost: 0.08 // 8 pages * $0.01/page for vision-ai
       }
     });
     

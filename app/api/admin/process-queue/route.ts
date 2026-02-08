@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { processNextQueuedBatch } from '@/lib/document-processing-queue';
 import { recoverAllOrphanedDocuments } from '@/lib/orphaned-document-recovery';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes
@@ -27,34 +28,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[QUEUE] Manual queue processing triggered');
+    logger.info('PROCESS_QUEUE', 'Manual queue processing triggered');
 
     // Recover stuck/orphaned documents first
     try {
       const recovered = await recoverAllOrphanedDocuments();
       if (recovered > 0) {
-        console.log(`[QUEUE] Recovered ${recovered} orphaned documents`);
+        logger.info('PROCESS_QUEUE', `Recovered ${recovered} orphaned documents`);
       }
     } catch (recoveryError) {
-      console.error('[QUEUE] Orphan recovery error (non-blocking):', recoveryError);
+      logger.error('PROCESS_QUEUE', 'Orphan recovery error (non-blocking)', recoveryError as Error);
     }
 
-    // Reset stale 'processing' documents (stuck for >10 min)
+    // Reset stale 'processing' documents (stuck for >30 min)
+    // Increased from 10 min because intelligence extraction now completes before marking done
     try {
-      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
       const staleReset = await prisma.document.updateMany({
         where: {
           queueStatus: 'processing',
           processed: false,
-          updatedAt: { lt: tenMinutesAgo },
+          updatedAt: { lt: thirtyMinutesAgo },
         },
         data: { queueStatus: 'pending' },
       });
       if (staleReset.count > 0) {
-        console.log(`[QUEUE] Reset ${staleReset.count} stale processing documents`);
+        logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
       }
     } catch (staleError) {
-      console.error('[QUEUE] Stale reset error (non-blocking):', staleError);
+      logger.error('PROCESS_QUEUE', 'Stale reset error (non-blocking)', staleError as Error);
     }
 
     // Process batches until queue is empty or error occurs
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
       message: `Processed ${totalProcessed} batches`,
     });
   } catch (error: any) {
-    console.error('[QUEUE] Error:', error);
+    logger.error('PROCESS_QUEUE', 'Queue processing error', error);
     return NextResponse.json(
       { error: 'Failed to process queue', details: error.message },
       { status: 500 }
@@ -97,34 +99,35 @@ export async function GET(request: Request) {
 
     if (isCronRequest) {
       // Cron invocation: process the queue
-      console.log('[QUEUE] Cron-triggered queue processing');
+      logger.info('PROCESS_QUEUE', 'Cron-triggered queue processing');
 
       // Recover stuck/orphaned documents first
       try {
         const recovered = await recoverAllOrphanedDocuments();
         if (recovered > 0) {
-          console.log(`[QUEUE] Recovered ${recovered} orphaned documents`);
+          logger.info('PROCESS_QUEUE', `Recovered ${recovered} orphaned documents`);
         }
       } catch (recoveryError) {
-        console.error('[QUEUE] Orphan recovery error (non-blocking):', recoveryError);
+        logger.error('PROCESS_QUEUE', 'Orphan recovery error (non-blocking)', recoveryError as Error);
       }
 
-      // Reset stale 'processing' documents (stuck for >10 min)
+      // Reset stale 'processing' documents (stuck for >30 min)
+      // Increased from 10 min because intelligence extraction now completes before marking done
       try {
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
         const staleReset = await prisma.document.updateMany({
           where: {
             queueStatus: 'processing',
             processed: false,
-            updatedAt: { lt: tenMinutesAgo },
+            updatedAt: { lt: thirtyMinutesAgo },
           },
           data: { queueStatus: 'pending' },
         });
         if (staleReset.count > 0) {
-          console.log(`[QUEUE] Reset ${staleReset.count} stale processing documents`);
+          logger.info('PROCESS_QUEUE', `Reset ${staleReset.count} stale processing documents`);
         }
       } catch (staleError) {
-        console.error('[QUEUE] Stale reset error (non-blocking):', staleError);
+        logger.error('PROCESS_QUEUE', 'Stale reset error (non-blocking)', staleError as Error);
       }
 
       let totalProcessed = 0;
@@ -161,7 +164,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ stats });
   } catch (error: any) {
-    console.error('[QUEUE STATS] Error:', error);
+    logger.error('PROCESS_QUEUE', 'Queue stats error', error);
     return NextResponse.json(
       { error: 'Failed to get queue stats' },
       { status: 500 }

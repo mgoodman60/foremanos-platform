@@ -19,9 +19,20 @@ vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
 
-// Mock fetch for Vision API
-const mockFetch = vi.hoisted(() => vi.fn());
-global.fetch = mockFetch as any;
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
+// Mock analyzeWithMultiProvider (replaces direct fetch calls)
+const mockAnalyzeWithMultiProvider = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/vision-api-multi-provider', () => ({
+  analyzeWithMultiProvider: mockAnalyzeWithMultiProvider,
+}));
 
 import {
   detectScalesWithVision,
@@ -40,8 +51,6 @@ import {
 describe('ScaleDetector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Set default API key for tests
-    process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
@@ -49,6 +58,27 @@ describe('ScaleDetector', () => {
   });
 
   describe('detectScalesWithVision', () => {
+    // Helper: build a successful VisionResponse from analyzeWithMultiProvider
+    function visionSuccess(content: string) {
+      return {
+        success: true,
+        content,
+        provider: 'claude-opus-4-6' as const,
+        attempts: 1,
+      };
+    }
+
+    // Helper: build a failed VisionResponse
+    function visionFailure(error: string) {
+      return {
+        success: false,
+        content: '',
+        provider: 'claude-opus-4-6' as const,
+        attempts: 3,
+        error,
+      };
+    }
+
     it('should detect architectural scale from Vision API', async () => {
       const mockResponse = {
         scales: [
@@ -64,18 +94,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 0.95,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData', 'A-101');
 
@@ -110,18 +129,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 0.92,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -147,18 +155,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 0.95,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -182,18 +179,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 0.90,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -217,18 +203,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 1.0,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -253,18 +228,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 1.0,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -273,8 +237,8 @@ describe('ScaleDetector', () => {
       expect(result.scales[0].scaleRatio).toBe(0);
     });
 
-    it('should handle missing API key', async () => {
-      delete process.env.OPENAI_API_KEY;
+    it('should handle all providers failing', async () => {
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionFailure('All providers failed'));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -284,10 +248,7 @@ describe('ScaleDetector', () => {
     });
 
     it('should handle API error response', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        statusText: 'Internal Server Error',
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionFailure('Server error: 500'));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -296,17 +257,8 @@ describe('ScaleDetector', () => {
       expect(result.confidence).toBe(0);
     });
 
-    it('should handle missing content in response', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {},
-            },
-          ],
-        }),
-      });
+    it('should handle empty content in response', async () => {
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(''));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -315,18 +267,7 @@ describe('ScaleDetector', () => {
     });
 
     it('should handle invalid JSON in response', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: 'Not valid JSON content',
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess('Not valid JSON content'));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -335,7 +276,7 @@ describe('ScaleDetector', () => {
     });
 
     it('should handle network errors', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockAnalyzeWithMultiProvider.mockRejectedValueOnce(new Error('Network error'));
 
       const result = await detectScalesWithVision('base64ImageData');
 
@@ -351,18 +292,7 @@ describe('ScaleDetector', () => {
         overallConfidence: 0.0,
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResponse),
-              },
-            },
-          ],
-        }),
-      });
+      mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(JSON.stringify(mockResponse)));
 
       const result = await detectScalesWithVision('base64ImageData');
 

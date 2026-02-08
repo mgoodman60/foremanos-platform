@@ -8,16 +8,19 @@ const mocks = vi.hoisted(() => ({
     },
   },
   suggestRoomsForPhoto: vi.fn(),
-  fetch: vi.fn(),
+  callLLM: vi.fn(),
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
 vi.mock('@/lib/photo-analyzer', () => ({
   suggestRoomsForPhoto: mocks.suggestRoomsForPhoto,
 }));
-
-// Mock global fetch
-global.fetch = mocks.fetch as any;
+vi.mock('@/lib/llm-providers', () => ({
+  callLLM: mocks.callLLM,
+}));
+vi.mock('@/lib/model-config', () => ({
+  SIMPLE_MODEL: 'gpt-4o-mini',
+}));
 
 // Import after mocking
 import {
@@ -64,7 +67,6 @@ describe('Room Suggester Service', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.OPENAI_API_KEY;
   });
 
   afterEach(() => {
@@ -142,28 +144,6 @@ describe('Room Suggester Service', () => {
   });
 
   describe('getRoomSuggestionsFromText', () => {
-    beforeEach(() => {
-      process.env.OPENAI_API_KEY = 'test-api-key';
-    });
-
-    describe('Configuration validation', () => {
-      it('should throw error when OPENAI_API_KEY is not configured', async () => {
-        delete process.env.OPENAI_API_KEY;
-
-        await expect(
-          getRoomSuggestionsFromText('test-project', { description: 'Kitchen tile' })
-        ).rejects.toThrow('OPENAI_API_KEY not configured');
-      });
-
-      it('should throw error when OPENAI_API_KEY is empty string', async () => {
-        process.env.OPENAI_API_KEY = '';
-
-        await expect(
-          getRoomSuggestionsFromText('test-project', { description: 'Kitchen tile' })
-        ).rejects.toThrow('OPENAI_API_KEY not configured');
-      });
-    });
-
     describe('Project and room lookup', () => {
       it('should return empty array when project not found', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(null);
@@ -208,63 +188,43 @@ describe('Room Suggester Service', () => {
     describe('LLM API integration', () => {
       it('should call LLM API with correct parameters for basic description', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-2',
-                        confidence: 0.92,
-                        reason: 'Kitchen matches description',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-2',
+                confidence: 0.92,
+                reason: 'Kitchen matches description',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         await getRoomSuggestionsFromText('test-project', {
           description: 'Ceramic tile installation',
         });
 
-        expect(mocks.fetch).toHaveBeenCalledWith(
-          'https://api.openai.com/v1/chat/completions',
+        expect(mocks.callLLM).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              role: 'user',
+              content: expect.stringContaining('Ceramic tile installation'),
+            }),
+          ]),
           expect.objectContaining({
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer test-api-key',
-            },
-            body: expect.stringContaining('gpt-4o-mini'),
+            model: 'gpt-4o-mini',
+            temperature: 0.1,
+            max_tokens: 500,
           })
         );
-
-        const callArgs = mocks.fetch.mock.calls[0][1];
-        const body = JSON.parse(callArgs.body);
-
-        expect(body.model).toBe('gpt-4o-mini');
-        expect(body.temperature).toBe(0.1);
-        expect(body.max_tokens).toBe(500);
-        expect(body.messages).toHaveLength(1);
-        expect(body.messages[0].role).toBe('user');
-        expect(body.messages[0].content).toContain('Ceramic tile installation');
       });
 
       it('should build context prompt with all provided fields', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              { message: { content: '{"suggestions": []}' } },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         await getRoomSuggestionsFromText('test-project', {
@@ -274,9 +234,9 @@ describe('Room Suggester Service', () => {
           tradeType: 'plumbing',
         });
 
-        const callArgs = mocks.fetch.mock.calls[0][1];
-        const body = JSON.parse(callArgs.body);
-        const prompt = body.messages[0].content;
+        const callArgs = mocks.callLLM.mock.calls[0];
+        const messages = callArgs[0];
+        const prompt = messages[0].content;
 
         expect(prompt).toContain('Description: Tile work');
         expect(prompt).toContain('Tags: ceramic, bathroom');
@@ -286,22 +246,18 @@ describe('Room Suggester Service', () => {
 
       it('should include room list in prompt', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              { message: { content: '{"suggestions": []}' } },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         await getRoomSuggestionsFromText('test-project', {
           description: 'Test',
         });
 
-        const callArgs = mocks.fetch.mock.calls[0][1];
-        const body = JSON.parse(callArgs.body);
-        const prompt = body.messages[0].content;
+        const callArgs = mocks.callLLM.mock.calls[0];
+        const messages = callArgs[0];
+        const prompt = messages[0].content;
 
         expect(prompt).toContain('Available rooms:');
         expect(prompt).toContain('ID: room-1');
@@ -328,22 +284,18 @@ describe('Room Suggester Service', () => {
           ],
         });
 
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              { message: { content: '{"suggestions": []}' } },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         await getRoomSuggestionsFromText('test-project', {
           description: 'Test',
         });
 
-        const callArgs = mocks.fetch.mock.calls[0][1];
-        const body = JSON.parse(callArgs.body);
-        const prompt = body.messages[0].content;
+        const callArgs = mocks.callLLM.mock.calls[0];
+        const messages = callArgs[0];
+        const prompt = messages[0].content;
 
         expect(prompt).toContain('Number: N/A');
         expect(prompt).toContain('Floor: N/A');
@@ -354,30 +306,22 @@ describe('Room Suggester Service', () => {
     describe('Response parsing', () => {
       it('should parse valid JSON response and return suggestions', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-2',
-                        confidence: 0.92,
-                        reason: 'Kitchen matches tile description',
-                      },
-                      {
-                        roomId: 'room-3',
-                        confidence: 0.78,
-                        reason: 'Bathroom also has tile work',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-2',
+                confidence: 0.92,
+                reason: 'Kitchen matches tile description',
+              },
+              {
+                roomId: 'room-3',
+                confidence: 0.78,
+                reason: 'Bathroom also has tile work',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -403,35 +347,27 @@ describe('Room Suggester Service', () => {
 
       it('should filter out suggestions with confidence <= 0.5', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-1',
-                        confidence: 0.9,
-                        reason: 'High confidence match',
-                      },
-                      {
-                        roomId: 'room-2',
-                        confidence: 0.5,
-                        reason: 'Low confidence match',
-                      },
-                      {
-                        roomId: 'room-3',
-                        confidence: 0.3,
-                        reason: 'Very low confidence',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-1',
+                confidence: 0.9,
+                reason: 'High confidence match',
+              },
+              {
+                roomId: 'room-2',
+                confidence: 0.5,
+                reason: 'Low confidence match',
+              },
+              {
+                roomId: 'room-3',
+                confidence: 0.3,
+                reason: 'Very low confidence',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -444,30 +380,22 @@ describe('Room Suggester Service', () => {
 
       it('should filter out suggestions for non-existent rooms', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-2',
-                        confidence: 0.92,
-                        reason: 'Valid room',
-                      },
-                      {
-                        roomId: 'room-999',
-                        confidence: 0.88,
-                        reason: 'Non-existent room',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-2',
+                confidence: 0.92,
+                reason: 'Valid room',
+              },
+              {
+                roomId: 'room-999',
+                confidence: 0.88,
+                reason: 'Non-existent room',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -480,25 +408,17 @@ describe('Room Suggester Service', () => {
 
       it('should limit results to top 3 suggestions', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      { roomId: 'room-1', confidence: 0.95, reason: 'Match 1' },
-                      { roomId: 'room-2', confidence: 0.90, reason: 'Match 2' },
-                      { roomId: 'room-3', confidence: 0.85, reason: 'Match 3' },
-                      { roomId: 'room-1', confidence: 0.80, reason: 'Match 4' }, // Duplicate ID
-                      { roomId: 'room-2', confidence: 0.75, reason: 'Match 5' }, // Duplicate ID
-                    ],
-                  }),
-                },
-              },
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
+              { roomId: 'room-1', confidence: 0.95, reason: 'Match 1' },
+              { roomId: 'room-2', confidence: 0.90, reason: 'Match 2' },
+              { roomId: 'room-3', confidence: 0.85, reason: 'Match 3' },
+              { roomId: 'room-1', confidence: 0.80, reason: 'Match 4' }, // Duplicate ID
+              { roomId: 'room-2', confidence: 0.75, reason: 'Match 5' }, // Duplicate ID
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -510,16 +430,10 @@ describe('Room Suggester Service', () => {
         expect(result[2].confidence).toBe(0.85);
       });
 
-      it('should extract JSON from response with markdown code blocks', async () => {
+      it('should extract JSON from response with surrounding text', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: `Here is the analysis:
-\`\`\`json
+        mocks.callLLM.mockResolvedValue({
+          content: `Here is the analysis:
 {
   "suggestions": [
     {
@@ -528,12 +442,8 @@ describe('Room Suggester Service', () => {
       "reason": "Kitchen match"
     }
   ]
-}
-\`\`\``,
-                },
-              },
-            ],
-          }),
+}`,
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -546,17 +456,9 @@ describe('Room Suggester Service', () => {
 
       it('should handle response with no suggestions array', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: '{"other": "data"}',
-                },
-              },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"other": "data"}',
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -568,17 +470,9 @@ describe('Room Suggester Service', () => {
 
       it('should handle response with empty suggestions array', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: '{"suggestions": []}',
-                },
-              },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -590,12 +484,9 @@ describe('Room Suggester Service', () => {
     });
 
     describe('Error handling', () => {
-      it('should return empty array when LLM API returns non-ok response', async () => {
+      it('should return empty array when LLM throws error', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: false,
-          statusText: 'Internal Server Error',
-        });
+        mocks.callLLM.mockRejectedValue(new Error('API error'));
 
         const result = await getRoomSuggestionsFromText('test-project', {
           description: 'Test',
@@ -606,29 +497,9 @@ describe('Room Suggester Service', () => {
 
       it('should return empty array when response has no content', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {},
-              },
-            ],
-          }),
-        });
-
-        const result = await getRoomSuggestionsFromText('test-project', {
-          description: 'Test',
-        });
-
-        expect(result).toEqual([]);
-      });
-
-      it('should return empty array when response has no choices', async () => {
-        mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({}),
+        mocks.callLLM.mockResolvedValue({
+          content: '',
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -640,17 +511,9 @@ describe('Room Suggester Service', () => {
 
       it('should return empty array when response contains invalid JSON', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: 'This is not valid JSON',
-                },
-              },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: 'This is not valid JSON',
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -662,17 +525,9 @@ describe('Room Suggester Service', () => {
 
       it('should return empty array when JSON parsing fails', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              {
-                message: {
-                  content: '{"suggestions": [invalid json]}',
-                },
-              },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": [invalid json]}',
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -682,25 +537,9 @@ describe('Room Suggester Service', () => {
         expect(result).toEqual([]);
       });
 
-      it('should return empty array when fetch throws error', async () => {
+      it('should return empty array when callLLM throws network error', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockRejectedValue(new Error('Network error'));
-
-        const result = await getRoomSuggestionsFromText('test-project', {
-          description: 'Test',
-        });
-
-        expect(result).toEqual([]);
-      });
-
-      it('should return empty array when API returns malformed response', async () => {
-        mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => {
-            throw new Error('Invalid JSON');
-          },
-        });
+        mocks.callLLM.mockRejectedValue(new Error('Network error'));
 
         const result = await getRoomSuggestionsFromText('test-project', {
           description: 'Test',
@@ -713,30 +552,22 @@ describe('Room Suggester Service', () => {
     describe('Edge cases', () => {
       it('should handle empty context object', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              { message: { content: '{"suggestions": []}' } },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {});
 
         expect(result).toEqual([]);
-        expect(mocks.fetch).toHaveBeenCalled();
+        expect(mocks.callLLM).toHaveBeenCalled();
       });
 
       it('should handle context with only some fields', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              { message: { content: '{"suggestions": []}' } },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         await getRoomSuggestionsFromText('test-project', {
@@ -744,9 +575,9 @@ describe('Room Suggester Service', () => {
           tradeType: 'plumbing',
         });
 
-        const callArgs = mocks.fetch.mock.calls[0][1];
-        const body = JSON.parse(callArgs.body);
-        const prompt = body.messages[0].content;
+        const callArgs = mocks.callLLM.mock.calls[0];
+        const messages = callArgs[0];
+        const prompt = messages[0].content;
 
         expect(prompt).toContain('Description: Tile work');
         expect(prompt).toContain('Trade Type: plumbing');
@@ -773,25 +604,17 @@ describe('Room Suggester Service', () => {
           ],
         });
 
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-1',
-                        confidence: 0.9,
-                        reason: 'Match',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-1',
+                confidence: 0.9,
+                reason: 'Match',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -804,13 +627,9 @@ describe('Room Suggester Service', () => {
 
       it('should handle special characters in context', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
-              { message: { content: '{"suggestions": []}' } },
-            ],
-          }),
+        mocks.callLLM.mockResolvedValue({
+          content: '{"suggestions": []}',
+          model: 'gpt-4o-mini',
         });
 
         await getRoomSuggestionsFromText('test-project', {
@@ -818,7 +637,7 @@ describe('Room Suggester Service', () => {
           tags: 'tag1, tag2 & tag3',
         });
 
-        expect(mocks.fetch).toHaveBeenCalled();
+        expect(mocks.callLLM).toHaveBeenCalled();
       });
 
       it('should preserve room number null vs empty string', async () => {
@@ -837,25 +656,17 @@ describe('Room Suggester Service', () => {
           ],
         });
 
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-1',
-                        confidence: 0.9,
-                        reason: 'Match',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-1',
+                confidence: 0.9,
+                reason: 'Match',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -869,35 +680,27 @@ describe('Room Suggester Service', () => {
     describe('Integration scenarios', () => {
       it('should handle complete workflow with all features', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-2',
-                        confidence: 0.92,
-                        reason: 'Kitchen tile work matches description',
-                      },
-                      {
-                        roomId: 'room-3',
-                        confidence: 0.78,
-                        reason: 'Bathroom also uses ceramic tile',
-                      },
-                      {
-                        roomId: 'room-1',
-                        confidence: 0.45,
-                        reason: 'Low confidence match',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-2',
+                confidence: 0.92,
+                reason: 'Kitchen tile work matches description',
+              },
+              {
+                roomId: 'room-3',
+                confidence: 0.78,
+                reason: 'Bathroom also uses ceramic tile',
+              },
+              {
+                roomId: 'room-1',
+                confidence: 0.45,
+                reason: 'Low confidence match',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {
@@ -924,25 +727,17 @@ describe('Room Suggester Service', () => {
 
       it('should match trade type in suggestions', async () => {
         mocks.prisma.project.findUnique.mockResolvedValue(mockProject);
-        mocks.fetch.mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            choices: [
+        mocks.callLLM.mockResolvedValue({
+          content: JSON.stringify({
+            suggestions: [
               {
-                message: {
-                  content: JSON.stringify({
-                    suggestions: [
-                      {
-                        roomId: 'room-3',
-                        confidence: 0.85,
-                        reason: 'Plumbing trade matches bathroom',
-                      },
-                    ],
-                  }),
-                },
+                roomId: 'room-3',
+                confidence: 0.85,
+                reason: 'Plumbing trade matches bathroom',
               },
             ],
           }),
+          model: 'gpt-4o-mini',
         });
 
         const result = await getRoomSuggestionsFromText('test-project', {

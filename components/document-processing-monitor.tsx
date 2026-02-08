@@ -29,6 +29,17 @@ interface ProcessingStatus {
   } | null;
 }
 
+interface DocumentProgress {
+  status: string;
+  pagesProcessed: number;
+  totalPages: number;
+  percentComplete: number;
+  currentPhase: string;
+  estimatedTimeRemaining: number;
+  queuePosition: number | null;
+  error: string | null;
+}
+
 interface Stats {
   total: number;
   completed: number;
@@ -56,6 +67,7 @@ export default function DocumentProcessingMonitor({
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [progressMap, setProgressMap] = useState<Record<string, DocumentProgress>>({});
 
   const fetchStatus = async () => {
     try {
@@ -82,6 +94,58 @@ export default function DocumentProcessingMonitor({
       return () => clearInterval(interval);
     }
   }, [projectId, autoRefresh, refreshInterval]);
+
+  // Per-document progress polling for actively processing documents
+  useEffect(() => {
+    const activeDocIds = documents
+      .filter(d => d.queueStatus === 'processing' || d.queueStatus === 'queued' || d.queueStatus === 'pending')
+      .map(d => d.id);
+
+    if (activeDocIds.length === 0) return;
+
+    const fetchProgress = async () => {
+      for (const docId of activeDocIds) {
+        try {
+          const res = await fetch(`/api/documents/${docId}/progress`);
+          if (res.ok) {
+            const data: DocumentProgress = await res.json();
+            setProgressMap(prev => ({ ...prev, [docId]: data }));
+          }
+        } catch { /* ignore polling errors */ }
+      }
+    };
+
+    fetchProgress();
+    const interval = setInterval(fetchProgress, 5000);
+    return () => clearInterval(interval);
+  }, [documents]);
+
+  const formatTimeRemaining = (seconds: number): string => {
+    if (seconds <= 0) return '';
+    if (seconds < 60) return `~${seconds}s remaining`;
+    const minutes = Math.ceil(seconds / 60);
+    return `~${minutes}m remaining`;
+  };
+
+  const getPhaseLabel = (phase: string, progress: DocumentProgress | undefined): string => {
+    if (!progress) return '';
+    switch (phase) {
+      case 'queued':
+        return progress.queuePosition ? `Waiting in queue (position ${progress.queuePosition})...` : 'Waiting in queue...';
+      case 'extracting':
+        return 'Extracting content from pages...';
+      case 'analyzing':
+        return `Analyzing page ${progress.pagesProcessed} of ${progress.totalPages}...`;
+      case 'indexing':
+        return 'Indexing content for search...';
+      case 'completed':
+        return 'Processing complete';
+      case 'failed':
+        return 'Processing failed';
+      default:
+        return 'Processing...';
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -241,28 +305,51 @@ export default function DocumentProcessingMonitor({
                     </div>
                     
                     {/* Progress Bar for Processing Documents */}
-                    {(doc.queueStatus === 'processing' || doc.queueStatus === 'queued') && doc.queueInfo && doc.queueInfo.totalPages > 0 && (
-                      <div className="mt-3">
-                        <div className="flex justify-between text-xs text-gray-400 mb-1">
-                          <span>{doc.queueStatus === 'queued' ? 'Waiting to process...' : 'Processing pages...'}</span>
-                          <span>{doc.queueInfo.pagesProcessed}/{doc.queueInfo.totalPages} pages ({Math.round((doc.queueInfo.pagesProcessed / doc.queueInfo.totalPages) * 100)}%)</span>
-                        </div>
-                        <div className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                          <div 
-                            className={`h-2.5 rounded-full transition-all duration-500 ease-out ${doc.queueStatus === 'queued' ? 'bg-yellow-500' : 'bg-blue-500'}`}
-                            style={{ width: `${Math.max(2, (doc.queueInfo.pagesProcessed / doc.queueInfo.totalPages) * 100)}%` }}
+                    {(doc.queueStatus === 'processing' || doc.queueStatus === 'queued') && (doc.queueInfo?.totalPages || progressMap[doc.id]?.totalPages) && (() => {
+                      const progress = progressMap[doc.id];
+                      const totalPages = progress?.totalPages || doc.queueInfo?.totalPages || 0;
+                      const pagesProcessed = progress?.pagesProcessed || doc.queueInfo?.pagesProcessed || 0;
+                      const percent = totalPages > 0 ? Math.round((pagesProcessed / totalPages) * 100) : 0;
+                      const phase = progress?.currentPhase || (doc.queueStatus === 'queued' ? 'queued' : 'analyzing');
+
+                      return (
+                        <div className="mt-3">
+                          {/* Phase indicator */}
+                          <div className="flex justify-between text-xs text-gray-400 mb-1">
+                            <span className="font-medium">{getPhaseLabel(phase, progress)}</span>
+                            <span>{pagesProcessed}/{totalPages} pages ({percent}%)</span>
+                          </div>
+                          <div
+                            className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden"
+                            role="progressbar"
+                            aria-valuenow={percent}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`Processing progress: ${percent}%`}
                           >
-                            <div className={`w-full h-full bg-gradient-to-r ${doc.queueStatus === 'queued' ? 'from-yellow-500 to-yellow-400' : 'from-blue-500 to-blue-400'} animate-pulse`} />
+                            <div
+                              className={`h-2.5 rounded-full transition-all duration-500 ease-out ${phase === 'queued' ? 'bg-yellow-500' : phase === 'indexing' ? 'bg-green-500' : 'bg-blue-500'}`}
+                              style={{ width: `${Math.max(2, percent)}%` }}
+                            >
+                              <div className={`w-full h-full bg-gradient-to-r ${phase === 'queued' ? 'from-yellow-500 to-yellow-400' : phase === 'indexing' ? 'from-green-500 to-green-400' : 'from-blue-500 to-blue-400'} animate-pulse`} />
+                            </div>
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>
+                              {doc.queueInfo && <>Batch {doc.queueInfo.currentBatch + 1} of {doc.queueInfo.totalBatches}</>}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              {progress?.estimatedTimeRemaining ? (
+                                <span className="text-gray-400">{formatTimeRemaining(progress.estimatedTimeRemaining)}</span>
+                              ) : null}
+                              {(doc.queueInfo?.retriesCount || 0) > 0 && (
+                                <span className="text-yellow-400">Retries: {doc.queueInfo?.retriesCount}</span>
+                              )}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>Batch {doc.queueInfo.currentBatch + 1} of {doc.queueInfo.totalBatches}</span>
-                          {doc.queueInfo.retriesCount > 0 && (
-                            <span className="text-yellow-400">Retries: {doc.queueInfo.retriesCount}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {doc.queueStatus === 'pending' && (
                       <div className="mt-2 text-xs text-blue-400">

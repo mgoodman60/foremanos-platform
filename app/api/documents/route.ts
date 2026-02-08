@@ -52,7 +52,9 @@ export async function GET(req: NextRequest) {
           filePath: true,
           fileSize: true,
           lastModified: true,
-          updatedAt: true
+          updatedAt: true,
+          queueStatus: true,
+          processed: true,
         },
         orderBy: {
           name: 'asc'
@@ -78,7 +80,9 @@ export async function GET(req: NextRequest) {
           filePath: true,
           fileSize: true,
           lastModified: true,
-          updatedAt: true
+          updatedAt: true,
+          queueStatus: true,
+          processed: true,
         },
         orderBy: {
           name: 'asc'

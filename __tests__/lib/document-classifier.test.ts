@@ -31,42 +31,42 @@ describe('Document Classifier - Image Files', () => {
     vi.clearAllMocks();
   });
 
-  it('should classify JPG files as gpt-4o-vision with confidence 1.0', async () => {
+  it('should classify JPG files as vision-ai with confidence 1.0', async () => {
     const result = await classifyDocument('site-photo.jpg', 'jpg');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
     expect(result.reason).toBe('Image file - requires visual analysis');
   });
 
-  it('should classify JPEG files as gpt-4o-vision with confidence 1.0', async () => {
+  it('should classify JPEG files as vision-ai with confidence 1.0', async () => {
     const result = await classifyDocument('progress-photo.jpeg', 'jpeg');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
     expect(result.reason).toBe('Image file - requires visual analysis');
   });
 
-  it('should classify PNG files as gpt-4o-vision with confidence 1.0', async () => {
+  it('should classify PNG files as vision-ai with confidence 1.0', async () => {
     const result = await classifyDocument('screenshot.png', 'png');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
     expect(result.reason).toBe('Image file - requires visual analysis');
   });
 
-  it('should classify TIFF files as gpt-4o-vision with confidence 1.0', async () => {
+  it('should classify TIFF files as vision-ai with confidence 1.0', async () => {
     const result = await classifyDocument('scan.tiff', 'tiff');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
     expect(result.reason).toBe('Image file - requires visual analysis');
   });
 
-  it('should classify HEIC files as gpt-4o-vision with confidence 1.0', async () => {
+  it('should classify HEIC files as vision-ai with confidence 1.0', async () => {
     const result = await classifyDocument('iphone-photo.heic', 'heic');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
     expect(result.reason).toBe('Image file - requires visual analysis');
   });
@@ -74,7 +74,7 @@ describe('Document Classifier - Image Files', () => {
   it('should handle mixed case image file extensions', async () => {
     const result = await classifyDocument('PHOTO.JPG', 'jpg');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
   });
 });
@@ -278,74 +278,74 @@ describe('Document Classifier - Architectural Plans', () => {
     vi.clearAllMocks();
   });
 
-  it('should classify floor plan documents as gpt-4o-vision with confidence 0.95', async () => {
+  it('should classify floor plan documents as vision-ai with confidence 0.95', async () => {
     const result = await classifyDocument('Floor-Plan-Level-1.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
     expect(result.reason).toBe('Architectural/engineering plan with drawings');
   });
 
-  it('should classify site plan documents as gpt-4o-vision', async () => {
+  it('should classify site plan documents as vision-ai', async () => {
     const result = await classifyDocument('Site-Plan-Main.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify elevation documents as gpt-4o-vision', async () => {
+  it('should classify elevation documents as vision-ai', async () => {
     const result = await classifyDocument('Building-Elevation-North.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify section documents as gpt-4o-vision', async () => {
+  it('should classify section documents as vision-ai', async () => {
     const result = await classifyDocument('Wall-Section-Detail.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify detail drawings as gpt-4o-vision', async () => {
+  it('should classify detail drawings as vision-ai', async () => {
     const result = await classifyDocument('Stair-Detail-1.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify architectural sheet numbers as gpt-4o-vision', async () => {
+  it('should classify architectural sheet numbers as vision-ai', async () => {
     const result = await classifyDocument('A-101-First-Floor.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify structural sheet numbers as gpt-4o-vision', async () => {
+  it('should classify structural sheet numbers as vision-ai', async () => {
     const result = await classifyDocument('S-001-Foundation.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify mechanical drawings as gpt-4o-vision', async () => {
+  it('should classify mechanical drawings as vision-ai', async () => {
     const result = await classifyDocument('M-201-HVAC-Plan.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify electrical drawings as gpt-4o-vision', async () => {
+  it('should classify electrical drawings as vision-ai', async () => {
     const result = await classifyDocument('E-301-Power-Plan.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should classify plumbing drawings as gpt-4o-vision', async () => {
+  it('should classify plumbing drawings as vision-ai', async () => {
     const result = await classifyDocument('P-101-Plumbing-Riser.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 });
@@ -486,39 +486,39 @@ describe('Document Classifier - Site Photos', () => {
     vi.clearAllMocks();
   });
 
-  it('should classify site photos as gpt-4o-vision with confidence 0.90', async () => {
+  it('should classify site photos as vision-ai with confidence 0.90', async () => {
     const result = await classifyDocument('Site-Photo-Foundation.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.90);
     expect(result.reason).toBe('Site photo or progress documentation');
   });
 
-  it('should classify progress reports as gpt-4o-vision', async () => {
+  it('should classify progress reports as vision-ai', async () => {
     const result = await classifyDocument('Progress Report Week 12.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.90);
   });
 
-  it('should classify progress photos as gpt-4o-vision', async () => {
+  it('should classify progress photos as vision-ai', async () => {
     const result = await classifyDocument('Progress-Photo-20240115.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.90);
   });
 
-  it('should classify inspection documents as gpt-4o-vision', async () => {
+  it('should classify inspection documents as vision-ai', async () => {
     const result = await classifyDocument('Inspection-Photos.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.90);
   });
 
   it('should handle case-insensitive photo pattern matching', async () => {
     const result = await classifyDocument('SITE-PHOTO-CONCRETE.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.90);
   });
 });
@@ -574,7 +574,7 @@ describe('Document Classifier - PDF Page Count Analysis', () => {
     const result = await classifyDocument('A-101-Floor-Plan.pdf', 'pdf', buffer);
 
     // Architectural pattern has higher priority than page count
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
@@ -601,7 +601,7 @@ describe('Document Classifier - PDF Page Count Analysis', () => {
     const result = await classifyDocument('unknown.pdf', 'pdf', buffer);
 
     // Should fallback to default vision classification
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
     expect(result.reason).toBe('Default to high-quality vision analysis');
   });
@@ -611,7 +611,7 @@ describe('Document Classifier - PDF Page Count Analysis', () => {
 
     // Should use default classification without page analysis
     expect(mockPDFDocument.load).not.toHaveBeenCalled();
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 
@@ -654,18 +654,18 @@ describe('Document Classifier - Default Classification', () => {
     vi.clearAllMocks();
   });
 
-  it('should default to gpt-4o-vision for unmatched PDF filenames', async () => {
+  it('should default to vision-ai for unmatched PDF filenames', async () => {
     const result = await classifyDocument('random-document.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
     expect(result.reason).toBe('Default to high-quality vision analysis');
   });
 
-  it('should default to gpt-4o-vision for unknown file types', async () => {
+  it('should default to vision-ai for unknown file types', async () => {
     const result = await classifyDocument('data.xlsx', 'xlsx');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
     expect(result.reason).toBe('Default to high-quality vision analysis');
   });
@@ -673,14 +673,14 @@ describe('Document Classifier - Default Classification', () => {
   it('should handle empty filename gracefully', async () => {
     const result = await classifyDocument('', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 
   it('should handle special characters in filename', async () => {
     const result = await classifyDocument('test@#$%.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 
@@ -688,7 +688,7 @@ describe('Document Classifier - Default Classification', () => {
     const longName = 'a'.repeat(500) + '.pdf';
     const result = await classifyDocument(longName, 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 });
@@ -706,7 +706,7 @@ describe('Document Classifier - Classification Priority', () => {
     const result = await classifyDocument('door-schedule.jpg', 'jpg');
 
     // Image type should override schedule pattern
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(1.0);
   });
 
@@ -730,7 +730,7 @@ describe('Document Classifier - Classification Priority', () => {
     const result = await classifyDocument('A-101-Schedule.pdf', 'pdf');
 
     // Architectural pattern checked before schedule pattern
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
@@ -756,9 +756,9 @@ describe('Document Classifier - Classification Priority', () => {
 // ============================================
 
 describe('Document Classifier - getProcessorName', () => {
-  it('should return correct name for gpt-4o-vision processor', () => {
-    const name = getProcessorName('gpt-4o-vision');
-    expect(name).toBe('GPT-4o Vision (High Detail)');
+  it('should return correct name for vision-ai processor', () => {
+    const name = getProcessorName('vision-ai');
+    expect(name).toBe('Vision AI (High Detail)');
   });
 
   it('should return correct name for claude-haiku-ocr processor', () => {
@@ -784,14 +784,14 @@ describe('Document Classifier - Edge Cases', () => {
   it('should handle filename with no extension', async () => {
     const result = await classifyDocument('document', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 
   it('should handle filename with multiple dots', async () => {
     const result = await classifyDocument('site.plan.v2.final.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
@@ -805,21 +805,21 @@ describe('Document Classifier - Edge Cases', () => {
   it('should handle mixed case in filename patterns', async () => {
     const result = await classifyDocument('FlOoR-pLaN-LeVeL-1.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
   it('should handle filenames with numbers only', async () => {
     const result = await classifyDocument('12345.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 
   it('should handle filenames with unicode characters', async () => {
     const result = await classifyDocument('планы-здания.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
   });
 
@@ -839,7 +839,7 @@ describe('Document Classifier - Edge Cases', () => {
     const result = await classifyDocument('test.pdf', 'pdf', buffer);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error analyzing PDF:', expect.any(Error));
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
 
     consoleErrorSpy.mockRestore();
@@ -858,14 +858,14 @@ describe('Document Classifier - Complex Filename Patterns', () => {
   it('should match sheet numbers with lowercase letters (a-101)', async () => {
     const result = await classifyDocument('a-101-basement.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 
   it('should match sheet numbers with uppercase letters (S-004)', async () => {
     const result = await classifyDocument('S-004-Structural-Detail.pdf', 'pdf');
 
-    expect(result.processorType).toBe('gpt-4o-vision');
+    expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.95);
   });
 

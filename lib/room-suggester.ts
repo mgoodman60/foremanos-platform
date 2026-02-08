@@ -7,6 +7,8 @@
 
 import { prisma } from './db';
 import { suggestRoomsForPhoto } from './photo-analyzer';
+import { callLLM } from '@/lib/llm-providers';
+import { SIMPLE_MODEL } from '@/lib/model-config';
 
 export interface RoomSuggestion {
   roomId: string;
@@ -44,11 +46,6 @@ export async function getRoomSuggestionsFromText(
     tradeType?: string;
   }
 ): Promise<RoomSuggestion[]> {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY not configured');
-  }
-
   // Get all rooms for the project
   const project = await prisma.project.findUnique({
     where: { slug: projectSlug },
@@ -108,34 +105,15 @@ Guidelines:
 - Return ONLY valid JSON`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.1,
-        max_tokens: 500,
-      }),
-    });
+    const llmResult = await callLLM(
+      [{ role: 'user', content: prompt }],
+      { model: SIMPLE_MODEL, temperature: 0.1, max_tokens: 500 }
+    );
 
-    if (!response.ok) {
-      throw new Error(`LLM API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = llmResult.content;
 
     if (!content) {
-      throw new Error('No content in LLM API response');
+      throw new Error('No content in LLM response');
     }
 
     // Parse JSON response

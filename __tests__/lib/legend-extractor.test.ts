@@ -6,9 +6,20 @@ import { SymbolCategory } from '@/lib/legend-extractor';
 // MOCKS
 // ============================================================================
 
-// Mock fetch for Vision API calls
-const mockFetch = vi.hoisted(() => vi.fn());
-vi.stubGlobal('fetch', mockFetch);
+// Mock analyzeWithMultiProvider (replaces direct fetch calls)
+const mockAnalyzeWithMultiProvider = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/vision-api-multi-provider', () => ({
+  analyzeWithMultiProvider: mockAnalyzeWithMultiProvider,
+}));
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 
 // Mock Prisma
 const prismaMock = vi.hoisted(() => ({
@@ -53,49 +64,54 @@ vi.mock('@/lib/title-block-extractor', async () => {
 // TEST DATA
 // ============================================================================
 
-const mockVisionResponse = {
-  choices: [
-    {
-      message: {
-        content: JSON.stringify({
-          found: true,
-          boundingBox: { x: 85, y: 10, width: 12, height: 30 },
-          confidence: 0.95,
-        }),
-      },
-    },
-  ],
-};
+// Helper: build a successful VisionResponse from analyzeWithMultiProvider
+function visionSuccess(content: string) {
+  return {
+    success: true,
+    content,
+    provider: 'claude-opus-4-6' as const,
+    attempts: 1,
+  };
+}
 
-const mockLegendExtractionResponse = {
-  choices: [
+// Helper: build a failed VisionResponse
+function visionFailure(error: string) {
+  return {
+    success: false,
+    content: '',
+    provider: 'claude-opus-4-6' as const,
+    attempts: 3,
+    error,
+  };
+}
+
+const mockVisionResponseContent = JSON.stringify({
+  found: true,
+  boundingBox: { x: 85, y: 10, width: 12, height: 30 },
+  confidence: 0.95,
+});
+
+const mockLegendExtractionContent = JSON.stringify({
+  entries: [
     {
-      message: {
-        content: JSON.stringify({
-          entries: [
-            {
-              symbolCode: 'FA-PS',
-              description: 'Fire Alarm Pull Station',
-              confidence: 0.95,
-            },
-            {
-              symbolCode: 'E-1',
-              description: 'Electrical Panel 1',
-              confidence: 0.90,
-            },
-            {
-              symbolCode: 'WP',
-              description: 'Water Pipe',
-              confidence: 0.88,
-            },
-          ],
-          boundingBox: { x: 85, y: 10, width: 12, height: 30 },
-          confidence: 0.92,
-        }),
-      },
+      symbolCode: 'FA-PS',
+      description: 'Fire Alarm Pull Station',
+      confidence: 0.95,
+    },
+    {
+      symbolCode: 'E-1',
+      description: 'Electrical Panel 1',
+      confidence: 0.90,
+    },
+    {
+      symbolCode: 'WP',
+      description: 'Water Pipe',
+      confidence: 0.88,
     },
   ],
-};
+  boundingBox: { x: 85, y: 10, width: 12, height: 30 },
+  confidence: 0.92,
+});
 
 const mockProject = {
   id: 'project-1',
@@ -131,14 +147,11 @@ const mockSheetLegend = {
 describe('detectLegendRegion', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.OPENAI_API_KEY = 'test-api-key';
+
   });
 
   it('should detect legend region successfully', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(mockVisionResponse),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(mockVisionResponseContent));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -148,33 +161,20 @@ describe('detectLegendRegion', () => {
     expect(result.confidence).toBe(0.95);
   });
 
-  it('should call Vision API with correct parameters', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(mockVisionResponse),
-    });
+  it('should call analyzeWithMultiProvider with correct parameters', async () => {
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(mockVisionResponseContent));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     await detectLegendRegion('base64image', 'A1.1');
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      'https://api.openai.com/v1/chat/completions',
-      expect.objectContaining({
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-api-key',
-        },
-        body: expect.stringContaining('claude-sonnet-4-5-20250929'),
-      })
+    expect(mockAnalyzeWithMultiProvider).toHaveBeenCalledWith(
+      'base64image',
+      expect.stringContaining('LEGEND')
     );
   });
 
   it('should handle API error responses', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      statusText: 'Internal Server Error',
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionFailure('All providers failed'));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -183,11 +183,8 @@ describe('detectLegendRegion', () => {
     expect(result.confidence).toBe(0);
   });
 
-  it('should handle missing content in response', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue({ choices: [] }),
-    });
+  it('should handle empty content in response', async () => {
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(''));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -197,20 +194,8 @@ describe('detectLegendRegion', () => {
   });
 
   it('should parse JSON from code blocks', async () => {
-    const responseWithCodeBlock = {
-      choices: [
-        {
-          message: {
-            content: '```json\n{"found": true, "boundingBox": {"x": 10, "y": 20, "width": 30, "height": 40}, "confidence": 0.85}\n```',
-          },
-        },
-      ],
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(responseWithCodeBlock),
-    });
+    const codeBlockContent = '```json\n{"found": true, "boundingBox": {"x": 10, "y": 20, "width": 30, "height": 40}, "confidence": 0.85}\n```';
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(codeBlockContent));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -221,20 +206,7 @@ describe('detectLegendRegion', () => {
   });
 
   it('should parse raw JSON without code blocks', async () => {
-    const responseWithRawJSON = {
-      choices: [
-        {
-          message: {
-            content: '{"found": false, "confidence": 0.1}',
-          },
-        },
-      ],
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(responseWithRawJSON),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess('{"found": false, "confidence": 0.1}'));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -244,20 +216,7 @@ describe('detectLegendRegion', () => {
   });
 
   it('should handle invalid JSON gracefully', async () => {
-    const responseWithInvalidJSON = {
-      choices: [
-        {
-          message: {
-            content: 'This is not JSON',
-          },
-        },
-      ],
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(responseWithInvalidJSON),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess('This is not JSON'));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -267,7 +226,7 @@ describe('detectLegendRegion', () => {
   });
 
   it('should handle network errors', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    mockAnalyzeWithMultiProvider.mockRejectedValueOnce(new Error('Network error'));
 
     const { detectLegendRegion } = await import('@/lib/legend-extractor');
     const result = await detectLegendRegion('base64image', 'A1.1');
@@ -284,14 +243,11 @@ describe('detectLegendRegion', () => {
 describe('extractLegendEntries', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.OPENAI_API_KEY = 'test-api-key';
+
   });
 
   it('should extract legend entries successfully', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(mockLegendExtractionResponse),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(mockLegendExtractionContent));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1', DisciplineCode.FIRE_PROTECTION);
@@ -304,10 +260,7 @@ describe('extractLegendEntries', () => {
   });
 
   it('should categorize entries based on discipline', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(mockLegendExtractionResponse),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(mockLegendExtractionContent));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1', DisciplineCode.FIRE_PROTECTION);
@@ -318,10 +271,7 @@ describe('extractLegendEntries', () => {
   });
 
   it('should generate unique IDs for entries', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(mockLegendExtractionResponse),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(mockLegendExtractionContent));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');
@@ -333,24 +283,18 @@ describe('extractLegendEntries', () => {
   });
 
   it('should handle API errors', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      statusText: 'Unauthorized',
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionFailure('All providers failed'));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Vision API error');
+    expect(result.error).toBeDefined();
     expect(result.confidence).toBe(0);
   });
 
-  it('should handle missing content', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue({ choices: [] }),
-    });
+  it('should handle empty content', async () => {
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(''));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');
@@ -360,20 +304,7 @@ describe('extractLegendEntries', () => {
   });
 
   it('should handle non-JSON responses', async () => {
-    const responseWithText = {
-      choices: [
-        {
-          message: {
-            content: 'No legend found on this sheet',
-          },
-        },
-      ],
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(responseWithText),
-    });
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess('No legend found on this sheet'));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');
@@ -383,27 +314,16 @@ describe('extractLegendEntries', () => {
   });
 
   it('should use default confidence when not provided', async () => {
-    const responseWithoutConfidence = {
-      choices: [
+    const content = JSON.stringify({
+      entries: [
         {
-          message: {
-            content: JSON.stringify({
-              entries: [
-                {
-                  symbolCode: 'TEST',
-                  description: 'Test Symbol',
-                },
-              ],
-            }),
-          },
+          symbolCode: 'TEST',
+          description: 'Test Symbol',
         },
       ],
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(responseWithoutConfidence),
     });
+
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(content));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');
@@ -413,7 +333,7 @@ describe('extractLegendEntries', () => {
   });
 
   it('should handle exception during extraction', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network timeout'));
+    mockAnalyzeWithMultiProvider.mockRejectedValueOnce(new Error('Network timeout'));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');
@@ -423,29 +343,18 @@ describe('extractLegendEntries', () => {
   });
 
   it('should include position data when provided', async () => {
-    const responseWithPositions = {
-      choices: [
+    const content = JSON.stringify({
+      entries: [
         {
-          message: {
-            content: JSON.stringify({
-              entries: [
-                {
-                  symbolCode: 'TEST',
-                  description: 'Test Symbol',
-                  position: { x: 10, y: 20, width: 5, height: 5 },
-                },
-              ],
-              confidence: 0.9,
-            }),
-          },
+          symbolCode: 'TEST',
+          description: 'Test Symbol',
+          position: { x: 10, y: 20, width: 5, height: 5 },
         },
       ],
-    };
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: vi.fn().mockResolvedValue(responseWithPositions),
+      confidence: 0.9,
     });
+
+    mockAnalyzeWithMultiProvider.mockResolvedValueOnce(visionSuccess(content));
 
     const { extractLegendEntries } = await import('@/lib/legend-extractor');
     const result = await extractLegendEntries('base64image', 'A1.1');

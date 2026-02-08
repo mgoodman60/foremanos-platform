@@ -3,6 +3,9 @@
  * Analyzes document metadata (filename, content preview, file type) to suggest appropriate categories
  */
 
+import { callLLM } from '@/lib/llm-providers';
+import { SIMPLE_MODEL } from '@/lib/model-config';
+
 type DocumentCategory = string;
 
 // Category display names and descriptions
@@ -70,18 +73,11 @@ export async function suggestDocumentCategory(
 
   // Use LLM for more complex analysis
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini', // Updated from deprecated gpt-3.5-turbo (Jan 2026)
-        messages: [
-          {
-            role: 'system',
-            content: `You are a construction document classifier. Analyze the document and suggest ONE of these categories:
+    const llmResult = await callLLM(
+      [
+        {
+          role: 'system',
+          content: `You are a construction document classifier. Analyze the document and suggest ONE of these categories:
 - budget_cost: Budget files, cost estimates, invoices
 - schedule: Gantt charts, timelines, project schedules
 - plans_drawings: Architectural/structural/MEP drawings and plans
@@ -92,26 +88,18 @@ export async function suggestDocumentCategory(
 - other: Miscellaneous documents
 
 Respond with ONLY a JSON object: {"category": "<category>", "confidence": 0.0-1.0, "reasoning": "<brief explanation>"}`
-          },
-          {
-            role: 'user',
-            content: `Classify this document:
+        },
+        {
+          role: 'user',
+          content: `Classify this document:
 Filename: ${fileName}
 File type: ${fileType}${contentPreview ? `\nContent preview: ${contentPreview.substring(0, 500)}` : ''}`
-          }
-        ],
-        temperature: 0.1,
-        max_tokens: 150
-      }),
-    });
+        }
+      ],
+      { model: SIMPLE_MODEL, temperature: 0.1, max_tokens: 150 }
+    );
 
-    if (!response.ok) {
-      console.error('LLM API error:', response.status);
-      return keywordMatch; // Fallback to keyword match
-    }
-
-    const data = await response.json();
-    const content = data.choices[0].message.content.trim();
+    const content = llmResult.content.trim();
     
     // Parse JSON response
     // Strip markdown code blocks if present (Claude sometimes wraps JSON in ```json ... ```)

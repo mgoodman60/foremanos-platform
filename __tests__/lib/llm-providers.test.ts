@@ -157,6 +157,262 @@ describe('LLM Providers', () => {
     });
   });
 
+  describe('callAnthropic - content block conversion', () => {
+    it('should convert image_url with data URL to Claude image format', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'Image analyzed' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [{
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Analyze this' },
+          { type: 'image_url', image_url: { url: 'data:image/png;base64,iVBORw0KGgo=' } },
+        ],
+      }];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const contentBlocks = body.messages[0].content;
+      // text block should pass through
+      expect(contentBlocks[0]).toEqual({ type: 'text', text: 'Analyze this' });
+      // image_url should be converted to Claude image format
+      expect(contentBlocks[1]).toEqual({
+        type: 'image',
+        source: { type: 'base64', media_type: 'image/png', data: 'iVBORw0KGgo=' },
+      });
+    });
+
+    it('should convert PDF data URL to Claude document format', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'PDF analyzed' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [{
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Read this' },
+          { type: 'image_url', image_url: { url: 'data:application/pdf;base64,JVBERi0=' } },
+        ],
+      }];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const docBlock = body.messages[0].content[1];
+      expect(docBlock).toEqual({
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: 'JVBERi0=' },
+      });
+    });
+
+    it('should handle raw base64 without data URL prefix as image/jpeg', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'OK' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [{
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Look' },
+          { type: 'image_url', image_url: { url: 'rawbase64data' } },
+        ],
+      }];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const imgBlock = body.messages[0].content[1];
+      expect(imgBlock).toEqual({
+        type: 'image',
+        source: { type: 'base64', media_type: 'image/jpeg', data: 'rawbase64data' },
+      });
+    });
+
+    it('should pass through document/source blocks natively', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'OK' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const docBlock = {
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: 'pdfdata' },
+      };
+      const messages: LLMMessage[] = [{
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Read' },
+          docBlock as any,
+        ],
+      }];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.messages[0].content[1]).toEqual(docBlock);
+    });
+
+    it('should convert file blocks to Claude document format', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'OK' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [{
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Read' },
+          { type: 'file', file: { filename: 'doc.pdf', file_data: 'filebase64' } },
+        ],
+      }];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.messages[0].content[1]).toEqual({
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: 'filebase64' },
+      });
+    });
+
+    it('should pass through string content unchanged', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'OK' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [
+        { role: 'user', content: 'Hello' },
+      ];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.messages[0].content).toBe('Hello');
+    });
+  });
+
+  describe('callAnthropic - response_format handling', () => {
+    it('should add JSON instruction to system prompt when response_format is json_object', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: '{"key": "value"}' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [
+        { role: 'user', content: 'Give me JSON' },
+      ];
+
+      await callAnthropic(messages, { response_format: { type: 'json_object' } });
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.system).toContain('valid JSON only');
+      expect(body.system).toContain('No markdown');
+    });
+
+    it('should append JSON instruction to existing system message', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: '{}' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [
+        { role: 'system', content: 'You are a construction expert' },
+        { role: 'user', content: 'Give me JSON' },
+      ];
+
+      await callAnthropic(messages, { response_format: { type: 'json_object' } });
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.system).toContain('construction expert');
+      expect(body.system).toContain('valid JSON only');
+    });
+
+    it('should not add JSON instruction when response_format is not set', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: [{ text: 'OK' }],
+          model: 'claude-sonnet-4-5-20250929',
+        }),
+      });
+
+      const messages: LLMMessage[] = [
+        { role: 'user', content: 'Hello' },
+      ];
+
+      await callAnthropic(messages);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.system).toBeUndefined();
+    });
+  });
+
+  describe('callOpenAI - response_format', () => {
+    it('should include response_format in request body when provided', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: '{"ok":true}' } }],
+          model: 'gpt-4o-mini',
+        }),
+      });
+
+      const messages: LLMMessage[] = [
+        { role: 'user', content: 'JSON please' },
+      ];
+
+      await callOpenAI(messages, { response_format: { type: 'json_object' } });
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.response_format).toEqual({ type: 'json_object' });
+    });
+
+    it('should not include response_format when not provided', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'ok' } }],
+          model: 'gpt-4o-mini',
+        }),
+      });
+
+      await callOpenAI([{ role: 'user', content: 'hi' }]);
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.response_format).toBeUndefined();
+    });
+  });
+
   describe('callLLM - Model Routing', () => {
     it('should route claude-* models to Anthropic', async () => {
       fetchMock.mockResolvedValueOnce({

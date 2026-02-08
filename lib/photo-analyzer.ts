@@ -8,7 +8,33 @@
  */
 
 import { prisma } from './db';
-import { VISION_MODEL } from '@/lib/model-config';
+import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
+import { logger } from '@/lib/logger';
+
+/**
+ * Convert an image URL to base64 by fetching it.
+ * If the input is already base64 data (no protocol), returns it as-is.
+ */
+async function urlToBase64(imageUrl: string): Promise<string> {
+  // If already base64 (no protocol prefix), return as-is
+  if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:')) {
+    return imageUrl;
+  }
+
+  // Handle data: URIs — strip prefix
+  if (imageUrl.startsWith('data:')) {
+    const commaIdx = imageUrl.indexOf(',');
+    return commaIdx >= 0 ? imageUrl.slice(commaIdx + 1) : imageUrl;
+  }
+
+  // Fetch the image and convert to base64
+  const response = await fetch(imageUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: HTTP ${response.status}`);
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return buffer.toString('base64');
+}
 
 interface PhotoAnalysisResult {
   description: string;
@@ -37,11 +63,6 @@ export async function analyzePhoto(
     finishType?: string;
   }
 ): Promise<PhotoAnalysisResult> {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY not configured');
-  }
-
   // Build context prompt
   let contextPrompt = '';
   if (context) {
@@ -69,51 +90,19 @@ Guidelines:
 - Return ONLY valid JSON`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: VISION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: prompt,
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl,
-                },
-              },
-            ],
-          },
-        ],
-        temperature: 0.1,
-        max_tokens: 500,
-      }),
-    });
+    const imageBase64 = await urlToBase64(imageUrl);
+    const result = await analyzeWithMultiProvider(imageBase64, prompt);
 
-    if (!response.ok) {
-      throw new Error(`Vision API error: ${response.statusText}`);
+    if (!result.success || !result.content) {
+      throw new Error(result.error || 'No content in Vision API response');
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('No content in Vision API response');
-    }
+    const content = result.content;
 
     // Parse JSON response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('Could not extract JSON from response:', content);
+      logger.warn('PHOTO_ANALYZER', 'Could not extract JSON from response', { content });
       return {
         description: 'Construction progress photo',
         tags: ['construction'],
@@ -124,7 +113,7 @@ Guidelines:
     const analysis = JSON.parse(jsonMatch[0]) as PhotoAnalysisResult;
     return analysis;
   } catch (error) {
-    console.error('Error analyzing photo:', error);
+    logger.error('PHOTO_ANALYZER', 'Error analyzing photo', error as Error);
     // Return fallback analysis
     return {
       description: 'Construction progress photo',
@@ -146,11 +135,6 @@ export async function suggestRoomsForPhoto(
     aiTags?: string;
   }
 ): Promise<RoomSuggestion[]> {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY not configured');
-  }
-
   // Get all rooms for the project
   const project = await prisma.project.findUnique({
     where: { slug: projectSlug },
@@ -210,51 +194,19 @@ Guidelines:
 - Return ONLY valid JSON`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: VISION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: prompt,
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl,
-                },
-              },
-            ],
-          },
-        ],
-        temperature: 0.1,
-        max_tokens: 500,
-      }),
-    });
+    const imageBase64 = await urlToBase64(imageUrl);
+    const data = await analyzeWithMultiProvider(imageBase64, prompt);
 
-    if (!response.ok) {
-      throw new Error(`Vision API error: ${response.statusText}`);
+    if (!data.success || !data.content) {
+      throw new Error(data.error || 'No content in Vision API response');
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('No content in Vision API response');
-    }
+    const content = data.content;
 
     // Parse JSON response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('Could not extract JSON from response:', content);
+      logger.warn('PHOTO_ANALYZER', 'Could not extract JSON from room suggestion response', { content });
       return [];
     }
 
@@ -276,7 +228,7 @@ Guidelines:
 
     return suggestions.slice(0, 3); // Return top 3
   } catch (error) {
-    console.error('Error suggesting rooms:', error);
+    logger.error('PHOTO_ANALYZER', 'Error suggesting rooms', error as Error);
     return [];
   }
 }
@@ -342,7 +294,7 @@ export async function batchProcessPhotos(
       await processUploadedPhoto(photoId, projectSlug);
       processed++;
     } catch (error) {
-      console.error(`Failed to process photo ${photoId}:`, error);
+      logger.error('PHOTO_ANALYZER', `Failed to process photo ${photoId}`, error as Error);
       failed++;
     }
   }
@@ -426,7 +378,7 @@ export async function getImageDimensions(buffer: Buffer): Promise<{ width: numbe
     // This is a placeholder. In production, you'd use sharp or another image library
     return null;
   } catch (error) {
-    console.error('Error getting image dimensions:', error);
+    logger.error('PHOTO_ANALYZER', 'Error getting image dimensions', error as Error);
     return null;
   }
 }
@@ -439,7 +391,7 @@ export async function extractBasicExif(buffer: Buffer): Promise<{ capturedAt?: D
     // This is a placeholder. In production, you'd use exif-parser or similar
     return null;
   } catch (error) {
-    console.error('Error extracting EXIF:', error);
+    logger.error('PHOTO_ANALYZER', 'Error extracting EXIF', error as Error);
     return null;
   }
 }
@@ -518,7 +470,7 @@ export async function generateAIPhotoDescription(
     const analysis = await analyzePhoto(imageUrl, '', {});
     return analysis.description;
   } catch (error) {
-    console.error('Error generating AI description:', error);
+    logger.error('PHOTO_ANALYZER', 'Error generating AI description', error as Error);
     return 'Construction progress photo';
   }
 }

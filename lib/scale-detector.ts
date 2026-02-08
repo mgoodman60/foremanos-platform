@@ -15,45 +15,8 @@
 
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './db';
-import { EXTRACTION_MODEL } from '@/lib/model-config';
-
-/**
- * Detect if base64 content is a PDF (starts with %PDF- magic number)
- */
-function isPdfContent(base64: string): boolean {
-  // PDF magic number in base64: "JVBERi" which is %PDF-
-  return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
-}
-
-/**
- * Build content array for vision API request, handling both image and PDF input
- */
-function buildVisionContent(prompt: string, base64Data: string): any[] {
-  const isPdf = isPdfContent(base64Data);
-
-  if (isPdf) {
-    // PDF content - use file type for APIs that support it
-    return [
-      { type: 'text', text: prompt },
-      {
-        type: 'file',
-        file: {
-          filename: 'page.pdf',
-          file_data: `data:application/pdf;base64,${base64Data}`,
-        },
-      }
-    ];
-  } else {
-    // Image content
-    return [
-      { type: 'text', text: prompt },
-      {
-        type: 'image_url',
-        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
-      }
-    ];
-  }
-}
+import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
+import { logger } from '@/lib/logger';
 
 /**
  * Supported scale formats
@@ -158,11 +121,6 @@ export async function detectScalesWithVision(
   confidence: number;
 }> {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY not configured');
-    }
-
     const prompt = `Analyze this construction drawing and extract ALL scales.
 
 **CRITICAL INSTRUCTIONS:**
@@ -208,35 +166,13 @@ If you find multiple scales on the sheet, extract:
 - "AS NOTED" → scaleString: "AS NOTED", format: "custom", confidence: 1.0
 - If no scale found → empty scales array, confidence: 0.0`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: EXTRACTION_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: buildVisionContent(prompt, imageBase64)
-          }
-        ],
-        temperature: 0.1,
-        max_tokens: 1000,
-      }),
-    });
+    const data = await analyzeWithMultiProvider(imageBase64, prompt);
 
-    if (!response.ok) {
-      throw new Error(`Vision API error: ${response.statusText}`);
+    if (!data.success || !data.content) {
+      throw new Error(data.error || 'No content in Vision API response');
     }
 
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('No content in Vision API response');
-    }
+    const content = data.content;
 
     // Parse JSON response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -263,7 +199,7 @@ If you find multiple scales on the sheet, extract:
       confidence: result.overallConfidence !== undefined ? result.overallConfidence : 0.8,
     };
   } catch (error) {
-    console.error('Scale detection error:', error);
+    logger.error('SCALE_DETECTOR', 'Scale detection error', error as Error);
     return {
       success: false,
       scales: [],

@@ -204,7 +204,7 @@ describe('Document Processor - PDF Processing', () => {
 
     mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
     mockClassifyDocument.mockResolvedValue({
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
       reason: 'Architectural plan',
     });
@@ -236,7 +236,7 @@ describe('Document Processor - PDF Processing', () => {
         data: expect.objectContaining({
           processed: true,
           pagesProcessed: 5,
-          processorType: 'gpt-4o-vision',
+          processorType: 'vision-ai',
         }),
       })
     );
@@ -246,7 +246,7 @@ describe('Document Processor - PDF Processing', () => {
       'doc-1',
       1,
       5,
-      'gpt-4o-vision'
+      'vision-ai'
     );
   });
 
@@ -294,7 +294,7 @@ describe('Document Processor - PDF Processing', () => {
     const mockDoc = createMockDocument();
     mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
     mockClassifyDocument.mockResolvedValue({
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
     });
 
@@ -328,7 +328,7 @@ describe('Document Processor - PDF Processing', () => {
 
     mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
     mockClassifyDocument.mockResolvedValue({
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
     });
 
@@ -520,7 +520,7 @@ describe('Document Processor - Classification', () => {
     mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
 
     await processDocument('doc-1', {
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
       reason: 'Architectural plan',
     });
@@ -564,7 +564,7 @@ describe('Document Processor - Classification', () => {
 
     const testCases = [
       { fileName: 'Door-Schedule.pdf', expectedProcessor: 'claude-haiku-ocr' },
-      { fileName: 'Site-Plan.pdf', expectedProcessor: 'gpt-4o-vision' },
+      { fileName: 'Site-Plan.pdf', expectedProcessor: 'vision-ai' },
       { fileName: 'Equipment-Schedule.pdf', expectedProcessor: 'claude-haiku-ocr' },
     ];
 
@@ -668,7 +668,7 @@ describe('Document Processor - Error Handling', () => {
     const mockDoc = createMockDocument();
     mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
     mockClassifyDocument.mockResolvedValue({
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
     });
 
@@ -726,7 +726,7 @@ describe('Document Processor - Batch Processing', () => {
     });
 
     mockClassifyDocument.mockResolvedValue({
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
     });
 
@@ -775,7 +775,7 @@ describe('Document Processor - Batch Processing', () => {
     });
 
     mockClassifyDocument.mockResolvedValue({
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 0.95,
     });
 

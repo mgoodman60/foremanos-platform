@@ -2,14 +2,14 @@
  * Document Classifier - Smart routing for optimal processing
  * 
  * Determines which processor to use based on document characteristics:
- * - GPT-4o Vision: Complex architectural plans, site photos, hand-drawn sketches
+ * - Vision AI: Complex architectural plans, site photos, hand-drawn sketches
  * - Claude 3 Haiku + OCR: Text-heavy schedules, specifications, reports
  * - Basic OCR: Simple text documents, emails, memos
  */
 
 import { PDFDocument } from 'pdf-lib';
 
-export type ProcessorType = 'gpt-4o-vision' | 'claude-haiku-ocr' | 'basic-ocr';
+export type ProcessorType = 'vision-ai' | 'claude-haiku-ocr' | 'basic-ocr';
 
 export interface DocumentClassification {
   processorType: ProcessorType;
@@ -30,7 +30,7 @@ export async function classifyDocument(
   // Image files always use vision
   if (['jpg', 'jpeg', 'png', 'tiff', 'heic'].includes(fileType)) {
     return {
-      processorType: 'gpt-4o-vision',
+      processorType: 'vision-ai',
       confidence: 1.0,
       reason: 'Image file - requires visual analysis',
     };
@@ -68,7 +68,7 @@ export async function classifyDocument(
     // Architectural/Engineering plans - HIGH confidence for Vision
     if (isArchitecturalPlan(lowerFileName)) {
       return {
-        processorType: 'gpt-4o-vision',
+        processorType: 'vision-ai',
         confidence: 0.95,
         reason: 'Architectural/engineering plan with drawings',
       };
@@ -95,7 +95,7 @@ export async function classifyDocument(
     // Site photos or progress reports - Vision
     if (isSitePhoto(lowerFileName)) {
       return {
-        processorType: 'gpt-4o-vision',
+        processorType: 'vision-ai',
         confidence: 0.90,
         reason: 'Site photo or progress documentation',
       };
@@ -131,7 +131,7 @@ export async function classifyDocument(
   
   // Default to Vision for PDFs (conservative approach)
   return {
-    processorType: 'gpt-4o-vision',
+    processorType: 'vision-ai',
     confidence: 0.60,
     reason: 'Default to high-quality vision analysis',
   };
@@ -273,7 +273,7 @@ async function getPdfPageCount(buffer: Buffer): Promise<number> {
  */
 export function getProcessorName(processorType: ProcessorType): string {
   const names: Record<ProcessorType, string> = {
-    'gpt-4o-vision': 'GPT-4o Vision (High Detail)',
+    'vision-ai': 'Vision AI (High Detail)',
     'claude-haiku-ocr': 'Claude 3 Haiku + OCR (Text Analysis)',
     'basic-ocr': 'Basic OCR (Simple Text)',
   };
