@@ -128,6 +128,14 @@ export async function GET(
       queuePosition = aheadCount + 1;
     }
 
+    // Concurrent processing metadata
+    const concurrency = (metadata.concurrency as number) ?? 3;
+    const failedBatchRanges = (metadata.failedBatchRanges as Array<{ startPage: number; endPage: number; error: string }>) ?? [];
+    const processingMode = (metadata.processingMode as string) ?? (totalPages > 5 ? 'concurrent' : 'sequential');
+    const activeBatches = currentPhase === 'analyzing' || currentPhase === 'extracting'
+      ? Math.min((queueEntry?.totalBatches ?? 0) - (queueEntry?.currentBatch ?? 0), concurrency)
+      : 0;
+
     return NextResponse.json({
       status: currentPhase,
       pagesProcessed,
@@ -143,6 +151,10 @@ export async function GET(
       lastActivityAt: queueEntry?.updatedAt ? new Date(queueEntry.updatedAt).toISOString() : null,
       secondsPerPage: Math.round(secondsPerPage * 10) / 10,
       elapsedSeconds,
+      concurrency,
+      activeBatches,
+      failedBatchRanges,
+      processingMode,
     });
   } catch (error) {
     console.error('[DOCUMENT PROGRESS] Error:', error);

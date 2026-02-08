@@ -41,15 +41,15 @@ export async function POST(request: Request) {
       logger.error('PROCESS_QUEUE', 'Orphan recovery error (non-blocking)', recoveryError as Error);
     }
 
-    // Reset stale 'processing' documents (stuck for >30 min)
-    // Increased from 10 min because intelligence extraction now completes before marking done
+    // Reset stale 'processing' documents (stuck for >8 min)
+    // Reduced from 30 min to align with concurrent batch processing recovery
     try {
-      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const eightMinutesAgo = new Date(Date.now() - 8 * 60 * 1000);
       const staleReset = await prisma.document.updateMany({
         where: {
           queueStatus: 'processing',
           processed: false,
-          updatedAt: { lt: thirtyMinutesAgo },
+          updatedAt: { lt: eightMinutesAgo },
         },
         data: { queueStatus: 'pending' },
       });
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       await prisma.processingQueue.updateMany({
         where: {
           status: ProcessingQueueStatus.processing,
-          updatedAt: { lt: thirtyMinutesAgo },
+          updatedAt: { lt: eightMinutesAgo },
         },
         data: {
           status: ProcessingQueueStatus.queued,
@@ -126,15 +126,15 @@ export async function GET(request: Request) {
         logger.error('PROCESS_QUEUE', 'Orphan recovery error (non-blocking)', recoveryError as Error);
       }
 
-      // Reset stale 'processing' documents (stuck for >30 min)
-      // Increased from 10 min because intelligence extraction now completes before marking done
+      // Reset stale 'processing' documents (stuck for >8 min)
+      // Reduced from 30 min to align with concurrent batch processing recovery
       try {
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const eightMinutesAgo = new Date(Date.now() - 8 * 60 * 1000);
         const staleReset = await prisma.document.updateMany({
           where: {
             queueStatus: 'processing',
             processed: false,
-            updatedAt: { lt: thirtyMinutesAgo },
+            updatedAt: { lt: eightMinutesAgo },
           },
           data: { queueStatus: 'pending' },
         });
@@ -146,7 +146,7 @@ export async function GET(request: Request) {
         await prisma.processingQueue.updateMany({
           where: {
             status: ProcessingQueueStatus.processing,
-            updatedAt: { lt: thirtyMinutesAgo },
+            updatedAt: { lt: eightMinutesAgo },
           },
           data: {
             status: ProcessingQueueStatus.queued,

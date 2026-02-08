@@ -38,6 +38,43 @@ const ALLOWED_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
+/** Category keywords mirrored from lib/document-categorizer.ts CATEGORY_INFO */
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  plans_drawings: ['plan', 'drawing', 'blueprint', 'architectural', 'structural', 'mep', 'electrical', 'plumbing', 'hvac', 'elevation', 'section', 'detail', 'site plan', 'floor plan', 'conformance'],
+  budget_cost: ['budget', 'cost', 'estimate', 'pricing', 'invoice', 'payment', 'bid', 'quote', 'financial', 'expense'],
+  schedule: ['schedule', 'timeline', 'gantt', 'critical path', 'milestone', 'deadline', 'calendar', 'duration', 'phase'],
+  specifications: ['spec', 'specification', 'datasheet', 'technical', 'material', 'product', 'standard', 'requirement'],
+  contracts: ['contract', 'agreement', 'rfi', 'change order', 'submittal', 'legal', 'proposal', 'addendum', 'amendment'],
+  daily_reports: ['daily', 'log', 'report', 'inspection', 'progress', 'status', 'field', 'observation'],
+  photos: ['photo', 'image', 'picture', 'jpg', 'jpeg', 'png', 'site photo', 'progress photo'],
+};
+
+/** Sheet number patterns common in construction documents (e.g., A-101, S-001, E-203) */
+const SHEET_NUMBER_PATTERN = /[AaSsEeMmPpCc]-\d+/;
+
+/**
+ * Infer document category from filename using keyword matching.
+ * Falls back to 'other' when no pattern matches.
+ */
+function inferCategoryFromFilename(fileName: string): string {
+  const lower = fileName.toLowerCase();
+
+  // Check for construction sheet number patterns first (strong signal for plans_drawings)
+  if (SHEET_NUMBER_PATTERN.test(fileName)) {
+    return 'plans_drawings';
+  }
+
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    for (const keyword of keywords) {
+      if (lower.includes(keyword)) {
+        return category;
+      }
+    }
+  }
+
+  return 'other';
+}
+
 export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploadModalProps) {
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -177,7 +214,8 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
           idx === i ? { ...f, progress: 80 } : f
         ));
 
-        // Step 3: Confirm upload
+        // Step 3: Confirm upload (infer category from filename for batch uploads)
+        const inferredCategory = inferCategoryFromFilename(uploadFile.file.name);
         const confirmRes = await fetch('/api/documents/confirm-upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -186,6 +224,7 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
             fileName: uploadFile.file.name,
             fileSize: uploadFile.file.size,
             projectId,
+            category: inferredCategory,
           }),
         });
 

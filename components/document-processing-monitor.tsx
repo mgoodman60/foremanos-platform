@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, Clock, XCircle, RefreshCw, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, XCircle, RefreshCw, FileText, Circle, Loader2, X } from 'lucide-react';
+import { primaryColors, semanticColors } from '@/lib/design-tokens';
 import { toast } from 'sonner';
 
 interface ProcessingStatus {
@@ -38,6 +39,10 @@ interface DocumentProgress {
   estimatedTimeRemaining: number;
   queuePosition: number | null;
   error: string | null;
+  concurrency?: number;
+  activeBatches?: number[];
+  failedBatchRanges?: string[];
+  processingMode?: string;
 }
 
 interface Stats {
@@ -120,6 +125,39 @@ export default function DocumentProcessingMonitor({
     return () => clearInterval(interval);
   }, [documents]);
 
+  type MonitorStage = 'upload' | 'scanning' | 'analysis' | 'extraction' | 'indexing' | 'complete';
+
+  const MONITOR_STAGES: { key: MonitorStage; label: string }[] = [
+    { key: 'upload', label: 'Uploaded' },
+    { key: 'scanning', label: 'Scanning' },
+    { key: 'analysis', label: 'Analysis' },
+    { key: 'extraction', label: 'Extraction' },
+    { key: 'indexing', label: 'Indexing' },
+    { key: 'complete', label: 'Complete' },
+  ];
+
+  const getMonitorStageIndex = (phase: string): number => {
+    switch (phase) {
+      case 'queued': return 0;
+      case 'pending': return 0;
+      case 'extracting': return 1;
+      case 'analyzing': return 2;
+      case 'processing': return 3;
+      case 'indexing': return 4;
+      case 'completed': return 5;
+      case 'failed': return -1;
+      default: return 0;
+    }
+  };
+
+  const getMonitorStageIcon = (idx: number, activeIdx: number, failed: boolean) => {
+    if (failed && idx === activeIdx) return <X className="w-3.5 h-3.5 text-red-500" />;
+    if (failed && idx > activeIdx) return <Circle className="w-3.5 h-3.5 text-gray-600" />;
+    if (idx < activeIdx) return <CheckCircle2 className="w-3.5 h-3.5" style={{ color: semanticColors.success[500] }} />;
+    if (idx === activeIdx) return <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: primaryColors.orange[500] }} />;
+    return <Circle className="w-3.5 h-3.5 text-gray-600" />;
+  };
+
   const formatTimeRemaining = (seconds: number): string => {
     if (seconds <= 0) return '';
     if (seconds < 60) return `~${seconds}s remaining`;
@@ -129,13 +167,14 @@ export default function DocumentProcessingMonitor({
 
   const getPhaseLabel = (phase: string, progress: DocumentProgress | undefined): string => {
     if (!progress) return '';
+    const concurrencyLabel = progress.concurrency && progress.concurrency > 1 ? ` (${progress.concurrency} parallel)` : '';
     switch (phase) {
       case 'queued':
         return progress.queuePosition ? `Waiting in queue (position ${progress.queuePosition})...` : 'Waiting in queue...';
       case 'extracting':
-        return 'Extracting content from pages...';
+        return `Extracting content from pages${concurrencyLabel}...`;
       case 'analyzing':
-        return `Analyzing page ${progress.pagesProcessed} of ${progress.totalPages}...`;
+        return `Analyzing page ${progress.pagesProcessed} of ${progress.totalPages}${concurrencyLabel}...`;
       case 'indexing':
         return 'Indexing content for search...';
       case 'completed':
@@ -304,23 +343,42 @@ export default function DocumentProcessingMonitor({
                       Uploaded: {new Date(doc.createdAt).toLocaleString()}
                     </div>
                     
-                    {/* Progress Bar for Processing Documents */}
+                    {/* Processing Stage Stepper */}
                     {(doc.queueStatus === 'processing' || doc.queueStatus === 'queued') && (doc.queueInfo?.totalPages || progressMap[doc.id]?.totalPages) && (() => {
                       const progress = progressMap[doc.id];
                       const totalPages = progress?.totalPages || doc.queueInfo?.totalPages || 0;
                       const pagesProcessed = progress?.pagesProcessed || doc.queueInfo?.pagesProcessed || 0;
                       const percent = totalPages > 0 ? Math.round((pagesProcessed / totalPages) * 100) : 0;
                       const phase = progress?.currentPhase || (doc.queueStatus === 'queued' ? 'queued' : 'analyzing');
+                      const isFailed = phase === 'failed';
+                      const activeIdx = getMonitorStageIndex(phase);
 
                       return (
-                        <div className="mt-3">
-                          {/* Phase indicator */}
-                          <div className="flex justify-between text-xs text-gray-400 mb-1">
-                            <span className="font-medium">{getPhaseLabel(phase, progress)}</span>
-                            <span>{pagesProcessed}/{totalPages} pages ({percent}%)</span>
+                        <div className="mt-3 space-y-2">
+                          {/* Stage stepper row */}
+                          <div className="flex items-center gap-0.5" role="list" aria-label="Processing stages">
+                            {MONITOR_STAGES.map((stage, idx) => {
+                              const isDone = idx < activeIdx;
+                              const isActive = idx === activeIdx;
+                              return (
+                                <div key={stage.key} className="flex items-center flex-1 min-w-0" role="listitem">
+                                  <div className="flex items-center gap-1 min-w-0">
+                                    <div className="flex-shrink-0">{getMonitorStageIcon(idx, activeIdx, isFailed)}</div>
+                                    <span className={`text-[10px] truncate ${isActive ? 'text-slate-200 font-semibold' : isDone ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {stage.label}
+                                    </span>
+                                  </div>
+                                  {idx < MONITOR_STAGES.length - 1 && (
+                                    <div className={`h-px flex-1 mx-1 min-w-[4px] ${isDone ? 'bg-green-700' : 'bg-gray-700'}`} />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
+
+                          {/* Progress bar */}
                           <div
-                            className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden"
+                            className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
                             role="progressbar"
                             aria-valuenow={percent}
                             aria-valuemin={0}
@@ -328,15 +386,16 @@ export default function DocumentProcessingMonitor({
                             aria-label={`Processing progress: ${percent}%`}
                           >
                             <div
-                              className={`h-2.5 rounded-full transition-all duration-500 ease-out ${phase === 'queued' ? 'bg-yellow-500' : phase === 'indexing' ? 'bg-green-500' : 'bg-blue-500'}`}
+                              className={`h-1.5 rounded-full transition-all duration-500 ${isFailed ? 'bg-red-500' : phase === 'indexing' ? 'bg-green-500' : 'bg-orange-500'}`}
                               style={{ width: `${Math.max(2, percent)}%` }}
-                            >
-                              <div className={`w-full h-full bg-gradient-to-r ${phase === 'queued' ? 'from-yellow-500 to-yellow-400' : phase === 'indexing' ? 'from-green-500 to-green-400' : 'from-blue-500 to-blue-400'} animate-pulse`} />
-                            </div>
+                            />
                           </div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>
-                              {doc.queueInfo && <>Batch {doc.queueInfo.currentBatch + 1} of {doc.queueInfo.totalBatches}</>}
+
+                          {/* Stats row */}
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span className="flex items-center gap-2">
+                              <span>{pagesProcessed}/{totalPages} pages ({percent}%)</span>
+                              {doc.queueInfo && <span>· Batch {doc.queueInfo.currentBatch + 1}/{doc.queueInfo.totalBatches}</span>}
                             </span>
                             <span className="flex items-center gap-2">
                               {progress?.estimatedTimeRemaining ? (

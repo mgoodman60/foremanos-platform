@@ -11,7 +11,13 @@ import { classifyDocument } from '@/lib/document-classifier';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { processDocument } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
+import { DocumentCategory } from '@prisma/client';
 import { waitUntil } from '@vercel/functions';
+
+const VALID_CATEGORIES: readonly string[] = [
+  'budget_cost', 'schedule', 'plans_drawings', 'specifications',
+  'contracts', 'daily_reports', 'photos', 'other',
+] as const;
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -48,7 +54,16 @@ export async function POST(request: Request) {
     }
 
     const body: CompleteUploadRequest = await request.json();
-    const { uploadId, fileName, fileSize, totalChunks, projectId, category = 'other' } = body;
+    const { uploadId, fileName, fileSize, totalChunks, projectId, category } = body;
+
+    // Validate category against Prisma enum
+    const validatedCategory: DocumentCategory = VALID_CATEGORIES.includes(category as string)
+      ? (category as DocumentCategory)
+      : DocumentCategory.other;
+
+    if (!category || !VALID_CATEGORIES.includes(category as string)) {
+      logger.warn('UPLOAD_COMPLETE', 'Category defaulted to other', { provided: category, fileName });
+    }
 
     // Verify project access
     const project = await prisma.project.findUnique({
@@ -180,7 +195,7 @@ export async function POST(request: Request) {
         fileSize: fileSize,
         syncSource: 'manual_upload',
         projectId,
-        category: category as any,
+        category: validatedCategory,
         processed: false,
         processorType: classification.processorType,
         tags: [],

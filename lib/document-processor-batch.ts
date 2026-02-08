@@ -20,7 +20,7 @@ interface ProviderStat {
   avgTimePerPage: number; // in seconds
 }
 
-interface BatchResult {
+export interface BatchResult {
   success: boolean;
   pagesProcessed: number;
   error?: string;
@@ -33,19 +33,21 @@ interface BatchResult {
  * @param startPage Starting page (1-indexed)
  * @param endPage Ending page (1-indexed)
  * @param processorType Optional processor type from document classification for smart routing
+ * @param preloadedPdfBuffer Optional pre-downloaded PDF buffer to skip re-downloading (used for concurrent batch dispatch)
  */
 export async function processDocumentBatch(
   documentId: string,
   startPage: number,
   endPage: number,
-  processorType?: string
+  processorType?: string,
+  preloadedPdfBuffer?: Buffer
 ): Promise<BatchResult> {
   let pagesProcessed = 0;
   const tempFiles: string[] = [];
   const providerStats: Record<string, ProviderStat> = {};
 
   try {
-    logger.info('BATCH_PROCESSOR', `Processing document ${documentId} pages ${startPage}-${endPage}`, { processorType: processorType || 'default' });
+    logger.info('BATCH_PROCESSOR', `Processing document ${documentId} pages ${startPage}-${endPage}`, { processorType: processorType || 'default', preloaded: !!preloadedPdfBuffer });
 
     // Get document
     const document = await prisma.document.findUnique({
@@ -64,10 +66,16 @@ export async function processDocumentBatch(
     // Use stored processorType if not provided as parameter
     const effectiveProcessorType = processorType || document.processorType || 'vision-ai';
 
-    // Download PDF
-    const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
-    const response = await fetch(fileUrl);
-    const buffer = Buffer.from(await response.arrayBuffer());
+    // Use preloaded buffer or download PDF
+    let buffer: Buffer;
+    if (preloadedPdfBuffer) {
+      buffer = preloadedPdfBuffer;
+      logger.info('BATCH_PROCESSOR', `Using preloaded PDF buffer (${(buffer.length / 1024 / 1024).toFixed(1)}MB)`);
+    } else {
+      const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
+      const response = await fetch(fileUrl);
+      buffer = Buffer.from(await response.arrayBuffer());
+    }
 
     const tempPdfPath = join(tmpdir(), `batch-${documentId}-${Date.now()}.pdf`);
     await writeFile(tempPdfPath, buffer);

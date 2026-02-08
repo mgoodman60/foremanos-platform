@@ -16,7 +16,13 @@ import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
 import { logger } from '@/lib/logger';
+import { DocumentCategory } from '@prisma/client';
 import { waitUntil } from '@vercel/functions';
+
+const VALID_CATEGORIES: readonly string[] = [
+  'budget_cost', 'schedule', 'plans_drawings', 'specifications',
+  'contracts', 'daily_reports', 'photos', 'other',
+] as const;
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for security scanning
@@ -73,7 +79,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const { cloudStoragePath, fileName, fileSize, projectId, category = 'other' } = body;
+    const { cloudStoragePath, fileName, fileSize, projectId, category } = body;
+
+    // Validate category against Prisma enum
+    const validatedCategory: DocumentCategory = VALID_CATEGORIES.includes(category)
+      ? (category as DocumentCategory)
+      : DocumentCategory.other;
+
+    if (!category || !VALID_CATEGORIES.includes(category)) {
+      logger.warn('CONFIRM_UPLOAD', 'Category defaulted to other', { provided: category, fileName });
+    }
 
     if (!cloudStoragePath || !fileName || !fileSize || !projectId) {
       return NextResponse.json(
@@ -333,7 +348,7 @@ export async function POST(request: Request) {
           fileType: fileExtension,
           projectId,
           accessLevel: 'guest',
-          category: category as any,
+          category: validatedCategory,
           cloud_storage_path: cloudStoragePath,
           isPublic: false,
           fileSize: buffer.length,

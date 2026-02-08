@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2, Circle } from 'lucide-react';
+import { primaryColors, semanticColors } from '@/lib/design-tokens';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -43,6 +44,10 @@ interface DocumentProgress {
   lastActivityAt?: string;
   secondsPerPage?: number;
   elapsedSeconds?: number;
+  concurrency?: number;
+  activeBatches?: number[];
+  failedBatchRanges?: string[];
+  processingMode?: string;
 }
 
 interface Document {
@@ -513,30 +518,109 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     return `~${minutes} minutes left`;
   };
 
-  const getPhaseExplanation = (phase: string, category: string): string => {
-    if (phase === 'queued') return 'Your document is in the processing queue.';
-    if (phase === 'extracting') return 'Converting pages to images for AI analysis...';
-    if (phase === 'indexing') return 'Building search index for AI chat queries...';
+  const getPhaseExplanation = (phase: string, category: string, progress?: DocumentProgress): string => {
+    if (phase === 'queued') {
+      return progress?.queuePosition
+        ? `Your document is #${progress.queuePosition} in the processing queue.`
+        : 'Your document is in the processing queue and will begin shortly.';
+    }
+    if (phase === 'extracting') {
+      const pages = progress?.totalPages;
+      return pages
+        ? `Converting ${pages} page${pages !== 1 ? 's' : ''} to images for AI analysis...`
+        : 'Converting pages to images for AI analysis...';
+    }
+    if (phase === 'indexing') return 'Building search index -- your document will be available for chat queries soon.';
     if (phase === 'analyzing') {
       const cat = category?.toLowerCase() || '';
+      const pageInfo = progress?.pagesProcessed != null && progress?.totalPages
+        ? ` (page ${progress.pagesProcessed} of ${progress.totalPages})`
+        : '';
       if (cat.includes('plan') || cat.includes('drawing') || cat.includes('architectural') || cat.includes('structural') || cat.includes('mechanical') || cat.includes('electrical') || cat.includes('plumbing') || cat.includes('civil'))
-        return 'AI is reading each page for dimensions, room names, door schedules, and symbols.';
+        return `AI is analyzing drawings for dimensions, room labels, and symbols${pageInfo}.`;
       if (cat.includes('spec') || cat.includes('specification'))
-        return 'AI is extracting material specs, product data, and technical requirements.';
+        return `AI is extracting material specs, product data, and requirements${pageInfo}.`;
       if (cat.includes('budget') || cat.includes('cost') || cat.includes('estimate') || cat.includes('pay'))
-        return 'AI is reading line items, costs, and budget breakdowns.';
+        return `AI is reading line items, costs, and budget breakdowns${pageInfo}.`;
       if (cat.includes('schedule') || cat.includes('gantt') || cat.includes('timeline'))
-        return 'AI is extracting tasks, milestones, and timeline data.';
-      return 'AI is analyzing each page individually for construction details.';
+        return `AI is extracting tasks, milestones, and timeline data${pageInfo}.`;
+      return `AI is analyzing each page for construction details${pageInfo}.`;
     }
     return '';
+  };
+
+  type ProcessingStage = 'upload' | 'scanning' | 'analysis' | 'extraction' | 'indexing' | 'complete';
+
+  const PROCESSING_STAGES: { key: ProcessingStage; label: string; description: string }[] = [
+    { key: 'upload', label: 'Upload Complete', description: 'File received and validated' },
+    { key: 'scanning', label: 'Page Scanning', description: 'Extracting text and images' },
+    { key: 'analysis', label: 'AI Analysis', description: 'Analyzing content with AI' },
+    { key: 'extraction', label: 'Data Extraction', description: 'Extracting structured data' },
+    { key: 'indexing', label: 'Indexing', description: 'Building search index' },
+    { key: 'complete', label: 'Complete', description: 'Ready for queries' },
+  ];
+
+  const getActiveStageIndex = (phase: string): number => {
+    switch (phase) {
+      case 'queued': return 0;
+      case 'pending': return 0;
+      case 'extracting': return 1;
+      case 'analyzing': return 2;
+      case 'processing': return 3;
+      case 'indexing': return 4;
+      case 'completed': return 5;
+      case 'failed': return -1;
+      default: return 0;
+    }
+  };
+
+  const getStageIcon = (stageIndex: number, activeIndex: number, failed: boolean) => {
+    if (failed && stageIndex > activeIndex) {
+      return <Circle className="w-4 h-4 text-gray-600" />;
+    }
+    if (failed && stageIndex === activeIndex) {
+      return <X className="w-4 h-4 text-red-500" />;
+    }
+    if (stageIndex < activeIndex) {
+      return <CheckCircle2 className="w-4 h-4" style={{ color: semanticColors.success[500] }} />;
+    }
+    if (stageIndex === activeIndex) {
+      return <Loader2 className="w-4 h-4 animate-spin" style={{ color: primaryColors.orange[500] }} />;
+    }
+    return <Circle className="w-4 h-4 text-gray-600" />;
+  };
+
+  const getStageDetail = (stage: ProcessingStage, progress: DocumentProgress | undefined, category: string): string | null => {
+    if (!progress) return null;
+    switch (stage) {
+      case 'scanning':
+        if (progress.totalPages) return `${progress.pagesProcessed ?? 0} of ${progress.totalPages} pages`;
+        return null;
+      case 'analysis': {
+        const parts: string[] = [];
+        if (progress.concurrency && progress.concurrency > 1) {
+          parts.push(`${progress.concurrency} parallel`);
+        }
+        if (progress.currentBatch != null && progress.totalBatches != null) {
+          parts.push(`Batch ${progress.currentBatch} of ${progress.totalBatches}`);
+        }
+        if (progress.pagesProcessed != null && progress.totalPages) {
+          parts.push(`${progress.pagesProcessed}/${progress.totalPages} pages`);
+        }
+        return parts.length > 0 ? parts.join(' -- ') : null;
+      }
+      case 'indexing':
+        return 'Preparing for chat queries';
+      default:
+        return null;
+    }
   };
 
   const isStalled = (progress: DocumentProgress | undefined, lastPollTime: number | undefined): boolean => {
     if (!progress || !progress.lastActivityAt) return false;
     const lastActivity = new Date(progress.lastActivityAt).getTime();
     const now = Date.now();
-    return (now - lastActivity) > 120000;
+    return (now - lastActivity) > 180000;
   };
 
   const formatLastUpdate = (lastActivityAt: string | undefined): string => {
@@ -1339,48 +1423,66 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         <div className="mt-1.5">
                           {getCategoryBadge(doc.category)}
                         </div>
-                        {/* Inline Processing Progress - Mobile */}
+                        {/* Inline Processing Progress - Mobile Compact Stepper */}
                         {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
                           const progress = progressMap[doc.id];
                           const percent = progress?.percentComplete ?? 0;
                           const phase = progress?.currentPhase || doc.queueStatus || 'queued';
-                          const hasBatch = progress?.currentBatch != null && progress?.totalBatches != null;
                           const stalled = isStalled(progress, lastPollTimes[doc.id]);
                           const eta = progress?.estimatedTimeRemaining ?? 0;
+                          const isFailed = phase === 'failed';
+                          const activeIdx = getActiveStageIndex(phase);
+                          const activeStage = activeIdx >= 0 && activeIdx < PROCESSING_STAGES.length ? PROCESSING_STAGES[activeIdx] : null;
+                          const detail = activeStage ? getStageDetail(activeStage.key, progress, doc.category) : null;
                           return (
                             <div className="mt-2">
+                              {/* Active stage name + percentage */}
                               <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
                                 <span className="flex items-center gap-1.5">
-                                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${stalled ? 'bg-yellow-500' : 'bg-blue-500 animate-pulse'}`} />
-                                  {phase === 'queued' && (progress?.queuePosition ? `Queue position ${progress.queuePosition}` : 'In queue...')}
-                                  {phase === 'extracting' && 'Extracting...'}
-                                  {phase === 'analyzing' && `Page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}`}
-                                  {phase === 'indexing' && 'Indexing...'}
-                                  {phase === 'failed' && 'Failed'}
-                                  {phase === 'pending' && 'Preparing...'}
-                                  {phase === 'processing' && `${progress?.pagesProcessed ?? 0}/${progress?.totalPages ?? '?'}`}
+                                  {isFailed ? (
+                                    <X className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                  ) : (
+                                    <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" style={{ color: stalled ? '#EAB308' : primaryColors.orange[500] }} />
+                                  )}
+                                  <span className="font-medium text-slate-200 truncate">
+                                    {isFailed ? 'Failed' : activeStage?.label || 'Processing'}
+                                  </span>
+                                  {progress?.concurrency && progress.concurrency > 1 && (
+                                    <span className="text-orange-400 font-semibold flex-shrink-0">({progress.concurrency}x)</span>
+                                  )}
+                                  {detail && <span className="text-gray-500 truncate">{detail}</span>}
                                 </span>
-                                <span className="flex items-center gap-1.5">
+                                <span className="flex items-center gap-1.5 flex-shrink-0">
                                   {percent > 0 && <span>{percent}%</span>}
-                                  {eta > 0 && phase !== 'queued' && phase !== 'failed' && <span className="text-gray-500">{formatETA(eta)}</span>}
+                                  {eta > 0 && !isFailed && <span className="text-gray-500">{formatETA(eta)}</span>}
                                 </span>
                               </div>
                               {stalled && (
                                 <p className="text-xs text-yellow-500/80 mb-1">May be paused -- will resume automatically</p>
                               )}
-                              <div
-                                className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
-                                role="progressbar"
-                                aria-valuenow={percent}
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-label={`Processing: ${percent}%`}
-                              >
-                                <div
-                                  className={`h-1.5 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : phase === 'queued' ? 'bg-yellow-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' && !stalled ? 'animate-pulse' : ''}`}
-                                  style={{ width: `${Math.max(2, percent)}%` }}
-                                />
+                              {/* Stage dots */}
+                              <div className="flex items-center gap-0.5 mb-1">
+                                {PROCESSING_STAGES.map((stage, idx) => (
+                                  <div
+                                    key={stage.key}
+                                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                                      idx < activeIdx ? 'bg-green-600' :
+                                      idx === activeIdx ? (isFailed ? 'bg-red-500' : stalled ? 'bg-yellow-500' : 'bg-orange-500') :
+                                      'bg-gray-700'
+                                    }`}
+                                    title={stage.label}
+                                  />
+                                ))}
                               </div>
+                              {/* Elapsed time for mobile */}
+                              {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && phase !== 'queued' && !isFailed && (
+                                <div className="text-[10px] text-gray-500">
+                                  {formatElapsed(progress.elapsedSeconds)} elapsed
+                                  {progress?.secondsPerPage != null && progress.secondsPerPage > 0 && (
+                                    <span> · {(60 / progress.secondsPerPage).toFixed(1)} pages/min</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           );
                         })()}
@@ -1475,50 +1577,77 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             {getCategoryBadge(doc.category)}
                           </div>
 
-                          {/* Inline Processing Progress - Desktop */}
+                          {/* Inline Processing Progress - Desktop Stepper */}
                           {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
                             const progress = progressMap[doc.id];
                             const percent = progress?.percentComplete ?? 0;
                             const phase = progress?.currentPhase || doc.queueStatus || 'queued';
-                            const hasBatch = progress?.currentBatch != null && progress?.totalBatches != null;
                             const stalled = isStalled(progress, lastPollTimes[doc.id]);
                             const eta = progress?.estimatedTimeRemaining ?? 0;
-                            const explanation = getPhaseExplanation(phase, doc.category);
+                            const isFailed = phase === 'failed';
+                            const activeIdx = getActiveStageIndex(phase);
+                            const explanation = getPhaseExplanation(phase, doc.category, progress);
                             return (
-                              <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg space-y-2">
-                                {/* Phase label + percentage */}
-                                <div className="flex justify-between text-xs text-gray-400">
-                                  <span className="flex items-center gap-1.5 font-medium">
-                                    <span className={`inline-block w-2 h-2 rounded-full ${stalled ? 'bg-yellow-500' : 'bg-blue-500 animate-pulse'}`} />
-                                    {phase === 'queued' && (progress?.queuePosition ? `Waiting in queue (position ${progress.queuePosition})` : 'Waiting in queue...')}
-                                    {phase === 'extracting' && (`Extracting content...${hasBatch ? ` (batch ${progress!.currentBatch} of ${progress!.totalBatches})` : ''}`)}
-                                    {phase === 'analyzing' && (`Analyzing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}${hasBatch ? ` (batch ${progress!.currentBatch} of ${progress!.totalBatches})` : ''}...`)}
-                                    {phase === 'indexing' && 'Indexing content for search...'}
-                                    {phase === 'failed' && 'Processing failed'}
-                                    {phase === 'pending' && 'Preparing to process...'}
-                                    {phase === 'processing' && (hasBatch ? `Processing batch ${progress!.currentBatch} of ${progress!.totalBatches}...` : `Processing page ${progress?.pagesProcessed ?? 0} of ${progress?.totalPages ?? '?'}...`)}
-                                  </span>
-                                  <span className="flex items-center gap-2">
-                                    {percent > 0 && <span>{percent}%</span>}
-                                    {eta > 0 && phase !== 'queued' && phase !== 'failed' && (
-                                      <span className="text-gray-500">{formatETA(eta)}</span>
+                              <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg space-y-3">
+                                {/* Category badge during processing */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    {getCategoryBadge(doc.category)}
+                                    {stalled && (
+                                      <span className="text-xs text-yellow-500 font-medium">May be paused</span>
                                     )}
-                                  </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    {percent > 0 && <span className="font-medium text-gray-400">{percent}%</span>}
+                                    {eta > 0 && phase !== 'queued' && !isFailed && (
+                                      <span>{formatETA(eta)}</span>
+                                    )}
+                                  </div>
                                 </div>
 
-                                {/* Explanatory sub-text */}
-                                {explanation && (
-                                  <p className="text-xs text-gray-500 pl-3.5">{explanation}</p>
-                                )}
+                                {/* Stage stepper */}
+                                <div className="flex items-center gap-1" role="list" aria-label="Processing stages">
+                                  {PROCESSING_STAGES.map((stage, idx) => {
+                                    const isActive = idx === activeIdx;
+                                    const isDone = idx < activeIdx;
+                                    const detail = isActive ? getStageDetail(stage.key, progress, doc.category) : null;
+                                    return (
+                                      <div key={stage.key} className="flex items-center flex-1 min-w-0" role="listitem">
+                                        <div className={`flex items-center gap-1.5 min-w-0 ${isActive ? 'flex-1' : ''}`}>
+                                          <div className="flex-shrink-0">
+                                            {getStageIcon(idx, activeIdx, isFailed)}
+                                          </div>
+                                          {isActive ? (
+                                            <div className="min-w-0 flex-1">
+                                              <span className="text-xs font-semibold text-slate-50 truncate block">
+                                                {stage.label}
+                                              </span>
+                                              {detail && (
+                                                <span className="text-[10px] text-gray-400 truncate block">{detail}</span>
+                                              )}
+                                            </div>
+                                          ) : (
+                                            <span className={`text-[10px] truncate hidden xl:inline ${isDone ? 'text-gray-400' : 'text-gray-600'}`}>
+                                              {stage.label}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {idx < PROCESSING_STAGES.length - 1 && (
+                                          <div className={`h-px flex-1 mx-1 min-w-[8px] ${isDone ? 'bg-green-700' : 'bg-gray-700'}`} />
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
 
-                                {/* Stalled warning */}
-                                {stalled && (
-                                  <p className="text-xs text-yellow-500/80 pl-3.5">Processing may be paused -- will resume automatically</p>
+                                {/* Explanation text */}
+                                {explanation && (
+                                  <p className="text-xs text-gray-500">{explanation}</p>
                                 )}
 
                                 {/* Progress bar */}
                                 <div
-                                  className="w-full bg-gray-700 rounded-full h-2 overflow-hidden"
+                                  className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
                                   role="progressbar"
                                   aria-valuenow={percent}
                                   aria-valuemin={0}
@@ -1526,36 +1655,74 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                   aria-label={`Document processing: ${percent}%`}
                                 >
                                   <div
-                                    className={`h-2 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : phase === 'queued' ? 'bg-yellow-500' : phase === 'indexing' ? 'bg-green-500' : phase === 'failed' ? 'bg-red-500' : 'bg-blue-500'} ${phase !== 'failed' && !stalled ? 'animate-pulse' : ''}`}
+                                    className={`h-1.5 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : isFailed ? 'bg-red-500' : phase === 'indexing' ? 'bg-green-500' : 'bg-orange-500'}`}
                                     style={{ width: `${Math.max(2, percent)}%` }}
                                   />
                                 </div>
 
-                                {/* Bottom row: elapsed, rate, last update */}
-                                {phase !== 'queued' && phase !== 'failed' && (
-                                  <div className="flex items-center gap-2 text-[10px] text-gray-500 pl-3.5">
+                                {/* Concurrent batch lanes */}
+                                {progress?.concurrency && progress.concurrency > 1 && progress.activeBatches && progress.activeBatches.length > 0 && progress.totalBatches && (
+                                  <div className="space-y-1" aria-label={`${progress.concurrency} concurrent batch lanes`}>
+                                    <div className="text-[10px] text-gray-500 font-medium">
+                                      Batch lanes ({progress.concurrency}x parallel)
+                                    </div>
+                                    <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${Math.min(progress.concurrency, 4)}, 1fr)` }}>
+                                      {progress.activeBatches.map((batchIdx) => {
+                                        const isFail = progress.failedBatchRanges?.some(r => r.startsWith(`${batchIdx}:`));
+                                        const isComplete = batchIdx < (progress.currentBatch ?? 0);
+                                        return (
+                                          <div key={batchIdx} className="flex items-center gap-1">
+                                            <div className="flex-1 bg-gray-700 rounded h-1.5 overflow-hidden">
+                                              <div
+                                                className={`h-1.5 rounded transition-all duration-300 ${
+                                                  isFail ? 'bg-red-500' :
+                                                  isComplete ? 'bg-green-600' :
+                                                  'bg-orange-500 animate-pulse'
+                                                }`}
+                                                style={{ width: isComplete ? '100%' : isFail ? '100%' : '60%' }}
+                                              />
+                                            </div>
+                                            <span className={`text-[9px] flex-shrink-0 ${
+                                              isFail ? 'text-red-400' : isComplete ? 'text-green-500' : 'text-gray-400'
+                                            }`}>
+                                              B{batchIdx + 1}
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                    {progress.failedBatchRanges && progress.failedBatchRanges.length > 0 && (
+                                      <div className="text-[10px] text-red-400">
+                                        Failed: {progress.failedBatchRanges.join(', ')}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Timing row */}
+                                {phase !== 'queued' && !isFailed && (
+                                  <div className="flex items-center gap-2 text-[10px] text-gray-500">
                                     {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && (
                                       <span>Elapsed: {formatElapsed(progress.elapsedSeconds)}</span>
                                     )}
                                     {progress?.secondsPerPage != null && progress.secondsPerPage > 0 && (
                                       <>
                                         <span className="text-gray-600">·</span>
-                                        <span>{progress.secondsPerPage}s/page</span>
-                                      </>
-                                    )}
-                                    {hasBatch && (
-                                      <>
-                                        <span className="text-gray-600">·</span>
-                                        <span>Batch {progress!.currentBatch}/{progress!.totalBatches}</span>
+                                        <span>{(60 / progress.secondsPerPage).toFixed(1)} pages/min</span>
                                       </>
                                     )}
                                     {progress?.lastActivityAt && (
                                       <>
                                         <span className="text-gray-600">·</span>
-                                        <span>Last update: {formatLastUpdate(progress.lastActivityAt)}</span>
+                                        <span>Updated {formatLastUpdate(progress.lastActivityAt)}</span>
                                       </>
                                     )}
                                   </div>
+                                )}
+
+                                {/* Failed state */}
+                                {isFailed && progress?.error && (
+                                  <p className="text-xs text-red-400">{progress.error}</p>
                                 )}
                               </div>
                             );

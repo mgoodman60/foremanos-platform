@@ -62,12 +62,30 @@ export async function GET(req: NextRequest) {
         lastError: true,
         retriesCount: true,
         updatedAt: true,
+        metadata: true,
       },
     });
 
-    // Create a map of queue status by document ID
+    // Create a map of queue status by document ID, enriching with metadata fields
     const queueStatusMap = new Map(
-      queueEntries.map((entry: any) => [entry.documentId, entry])
+      queueEntries.map((entry: any) => {
+        const meta = entry.metadata as any;
+        return [entry.documentId, {
+          documentId: entry.documentId,
+          status: entry.status,
+          totalPages: entry.totalPages,
+          pagesProcessed: entry.pagesProcessed,
+          currentBatch: entry.currentBatch,
+          totalBatches: entry.totalBatches,
+          lastError: entry.lastError,
+          retriesCount: entry.retriesCount,
+          updatedAt: entry.updatedAt,
+          concurrency: meta?.concurrency || 3,
+          activeBatches: entry.status === 'processing' ? Math.min(entry.totalBatches - entry.currentBatch, meta?.concurrency || 3) : 0,
+          failedBatchRanges: meta?.failedBatchRanges || [],
+          processingMode: meta?.concurrency > 1 || entry.totalBatches > 1 ? 'concurrent' : 'sequential',
+        }];
+      })
     );
 
     // Enhance documents with queue information

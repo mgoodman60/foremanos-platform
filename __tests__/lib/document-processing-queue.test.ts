@@ -25,6 +25,7 @@ const mockPrisma = vi.hoisted(() => ({
 
 const mockProcessDocumentBatch = vi.hoisted(() => vi.fn());
 const mockTriggerEnhancement = vi.hoisted(() => vi.fn());
+const mockGetFileUrl = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/document-processor-batch', () => ({
@@ -40,6 +41,9 @@ vi.mock('@/lib/logger', () => ({
     error: vi.fn(),
   },
 }));
+vi.mock('@/lib/s3', () => ({
+  getFileUrl: mockGetFileUrl,
+}));
 vi.mock('@/lib/intelligence-orchestrator', () => ({
   runIntelligenceExtraction: vi.fn().mockResolvedValue({ phasesRun: [] }),
 }));
@@ -52,7 +56,7 @@ vi.mock('@/lib/takeoff-extractor', () => ({
 }));
 
 // Import after mocks
-import { processNextQueuedBatch, queueDocumentForProcessing } from '@/lib/document-processing-queue';
+import { processNextQueuedBatch, queueDocumentForProcessing, processQueuedDocument } from '@/lib/document-processing-queue';
 
 // ============================================
 // Tests
@@ -350,12 +354,63 @@ describe('Document Processing Queue', () => {
     });
   });
 
-  // C4: triggerAutoTakeoffAfterProcessing is no longer called from processQueuedDocument
-  describe('processQueuedDocument', () => {
-    it('should not call triggerAutoTakeoffAfterProcessing after completion (C4 dedup)', async () => {
-      const { processQueuedDocument } = await import('@/lib/document-processing-queue');
+  // Stale batch recovery in processNextQueuedBatch
+  describe('stale batch recovery', () => {
+    it('should reset ProcessingQueue entries stuck in processing for >5 minutes', async () => {
+      // Simulate a stale entry stuck in 'processing' for 10 minutes
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      mockPrisma.processingQueue.findMany
+        .mockResolvedValueOnce([
+          { documentId: 'stuck-doc', status: 'processing', updatedAt: tenMinutesAgo },
+        ]) // stale check
+        .mockResolvedValueOnce([]); // no queued entries after reset
 
-      const completedEntry = {
+      // Reset succeeds
+      mockPrisma.processingQueue.updateMany.mockResolvedValue({ count: 1 });
+
+      await processNextQueuedBatch();
+
+      // Verify updateMany was called to reset stale entries
+      expect(mockPrisma.processingQueue.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            documentId: 'stuck-doc',
+            status: 'processing',
+            updatedAt: expect.objectContaining({ lt: expect.any(Date) }),
+          }),
+          data: expect.objectContaining({
+            status: 'queued',
+          }),
+        })
+      );
+    });
+
+    it('should not reset entries that are recently updated (within 5 minutes)', async () => {
+      // No stale entries
+      mockPrisma.processingQueue.findMany
+        .mockResolvedValueOnce([]) // no stale processing entries
+        .mockResolvedValueOnce([]); // no queued entries
+
+      await processNextQueuedBatch();
+
+      // Only the stale check findMany should have been called
+      expect(mockPrisma.processingQueue.findMany).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('processQueuedDocument concurrent dispatch', () => {
+    const mockPdfBuffer = Buffer.from('fake-pdf-content');
+
+    beforeEach(() => {
+      // Mock PDF download
+      mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+      global.fetch = vi.fn().mockResolvedValue({
+        arrayBuffer: () => Promise.resolve(mockPdfBuffer.buffer),
+      }) as any;
+    });
+
+    it('should skip processing when document is already completed', async () => {
+      mockPrisma.processingQueue.findFirst.mockResolvedValue({
         id: 'queue-1',
         documentId: 'doc-1',
         status: 'completed',
@@ -364,34 +419,181 @@ describe('Document Processing Queue', () => {
         totalPages: 25,
         pagesProcessed: 25,
         retriesCount: 0,
-        lastError: null,
         metadata: { batchSize: 5 },
+      });
+
+      // Stale batch reset (no stale entries)
+      mockPrisma.processingQueue.updateMany.mockResolvedValue({ count: 0 });
+
+      await processQueuedDocument('doc-1');
+
+      // Should NOT try to claim or process
+      expect(mockProcessDocumentBatch).not.toHaveBeenCalled();
+    });
+
+    it('should dispatch batches concurrently and aggregate results', async () => {
+      const queueEntry = {
+        id: 'queue-1',
+        documentId: 'doc-1',
+        status: 'queued',
+        currentBatch: 0,
+        totalBatches: 2,
+        totalPages: 10,
+        pagesProcessed: 0,
+        retriesCount: 0,
+        metadata: { batchSize: 5, processorType: 'vision-ai' },
       };
 
-      // findFirst is called 3 times:
-      // 1. Initial entry lookup
-      // 2. Inside while loop - sees completed, breaks
-      // 3. Final status check
-      mockPrisma.processingQueue.findFirst
-        .mockResolvedValueOnce(completedEntry)  // initial
-        .mockResolvedValueOnce(completedEntry)  // while loop
-        .mockResolvedValueOnce(completedEntry); // final status
+      mockPrisma.processingQueue.findFirst.mockResolvedValue(queueEntry);
+      // Stale reset: no stale entries
+      mockPrisma.processingQueue.updateMany
+        .mockResolvedValueOnce({ count: 0 }) // stale reset
+        .mockResolvedValueOnce({ count: 1 }); // claim succeeds
 
       mockPrisma.document.update.mockResolvedValue({});
       mockPrisma.document.findUnique.mockResolvedValue({
         id: 'doc-1',
+        cloud_storage_path: 'docs/test.pdf',
+        isPublic: false,
         Project: { slug: 'test-project' },
-        name: 'test-doc.pdf',
+        name: 'test.pdf',
       });
+
+      // Both batches succeed
+      mockProcessDocumentBatch
+        .mockResolvedValueOnce({ success: true, pagesProcessed: 5, providerStats: {} })
+        .mockResolvedValueOnce({ success: true, pagesProcessed: 5, providerStats: {} });
+
+      mockPrisma.processingQueue.update.mockResolvedValue({});
+      mockPrisma.document.updateMany.mockResolvedValue({ count: 1 }); // post-processing claim
+      mockPrisma.project.findUnique.mockResolvedValue({ id: 'proj-1' });
       mockTriggerEnhancement.mockResolvedValue(undefined);
 
       await processQueuedDocument('doc-1');
 
-      // Verify enhancement was triggered (replaces old takeoff trigger)
-      expect(mockTriggerEnhancement).toHaveBeenCalledWith('test-project', 'test-doc.pdf');
+      // Both batches should have been called with the preloaded buffer
+      expect(mockProcessDocumentBatch).toHaveBeenCalledTimes(2);
+      expect(mockProcessDocumentBatch).toHaveBeenCalledWith(
+        'doc-1', 1, 5, 'vision-ai', expect.any(Buffer)
+      );
+      expect(mockProcessDocumentBatch).toHaveBeenCalledWith(
+        'doc-1', 6, 10, 'vision-ai', expect.any(Buffer)
+      );
 
-      // The module no longer imports triggerAutoTakeoffAfterProcessing at all
-      // This is verified by the removal of the import in the source file
+      // Queue should be updated with completed status and concurrency metadata
+      expect(mockPrisma.processingQueue.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'completed',
+            pagesProcessed: 10,
+            currentBatch: 2,
+            metadata: expect.objectContaining({
+              concurrency: 3,
+              processingMode: 'concurrent',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should handle partial failure: save successful batches and record failed ranges', async () => {
+      const queueEntry = {
+        id: 'queue-1',
+        documentId: 'doc-1',
+        status: 'queued',
+        currentBatch: 0,
+        totalBatches: 2,
+        totalPages: 10,
+        pagesProcessed: 0,
+        retriesCount: 0,
+        metadata: { batchSize: 5, processorType: 'vision-ai' },
+      };
+
+      mockPrisma.processingQueue.findFirst.mockResolvedValue(queueEntry);
+      mockPrisma.processingQueue.updateMany
+        .mockResolvedValueOnce({ count: 0 }) // stale reset
+        .mockResolvedValueOnce({ count: 1 }); // claim
+
+      mockPrisma.document.update.mockResolvedValue({});
+      mockPrisma.document.findUnique.mockResolvedValue({
+        id: 'doc-1',
+        cloud_storage_path: 'docs/test.pdf',
+        isPublic: false,
+      });
+
+      // Batch 1 succeeds, batch 2 fails
+      mockProcessDocumentBatch
+        .mockResolvedValueOnce({ success: true, pagesProcessed: 5, providerStats: {} })
+        .mockResolvedValueOnce({ success: false, pagesProcessed: 0, error: 'Vision API timeout' });
+
+      mockPrisma.processingQueue.update.mockResolvedValue({});
+
+      await processQueuedDocument('doc-1');
+
+      // Should be queued (not completed or failed) for retry
+      expect(mockPrisma.processingQueue.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'queued', // Partial success — queued for retry
+            pagesProcessed: 5,
+            metadata: expect.objectContaining({
+              failedBatchRanges: expect.arrayContaining([
+                expect.objectContaining({
+                  startPage: 6,
+                  endPage: 10,
+                  error: 'Vision API timeout',
+                }),
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should store concurrency and processingMode in metadata', async () => {
+      const queueEntry = {
+        id: 'queue-1',
+        documentId: 'doc-1',
+        status: 'queued',
+        currentBatch: 0,
+        totalBatches: 1,
+        totalPages: 5,
+        pagesProcessed: 0,
+        retriesCount: 0,
+        metadata: { batchSize: 5, processorType: 'vision-ai' },
+      };
+
+      mockPrisma.processingQueue.findFirst.mockResolvedValue(queueEntry);
+      mockPrisma.processingQueue.updateMany
+        .mockResolvedValueOnce({ count: 0 })
+        .mockResolvedValueOnce({ count: 1 });
+
+      mockPrisma.document.update.mockResolvedValue({});
+      mockPrisma.document.findUnique.mockResolvedValue({
+        id: 'doc-1',
+        cloud_storage_path: 'docs/test.pdf',
+        isPublic: false,
+        Project: { slug: 'test-project' },
+        name: 'test.pdf',
+      });
+      mockProcessDocumentBatch.mockResolvedValue({ success: true, pagesProcessed: 5, providerStats: {} });
+      mockPrisma.processingQueue.update.mockResolvedValue({});
+      mockPrisma.document.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.project.findUnique.mockResolvedValue({ id: 'proj-1' });
+      mockTriggerEnhancement.mockResolvedValue(undefined);
+
+      await processQueuedDocument('doc-1');
+
+      expect(mockPrisma.processingQueue.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              concurrency: 3,
+              processingMode: 'concurrent',
+            }),
+          }),
+        })
+      );
     });
   });
 });
