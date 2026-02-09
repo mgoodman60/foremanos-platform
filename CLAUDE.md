@@ -80,7 +80,7 @@ app/api/          # 392 API routes organized by feature domain
 lib/              # 224 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
 components/       # 319 React components (Shadcn/Radix UI primitives + document intelligence)
 prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (183 test files: 148 lib + 28 API + 3 smoke + 1 hooks + 3 coverage gaps)
+__tests__/        # Vitest tests (222 test files: 187 lib + 32 API + 3 smoke)
 e2e/              # Playwright E2E tests (23 spec files)
 .claude/agents/   # 24 custom Claude Code agents
 .claude/skills/   # 13 project slash commands + 24 installed skills (see below)
@@ -376,9 +376,9 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 
 ## Testing
 
-- **Vitest**: 183 test files, 7572 tests total (7533 passing, 39 skipped)
-  - 148 lib tests (`__tests__/lib/`)
-  - 28 API tests (`__tests__/api/`)
+- **Vitest**: 222 test files, 8706 tests total (8706 passing, 41 skipped)
+  - 187 lib tests (`__tests__/lib/`)
+  - 32 API tests (`__tests__/api/`)
   - 3 smoke tests (`__tests__/smoke/`)
   - 1 hooks test (`__tests__/hooks/`)
   - 3 coverage gap tests
