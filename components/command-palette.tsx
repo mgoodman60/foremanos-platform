@@ -46,6 +46,8 @@ interface CommandPaletteProps {
   onOpenPhotoLibrary?: () => void;
   /** Callback when report history is opened */
   onOpenReportHistory?: () => void;
+  /** Callback to trigger file upload (replaces DOM querySelector) */
+  onUpload?: () => void;
 }
 
 interface CommandItem {
@@ -82,6 +84,7 @@ export function CommandPalette({
   onOpenWeather,
   onOpenPhotoLibrary,
   onOpenReportHistory,
+  onUpload,
 }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -207,9 +210,13 @@ export function CommandPalette({
         shortcut: 'U',
         keywords: ['add', 'new', 'file'],
         action: () => {
-          // Trigger file input click - component should handle this
-          const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-          if (fileInput) fileInput.click();
+          if (onUpload) {
+            onUpload();
+          } else {
+            // Fallback: trigger file input click via DOM query
+            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+            if (fileInput) fileInput.click();
+          }
         },
       });
 

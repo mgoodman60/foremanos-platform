@@ -55,9 +55,13 @@ interface ChatInterfaceProps {
   projectId?: string;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  /** When true, hides ConversationSidebar and shows compact layout for drawer mode */
+  compact?: boolean;
+  /** Context hint banner shown at top of chat when provided */
+  contextHint?: string;
 }
 
-export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, mobileOpen, onMobileClose }: ChatInterfaceProps = {}) {
+export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, mobileOpen, onMobileClose, compact, contextHint }: ChatInterfaceProps = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1004,9 +1008,9 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   };
 
   return (
-    <div className="flex h-[600px] md:h-[700px] bg-dark-surface rounded-lg shadow-xl overflow-hidden border border-gray-700">
-      {/* Conversation Sidebar */}
-      {isLoggedIn && projectSlug && projectId && (
+    <div className={`flex ${compact ? 'h-full' : 'h-[600px] md:h-[700px]'} bg-dark-surface ${compact ? '' : 'rounded-lg shadow-xl border border-gray-700'} overflow-hidden`}>
+      {/* Conversation Sidebar - hidden in compact (drawer) mode */}
+      {!compact && isLoggedIn && projectSlug && projectId && (
         <ConversationSidebar
           projectSlug={projectSlug}
           projectId={projectId}
@@ -1020,6 +1024,27 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
 
       {/* Main Chat Interface */}
       <div className="flex flex-col flex-1 min-w-0">
+
+      {/* Context Hint Banner */}
+      {contextHint && (
+        <div className="px-3 py-2 bg-orange-500/10 border-b border-orange-500/30 text-sm text-orange-300 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-orange-400 rounded-full flex-shrink-0" />
+          Context: {contextHint}
+        </div>
+      )}
+
+      {/* Compact mode: conversation switcher dropdown */}
+      {compact && isLoggedIn && projectSlug && projectId && (
+        <ConversationSidebar
+          projectSlug={projectSlug}
+          projectId={projectId}
+          activeConversationId={activeConversationId}
+          onConversationSelect={handleConversationSelect}
+          onNewConversation={handleNewConversation}
+          compact
+        />
+      )}
+
       {/* Header - Mobile Optimized */}
       <div className="bg-dark-surface text-white p-2 sm:p-3 lg:p-4 border-b border-gray-700">
         <div className="flex items-center justify-between">

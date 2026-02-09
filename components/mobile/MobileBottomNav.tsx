@@ -1,29 +1,50 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  MessageSquare, 
-  FolderOpen, 
-  Camera, 
+import {
+  LayoutDashboard,
+  FolderOpen,
+  Camera,
+  ClipboardList,
   Menu,
   X,
-  Upload,
   Calendar,
-  BarChart2,
+  FileCheck,
+  Ruler,
+  Building,
+  Cpu,
+  MessageSquare,
+  CloudSun,
+  Activity,
+  Eye,
   Settings,
-  Home,
-  Plus
+  User,
+  LogOut,
+  ChevronRight,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface MobileBottomNavProps {
-  activeTab: 'chat' | 'documents' | 'tools' | 'menu';
+  activeTab: 'overview' | 'docs' | 'capture' | 'field' | 'more';
   projectSlug: string;
   onShowDocuments: () => void;
   onShowCamera: () => void;
-  onUpload: () => void;
-  onToggleSidebar: () => void;
+  onOpenAiDrawer?: () => void;
+  onShowWeather?: () => void;
+  onShowProcessingMonitor?: () => void;
+  onShowLookahead?: () => void;
   pendingUpdatesCount?: number;
+}
+
+interface MoreMenuItem {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+}
+
+interface MoreMenuSection {
+  title: string;
+  items: MoreMenuItem[];
 }
 
 export function MobileBottomNav({
@@ -31,12 +52,14 @@ export function MobileBottomNav({
   projectSlug,
   onShowDocuments,
   onShowCamera,
-  onUpload,
-  onToggleSidebar,
+  onOpenAiDrawer,
+  onShowWeather,
+  onShowProcessingMonitor,
+  onShowLookahead,
   pendingUpdatesCount = 0
 }: MobileBottomNavProps) {
   const router = useRouter();
-  const [showQuickMenu, setShowQuickMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -56,96 +79,187 @@ export function MobileBottomNav({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  const navItems = [
+  // Close More menu on Escape
+  useEffect(() => {
+    if (!showMoreMenu) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowMoreMenu(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showMoreMenu]);
+
+  const moreMenuSections: MoreMenuSection[] = [
     {
-      id: 'chat' as const,
-      icon: MessageSquare,
-      label: 'Chat',
-      onClick: () => {/* already on chat */},
+      title: 'Project',
+      items: [
+        {
+          icon: Calendar,
+          label: 'Schedule & Budget',
+          onClick: () => { router.push(`/project/${projectSlug}/schedule-budget`); setShowMoreMenu(false); },
+        },
+        {
+          icon: FileCheck,
+          label: 'Submittals',
+          onClick: () => { router.push(`/project/${projectSlug}/mep/submittals`); setShowMoreMenu(false); },
+        },
+        {
+          icon: Ruler,
+          label: 'Takeoffs',
+          onClick: () => { router.push(`/project/${projectSlug}/takeoffs`); setShowMoreMenu(false); },
+        },
+      ],
     },
     {
-      id: 'documents' as const,
+      title: 'Intelligence',
+      items: [
+        {
+          icon: Building,
+          label: 'Room Browser',
+          onClick: () => { router.push(`/project/${projectSlug}/rooms`); setShowMoreMenu(false); },
+        },
+        {
+          icon: Cpu,
+          label: 'MEP Equipment',
+          onClick: () => { router.push(`/project/${projectSlug}/mep/equipment`); setShowMoreMenu(false); },
+        },
+        {
+          icon: Eye,
+          label: 'Document Intelligence',
+          onClick: () => { router.push(`/project/${projectSlug}/intelligence`); setShowMoreMenu(false); },
+        },
+      ],
+    },
+    {
+      title: 'Tools',
+      items: [
+        {
+          icon: MessageSquare,
+          label: 'AI Assistant',
+          onClick: () => { onOpenAiDrawer?.(); setShowMoreMenu(false); },
+        },
+        {
+          icon: CloudSun,
+          label: 'Weather',
+          onClick: () => { onShowWeather?.(); setShowMoreMenu(false); },
+        },
+        {
+          icon: Activity,
+          label: 'Processing Status',
+          onClick: () => { onShowProcessingMonitor?.(); setShowMoreMenu(false); },
+        },
+        {
+          icon: Calendar,
+          label: '3-Week Look-Ahead',
+          onClick: () => { onShowLookahead?.(); setShowMoreMenu(false); },
+        },
+      ],
+    },
+    {
+      title: 'Settings',
+      items: [
+        {
+          icon: Settings,
+          label: 'Project Settings',
+          onClick: () => { router.push(`/project/${projectSlug}/settings`); setShowMoreMenu(false); },
+        },
+        {
+          icon: User,
+          label: 'Profile',
+          onClick: () => { router.push('/profile'); setShowMoreMenu(false); },
+        },
+        {
+          icon: LogOut,
+          label: 'Sign Out',
+          onClick: () => { router.push('/api/auth/signout'); setShowMoreMenu(false); },
+        },
+      ],
+    },
+  ];
+
+  const navItems = [
+    {
+      id: 'overview' as const,
+      icon: LayoutDashboard,
+      label: 'Overview',
+      onClick: () => router.push(`/project/${projectSlug}`),
+    },
+    {
+      id: 'docs' as const,
       icon: FolderOpen,
       label: 'Docs',
       onClick: onShowDocuments,
     },
     {
-      id: 'tools' as const,
-      icon: Plus,
-      label: 'Actions',
-      onClick: () => setShowQuickMenu(!showQuickMenu),
+      id: 'capture' as const,
+      icon: Camera,
+      label: 'Capture',
+      onClick: onShowCamera,
       isCenter: true,
     },
     {
-      id: 'menu' as const,
+      id: 'field' as const,
+      icon: ClipboardList,
+      label: 'Field',
+      onClick: () => router.push(`/project/${projectSlug}/field-ops/daily-reports`),
+    },
+    {
+      id: 'more' as const,
       icon: Menu,
-      label: 'Menu',
-      onClick: onToggleSidebar,
+      label: 'More',
+      onClick: () => setShowMoreMenu(!showMoreMenu),
       badge: pendingUpdatesCount > 0 ? pendingUpdatesCount : undefined,
-    },
-  ];
-
-  const quickActions = [
-    {
-      icon: Camera,
-      label: 'Quick Capture',
-      onClick: () => { onShowCamera(); setShowQuickMenu(false); },
-      color: 'bg-orange-500',
-    },
-    {
-      icon: Upload,
-      label: 'Upload Doc',
-      onClick: () => { onUpload(); setShowQuickMenu(false); },
-      color: 'bg-blue-500',
-    },
-    {
-      icon: Calendar,
-      label: 'Schedule',
-      onClick: () => { router.push(`/project/${projectSlug}/schedule-budget`); setShowQuickMenu(false); },
-      color: 'bg-green-500',
-    },
-    {
-      icon: BarChart2,
-      label: 'Reports',
-      onClick: () => { router.push(`/project/${projectSlug}/reports`); setShowQuickMenu(false); },
-      color: 'bg-purple-500',
     },
   ];
 
   return (
     <>
-      {/* Quick Actions Overlay */}
-      {showQuickMenu && (
+      {/* More Menu Full-Screen Overlay */}
+      {showMoreMenu && (
         <div
-          id="quick-actions-menu"
-          role="menu"
+          className="fixed inset-0 bg-slate-900/98 z-40 md:hidden motion-safe:animate-in motion-safe:fade-in overflow-y-auto"
+          role="dialog"
           aria-modal="true"
-          aria-label="Quick actions"
-          className="fixed inset-0 bg-black/90 z-40 md:hidden"
-          onClick={() => setShowQuickMenu(false)}
+          aria-label="More menu"
         >
-          <div
-            className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-3 p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {quickActions.map((action, index) => (
-              <button
-                key={action.label}
-                onClick={action.onClick}
-                role="menuitem"
-                aria-label={action.label}
-                className={`${action.color} w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-lg transform transition-all animate-in zoom-in-50 slide-in-from-bottom-4`}
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <action.icon className="w-6 h-6 text-white" />
-              </button>
-            ))}
+          <div className="flex items-center justify-between px-6 pt-6 pb-4">
+            <h2 className="text-lg font-semibold text-gray-100">More</h2>
+            <button
+              onClick={() => setShowMoreMenu(false)}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
+              aria-label="Close menu"
+            >
+              <X className="w-6 h-6" />
+            </button>
           </div>
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-2">
-            {quickActions.map((action) => (
-              <span key={action.label} className="text-xs text-white font-medium px-2">
-                {action.label}
-              </span>
+
+          <div className="px-6 pb-24 space-y-6">
+            {moreMenuSections.map((section) => (
+              <div key={section.title}>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  {section.title}
+                </h3>
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.label}
+                        onClick={item.onClick}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
+                        style={{ minHeight: '48px' }}
+                      >
+                        <Icon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -154,29 +268,23 @@ export function MobileBottomNav({
       {/* Bottom Navigation Bar */}
       <nav
         aria-label="Mobile navigation"
-        className={`fixed bottom-0 left-0 right-0 bg-dark-surface border-t border-gray-700 z-50 md:hidden transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
+        className={`fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-gray-700 z-50 md:hidden transition-transform motion-reduce:transition-none duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex items-center justify-around h-16 px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id || (item.id === 'tools' && showQuickMenu);
-            
+            const isActive = activeTab === item.id || (item.id === 'more' && showMoreMenu);
+
             if (item.isCenter) {
               return (
                 <button
                   key={item.id}
                   onClick={item.onClick}
-                  aria-label={showQuickMenu ? "Close quick actions menu" : "Open quick actions menu"}
-                  aria-expanded={showQuickMenu}
-                  aria-controls="quick-actions-menu"
-                  className={`relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all transform active:scale-95 ${showQuickMenu ? 'bg-red-500 rotate-45' : 'bg-orange-500'}`}
+                  aria-label="Quick capture"
+                  className="relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg bg-orange-500 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none"
                 >
-                  {showQuickMenu ? (
-                    <X className="w-6 h-6 text-white" />
-                  ) : (
-                    <Icon className="w-6 h-6 text-white" />
-                  )}
+                  <Icon className="w-6 h-6 text-white" />
                 </button>
               );
             }
@@ -185,11 +293,14 @@ export function MobileBottomNav({
               <button
                 key={item.id}
                 onClick={item.onClick}
-                aria-current={isActive ? "page" : undefined}
-                className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-colors relative ${isActive ? 'text-orange-500' : 'text-gray-400'}`}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors relative focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none ${
+                  isActive ? 'text-orange-500' : 'text-gray-400'
+                }`}
+                style={{ minHeight: '48px' }}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-xs mt-1 font-medium">{item.label}</span>
+                <span className="text-[10px] mt-1 font-medium">{item.label}</span>
                 {item.badge && (
                   <span
                     className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold"

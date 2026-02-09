@@ -20,6 +20,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useProject } from '@/components/layout/project-context';
+import { useProjectModals } from '@/hooks/use-project-modals';
 
 interface OnboardingStep {
   id: string;
@@ -39,6 +41,11 @@ interface OnboardingChecklistProps {
 }
 
 export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocumentLibrary }: OnboardingChecklistProps) {
+  const { refreshProject, setAiDrawerOpen } = useProject();
+  const { setShowDocumentLibrary } = useProjectModals();
+
+  const handleOpenDocumentLibrary = onOpenDocumentLibrary ?? (() => setShowDocumentLibrary(true));
+  const handleRefresh = onRefresh ?? (() => refreshProject());
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
@@ -79,12 +86,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
           completed: data.uploadedDocuments,
           completedAt: data.uploadedDocumentsAt ? new Date(data.uploadedDocumentsAt) : null,
           icon: Upload,
-          action: () => {
-            // Open document library modal
-            if (onOpenDocumentLibrary) {
-              onOpenDocumentLibrary();
-            }
-          },
+          action: handleOpenDocumentLibrary,
           actionLabel: 'Upload Now'
         },
         {
@@ -102,12 +104,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
           completed: data.startedFirstChat,
           completedAt: data.startedFirstChatAt ? new Date(data.startedFirstChatAt) : null,
           icon: MessageSquare,
-          action: () => {
-            // Focus on chat input
-            const chatInput = document.querySelector<HTMLTextAreaElement>('[data-chat-input]');
-            chatInput?.focus();
-            chatInput?.scrollIntoView({ behavior: 'smooth' });
-          },
+          action: () => setAiDrawerOpen(true),
           actionLabel: 'Start Chatting'
         },
         {
@@ -117,11 +114,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
           completed: data.finalizedFirstReport,
           completedAt: data.finalizedFirstReportAt ? new Date(data.finalizedFirstReportAt) : null,
           icon: FileCheck,
-          action: () => {
-            // Scroll to or open daily report section
-            const reportButton = document.querySelector('[data-daily-report-trigger]');
-            reportButton?.scrollIntoView({ behavior: 'smooth' });
-          },
+          action: () => router.push(`/project/${projectSlug}/field-ops/daily-reports`),
           actionLabel: 'Create Report'
         },
         {
@@ -165,7 +158,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
       
       setDismissed(true);
       toast.success('Onboarding guide dismissed');
-      onRefresh?.();
+      handleRefresh();
     } catch (error) {
       console.error('Error dismissing:', error);
       toast.error('Failed to dismiss guide');

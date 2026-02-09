@@ -30,6 +30,7 @@ import LaborMaterialReview from '@/components/budget/LaborMaterialReview';
 import BudgetVarianceWidget from '@/components/budget/BudgetVarianceWidget';
 import CostForecastWidget from '@/components/budget/CostForecastWidget';
 import { FeatureTip } from '@/components/feature-tip';
+import { AskAiButton } from '@/components/shared/ask-ai-button';
 
 export default function BudgetPage() {
   const params = useParams();
@@ -193,6 +194,8 @@ export default function BudgetPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AskAiButton label="Ask AI about budget trends" />
     </div>
   );
 }

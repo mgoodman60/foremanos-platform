@@ -43,6 +43,8 @@ interface ConversationSidebarProps {
   onNewConversation: () => void;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  /** When true, renders as a compact dropdown selector instead of full sidebar */
+  compact?: boolean;
 }
 
 export function ConversationSidebar({
@@ -53,6 +55,7 @@ export function ConversationSidebar({
   onNewConversation,
   mobileOpen,
   onMobileClose,
+  compact,
 }: ConversationSidebarProps) {
   const { data: session } = useSession() || {};
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -262,6 +265,73 @@ export function ConversationSidebar({
     setEditingId(null);
     setEditTitle('');
   };
+
+  // Compact mode: dropdown selector for drawer context
+  if (compact) {
+    const activeConv = conversations.find(c => c.id === activeConversationId);
+    const [compactOpen, setCompactOpen] = useState(false);
+
+    return (
+      <div className="relative border-b border-gray-700 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCompactOpen(!compactOpen)}
+            className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 text-sm bg-dark-card border border-gray-600 rounded-lg text-gray-300 hover:border-gray-500 transition-colors"
+          >
+            <span className="truncate">
+              {activeConv ? activeConv.title : 'New Conversation'}
+            </span>
+            <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${compactOpen ? 'rotate-180' : ''}`} />
+          </button>
+          <button
+            onClick={onNewConversation}
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-card rounded-lg transition-colors"
+            title="New conversation"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+
+        {compactOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setCompactOpen(false)} />
+            <div className="absolute left-3 right-3 top-full mt-1 bg-dark-card border border-gray-700 rounded-lg shadow-xl z-50 max-h-[300px] overflow-y-auto">
+              {loading ? (
+                <div className="p-3 text-sm text-gray-500">Loading...</div>
+              ) : conversations.length === 0 ? (
+                <div className="p-3 text-sm text-gray-500">No conversations yet</div>
+              ) : (
+                conversations.map(conv => (
+                  <button
+                    key={conv.id}
+                    onClick={() => {
+                      onConversationSelect(conv.id);
+                      setCompactOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                      activeConversationId === conv.id
+                        ? 'bg-orange-500/20 text-orange-400'
+                        : 'text-gray-300 hover:bg-dark-surface'
+                    }`}
+                  >
+                    {conv.conversationType === 'daily_report' ? (
+                      <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                    ) : (
+                      <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+                    )}
+                    <span className="truncate">{conv.title}</span>
+                    {conv.finalized && (
+                      <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 ml-auto" />
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
 
   // Mobile collapsed state - show toggle button (only if not using external control)
   if (isMobile && !isMobileOpen && mobileOpen === undefined) {
