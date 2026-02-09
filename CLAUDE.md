@@ -76,14 +76,18 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 ### Core Directories
 
 ```
-app/api/          # 392 API routes organized by feature domain
-lib/              # 224 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
-components/       # 319 React components (Shadcn/Radix UI primitives + document intelligence)
-prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (222 test files: 187 lib + 32 API + 3 smoke)
-e2e/              # Playwright E2E tests (23 spec files)
-.claude/agents/   # 24 custom Claude Code agents
-.claude/skills/   # 13 project slash commands + 24 installed skills (see below)
+app/api/              # 392 API routes organized by feature domain
+lib/                  # 224 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
+  lib/rag/            # 19 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
+  lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
+  lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
+  lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
+components/           # 319 React components (Shadcn/Radix UI primitives + document intelligence)
+prisma/               # Database schema and migrations (112 models)
+__tests__/            # Vitest tests (222 test files: 187 lib + 32 API + 3 smoke)
+e2e/                  # Playwright E2E tests (23 spec files)
+.claude/agents/       # 24 custom Claude Code agents
+.claude/skills/       # 13 project slash commands + 24 installed skills (see below)
 ```
 
 ### Key Service Modules
@@ -92,7 +96,7 @@ e2e/              # Playwright E2E tests (23 spec files)
 |------|---------|
 | `lib/db.ts` | Prisma singleton with connection management |
 | `lib/auth-options.ts` | NextAuth configuration |
-| `lib/rag.ts` | RAG retrieval with 1000+ point scoring system |
+| `lib/rag.ts` | Barrel re-export → `lib/rag/` (5 modules: core-types, document-retrieval, context-generation, query-classifiers, phase-instructions) |
 | `lib/s3.ts` | AWS S3 operations with timeout/retry |
 | `lib/rate-limiter.ts` | Distributed rate limiting (Redis with memory fallback) |
 | `lib/document-processor.ts` | Document processing pipeline |
@@ -112,10 +116,10 @@ e2e/              # Playwright E2E tests (23 spec files)
 | `lib/query-cache.ts` | Redis-backed query caching for LLM cost reduction |
 | `lib/model-config.ts` | Centralized LLM model constants (single source of truth) |
 | `lib/vision-api-multi-provider.ts` | Multi-provider vision with fallback (Claude Opus, GPT-5.2, Claude Sonnet) |
-| `lib/rag-enhancements.ts` | Extended RAG with advanced retrieval strategies |
+| `lib/rag-enhancements.ts` | Barrel re-export → `lib/rag/` (14 modules: types, query-classification, measurement-extraction, takeoff-extraction, symbol-legend, mep-coordination, compliance-checking, scale-detection, abbreviations, spatial-analysis, system-topology, isometric-views, symbol-learning, export-utilities) |
 | `lib/budget-sync-service.ts` | Budget synchronization and AI extraction |
 | `lib/workflow-service.ts` | Workflow orchestration and state transitions |
-| `lib/report-finalization.ts` | Report generation finalization and export |
+| `lib/report-finalization.ts` | Barrel re-export → `lib/report-finalization/` (8 modules: types, validation, pdf-generation, document-library, onedrive-export, rag-indexing, schedule-processing, orchestrator) |
 | `lib/logger.ts` | Structured logging utility with context and metadata |
 | `lib/intelligence-orchestrator.ts` | Phase A/B/C intelligence extraction orchestration |
 | `lib/schedule-extractor-ai.ts` | AI-powered schedule/Gantt chart extraction |
@@ -137,6 +141,8 @@ e2e/              # Playwright E2E tests (23 spec files)
 | `lib/quantity-calculator.ts` | 2D/3D quantity calculation engine (areas, volumes, linear footage) |
 | `lib/quantity-calculation-orchestrator.ts` | Run calculations per room/zone, confidence scoring, CSI rollups |
 | `lib/calculated-takeoff-generator.ts` | Auto-generate MaterialTakeoff line items from calculated quantities |
+| `lib/mep-takeoff-generator.ts` | Barrel re-export → `lib/mep-takeoff/` (4 modules: types, pricing-database, extraction, triggers) |
+| `lib/sitework-takeoff-extractor.ts` | Barrel re-export → `lib/sitework/` (7 modules: patterns, unit-conversion, drawing-classification, extraction, quantity-derivation, geotech-integration, cad-integration) |
 | `lib/discipline-colors.ts` | Shared discipline → color/icon mapping |
 
 ### Type Helper Files
@@ -374,6 +380,18 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 | `ExtractionFeedbackBanner.tsx` | Post-processing completion summary banner |
 | `DocumentFilterBar.tsx` | Search + multi-select filter controls for document library |
 
+### Codebase Health Sprint (Feb 2026) — ALL 5 SPRINTS COMPLETE
+
+Comprehensive codebase quality initiative addressing TypeScript errors, logging, file splitting, and test coverage.
+
+**Sprint 1**: Fixed 17 TS errors + migrated 692 `console.log` → structured `logger` across 117 lib files
+**Sprint 2**: Split `rag-enhancements.ts` (4,612 lines) + `rag.ts` (3,314 lines) into 25 modules in `lib/rag/`
+**Sprint 3**: Split `mep-takeoff-generator.ts` (1,973→5 modules in `lib/mep-takeoff/`), `sitework-takeoff-extractor.ts` (1,895→8 modules in `lib/sitework/`), `report-finalization.ts` (1,058→9 modules in `lib/report-finalization/`)
+**Sprint 4**: Added 20 test files for critical business logic (+632 tests)
+**Sprint 5**: Added 19 lib test files + 4 API route tests (+502 tests)
+
+**Key outcomes**: Zero TS errors, zero `console.log` in `lib/`, no file exceeds ~900 lines, 221→222 test files, 7572→8706 tests. All barrel re-exports preserve original import paths — zero consumer changes needed.
+
 ## Testing
 
 - **Vitest**: 222 test files, 8706 tests total (8706 passing, 41 skipped)
@@ -388,7 +406,7 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 
 ### Test Coverage
 
-148 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops, document intelligence). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+187 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops, document intelligence, MEP, analytics, drawing intelligence). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
 
 **Daily Report Test Files** (Phases 1-6B):
 | File | Coverage | Tests |
@@ -422,6 +440,53 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 | `__tests__/api/documents/search.test.ts` | Document search endpoint (filters, pagination) |
 | `__tests__/api/cron/processing-queue-cleanup.test.ts` | Cron cleanup (CRON_SECRET auth, 30-day threshold) |
 
+**Codebase Health Sprint 4 Test Files** (Critical Business Logic):
+| File | Tests | Coverage |
+|------|-------|----------|
+| `__tests__/lib/email-service.test.ts` | 28 | Email sending, templates, error handling |
+| `__tests__/lib/onedrive-service.test.ts` | 26 | OneDrive upload, auth, folder creation |
+| `__tests__/lib/workflow-service.test.ts` | 31 | Workflow state transitions |
+| `__tests__/lib/export-service.test.ts` | 28 | Data export formats |
+| `__tests__/lib/design-tokens.test.ts` | 55 | Color palette, spacing, token consistency |
+| `__tests__/lib/document-processor-batch.test.ts` | 17 | Batch processing pipeline |
+| `__tests__/lib/schedule-extractor-ai.test.ts` | 24 | AI schedule extraction |
+| `__tests__/lib/photo-analyzer.test.ts` | 38 | Photo analysis pipeline |
+| `__tests__/lib/regulatory-documents.test.ts` | 22 | Regulatory doc caching and linking |
+| `__tests__/lib/title-block-extractor.test.ts` | 36 | Title block parsing |
+| `__tests__/lib/volume-calculator.test.ts` | 57 | 2D/3D volume calculations |
+| `__tests__/lib/spatial-correlation.test.ts` | 49 | Spatial correlation scoring |
+| `__tests__/lib/verification-audit-service.test.ts` | 30 | Verification audit logic |
+| `__tests__/lib/earthwork-calculator.test.ts` | 40 | Cut/fill calculations |
+| `__tests__/lib/room-extractor.test.ts` | 26 | Room data extraction |
+| `__tests__/lib/project-health-service.test.ts` | 24 | Project health metrics |
+| `__tests__/lib/trade-inference.test.ts` | 18 | Trade detection from content |
+| `__tests__/lib/room-docx-generator.test.ts` | 19 | Room schedule DOCX generation |
+| `__tests__/lib/daily-report-docx-generator.test.ts` | 27 | Daily report DOCX generation |
+| `__tests__/lib/processing-limits.test.ts` | 37 | Processing rate limits |
+
+**Codebase Health Sprint 5 Test Files** (MEP, Takeoffs, Drawing Intelligence & API Routes):
+| File | Tests | Coverage |
+|------|-------|----------|
+| `__tests__/lib/mep-takeoff-extraction.test.ts` | 18 | MEP takeoff extraction pipeline |
+| `__tests__/lib/mep-extraction-service.test.ts` | 25 | MEP extraction service |
+| `__tests__/lib/fixture-extractor.test.ts` | 15 | Fixture extraction from drawings |
+| `__tests__/lib/hardware-set-extractor.test.ts` | 25 | Hardware set parsing |
+| `__tests__/lib/window-schedule-extractor.test.ts` | 25 | Window schedule extraction |
+| `__tests__/lib/symbol-learner.test.ts` | 31 | Symbol recognition learning |
+| `__tests__/lib/adaptive-symbol-learning.test.ts` | 27 | Adaptive symbol learning |
+| `__tests__/lib/takeoff-memory-service.test.ts` | 41 | Takeoff memory/caching |
+| `__tests__/lib/auto-takeoff-generator.test.ts` | 21 | Auto takeoff generation |
+| `__tests__/lib/takeoff-qa-service.test.ts` | 41 | Takeoff QA validation |
+| `__tests__/lib/drawing-classifier.test.ts` | 41 | Drawing type classification |
+| `__tests__/lib/dimension-intelligence.test.ts` | 56 | Dimension parsing and intelligence |
+| `__tests__/lib/schedule-health-analyzer.test.ts` | 20 | Schedule health metrics |
+| `__tests__/lib/predictive-scheduling.test.ts` | 25 | Predictive schedule analysis |
+| `__tests__/lib/change-order-budget-service.test.ts` | 22 | Change order budget impact |
+| `__tests__/api/dashboard/route.test.ts` | 12 | Dashboard API endpoint |
+| `__tests__/api/admin/analytics/route.test.ts` | 12 | Admin analytics endpoint |
+| `__tests__/api/admin/users/route.test.ts` | 26 | Admin user management |
+| `__tests__/api/conversations/list/route.test.ts` | 20 | Conversation listing |
+
 ### API Test Suites
 | Directory | Coverage |
 |-----------|----------|
@@ -432,6 +497,9 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 | `__tests__/api/stripe/` | Stripe webhook and checkout |
 | `__tests__/api/cron/` | Cron job endpoints (processing-queue-cleanup) |
 | `__tests__/api/projects/daily-reports/` | Daily report CRUD with RBAC enforcement |
+| `__tests__/api/dashboard/` | Dashboard data aggregation |
+| `__tests__/api/admin/` | Admin analytics, user management |
+| `__tests__/api/conversations/` | Conversation listing and management |
 
 ### Smoke Tests
 | File | Coverage |
