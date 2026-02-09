@@ -12,6 +12,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 import type { MEPElement } from './mep-path-tracer';
 
 // ============================================================================
@@ -123,7 +124,7 @@ export async function detectIsometricViews(
 
     return analysis;
   } catch (error) {
-    console.error('Error detecting isometric views:', error);
+    logger.error('ISOMETRIC', 'Error detecting isometric views', error as Error);
     return null;
   }
 }
@@ -194,7 +195,7 @@ Respond in JSON:
       };
     }
   } catch (error) {
-    console.error('AI analysis error:', error);
+    logger.error('ISOMETRIC', 'AI analysis error', error as Error);
     return {
       viewType: 'isometric',
       confidence: 0.3,
@@ -278,7 +279,7 @@ export async function reconstructFrom2D(
       paths
     };
   } catch (error) {
-    console.error('Error reconstructing 3D from isometric:', error);
+    logger.error('ISOMETRIC', 'Error reconstructing 3D from isometric', error as Error);
     return null;
   }
 }
@@ -615,7 +616,7 @@ export async function generateIsometricView(
       visualization
     };
   } catch (error) {
-    console.error('Error generating isometric view:', error);
+    logger.error('ISOMETRIC', 'Error generating isometric view', error as Error);
     return {
       success: false,
       message: 'Failed to generate isometric view'
@@ -698,7 +699,7 @@ If no MEP elements are found, respond with an empty array: []`;
       label: elem.label
     }));
   } catch (error) {
-    console.error('AI extraction error:', error);
+    logger.error('ISOMETRIC', 'AI extraction error', error as Error);
     return [];
   }
 }

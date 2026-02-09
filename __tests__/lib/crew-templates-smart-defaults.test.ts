@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { CrewTemplate, DailyReport, LaborEntry, EquipmentEntry } from '@prisma/client';
+import type { CrewTemplate, DailyReport, LaborEntry } from '@prisma/client';
 
 const mockPrisma = vi.hoisted(() => ({
   crewTemplate: { findMany: vi.fn() },

@@ -6,7 +6,10 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { v4 as uuidv4 } from 'uuid';
+
+const log = createScopedLogger('EXTRACTION_LOCK');
 
 export type ExtractionType = 'schedule' | 'budget' | 'takeoff' | 'mep' | 'doors' | 'windows' | 'room' | 'sitework';
 export type ResourceType = 'document' | 'project';
@@ -59,7 +62,7 @@ export async function acquireLock(
       },
     });
 
-    console.log(`[EXTRACTION_LOCK] ✅ Lock acquired for ${extractionType} on ${resourceType}:${resourceId} (process: ${processId.slice(0, 8)})`);
+    log.info('Lock acquired', { extractionType, resourceType, resourceId, processId: processId.slice(0, 8) });
     
     return {
       acquired: true,
@@ -82,7 +85,7 @@ export async function acquireLock(
       if (existingLock) {
         // Check if the existing lock has expired
         if (existingLock.expiresAt < now) {
-          console.log(`[EXTRACTION_LOCK] 🔄 Existing lock expired, attempting to take over...`);
+          log.info('Existing lock expired, attempting to take over');
           
           // Delete the expired lock and try again
           try {
@@ -96,7 +99,7 @@ export async function acquireLock(
           }
         }
 
-        console.log(`[EXTRACTION_LOCK] ⏳ Lock held by process ${existingLock.processId.slice(0, 8)}, acquired at ${existingLock.acquiredAt.toISOString()}`);
+        log.info('Lock held by another process', { processId: existingLock.processId.slice(0, 8), acquiredAt: existingLock.acquiredAt.toISOString() });
         
         return {
           acquired: false,
@@ -109,7 +112,7 @@ export async function acquireLock(
       }
     }
 
-    console.error(`[EXTRACTION_LOCK] Error acquiring lock:`, error);
+    log.error('Error acquiring lock', error as Error);
     throw error;
   }
 }
@@ -140,12 +143,12 @@ export async function acquireLockWithRetry(
     }
 
     if (attempt < maxAttempts) {
-      console.log(`[EXTRACTION_LOCK] Attempt ${attempt}/${maxAttempts} failed, waiting ${retryIntervalMs}ms...`);
+      log.info('Lock attempt failed, retrying', { attempt, maxAttempts, retryIntervalMs });
       await new Promise(resolve => setTimeout(resolve, retryIntervalMs));
     }
   }
 
-  console.log(`[EXTRACTION_LOCK] ❌ Failed to acquire lock after ${maxAttempts} attempts`);
+  log.warn('Failed to acquire lock after max attempts', { maxAttempts });
   return { acquired: false };
 }
 
@@ -172,13 +175,13 @@ export async function releaseLock(
     const result = await prisma.extractionLock.deleteMany({ where });
     
     if (result.count > 0) {
-      console.log(`[EXTRACTION_LOCK] 🔓 Released ${result.count} lock(s) for process ${processId.slice(0, 8)}`);
+      log.info('Released locks', { count: result.count, processId: processId.slice(0, 8) });
       return true;
     }
     
     return false;
   } catch (error) {
-    console.error(`[EXTRACTION_LOCK] Error releasing lock:`, error);
+    log.error('Error releasing lock', error as Error);
     return false;
   }
 }
@@ -191,10 +194,10 @@ export async function releaseLockById(lockId: string): Promise<boolean> {
     await prisma.extractionLock.delete({
       where: { id: lockId },
     });
-    console.log(`[EXTRACTION_LOCK] 🔓 Released lock ${lockId.slice(0, 8)}`);
+    log.info('Released lock by ID', { lockId: lockId.slice(0, 8) });
     return true;
   } catch (error) {
-    console.error(`[EXTRACTION_LOCK] Error releasing lock by ID:`, error);
+    log.error('Error releasing lock by ID', error as Error);
     return false;
   }
 }
@@ -262,7 +265,7 @@ export async function cleanupExpiredLocks(): Promise<number> {
   });
 
   if (result.count > 0) {
-    console.log(`[EXTRACTION_LOCK] 🧹 Cleaned up ${result.count} expired lock(s)`);
+    log.info('Cleaned up expired locks', { count: result.count });
   }
 
   return result.count;
@@ -289,7 +292,7 @@ export async function extendLock(
     });
 
     if (!lock) {
-      console.warn(`[EXTRACTION_LOCK] Cannot extend - lock not found`);
+      log.warn('Cannot extend - lock not found');
       return false;
     }
 
@@ -300,10 +303,10 @@ export async function extendLock(
       data: { expiresAt: newExpiresAt },
     });
 
-    console.log(`[EXTRACTION_LOCK] ⏰ Extended lock until ${newExpiresAt.toISOString()}`);
+    log.info('Extended lock', { expiresAt: newExpiresAt.toISOString() });
     return true;
   } catch (error) {
-    console.error(`[EXTRACTION_LOCK] Error extending lock:`, error);
+    log.error('Error extending lock', error as Error);
     return false;
   }
 }
@@ -339,7 +342,7 @@ export async function withLock<T>(
 
   if (!lockResult.acquired) {
     if (skipIfLocked) {
-      console.log(`[EXTRACTION_LOCK] Skipping ${extractionType} - already in progress`);
+      log.info('Skipping extraction - already in progress', { extractionType });
       return { success: true, skipped: true };
     }
     return { success: false, error: 'Could not acquire lock' };
@@ -349,7 +352,7 @@ export async function withLock<T>(
     const result = await fn();
     return { success: true, result };
   } catch (error: any) {
-    console.error(`[EXTRACTION_LOCK] Error during locked operation:`, error);
+    log.error('Error during locked operation', error as Error);
     return { success: false, error: error.message };
   } finally {
     // Always release the lock

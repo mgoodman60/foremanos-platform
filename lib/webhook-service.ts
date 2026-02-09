@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 export type WebhookEvent = 
   | 'daily_report.created'
@@ -71,7 +72,7 @@ function readStorage(): WebhookStorage {
       return JSON.parse(data);
     }
   } catch (e) {
-    console.error('[Webhook] Storage read error:', e);
+    logger.error('WEBHOOK', 'Storage read error', e as Error);
   }
   return {};
 }
@@ -82,7 +83,7 @@ function writeStorage(data: WebhookStorage): void {
     const storagePath = getStoragePath();
     fs.writeFileSync(storagePath, JSON.stringify(data, null, 2));
   } catch (e) {
-    console.error('[Webhook] Storage write error:', e);
+    logger.error('WEBHOOK', 'Storage write error', e as Error);
   }
 }
 

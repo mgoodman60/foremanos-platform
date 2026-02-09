@@ -5,6 +5,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { startOfDay, endOfDay, format } from 'date-fns';
 import { syncBudgetFromSchedule } from './budget-sync-service';
 
@@ -188,7 +189,7 @@ async function updateProjectBudgetTotals(projectId: string): Promise<number> {
   const totalActualHours = budgetItemStats._sum.actualHours || 0;
   const itemCount = budgetItemStats._count.id;
 
-  console.log(`[CostRollup] Budget totals: $${totalActualCost.toFixed(2)} spent across ${itemCount} items, ${totalActualHours.toFixed(1)} total hours`);
+  logger.info('COST_ROLLUP', 'Budget totals', { totalActualCost: totalActualCost.toFixed(2), itemCount, totalActualHours: totalActualHours.toFixed(1) });
 
   return itemCount;
 }
@@ -287,7 +288,7 @@ export async function recalculateBudgetItemActuals(projectId: string): Promise<n
 
     // Log after transaction succeeds
     updates.forEach(u => {
-      console.log(`[CostRollup] Recalculated ${u.name}: ${u.laborHours} hours, $${u.totalActualCost.toFixed(2)}`);
+      logger.info('COST_ROLLUP', `Recalculated ${u.name}`, { laborHours: u.laborHours, totalActualCost: u.totalActualCost.toFixed(2) });
     });
   }
 
@@ -302,12 +303,12 @@ export async function performDailyCostRollup(
   date: Date,
   userId?: string
 ): Promise<CostRollupResult> {
-  console.log(`[CostRollup] Starting rollup for project ${projectId} on ${format(date, 'yyyy-MM-dd')}`);
+  logger.info('COST_ROLLUP', `Starting rollup`, { projectId, date: format(date, 'yyyy-MM-dd') });
 
   try {
     // 1. Calculate daily costs
     const summary = await calculateDailyCosts(projectId, date);
-    console.log(`[CostRollup] Daily summary: Labor $${summary.laborCost.toFixed(2)}, Materials $${summary.materialCost.toFixed(2)}, Equipment $${summary.equipmentCost.toFixed(2)}, Total $${summary.totalCost.toFixed(2)}`);
+    logger.info('COST_ROLLUP', 'Daily summary', { laborCost: summary.laborCost.toFixed(2), materialCost: summary.materialCost.toFixed(2), equipmentCost: summary.equipmentCost.toFixed(2), totalCost: summary.totalCost.toFixed(2) });
 
     // 2. Store daily snapshot in BudgetSnapshot
     const dayStart = startOfDay(date);
@@ -347,12 +348,12 @@ export async function performDailyCostRollup(
     try {
       await syncBudgetFromSchedule(projectId, userId);
       evmRefreshed = true;
-      console.log('[CostRollup] EVM metrics refreshed');
+      logger.info('COST_ROLLUP', 'EVM metrics refreshed');
     } catch (error) {
-      console.error('[CostRollup] Error refreshing EVM:', error);
+      logger.error('COST_ROLLUP', 'Error refreshing EVM', error as Error);
     }
 
-    console.log(`[CostRollup] Rollup complete for ${format(date, 'yyyy-MM-dd')}`);
+    logger.info('COST_ROLLUP', `Rollup complete for ${format(date, 'yyyy-MM-dd')}`);
 
     return {
       success: true,
@@ -362,7 +363,7 @@ export async function performDailyCostRollup(
       evmRefreshed,
     };
   } catch (error) {
-    console.error('[CostRollup] Error:', error);
+    logger.error('COST_ROLLUP', 'Rollup error', error as Error);
     return {
       success: false,
       date,

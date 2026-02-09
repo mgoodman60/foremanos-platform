@@ -12,6 +12,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 // ============================================================================
 // INTERFACES
@@ -125,7 +126,7 @@ ${documentText.substring(0, 15000)}`;
     // Parse JSON from response
     const jsonMatch = response.content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.log('[DoorScheduleExtractor] No valid JSON found in response');
+      logger.warn('DOOR_SCHEDULE', 'No valid JSON found in LLM response');
       return { doors: [], doorTypes: {}, hardwareSets: {}, extractedAt: new Date() };
     }
 
@@ -144,7 +145,7 @@ ${documentText.substring(0, 15000)}`;
       extractedAt: new Date(),
     };
   } catch (error) {
-    console.error('[DoorScheduleExtractor] Extraction failed:', error);
+    logger.error('DOOR_SCHEDULE', 'Extraction failed', error as Error);
     return { doors: [], doorTypes: {}, hardwareSets: {}, extractedAt: new Date() };
   }
 }
@@ -247,12 +248,12 @@ export async function storeDoorScheduleData(
       stats.created++;
     } catch (error) {
       const errorMsg = `Failed to store door ${door.doorNumber}: ${error}`;
-      console.error('[DoorScheduleExtractor]', errorMsg);
+      logger.error('DOOR_SCHEDULE', errorMsg);
       stats.errors.push(errorMsg);
     }
   }
 
-  console.log(`[DoorScheduleExtractor] Stored ${stats.created} doors for project ${projectId}`);
+  logger.info('DOOR_SCHEDULE', 'Stored doors for project', { created: stats.created, projectId });
   return stats;
 }
 
@@ -305,7 +306,7 @@ export async function getDoorScheduleContext(projectSlug: string): Promise<strin
 
     return context;
   } catch (error) {
-    console.error('[DoorScheduleExtractor] Failed to get context:', error);
+    logger.error('DOOR_SCHEDULE', 'Failed to get context', error as Error);
     return null;
   }
 }
@@ -378,7 +379,7 @@ export async function processDoorScheduleForProject(
       errors: allErrors,
     };
   } catch (error) {
-    console.error('[DoorScheduleExtractor] Processing failed:', error);
+    logger.error('DOOR_SCHEDULE', 'Processing failed', error as Error);
     return {
       success: false,
       doorsExtracted: 0,
@@ -410,7 +411,7 @@ export async function getPrimaryDoorTypeForRoom(
 
     return door?.doorType || null;
   } catch (error) {
-    console.error('[DoorScheduleExtractor] Error getting door type:', error);
+    logger.error('DOOR_SCHEDULE', 'Error getting door type', error as Error);
     return null;
   }
 }

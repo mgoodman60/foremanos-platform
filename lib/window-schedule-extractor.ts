@@ -12,6 +12,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 // ============================================================================
 // INTERFACES
@@ -130,7 +131,7 @@ ${documentText.substring(0, 15000)}`;
     // Parse JSON from response
     const jsonMatch = response.content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.log('[WindowScheduleExtractor] No valid JSON found in response');
+      logger.warn('WINDOW_SCHEDULE', 'No valid JSON found in LLM response');
       return { windows: [], windowTypes: {}, glassTypes: {}, extractedAt: new Date() };
     }
 
@@ -149,7 +150,7 @@ ${documentText.substring(0, 15000)}`;
       extractedAt: new Date(),
     };
   } catch (error) {
-    console.error('[WindowScheduleExtractor] Extraction failed:', error);
+    logger.error('WINDOW_SCHEDULE', 'Extraction failed', error as Error);
     return { windows: [], windowTypes: {}, glassTypes: {}, extractedAt: new Date() };
   }
 }
@@ -256,12 +257,12 @@ export async function storeWindowScheduleData(
       stats.created++;
     } catch (error) {
       const errorMsg = `Failed to store window ${window.windowNumber}: ${error}`;
-      console.error('[WindowScheduleExtractor]', errorMsg);
+      logger.error('WINDOW_SCHEDULE', errorMsg);
       stats.errors.push(errorMsg);
     }
   }
 
-  console.log(`[WindowScheduleExtractor] Stored ${stats.created} windows for project ${projectId}`);
+  logger.info('WINDOW_SCHEDULE', 'Stored windows for project', { created: stats.created, projectId });
   return stats;
 }
 
@@ -328,7 +329,7 @@ export async function getWindowScheduleContext(projectSlug: string): Promise<str
 
     return context;
   } catch (error) {
-    console.error('[WindowScheduleExtractor] Failed to get context:', error);
+    logger.error('WINDOW_SCHEDULE', 'Failed to get context', error as Error);
     return null;
   }
 }
@@ -403,7 +404,7 @@ export async function processWindowScheduleForProject(
       errors: allErrors,
     };
   } catch (error) {
-    console.error('[WindowScheduleExtractor] Processing failed:', error);
+    logger.error('WINDOW_SCHEDULE', 'Processing failed', error as Error);
     return {
       success: false,
       windowsExtracted: 0,

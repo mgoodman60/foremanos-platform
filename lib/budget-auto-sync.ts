@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 
@@ -70,7 +71,7 @@ Return ONLY the JSON array, no explanation.`;
       return JSON.parse(jsonMatch[0]);
     }
   } catch (error) {
-    console.error('[Budget Auto-Sync] Failed to extract budget:', error);
+    logger.error('BUDGET_AUTO_SYNC', 'Failed to extract budget', error instanceof Error ? error : new Error(String(error)));
   }
   
   return [];
@@ -295,8 +296,8 @@ export async function processUploadedBudgetDocument(
     // Compare with takeoffs
     const comparison = await compareTakeoffsToBudget(projectId);
 
-    console.log(`[Budget Auto-Sync] Processed ${result.total} items, ${result.created} created, ${result.updated} updated`);
-    console.log(`[Budget Auto-Sync] Takeoff comparison: ${comparison.matches} matches, ${comparison.overBudget} over, ${comparison.underBudget} under`);
+    logger.info('BUDGET_AUTO_SYNC', `Processed ${result.total} items, ${result.created} created, ${result.updated} updated`, { total: result.total, created: result.created, updated: result.updated });
+    logger.info('BUDGET_AUTO_SYNC', `Takeoff comparison: ${comparison.matches} matches, ${comparison.overBudget} over, ${comparison.underBudget} under`, { matches: comparison.matches, overBudget: comparison.overBudget, underBudget: comparison.underBudget });
 
     return {
       success: true,
@@ -304,7 +305,7 @@ export async function processUploadedBudgetDocument(
       message: `Imported ${result.created} new items, updated ${result.updated} existing. Takeoff coverage: ${comparison.matches + comparison.overBudget + comparison.underBudget} categories compared.`,
     };
   } catch (error) {
-    console.error('[Budget Auto-Sync] Error:', error);
+    logger.error('BUDGET_AUTO_SYNC', 'Error in processUploadedBudgetDocument', error instanceof Error ? error : new Error(String(error)));
     return { success: false, itemsProcessed: 0, message: 'Failed to process budget document' };
   }
 }

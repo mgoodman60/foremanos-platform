@@ -13,6 +13,7 @@
  */
 
 import { PDFDocument } from 'pdf-lib';
+import { logger } from '@/lib/logger';
 
 export interface PageImage {
   pageNumber: number;
@@ -59,7 +60,7 @@ export async function extractPageAsPdf(
       pageCount,
     };
   } catch (error: any) {
-    console.error('[PDF-SERVERLESS] Error extracting page:', error.message);
+    logger.error('PDF_SERVERLESS', 'Error extracting page', undefined, { message: error.message });
     throw error;
   }
 }
@@ -149,9 +150,9 @@ export async function splitPdfIntoPages(
         source: 'pdf-native',
       });
       
-      console.log(`[PDF-SERVERLESS] Extracted page ${i}/${lastPage} (type: ${pageType})`);
+      logger.info('PDF_SERVERLESS', 'Extracted page', { page: i, totalPages: lastPage, pageType });
     } catch (error: any) {
-      console.error(`[PDF-SERVERLESS] Error extracting page ${i}:`, error.message);
+      logger.error('PDF_SERVERLESS', 'Error extracting page', undefined, { page: i, message: error.message });
     }
   }
   
@@ -354,6 +355,6 @@ export async function isCanvasAvailable(): Promise<boolean> {
 export async function getBestStrategy(): Promise<'native-pdf' | 'canvas-raster' | 'text-only'> {
   // Native PDF works best for modern vision APIs (Claude, GPT-4V)
   // Canvas was removed to meet Vercel serverless function size limits
-  console.log('[PDF-SERVERLESS] Using native PDF strategy (Claude/GPT document support)');
+  logger.info('PDF_SERVERLESS', 'Using native PDF strategy (Claude/GPT document support)');
   return 'native-pdf';
 }

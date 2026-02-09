@@ -13,6 +13,7 @@
 import { prisma } from './db';
 import type { GridCoordinate } from './spatial-correlation';
 import { parseGridCoordinate } from './spatial-correlation';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -367,7 +368,7 @@ export async function addAnnotationReply(
       createdAt: dbReply.createdAt
     };
   } catch (error) {
-    console.error('[Visual Annotations] Error adding reply:', error);
+    logger.error('VISUAL_ANNOTATIONS', 'Error adding reply', error instanceof Error ? error : undefined);
     return null;
   }
 }
@@ -402,7 +403,7 @@ export async function updateAnnotationReply(
 
     return true;
   } catch (error) {
-    console.error('[Visual Annotations] Error updating reply:', error);
+    logger.error('VISUAL_ANNOTATIONS', 'Error updating reply', error instanceof Error ? error : undefined);
     return false;
   }
 }
@@ -428,7 +429,7 @@ export async function deleteAnnotationReply(
 
     return true;
   } catch (error) {
-    console.error('[Visual Annotations] Error deleting reply:', error);
+    logger.error('VISUAL_ANNOTATIONS', 'Error deleting reply', error instanceof Error ? error : undefined);
     return false;
   }
 }
@@ -458,7 +459,7 @@ export async function getAnnotationReplies(annotationId: string): Promise<Annota
       createdAt: r.createdAt
     }));
   } catch (error) {
-    console.error('[Visual Annotations] Error getting replies:', error);
+    logger.error('VISUAL_ANNOTATIONS', 'Error getting replies', error instanceof Error ? error : undefined);
     return [];
   }
 }

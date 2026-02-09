@@ -48,6 +48,15 @@ import {
   getEffectiveModel,
 } from '@/lib/stripe';
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 describe('stripe module', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -97,7 +106,6 @@ describe('stripe module', () => {
 
     it('should throw error when checkout session creation fails', async () => {
       mockCheckoutSessionsCreate.mockRejectedValue(new Error('Stripe API error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(
         createCheckoutSession({
@@ -109,11 +117,7 @@ describe('stripe module', () => {
         })
       ).rejects.toThrow('Stripe API error');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error creating checkout session:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle different price IDs', async () => {
@@ -184,7 +188,6 @@ describe('stripe module', () => {
 
     it('should throw error when portal session creation fails', async () => {
       mockBillingPortalSessionsCreate.mockRejectedValue(new Error('Customer not found'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(
         createPortalSession({
@@ -193,11 +196,7 @@ describe('stripe module', () => {
         })
       ).rejects.toThrow('Customer not found');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error creating portal session:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle different return URLs', async () => {
@@ -240,17 +239,12 @@ describe('stripe module', () => {
 
     it('should throw error when subscription not found', async () => {
       mockSubscriptionsRetrieve.mockRejectedValue(new Error('No such subscription'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(getSubscription('sub_invalid')).rejects.toThrow(
         'No such subscription'
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error retrieving subscription:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle canceled subscription', async () => {
@@ -286,17 +280,12 @@ describe('stripe module', () => {
 
     it('should throw error when cancellation fails', async () => {
       mockSubscriptionsUpdate.mockRejectedValue(new Error('Subscription already canceled'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(cancelSubscription('sub_test123')).rejects.toThrow(
         'Subscription already canceled'
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error canceling subscription:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle already pending cancellation', async () => {
@@ -333,17 +322,12 @@ describe('stripe module', () => {
 
     it('should throw error when reactivation fails', async () => {
       mockSubscriptionsUpdate.mockRejectedValue(new Error('Subscription expired'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(reactivateSubscription('sub_test123')).rejects.toThrow(
         'Subscription expired'
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error reactivating subscription:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle already active subscription', async () => {

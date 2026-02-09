@@ -6,6 +6,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 // Valid trade types from schema
 export const TRADE_TYPES = [
@@ -68,7 +69,7 @@ export async function inferTradesForSchedule(
   scheduleId: string,
   projectId: string
 ): Promise<{ updated: number; needsClarification: number; errors: string[] }> {
-  console.log(`[TRADE-INFERENCE] Starting inference for schedule ${scheduleId}`);
+  logger.info('TRADE_INFERENCE', 'Starting inference for schedule', { scheduleId });
   
   const errors: string[] = [];
   let updated = 0;
@@ -167,11 +168,11 @@ export async function inferTradesForSchedule(
       await createTradeInferenceNotification(projectId, scheduleId, needsClarification);
     }
 
-    console.log(`[TRADE-INFERENCE] Complete: ${updated} updated, ${needsClarification} need clarification`);
+    logger.info('TRADE_INFERENCE', 'Inference complete', { updated, needsClarification });
     return { updated, needsClarification, errors };
 
   } catch (error: any) {
-    console.error('[TRADE-INFERENCE] Error:', error.message);
+    logger.error('TRADE_INFERENCE', 'Inference error', error as Error);
     errors.push(error.message);
     return { updated, needsClarification, errors };
   }
@@ -264,7 +265,7 @@ function parseTradeInferenceResponse(
   try {
     const jsonMatch = response.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
-      console.error('[TRADE-INFERENCE] No JSON array found in response');
+      logger.error('TRADE_INFERENCE', 'No JSON array found in response');
       return tasks.map(t => ({
         taskId: t.taskId,
         taskName: t.name,
@@ -316,7 +317,7 @@ function parseTradeInferenceResponse(
 
     return results;
   } catch (error: any) {
-    console.error('[TRADE-INFERENCE] Parse error:', error.message);
+    logger.error('TRADE_INFERENCE', 'Parse error', error as Error);
     return tasks.map(t => ({
       taskId: t.taskId,
       taskName: t.name,
@@ -407,9 +408,9 @@ async function createTradeInferenceNotification(
       },
     });
 
-    console.log(`[TRADE-INFERENCE] Created notification for ${count} tasks needing clarification`);
+    logger.info('TRADE_INFERENCE', 'Created notification for tasks needing clarification', { count });
   } catch (error: any) {
-    console.error('[TRADE-INFERENCE] Failed to create notification:', error.message);
+    logger.error('TRADE_INFERENCE', 'Failed to create notification', error as Error);
   }
 }
 

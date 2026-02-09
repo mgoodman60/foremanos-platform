@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 interface UpdateProgressParams {
   userId: string;
@@ -80,7 +81,7 @@ export async function updateOnboardingProgress(params: UpdateProgressParams) {
 
     return updatedProgress;
   } catch (error) {
-    console.error('Error updating onboarding progress:', error);
+    logger.error('ONBOARDING', 'Error updating onboarding progress', error as Error);
     // Silently fail - don't block user actions
     return null;
   }

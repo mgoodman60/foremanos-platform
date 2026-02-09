@@ -501,6 +501,7 @@ describe('Document Content Pipeline', () => {
         message: 'What concrete specs are required?',
         projectSlug: TEST_PROJECT_SLUG,
         userRole: 'admin',
+        image: null,
       });
 
       expect(result).toBeDefined();

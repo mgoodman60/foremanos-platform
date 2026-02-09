@@ -12,6 +12,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 /**
  * Detect if base64 content is a PDF (starts with %PDF- magic number)
@@ -278,7 +279,7 @@ Return as JSON:
       boundingBox: a.boundingBox,
     }));
   } catch (error) {
-    console.error('Vision annotation extraction failed:', error);
+    logger.error('ANNOTATION_PROCESSOR', 'Vision annotation extraction failed', error as Error);
     return [];
   }
 }

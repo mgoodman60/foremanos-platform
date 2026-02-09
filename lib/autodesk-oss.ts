@@ -4,6 +4,7 @@
  */
 
 import { getAccessToken } from './autodesk-auth';
+import { logger } from '@/lib/logger';
 
 const OSS_BASE_URL = 'https://developer.api.autodesk.com/oss/v2';
 const BUCKET_KEY = `foremanos_${process.env.NODE_ENV || 'development'}`.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -95,7 +96,7 @@ export async function uploadFile(
   // Generate a unique object key
   const objectKey = `${Date.now()}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
 
-  console.log('[Autodesk OSS] Getting signed upload URL for:', objectKey);
+  logger.info('AUTODESK_OSS', 'Getting signed upload URL', { objectKey });
 
   // Step 1: Get signed upload URL
   const signedUrlResponse = await fetch(
@@ -115,7 +116,7 @@ export async function uploadFile(
   }
 
   const signedData = await signedUrlResponse.json();
-  console.log('[Autodesk OSS] Got signed URL, uploading to S3...');
+  logger.info('AUTODESK_OSS', 'Got signed URL, uploading to S3');
 
   // Step 2: Upload directly to S3 using signed URL
   const s3Response = await fetch(signedData.urls[0], {
@@ -131,7 +132,7 @@ export async function uploadFile(
     throw new Error(`Failed to upload to S3: ${errorText}`);
   }
 
-  console.log('[Autodesk OSS] S3 upload complete, finalizing...');
+  logger.info('AUTODESK_OSS', 'S3 upload complete, finalizing');
 
   // Step 3: Complete the upload
   const completeResponse = await fetch(
@@ -154,7 +155,7 @@ export async function uploadFile(
   }
 
   const result = await completeResponse.json();
-  console.log('[Autodesk OSS] File uploaded successfully:', result.objectKey);
+  logger.info('AUTODESK_OSS', 'File uploaded successfully', { objectKey: result.objectKey });
   return result;
 }
 

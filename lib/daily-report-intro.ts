@@ -1,9 +1,10 @@
-import { 
+import {
   fetchWeatherForecast,
   DailyWeatherData,
   forecastsToDailyWeather
 } from './weather-service';
 import { formatWeatherForIntro } from './weather-automation';
+import { logger } from './logger';
 
 /**
  * Generate intro message for Daily Report Chat
@@ -69,7 +70,7 @@ export async function getWeatherSummary(
     }
     return 'Weather data unavailable.';
   } catch (error) {
-    console.error('[DailyReportIntro] Weather fetch error:', error);
+    logger.error('DAILY_REPORT_INTRO', 'Weather fetch error', error as Error);
     return 'Unable to retrieve weather data.';
   }
 }

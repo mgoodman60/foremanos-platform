@@ -17,8 +17,11 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+
+const log = createScopedLogger('MEP_SCHEDULE');
 
 // ============================================================================
 // INTERFACES
@@ -265,7 +268,7 @@ export async function extractMEPSchedules(
   schedulesFound: string[];
   errors?: string[];
 }> {
-  console.log(`[MEP Schedule Extractor] Starting extraction for project: ${projectSlug}`);
+  log.info('Starting extraction', { projectSlug });
   
   const project = await prisma.project.findUnique({
     where: { slug: projectSlug },
@@ -302,7 +305,7 @@ export async function extractMEPSchedules(
     }
   }
 
-  console.log(`[MEP Schedule Extractor] Searching ${allChunks.length} document chunks`);
+  log.info('Searching document chunks', { chunkCount: allChunks.length });
 
   // Find chunks containing each schedule type
   const scheduleChunks: Record<string, typeof allChunks> = {};
@@ -316,7 +319,7 @@ export async function extractMEPSchedules(
     if (matchingChunks.length > 0) {
       scheduleChunks[scheduleType] = matchingChunks;
       schedulesFound.push(scheduleType);
-      console.log(`[MEP Schedule Extractor] Found ${matchingChunks.length} chunks for ${scheduleType}`);
+      log.info('Found chunks for schedule type', { scheduleType, chunkCount: matchingChunks.length });
     }
   }
 
@@ -346,14 +349,14 @@ export async function extractMEPSchedules(
   if (scheduleChunks.lightFixtures) {
     const fixtures = await extractLightFixtureSchedule(scheduleChunks.lightFixtures);
     results.lightFixtures = fixtures;
-    console.log(`[MEP Schedule Extractor] Extracted ${fixtures.length} light fixtures`);
+    log.info('Extracted light fixtures', { count: fixtures.length });
   }
 
   // Extract Plumbing Fixtures
   if (scheduleChunks.plumbingFixtures) {
     const fixtures = await extractPlumbingFixtures(scheduleChunks.plumbingFixtures);
     results.plumbingFixtures = fixtures;
-    console.log(`[MEP Schedule Extractor] Extracted ${fixtures.length} plumbing fixtures`);
+    log.info('Extracted plumbing fixtures', { count: fixtures.length });
   }
 
   // Extract HVAC Equipment (fans, ERVs, heat pumps, mini-splits)
@@ -361,7 +364,7 @@ export async function extractMEPSchedules(
     if (scheduleChunks[hvacType]) {
       const equipment = await extractHVACEquipment(scheduleChunks[hvacType], hvacType);
       results.hvacEquipment.push(...equipment);
-      console.log(`[MEP Schedule Extractor] Extracted ${equipment.length} ${hvacType} items`);
+      log.info('Extracted HVAC items', { hvacType, count: equipment.length });
     }
   }
 
@@ -369,7 +372,7 @@ export async function extractMEPSchedules(
   if (scheduleChunks.mechanicalAbbreviations) {
     const abbreviations = await extractMechanicalAbbreviations(scheduleChunks.mechanicalAbbreviations);
     results.abbreviations = abbreviations;
-    console.log(`[MEP Schedule Extractor] Extracted ${abbreviations.length} abbreviations`);
+    log.info('Extracted abbreviations', { count: abbreviations.length });
   }
 
   // Store extracted data in database
@@ -425,7 +428,7 @@ Return ONLY a valid JSON array:
 
     return JSON.parse(jsonMatch[0]) as LightFixture[];
   } catch (error) {
-    console.error('[MEP Schedule Extractor] Light fixture extraction error:', error);
+    log.error('Light fixture extraction error', error as Error);
     return [];
   }
 }
@@ -474,7 +477,7 @@ Return ONLY a valid JSON array:
 
     return JSON.parse(jsonMatch[0]) as PlumbingFixture[];
   } catch (error) {
-    console.error('[MEP Schedule Extractor] Plumbing fixture extraction error:', error);
+    log.error('Plumbing fixture extraction error', error as Error);
     return [];
   }
 }
@@ -532,7 +535,7 @@ Return ONLY a valid JSON array:
 
     return JSON.parse(jsonMatch[0]) as HVACEquipment[];
   } catch (error) {
-    console.error(`[MEP Schedule Extractor] ${scheduleType} extraction error:`, error);
+    log.error('HVAC extraction error', error as Error, { scheduleType });
     return [];
   }
 }
@@ -574,7 +577,7 @@ Return ONLY a valid JSON array:
 
     return JSON.parse(jsonMatch[0]) as MechanicalAbbreviation[];
   } catch (error) {
-    console.error('[MEP Schedule Extractor] Abbreviations extraction error:', error);
+    log.error('Abbreviations extraction error', error as Error);
     return [];
   }
 }
@@ -631,7 +634,7 @@ async function storeMEPScheduleData(
     }
   });
 
-  console.log('[MEP Schedule Extractor] Stored MEP schedule data in database');
+  log.info('Stored MEP schedule data in database');
 }
 
 // ============================================================================

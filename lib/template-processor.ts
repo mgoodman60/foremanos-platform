@@ -8,6 +8,7 @@ import PizZip from 'pizzip';
 import { PDFDocument, PDFForm, PDFTextField, PDFCheckBox, PDFRadioGroup } from 'pdf-lib';
 import { getFileUrl } from './s3';
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 import type { Prisma } from '@prisma/client';
 import type {
   ReportData,
@@ -298,7 +299,7 @@ export async function processDocxTemplate(
 
     return output;
   } catch (error) {
-    console.error('[TEMPLATE_PROCESSOR] Error processing DOCX template:', error);
+    logger.error('TEMPLATE_PROCESSOR', 'Error processing DOCX template', error instanceof Error ? error : new Error(String(error)));
     throw new Error(
       `Failed to process DOCX template: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
@@ -343,7 +344,7 @@ export async function processXlsxTemplate(
     const output = await workbook.outputAsync();
     return output;
   } catch (error) {
-    console.error('[TEMPLATE_PROCESSOR] Error processing XLSX template:', error);
+    logger.error('TEMPLATE_PROCESSOR', 'Error processing XLSX template', error instanceof Error ? error : new Error(String(error)));
     throw new Error(
       `Failed to process XLSX template: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
@@ -368,7 +369,7 @@ export async function fillPdfForm(
     const fields = form.getFields();
 
     if (fields.length === 0) {
-      console.warn('[TEMPLATE_PROCESSOR] PDF has no form fields, returning original document');
+      logger.warn('TEMPLATE_PROCESSOR', 'PDF has no form fields, returning original document');
       return pdfBuffer;
     }
 
@@ -429,10 +430,10 @@ export async function fillPdfForm(
         // Note: PDFDropdown is also supported by pdf-lib but less common
       } catch (fieldError) {
         // Log field-specific error but continue processing other fields
-        console.warn(
-          `[TEMPLATE_PROCESSOR] Failed to fill field "${fieldName}":`,
-          fieldError instanceof Error ? fieldError.message : 'Unknown error'
-        );
+        logger.warn('TEMPLATE_PROCESSOR', `Failed to fill field "${fieldName}"`, {
+          fieldName,
+          error: fieldError instanceof Error ? fieldError.message : 'Unknown error'
+        });
       }
     }
 
@@ -445,7 +446,7 @@ export async function fillPdfForm(
     return Buffer.from(filledPdfBytes);
 
   } catch (error) {
-    console.error('[TEMPLATE_PROCESSOR] Error filling PDF form:', error);
+    logger.error('TEMPLATE_PROCESSOR', 'Error filling PDF form', error instanceof Error ? error : new Error(String(error)));
 
     // Check if this is a PDF without forms or invalid PDF
     if (error instanceof Error) {

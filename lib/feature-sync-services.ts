@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { FeatureType, DataSourceType, DATA_SOURCE_PRIORITY, recordDataSource } from './document-intelligence-router';
 
@@ -56,7 +57,7 @@ export async function syncScaleData(
 
     // Log scale update for higher confidence sources
     if (sourceType === 'dwg' || sourceType === 'rvt') {
-      console.log(`[Scale Sync] Updated project scale to ${bestScale} from ${sourceType} source`);
+      logger.info('FEATURE_SYNC', `Updated project scale to ${bestScale} from ${sourceType} source`);
     }
 
     return { updated: true, scale: bestScale, ratio: bestRatio || undefined };
@@ -155,7 +156,7 @@ Return ONLY JSON array.`;
       return { created, updated };
     }
   } catch (error) {
-    console.error('[Room Sync] Error:', error);
+    logger.error('FEATURE_SYNC', 'Room sync error', error as Error);
   }
 
   return { created: 0, updated: 0 };
@@ -206,7 +207,7 @@ Return ONLY JSON array.`;
       return { created: doors.length, updated: 0 };
     }
   } catch (error) {
-    console.error('[Door Sync] Error:', error);
+    logger.error('FEATURE_SYNC', 'Door sync error', error as Error);
   }
 
   return { created: 0, updated: 0 };
@@ -262,7 +263,7 @@ Return ONLY JSON array.`;
       return { items: items.length };
     }
   } catch (error) {
-    console.error(`[MEP Sync - ${mepType}] Error:`, error);
+    logger.error('FEATURE_SYNC', `MEP sync error (${mepType})`, error as Error);
   }
 
   return { items: 0 };
@@ -281,7 +282,7 @@ export async function syncScheduleData(
   });
 
   if (existingSchedule) {
-    console.log('[Schedule Sync] Schedule already exists for this document');
+    logger.info('FEATURE_SYNC', 'Schedule already exists for this document');
     return { tasks: existingSchedule._count.ScheduleTask || 0 };
   }
 
@@ -299,7 +300,7 @@ export async function syncScheduleData(
       return { tasks: result.extractedTasks.length };
     }
   } catch (error) {
-    console.error('[Schedule Sync] Error:', error);
+    logger.error('FEATURE_SYNC', 'Schedule sync error', error as Error);
   }
 
   return { tasks: 0 };
@@ -411,7 +412,7 @@ Return ONLY JSON array.`;
       return { materials: materials.length };
     }
   } catch (error) {
-    console.error('[Materials Sync] Error:', error);
+    logger.error('FEATURE_SYNC', 'Materials sync error', error as Error);
   }
 
   return { materials: 0 };

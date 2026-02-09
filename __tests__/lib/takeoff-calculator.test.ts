@@ -27,6 +27,15 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 // ============================================
 // Test Data Helpers
 // ============================================
@@ -598,18 +607,12 @@ describe('takeoff-calculator', () => {
           .mockRejectedValueOnce(new Error('Room calculation failed'))
           .mockResolvedValueOnce(rooms[1]);
 
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         const result = await calculateProjectTakeoffs('project-1');
 
         expect(result).toHaveLength(1);
         expect(result[0].roomNumber).toBe('102');
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to calculate takeoffs for room 101'),
-          expect.any(Error)
-        );
-
-        consoleErrorSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalled();
       });
 
       it('should handle database errors when fetching rooms', async () => {

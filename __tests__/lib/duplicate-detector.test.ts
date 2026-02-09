@@ -5,6 +5,14 @@ import crypto from 'crypto';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock prisma with vi.hoisted to ensure it's available before mock calls
 const mockPrisma = vi.hoisted(() => ({
   document: {
@@ -14,6 +22,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
@@ -326,9 +335,6 @@ describe('Duplicate Detector - findDuplicates', () => {
 describe('Duplicate Detector - removeDuplicates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Suppress console.log and console.error during tests
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   describe('Successful duplicate removal', () => {
@@ -535,7 +541,6 @@ describe('Duplicate Detector - removeDuplicates', () => {
     });
 
     it('should log duplicate findings to console', async () => {
-      const consoleSpy = vi.spyOn(console, 'log');
       const docs = [
         createMockDocument({ id: 'doc-1', fileName: 'plan.pdf', oneDriveHash: 'hash-1', createdAt: new Date('2024-01-01') }),
         createMockDocument({ id: 'doc-2', fileName: 'plan.pdf', oneDriveHash: 'hash-1', createdAt: new Date('2024-01-02') }),
@@ -546,12 +551,8 @@ describe('Duplicate Detector - removeDuplicates', () => {
 
       await removeDuplicates('project-1');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Duplicate found by hash: plan.pdf')
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Removed 1 duplicate documents from project project-1')
-      );
+      expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockLogger.info.mock.calls.length).toBeGreaterThan(0);
     });
   });
 });

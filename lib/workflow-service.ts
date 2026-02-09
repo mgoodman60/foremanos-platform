@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import { logger } from './logger';
 import { ProjectType, TradeType } from '@prisma/client';
 import type { DocumentChunkMetadata } from '@/types/document-metadata';
 
@@ -49,7 +50,7 @@ export async function getWorkflowById(workflowId: string) {
 
     return template;
   } catch (error) {
-    console.error('[WORKFLOW] Error fetching template:', error);
+    logger.error('WORKFLOW', 'Error fetching template', error as Error);
     return null;
   }
 }
@@ -79,7 +80,7 @@ export async function getWorkflowTemplate(
 
     return template;
   } catch (error) {
-    console.error('[WORKFLOW] Error fetching template:', error);
+    logger.error('WORKFLOW', 'Error fetching template', error as Error);
     return null;
   }
 }
@@ -109,7 +110,7 @@ export async function getAvailableWorkflows(projectType: ProjectType) {
 
     return templates;
   } catch (error) {
-    console.error('[WORKFLOW] Error fetching workflows:', error);
+    logger.error('WORKFLOW', 'Error fetching workflows', error as Error);
     return [];
   }
 }
@@ -145,10 +146,10 @@ export async function createWorkflowTemplate(data: WorkflowTemplateData) {
       }
     });
 
-    console.log(`[WORKFLOW] Created template: ${template.name} (${template.id})`);
+    logger.info('WORKFLOW', 'Created template', { name: template.name, id: template.id });
     return template;
   } catch (error) {
-    console.error('[WORKFLOW] Error creating template:', error);
+    logger.error('WORKFLOW', 'Error creating template', error as Error);
     throw error;
   }
 }
@@ -178,7 +179,7 @@ export async function saveWorkflowResponse(
 
     return workflowResponse;
   } catch (error) {
-    console.error('[WORKFLOW] Error saving response:', error);
+    logger.error('WORKFLOW', 'Error saving response', error as Error);
     return null;
   }
 }
@@ -203,7 +204,7 @@ export async function getWorkflowResponses(conversationId: string) {
 
     return responses;
   } catch (error) {
-    console.error('[WORKFLOW] Error fetching responses:', error);
+    logger.error('WORKFLOW', 'Error fetching responses', error as Error);
     return [];
   }
 }
@@ -259,7 +260,7 @@ export async function updateReportingPattern(
 
     return pattern;
   } catch (error) {
-    console.error('[WORKFLOW] Error updating reporting pattern:', error);
+    logger.error('WORKFLOW', 'Error updating reporting pattern', error as Error);
     return null;
   }
 }
@@ -283,7 +284,7 @@ export async function getReportingPattern(
 
     return pattern;
   } catch (error) {
-    console.error('[WORKFLOW] Error fetching reporting pattern:', error);
+    logger.error('WORKFLOW', 'Error fetching reporting pattern', error as Error);
     return null;
   }
 }
@@ -351,7 +352,7 @@ export async function getNextStepsForWorkflow(
 
     return nextSteps;
   } catch (error) {
-    console.error('[WORKFLOW] Error getting next steps:', error);
+    logger.error('WORKFLOW', 'Error getting next steps', error as Error);
     return [];
   }
 }
@@ -411,7 +412,7 @@ export async function getScheduleContext(
     
     return context;
   } catch (error) {
-    console.error('[WORKFLOW] Error fetching schedule context:', error);
+    logger.error('WORKFLOW', 'Error fetching schedule context', error as Error);
     return null;
   }
 }

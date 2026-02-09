@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { extractPlumbingFixtures, getPlumbingRequirements } from './plumbing-fixture-extractor';
 import { extractElectricalSchedule, getElectricalRequirements } from './electrical-panel-extractor';
 import { extractEquipmentSchedule, getEquipmentRequirements } from './equipment-schedule-extractor';
@@ -49,7 +50,7 @@ export interface ProjectRequirements {
  * Extract all requirements from project schedules
  */
 export async function extractAllRequirements(projectId: string): Promise<ProjectRequirements> {
-  console.log(`[RequirementService] Extracting requirements for project ${projectId}`);
+  logger.info('SUBMITTAL_REQUIREMENTS', 'Extracting requirements', { projectId });
 
   const categories: ProjectRequirements['categories'] = {
     doors: [],
@@ -68,7 +69,7 @@ export async function extractAllRequirements(projectId: string): Promise<Project
     categories.doors = doorReqs.doors;
     categories.hardware = doorReqs.hardware;
   } catch (e) {
-    console.log('[RequirementService] Door extraction failed:', e);
+    logger.warn('SUBMITTAL_REQUIREMENTS', 'Door extraction failed', { error: (e as Error).message });
   }
 
   // Extract window requirements
@@ -76,7 +77,7 @@ export async function extractAllRequirements(projectId: string): Promise<Project
     const windowReqs = await extractWindowRequirements(projectId);
     categories.windows = windowReqs;
   } catch (e) {
-    console.log('[RequirementService] Window extraction failed:', e);
+    logger.warn('SUBMITTAL_REQUIREMENTS', 'Window extraction failed', { error: (e as Error).message });
   }
 
   // Extract plumbing requirements
@@ -84,7 +85,7 @@ export async function extractAllRequirements(projectId: string): Promise<Project
     const plumbingReqs = await getPlumbingRequirements(projectId);
     categories.plumbing = plumbingReqs.fixtures;
   } catch (e) {
-    console.log('[RequirementService] Plumbing extraction failed:', e);
+    logger.warn('SUBMITTAL_REQUIREMENTS', 'Plumbing extraction failed', { error: (e as Error).message });
   }
 
   // Extract electrical requirements
@@ -93,7 +94,7 @@ export async function extractAllRequirements(projectId: string): Promise<Project
     categories.electrical = electricalReqs.panels;
     categories.lighting = electricalReqs.lightingFixtures;
   } catch (e) {
-    console.log('[RequirementService] Electrical extraction failed:', e);
+    logger.warn('SUBMITTAL_REQUIREMENTS', 'Electrical extraction failed', { error: (e as Error).message });
   }
 
   // Extract mechanical equipment requirements
@@ -101,7 +102,7 @@ export async function extractAllRequirements(projectId: string): Promise<Project
     const mechReqs = await getEquipmentRequirements(projectId);
     categories.mechanical = [...mechReqs.equipment, ...mechReqs.diffusers];
   } catch (e) {
-    console.log('[RequirementService] Mechanical extraction failed:', e);
+    logger.warn('SUBMITTAL_REQUIREMENTS', 'Mechanical extraction failed', { error: (e as Error).message });
   }
 
   // Extract finish requirements
@@ -109,7 +110,7 @@ export async function extractAllRequirements(projectId: string): Promise<Project
     const finishReqs = await extractFinishRequirements(projectId);
     categories.finishes = finishReqs;
   } catch (e) {
-    console.log('[RequirementService] Finish extraction failed:', e);
+    logger.warn('SUBMITTAL_REQUIREMENTS', 'Finish extraction failed', { error: (e as Error).message });
   }
 
   // Calculate totals
@@ -378,7 +379,7 @@ export async function autoImportRequirements(
     }
   }
 
-  console.log(`[RequirementService] Imported ${imported} requirements, skipped ${skipped} duplicates`);
+  logger.info('SUBMITTAL_REQUIREMENTS', `Imported ${imported} requirements, skipped ${skipped} duplicates`);
   return { imported, skipped, errors };
 }
 

@@ -4,6 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock Prisma with vi.hoisted to ensure it's available before module imports
 const mockPrisma = vi.hoisted(() => ({
   projectDataSource: {
@@ -18,6 +26,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
@@ -734,8 +743,6 @@ describe('Document Intelligence Router - getProjectDataSources', () => {
 describe('Document Intelligence Router - routeDocumentToProcessors', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock console.log to avoid cluttering test output
-    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   it('should route DWG file and trigger all features', async () => {
@@ -858,9 +865,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       'architectural_plans'
     );
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringContaining('[Intelligence Router]')
-    );
+    expect(mockLogger.info).toHaveBeenCalled();
   });
 
   it('should log upgrade decisions', async () => {
@@ -884,9 +889,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       'architectural_plans'
     );
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringMatching(/Upgrading from pdf_scan.*to dwg/)
-    );
+    expect(mockLogger.info).toHaveBeenCalled();
   });
 
   it('should log keeping existing decisions', async () => {
@@ -909,9 +912,7 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
       'architectural_plans'
     );
 
-    expect(console.log).toHaveBeenCalledWith(
-      expect.stringMatching(/Keeping existing dwg.*over pdf_cad/)
-    );
+    expect(mockLogger.info).toHaveBeenCalled();
   });
 
   it('should handle documents with no category', async () => {
@@ -1053,7 +1054,6 @@ describe('Document Intelligence Router - routeDocumentToProcessors', () => {
 describe('Document Intelligence Router - Edge Cases', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   it('should handle empty filename gracefully', () => {

@@ -13,7 +13,10 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
+
+const log = createScopedLogger('SITEWORK_TAKEOFF');
 
 // ============================================================================
 // PHASE 1: ENHANCED PATTERN RECOGNITION
@@ -1405,7 +1408,7 @@ export async function extractFromDWG(
     });
     
     if (!document) {
-      console.log('[CAD] Document not found');
+      log.info('Document not found for CAD extraction', { documentId });
       return [];
     }
     
@@ -1426,7 +1429,7 @@ export async function extractFromDWG(
       const cadData = cadMeta.cadData || cadMeta.dwgExtraction || cadMeta.autodeskData;
       
       if (cadData) {
-        console.log('[CAD] Found CAD metadata, extracting quantities');
+        log.info('Found CAD metadata, extracting quantities');
         return convertCADToTakeoff(cadData);
       }
     }
@@ -1440,12 +1443,12 @@ export async function extractFromDWG(
     }).catch(() => null);
     
     if (autodeskModel) {
-      console.log('[CAD] Found associated Autodesk model, querying metadata');
+      log.info('Found associated Autodesk model, querying metadata');
       // Check if model has extracted metadata
       if (autodeskModel.extractedMetadata) {
         const extractedData = autodeskModel.extractedMetadata as any;
         if (extractedData.layers || extractedData.blocks) {
-          console.log('[CAD] Found DWG extraction data');
+          log.info('Found DWG extraction data');
           return convertCADToTakeoff({
             layers: extractedData.layers || [],
             blocks: extractedData.blocks || [],
@@ -1456,11 +1459,11 @@ export async function extractFromDWG(
       }
     }
     
-    console.log('[CAD] No CAD data available for extraction');
+    log.info('No CAD data available for extraction');
     return [];
     
   } catch (error) {
-    console.error('[CAD] Error extracting from DWG:', error);
+    log.error('Error extracting from DWG', error as Error);
     return [];
   }
 }
@@ -1481,7 +1484,7 @@ export async function extractSiteworkTakeoff(
     geotechDocumentId?: string;
   }
 ): Promise<SiteworkExtractionResult[]> {
-  console.log(`[SITEWORK] Starting comprehensive extraction for document ${documentId}`);
+  log.info('Starting comprehensive extraction', { documentId });
   
   let results: SiteworkExtractionResult[] = [];
   
@@ -1508,7 +1511,7 @@ export async function extractSiteworkTakeoff(
       
       // Phase 3: Classify drawing type
       const drawingType = classifyDrawingType(sheetNumber, chunk.content);
-      console.log(`[SITEWORK] Page ${chunk.pageNumber}: Classified as ${drawingType}`);
+      log.info('Page classified', { page: chunk.pageNumber, drawingType });
       
       // Phase 1 & 3: Extract based on drawing type with enhanced patterns
       const pageResults = await extractByDrawingType(drawingType, chunk.content, metadata);
@@ -1540,18 +1543,18 @@ export async function extractSiteworkTakeoff(
         const geotechContent = geotechChunks.map((c: any) => c.content).join('\n');
         const geotechData = extractGeotechData(geotechContent);
         results = adjustForGeotechConditions(results, geotechData);
-        console.log('[SITEWORK] Applied geotech adjustments');
+        log.info('Applied geotech adjustments');
       }
     }
     
     // Deduplicate and consolidate
     results = consolidateResults(results);
     
-    console.log(`[SITEWORK] Extraction complete: ${results.length} items`);
+    log.info('Extraction complete', { itemCount: results.length });
     return results;
     
   } catch (error) {
-    console.error('[SITEWORK] Extraction error:', error);
+    log.error('Extraction error', error as Error);
     throw error;
   }
 }
@@ -1590,7 +1593,7 @@ function consolidateResults(items: SiteworkExtractionResult[]): SiteworkExtracti
 export async function extractSiteworkFromProjectModels(
   projectId: string
 ): Promise<SiteworkExtractionResult[]> {
-  console.log(`[SITEWORK-BIM] Extracting from all project models: ${projectId}`);
+  log.info('Extracting from all project models', { projectId });
   
   const results: SiteworkExtractionResult[] = [];
   
@@ -1607,7 +1610,7 @@ export async function extractSiteworkFromProjectModels(
       },
     });
     
-    console.log(`[SITEWORK-BIM] Found ${dwgModels.length} DWG models`);
+    log.info('Found DWG models', { count: dwgModels.length });
     
     for (const model of dwgModels) {
       if (!model.extractedMetadata) continue;
@@ -1628,7 +1631,7 @@ export async function extractSiteworkFromProjectModels(
       
       if (!isSitework) continue;
       
-      console.log(`[SITEWORK-BIM] Processing sitework drawing: ${model.fileName}`);
+      log.info('Processing sitework drawing', { fileName: model.fileName });
       
       // Extract from layers
       if (metadata.layers && Array.isArray(metadata.layers)) {
@@ -1863,11 +1866,11 @@ export async function extractSiteworkFromProjectModels(
     
     // Consolidate results
     const consolidated = consolidateResults(results);
-    console.log(`[SITEWORK-BIM] Extracted ${consolidated.length} sitework items from DWG models`);
+    log.info('Extracted sitework items from DWG models', { itemCount: consolidated.length });
     
     return consolidated;
   } catch (error) {
-    console.error('[SITEWORK-BIM] Error extracting from project models:', error);
+    log.error('Error extracting from project models', error as Error);
     return [];
   }
 }

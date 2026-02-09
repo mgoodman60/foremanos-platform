@@ -6,6 +6,7 @@
 
 import { callAbacusLLM } from './abacus-llm';
 import { type DrawingScale, type SheetScaleData, extractScalesWithPatterns } from './scale-detector';
+import { logger } from './logger';
 
 export interface ScaleData {
   found: boolean;
@@ -108,7 +109,7 @@ export async function extractScaleData(
       confidence: result.confidence || 0.8,
     };
   } catch (error) {
-    console.error(`Error extracting scale from page ${pageNumber}:`, error);
+    logger.error('SCALE_EXTRACTOR', `Error extracting scale from page ${pageNumber}`, error as Error);
     return {
       found: false,
       hasMultipleScales: false,

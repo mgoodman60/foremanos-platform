@@ -20,25 +20,16 @@ const mocks = vi.hoisted(() => ({
       findFirst: vi.fn(),
     },
   },
-  consoleLog: vi.fn(),
-  consoleError: vi.fn(),
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
-
-// Mock console methods to suppress output in tests
-const originalConsoleLog = console.log;
-const originalConsoleError = console.error;
-
-beforeEach(() => {
-  console.log = mocks.consoleLog;
-  console.error = mocks.consoleError;
-});
-
-afterEach(() => {
-  console.log = originalConsoleLog;
-  console.error = originalConsoleError;
-});
+vi.mock('@/lib/logger', () => ({ logger: mocks.logger }));
 
 // Import after mocks are set up
 import {
@@ -89,8 +80,10 @@ describe('Report Change Log Service', () => {
         },
       });
 
-      expect(mocks.consoleLog).toHaveBeenCalledWith(
-        '[REPORT_CHANGE_LOG] Logged message_added for conversation conv-1'
+      expect(mocks.logger.info).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        'Logged message_added',
+        expect.objectContaining({ conversationId: 'conv-1', changeType: 'message_added' })
       );
     });
 
@@ -274,9 +267,11 @@ describe('Report Change Log Service', () => {
       // Should not throw - errors are caught and logged
       await expect(logReportChange(baseParams)).resolves.toBeUndefined();
 
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[REPORT_CHANGE_LOG_ERROR]',
-        expect.any(Error)
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.any(Error),
+        expect.any(Object)
       );
     });
 
@@ -365,9 +360,11 @@ describe('Report Change Log Service', () => {
 
       await logReportChange(baseParams);
 
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[REPORT_CHANGE_LOG_ERROR]',
-        expect.objectContaining({ message: 'ETIMEDOUT' })
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.objectContaining({ message: 'ETIMEDOUT' }),
+        expect.any(Object)
       );
     });
 
@@ -378,9 +375,11 @@ describe('Report Change Log Service', () => {
 
       await logReportChange(baseParams);
 
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[REPORT_CHANGE_LOG_ERROR]',
-        expect.objectContaining({ message: 'Invalid field type' })
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.objectContaining({ message: 'Invalid field type' }),
+        expect.any(Object)
       );
     });
   });
@@ -492,9 +491,11 @@ describe('Report Change Log Service', () => {
       const result = await getReportChangeLog('conv-1');
 
       expect(result).toEqual([]);
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[GET_REPORT_CHANGE_LOG_ERROR]',
-        expect.any(Error)
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.any(Error),
+        expect.any(Object)
       );
     });
 
@@ -506,9 +507,11 @@ describe('Report Change Log Service', () => {
       const result = await getReportChangeLog('conv-1');
 
       expect(result).toEqual([]);
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[GET_REPORT_CHANGE_LOG_ERROR]',
-        expect.objectContaining({ message: 'ECONNREFUSED' })
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.objectContaining({ message: 'ECONNREFUSED' }),
+        expect.any(Object)
       );
     });
 
@@ -646,9 +649,11 @@ describe('Report Change Log Service', () => {
       const result = await isReportLocked('conv-1');
 
       expect(result).toBe(false);
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[IS_REPORT_LOCKED_ERROR]',
-        expect.any(Error)
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.any(Error),
+        expect.any(Object)
       );
     });
 
@@ -684,9 +689,11 @@ describe('Report Change Log Service', () => {
       const result = await isReportLocked('conv-1');
 
       expect(result).toBe(false);
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[IS_REPORT_LOCKED_ERROR]',
-        expect.objectContaining({ message: 'ETIMEDOUT' })
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.objectContaining({ message: 'ETIMEDOUT' }),
+        expect.any(Object)
       );
     });
 
@@ -816,9 +823,11 @@ describe('Report Change Log Service', () => {
       const result = await canModifyLockedReport('user-1', 'project-1');
 
       expect(result).toBe(false);
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[CAN_MODIFY_LOCKED_REPORT_ERROR]',
-        expect.any(Error)
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.any(Error),
+        expect.any(Object)
       );
     });
 
@@ -899,9 +908,11 @@ describe('Report Change Log Service', () => {
       const result = await canModifyLockedReport('user-1', 'project-1');
 
       expect(result).toBe(false);
-      expect(mocks.consoleError).toHaveBeenCalledWith(
-        '[CAN_MODIFY_LOCKED_REPORT_ERROR]',
-        expect.objectContaining({ message: 'ECONNREFUSED' })
+      expect(mocks.logger.error).toHaveBeenCalledWith(
+        'REPORT_CHANGELOG',
+        expect.stringContaining('Error'),
+        expect.objectContaining({ message: 'ECONNREFUSED' }),
+        expect.any(Object)
       );
     });
 

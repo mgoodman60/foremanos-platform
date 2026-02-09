@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 
 interface BudgetImpact {
   budgetItemId: string;
@@ -191,7 +192,7 @@ export async function previewChangeOrderImpact(
       warnings
     };
   } catch (error) {
-    console.error('[Change Order Impact Preview Error]:', error);
+    logger.error('CHANGE_ORDER', 'Impact preview error', error as Error);
     return null;
   }
 }
@@ -377,7 +378,7 @@ export async function applyChangeOrderToBudget(
       });
     } catch (e) {
       // Non-critical - legacy table sync
-      console.log('[Legacy ChangeOrder sync skipped]:', e);
+      logger.warn('CHANGE_ORDER', 'Legacy ChangeOrder sync skipped', { error: e instanceof Error ? e.message : String(e) });
     }
 
     return {
@@ -388,7 +389,7 @@ export async function applyChangeOrderToBudget(
       newBudgetItemId
     };
   } catch (error) {
-    console.error('[Apply Change Order to Budget Error]:', error);
+    logger.error('CHANGE_ORDER', 'Error applying change order to budget', error as Error);
     return {
       success: false,
       budgetItemsUpdated: 0,
@@ -434,7 +435,7 @@ export async function recalculateBudgetFromChangeOrders(projectId: string): Prom
       pendingValue
     };
   } catch (error) {
-    console.error('[Recalculate Budget from COs Error]:', error);
+    logger.error('CHANGE_ORDER', 'Error recalculating budget from change orders', error as Error);
     return {
       totalChangeOrderValue: 0,
       approvedCount: 0,
@@ -472,7 +473,7 @@ export async function getBudgetWithChangeOrders(projectId: string) {
       variancePercent: coStats.totalChangeOrderValue / (projectBudget.totalBudget - coStats.totalChangeOrderValue) * 100
     };
   } catch (error) {
-    console.error('[Get Budget with COs Error]:', error);
+    logger.error('CHANGE_ORDER', 'Error getting budget with change orders', error as Error);
     return null;
   }
 }

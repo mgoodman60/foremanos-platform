@@ -1,5 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
+
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+}));
+
 import {
   convertPdfToImages,
   convertSinglePage,
@@ -278,18 +291,12 @@ describe('convertPdfToImages', () => {
       }
     });
 
-    it('should log error to console on failure', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('should log error to logger on failure', async () => {
       const invalidBuffer = createInvalidPDFBuffer();
 
       await expect(convertPdfToImages(invalidBuffer)).rejects.toThrow();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[PDF-UTILS] Page extraction error:'),
-        expect.any(String)
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -561,18 +568,12 @@ describe('getPdfPageCount', () => {
       }
     });
 
-    it('should log error to console on failure', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('should log error to logger on failure', async () => {
       const invalidBuffer = createInvalidPDFBuffer();
 
       await expect(getPdfPageCount(invalidBuffer)).rejects.toThrow();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[PDF-UTILS] Error getting page count:'),
-        expect.any(String)
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });

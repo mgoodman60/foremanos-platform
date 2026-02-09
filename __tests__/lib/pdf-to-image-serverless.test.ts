@@ -5,8 +5,17 @@ import { PDFDocument, PDFPage } from 'pdf-lib';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
-// No external dependencies to mock for this module
-// It only uses pdf-lib which we'll use directly for testing
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+}));
 
 // Import functions after mocks
 import {
@@ -329,7 +338,6 @@ describe('PDF-to-Image Serverless - splitPdfIntoPages', () => {
     const pdfBuffer = await createSimplePDF(3);
 
     // Mock console.error to suppress error output
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // This should handle extraction errors and return pages that succeeded
     const pages = await splitPdfIntoPages(pdfBuffer, 1, 3);
@@ -337,7 +345,6 @@ describe('PDF-to-Image Serverless - splitPdfIntoPages', () => {
     // All pages should succeed since they're valid
     expect(pages.length).toBeGreaterThan(0);
 
-    consoleErrorSpy.mockRestore();
   });
 
   it('should return valid base64 for each page', async () => {
@@ -582,46 +589,34 @@ describe('PDF-to-Image Serverless - getBestStrategy', () => {
 
   it('should always return native-pdf strategy (canvas removed Feb 2026)', async () => {
     // Mock console.log to suppress output
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const strategy = await getBestStrategy();
 
     // Canvas was removed, so always returns native-pdf
     expect(strategy).toBe('native-pdf');
 
-    consoleLogSpy.mockRestore();
   });
 
   it('should log strategy selection', async () => {
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
     await getBestStrategy();
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[PDF-SERVERLESS]')
-    );
-
-    consoleLogSpy.mockRestore();
+    expect(mockLogger.info).toHaveBeenCalled();
   });
 
   it('should never return canvas-raster strategy (canvas removed)', async () => {
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const strategy = await getBestStrategy();
 
     expect(strategy).not.toBe('canvas-raster');
 
-    consoleLogSpy.mockRestore();
   });
 
   it('should never return text-only strategy', async () => {
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const strategy = await getBestStrategy();
 
     expect(strategy).not.toBe('text-only');
 
-    consoleLogSpy.mockRestore();
   });
 });
 

@@ -6,6 +6,7 @@
 
 import { RedisCacheAdapter } from './redis-cache-adapter';
 import { connectRedis, isRedisConnected } from './redis-client';
+import { logger } from '@/lib/logger';
 
 interface CacheEntry<T> {
   key: string;
@@ -94,7 +95,7 @@ export class PerformanceCache<T = unknown> {
 
     // Check if we need to evict
     if (size > this.maxSize) {
-      console.warn(`Cache entry too large: ${size} bytes exceeds max ${this.maxSize}`);
+      logger.warn('PERFORMANCE_CACHE', 'Cache entry too large', { size, maxSize: this.maxSize });
       return;
     }
 
@@ -258,12 +259,12 @@ export class HybridCache<T = unknown> {
       if (redis && isRedisConnected()) {
         this.redisCache = new RedisCacheAdapter(prefix, ttl);
         this.useRedis = true;
-        if (!(process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production')) console.log(`✅ ${prefix} cache using Redis backend`);
+        if (!(process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production')) logger.info('PERFORMANCE_CACHE', 'Cache using Redis backend', { prefix });
       } else {
-        if (!(process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production')) console.log(`⚠️  ${prefix} cache using in-memory fallback`);
+        if (!(process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production')) logger.info('PERFORMANCE_CACHE', 'Cache using in-memory fallback', { prefix });
       }
     } catch (error) {
-      if (!(process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production')) console.warn(`⚠️  Redis unavailable for ${prefix}, using in-memory cache:`, error);
+      if (!(process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production')) logger.warn('PERFORMANCE_CACHE', 'Redis unavailable, using in-memory cache', { prefix });
       this.useRedis = false;
     }
   }

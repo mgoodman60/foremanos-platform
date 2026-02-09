@@ -9,6 +9,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import FormData from 'form-data';
 
 interface VirusScanResult {
@@ -43,7 +44,7 @@ export async function scanFileBuffer(
   // Graceful degradation if API key missing
   if (!apiKey) {
     if (skipIfMissingKey) {
-      console.warn('[VIRUS SCAN] VirusTotal API key not configured - skipping scan');
+      logger.warn('VIRUS_SCANNER', 'VirusTotal API key not configured - skipping scan');
       await logSecurityEvent('VIRUS_SCAN_SKIPPED', {
         fileName,
         reason: 'API key not configured',
@@ -59,7 +60,7 @@ export async function scanFileBuffer(
   }
 
   try {
-    console.log(`[VIRUS SCAN] Scanning file: ${fileName} (${(buffer.length / 1024).toFixed(2)}KB)`);
+    logger.info('VIRUS_SCANNER', `Scanning file: ${fileName}`, { sizeKB: (buffer.length / 1024).toFixed(2) });
 
     // Create form data for file upload
     const form = new FormData();
@@ -89,7 +90,7 @@ export async function scanFileBuffer(
 
       // Handle rate limiting
       if (uploadResponse.status === 429) {
-        console.warn('[VIRUS SCAN] Rate limit exceeded - skipping scan');
+        logger.warn('VIRUS_SCANNER', 'Rate limit exceeded - skipping scan');
         await logSecurityEvent('VIRUS_SCAN_RATE_LIMITED', {
           fileName,
           statusCode: uploadResponse.status,
@@ -111,7 +112,7 @@ export async function scanFileBuffer(
       throw new Error('No scan ID returned from VirusTotal');
     }
 
-    console.log(`[VIRUS SCAN] File uploaded to VirusTotal, scan ID: ${scanId}`);
+    logger.info('VIRUS_SCANNER', 'File uploaded to VirusTotal', { scanId });
 
     // Wait a moment for analysis to start
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -119,7 +120,7 @@ export async function scanFileBuffer(
     // Get scan results
     const scanResult = await getScanResult(scanId);
 
-    console.log(`[VIRUS SCAN] Scan completed: ${scanResult.clean ? 'CLEAN' : 'THREAT DETECTED'}`);
+    logger.info('VIRUS_SCANNER', `Scan completed: ${scanResult.clean ? 'CLEAN' : 'THREAT DETECTED'}`);
 
     if (!scanResult.clean) {
       await logSecurityEvent('VIRUS_DETECTED', {
@@ -133,7 +134,7 @@ export async function scanFileBuffer(
   } catch (error: any) {
     // Handle timeout
     if (error.name === 'AbortError') {
-      console.error('[VIRUS SCAN ERROR] Scan timeout:', fileName);
+      logger.error('VIRUS_SCANNER', 'Scan timeout', error as Error, { fileName });
       await logSecurityEvent('VIRUS_SCAN_TIMEOUT', {
         fileName,
         timeout,
@@ -148,7 +149,7 @@ export async function scanFileBuffer(
     }
 
     // Handle other errors
-    console.error('[VIRUS SCAN ERROR]', error);
+    logger.error('VIRUS_SCANNER', 'Scan error', error as Error);
     await logSecurityEvent('VIRUS_SCAN_ERROR', {
       fileName,
       error: error.message,
@@ -213,7 +214,7 @@ export async function getScanResult(scanId: string): Promise<VirusScanResult> {
       timestamp: new Date(),
     };
   } catch (error: any) {
-    console.error('[VIRUS SCAN] Error getting scan result:', error);
+    logger.error('VIRUS_SCANNER', 'Error getting scan result', error as Error);
     throw error;
   }
 }
@@ -226,8 +227,7 @@ export async function logSecurityEvent(
   details: Record<string, any>
 ): Promise<void> {
   try {
-    // Log to console
-    console.log(`[SECURITY EVENT] ${event}:`, details);
+    logger.info('VIRUS_SCANNER', `Security event: ${event}`, details);
 
     // Optionally store in database if you have a SecurityLog model
     // For now, just console logging
@@ -239,7 +239,7 @@ export async function logSecurityEvent(
     //   },
     // });
   } catch (error) {
-    console.error('[SECURITY LOG ERROR]', error);
+    logger.error('VIRUS_SCANNER', 'Security log error', error as Error);
     // Don't throw - logging failure shouldn't break the flow
   }
 }

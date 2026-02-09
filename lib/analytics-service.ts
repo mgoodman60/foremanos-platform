@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { differenceInDays, startOfWeek, subDays, subWeeks, subMonths, format, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
 
 // =============================================
@@ -61,38 +62,38 @@ export async function calculateProjectKPIs(projectId: string): Promise<ProjectKP
       where: { projectId },
       include: { ScheduleTask: true },
     }).catch((err) => {
-      console.error(`[Analytics] Failed to fetch schedule for ${projectId}:`, err);
+      logger.error('ANALYTICS', `Failed to fetch schedule for ${projectId}`, err as Error);
       return null;
     }),
     prisma.projectBudget.findFirst({
       where: { projectId },
       include: { BudgetItem: true },
     }).catch((err) => {
-      console.error(`[Analytics] Failed to fetch budget for ${projectId}:`, err);
+      logger.error('ANALYTICS', `Failed to fetch budget for ${projectId}`, err as Error);
       return null;
     }),
     prisma.document.findMany({
       where: { projectId, deletedAt: null },
     }).catch((err) => {
-      console.error(`[Analytics] Failed to fetch documents for ${projectId}:`, err);
+      logger.error('ANALYTICS', `Failed to fetch documents for ${projectId}`, err as Error);
       return [] as Awaited<ReturnType<typeof prisma.document.findMany>>;
     }),
     prisma.dailyReport.findMany({
       where: { projectId, createdAt: { gte: subDays(now, 30) } },
     }).catch((err) => {
-      console.error(`[Analytics] Failed to fetch daily reports for ${projectId}:`, err);
+      logger.error('ANALYTICS', `Failed to fetch daily reports for ${projectId}`, err as Error);
       return [] as Awaited<ReturnType<typeof prisma.dailyReport.findMany>>;
     }),
     prisma.changeOrder.findMany({
       where: { projectId },
     }).catch((err) => {
-      console.error(`[Analytics] Failed to fetch change orders for ${projectId}:`, err);
+      logger.error('ANALYTICS', `Failed to fetch change orders for ${projectId}`, err as Error);
       return [] as Awaited<ReturnType<typeof prisma.changeOrder.findMany>>;
     }),
     prisma.crew.findMany({
       where: { projectId },
     }).catch((err) => {
-      console.error(`[Analytics] Failed to fetch crews for ${projectId}:`, err);
+      logger.error('ANALYTICS', `Failed to fetch crews for ${projectId}`, err as Error);
       return [] as Awaited<ReturnType<typeof prisma.crew.findMany>>;
     }),
   ]);
@@ -613,7 +614,7 @@ export async function compareProjects(projectIds: string[]): Promise<ProjectComp
   // Calculate KPIs in parallel for all projects
   const kpisPromises = projectIds.map(projectId =>
     calculateProjectKPIs(projectId).catch(error => {
-      console.error(`Error calculating KPIs for project ${projectId}:`, error);
+      logger.error('ANALYTICS', `Error calculating KPIs for project ${projectId}`, error as Error);
       return null;
     })
   );

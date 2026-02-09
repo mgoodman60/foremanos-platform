@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 
 const RETRY_CONFIG = {
   maxRetries: 3,
@@ -39,13 +40,13 @@ export async function withRetry<T>(
         RETRY_CONFIG.maxRetries - retries
       );
       
-      console.warn(`[DB] Retry ${operationName} in ${delay}ms...`);
+      logger.warn('DB_HELPERS', `Retry ${operationName}`, { delay });
       await new Promise(resolve => setTimeout(resolve, delay));
       
       try {
         await prisma.$connect();
       } catch (e) {
-        console.error('[DB] Reconnect failed');
+        logger.error('DB_HELPERS', 'Reconnect failed');
       }
       
       return withRetry(operation, operationName, retries - 1);
@@ -63,7 +64,7 @@ export async function withErrorHandling<T>(
   try {
     return await operation();
   } catch (error) {
-    console.error(`[DB] ${operationName} failed:`, error);
+    logger.error('DB_HELPERS', `${operationName} failed`, error instanceof Error ? error : undefined);
     return defaultValue;
   }
 }

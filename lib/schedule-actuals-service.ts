@@ -5,6 +5,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 
 interface TaskWorkEntry {
   taskId: string;
@@ -91,7 +92,7 @@ export async function extractActualsFromDailyReport(
 
     return { updatedTasks };
   } catch (error) {
-    console.error('[Schedule Actuals] Error extracting actuals:', error);
+    logger.error('SCHEDULE_ACTUALS', 'Error extracting actuals', error instanceof Error ? error : undefined);
     return { updatedTasks };
   }
 }
@@ -133,7 +134,7 @@ export async function setBaselineForSchedule(
 
     return { tasksUpdated: count };
   } catch (error) {
-    console.error('[Schedule Actuals] Error setting baseline:', error);
+    logger.error('SCHEDULE_ACTUALS', 'Error setting baseline', error instanceof Error ? error : undefined);
     return { tasksUpdated: 0 };
   }
 }
@@ -179,7 +180,7 @@ export async function updateTaskActuals(
 
     return false;
   } catch (error) {
-    console.error('[Schedule Actuals] Error updating task actuals:', error);
+    logger.error('SCHEDULE_ACTUALS', 'Error updating task actuals', error instanceof Error ? error : undefined);
     return false;
   }
 }
@@ -266,7 +267,7 @@ export async function backfillActualsFromHistory(
 
     return { reportsProcessed, tasksUpdated };
   } catch (error) {
-    console.error('[Schedule Actuals] Error backfilling actuals:', error);
+    logger.error('SCHEDULE_ACTUALS', 'Error backfilling actuals', error instanceof Error ? error : undefined);
     return { reportsProcessed, tasksUpdated };
   }
 }

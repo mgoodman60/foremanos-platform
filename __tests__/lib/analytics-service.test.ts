@@ -35,7 +35,16 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }));
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 
 // Import after mocking
 import {
@@ -428,8 +437,6 @@ describe('Analytics Service - calculateProjectKPIs()', () => {
     mockPrisma.changeOrder.findMany.mockResolvedValue([]);
     mockPrisma.crew.findMany.mockResolvedValue([]);
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
     const result = await calculateProjectKPIs('project-1');
 
     // Should still return default values without throwing
@@ -439,12 +446,11 @@ describe('Analytics Service - calculateProjectKPIs()', () => {
     expect(result.totalDocuments).toBe(0);
 
     // Should log errors
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[Analytics] Failed to fetch schedule'),
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining('Failed to fetch schedule'),
       expect.any(Error)
     );
-
-    consoleSpy.mockRestore();
   });
 
   it('should calculate safety metrics', async () => {
@@ -1452,16 +1458,13 @@ describe('Analytics Service - compareProjects()', () => {
     mockPrisma.changeOrder.findMany.mockResolvedValue([]);
     mockPrisma.crew.findMany.mockResolvedValue([]);
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
     const result = await compareProjects(['project-1', 'project-2']);
 
     // Should only return the successful project
     expect(result).toHaveLength(1);
     expect(result[0].projectId).toBe('project-1');
 
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 
   it('should calculate schedule performance as percentage', async () => {

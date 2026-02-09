@@ -4,6 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock Prisma with vi.hoisted
 const mockPrisma = vi.hoisted(() => ({
   documentChunk: {
@@ -24,6 +32,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
@@ -220,15 +229,10 @@ describe('Budget Auto-Sync - AI JSON Extraction', () => {
   it('should return empty array when extraction fails', async () => {
     mockOpenAICreate.mockRejectedValue(new Error('API timeout'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const result = await extractBudgetFromContent('Budget content');
 
     expect(result).toEqual([]);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[Budget Auto-Sync] Failed to extract budget:',
-      expect.any(Error)
-    );
-    consoleSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 
   it('should return empty array for invalid JSON response', async () => {
@@ -1044,35 +1048,23 @@ describe('Budget Auto-Sync - Full Pipeline', () => {
     ];
     mockPrisma.materialTakeoff.findMany.mockResolvedValue(takeoffs);
 
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     await processUploadedBudgetDocument('doc-1', 'project-1');
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[Budget Auto-Sync] Processed 1 items, 1 created, 0 updated'
-    );
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[Budget Auto-Sync] Takeoff comparison:')
-    );
+    expect(mockLogger.info).toHaveBeenCalled();
 
-    consoleSpy.mockRestore();
   });
 
   it('should handle processing errors gracefully', async () => {
     mockPrisma.documentChunk.findMany.mockRejectedValue(new Error('Database error'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await processUploadedBudgetDocument('doc-1', 'project-1');
 
     expect(result.success).toBe(false);
     expect(result.itemsProcessed).toBe(0);
     expect(result.message).toBe('Failed to process budget document');
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[Budget Auto-Sync] Error:',
-      expect.any(Error)
-    );
+    expect(mockLogger.error).toHaveBeenCalled();
 
-    consoleSpy.mockRestore();
   });
 });

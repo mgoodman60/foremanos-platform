@@ -1,4 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+}));
+
 import {
   withRetry,
   fetchWithRetry,
@@ -937,11 +950,9 @@ describe('retry-util', () => {
 
     it('should use default operation name', async () => {
       const mockOp = vi.fn().mockResolvedValue('success');
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       await withDatabaseRetry(mockOp);
 
-      consoleSpy.mockRestore();
       expect(mockOp).toHaveBeenCalledTimes(1);
     });
 
@@ -957,19 +968,16 @@ describe('retry-util', () => {
         return Promise.resolve('success');
       });
 
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
       const resultPromise = withDatabaseRetry(mockOp, 'Custom DB Operation');
       await vi.advanceTimersByTimeAsync(1000);
 
       await resultPromise;
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'RETRY_UTIL',
         expect.stringContaining('Custom DB Operation'),
-        expect.any(String)
+        expect.objectContaining({ error: 'Connection lost' })
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should use exponential backoff starting at 1000ms', async () => {

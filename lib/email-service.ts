@@ -131,15 +131,7 @@ export async function sendEmail({
 }
 
 function logEmailToConsole(to: string, subject: string, body: string, type: string) {
-  console.log('\n' + '='.repeat(80));
-  console.log('📧 EMAIL (Console Log)');
-  console.log('='.repeat(80));
-  console.log(`To: ${to}`);
-  console.log(`Subject: ${subject}`);
-  console.log(`Type: ${type}`);
-  console.log('-'.repeat(80));
-  console.log(body);
-  console.log('='.repeat(80) + '\n');
+  log.info('Email logged to console (no Resend API key)', { to, subject, type, body });
 }
 
 /**
@@ -369,7 +361,7 @@ export async function sendUserRequestNotification(
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending user request notification:', error);
+    log.error('Error sending user request notification', error as Error);
     return { success: false };
   }
 }

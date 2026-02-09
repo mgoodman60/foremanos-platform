@@ -13,8 +13,17 @@ vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
 
-// Mock console.error to suppress error logs in tests
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+}));
 
 import {
   updateOnboardingProgress,
@@ -377,8 +386,9 @@ describe('Onboarding Tracker', () => {
         });
 
         expect(result).toBeNull();
-        expect(mockConsoleError).toHaveBeenCalledWith(
-          'Error updating onboarding progress:',
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'ONBOARDING',
+          'Error updating onboarding progress',
           expect.any(Error)
         );
       });
@@ -396,8 +406,9 @@ describe('Onboarding Tracker', () => {
         });
 
         expect(result).toBeNull();
-        expect(mockConsoleError).toHaveBeenCalledWith(
-          'Error updating onboarding progress:',
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'ONBOARDING',
+          'Error updating onboarding progress',
           expect.any(Error)
         );
       });
@@ -432,8 +443,9 @@ describe('Onboarding Tracker', () => {
         });
 
         expect(result).toBeNull();
-        expect(mockConsoleError).toHaveBeenCalledWith(
-          'Error updating onboarding progress:',
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'ONBOARDING',
+          'Error updating onboarding progress',
           expect.any(Error)
         );
       });
@@ -503,7 +515,7 @@ describe('Onboarding Tracker', () => {
       const result = await markDocumentUploaded('user-1', 'project-1');
 
       expect(result).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -534,7 +546,7 @@ describe('Onboarding Tracker', () => {
       const result = await markDocumentProcessed('user-1', 'project-1');
 
       expect(result).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -565,7 +577,7 @@ describe('Onboarding Tracker', () => {
       const result = await markFirstChatStarted('user-1', 'project-1');
 
       expect(result).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -596,7 +608,7 @@ describe('Onboarding Tracker', () => {
       const result = await markFirstReportFinalized('user-1', 'project-1');
 
       expect(result).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -627,7 +639,7 @@ describe('Onboarding Tracker', () => {
       const result = await markScheduleUpdatesReviewed('user-1', 'project-1');
 
       expect(result).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -770,7 +782,7 @@ describe('Onboarding Tracker', () => {
       });
 
       expect(result).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle null values in existing progress', async () => {

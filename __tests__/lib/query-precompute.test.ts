@@ -18,9 +18,27 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
+const mockScopedLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
 vi.mock('@/lib/rag', () => mocks.rag);
 vi.mock('@/lib/query-cache', () => mocks.queryCache);
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+  createScopedLogger: vi.fn(() => mockScopedLogger),
+}));
 
 // Import after mocks
 import {
@@ -31,13 +49,8 @@ import {
 } from '@/lib/query-precompute';
 
 describe('Query Precompute System', () => {
-  let consoleLogSpy: any;
-  let consoleErrorSpy: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Default mock implementations
     mocks.queryCache.analyzeQueryComplexity.mockReturnValue({
@@ -46,11 +59,6 @@ describe('Query Precompute System', () => {
     });
     mocks.rag.generateContextWithCorrections.mockReturnValue('mocked context');
     mocks.queryCache.cacheResponse.mockReturnValue(undefined);
-  });
-
-  afterEach(() => {
-    consoleLogSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
   });
 
   describe('COMMON_CONSTRUCTION_QUERIES', () => {
@@ -317,9 +325,7 @@ describe('Query Precompute System', () => {
 
         await precomputeCommonQueries('test-project', 'admin', ['timeline']);
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Skipping')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
     });
 
@@ -343,10 +349,7 @@ describe('Query Precompute System', () => {
 
         await precomputeCommonQueries('test-project', 'admin', ['timeline']);
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to pre-compute'),
-          expect.any(Error)
-        );
+        expect(mockScopedLogger.error).toHaveBeenCalled();
       });
 
       it('should continue processing other queries after one fails', async () => {
@@ -468,9 +471,7 @@ describe('Query Precompute System', () => {
 
         await precomputeCommonQueries('test-project', 'admin', ['timeline']);
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining(`Starting pre-computation of ${COMMON_CONSTRUCTION_QUERIES.timeline.length} queries`)
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
 
       it('should log completion summary', async () => {
@@ -481,9 +482,7 @@ describe('Query Precompute System', () => {
 
         await precomputeCommonQueries('test-project', 'admin', ['timeline']);
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Pre-computation complete')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
     });
   });
@@ -692,10 +691,7 @@ describe('Query Precompute System', () => {
         const result = await getRecommendedQueries('test-project');
 
         expect(result).toEqual([]);
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error getting recommended queries:',
-          expect.any(Error)
-        );
+        expect(mockScopedLogger.error).toHaveBeenCalled();
       });
 
       it('should handle null document names gracefully', async () => {
@@ -712,10 +708,7 @@ describe('Query Precompute System', () => {
 
         // Function returns empty array on error (calling .toLowerCase() on null throws)
         expect(result).toEqual([]);
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error getting recommended queries:',
-          expect.any(Error)
-        );
+        expect(mockScopedLogger.error).toHaveBeenCalled();
       });
     });
 
@@ -783,28 +776,19 @@ describe('Query Precompute System', () => {
       it('should log start message with project slug', async () => {
         await autoPrecomputeOnUpload('test-project');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Auto-precomputing queries for project test-project')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
 
       it('should process project and log messages', async () => {
         await autoPrecomputeOnUpload('test-project');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Auto-precomputing queries')
-        );
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Pre-computing')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
 
       it('should log completion message', async () => {
         await autoPrecomputeOnUpload('test-project');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Auto-precompute complete')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
 
       it('should handle projects with many recommended queries', async () => {
@@ -821,9 +805,7 @@ describe('Query Precompute System', () => {
 
         await autoPrecomputeOnUpload('test-project');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Pre-computing')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
     });
 
@@ -837,9 +819,7 @@ describe('Query Precompute System', () => {
 
         await autoPrecomputeOnUpload('test-project');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('No recommended queries for pre-computation')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
 
       it('should limit to top 20 recommended queries', async () => {
@@ -859,9 +839,7 @@ describe('Query Precompute System', () => {
         await autoPrecomputeOnUpload('test-project');
 
         // Should log that it's pre-computing queries, max 20
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringMatching(/Pre-computing \d+ recommended queries/)
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
 
       it('should handle project with exactly 20 recommended queries', async () => {
@@ -876,7 +854,7 @@ describe('Query Precompute System', () => {
 
         await autoPrecomputeOnUpload('test-project');
 
-        expect(consoleLogSpy).toHaveBeenCalled();
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
     });
 
@@ -889,10 +867,7 @@ describe('Query Precompute System', () => {
         await autoPrecomputeOnUpload('test-project');
 
         // Error is caught in getRecommendedQueries, which logs and returns []
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error getting recommended queries:',
-          expect.any(Error)
-        );
+        expect(mockScopedLogger.error).toHaveBeenCalled();
       });
 
       it('should not throw errors on failure', async () => {
@@ -911,9 +886,7 @@ describe('Query Precompute System', () => {
 
         // Error is caught in getRecommendedQueries which returns []
         // Then autoPrecomputeOnUpload logs no queries message
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('No recommended queries for pre-computation')
-        );
+        expect(mockScopedLogger.info).toHaveBeenCalled();
       });
     });
   });

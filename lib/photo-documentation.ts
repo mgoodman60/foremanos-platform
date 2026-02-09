@@ -11,6 +11,7 @@
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
 import { generatePresignedUploadUrl, getFileUrl } from './s3';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // INTERFACES
@@ -137,7 +138,7 @@ export async function finalizePhotoUpload(
         },
       });
     } catch (error) {
-      console.error('[PhotoDocumentation] AI analysis failed:', error);
+      logger.error('PHOTO_DOCUMENTATION', 'AI analysis failed', error instanceof Error ? error : undefined);
     }
   }
 
@@ -189,7 +190,7 @@ Return only valid JSON.`;
       detectedItems: [],
     };
   } catch (error) {
-    console.error('[PhotoDocumentation] Analysis error:', error);
+    logger.error('PHOTO_DOCUMENTATION', 'Analysis error', error instanceof Error ? error : undefined);
     return {
       description: 'Photo uploaded successfully',
       tags: ['construction', 'site-photo'],
@@ -374,7 +375,7 @@ export async function deletePhoto(photoId: string): Promise<boolean> {
     });
     return true;
   } catch (error) {
-    console.error('[PhotoDocumentation] Delete failed:', error);
+    logger.error('PHOTO_DOCUMENTATION', 'Delete failed', error instanceof Error ? error : undefined);
     return false;
   }
 }

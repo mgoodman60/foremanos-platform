@@ -6,6 +6,7 @@
 import { prisma } from './db';
 import { BIMExtractionResult, ElementProperty, categorizeElement } from './bim-metadata-extractor';
 import { extractMEPEquipment } from './bim-to-takeoff-service';
+import { logger } from '@/lib/logger';
 
 export interface BIMIndexEntry {
   type: 'element' | 'summary' | 'mep' | 'material' | 'level';
@@ -190,7 +191,7 @@ export async function indexBIMForRAG(
   modelId: string,
   bimData: BIMExtractionResult
 ): Promise<number> {
-  console.log(`[BIM RAG] Indexing BIM data for project ${projectId}`);
+  logger.info('BIM_RAG_INDEXER', `Indexing BIM data for project ${projectId}`);
 
   // Generate index entries
   const entries = generateBIMIndexEntries(bimData);
@@ -264,7 +265,7 @@ export async function indexBIMForRAG(
     },
   });
 
-  console.log(`[BIM RAG] Indexed ${entries.length} chunks for model ${modelId}`);
+  logger.info('BIM_RAG_INDEXER', `Indexed ${entries.length} chunks for model ${modelId}`);
 
   return entries.length;
 }

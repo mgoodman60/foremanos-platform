@@ -1,6 +1,7 @@
 import mammoth from 'mammoth';
 import PDFDocument from 'pdfkit';
 import { Readable } from 'stream';
+import { logger } from './logger';
 
 export async function convertDocxToPdf(docxBuffer: Buffer): Promise<Buffer> {
   try {
@@ -43,7 +44,7 @@ export async function convertDocxToPdf(docxBuffer: Buffer): Promise<Buffer> {
 
     return Buffer.concat(chunks);
   } catch (error) {
-    console.error('Error converting DOCX to PDF:', error);
+    logger.error('DOCX_CONVERTER', 'Error converting DOCX to PDF', error as Error);
     throw new Error('Failed to convert document to PDF');
   }
 }

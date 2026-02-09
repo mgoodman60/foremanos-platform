@@ -8,8 +8,11 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { retrieveRelevantDocuments, generateContextWithCorrections, retrieveRelevantCorrections } from './rag';
 import { cacheResponse, analyzeQueryComplexity } from './query-cache';
+
+const log = createScopedLogger('QUERY_PRECOMPUTE');
 
 /**
  * Common construction queries organized by category
@@ -114,7 +117,7 @@ export async function precomputeCommonQueries(
   
   stats.total = queriesToProcess.length;
   
-  console.log(`🔄 Starting pre-computation of ${stats.total} queries for project ${projectSlug}...`);
+  log.info('Starting pre-computation', { total: stats.total, projectSlug });
   
   // Process each query
   for (const query of queriesToProcess) {
@@ -129,7 +132,7 @@ export async function precomputeCommonQueries(
       
       // Skip if no relevant documents found
       if (chunks.length === 0) {
-        console.log(`⏭️  Skipping "${query}" - no relevant documents`);
+        log.info('Skipping query - no relevant documents', { query });
         stats.skipped++;
         continue;
       }
@@ -158,23 +161,19 @@ export async function precomputeCommonQueries(
         complexityAnalysis.model
       );
       
-      console.log(`✅ Pre-computed "${query}" (${complexityAnalysis.complexity})`);
+      log.info('Pre-computed query', { query, complexity: complexityAnalysis.complexity });
       stats.success++;
       
       // Rate limit to avoid overwhelming the system
       await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
       
     } catch (error) {
-      console.error(`❌ Failed to pre-compute "${query}":`, error);
+      log.error('Failed to pre-compute query', error as Error, { query });
       stats.failed++;
     }
   }
   
-  console.log(`\n📊 Pre-computation complete:`);
-  console.log(`   ✅ Success: ${stats.success}`);
-  console.log(`   ❌ Failed: ${stats.failed}`);
-  console.log(`   ⏭️  Skipped: ${stats.skipped}`);
-  console.log(`   📈 Total: ${stats.total}`);
+  log.info('Pre-computation complete', { success: stats.success, failed: stats.failed, skipped: stats.skipped, total: stats.total });
   
   return stats;
 }
@@ -232,7 +231,7 @@ export async function getRecommendedQueries(
     return [...new Set(recommended)];
     
   } catch (error) {
-    console.error('Error getting recommended queries:', error);
+    log.error('Error getting recommended queries', error as Error);
     return [];
   }
 }
@@ -245,27 +244,27 @@ export async function autoPrecomputeOnUpload(
   projectSlug: string
 ): Promise<void> {
   try {
-    console.log(`🚀 Auto-precomputing queries for project ${projectSlug}...`);
+    log.info('Auto-precomputing queries', { projectSlug });
     
     // Get recommended queries based on documents
     const recommended = await getRecommendedQueries(projectSlug);
     
     if (recommended.length === 0) {
-      console.log('⏭️  No recommended queries for pre-computation');
+      log.info('No recommended queries for pre-computation');
       return;
     }
     
     // Pre-compute top 20 most relevant queries (balance between cache coverage and time)
     const topQueries = recommended.slice(0, 20);
     
-    console.log(`📋 Pre-computing ${topQueries.length} recommended queries...`);
+    log.info('Pre-computing recommended queries', { count: topQueries.length });
     
     // Note: This would need to actually call the API to generate real responses
     // For now, we're just demonstrating the structure
     
-    console.log('✅ Auto-precompute complete');
+    log.info('Auto-precompute complete');
     
   } catch (error) {
-    console.error('Error in auto-precompute:', error);
+    log.error('Error in auto-precompute', error as Error);
   }
 }

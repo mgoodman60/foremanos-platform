@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { getFileUrl } from '@/lib/s3';
 
 interface ExtractedLineItem {
@@ -102,7 +103,7 @@ async function fetchPDFAsBase64(cloudStoragePath: string): Promise<string | null
     const buffer = await response.arrayBuffer();
     return Buffer.from(buffer).toString('base64');
   } catch (error) {
-    console.error('[QuoteAnalysis] Error fetching PDF:', error);
+    logger.error('QUOTE_ANALYSIS', 'Error fetching PDF', error as Error);
     return null;
   }
 }
@@ -115,7 +116,7 @@ export async function analyzeQuotePDF(
   fileName: string
 ): Promise<ExtractedQuoteData | null> {
   try {
-    console.log(`[QuoteAnalysis] Analyzing: ${fileName}`);
+    logger.info('QUOTE_ANALYSIS', `Analyzing quote`, { fileName });
     
     // Fetch PDF as base64
     const pdfBase64 = await fetchPDFAsBase64(cloudStoragePath);
@@ -197,14 +198,14 @@ Be accurate with numbers. If a value is not found, use null. Extract as many lin
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      console.error('[QuoteAnalysis] No response content');
+      logger.error('QUOTE_ANALYSIS', 'No response content');
       return null;
     }
 
     // Parse JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('[QuoteAnalysis] Could not find JSON in response');
+      logger.error('QUOTE_ANALYSIS', 'Could not find JSON in response');
       return null;
     }
 
@@ -215,11 +216,11 @@ Be accurate with numbers. If a value is not found, use null. Extract as many lin
       extracted.tradeType = inferTradeType(extracted.scopeDescription + ' ' + extracted.companyName);
     }
 
-    console.log(`[QuoteAnalysis] Extracted: ${extracted.companyName}, Total: $${extracted.totalAmount}, Confidence: ${extracted.confidence}`);
+    logger.info('QUOTE_ANALYSIS', 'Extraction complete', { companyName: extracted.companyName, totalAmount: extracted.totalAmount, confidence: extracted.confidence });
     
     return extracted;
   } catch (error) {
-    console.error('[QuoteAnalysis] Error analyzing quote:', error);
+    logger.error('QUOTE_ANALYSIS', 'Error analyzing quote', error as Error);
     return null;
   }
 }
@@ -255,12 +256,12 @@ export async function linkOrCreateSubcontractor(
           contactPhone: quoteData.contactPhone,
         },
       });
-      console.log(`[QuoteAnalysis] Created subcontractor: ${subcontractor.companyName}`);
+      logger.info('QUOTE_ANALYSIS', 'Created subcontractor', { companyName: subcontractor.companyName });
     }
 
     return subcontractor?.id || null;
   } catch (error) {
-    console.error('[QuoteAnalysis] Error linking subcontractor:', error);
+    logger.error('QUOTE_ANALYSIS', 'Error linking subcontractor', error as Error);
     return null;
   }
 }
@@ -340,10 +341,10 @@ export async function convertQuoteToBudgetItems(
       data: { totalBudget: newTotal },
     });
 
-    console.log(`[QuoteAnalysis] Created ${createdCount} budget items from quote`);
+    logger.info('QUOTE_ANALYSIS', `Created ${createdCount} budget items from quote`);
     return createdCount;
   } catch (error) {
-    console.error('[QuoteAnalysis] Error converting to budget:', error);
+    logger.error('QUOTE_ANALYSIS', 'Error converting to budget', error as Error);
     return 0;
   }
 }

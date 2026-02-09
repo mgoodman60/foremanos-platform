@@ -9,7 +9,10 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
+
+const log = createScopedLogger('ENHANCED_TAKEOFF');
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client, getBucketConfig } from './aws-config';
 
@@ -106,7 +109,7 @@ export async function extractTakeoffsWithVision(
     includeSchedules = true 
   } = options;
 
-  console.log(`[ENHANCED-TAKEOFF] Starting extraction for document ${documentId}`);
+  log.info('Starting extraction', { documentId });
 
   // Get the document and its chunks
   const document = await prisma.document.findUnique({
@@ -160,7 +163,7 @@ export async function extractTakeoffsWithVision(
     const metadata = chunk.metadata as Record<string, unknown> | null;
     const pageNum = chunk.pageNumber || 0;
 
-    console.log(`[ENHANCED-TAKEOFF] Processing page ${pageNum}`);
+    log.info('Processing page', { pageNum });
 
     let extractionResult: VisionExtractionResult;
     const cloudStoragePath = (chunk as { Document?: { cloud_storage_path?: string | null } }).Document?.cloud_storage_path;
@@ -261,10 +264,12 @@ export async function extractTakeoffsWithVision(
   // Sort by confidence (lowest first for review)
   enhancedItems.sort((a, b) => a.confidence - b.confidence);
 
-  console.log(`[ENHANCED-TAKEOFF] Extracted ${enhancedItems.length} items`);
-  console.log(`[ENHANCED-TAKEOFF] Auto-approved: ${enhancedItems.filter(i => i.verificationStatus === 'auto_approved').length}`);
-  console.log(`[ENHANCED-TAKEOFF] Needs review: ${enhancedItems.filter(i => i.verificationStatus === 'needs_review').length}`);
-  console.log(`[ENHANCED-TAKEOFF] Low confidence: ${enhancedItems.filter(i => i.verificationStatus === 'low_confidence').length}`);
+  log.info('Extraction complete', {
+    totalItems: enhancedItems.length,
+    autoApproved: enhancedItems.filter(i => i.verificationStatus === 'auto_approved').length,
+    needsReview: enhancedItems.filter(i => i.verificationStatus === 'needs_review').length,
+    lowConfidence: enhancedItems.filter(i => i.verificationStatus === 'low_confidence').length,
+  });
 
   return enhancedItems;
 }
@@ -284,7 +289,7 @@ async function extractWithVisionAI(
     const imageBase64 = await fetchImageAsBase64(cloudStoragePath);
     
     if (!imageBase64) {
-      console.log(`[ENHANCED-TAKEOFF] Could not fetch image, falling back to text extraction`);
+      log.info('Could not fetch image, falling back to text extraction');
       return extractFromText(textContent, metadata, scaleInfo, pageNumber);
     }
 
@@ -324,7 +329,7 @@ async function extractWithVisionAI(
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`[ENHANCED-TAKEOFF] Vision extraction failed:`, errorMessage);
+    log.error('Vision extraction failed', new Error(errorMessage));
     return extractFromText(textContent, metadata, scaleInfo, pageNumber);
   }
 }
@@ -564,7 +569,7 @@ Return ONLY the JSON array.`;
       })) : [];
     }
   } catch (error) {
-    console.error('[ENHANCED-TAKEOFF] Text AI extraction failed:', error);
+    log.error('Text AI extraction failed', error as Error);
   }
 
   return [];
@@ -915,7 +920,7 @@ async function fetchImageAsBase64(cloudStoragePath: string): Promise<string | nu
     const buffer = Buffer.concat(chunks);
     return buffer.toString('base64');
   } catch (error) {
-    console.error('[ENHANCED-TAKEOFF] Failed to fetch image:', error);
+    log.error('Failed to fetch image', error as Error);
     return null;
   }
 }
@@ -940,7 +945,7 @@ function parseVisionResponse(response: string, sheetNumber: string, pageNumber: 
       warnings: parsed.warnings || [],
     };
   } catch (error) {
-    console.error('[ENHANCED-TAKEOFF] Failed to parse vision response:', error);
+    log.error('Failed to parse vision response', error as Error);
     return { items: [], warnings: ['Failed to parse AI vision response'] };
   }
 }
@@ -1044,6 +1049,6 @@ export async function saveEnhancedTakeoff(
     });
   }
 
-  console.log(`[ENHANCED-TAKEOFF] Saved takeoff ${takeoff.id} with ${items.length} items`);
+  log.info('Saved takeoff', { takeoffId: takeoff.id, itemCount: items.length });
   return takeoff.id;
 }

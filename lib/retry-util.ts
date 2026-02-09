@@ -5,6 +5,8 @@
  * with increasing delays between attempts.
  */
 
+import { logger } from '@/lib/logger';
+
 export interface RetryOptions {
   maxRetries?: number;
   initialDelay?: number;
@@ -42,7 +44,7 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
     return false;
   },
   onRetry: (attempt, error) => {
-    console.log(`[Retry] Attempt ${attempt} failed:`, error instanceof Error ? error.message : String(error));
+    logger.warn('RETRY_UTIL', `Attempt ${attempt} failed`, { error: error instanceof Error ? error.message : String(error) });
   },
 };
 
@@ -139,7 +141,7 @@ export async function withDatabaseRetry<T>(
         return false;
       },
       onRetry: (attempt, error) => {
-        console.log(`[DB Retry] ${operationName} - Attempt ${attempt} failed:`, error instanceof Error ? error.message : String(error));
+        logger.warn('RETRY_UTIL', `DB retry: ${operationName} - Attempt ${attempt} failed`, { error: error instanceof Error ? error.message : String(error) });
       },
     }
   );

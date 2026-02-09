@@ -12,7 +12,10 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
+
+const log = createScopedLogger('TAKEOFF_EXTRACTOR');
 import {
   extractSiteworkTakeoff,
   classifyDrawingType,
@@ -112,7 +115,7 @@ export async function extractQuantitiesFromDocument(
       throw new Error('Document has not been processed for OCR yet');
     }
 
-    console.log(`[QUANTITY_EXTRACTION] Processing ${existingChunks.length} pages for document ${document.name}`);
+    log.info('Processing pages for document', { pageCount: existingChunks.length, documentName: document.name });
 
     // Create a new material takeoff
     const takeoff = await prisma.materialTakeoff.create({
@@ -127,7 +130,7 @@ export async function extractQuantitiesFromDocument(
       }
     });
 
-    console.log(`[QUANTITY_EXTRACTION] Created takeoff ${takeoff.id}`);
+    log.info('Created takeoff', { takeoffId: takeoff.id });
 
     // Process chunks and extract quantities using enhanced vision prompts
     const allExtractedItems: QuantityExtractionResult[] = [];
@@ -138,14 +141,14 @@ export async function extractQuantitiesFromDocument(
       const pageNum = chunk.pageNumber || 0;
       const metadata = chunk.metadata as any;
 
-      console.log(`[QUANTITY_EXTRACTION] Processing page ${pageNum}...`);
+      log.info('Processing page', { pageNum });
 
       // Extract quantity-specific information from existing metadata
       const extracted = await extractQuantitiesFromChunk(chunk, document.name);
       
       if (extracted.items.length > 0) {
         allExtractedItems.push(extracted);
-        console.log(`[QUANTITY_EXTRACTION] Found ${extracted.items.length} items in ${extracted.category}`);
+        log.info('Found items', { itemCount: extracted.items.length, category: extracted.category });
       }
     }
 
@@ -174,7 +177,7 @@ export async function extractQuantitiesFromDocument(
       }
     }
 
-    console.log(`[QUANTITY_EXTRACTION] Created ${lineItemsCreated.length} line items`);
+    log.info('Created line items', { count: lineItemsCreated.length });
 
     // Update takeoff with totals
     await prisma.materialTakeoff.update({
@@ -194,7 +197,7 @@ export async function extractQuantitiesFromDocument(
       pagesProcessed: existingChunks.length
     };
   } catch (error) {
-    console.error('[QUANTITY_EXTRACTION] Error:', error);
+    log.error('Quantity extraction error', error as Error);
     throw error;
   }
 }
@@ -475,7 +478,7 @@ export async function extractQuantitiesWithAI(
   projectId: string,
   documentId: string
 ): Promise<TakeoffItem[]> {
-  console.log(`[TAKEOFF-AI] Starting AI quantity extraction for document ${documentId}`);
+  log.info('Starting AI quantity extraction', { documentId });
   
   // Get document chunks with their content
   const chunks = await prisma.documentChunk.findMany({
@@ -484,7 +487,7 @@ export async function extractQuantitiesWithAI(
   });
 
   if (chunks.length === 0) {
-    console.log(`[TAKEOFF-AI] No chunks found for document`);
+    log.info('No chunks found for document');
     return [];
   }
 
@@ -539,11 +542,11 @@ Return results as a JSON array.`
     });
 
     const extractedItems = parseAITakeoffResponse(response.content, documentId);
-    console.log(`[TAKEOFF-AI] Extracted ${extractedItems.length} items from document`);
+    log.info('Extracted items from document', { count: extractedItems.length });
     return extractedItems;
     
   } catch (error: any) {
-    console.error(`[TAKEOFF-AI] AI extraction failed:`, error.message);
+    log.error('AI extraction failed', error as Error);
     return [];
   }
 }
@@ -641,7 +644,7 @@ function parseAITakeoffResponse(response: string, documentId: string): TakeoffIt
     // Extract JSON from response
     const jsonMatch = response.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
-      console.log('[TAKEOFF-AI] No JSON array found in response');
+      log.warn('No JSON array found in AI response');
       return [];
     }
 
@@ -666,7 +669,7 @@ function parseAITakeoffResponse(response: string, documentId: string): TakeoffIt
     })).filter((item: TakeoffItem) => item.quantity > 0);
     
   } catch (error: any) {
-    console.error('[TAKEOFF-AI] Failed to parse AI response:', error.message);
+    log.error('Failed to parse AI response', error as Error);
     return [];
   }
 }
@@ -687,7 +690,7 @@ export async function autoExtractTakeoffs(
   projectId: string,
   projectSlug: string
 ): Promise<{ success: boolean; itemCount: number; takeoffId?: string }> {
-  console.log(`[TAKEOFF-AUTO] Starting auto-extraction for project ${projectSlug}`);
+  log.info('Starting auto-extraction', { projectSlug });
   
   try {
     // Get all processed documents for the project
@@ -701,7 +704,7 @@ export async function autoExtractTakeoffs(
     });
 
     if (documents.length === 0) {
-      console.log(`[TAKEOFF-AUTO] No processed documents found`);
+      log.info('No processed documents found');
       return { success: false, itemCount: 0 };
     }
 
@@ -741,7 +744,7 @@ export async function autoExtractTakeoffs(
                            doc.name.toLowerCase().match(/^c[-_]?\d/i); // C-1, C1, C_1 sheet patterns
       
       if (isSiteworkDoc) {
-        console.log(`[TAKEOFF-AUTO] Running enhanced sitework extraction for ${doc.name}`);
+        log.info('Running enhanced sitework extraction', { documentName: doc.name });
         try {
           const siteworkItems = await extractSiteworkTakeoff(doc.id, projectId, {
             includeCAD: true,
@@ -764,13 +767,13 @@ export async function autoExtractTakeoffs(
             });
           }
         } catch (error) {
-          console.error(`[TAKEOFF-AUTO] Sitework extraction failed for ${doc.name}:`, error);
+          log.error(`Sitework extraction failed for ${doc.name}`, error as Error);
         }
       }
     }
 
     if (allItems.length === 0) {
-      console.log(`[TAKEOFF-AUTO] No quantities extracted`);
+      log.info('No quantities extracted');
       return { success: true, itemCount: 0 };
     }
 
@@ -824,11 +827,11 @@ export async function autoExtractTakeoffs(
       });
     }
 
-    console.log(`[TAKEOFF-AUTO] Created ${allItems.length} takeoff items`);
+    log.info('Created takeoff items', { count: allItems.length });
     return { success: true, itemCount: allItems.length, takeoffId: takeoff.id };
     
   } catch (error: any) {
-    console.error(`[TAKEOFF-AUTO] Auto-extraction failed:`, error.message);
+    log.error('Auto-extraction failed', error as Error);
     return { success: false, itemCount: 0 };
   }
 }

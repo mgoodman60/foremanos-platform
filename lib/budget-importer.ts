@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 
 export interface WalkerBudgetLine {
   phaseCode: number;
@@ -117,7 +118,7 @@ export async function importOneSeniorCareBudget(projectSlug: string): Promise<{
       await prisma.budgetItem.deleteMany({
         where: { budgetId: budget.id },
       });
-      console.log(`[Budget Import] Cleared ${budget.BudgetItem.length} existing items`);
+      logger.info('BUDGET_IMPORTER', 'Cleared existing items', { count: budget.BudgetItem.length });
     }
 
     // Create budget if not exists
@@ -165,7 +166,7 @@ export async function importOneSeniorCareBudget(projectSlug: string): Promise<{
       },
     });
 
-    console.log(`[Budget Import] Created ${itemsCreated} items, total: $${totalBudget.toLocaleString()}`);
+    logger.info('BUDGET_IMPORTER', 'Budget import complete', { itemsCreated, totalBudget });
 
     return {
       success: true,
@@ -174,7 +175,7 @@ export async function importOneSeniorCareBudget(projectSlug: string): Promise<{
     };
 
   } catch (error) {
-    console.error('[Budget Import] Error:', error);
+    logger.error('BUDGET_IMPORTER', 'Import error', error instanceof Error ? error : undefined);
     return {
       success: false,
       itemsCreated: 0,

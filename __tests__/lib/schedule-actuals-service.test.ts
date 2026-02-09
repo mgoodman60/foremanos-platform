@@ -17,6 +17,15 @@ const mockPrisma = vi.hoisted(() => ({
 
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 describe('Schedule Actuals Service - extractActualsFromDailyReport', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -457,7 +466,6 @@ describe('Schedule Actuals Service - extractActualsFromDailyReport', () => {
   it('should handle database errors gracefully', async () => {
     const { extractActualsFromDailyReport } = await import('@/lib/schedule-actuals-service');
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockPrisma.schedule.findFirst.mockRejectedValue(new Error('Database connection failed'));
 
@@ -469,12 +477,7 @@ describe('Schedule Actuals Service - extractActualsFromDailyReport', () => {
     );
 
     expect(result.updatedTasks).toEqual([]);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[Schedule Actuals] Error extracting actuals:',
-      expect.any(Error)
-    );
-
-    consoleErrorSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 
   it('should filter task name words by minimum length (>3 chars)', async () => {
@@ -650,19 +653,13 @@ describe('Schedule Actuals Service - setBaselineForSchedule', () => {
   it('should handle database errors gracefully', async () => {
     const { setBaselineForSchedule } = await import('@/lib/schedule-actuals-service');
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockPrisma.scheduleTask.findMany.mockRejectedValue(new Error('Database error'));
 
     const result = await setBaselineForSchedule('schedule-1');
 
     expect(result.tasksUpdated).toBe(0);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[Schedule Actuals] Error setting baseline:',
-      expect.any(Error)
-    );
-
-    consoleErrorSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 
   it('should copy current planned dates to baseline fields', async () => {
@@ -842,19 +839,13 @@ describe('Schedule Actuals Service - updateTaskActuals', () => {
   it('should handle database errors gracefully', async () => {
     const { updateTaskActuals } = await import('@/lib/schedule-actuals-service');
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockPrisma.scheduleTask.update.mockRejectedValue(new Error('Database error'));
 
     const result = await updateTaskActuals('task-1', new Date());
 
     expect(result).toBe(false);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[Schedule Actuals] Error updating task actuals:',
-      expect.any(Error)
-    );
-
-    consoleErrorSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 });
 
@@ -1220,7 +1211,6 @@ describe('Schedule Actuals Service - backfillActualsFromHistory', () => {
   it('should handle database errors gracefully', async () => {
     const { backfillActualsFromHistory } = await import('@/lib/schedule-actuals-service');
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockPrisma.dailyReport.findMany.mockRejectedValue(new Error('Database error'));
 
@@ -1228,18 +1218,12 @@ describe('Schedule Actuals Service - backfillActualsFromHistory', () => {
 
     expect(result.reportsProcessed).toBe(0);
     expect(result.tasksUpdated).toBe(0);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[Schedule Actuals] Error backfilling actuals:',
-      expect.any(Error)
-    );
-
-    consoleErrorSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 
   it('should process reports even if some fail', async () => {
     const { backfillActualsFromHistory } = await import('@/lib/schedule-actuals-service');
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockPrisma.dailyReport.findMany.mockResolvedValue([
       {
@@ -1264,7 +1248,5 @@ describe('Schedule Actuals Service - backfillActualsFromHistory', () => {
 
     // Should still report 1 report processed despite error
     expect(result.reportsProcessed).toBe(1);
-
-    consoleErrorSpy.mockRestore();
   });
 });

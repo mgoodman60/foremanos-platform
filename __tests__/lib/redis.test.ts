@@ -20,18 +20,21 @@ vi.mock('ioredis', () => ({
   default: mockRedisConstructor,
 }));
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 describe('Redis Client', () => {
   let originalEnv: NodeJS.ProcessEnv;
-  let consoleWarnSpy: any;
-  let consoleErrorSpy: any;
-  let consoleLogSpy: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
     originalEnv = { ...process.env };
-    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // Reset module state
     vi.resetModules();
@@ -39,9 +42,6 @@ describe('Redis Client', () => {
 
   afterEach(() => {
     process.env = originalEnv;
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-    consoleLogSpy.mockRestore();
   });
 
   describe('Redis client initialization', () => {
@@ -50,9 +50,7 @@ describe('Redis Client', () => {
 
       const { isRedisAvailable } = await import('@/lib/redis');
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        '⚠️  REDIS_URL not configured - running without Redis caching'
-      );
+      expect(mockLogger.warn).toHaveBeenCalled();
       expect(isRedisAvailable()).toBe(false);
     });
 
@@ -95,10 +93,7 @@ describe('Redis Client', () => {
 
       const { isRedisAvailable } = await import('@/lib/redis');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '❌ Failed to create Redis client:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
       expect(isRedisAvailable()).toBe(false);
     });
   });
@@ -177,10 +172,7 @@ describe('Redis Client', () => {
       const result = await redisModule.getCached('test-key');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis GET error for key test-key:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -247,10 +239,7 @@ describe('Redis Client', () => {
       const result = await redisModule.setCached('test-key', { data: 'value' });
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis SET error for key test-key:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -292,10 +281,7 @@ describe('Redis Client', () => {
       const result = await redisModule.deleteCached('test-key');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis DEL error for key test-key:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -356,10 +342,7 @@ describe('Redis Client', () => {
       const result = await redisModule.clearCachePattern('test:*');
 
       expect(result).toBe(0);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis clear pattern error for test:*:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -434,10 +417,7 @@ describe('Redis Client', () => {
       const result = await redisModule.incrementCounter('counter:test');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis INCR error for key counter:test:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -494,10 +474,7 @@ describe('Redis Client', () => {
       const result = await redisModule.getCounter('counter:test');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis GET counter error for key counter:test:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -519,7 +496,7 @@ describe('Redis Client', () => {
       await redisModule.disconnectRedis();
 
       expect(mockRedisInstance.quit).toHaveBeenCalled();
-      expect(consoleLogSpy).toHaveBeenCalledWith('✅ Redis disconnected gracefully');
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should handle disconnect errors gracefully', async () => {
@@ -529,10 +506,7 @@ describe('Redis Client', () => {
       const redisModule = await import('@/lib/redis');
       await redisModule.disconnectRedis();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '❌ Error disconnecting Redis:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });

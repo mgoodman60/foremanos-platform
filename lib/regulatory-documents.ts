@@ -13,6 +13,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { logger } from './logger';
 import path from 'path';
 import fs from 'fs';
 
@@ -106,7 +107,7 @@ export async function linkRegulatoryDocumentToProject(
   error?: string;
 }> {
   try {
-    console.log(`[RegulatoryCache] Linking ${standard} ${version} to project ${projectId}...`);
+    logger.info('REGULATORY_DOCS', `Linking ${standard} ${version} to project`, { projectId });
 
     // Check if regulatory document exists and is processed
     const regDoc = await prisma.regulatoryDocument.findFirst({
@@ -151,7 +152,7 @@ export async function linkRegulatoryDocumentToProject(
     });
 
     if (existingLink) {
-      console.log(`[RegulatoryCache] Project ${projectId} already has ${standard} ${version} linked`);
+      logger.info('REGULATORY_DOCS', `Project already has ${standard} ${version} linked`, { projectId });
       return {
         success: true,
         chunksLinked: regDoc.DocumentChunk?.length || 0,
@@ -191,16 +192,14 @@ export async function linkRegulatoryDocumentToProject(
 
     await Promise.all(chunkPromises);
 
-    console.log(
-      `[RegulatoryCache] Successfully linked ${regDoc.DocumentChunk?.length || 0} chunks of ${standard} ${version} to project ${projectId}`
-    );
+    logger.info('REGULATORY_DOCS', `Successfully linked chunks to project`, { chunksLinked: regDoc.DocumentChunk?.length || 0, standard, version, projectId });
 
     return {
       success: true,
       chunksLinked: regDoc.DocumentChunk?.length || 0,
     };
   } catch (error) {
-    console.error(`[RegulatoryCache] Error linking regulatory document:`, error);
+    logger.error('REGULATORY_DOCS', 'Error linking regulatory document', error as Error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -262,7 +261,7 @@ export async function ensureRegulatoryDocumentForProject(
       needsProcessing: true,
     };
   } catch (error) {
-    console.error(`[RegulatoryCache] Error ensuring regulatory document:`, error);
+    logger.error('REGULATORY_DOCS', 'Error ensuring regulatory document', error as Error);
     return {
       success: false,
       cached: false,
@@ -450,7 +449,7 @@ export async function initializeRegulatoryDocumentsForProject(
     error?: string;
   }>;
 }> {
-  console.log(`[RegulatoryCache] Initializing regulatory documents for project ${projectId}...`);
+  logger.info('REGULATORY_DOCS', 'Initializing regulatory documents for project', { projectId });
 
   const results = await Promise.all(
     AVAILABLE_REGULATORY_DOCUMENTS.map(async (doc) => {
@@ -483,9 +482,7 @@ export async function initializeRegulatoryDocumentsForProject(
   const linked = results.filter((r) => r.status === 'linked').length;
   const needsProcessing = results.filter((r) => r.status === 'needs_processing').length;
 
-  console.log(
-    `[RegulatoryCache] Initialization complete: ${linked} linked, ${needsProcessing} need processing`
-  );
+  logger.info('REGULATORY_DOCS', 'Initialization complete', { linked, needsProcessing });
 
   return {
     success: true,

@@ -4,6 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock OpenAI client and constructor together
 const { mockOpenAI, MockOpenAIConstructor } = vi.hoisted(() => {
   const mockOpenAI = {
@@ -19,6 +27,7 @@ const { mockOpenAI, MockOpenAIConstructor } = vi.hoisted(() => {
   return { mockOpenAI, MockOpenAIConstructor };
 });
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('openai', () => ({
   default: MockOpenAIConstructor,
 }));
@@ -309,7 +318,6 @@ describe('Contract Extraction Service - extractContractData', () => {
   });
 
   it('should log successful extraction with confidence level', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     mockOpenAI.chat.completions.create.mockResolvedValue({
       choices: [
@@ -323,11 +331,8 @@ describe('Contract Extraction Service - extractContractData', () => {
 
     await extractContractData(createMockPDFBuffer(), 'test-contract.pdf');
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[Contract Extraction] Extracted data from test-contract.pdf with 85% confidence')
-    );
+    expect(mockLogger.info).toHaveBeenCalled();
 
-    consoleSpy.mockRestore();
   });
 });
 

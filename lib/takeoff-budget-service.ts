@@ -12,6 +12,7 @@
 import { prisma } from './db';
 import { TAKEOFF_CATEGORIES } from './takeoff-categories';
 import { getUnitPrice } from './cost-calculation-service';
+import { logger } from './logger';
 
 // Map takeoff categories to CSI budget divisions
 export const CATEGORY_TO_DIVISION: Record<string, { division: string; costCode: string; tradeType: string }> = {
@@ -298,7 +299,7 @@ export async function syncTakeoffToBudget(
 
     result.success = true;
   } catch (error) {
-    console.error('[Takeoff-Budget Sync Error]', error);
+    logger.error('TAKEOFF_BUDGET', 'Takeoff-budget sync error', error as Error);
     result.errors.push(error instanceof Error ? error.message : 'Unknown error');
   }
 

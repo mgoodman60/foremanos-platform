@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit, createRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limiter';
+import { logger } from '@/lib/logger';
 import type { AuthCheckResult, RateLimitCheckResult } from '@/types/chat';
 
 /**
@@ -12,7 +13,7 @@ export async function checkRateLimitMiddleware(
   const rateLimitResult = await checkRateLimit(auth.rateLimitId, RATE_LIMITS.CHAT);
 
   if (!rateLimitResult.success) {
-    console.warn(`[RATE LIMIT EXCEEDED] ${auth.rateLimitId} - ${rateLimitResult.limit} requests/min`);
+    logger.warn('RATE_LIMIT', `Rate limit exceeded for ${auth.rateLimitId}`, { limit: rateLimitResult.limit });
     return {
       allowed: false,
       remaining: rateLimitResult.remaining || 0,
@@ -22,7 +23,7 @@ export async function checkRateLimitMiddleware(
     };
   }
 
-  console.log(`[RATE LIMIT OK] ${auth.rateLimitId} - ${rateLimitResult.remaining}/${rateLimitResult.limit} remaining`);
+  logger.info('RATE_LIMIT', 'Rate limit check passed', { rateLimitId: auth.rateLimitId, remaining: rateLimitResult.remaining, limit: rateLimitResult.limit });
 
   return {
     allowed: true,

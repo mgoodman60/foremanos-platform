@@ -8,6 +8,7 @@
  */
 
 import { PDFDocument } from 'pdf-lib';
+import { logger } from '@/lib/logger';
 
 export type ProcessorType = 'vision-ai' | 'claude-haiku-ocr' | 'basic-ocr';
 
@@ -124,7 +125,7 @@ export async function classifyDocument(
           };
         }
       } catch (error) {
-        console.error('Error analyzing PDF:', error);
+        logger.error('DOC_CLASSIFIER', 'Error analyzing PDF', error as Error);
       }
     }
   }
@@ -264,7 +265,7 @@ async function getPdfPageCount(buffer: Buffer): Promise<number> {
     const pdfDoc = await PDFDocument.load(buffer);
     return pdfDoc.getPageCount();
   } catch (error) {
-    console.error('Error loading PDF:', error);
+    logger.error('DOC_CLASSIFIER', 'Error loading PDF', error as Error);
     throw error;
   }
 }

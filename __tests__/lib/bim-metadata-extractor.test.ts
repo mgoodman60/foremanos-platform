@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock fetch globally
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -9,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   getAccessToken: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/autodesk-auth', () => ({
   getAccessToken: mocks.getAccessToken,
 }));
@@ -810,7 +819,6 @@ describe('BIM Metadata Extractor', () => {
     });
 
     it('should continue processing if one view fails', async () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       // Mock getModelMetadata
       mockFetch.mockResolvedValueOnce({
@@ -851,12 +859,7 @@ describe('BIM Metadata Extractor', () => {
 
       expect(result.totalElements).toBe(1);
       expect(result.viewableGuids).toEqual(['good-guid', 'bad-guid']);
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to get properties for view bad-guid'),
-        expect.any(Error)
-      );
-
-      consoleWarnSpy.mockRestore();
+      expect(mockLogger.warn).toHaveBeenCalled();
     });
 
     it('should deduplicate elements across multiple views', async () => {
@@ -965,7 +968,6 @@ describe('BIM Metadata Extractor', () => {
     });
 
     it('should log extraction progress', async () => {
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -987,18 +989,7 @@ describe('BIM Metadata Extractor', () => {
 
       await extractBIMData('test-urn');
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[BIM Extractor] Starting extraction for URN:',
-        'test-urn'
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[BIM Extractor] View test-guid: 1 elements'
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[BIM Extractor] Extraction complete: 1 elements'
-      );
-
-      consoleLogSpy.mockRestore();
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should handle API authentication errors', async () => {

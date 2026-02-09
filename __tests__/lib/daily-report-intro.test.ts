@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock weather service
 const mocks = vi.hoisted(() => ({
   fetchWeatherForecast: vi.fn(),
@@ -7,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   formatWeatherForIntro: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/weather-service', () => ({
   fetchWeatherForecast: mocks.fetchWeatherForecast,
   forecastsToDailyWeather: mocks.forecastsToDailyWeather,
@@ -322,18 +331,12 @@ describe('Daily Report Intro', () => {
     });
 
     it('should log error when fetch fails', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const error = new Error('API error');
       mocks.fetchWeatherForecast.mockRejectedValue(error);
 
       await getWeatherSummary(38.2085, -85.7585);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[DailyReportIntro] Weather fetch error:',
-        error
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should work with different coordinates', async () => {

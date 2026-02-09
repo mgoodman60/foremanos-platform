@@ -6,10 +6,13 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { getCSIDivisionByNumber, type CSIDivision } from './csi-divisions';
 import { callAbacusLLM } from './abacus-llm';
 import { generateAbbreviationContext } from './construction-abbreviations';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+
+const log = createScopedLogger('ROOM_EXTRACTOR');
 
 interface ExtractedRoom {
   roomNumber: string;
@@ -44,7 +47,7 @@ interface ExtractionResult {
 export async function extractRoomsFromDocuments(
   projectSlug: string
 ): Promise<ExtractionResult> {
-  console.log(`[Room Extractor] Starting extraction for project: ${projectSlug}`);
+  log.info('Starting extraction', { projectSlug });
   
   // Get project
   const project = await prisma.project.findUnique({
@@ -63,11 +66,11 @@ export async function extractRoomsFromDocuments(
   });
 
   if (!project) {
-    console.error(`[Room Extractor] Project not found: ${projectSlug}`);
+    log.error('Project not found', undefined, { projectSlug });
     throw new Error('Project not found');
   }
 
-  console.log(`[Room Extractor] Found project: ${project.name} with ${project.Document.length} processed documents`);
+  log.info('Found project', { projectName: project.name, documentCount: project.Document.length });
 
   // Gather all relevant document chunks
   const relevantChunks: string[] = [];
@@ -77,7 +80,7 @@ export async function extractRoomsFromDocuments(
     const chunks = doc.DocumentChunk || [];
     if (chunks.length > 0) {
       documentsProcessed++;
-      console.log(`[Room Extractor] Processing document: ${doc.name} with ${chunks.length} chunks`);
+      log.info('Processing document', { documentName: doc.name, chunkCount: chunks.length });
       // Add chunks that might contain room or finish information
       for (const chunk of chunks) {
         if (chunk.content && chunk.content.trim().length > 0) {
@@ -87,10 +90,10 @@ export async function extractRoomsFromDocuments(
     }
   }
 
-  console.log(`[Room Extractor] Collected ${relevantChunks.length} chunks from ${documentsProcessed} documents`);
+  log.info('Collected chunks', { chunkCount: relevantChunks.length, documentsProcessed });
 
   if (relevantChunks.length === 0) {
-    console.log('[Room Extractor] No document chunks found');
+    log.info('No document chunks found');
     return {
       rooms: [],
       summary: 'No processed documents with content found. Please upload and process construction documents first.',
@@ -105,7 +108,7 @@ export async function extractRoomsFromDocuments(
       project.name
     );
 
-    console.log(`[Room Extractor] Extraction complete: ${extractedRooms.length} rooms found`);
+    log.info('Extraction complete', { roomCount: extractedRooms.length });
 
     return {
       rooms: extractedRooms,
@@ -113,7 +116,7 @@ export async function extractRoomsFromDocuments(
       documentsProcessed,
     };
   } catch (llmError: any) {
-    console.error(`[Room Extractor] LLM extraction error:`, llmError?.message || llmError);
+    log.error('LLM extraction error', llmError as Error);
     throw new Error(`Failed to extract rooms: ${llmError?.message || 'Unknown error'}`);
   }
 }
@@ -179,13 +182,13 @@ async function extractRoomDataWithLLM(
 ): Promise<ExtractedRoom[]> {
   // STEP 1: Pattern-based extraction to find all room numbers
   const detectedRoomNumbers = extractRoomNumbersWithPatterns(chunks);
-  console.log(`[Room Extractor] Pattern matching found ${detectedRoomNumbers.size} potential room numbers:`, Array.from(detectedRoomNumbers).sort().join(', '));
+  log.info('Pattern matching complete', { potentialRoomNumbers: detectedRoomNumbers.size });
 
   // Combine chunks (increased limit for large construction documents)
   // GPT-4o has 128K context window, so we can handle larger documents
   const MAX_CHUNKS = parseInt(process.env.ROOM_EXTRACTION_MAX_CHUNKS || '150', 10);
   const chunksToUse = chunks.slice(0, MAX_CHUNKS);
-  console.log(`[Room Extractor] Using ${chunksToUse.length} of ${chunks.length} chunks (max: ${MAX_CHUNKS})`);
+  log.info('Using chunks', { used: chunksToUse.length, total: chunks.length, max: MAX_CHUNKS });
   const combinedContent = chunksToUse.join('\n\n---\n\n');
   
   // STEP 2: Include detected room numbers in LLM prompt for validation
@@ -283,8 +286,7 @@ FORMAT REQUIREMENTS:
 Return ONLY the JSON array, no additional text.`;
 
   try {
-    console.log('[Room Extractor] Calling LLM API for room extraction...');
-    console.log(`[Room Extractor] Processing ${chunksToUse.length} chunks with ~${combinedContent.length} characters`);
+    log.info('Calling LLM API for room extraction', { chunks: chunksToUse.length, characters: combinedContent.length });
     
     const llmResponse = await callAbacusLLM([
       {
@@ -302,7 +304,7 @@ Return ONLY the JSON array, no additional text.`;
     });
 
     const content = llmResponse.content;
-    console.log('[Room Extractor] LLM API call successful');
+    log.info('LLM API call successful');
 
     if (!content) {
       throw new Error('No content in LLM response');
@@ -328,19 +330,19 @@ Return ONLY the JSON array, no additional text.`;
     // Try to extract JSON array
     const jsonMatch = jsonContent.match(/\[\s*[\s\S]*\]/);
     if (!jsonMatch) {
-      console.error('[Room Extractor] Could not extract JSON from response:', content.substring(0, 500));
+      log.error('Could not extract JSON from response', undefined, { preview: content.substring(0, 500) });
       return [];
     }
 
     try {
       const extractedRooms = JSON.parse(jsonMatch[0]) as ExtractedRoom[];
-      console.log(`[Room Extractor] Successfully parsed ${extractedRooms.length} rooms from LLM response`);
+      log.info('Successfully parsed rooms from LLM response', { roomCount: extractedRooms.length });
       
       // Filter out rooms with "Unknown" type (safety check)
       const filteredRooms = extractedRooms.filter(room => {
         const type = room.roomType?.trim().toLowerCase();
         if (!type || type === 'unknown' || type === 'n/a' || type === 'na' || type === 'tbd') {
-          console.log(`[Room Extractor] Skipping room ${room.roomNumber} - type is "${room.roomType}"`);
+          log.info('Skipping room with invalid type', { roomNumber: room.roomNumber, roomType: room.roomType });
           return false;
         }
         return true;
@@ -348,25 +350,24 @@ Return ONLY the JSON array, no additional text.`;
       
       const skippedCount = extractedRooms.length - filteredRooms.length;
       if (skippedCount > 0) {
-        console.log(`[Room Extractor] Filtered out ${skippedCount} rooms with unknown/invalid types`);
+        log.info('Filtered out rooms with unknown/invalid types', { skippedCount });
       }
       
       // Log room numbers for debugging
       const roomNumbers = filteredRooms.map(r => r.roomNumber).join(', ');
-      console.log(`[Room Extractor] Final room numbers: ${roomNumbers}`);
+      log.info('Final room numbers', { roomNumbers });
       
       // Log statistics
       const roomsWithFinishes = filteredRooms.filter(r => r.finishItems && r.finishItems.length > 0).length;
-      console.log(`[Room Extractor] ${roomsWithFinishes} rooms have finish data, ${filteredRooms.length - roomsWithFinishes} rooms without finishes`);
+      log.info('Finish data summary', { withFinishes: roomsWithFinishes, withoutFinishes: filteredRooms.length - roomsWithFinishes });
       
       return filteredRooms;
     } catch (parseError) {
-      console.error('[Room Extractor] JSON parse error:', parseError);
-      console.error('[Room Extractor] Attempted to parse:', jsonMatch[0].substring(0, 500));
+      log.error('JSON parse error', parseError as Error, { preview: jsonMatch[0].substring(0, 500) });
       return [];
     }
   } catch (error: any) {
-    console.error('[Room Extractor] Error extracting room data with LLM:', error?.message || error);
+    log.error('Error extracting room data with LLM', error as Error);
     throw new Error(`Failed to extract rooms: ${error?.message || 'Unknown error'}`);
   }
 }

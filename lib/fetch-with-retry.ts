@@ -15,6 +15,8 @@
  * ```
  */
 
+import { logger } from './logger';
+
 export interface FetchError extends Error {
   status?: number;
   response?: Response;
@@ -38,7 +40,7 @@ const DEFAULT_RETRY_OPTIONS: Required<FetchRetryOptions> = {
   maxDelay: 5000,
   backoffFactor: 2,
   onRetry: (attempt: number, error: Error) => {
-    console.log(`[Fetch Retry] Attempt ${attempt} failed:`, error.message);
+    logger.warn('FETCH_RETRY', `Attempt ${attempt} failed: ${error.message}`);
   },
 };
 

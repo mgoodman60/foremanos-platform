@@ -5,6 +5,8 @@
  * Provides consistent error handling across the application.
  */
 
+import { logger } from '@/lib/logger';
+
 export type ErrorCategory =
   | 'network'
   | 'auth'
@@ -407,12 +409,12 @@ export function logError(
 
   switch (severity) {
     case 'info':
-      console.info('[Error Log]', logData);
+      logger.info('ERROR_MESSAGES', message, logData);
       break;
     case 'warn':
-      console.warn('[Error Log]', logData);
+      logger.warn('ERROR_MESSAGES', message, logData);
       break;
     default:
-      console.error('[Error Log]', logData);
+      logger.error('ERROR_MESSAGES', message, error instanceof Error ? error : undefined, logData);
   }
 }

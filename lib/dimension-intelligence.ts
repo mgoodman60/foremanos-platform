@@ -13,6 +13,7 @@
 import { prisma } from './db';
 import { Prisma } from '@prisma/client';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 /**
  * Detect if base64 content is a PDF (starts with %PDF- magic number)
@@ -369,7 +370,7 @@ Return as JSON array:
       boundingBox: d.boundingBox,
     }));
   } catch (error) {
-    console.error('Vision dimension extraction failed:', error);
+    logger.error('DIMENSION_INTELLIGENCE', 'Vision dimension extraction failed', error as Error);
     return [];
   }
 }

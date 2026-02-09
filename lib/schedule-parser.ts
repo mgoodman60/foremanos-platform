@@ -9,6 +9,9 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
+
+const log = createScopedLogger('SCHEDULE_PARSER');
 
 interface ParsedTask {
   taskId: string;         // e.g., "A1010", "T-001"
@@ -57,7 +60,7 @@ export async function parseScheduleFromDocument(
       throw new Error('Only PDF documents are supported for schedule parsing');
     }
 
-    console.log(`[SCHEDULE_PARSER] Parsing schedule from ${document.name}`);
+    log.info('Parsing schedule from document', { documentName: document.name });
 
     // Get existing chunks (OCR data)
     const chunks = await prisma.documentChunk.findMany({
@@ -99,7 +102,7 @@ export async function parseScheduleFromDocument(
       }
     });
 
-    console.log(`[SCHEDULE_PARSER] Created schedule ${schedule.id} with ${tasks.length} tasks`);
+    log.info('Created schedule', { scheduleId: schedule.id, taskCount: tasks.length });
 
     // Create tasks
     const createdTasks = [];
@@ -129,7 +132,7 @@ export async function parseScheduleFromDocument(
 
     const criticalPathTasks = tasks.filter((t: any) => t.isCritical).length;
 
-    console.log(`[SCHEDULE_PARSER] Parsed ${tasks.length} tasks, ${criticalPathTasks} on critical path`);
+    log.info('Parsed tasks', { taskCount: tasks.length, criticalPathTasks });
 
     return {
       scheduleId: schedule.id,
@@ -140,7 +143,7 @@ export async function parseScheduleFromDocument(
       tasks
     };
   } catch (error) {
-    console.error('[SCHEDULE_PARSER] Error:', error);
+    log.error('Schedule parsing error', error as Error);
     throw error;
   }
 }
@@ -367,7 +370,7 @@ export interface ScheduleCandidate {
  */
 export async function findScheduleCandidates(projectId: string): Promise<ScheduleCandidate[]> {
   try {
-    console.log('[SCHEDULE_PARSER] Finding schedule candidates for project:', projectId);
+    log.info('Finding schedule candidates', { projectId });
 
     // Look for documents in the schedule category or with schedule-related names
     const documents = await prisma.document.findMany({
@@ -389,7 +392,7 @@ export async function findScheduleCandidates(projectId: string): Promise<Schedul
     });
 
     if (documents.length === 0) {
-      console.log('[SCHEDULE_PARSER] No schedule documents found');
+      log.info('No schedule documents found');
       return [];
     }
 
@@ -437,10 +440,10 @@ export async function findScheduleCandidates(projectId: string): Promise<Schedul
     // Sort by match score (highest first)
     candidates.sort((a, b) => b.matchScore - a.matchScore);
 
-    console.log(`[SCHEDULE_PARSER] Found ${candidates.length} schedule candidates`);
+    log.info('Found schedule candidates', { count: candidates.length });
     return candidates;
   } catch (error) {
-    console.error('[SCHEDULE_PARSER] Error finding schedule candidates:', error);
+    log.error('Error finding schedule candidates', error as Error);
     return [];
   }
 }
@@ -455,7 +458,7 @@ export async function parseScheduleActivities(
   targetDate: Date
 ): Promise<ScheduledActivity[]> {
   try {
-    console.log('[SCHEDULE_PARSER] Parsing activities for date:', targetDate);
+    log.info('Parsing activities for date', { targetDate });
 
     // Get project
     const project = await prisma.project.findUnique({
@@ -473,7 +476,7 @@ export async function parseScheduleActivities(
     });
 
     if (chunks.length === 0) {
-      console.log('[SCHEDULE_PARSER] No document chunks found');
+      log.info('No document chunks found');
       return [];
     }
 
@@ -497,10 +500,10 @@ export async function parseScheduleActivities(
     // Remove duplicates
     const uniqueActivities = deduplicateActivities(activities);
 
-    console.log(`[SCHEDULE_PARSER] Found ${uniqueActivities.length} activities for ${targetDateStr}`);
+    log.info('Found activities', { count: uniqueActivities.length, date: targetDateStr });
     return uniqueActivities;
   } catch (error) {
-    console.error('[SCHEDULE_PARSER] Error parsing schedule activities:', error);
+    log.error('Error parsing schedule activities', error as Error);
     return [];
   }
 }

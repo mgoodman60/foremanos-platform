@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 
@@ -139,7 +140,7 @@ Return ONLY valid JSON array, no markdown.`;
       quantity: p.quantity || 1,
     }));
   } catch (error) {
-    console.error('[ElectricalExtractor] Panel error:', error);
+    logger.error('ELECTRICAL_PANEL', 'Panel extraction error', error instanceof Error ? error : new Error(String(error)));
     return [];
   }
 }
@@ -213,7 +214,7 @@ Return ONLY valid JSON array, no markdown.`;
       quantity: f.quantity || 1,
     }));
   } catch (error) {
-    console.error('[ElectricalExtractor] Lighting error:', error);
+    logger.error('ELECTRICAL_PANEL', 'Lighting fixture extraction error', error instanceof Error ? error : new Error(String(error)));
     return [];
   }
 }
@@ -245,10 +246,10 @@ export async function extractElectricalSchedule(
       totalLightFixtures: lightingFixtures.reduce((sum, f) => sum + f.quantity, 0),
     };
 
-    console.log(`[ElectricalExtractor] Extracted ${panels.length} panel types, ${lightingFixtures.length} fixture types`);
+    logger.info('ELECTRICAL_PANEL', `Extracted ${panels.length} panel types, ${lightingFixtures.length} fixture types`, { panelCount: panels.length, fixtureCount: lightingFixtures.length });
     return schedule;
   } catch (error) {
-    console.error('[ElectricalExtractor] Error:', error);
+    logger.error('ELECTRICAL_PANEL', 'Error in extractElectricalSchedule', error instanceof Error ? error : new Error(String(error)));
     return null;
   }
 }
@@ -297,7 +298,7 @@ export async function getElectricalContext(projectSlug: string): Promise<string 
 
     return context;
   } catch (error) {
-    console.error('[ElectricalExtractor] Context error:', error);
+    logger.error('ELECTRICAL_PANEL', 'Context error', error instanceof Error ? error : new Error(String(error)));
     return null;
   }
 }

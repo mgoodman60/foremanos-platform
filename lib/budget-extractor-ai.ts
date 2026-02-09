@@ -8,6 +8,7 @@
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
 import { getFileUrl } from './s3';
+import { logger } from '@/lib/logger';
 import fs from 'fs';
 import path from 'path';
 
@@ -91,7 +92,7 @@ async function extractBudgetFromPdfWithVision(
   isPublic: boolean,
   documentName: string
 ): Promise<ExtractedBudgetItem[]> {
-  console.log(`[BUDGET_EXTRACTOR] Extracting budget from PDF: ${documentName}`);
+  logger.info('BUDGET_EXTRACTOR', `Extracting budget from PDF: ${documentName}`);
 
   const fileUrl = await getFileUrl(cloudStoragePath, isPublic);
   if (!fileUrl) {
@@ -162,7 +163,7 @@ Respond with ONLY valid JSON in this exact format:
   // Extract JSON from response
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    console.error('[BUDGET_EXTRACTOR] Failed to parse JSON from response:', content.substring(0, 500));
+    logger.error('BUDGET_EXTRACTOR', 'Failed to parse JSON from response', new Error('JSON parse failed'), { contentPreview: content.substring(0, 500) });
     throw new Error('Failed to parse budget data from document');
   }
 
@@ -188,10 +189,10 @@ Respond with ONLY valid JSON in this exact format:
       unitCost: item.unitCost ? parseFloat(String(item.unitCost)) : undefined,
     }));
 
-    console.log(`[BUDGET_EXTRACTOR] Extracted ${items.length} budget items`);
+    logger.info('BUDGET_EXTRACTOR', `Extracted ${items.length} budget items`, { itemCount: items.length });
     return items;
   } catch (parseError) {
-    console.error('[BUDGET_EXTRACTOR] JSON parse error:', parseError);
+    logger.error('BUDGET_EXTRACTOR', 'JSON parse error', parseError instanceof Error ? parseError : new Error(String(parseError)));
     throw new Error('Failed to parse budget extraction response');
   }
 }
@@ -280,7 +281,7 @@ export async function extractBudgetWithAI(
   projectId: string,
   userId: string
 ): Promise<BudgetExtractionResult> {
-  console.log('[BUDGET_EXTRACTOR] Starting budget extraction');
+  logger.info('BUDGET_EXTRACTOR', 'Starting budget extraction');
 
   const document = await prisma.document.findUnique({
     where: { id: documentId },
@@ -306,7 +307,7 @@ export async function extractBudgetWithAI(
       document.name
     );
   } catch (visionError) {
-    console.log('[BUDGET_EXTRACTOR] Vision extraction failed, trying text chunks:', visionError);
+    logger.warn('BUDGET_EXTRACTOR', 'Vision extraction failed, trying text chunks', { error: visionError });
     extractionMethod = 'text';
   }
 
@@ -332,7 +333,7 @@ export async function extractBudgetWithAI(
   const itemsWithCodes = items.filter(i => i.costCode).length;
   const confidence = Math.min(95, 50 + (itemsWithCodes / items.length) * 30 + (items.length > 5 ? 15 : 0));
 
-  console.log(`[BUDGET_EXTRACTOR] Extraction complete: ${items.length} items, $${totalBudget.toLocaleString()} total`);
+  logger.info('BUDGET_EXTRACTOR', `Extraction complete: ${items.length} items, $${totalBudget.toLocaleString()} total`, { itemCount: items.length, totalBudget });
 
   return {
     totalBudget,
@@ -352,7 +353,7 @@ export async function importBudgetToProject(
   extraction: BudgetExtractionResult,
   userId: string
 ): Promise<{ budgetId: string; itemsCreated: number }> {
-  console.log('[BUDGET_EXTRACTOR] Importing budget to project');
+  logger.info('BUDGET_EXTRACTOR', 'Importing budget to project');
 
   // Check for existing budget
   const existingBudget = await prisma.projectBudget.findUnique({
@@ -407,7 +408,7 @@ export async function importBudgetToProject(
     data: itemsToCreate,
   });
 
-  console.log(`[BUDGET_EXTRACTOR] Imported ${itemsToCreate.length} budget items`);
+  logger.info('BUDGET_EXTRACTOR', `Imported ${itemsToCreate.length} budget items`, { itemCount: itemsToCreate.length });
 
   return {
     budgetId,

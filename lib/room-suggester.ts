@@ -9,6 +9,7 @@ import { prisma } from './db';
 import { suggestRoomsForPhoto } from './photo-analyzer';
 import { callLLM } from '@/lib/llm-providers';
 import { SIMPLE_MODEL } from '@/lib/model-config';
+import { logger } from '@/lib/logger';
 
 export interface RoomSuggestion {
   roomId: string;
@@ -119,7 +120,7 @@ Guidelines:
     // Parse JSON response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('Could not extract JSON from response:', content);
+      logger.error('ROOM_SUGGESTER', 'Could not extract JSON from response', undefined, { content });
       return [];
     }
 
@@ -141,7 +142,7 @@ Guidelines:
 
     return suggestions.slice(0, 3); // Return top 3
   } catch (error) {
-    console.error('Error suggesting rooms from text:', error);
+    logger.error('ROOM_SUGGESTER', 'Error suggesting rooms from text', error as Error);
     return [];
   }
 }

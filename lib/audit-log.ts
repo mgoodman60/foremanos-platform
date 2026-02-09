@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 interface LogActivityParams {
   userId?: string;
@@ -37,8 +38,8 @@ export async function logActivity(params: LogActivityParams) {
       },
     });
   } catch (error) {
-    // Log to console but don't throw - audit logging should never break the app
-    console.error('Failed to log activity:', error);
+    // Log but don't throw - audit logging should never break the app
+    logger.error('AUDIT_LOG', 'Failed to log activity', error instanceof Error ? error : undefined);
   }
 }
 
@@ -64,18 +65,8 @@ export async function createNotification({
       },
     });
 
-    // Also log to console (simulated email)
-    console.log(`
-========================================
-EMAIL NOTIFICATION
-========================================
-To: User ${userId}
-Type: ${type}
-Subject: ${subject}
-Body: ${body}
-========================================
-`);
+    logger.info('AUDIT_LOG', 'Email notification created', { userId, type, subject });
   } catch (error) {
-    console.error('Failed to create notification:', error);
+    logger.error('AUDIT_LOG', 'Failed to create notification', error instanceof Error ? error : undefined);
   }
 }

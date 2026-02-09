@@ -6,6 +6,7 @@
 import { prisma } from './db';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { logger } from '@/lib/logger';
 
 let openaiInstance: OpenAI | null = null;
 
@@ -76,7 +77,7 @@ export async function extractPlumbingFixtures(
     });
 
     if (chunks.length === 0) {
-      console.log('[PlumbingExtractor] No plumbing schedule content found');
+      logger.info('PLUMBING_FIXTURE', 'No plumbing schedule content found');
       return null;
     }
 
@@ -137,10 +138,10 @@ Return ONLY valid JSON array, no markdown.`;
       byType,
     };
 
-    console.log(`[PlumbingExtractor] Extracted ${processedFixtures.length} fixture types, ${schedule.totalFixtures} total fixtures`);
+    logger.info('PLUMBING_FIXTURE', 'Extracted fixture types', { fixtureTypes: processedFixtures.length, totalFixtures: schedule.totalFixtures });
     return schedule;
   } catch (error) {
-    console.error('[PlumbingExtractor] Error:', error);
+    logger.error('PLUMBING_FIXTURE', 'Error extracting fixtures', error instanceof Error ? error : undefined);
     return null;
   }
 }
@@ -186,7 +187,7 @@ export async function getPlumbingFixtureContext(projectSlug: string): Promise<st
 
     return context;
   } catch (error) {
-    console.error('[PlumbingExtractor] Context error:', error);
+    logger.error('PLUMBING_FIXTURE', 'Context error', error instanceof Error ? error : undefined);
     return null;
   }
 }

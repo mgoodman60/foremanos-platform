@@ -64,8 +64,8 @@ export async function processDocumentForSync(
   const confidence = DATA_SOURCE_PRIORITY[sourceType];
   const features = getExtractableFeatures(document.category, document.fileName);
 
-  console.log(`[Auto-Sync] Processing ${document.fileName} (${sourceType}, confidence: ${confidence})`);
-  console.log(`[Auto-Sync] Extractable features: ${features.join(', ')}`);
+  logger.info('AUTO_SYNC', 'Processing document', { fileName: document.fileName, sourceType, confidence });
+  logger.info('AUTO_SYNC', 'Extractable features', { features });
 
   const result: SyncResult = {
     documentId,
@@ -85,21 +85,21 @@ export async function processDocumentForSync(
         await shouldOverrideExisting(projectId, feature, sourceType);
 
       if (!shouldOverride) {
-        console.log(`[Auto-Sync] Skipping ${feature}: existing ${existingSource} (${existingConfidence}) is higher confidence than ${sourceType} (${confidence})`);
+        logger.info('AUTO_SYNC', `Skipping ${feature}: existing source has higher confidence`, { feature, existingSource, existingConfidence, sourceType, confidence });
         result.featuresSkipped.push(`${feature} (existing: ${existingSource})`);
         continue;
       }
 
-      console.log(`[Auto-Sync] Processing ${feature}...`);
+      logger.info('AUTO_SYNC', `Processing feature: ${feature}`);
       
       // Route to appropriate sync service
       const syncResult = await syncFeature(feature, projectId, documentId, sourceType);
       result.results[feature] = syncResult;
       result.featuresProcessed.push(feature);
       
-      console.log(`[Auto-Sync] ${feature} complete:`, syncResult);
+      logger.info('AUTO_SYNC', `${feature} complete`, syncResult);
     } catch (error: unknown) {
-      console.error(`[Auto-Sync] Error processing ${feature}:`, error);
+      logger.error('AUTO_SYNC', `Error processing ${feature}`, error as Error);
       const message = error instanceof Error ? error.message : String(error);
       result.errors.push(`${feature}: ${message}`);
     }
@@ -183,7 +183,7 @@ async function syncFeature(
       return syncMaterialsData(projectId, documentId, sourceType);
 
     default:
-      console.warn(`[Auto-Sync] No sync handler for feature: ${feature}`);
+      logger.warn('AUTO_SYNC', `No sync handler for feature: ${feature}`);
       return { skipped: true, reason: 'No handler' };
   }
 }
@@ -210,7 +210,7 @@ export async function syncAllProjectDocuments(
       const result = await processDocumentForSync(doc.id, projectId);
       results.push(result);
     } catch (error: unknown) {
-      console.error(`[Auto-Sync] Error processing ${doc.fileName}:`, error);
+      logger.error('AUTO_SYNC', `Error processing ${doc.fileName}`, error as Error);
       const message = error instanceof Error ? error.message : String(error);
       results.push({
         documentId: doc.id,
@@ -256,12 +256,12 @@ export async function handleDocumentDeletion(
     });
 
     if (affectedSources.length === 0) {
-      console.log(`[Auto-Sync] No data sources found for deleted document ${documentId}`);
+      logger.info('AUTO_SYNC', 'No data sources found for deleted document', { documentId });
       return result;
     }
 
     result.featuresAffected = affectedSources.map(s => s.featureType);
-    console.log(`[Auto-Sync] Document deletion affects features: ${result.featuresAffected.join(', ')}`);
+    logger.info('AUTO_SYNC', 'Document deletion affects features', { features: result.featuresAffected });
 
     // Get all remaining documents in the project
     const remainingDocs = await prisma.document.findMany({
@@ -291,7 +291,7 @@ export async function handleDocumentDeletion(
 
         if (candidateDocs.length > 0) {
           const nextBest = candidateDocs[0];
-          console.log(`[Auto-Sync] Re-syncing ${feature} from ${nextBest.fileName} (${nextBest.sourceType})`);
+          logger.info('AUTO_SYNC', `Re-syncing ${feature}`, { fileName: nextBest.fileName, sourceType: nextBest.sourceType });
           
           // Delete the old data source first
           await prisma.projectDataSource.deleteMany({
@@ -302,7 +302,7 @@ export async function handleDocumentDeletion(
           await syncFeature(feature, projectId, nextBest.id, nextBest.sourceType);
           result.featuresResynced.push(feature);
         } else {
-          console.log(`[Auto-Sync] No alternative source for ${feature}, clearing data`);
+          logger.info('AUTO_SYNC', `No alternative source for ${feature}, clearing data`);
           
           // Delete the data source and clear related project data
           await prisma.projectDataSource.deleteMany({
@@ -314,15 +314,15 @@ export async function handleDocumentDeletion(
           result.featuresCleared.push(feature);
         }
       } catch (error: unknown) {
-        console.error(`[Auto-Sync] Error re-syncing ${feature}:`, error);
+        logger.error('AUTO_SYNC', `Error re-syncing ${feature}`, error as Error);
         const message = error instanceof Error ? error.message : String(error);
         result.errors.push(`${feature}: ${message}`);
       }
     }
 
-    console.log(`[Auto-Sync] Document deletion complete: resynced ${result.featuresResynced.length}, cleared ${result.featuresCleared.length}`);
+    logger.info('AUTO_SYNC', 'Document deletion complete', { resynced: result.featuresResynced.length, cleared: result.featuresCleared.length });
   } catch (error: unknown) {
-    console.error(`[Auto-Sync] Error handling document deletion:`, error);
+    logger.error('AUTO_SYNC', 'Error handling document deletion', error as Error);
     const message = error instanceof Error ? error.message : String(error);
     result.errors.push(message);
   }
@@ -348,28 +348,28 @@ async function clearFeatureData(projectId: string, feature: FeatureType): Promis
         where: { projectId },
         data: { isActive: false },
       });
-      console.log(`[Auto-Sync] Deactivated schedules for project ${projectId}`);
+      logger.info('AUTO_SYNC', 'Deactivated schedules', { projectId });
       break;
 
     case 'budget':
       // Clear budget actuals but keep structure
       // Note: We don't delete budget items as they may have manual entries
-      console.log(`[Auto-Sync] Budget source removed - manual entries preserved`);
+      logger.info('AUTO_SYNC', 'Budget source removed - manual entries preserved');
       break;
 
     case 'rooms':
       // Clear room count from project if tracked there
-      console.log(`[Auto-Sync] Room data source cleared`);
+      logger.info('AUTO_SYNC', 'Room data source cleared');
       break;
 
     case 'mep_electrical':
     case 'mep_plumbing':
     case 'mep_hvac':
-      console.log(`[Auto-Sync] MEP ${feature} data source cleared`);
+      logger.info('AUTO_SYNC', `MEP ${feature} data source cleared`);
       break;
 
     default:
-      console.log(`[Auto-Sync] Feature ${feature} data source cleared (no additional cleanup needed)`);
+      logger.info('AUTO_SYNC', `Feature ${feature} data source cleared`);
   }
 }
 

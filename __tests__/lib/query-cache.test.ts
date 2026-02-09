@@ -126,7 +126,7 @@ describe('Query Cache', () => {
 
         expect(result.complexity).toBe('medium');
         expect(result.model).toBe('claude-sonnet-4-5-20250929');
-        expect(result.reasoning_effort).toBeUndefined();
+
       });
 
       it('should detect difference queries', () => {

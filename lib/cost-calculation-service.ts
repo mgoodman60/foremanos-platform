@@ -14,6 +14,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { TAKEOFF_CATEGORIES, TakeoffCategory, SubCategory } from './takeoff-categories';
 import { 
   CSI_DIVISION_PRICING, 
@@ -541,7 +542,7 @@ export async function getUnitPrice(
     
     return null;
   } catch (error) {
-    console.error('[CostCalculation] Error getting unit price:', error);
+    logger.error('COST_CALCULATION', 'Error getting unit price', error as Error);
     return null;
   }
 }
@@ -730,7 +731,7 @@ export async function calculateTakeoffCosts(
       byCategory: Array.from(categoryTotals.values()).sort((a, b) => b.totalCost - a.totalCost),
     };
   } catch (error) {
-    console.error('[CostCalculation] Error calculating takeoff costs:', error);
+    logger.error('COST_CALCULATION', 'Error calculating takeoff costs', error as Error);
     throw error;
   }
 }
@@ -799,7 +800,7 @@ export async function applyCalculatedCosts(
     
     return { updated, skipped };
   } catch (error) {
-    console.error('[CostCalculation] Error applying costs:', error);
+    logger.error('COST_CALCULATION', 'Error applying costs', error as Error);
     throw error;
   }
 }
@@ -878,7 +879,7 @@ export async function saveUnitPrice(
       return { id: created.id, created: true };
     }
   } catch (error) {
-    console.error('[CostCalculation] Error saving unit price:', error);
+    logger.error('COST_CALCULATION', 'Error saving unit price', error as Error);
     throw error;
   }
 }
@@ -931,7 +932,7 @@ export async function getProjectUnitPrices(
       isProjectSpecific: p.projectId === projectId,
     }));
   } catch (error) {
-    console.error('[CostCalculation] Error getting project prices:', error);
+    logger.error('COST_CALCULATION', 'Error getting project prices', error as Error);
     return [];
   }
 }

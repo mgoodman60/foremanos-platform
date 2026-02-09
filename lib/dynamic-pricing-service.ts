@@ -13,6 +13,7 @@
 
 import { callAbacusLLM } from './abacus-llm';
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 import { REGIONAL_MULTIPLIERS, CSI_DIVISION_PRICING, UnitPriceEntry } from './construction-pricing-database';
 
 export interface PriceSearchResult {
@@ -205,11 +206,11 @@ Use web search to find the most current pricing data. Consider:
             }
           }
         } catch (parseErr) {
-          console.warn('[DYNAMIC_PRICING] Failed to parse AI response:', parseErr);
+          logger.warn('DYNAMIC_PRICING', 'Failed to parse AI response', { error: String(parseErr) });
         }
       }
     } catch (err) {
-      console.error(`[DYNAMIC_PRICING] Error searching ${category} prices:`, err);
+      logger.error('DYNAMIC_PRICING', 'Error searching prices', err instanceof Error ? err : undefined, { category });
     }
   }
   
@@ -340,7 +341,7 @@ export async function applyPriceUpdates(
       
       updated++;
     } catch (err) {
-      console.error(`[DYNAMIC_PRICING] Failed to update item ${update.itemId}:`, err);
+      logger.error('DYNAMIC_PRICING', 'Failed to update item', err instanceof Error ? err : undefined, { itemId: update.itemId });
       failed++;
     }
   }

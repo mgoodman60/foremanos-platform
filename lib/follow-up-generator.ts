@@ -6,6 +6,7 @@
  */
 
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 interface GenerateFollowUpParams {
   userQuery: string;
@@ -137,7 +138,7 @@ Return ONLY the 3 questions, one per line, no numbering or bullets.`;
     // Fallback to templates
     return templates.slice(0, 3);
   } catch (error) {
-    console.error('[FollowUp] Error generating suggestions:', error);
+    logger.error('FOLLOW_UP', 'Error generating suggestions', error as Error);
     // Return template suggestions on error
     const queryType = detectQueryType(userQuery);
     return (FOLLOW_UP_TEMPLATES[queryType] || FOLLOW_UP_TEMPLATES.general).slice(0, 3);

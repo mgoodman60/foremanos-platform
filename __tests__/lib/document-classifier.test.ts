@@ -4,12 +4,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock pdf-lib for getPdfPageCount function
 const mockPDFDocument = vi.hoisted(() => ({
   load: vi.fn(),
   getPageCount: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('pdf-lib', () => ({
   PDFDocument: mockPDFDocument,
 }));
@@ -831,18 +840,15 @@ describe('Document Classifier - Edge Cases', () => {
   });
 
   it('should log errors when PDF parsing fails but continue classification', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const buffer = Buffer.from('corrupt-data');
 
     mockPDFDocument.load.mockRejectedValue(new Error('PDF parsing failed'));
 
     const result = await classifyDocument('test.pdf', 'pdf', buffer);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error analyzing PDF:', expect.any(Error));
+    expect(mockLogger.error).toHaveBeenCalled();
     expect(result.processorType).toBe('vision-ai');
     expect(result.confidence).toBe(0.60);
-
-    consoleErrorSpy.mockRestore();
   });
 });
 

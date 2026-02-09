@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 
@@ -145,7 +146,7 @@ Return ONLY valid JSON array, no markdown.`;
       quantity: e.quantity || 1,
     }));
   } catch (error) {
-    console.error('[EquipmentExtractor] Equipment error:', error);
+    logger.error('EQUIPMENT_SCHEDULE', 'Equipment extraction error', error instanceof Error ? error : new Error(String(error)));
     return [];
   }
 }
@@ -216,7 +217,7 @@ Return ONLY valid JSON array, no markdown.`;
       quantity: d.quantity || 1,
     }));
   } catch (error) {
-    console.error('[EquipmentExtractor] Diffuser error:', error);
+    logger.error('EQUIPMENT_SCHEDULE', 'Diffuser extraction error', error instanceof Error ? error : new Error(String(error)));
     return [];
   }
 }
@@ -266,10 +267,10 @@ export async function extractEquipmentSchedule(
       byType,
     };
 
-    console.log(`[EquipmentExtractor] Extracted ${equipment.length} equipment types, ${diffusers.length} diffuser types`);
+    logger.info('EQUIPMENT_SCHEDULE', `Extracted ${equipment.length} equipment types, ${diffusers.length} diffuser types`, { equipmentCount: equipment.length, diffuserCount: diffusers.length });
     return schedule;
   } catch (error) {
-    console.error('[EquipmentExtractor] Error:', error);
+    logger.error('EQUIPMENT_SCHEDULE', 'Error in extractEquipmentSchedule', error instanceof Error ? error : new Error(String(error)));
     return null;
   }
 }
@@ -320,7 +321,7 @@ export async function getEquipmentContext(projectSlug: string): Promise<string |
 
     return context;
   } catch (error) {
-    console.error('[EquipmentExtractor] Context error:', error);
+    logger.error('EQUIPMENT_SCHEDULE', 'Context error', error instanceof Error ? error : new Error(String(error)));
     return null;
   }
 }

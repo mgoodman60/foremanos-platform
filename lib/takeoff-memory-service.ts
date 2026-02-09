@@ -12,6 +12,7 @@
 import { prisma } from './db';
 import { MaterialTakeoffStatus } from '@prisma/client';
 import { TAKEOFF_CATEGORIES, TakeoffCategory, SubCategory } from './takeoff-categories';
+import { logger } from '@/lib/logger';
 
 // Query detection keywords organized by intent
 export const TAKEOFF_QUERY_PATTERNS = {
@@ -354,7 +355,7 @@ export async function getTakeoffContext(
     };
     
   } catch (error) {
-    console.error('[TakeoffMemory] Error retrieving takeoff context:', error);
+    logger.error('TAKEOFF_MEMORY', 'Error retrieving takeoff context', error instanceof Error ? error : undefined);
     return null;
   }
 }
@@ -505,7 +506,7 @@ export async function getMaterialQuantity(
     };
     
   } catch (error) {
-    console.error('[TakeoffMemory] Error getting material quantity:', error);
+    logger.error('TAKEOFF_MEMORY', 'Error getting material quantity', error instanceof Error ? error : undefined);
     return null;
   }
 }
@@ -549,7 +550,7 @@ export async function getCategoryTotals(
     }
     
   } catch (error) {
-    console.error('[TakeoffMemory] Error getting category totals:', error);
+    logger.error('TAKEOFF_MEMORY', 'Error getting category totals', error instanceof Error ? error : undefined);
   }
   
   return result;

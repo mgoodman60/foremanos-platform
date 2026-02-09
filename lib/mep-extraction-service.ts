@@ -6,6 +6,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 export interface MEPEquipment {
   id: string;
@@ -235,7 +236,7 @@ export async function extractMEPEquipmentWithAI(
       }
     }
   } catch (error) {
-    console.error('AI MEP extraction error:', error);
+    logger.error('MEP_EXTRACTION', 'AI MEP extraction error', error as Error);
   }
 
   const equipment = Array.from(equipmentMap.values());

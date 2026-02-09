@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { startOfDay, subDays } from 'date-fns';
 
 export interface EVMMetrics {
@@ -408,29 +409,29 @@ async function createAlert(alert: CostAlertInput): Promise<void> {
  */
 export async function syncBudgetFromSchedule(projectId: string, userId?: string): Promise<void> {
   try {
-    console.log(`[BudgetSync] Starting sync for project ${projectId}`);
+    logger.info('BUDGET_SYNC', `Starting sync`, { projectId });
 
     // 1. Calculate fresh EVM metrics
     const metrics = await calculateEVMFromSchedule(projectId);
     if (!metrics) {
-      console.log(`[BudgetSync] No budget or schedule found for project ${projectId}`);
+      logger.info('BUDGET_SYNC', `No budget or schedule found`, { projectId });
       return;
     }
 
     // 2. Record EVM snapshot
     await recordEVMSnapshot(projectId, metrics, userId);
-    console.log(`[BudgetSync] EVM snapshot recorded`);
+    logger.info('BUDGET_SYNC', 'EVM snapshot recorded');
 
     // 3. Generate S-curve data point
     await generateSCurveSnapshot(projectId);
-    console.log(`[BudgetSync] S-curve snapshot generated`);
+    logger.info('BUDGET_SYNC', 'S-curve snapshot generated');
 
     // 4. Check and generate alerts
     const alerts = await checkAndGenerateAlerts(projectId);
-    console.log(`[BudgetSync] Generated ${alerts.length} alerts`);
+    logger.info('BUDGET_SYNC', `Generated ${alerts.length} alerts`);
 
-    console.log(`[BudgetSync] Sync complete for project ${projectId}`);
+    logger.info('BUDGET_SYNC', 'Sync complete', { projectId });
   } catch (error) {
-    console.error(`[BudgetSync] Error syncing budget:`, error);
+    logger.error('BUDGET_SYNC', 'Error syncing budget', error as Error);
   }
 }

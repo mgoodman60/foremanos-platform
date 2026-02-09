@@ -6,8 +6,11 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import crypto from 'crypto';
 import { sendEmail } from './email-service';
+
+const log = createScopedLogger('PROCESSING_LIMITS');
 
 export interface ProcessingLimits {
   dailyPageLimit: number;
@@ -62,11 +65,11 @@ export async function needsProcessing(
   }
 
   if (document.lastProcessedHash === currentHash) {
-    console.log(`[PROCESSING_LIMITS] Document ${documentId} unchanged (hash match), skipping`);
+    log.info('Document unchanged (hash match), skipping', { documentId });
     return false; // Content unchanged
   }
 
-  console.log(`[PROCESSING_LIMITS] Document ${documentId} changed (hash mismatch), needs reprocessing`);
+  log.info('Document changed (hash mismatch), needs reprocessing', { documentId });
   return true;
 }
 
@@ -282,9 +285,9 @@ export async function sendLimitNotification(
       html: message, // HTML version
     });
 
-    console.log(`[PROCESSING_LIMITS] Sent ${type} notification to ${project.User_Project_ownerIdToUser.email}`);
+    log.info('Sent limit notification', { type, email: project.User_Project_ownerIdToUser.email });
   } catch (error) {
-    console.error('[PROCESSING_LIMITS] Failed to send notification:', error);
+    log.error('Failed to send notification', error as Error);
   }
 }
 
@@ -304,7 +307,7 @@ export async function queueDocumentForProcessing(
     },
   });
 
-  console.log(`[PROCESSING_LIMITS] Queued document ${documentId} for batch processing (priority: ${priority})`);
+  log.info('Queued document for batch processing', { documentId, priority });
 }
 
 // ============================================================================
@@ -312,17 +315,17 @@ export async function queueDocumentForProcessing(
 // ============================================================================
 
 export async function canProcessDocument(userId: string, pageCount: number): Promise<{ allowed: boolean; reason?: string }> {
-  console.log('[PROCESSING_LIMITS] canProcessDocument - stub for legacy compatibility');
+  log.info('canProcessDocument - stub for legacy compatibility');
   return { allowed: true };
 }
 
 export async function getRemainingPages(pagesUsed: number, tier?: string): Promise<number> {
-  console.log('[PROCESSING_LIMITS] getRemainingPages - stub for legacy compatibility');
+  log.info('getRemainingPages - stub for legacy compatibility');
   return Math.max(0, 1000 - pagesUsed);
 }
 
 export async function shouldResetQuota(user: any): Promise<boolean> {
-  console.log('[PROCESSING_LIMITS] shouldResetQuota - stub for legacy compatibility');
+  log.info('shouldResetQuota - stub for legacy compatibility');
   return false;
 }
 
@@ -342,7 +345,7 @@ export function calculateProcessingCost(pages: number, processorType: string): n
 
 // Legacy function for user-based limits (old quota system)
 export function getProcessingLimits(tier: string): { monthlyPageLimit: number; pagesPerMonth: number } {
-  console.log('[PROCESSING_LIMITS] getProcessingLimits(tier) - stub for legacy user quota');
+  log.info('getProcessingLimits(tier) - stub for legacy user quota');
   return { monthlyPageLimit: 1000, pagesPerMonth: 1000 };
 }
 
@@ -366,7 +369,7 @@ export async function getQueuedDocuments(
   const availablePages = maxPages || stats.dailyRemaining;
 
   if (availablePages <= 0) {
-    console.log(`[PROCESSING_LIMITS] No pages available for processing (daily limit reached)`);
+    log.info('No pages available for processing (daily limit reached)');
     return [];
   }
 
@@ -415,7 +418,7 @@ export async function getQueuedDocuments(
     }
   }
 
-  console.log(`[PROCESSING_LIMITS] Selected ${selectedDocs.length} documents (est. ${totalPages} pages) for processing`);
+  log.info('Selected documents for processing', { count: selectedDocs.length, estimatedPages: totalPages });
 
   return selectedDocs;
 }

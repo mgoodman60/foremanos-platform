@@ -1,8 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock fetch globally
 const mockFetch = vi.hoisted(() => vi.fn());
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.stubGlobal('fetch', mockFetch);
 
 // Import after mocks are set up
@@ -166,18 +175,13 @@ describe('Autodesk Auth Module', () => {
           text: async () => 'Unauthorized',
         });
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow(
           'Failed to get Autodesk token: 401'
         );
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Autodesk Auth] Token request failed:',
-          'Unauthorized'
-        );
+        expect(mockLogger.error).toHaveBeenCalled();
 
-        consoleSpy.mockRestore();
       });
 
       it('should throw error when API request fails with 403', async () => {
@@ -190,13 +194,11 @@ describe('Autodesk Auth Module', () => {
           text: async () => 'Forbidden',
         });
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow(
           'Failed to get Autodesk token: 403'
         );
 
-        consoleSpy.mockRestore();
       });
 
       it('should throw error when API request fails with 500', async () => {
@@ -209,13 +211,11 @@ describe('Autodesk Auth Module', () => {
           text: async () => 'Internal Server Error',
         });
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow(
           'Failed to get Autodesk token: 500'
         );
 
-        consoleSpy.mockRestore();
       });
 
       it('should handle network errors', async () => {
@@ -225,16 +225,11 @@ describe('Autodesk Auth Module', () => {
         const networkError = new Error('Network timeout');
         mockFetch.mockRejectedValueOnce(networkError);
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow('Network timeout');
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Autodesk Auth] Error getting token:',
-          networkError
-        );
+        expect(mockLogger.error).toHaveBeenCalled();
 
-        consoleSpy.mockRestore();
       });
 
       it('should handle JSON parsing errors', async () => {
@@ -248,11 +243,9 @@ describe('Autodesk Auth Module', () => {
           },
         });
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow('Invalid JSON');
 
-        consoleSpy.mockRestore();
       });
     });
 
@@ -272,7 +265,6 @@ describe('Autodesk Auth Module', () => {
           json: async () => mockToken,
         });
 
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
         const token = await getAccessToken();
 
@@ -294,13 +286,8 @@ describe('Autodesk Auth Module', () => {
           }
         );
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Autodesk Auth] Token obtained, expires in',
-          3600,
-          'seconds'
-        );
+        expect(mockLogger.info).toHaveBeenCalled();
 
-        consoleSpy.mockRestore();
       });
 
       it('should include all required OAuth parameters', async () => {
@@ -593,11 +580,9 @@ describe('Autodesk Auth Module', () => {
           text: async () => 'Invalid credentials',
         });
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow('Failed to get Autodesk token: 401');
 
-        consoleSpy.mockRestore();
       });
 
       it('should handle token response with extra fields', async () => {
@@ -748,17 +733,11 @@ describe('Autodesk Auth Module', () => {
           json: async () => mockToken,
         });
 
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
         await getAccessToken();
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Autodesk Auth] Token obtained, expires in',
-          7200,
-          'seconds'
-        );
+        expect(mockLogger.info).toHaveBeenCalled();
 
-        consoleSpy.mockRestore();
       });
 
       it('should log error details when request fails', async () => {
@@ -771,16 +750,11 @@ describe('Autodesk Auth Module', () => {
           text: async () => 'Bad Request: Invalid scope',
         });
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow('Failed to get Autodesk token: 400');
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Autodesk Auth] Token request failed:',
-          'Bad Request: Invalid scope'
-        );
+        expect(mockLogger.error).toHaveBeenCalled();
 
-        consoleSpy.mockRestore();
       });
 
       it('should log error when exception occurs', async () => {
@@ -790,16 +764,11 @@ describe('Autodesk Auth Module', () => {
         const testError = new Error('Test error');
         mockFetch.mockRejectedValueOnce(testError);
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await expect(getAccessToken()).rejects.toThrow('Test error');
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Autodesk Auth] Error getting token:',
-          testError
-        );
+        expect(mockLogger.error).toHaveBeenCalled();
 
-        consoleSpy.mockRestore();
       });
     });
   });

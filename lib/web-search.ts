@@ -87,7 +87,7 @@ export function shouldUseWebSearch(query: string, documentChunksFound: number): 
   // Check if query is about codes or regulations
   const needsCodeLookup = buildingCodeKeywords.some(keyword => lowerQuery.includes(keyword));
   if (needsCodeLookup) {
-    console.log('🔍 [WEB SEARCH TRIGGERED] Code/regulation query detected');
+    logger.info('WEB_SEARCH', 'Code/regulation query detected, triggering web search');
     return true;
   }
   

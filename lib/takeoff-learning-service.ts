@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 
 // Types
 export interface FeedbackInput {
@@ -106,7 +107,7 @@ export async function submitFeedback(input: FeedbackInput): Promise<{ success: b
 
     return { success: true, feedbackId: feedback.id };
   } catch (error) {
-    console.error('Error submitting feedback:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error submitting feedback', error as Error);
     return { success: false, error: String(error) };
   }
 }
@@ -137,7 +138,7 @@ export async function submitCorrection(input: CorrectionInput): Promise<{ succes
 
     return { success: true, correctionId: correction.id };
   } catch (error) {
-    console.error('Error submitting correction:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error submitting correction', error as Error);
     return { success: false, error: String(error) };
   }
 }
@@ -257,7 +258,7 @@ export async function applyCorrection(
 
     return { success: true };
   } catch (error) {
-    console.error('Error applying correction:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error applying correction', error as Error);
     return { success: false, error: String(error) };
   }
 }
@@ -360,7 +361,7 @@ export async function getLearningStats(takeoffId?: string): Promise<LearningStat
       patternsByCategory,
     };
   } catch (error) {
-    console.error('Error getting learning stats:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error getting learning stats', error as Error);
     return {
       totalFeedback: 0,
       totalCorrections: 0,
@@ -450,7 +451,7 @@ export async function getPendingCorrections(takeoffId?: string): Promise<{
       }),
     };
   } catch (error) {
-    console.error('Error getting pending corrections:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error getting pending corrections', error as Error);
     return { corrections: [] };
   }
 }
@@ -570,7 +571,7 @@ export async function generateSuggestions(takeoffId: string): Promise<Correction
     // Sort by confidence
     return suggestions.sort((a, b) => b.confidence - a.confidence);
   } catch (error) {
-    console.error('Error generating suggestions:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error generating suggestions', error as Error);
     return [];
   }
 }
@@ -598,12 +599,12 @@ async function analyzeFeedbackPatterns(takeoffId: string): Promise<void> {
       for (const [type, count] of Object.entries(feedbackByType)) {
         if (count / totalFeedback >= 0.5) {
           // More than 50% of feedback is of this type
-          console.log(`[Learning] Pattern detected: ${type} appears in ${((count / totalFeedback) * 100).toFixed(0)}% of feedback`);
+          logger.info('TAKEOFF_LEARNING', 'Pattern detected', { type, percentOfFeedback: ((count / totalFeedback) * 100).toFixed(0) });
         }
       }
     }
   } catch (error) {
-    console.error('Error analyzing feedback patterns:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error analyzing feedback patterns', error as Error);
   }
 }
 
@@ -639,7 +640,7 @@ export async function getLearnedPatterns(category?: string): Promise<LearnedPatt
       source: p.source,
     }));
   } catch (error) {
-    console.error('Error getting learned patterns:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error getting learned patterns', error as Error);
     return [];
   }
 }
@@ -652,7 +653,7 @@ export async function deletePattern(patternId: string): Promise<{ success: boole
     });
     return { success: true };
   } catch (error) {
-    console.error('Error deleting pattern:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error deleting pattern', error as Error);
     return { success: false, error: String(error) };
   }
 }
@@ -665,7 +666,7 @@ export async function rejectCorrection(correctionId: string, userId: string): Pr
     });
     return { success: true };
   } catch (error) {
-    console.error('Error rejecting correction:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error rejecting correction', error as Error);
     return { success: false, error: String(error) };
   }
 }
@@ -717,7 +718,7 @@ export async function getRecentFeedback(takeoffId?: string, limit: number = 20):
       submittedBy: userMap.get(f.userId) || 'Unknown',
     }));
   } catch (error) {
-    console.error('Error getting recent feedback:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error getting recent feedback', error as Error);
     return [];
   }
 }
@@ -735,7 +736,7 @@ export async function resolveFeedback(feedbackId: string, userId: string): Promi
     });
     return { success: true };
   } catch (error) {
-    console.error('Error resolving feedback:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error resolving feedback', error as Error);
     return { success: false, error: String(error) };
   }
 }
@@ -791,7 +792,7 @@ export async function bulkApplySuggestions(
 
     return { success: true, appliedCount };
   } catch (error) {
-    console.error('Error bulk applying suggestions:', error);
+    logger.error('TAKEOFF_LEARNING', 'Error bulk applying suggestions', error as Error);
     return { success: false, appliedCount: 0, error: String(error) };
   }
 }

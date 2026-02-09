@@ -9,10 +9,13 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { extractMEPTakeoffs } from './mep-takeoff-generator';
 import { extractFinishSchedules } from './finish-schedule-extractor';
 import { extractSiteworkFromProjectModels } from './sitework-takeoff-extractor';
 import { getProjectSpecificPrice, getConcreteSpecs, getSiteworkSpecs } from './project-specific-pricing';
+
+const log = createScopedLogger('AUTO_TAKEOFF');
 
 // Standard assumptions for calculations
 const DEFAULTS = {
@@ -163,12 +166,12 @@ export async function autoGenerateTakeoffs(
     finishesExtracted: number;
   };
 }> {
-  console.log(`[AUTO-TAKEOFF] Starting automatic takeoff generation for project: ${projectSlug}`);
+  log.info('Starting automatic takeoff generation', { projectSlug });
   
   // Step 1: Extract finish schedules first
-  console.log(`[AUTO-TAKEOFF] Step 1: Extracting finish schedules...`);
+  log.info('Step 1: Extracting finish schedules');
   const finishResult = await extractFinishSchedules(projectSlug);
-  console.log(`[AUTO-TAKEOFF] Finish extraction result: ${finishResult.matchedRooms} rooms matched, ${finishResult.totalFinishes} finishes`);
+  log.info('Finish extraction result', { matchedRooms: finishResult.matchedRooms, totalFinishes: finishResult.totalFinishes });
   
   // Step 2: Get project with rooms and their finish items
   const project = await prisma.project.findUnique({
@@ -206,7 +209,7 @@ export async function autoGenerateTakeoffs(
         extractedBy: 'system',
       },
     });
-    console.log(`[AUTO-TAKEOFF] Created new MaterialTakeoff: ${takeoff.id}`);
+    log.info('Created new MaterialTakeoff', { takeoffId: takeoff.id });
   }
   
   // Step 3: Generate takeoff items for each room with finishes
@@ -222,7 +225,7 @@ export async function autoGenerateTakeoffs(
     const finishItems = room.FinishScheduleItem;
     if (finishItems.length === 0) {
       // No finish items - skip but log
-      console.log(`[AUTO-TAKEOFF] Room ${room.roomNumber} has no finish items, skipping`);
+      log.info('Room has no finish items, skipping', { roomNumber: room.roomNumber });
       continue;
     }
     
@@ -289,7 +292,7 @@ export async function autoGenerateTakeoffs(
             updatedAt: new Date(),
           },
         });
-        console.log(`[AUTO-TAKEOFF] Updated item for Room ${room.roomNumber} ${finish.category}`);
+        log.info('Updated item', { roomNumber: room.roomNumber, category: finish.category });
       } else {
         // Create new
         await prisma.takeoffLineItem.create({
@@ -311,7 +314,7 @@ export async function autoGenerateTakeoffs(
           },
         });
         itemsCreated++;
-        console.log(`[AUTO-TAKEOFF] Created item: ${finish.material} for Room ${room.roomNumber}`);
+        log.info('Created item', { material: finish.material, roomNumber: room.roomNumber });
       }
     }
   }
@@ -334,10 +337,10 @@ export async function autoGenerateTakeoffs(
     },
   });
   
-  console.log(`[AUTO-TAKEOFF] ✅ Interior finishes complete! Processed ${roomsProcessed} rooms, created ${itemsCreated} items`);
+  log.info('Interior finishes complete', { roomsProcessed, itemsCreated });
   
   // Step 5: Extract MEP items (Electrical, Plumbing, HVAC)
-  console.log(`[AUTO-TAKEOFF] Step 5: Extracting MEP (Electrical/Plumbing/HVAC)...`);
+  log.info('Step 5: Extracting MEP (Electrical/Plumbing/HVAC)');
   let mepItemsCreated = 0;
   let mepTotalCost = 0;
   
@@ -345,16 +348,16 @@ export async function autoGenerateTakeoffs(
     const mepResult = await extractMEPTakeoffs(projectSlug);
     mepItemsCreated = mepResult.itemsCreated;
     mepTotalCost = mepResult.totalCost;
-    console.log(`[AUTO-TAKEOFF] MEP extraction: ${mepItemsCreated} items, $${mepTotalCost.toLocaleString()}`);
+    log.info('MEP extraction result', { items: mepItemsCreated, totalCost: mepTotalCost });
   } catch (mepError) {
-    console.error(`[AUTO-TAKEOFF] MEP extraction failed:`, mepError);
+    log.error('MEP extraction failed', mepError as Error);
   }
   
   // Final total including MEP
   const grandTotal = calculatedTotalCost + mepTotalCost;
   const totalItems = itemsCreated + mepItemsCreated;
   
-  console.log(`[AUTO-TAKEOFF] ✅ Complete! Interior: $${calculatedTotalCost.toLocaleString()}, MEP: $${mepTotalCost.toLocaleString()}, Total: $${grandTotal.toLocaleString()}`);
+  log.info('Takeoff generation complete', { interiorCost: calculatedTotalCost, mepCost: mepTotalCost, grandTotal });
   
   return {
     success: true,
@@ -383,7 +386,7 @@ export async function triggerAutoTakeoffAfterProcessing(documentId: string): Pro
     });
     
     if (!document?.Project) {
-      console.log(`[AUTO-TAKEOFF] Document ${documentId} has no project, skipping`);
+      log.info('Document has no project, skipping', { documentId });
       return;
     }
     
@@ -397,18 +400,18 @@ export async function triggerAutoTakeoffAfterProcessing(documentId: string): Pro
                            fileName.includes('finish');
     
     if (!isPlansDocument) {
-      console.log(`[AUTO-TAKEOFF] Document ${document.name} doesn't appear to be plans/drawings, skipping auto-takeoff`);
+      log.info('Document does not appear to be plans/drawings, skipping', { documentName: document.name });
       return;
     }
     
-    console.log(`[AUTO-TAKEOFF] Triggering auto-generation for project: ${projectSlug}`);
+    log.info('Triggering auto-generation', { projectSlug });
     
     // Run auto-generation (non-blocking)
     autoGenerateTakeoffs(projectSlug).catch(err => {
-      console.error(`[AUTO-TAKEOFF] Error generating takeoffs:`, err);
+      log.error('Error generating takeoffs', err as Error);
     });
     
   } catch (error) {
-    console.error(`[AUTO-TAKEOFF] Error in trigger:`, error);
+    log.error('Error in trigger', error as Error);
   }
 }

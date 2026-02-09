@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock dependencies using vi.hoisted pattern
 const mocks = vi.hoisted(() => ({
   prisma: {
@@ -18,6 +26,7 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
 
 // Import after mocking
@@ -31,8 +40,6 @@ import {
 describe('BudgetImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   describe('ONE_SENIOR_CARE_BUDGET', () => {
@@ -188,9 +195,7 @@ describe('BudgetImporter', () => {
       expect(mocks.prisma.budgetItem.deleteMany).toHaveBeenCalledWith({
         where: { budgetId: 'budget-1' },
       });
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Cleared 2 existing items')
-      );
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should not clear items if budget has no existing items', async () => {
@@ -354,9 +359,7 @@ describe('BudgetImporter', () => {
 
       await importOneSeniorCareBudget('one-senior-care');
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringMatching(/Created \d+ items, total: \$[\d,]+/)
-      );
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should handle database errors gracefully', async () => {
@@ -373,10 +376,7 @@ describe('BudgetImporter', () => {
       expect(result.itemsCreated).toBe(0);
       expect(result.totalBudget).toBe(0);
       expect(result.error).toContain('Database connection failed');
-      expect(console.error).toHaveBeenCalledWith(
-        '[Budget Import] Error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle budget creation error', async () => {

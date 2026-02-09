@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // Data source confidence levels (higher = more accurate)
 export const DATA_SOURCE_PRIORITY = {
@@ -216,20 +217,20 @@ export async function routeDocumentToProcessors(
   const features = getExtractableFeatures(category, fileName);
   const triggered: string[] = [];
   
-  console.log(`[Intelligence Router] Document ${fileName} (${sourceType}): Features ${features.join(', ')}`);
+  logger.info('DOC_INTELLIGENCE_ROUTER', 'Routing document', { fileName, sourceType, features: features.join(', ') });
   
   for (const feature of features) {
     const { shouldOverride, existingSource, existingConfidence } = 
       await shouldOverrideExisting(projectId, feature, sourceType);
     
     if (shouldOverride) {
-      console.log(`[Intelligence Router] ${feature}: Upgrading from ${existingSource || 'none'} (${existingConfidence || 0}) to ${sourceType} (${DATA_SOURCE_PRIORITY[sourceType]})`);
+      logger.info('DOC_INTELLIGENCE_ROUTER', 'Upgrading data source', { feature, existingSource: existingSource || 'none', existingConfidence: existingConfidence || 0, newSource: sourceType, newConfidence: DATA_SOURCE_PRIORITY[sourceType] });
       triggered.push(feature);
       
       // Record the new data source
       await recordDataSource(projectId, documentId, feature, sourceType);
     } else {
-      console.log(`[Intelligence Router] ${feature}: Keeping existing ${existingSource} (${existingConfidence}) over ${sourceType} (${DATA_SOURCE_PRIORITY[sourceType]})`);
+      logger.info('DOC_INTELLIGENCE_ROUTER', 'Keeping existing data source', { feature, existingSource, existingConfidence, newSource: sourceType, newConfidence: DATA_SOURCE_PRIORITY[sourceType] });
     }
   }
   

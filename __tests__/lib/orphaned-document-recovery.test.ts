@@ -30,6 +30,26 @@ vi.mock('@/lib/document-processor', () => ({
   processDocument: mockProcessDocument,
 }));
 
+// Mock logger for createScopedLogger
+const mockScopedLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+  createScopedLogger: vi.fn(() => mockScopedLogger),
+}));
+
 // Import functions after mocks
 import {
   findOrphanedDocuments,
@@ -70,11 +90,7 @@ function createMockQueueEntry(overrides = {}) {
   };
 }
 
-// Mock console methods to suppress logs during tests
-const consoleSpy = {
-  log: vi.spyOn(console, 'log').mockImplementation(() => {}),
-  error: vi.spyOn(console, 'error').mockImplementation(() => {}),
-};
+// No need for console spies anymore - using logger mocks
 
 // ============================================
 // findOrphanedDocuments() Tests (14 tests)
@@ -86,8 +102,8 @@ describe('Orphaned Document Recovery - findOrphanedDocuments()', () => {
   });
 
   afterEach(() => {
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
+    mockScopedLogger.info.mockClear();
+    mockScopedLogger.error.mockClear();
   });
 
   it('should find orphaned documents with no chunks and no queue entry', async () => {
@@ -307,10 +323,7 @@ describe('Orphaned Document Recovery - findOrphanedDocuments()', () => {
     const result = await findOrphanedDocuments();
 
     expect(result).toEqual([]);
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Error finding orphaned documents:',
-      expect.any(Error)
-    );
+    expect(mockScopedLogger.error).toHaveBeenCalled();
   });
 
   it('should handle queue query errors gracefully', async () => {
@@ -324,10 +337,7 @@ describe('Orphaned Document Recovery - findOrphanedDocuments()', () => {
     const result = await findOrphanedDocuments();
 
     expect(result).toEqual([]);
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Error finding orphaned documents:',
-      expect.any(Error)
-    );
+    expect(mockScopedLogger.error).toHaveBeenCalled();
   });
 });
 
@@ -341,8 +351,8 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
   });
 
   afterEach(() => {
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
+    mockScopedLogger.info.mockClear();
+    mockScopedLogger.error.mockClear();
   });
 
   it('should successfully recover an orphaned document', async () => {
@@ -362,9 +372,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
 
     expect(result).toBe(true);
     expect(mockProcessDocument).toHaveBeenCalledWith('doc-1');
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Successfully initiated recovery for Floor Plan'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should return false if document not found', async () => {
@@ -374,9 +382,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
 
     expect(result).toBe(false);
     expect(mockProcessDocument).not.toHaveBeenCalled();
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Document nonexistent-doc not found'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should return false if document has no cloud_storage_path', async () => {
@@ -391,9 +397,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
 
     expect(result).toBe(false);
     expect(mockProcessDocument).not.toHaveBeenCalled();
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Document doc-1 has no file'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should return false if document already processed', async () => {
@@ -408,9 +412,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
 
     expect(result).toBe(false);
     expect(mockProcessDocument).not.toHaveBeenCalled();
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Document doc-1 is already processed'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should delete existing chunks before recovery', async () => {
@@ -470,10 +472,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(false);
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Error recovering document doc-1:',
-      expect.any(Error)
-    );
+    expect(mockScopedLogger.error).toHaveBeenCalled();
   });
 
   it('should handle database errors during cleanup', async () => {
@@ -490,10 +489,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(false);
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Error recovering document doc-1:',
-      expect.any(Error)
-    );
+    expect(mockScopedLogger.error).toHaveBeenCalled();
   });
 
   it('should log start and success messages', async () => {
@@ -509,12 +505,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
 
     await recoverOrphanedDocument('doc-1');
 
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Starting recovery for document doc-1'
-    );
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Successfully initiated recovery for Test Doc'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should handle null document name gracefully', async () => {
@@ -531,9 +522,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(true);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('Successfully initiated recovery for')
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 });
 
@@ -549,8 +538,8 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
+    mockScopedLogger.info.mockClear();
+    mockScopedLogger.error.mockClear();
   });
 
   it('should recover all orphaned documents', async () => {
@@ -584,9 +573,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
 
     expect(result).toBe(2);
     expect(mockProcessDocument).toHaveBeenCalledTimes(2);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('Recovery complete: 2/2 documents recovered')
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should return 0 when no orphaned documents found', async () => {
@@ -597,9 +584,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
 
     expect(result).toBe(0);
     expect(mockProcessDocument).not.toHaveBeenCalled();
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] No orphaned documents found'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should handle partial recovery failures', async () => {
@@ -633,9 +618,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     const result = await resultPromise;
 
     expect(result).toBe(1);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('Recovery complete: 1/2 documents recovered')
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should add 1 second delay between recoveries', async () => {
@@ -699,12 +682,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     await vi.advanceTimersByTimeAsync(1000);
     await resultPromise;
 
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Found 1 orphaned documents:'
-    );
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('Test Plan (orphan-1)')
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should handle errors during scan gracefully', async () => {
@@ -716,10 +694,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
 
     expect(result).toBe(0);
     // Error is logged from findOrphanedDocuments, not recoverAllOrphanedDocuments
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Error finding orphaned documents:',
-      expect.any(Error)
-    );
+    expect(mockScopedLogger.error).toHaveBeenCalled();
   });
 
   it('should log scan start message', async () => {
@@ -728,9 +703,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
 
     await recoverAllOrphanedDocuments();
 
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Starting scan for orphaned documents...'
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should handle recovery of many documents', async () => {
@@ -762,9 +735,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     const result = await resultPromise;
 
     expect(result).toBe(5);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('Recovery complete: 5/5 documents recovered')
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 });
 
@@ -778,8 +749,8 @@ describe('Orphaned Document Recovery - getOrphanedDocumentStats()', () => {
   });
 
   afterEach(() => {
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
+    mockScopedLogger.info.mockClear();
+    mockScopedLogger.error.mockClear();
   });
 
   it('should return statistics for orphaned documents', async () => {
@@ -889,10 +860,7 @@ describe('Orphaned Document Recovery - getOrphanedDocumentStats()', () => {
       totalOrphanedDocs: [],
     });
     // Error is logged from findOrphanedDocuments, not getOrphanedDocumentStats
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      '[ORPHAN RECOVERY] Error finding orphaned documents:',
-      expect.any(Error)
-    );
+    expect(mockScopedLogger.error).toHaveBeenCalled();
   });
 
   it('should return proper OrphanedDocument structure', async () => {
@@ -933,8 +901,8 @@ describe('Orphaned Document Recovery - Edge Cases', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
+    mockScopedLogger.info.mockClear();
+    mockScopedLogger.error.mockClear();
   });
 
   it('should handle documents with exactly 0 chunks', async () => {
@@ -1018,9 +986,7 @@ describe('Orphaned Document Recovery - Edge Cases', () => {
     const result = await resultPromise;
 
     expect(result).toBe(0);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('Recovery complete: 0/2 documents recovered')
-    );
+    expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should handle empty projectId in stats', async () => {

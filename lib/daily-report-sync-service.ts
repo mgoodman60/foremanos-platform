@@ -10,6 +10,7 @@
 
 import { prisma } from './db';
 import { getProjectLaborRate } from './project-specific-pricing';
+import { logger } from '@/lib/logger';
 
 // Trade to budget phase mapping
 const TRADE_TO_PHASE_CODE: Record<string, number> = {
@@ -523,7 +524,7 @@ export async function recordWeatherDelay(
         },
       });
     } catch (weatherDayError) {
-      console.error('[DailyReportSync] WeatherDay creation failed:', weatherDayError);
+      logger.error('DAILY_REPORT_SYNC', 'WeatherDay creation failed', weatherDayError as Error);
     }
   }
 
@@ -670,7 +671,7 @@ export async function syncDailyReportFull(
       errors
     };
   } catch (error) {
-    console.error('[DailyReportSync] Error:', error);
+    logger.error('DAILY_REPORT_SYNC', 'Sync error', error as Error);
     return {
       success: false,
       laborSynced: 0,

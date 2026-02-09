@@ -4,11 +4,20 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock autodesk-auth module with vi.hoisted
 const { mockGetAccessToken } = vi.hoisted(() => ({
   mockGetAccessToken: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/autodesk-auth', () => ({
   getAccessToken: mockGetAccessToken,
 }));
@@ -214,9 +223,6 @@ describe('Autodesk OSS - File Upload', () => {
     vi.clearAllMocks();
     mockGetAccessToken.mockResolvedValue('test-access-token');
     global.fetch = vi.fn();
-
-    // Mock console.log to avoid noise in tests
-    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -457,8 +463,6 @@ describe('Autodesk OSS - File Upload', () => {
     });
 
     it('should log progress through the upload steps', async () => {
-      const consoleSpy = vi.spyOn(console, 'log');
-
       const mockBucket = createMockBucketDetails();
       const mockSignedData = {
         uploadKey: 'upload-key',
@@ -474,13 +478,13 @@ describe('Autodesk OSS - File Upload', () => {
 
       await uploadFile('test.pdf', Buffer.from('content'), 'application/pdf');
 
-      // The console.log calls have multiple arguments, so we check each call individually
-      const logCalls = consoleSpy.mock.calls;
+      // The logger.info calls have multiple arguments, so we check each call individually
+      const logCalls = mockLogger.info.mock.calls;
 
-      expect(logCalls.some(call => call[0]?.includes('[Autodesk OSS] Getting signed upload URL'))).toBe(true);
-      expect(logCalls.some(call => call[0]?.includes('[Autodesk OSS] Got signed URL, uploading to S3'))).toBe(true);
-      expect(logCalls.some(call => call[0]?.includes('[Autodesk OSS] S3 upload complete, finalizing'))).toBe(true);
-      expect(logCalls.some(call => call[0]?.includes('[Autodesk OSS] File uploaded successfully'))).toBe(true);
+      expect(logCalls.some(call => call[1]?.includes('Getting signed upload URL'))).toBe(true);
+      expect(logCalls.some(call => call[1]?.includes('Got signed URL, uploading to S3'))).toBe(true);
+      expect(logCalls.some(call => call[1]?.includes('S3 upload complete, finalizing'))).toBe(true);
+      expect(logCalls.some(call => call[1]?.includes('File uploaded successfully'))).toBe(true);
     });
   });
 });

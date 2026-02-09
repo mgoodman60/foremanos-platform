@@ -6,6 +6,9 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
+
+const log = createScopedLogger('MEP_TAKEOFF');
 
 // ============================================================================
 // MEP COMMERCIAL PRICING DATABASE
@@ -1098,7 +1101,7 @@ export async function extractMEPTakeoffs(projectSlug: string): Promise<MEPExtrac
       return result;
     }
 
-    console.log(`[MEP Extraction] Starting for project: ${project.name}`);
+    log.info('Starting MEP extraction', { projectName: project.name });
 
     // Categorize documents by MEP type
     const electricalDocs = project.Document.filter(d => 
@@ -1117,7 +1120,7 @@ export async function extractMEPTakeoffs(projectSlug: string): Promise<MEPExtrac
     );
 
     // Extract from each category
-    console.log(`[MEP Extraction] Found ${electricalDocs.length} electrical docs, ${plumbingDocs.length} plumbing docs, ${hvacDocs.length} HVAC docs`);
+    log.info('Found MEP documents', { electrical: electricalDocs.length, plumbing: plumbingDocs.length, hvac: hvacDocs.length });
 
     // Extract electrical items
     for (const doc of electricalDocs) {
@@ -1144,7 +1147,7 @@ export async function extractMEPTakeoffs(projectSlug: string): Promise<MEPExtrac
 
     // If no items found from documents, use AI-based estimation from room data
     if (result.electrical.length === 0 && result.plumbing.length === 0 && result.hvac.length === 0) {
-      console.log('[MEP Extraction] No items from documents, using room-based estimation');
+      log.info('No items from documents, using room-based estimation');
       const estimatedItems = await estimateMEPFromRooms(project.id);
       result.electrical = estimatedItems.electrical;
       result.plumbing = estimatedItems.plumbing;
@@ -1160,12 +1163,12 @@ export async function extractMEPTakeoffs(projectSlug: string): Promise<MEPExtrac
     result.itemsCreated = createResult.itemsCreated;
     if (createResult.error) result.errors.push(createResult.error);
 
-    console.log(`[MEP Extraction] Complete: ${allItems.length} items, $${result.totalCost.toLocaleString()} total`);
+    log.info('MEP extraction complete', { itemCount: allItems.length, totalCost: result.totalCost });
 
   } catch (error) {
     result.success = false;
     result.errors.push(`MEP extraction failed: ${error}`);
-    console.error('[MEP Extraction] Error:', error);
+    log.error('MEP extraction error', error as Error);
   }
 
   return result;
@@ -1261,7 +1264,7 @@ async function estimateMEPFromRooms(projectId: string): Promise<{
   const totalArea = rooms.reduce((sum, r) => sum + (r.area || 0), 0);
   const roomCount = rooms.length;
 
-  console.log(`[MEP Estimation] ${roomCount} rooms, ${totalArea.toFixed(0)} SF total`);
+  log.info('Room-based MEP estimation', { roomCount, totalAreaSF: Math.round(totalArea) });
 
   // Count room types - broader detection for healthcare facilities
   const toiletCount = rooms.filter(r => 
@@ -1299,7 +1302,7 @@ async function estimateMEPFromRooms(projectId: string): Promise<{
     r.name.toLowerCase().includes('laundry')
   ).length;
 
-  console.log(`[MEP Estimation] Toilets: ${toiletCount}, Kitchens: ${kitchenCount}, Exam: ${examCount}, Mech: ${mechCount}, Laundry: ${laundryCount}`);
+  log.info('Room type counts', { toilets: toiletCount, kitchens: kitchenCount, exam: examCount, mech: mechCount, laundry: laundryCount });
 
   // ============================================================================
   // ELECTRICAL ESTIMATES (Healthcare-appropriate density)
@@ -1939,11 +1942,11 @@ async function createMEPTakeoffRecords(
       data: { totalCost: extraction.totalCost },
     });
 
-    console.log(`[MEP Extraction] Created ${itemsCreated} takeoff line items`);
+    log.info('Created takeoff line items', { itemsCreated });
     return { itemsCreated };
 
   } catch (error) {
-    console.error('[MEP Extraction] Database error:', error);
+    log.error('Database error creating takeoff records', error as Error);
     return { itemsCreated: 0, error: `${error}` };
   }
 }
@@ -1957,14 +1960,14 @@ export async function triggerMEPExtractionAfterProcessing(
 ): Promise<void> {
   // Only trigger for MEP-related documents
   if (documentName.match(/\b(E[\-\s]?\d|P[\-\s]?\d|M[\-\s]?\d|electrical|plumbing|mechanical|hvac)\b/i)) {
-    console.log(`[MEP Extraction] Document "${documentName}" is MEP-related, triggering extraction...`);
+    log.info('MEP-related document detected, triggering extraction', { documentName });
     
     extractMEPTakeoffs(projectSlug)
       .then(result => {
-        console.log(`[MEP Extraction] Complete: $${result.totalCost.toLocaleString()} total`);
+        log.info('MEP extraction triggered complete', { totalCost: result.totalCost });
       })
       .catch(error => {
-        console.error(`[MEP Extraction] Failed:`, error);
+        log.error('MEP extraction trigger failed', error as Error);
       });
   }
 }

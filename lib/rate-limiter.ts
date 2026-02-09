@@ -1,4 +1,5 @@
 import { incrementCounter, getCounter, isRedisAvailable } from './redis';
+import { logger } from '@/lib/logger';
 
 /**
  * Rate Limiter with Redis Integration
@@ -101,13 +102,13 @@ export async function checkRateLimit(
         
         if (!success) {
           result.retryAfter = windowSeconds;
-          console.warn(`[REDIS RATE LIMIT] ${identifier} exceeded limit: ${count}/${maxRequests}`);
+          logger.warn('RATE_LIMITER', 'Redis rate limit exceeded', { identifier, count, maxRequests });
         }
         
         return result;
       }
     } catch (error) {
-      console.error('[REDIS RATE LIMIT ERROR]', error);
+      logger.error('RATE_LIMITER', 'Redis rate limit error', error instanceof Error ? error : undefined);
       // Fall through to in-memory
     }
   }
@@ -145,7 +146,7 @@ export async function checkRateLimit(
   
   if (!success) {
     result.retryAfter = Math.ceil((entry.resetAt - nowMs) / 1000);
-    console.warn(`[IN-MEMORY RATE LIMIT] ${identifier} exceeded limit: ${entry.count}/${maxRequests}`);
+    logger.warn('RATE_LIMITER', 'In-memory rate limit exceeded', { identifier, count: entry.count, maxRequests });
   }
   
   return result;
@@ -180,7 +181,7 @@ export async function getRateLimitStatus(
         };
       }
     } catch (error) {
-      console.error('[REDIS RATE LIMIT STATUS ERROR]', error);
+      logger.error('RATE_LIMITER', 'Redis rate limit status error', error instanceof Error ? error : undefined);
     }
   }
   

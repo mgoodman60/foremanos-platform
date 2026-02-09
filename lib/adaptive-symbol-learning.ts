@@ -12,6 +12,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -114,7 +115,7 @@ export async function detectUnknownSymbol(
       suggestion: analysis.suggestion
     };
   } catch (error) {
-    console.error('Symbol detection error:', error);
+    logger.error('ADAPTIVE_SYMBOL', 'Symbol detection error', error as Error);
     return {
       symbol: null,
       confidence: 0,
@@ -189,7 +190,7 @@ async function findSimilarSymbol(
 
     return null;
   } catch (error) {
-    console.error('Error finding similar symbol:', error);
+    logger.error('ADAPTIVE_SYMBOL', 'Error finding similar symbol', error as Error);
     return null;
   }
 }
@@ -263,7 +264,7 @@ Respond in JSON format:
       };
     }
   } catch (error) {
-    console.error('AI analysis error:', error);
+    logger.error('ADAPTIVE_SYMBOL', 'AI analysis error', error as Error);
     return {
       name: description,
       category: 'custom',
@@ -500,7 +501,7 @@ export async function applyLearningFeedback(
 
     return true;
   } catch (error) {
-    console.error('Error applying learning feedback:', error);
+    logger.error('ADAPTIVE_SYMBOL', 'Error applying learning feedback', error as Error);
     return false;
   }
 }
@@ -564,7 +565,7 @@ export async function learnFromDocuments(
       confidence: avgConfidence
     };
   } catch (error) {
-    console.error('Error learning from documents:', error);
+    logger.error('ADAPTIVE_SYMBOL', 'Error learning from documents', error as Error);
     return {
       symbolsLearned: 0,
       categoriesFound: new Set(),

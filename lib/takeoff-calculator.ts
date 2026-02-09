@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // Standard assumptions for calculations
 const DEFAULTS = {
@@ -185,7 +186,7 @@ export async function calculateProjectTakeoffs(
       const calculations = await calculateRoomTakeoffs(room.id, ceilingHeight);
       allCalculations.push(...calculations);
     } catch (error) {
-      console.error(`Failed to calculate takeoffs for room ${room.roomNumber}:`, error);
+      logger.error('TAKEOFF_CALCULATOR', `Failed to calculate takeoffs for room ${room.roomNumber}`, error as Error);
       // Continue with other rooms
     }
   }

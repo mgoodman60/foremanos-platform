@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { TAKEOFF_CATEGORIES, getLaborHoursPerUnit } from './takeoff-categories';
 
 // Types
@@ -148,7 +149,7 @@ async function getProjectCrewSize(projectId: string, tradeType: string): Promise
 
       projectCrewSizeCache.set(cacheKey, avgCrewSizes);
     } catch (error) {
-      console.error('[Labor Schedule] Error loading project crew sizes:', error);
+      logger.error('LABOR_SCHEDULE', 'Error loading project crew sizes', error as Error);
       projectCrewSizeCache.set(cacheKey, new Map());
     }
   }

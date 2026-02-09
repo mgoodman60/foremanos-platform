@@ -14,6 +14,7 @@
 import { prisma } from './db';
 import type { GridCoordinate } from './spatial-correlation';
 import { parseGridCoordinate, calculateGridDistance } from './spatial-correlation';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -174,7 +175,7 @@ export async function extractMEPElements(
 
     return elements;
   } catch (error) {
-    console.error('Error extracting MEP elements:', error);
+    logger.error('MEP_PATH_TRACER', 'Error extracting MEP elements', error instanceof Error ? error : undefined);
     return [];
   }
 }
@@ -519,7 +520,7 @@ export async function tracePath(
       confidence: 0.8
     };
   } catch (error) {
-    console.error('Error tracing path:', error);
+    logger.error('MEP_PATH_TRACER', 'Error tracing path', error instanceof Error ? error : undefined);
     return null;
   }
 }
@@ -802,7 +803,7 @@ export async function detectAllClashes(
 
     return clashes;
   } catch (error) {
-    console.error('Error detecting clashes:', error);
+    logger.error('MEP_PATH_TRACER', 'Error detecting clashes', error instanceof Error ? error : undefined);
     return [];
   }
 }
@@ -860,7 +861,7 @@ export async function identifyVerticalRisers(
 
     return verticalRisers;
   } catch (error) {
-    console.error('Error identifying vertical risers:', error);
+    logger.error('MEP_PATH_TRACER', 'Error identifying vertical risers', error instanceof Error ? error : undefined);
     return [];
   }
 }

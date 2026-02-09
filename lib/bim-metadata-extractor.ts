@@ -4,6 +4,7 @@
  */
 
 import { getAccessToken } from './autodesk-auth';
+import { logger } from '@/lib/logger';
 
 const MD_BASE_URL = 'https://developer.api.autodesk.com/modelderivative/v2';
 
@@ -272,7 +273,7 @@ export function categorizeElement(category: string): { category: string; subcate
  * Full extraction of BIM data from a model
  */
 export async function extractBIMData(urn: string): Promise<BIMExtractionResult> {
-  console.log('[BIM Extractor] Starting extraction for URN:', urn);
+  logger.info('BIM_METADATA', 'Starting extraction for URN', { urn });
 
   // Get all viewables/metadata
   const metadata = await getModelMetadata(urn);
@@ -298,9 +299,9 @@ export async function extractBIMData(urn: string): Promise<BIMExtractionResult> 
           categories[element.category] = (categories[element.category] || 0) + 1;
         }
 
-        console.log(`[BIM Extractor] View ${view.guid}: ${properties.length} elements`);
+        logger.info('BIM_METADATA', 'View processed', { guid: view.guid, elements: properties.length });
       } catch (error) {
-        console.warn(`[BIM Extractor] Failed to get properties for view ${view.guid}:`, error);
+        logger.warn('BIM_METADATA', 'Failed to get properties for view', { guid: view.guid });
       }
     }
   }
@@ -312,7 +313,7 @@ export async function extractBIMData(urn: string): Promise<BIMExtractionResult> 
     summary[category as keyof typeof summary] = (summary[category as keyof typeof summary] || 0) + 1;
   }
 
-  console.log(`[BIM Extractor] Extraction complete: ${allElements.length} elements`);
+  logger.info('BIM_METADATA', 'Extraction complete', { elements: allElements.length });
 
   return {
     modelUrn: urn,

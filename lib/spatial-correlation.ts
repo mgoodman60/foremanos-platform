@@ -10,6 +10,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -241,7 +242,7 @@ export async function extractGridSystem(
       scale
     };
   } catch (error) {
-    console.error(`Error extracting grid system for sheet ${sheetNumber}:`, error);
+    logger.error('SPATIAL_CORRELATION', 'Error extracting grid system', error instanceof Error ? error : undefined, { sheetNumber });
     return null;
   }
 }
@@ -395,7 +396,7 @@ export async function findSheetsAtLocation(
     
     return matches;
   } catch (error) {
-    console.error('Error finding sheets at location:', error);
+    logger.error('SPATIAL_CORRELATION', 'Error finding sheets at location', error instanceof Error ? error : undefined);
     return [];
   }
 }
@@ -492,7 +493,7 @@ export async function correlateTwoSheets(
       discipline2: ref2.discipline
     };
   } catch (error) {
-    console.error('Error correlating sheets:', error);
+    logger.error('SPATIAL_CORRELATION', 'Error correlating sheets', error instanceof Error ? error : undefined);
     return null;
   }
 }
@@ -545,7 +546,7 @@ export async function transformCoordinate(
     
     return match || null;
   } catch (error) {
-    console.error('Error transforming coordinate:', error);
+    logger.error('SPATIAL_CORRELATION', 'Error transforming coordinate', error instanceof Error ? error : undefined);
     return null;
   }
 }

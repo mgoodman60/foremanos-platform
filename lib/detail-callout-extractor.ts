@@ -10,6 +10,7 @@
 import { prisma } from './db';
 import { Prisma } from '@prisma/client';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -214,7 +215,7 @@ Return as JSON array:
       confidence: c.confidence || 0.8,
     }));
   } catch (error) {
-    console.error('Vision extraction failed:', error);
+    logger.error('DETAIL_CALLOUT', 'Vision extraction failed', error as Error);
     return [];
   }
 }

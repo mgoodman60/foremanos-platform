@@ -5,6 +5,7 @@
 
 import { callLLM } from '@/lib/llm-providers';
 import { SIMPLE_MODEL } from '@/lib/model-config';
+import { logger } from '@/lib/logger';
 
 type DocumentCategory = string;
 
@@ -117,7 +118,7 @@ File type: ${fileType}${contentPreview ? `\nContent preview: ${contentPreview.su
       reasoning: parsed.reasoning
     };
   } catch (error) {
-    console.error('Error in AI categorization:', error);
+    logger.error('DOCUMENT_CATEGORIZER', 'AI categorization failed', error as Error);
     return keywordMatch; // Fallback to keyword match
   }
 }

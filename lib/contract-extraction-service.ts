@@ -4,6 +4,7 @@
  */
 
 import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 
 // Lazy initialization to avoid build-time API key requirement
 let openaiInstance: OpenAI | null = null;
@@ -151,11 +152,11 @@ ONLY respond with valid JSON. Do not include any other text.`;
     
     const extracted = JSON.parse(jsonStr) as ExtractedContractData;
     
-    console.log(`[Contract Extraction] Extracted data from ${fileName} with ${extracted.confidence || 0}% confidence`);
+    logger.info('CONTRACT_EXTRACTION', `Extracted data from ${fileName}`, { confidence: extracted.confidence || 0 });
     
     return extracted;
   } catch (error) {
-    console.error('[Contract Extraction] Error:', error);
+    logger.error('CONTRACT_EXTRACTION', 'Extraction failed', error as Error);
     return {
       confidence: 0,
       extractionNotes: `Extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`,

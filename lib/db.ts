@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { logger } from './logger'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -30,12 +31,12 @@ const MAX_CONNECTION_ATTEMPTS = 5
 // Prevents "Connection refused" errors during restarts
 const cleanup = async () => {
   try {
-    console.log('[DB] Disconnecting...')
+    logger.info('DATABASE', 'Disconnecting...')
     isConnected = false
     await prisma.$disconnect()
-    console.log('[DB] Disconnected successfully')
+    logger.info('DATABASE', 'Disconnected successfully')
   } catch (error) {
-    console.error('[DB] Error during disconnect:', error)
+    logger.error('DATABASE', 'Error during disconnect', error as Error)
   }
 }
 
@@ -47,7 +48,7 @@ process.on('SIGTERM', cleanup)
 let isConnecting = false
 async function ensureConnection(retryDelay = 1000) {
   if (isConnecting) {
-    console.log('[DB] Connection attempt already in progress')
+    logger.info('DATABASE', 'Connection attempt already in progress')
     return
   }
   
@@ -59,7 +60,7 @@ async function ensureConnection(retryDelay = 1000) {
     isConnecting = true
     connectionAttempts++
     
-    console.log(`[DB] Attempting connection (attempt ${connectionAttempts})...`)
+    logger.info('DATABASE', `Attempting connection (attempt ${connectionAttempts})...`)
     await prisma.$connect()
     
     // Test the connection with a simple query
@@ -67,22 +68,22 @@ async function ensureConnection(retryDelay = 1000) {
     
     isConnected = true
     connectionAttempts = 0 // Reset on success
-    console.log('[DB] Connected successfully')
+    logger.info('DATABASE', 'Connected successfully')
     
   } catch (error: unknown) {
-    console.error('[DB] Connection error:', error instanceof Error ? error.message : String(error))
+    logger.error('DATABASE', 'Connection error', error instanceof Error ? error : new Error(String(error)))
     isConnected = false
     
     // Exponential backoff for retries
     if (connectionAttempts < MAX_CONNECTION_ATTEMPTS) {
       const nextDelay = Math.min(retryDelay * 2, 10000)
-      console.log(`[DB] Retrying in ${nextDelay}ms...`)
+      logger.info('DATABASE', `Retrying in ${nextDelay}ms...`)
       setTimeout(() => {
         isConnecting = false
         ensureConnection(nextDelay)
       }, nextDelay)
     } else {
-      console.error('[DB] Max connection attempts reached. Manual intervention required.')
+      logger.error('DATABASE', 'Max connection attempts reached. Manual intervention required.')
       connectionAttempts = 0 // Reset for future attempts
     }
   } finally {

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 // ============================================
 // Hoisted mocks
@@ -37,7 +38,7 @@ const ownerSession = {
 };
 
 function createRequest(documentId: string) {
-  return new Request(`http://localhost/api/documents/${documentId}/progress`, {
+  return new NextRequest(`http://localhost/api/documents/${documentId}/progress`, {
     method: 'GET',
   });
 }

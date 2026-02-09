@@ -5,6 +5,7 @@
  */
 
 import { getRedisClient, isRedisConnected } from './redis-client';
+import { logger } from './logger';
 
 export interface CacheStats {
   size: number;
@@ -71,7 +72,7 @@ export class RedisCacheAdapter {
 
       await redis.setex(this.getKey(key), expirySeconds, serialized);
     } catch (error) {
-      console.error('Redis cache set error:', error);
+      logger.error('REDIS_CACHE', 'Cache set error', error as Error);
     }
   }
 
@@ -104,7 +105,7 @@ export class RedisCacheAdapter {
       this.hits++;
       return entry.value;
     } catch (error) {
-      console.error('Redis cache get error:', error);
+      logger.error('REDIS_CACHE', 'Cache get error', error as Error);
       this.misses++;
       return null;
     }
@@ -123,7 +124,7 @@ export class RedisCacheAdapter {
       const exists = await redis.exists(this.getKey(key));
       return exists === 1;
     } catch (error) {
-      console.error('Redis cache has error:', error);
+      logger.error('REDIS_CACHE', 'Cache has error', error as Error);
       return false;
     }
   }
@@ -141,7 +142,7 @@ export class RedisCacheAdapter {
       const deleted = await redis.del(this.getKey(key));
       return deleted > 0;
     } catch (error) {
-      console.error('Redis cache delete error:', error);
+      logger.error('REDIS_CACHE', 'Cache delete error', error as Error);
       return false;
     }
   }
@@ -180,7 +181,7 @@ export class RedisCacheAdapter {
       this.hits = 0;
       this.misses = 0;
     } catch (error) {
-      console.error('Redis cache clear error:', error);
+      logger.error('REDIS_CACHE', 'Cache clear error', error as Error);
     }
   }
 
@@ -222,7 +223,7 @@ export class RedisCacheAdapter {
 
       return deleted;
     } catch (error) {
-      console.error('Redis cache invalidatePattern error:', error);
+      logger.error('REDIS_CACHE', 'Cache invalidatePattern error', error as Error);
       return 0;
     }
   }
@@ -281,7 +282,7 @@ export class RedisCacheAdapter {
         evictions: 0, // Redis handles eviction internally
       };
     } catch (error) {
-      console.error('Redis cache getStats error:', error);
+      logger.error('REDIS_CACHE', 'Cache getStats error', error as Error);
       return {
         size: 0,
         entries: 0,

@@ -18,16 +18,23 @@ const mockRedisClientFunctions = vi.hoisted(() => ({
 
 vi.mock('@/lib/redis-client', () => mockRedisClientFunctions);
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 // Import after mocks
 import { RedisCacheAdapter, CacheStats, CacheEntry } from '@/lib/redis-cache-adapter';
 
 describe('RedisCacheAdapter', () => {
   let adapter: RedisCacheAdapter;
-  let consoleErrorSpy: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Default: Redis is available and connected
     mockRedisClientFunctions.getRedisClient.mockReturnValue(mockRedisClient as unknown as Redis);
@@ -35,10 +42,6 @@ describe('RedisCacheAdapter', () => {
 
     // Create fresh adapter instance
     adapter = new RedisCacheAdapter('test-cache', 3600000);
-  });
-
-  afterEach(() => {
-    consoleErrorSpy.mockRestore();
   });
 
   describe('constructor', () => {
@@ -133,10 +136,7 @@ describe('RedisCacheAdapter', () => {
 
       await adapter.set('mykey', 'value');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache set error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle complex nested objects', async () => {
@@ -230,10 +230,7 @@ describe('RedisCacheAdapter', () => {
       const result = await adapter.get('mykey');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache get error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle JSON parse errors gracefully', async () => {
@@ -242,10 +239,7 @@ describe('RedisCacheAdapter', () => {
       const result = await adapter.get('corrupted');
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache get error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should track cache hits correctly', async () => {
@@ -340,10 +334,7 @@ describe('RedisCacheAdapter', () => {
       const result = await adapter.has('mykey');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache has error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -388,10 +379,7 @@ describe('RedisCacheAdapter', () => {
       const result = await adapter.delete('mykey');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache delete error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -481,10 +469,7 @@ describe('RedisCacheAdapter', () => {
 
       await adapter.clear();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache clear error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle multiple SCAN iterations correctly', async () => {
@@ -585,10 +570,7 @@ describe('RedisCacheAdapter', () => {
       const deleted = await adapter.invalidatePattern(/test/);
 
       expect(deleted).toBe(0);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache invalidatePattern error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle complex regex patterns', async () => {
@@ -746,10 +728,7 @@ describe('RedisCacheAdapter', () => {
       expect(stats.hits).toBe(0);
       expect(stats.misses).toBe(1);
       expect(stats.hitRate).toBe(0);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Redis cache getStats error:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should accumulate size across all entries', async () => {

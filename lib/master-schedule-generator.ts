@@ -7,6 +7,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { callAbacusLLM, LLMResponse } from './abacus-llm';
 import { getFileUrl } from './s3';
 import { CSI_DIVISIONS, getCSIDivision, generateWBSCode } from './schedule-improvement-analyzer';
@@ -138,7 +139,7 @@ export async function generateMasterSchedule(
     matchSubcontractors?: boolean;
   }
 ): Promise<MasterScheduleResult> {
-  console.log('[MASTER_SCHEDULE] Starting master schedule generation for project:', projectId);
+  logger.info('MASTER_SCHEDULE', 'Starting master schedule generation', { projectId });
 
   // Get project info
   const project = await prisma.project.findUnique({
@@ -193,7 +194,7 @@ export async function generateMasterSchedule(
 
   // DETAILED: Try to extract from plans/specs with AI
   if (detailLevel === 'detailed') {
-    console.log('[MASTER_SCHEDULE] Generating detailed schedule from all sources...');
+    logger.info('MASTER_SCHEDULE', 'Generating detailed schedule from all sources...');
     
     const extractionResult = await extractDetailedScheduleFromPlans(projectId);
     if (extractionResult.success && extractionResult.extractedTasks.length > 30) {
@@ -225,11 +226,11 @@ export async function generateMasterSchedule(
   if (tasks.length === 0) {
     // Analyze documents to identify scope
     const scopeAnalysis = await analyzeProjectScope(chunks, project.name, budgetItems);
-    console.log('[MASTER_SCHEDULE] Scope analysis complete:', scopeAnalysis);
+    logger.info('MASTER_SCHEDULE', 'Scope analysis complete', { projectType: scopeAnalysis.projectType, complexity: scopeAnalysis.complexity });
 
     // Generate tasks based on scope and SOV
     tasks = await generateEnhancedTasks(scopeAnalysis, budgetItems, subcontractors, detailLevel);
-    console.log(`[MASTER_SCHEDULE] Generated ${tasks.length} tasks`);
+    logger.info('MASTER_SCHEDULE', `Generated ${tasks.length} tasks`);
 
     sourcesUsed.push('document analysis');
     if (budgetItems.length > 0) sourcesUsed.push('SOV/budget');
@@ -284,7 +285,7 @@ export async function generateMasterSchedule(
     });
   }
 
-  console.log(`[MASTER_SCHEDULE] Successfully created schedule with ${tasks.length} tasks`);
+  logger.info('MASTER_SCHEDULE', `Successfully created schedule with ${tasks.length} tasks`);
 
   return {
     scheduleId: schedule.id,
@@ -364,7 +365,7 @@ Return ONLY valid JSON, no other text.`;
       };
     }
   } catch (error) {
-    console.error('[MASTER_SCHEDULE] Scope analysis error:', error);
+    logger.error('MASTER_SCHEDULE', 'Scope analysis error', error as Error);
   }
 
   // Default fallback
@@ -426,7 +427,7 @@ async function generateEnhancedTasks(
 
   // Generate tasks from SOV if available
   if (budgetItems.length > 10) {
-    console.log('[MASTER_SCHEDULE] Generating tasks from SOV...');
+    logger.info('MASTER_SCHEDULE', 'Generating tasks from SOV...');
     
     // Group budget items by phase
     const phaseGroups = new Map<number, any[]>();
@@ -485,7 +486,7 @@ async function generateEnhancedTasks(
 
   // If no SOV or insufficient, use template-based generation
   if (tasks.length < 20) {
-    console.log('[MASTER_SCHEDULE] Using template-based generation...');
+    logger.info('MASTER_SCHEDULE', 'Using template-based generation...');
     
     for (const phase of CONSTRUCTION_PHASES) {
       const phaseTasks = TRADE_TASKS[phase.name] || [];

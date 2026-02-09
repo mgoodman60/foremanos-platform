@@ -538,7 +538,7 @@ async function processScheduleUpdatesAfterFinalization(
   userId?: string
 ): Promise<void> {
   if (!projectSlug) {
-    console.log('[SCHEDULE_UPDATE] No project slug, skipping schedule updates');
+    log.info('No project slug, skipping schedule updates');
     return;
   }
 
@@ -564,20 +564,20 @@ async function processScheduleUpdatesAfterFinalization(
     });
 
     if (!project) {
-      console.log('[SCHEDULE_UPDATE] Project not found');
+      log.info('Project not found for schedule update');
       return;
     }
 
     // Check if auto-update is enabled at project level
     if (!project.scheduleAutoUpdateEnabled) {
-      console.log('[SCHEDULE_UPDATE] Schedule auto-update disabled at project level');
+      log.info('Schedule auto-update disabled at project level');
       return;
     }
 
     // Check if there's an active schedule with auto-update enabled
     const activeSchedule = project.Schedule[0];
     if (!activeSchedule || !activeSchedule.autoUpdateEnabled) {
-      console.log('[SCHEDULE_UPDATE] No active schedule with auto-update enabled');
+      log.info('No active schedule with auto-update enabled');
       return;
     }
 
@@ -594,7 +594,7 @@ async function processScheduleUpdatesAfterFinalization(
       .join('\n\n');
 
     if (!reportContent) {
-      console.log('[SCHEDULE_UPDATE] No report content found');
+      log.info('No report content found for schedule update');
       return;
     }
 
@@ -603,7 +603,7 @@ async function processScheduleUpdatesAfterFinalization(
     const analysis = await analyzeScheduleImpact(reportContent, projectSlug);
 
     if (!analysis.hasScheduleImpact || analysis.suggestions.length === 0) {
-      console.log('[SCHEDULE_UPDATE] No schedule impacts detected');
+      log.info('No schedule impacts detected');
       return;
     }
 
@@ -616,9 +616,7 @@ async function processScheduleUpdatesAfterFinalization(
     );
 
     if (autoApplicableSuggestions.length === 0) {
-      console.log(
-        `[SCHEDULE_UPDATE] ${analysis.suggestions.length} suggestion(s) found, but none meet ${threshold}% confidence threshold`
-      );
+      log.info('Suggestions below confidence threshold', { count: analysis.suggestions.length, threshold });
       
       // Store suggestions as pending for manual review
       for (const suggestion of analysis.suggestions) {
@@ -647,9 +645,7 @@ async function processScheduleUpdatesAfterFinalization(
 
     if (requireManualReview) {
       // Store all suggestions as pending for manual review
-      console.log(
-        `[SCHEDULE_UPDATE] Manual review required. Storing ${autoApplicableSuggestions.length} suggestion(s) as pending`
-      );
+      log.info('Manual review required, storing suggestions as pending', { count: autoApplicableSuggestions.length });
       
       for (const suggestion of autoApplicableSuggestions) {
         await prisma.scheduleUpdate.create({
@@ -676,9 +672,7 @@ async function processScheduleUpdatesAfterFinalization(
     }
 
     // Auto-apply high-confidence suggestions
-    console.log(
-      `[SCHEDULE_UPDATE] Auto-applying ${autoApplicableSuggestions.length} high-confidence update(s)`
-    );
+    log.info('Auto-applying high-confidence updates', { count: autoApplicableSuggestions.length });
 
     for (const suggestion of autoApplicableSuggestions) {
       try {
@@ -691,7 +685,7 @@ async function processScheduleUpdatesAfterFinalization(
         });
 
         if (!task) {
-          console.log(`[SCHEDULE_UPDATE] Task ${suggestion.taskId} not found, skipping`);
+          log.info('Task not found, skipping', { taskId: suggestion.taskId });
           continue;
         }
 
@@ -727,11 +721,9 @@ async function processScheduleUpdatesAfterFinalization(
           },
         });
 
-        console.log(
-          `[SCHEDULE_UPDATE] Auto-applied update for task ${suggestion.taskId}: ${suggestion.currentPercentComplete}% → ${suggestion.suggestedPercentComplete}%`
-        );
+        log.info('Auto-applied schedule update', { taskId: suggestion.taskId, from: suggestion.currentPercentComplete, to: suggestion.suggestedPercentComplete });
       } catch (error) {
-        console.error(`[SCHEDULE_UPDATE] Error auto-applying update for task ${suggestion.taskId}:`, error);
+        log.error(`Error auto-applying update for task ${suggestion.taskId}`, error as Error);
       }
     }
 
@@ -741,11 +733,9 @@ async function processScheduleUpdatesAfterFinalization(
       data: { lastAutoUpdateAt: new Date() },
     });
 
-    console.log(
-      `[SCHEDULE_UPDATE] Processed ${autoApplicableSuggestions.length} automatic schedule update(s)`
-    );
+    log.info('Processed automatic schedule updates', { count: autoApplicableSuggestions.length });
   } catch (error) {
-    console.error('[SCHEDULE_UPDATE] Error processing schedule updates:', error);
+    log.error('Error processing schedule updates', error as Error);
     throw error;
   }
 }
@@ -930,16 +920,16 @@ export async function finalizeReport(
         );
         
         if (actualsResult.updatedTasks.length > 0) {
-          console.log(`[FINALIZATION] Updated actuals for ${actualsResult.updatedTasks.length} tasks: ${actualsResult.updatedTasks.join(', ')}`);
+          log.info('Updated schedule actuals', { taskCount: actualsResult.updatedTasks.length, tasks: actualsResult.updatedTasks });
         }
       }
     } catch (error) {
-      console.error('[FINALIZATION] Error extracting schedule actuals:', error);
+      log.error('Error extracting schedule actuals', error as Error);
       // Don't fail finalization if actuals extraction fails
     }
 
     // 14. Perform daily cost rollup and sync budget metrics
-    console.log('[FINALIZATION] Performing daily cost rollup');
+    log.info('Performing daily cost rollup');
     try {
       if (conversation.Project?.id) {
         const { performDailyCostRollup } = await import('./cost-rollup-service');
@@ -949,11 +939,11 @@ export async function finalizeReport(
           userId
         );
         if (rollupResult.success) {
-          console.log(`[FINALIZATION] Cost rollup complete: $${rollupResult.summary.totalCost.toFixed(2)} total daily cost, ${rollupResult.budgetItemsUpdated} budget items updated`);
+          log.info('Cost rollup complete', { totalCost: rollupResult.summary.totalCost, budgetItemsUpdated: rollupResult.budgetItemsUpdated });
         }
       }
     } catch (error) {
-      console.error('[FINALIZATION] Error performing cost rollup:', error);
+      log.error('Error performing cost rollup', error as Error);
       // Don't fail finalization if cost rollup fails
     }
 
@@ -966,7 +956,7 @@ export async function finalizeReport(
       ragIndexed,
     };
   } catch (error) {
-    console.error('[FINALIZATION] Error finalizing report:', error);
+    log.error('Error finalizing report', error as Error, { conversationId });
     return {
       success: false,
       conversationId,

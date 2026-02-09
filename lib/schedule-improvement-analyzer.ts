@@ -7,6 +7,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from '@/lib/logger';
 
 export interface ScheduleImprovementRecommendation {
   id: string;
@@ -74,7 +75,7 @@ export const CSI_DIVISIONS = {
 export async function analyzeScheduleForImprovements(
   scheduleId: string
 ): Promise<ScheduleAnalysisResult> {
-  console.log('[SCHEDULE_ANALYZER] Starting analysis for schedule:', scheduleId);
+  logger.info('SCHEDULE_IMPROVEMENT', 'Starting analysis for schedule', { scheduleId });
 
   // Get schedule and tasks
   const schedule = await prisma.schedule.findUnique({
@@ -645,7 +646,7 @@ Provide actionable summary for a superintendent or project manager.`;
       return response.content;
     }
   } catch (error) {
-    console.error('[SCHEDULE_ANALYZER] AI summary error:', error);
+    logger.error('SCHEDULE_IMPROVEMENT', 'AI summary error', error as Error);
   }
 
   return `Analysis identified ${recommendations.length} recommendations including ${highPriority} high-priority items. Addressing these could save up to ${totalSavings} days.`;

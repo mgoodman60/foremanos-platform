@@ -47,8 +47,7 @@ describe('offline-store', () => {
 
   afterAll(() => {
     if (originalWindow === undefined) {
-      // @ts-expect-error - cleaning up global mock
-      delete global.window;
+      delete (global as any).window;
     }
   });
 
@@ -332,8 +331,7 @@ describe('offline-store', () => {
 
     it('should return true when navigator is undefined', async () => {
       const origNavigator = global.navigator;
-      // @ts-expect-error - testing SSR scenario
-      delete global.navigator;
+      delete (global as any).navigator;
 
       const { isOnline } = await import('@/lib/offline-store');
       expect(isOnline()).toBe(true);
@@ -350,8 +348,7 @@ describe('offline-store', () => {
   describe('SSR guard', () => {
     it('should throw error when window is undefined (server-side)', async () => {
       const origWindow = global.window;
-      // @ts-expect-error - testing SSR scenario
-      delete global.window;
+      delete (global as any).window;
 
       // Re-import to get fresh module
       const { saveDraft } = await import('@/lib/offline-store');

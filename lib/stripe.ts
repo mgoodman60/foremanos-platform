@@ -8,6 +8,7 @@ import {
   FALLBACK_MODEL,
   resolveModelAlias,
 } from '@/lib/model-config';
+import { logger } from '@/lib/logger';
 
 // Lazy initialization to avoid build-time API key requirement
 let stripeInstance: Stripe | null = null;
@@ -129,7 +130,7 @@ export async function createCheckoutSession({
 
     return session;
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    logger.error('STRIPE', 'Error creating checkout session', error as Error);
     throw error;
   }
 }
@@ -152,7 +153,7 @@ export async function createPortalSession({
 
     return session;
   } catch (error) {
-    console.error('Error creating portal session:', error);
+    logger.error('STRIPE', 'Error creating portal session', error as Error);
     throw error;
   }
 }
@@ -165,7 +166,7 @@ export async function getSubscription(subscriptionId: string) {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     return subscription;
   } catch (error) {
-    console.error('Error retrieving subscription:', error);
+    logger.error('STRIPE', 'Error retrieving subscription', error as Error);
     throw error;
   }
 }
@@ -180,7 +181,7 @@ export async function cancelSubscription(subscriptionId: string) {
     });
     return subscription;
   } catch (error) {
-    console.error('Error canceling subscription:', error);
+    logger.error('STRIPE', 'Error canceling subscription', error as Error);
     throw error;
   }
 }
@@ -195,7 +196,7 @@ export async function reactivateSubscription(subscriptionId: string) {
     });
     return subscription;
   } catch (error) {
-    console.error('Error reactivating subscription:', error);
+    logger.error('STRIPE', 'Error reactivating subscription', error as Error);
     throw error;
   }
 }

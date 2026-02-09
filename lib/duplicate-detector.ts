@@ -1,6 +1,7 @@
 import { prisma } from './db';
 import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 /**
  * Calculate hash of file buffer for duplicate detection
@@ -139,7 +140,7 @@ export async function removeDuplicates(projectId: string): Promise<{
       if (doc.oneDriveHash) {
         if (uniqueByHash.has(doc.oneDriveHash)) {
           isDuplicate = true;
-          console.log(`Duplicate found by hash: ${doc.fileName} (${doc.id})`);
+          logger.info('DUPLICATE_DETECTOR', 'Duplicate found by hash', { fileName: doc.fileName, id: doc.id });
         } else {
           uniqueByHash.set(doc.oneDriveHash, doc.id);
         }
@@ -148,7 +149,7 @@ export async function removeDuplicates(projectId: string): Promise<{
         const signature = `${doc.fileName}-${doc.fileSize || 0}`;
         if (uniqueBySignature.has(signature)) {
           isDuplicate = true;
-          console.log(`Duplicate found by signature: ${doc.fileName} (${doc.id})`);
+          logger.info('DUPLICATE_DETECTOR', 'Duplicate found by signature', { fileName: doc.fileName, id: doc.id });
         } else {
           uniqueBySignature.set(signature, doc.id);
         }
@@ -173,11 +174,11 @@ export async function removeDuplicates(projectId: string): Promise<{
       });
 
       result.removed = deleteResult.count;
-      console.log(`Removed ${result.removed} duplicate documents from project ${projectId}`);
+      logger.info('DUPLICATE_DETECTOR', 'Removed duplicate documents', { removed: result.removed, projectId });
     }
   } catch (error) {
     const errorMsg = `Error removing duplicates: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    console.error(errorMsg);
+    logger.error('DUPLICATE_DETECTOR', errorMsg);
     result.errors.push(errorMsg);
   }
 

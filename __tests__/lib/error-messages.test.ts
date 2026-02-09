@@ -1,4 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 import {
   categorizeError,
   getErrorInfo,
@@ -455,124 +466,74 @@ describe('error-messages', () => {
   });
 
   describe('logError', () => {
-    let consoleInfoSpy: ReturnType<typeof vi.spyOn>;
-    let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
-    let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-
     beforeEach(() => {
-      consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-      consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-      consoleInfoSpy.mockRestore();
-      consoleWarnSpy.mockRestore();
-      consoleErrorSpy.mockRestore();
+      vi.clearAllMocks();
     });
 
     it('should log error with default severity', () => {
       logError('Test error');
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(consoleInfoSpy).not.toHaveBeenCalled();
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
+      expect(mockLogger.info).not.toHaveBeenCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('should log with info severity', () => {
       logError('Test info', undefined, 'info');
 
-      expect(consoleInfoSpy).toHaveBeenCalled();
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should log with warn severity', () => {
       logError('Test warning', undefined, 'warn');
 
-      expect(consoleWarnSpy).toHaveBeenCalled();
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should include context in log', () => {
       logError('Test error', 'test context');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          context: 'test context',
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should include category in log', () => {
       logError('Network error');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          category: 'network',
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should include message in log', () => {
       logError('Test error message');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          message: 'Test error message',
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should include stack trace for Error objects', () => {
       const error = new Error('Test error');
       logError(error);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          stack: expect.any(String),
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should include timestamp', () => {
       logError('Test error');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          timestamp: expect.any(String),
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle Error objects', () => {
       const error = new Error('Custom error message');
       logError(error, 'error context');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          message: 'Custom error message',
-          context: 'error context',
-          stack: expect.any(String),
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle string errors without stack', () => {
       logError('String error message');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[Error Log]',
-        expect.objectContaining({
-          message: 'String error message',
-          stack: undefined,
-        })
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 

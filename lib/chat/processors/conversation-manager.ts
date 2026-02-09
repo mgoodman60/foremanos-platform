@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { isReportLocked, canModifyLockedReport } from '@/lib/report-change-log';
 import { markFirstChatStarted } from '@/lib/onboarding-tracker';
 import type { ConversationResult } from '@/types/chat';
@@ -51,7 +52,7 @@ export async function manageConversation(
     // Track onboarding progress - first chat started
     if (currentProjectId) {
       markFirstChatStarted(options.userId, currentProjectId).catch((err) => {
-        console.error('[ONBOARDING] Error marking first chat started:', err);
+        logger.error('CONVERSATION_MANAGER', 'Error marking first chat started', err as Error);
       });
     }
   }
@@ -74,7 +75,7 @@ export async function manageConversation(
         }
 
         // User has permission to modify locked report - log this action
-        console.log(`[LOCKED_REPORT_MODIFICATION] User ${options.userId} is modifying locked report ${currentConversationId}`);
+        logger.info('CONVERSATION_MANAGER', `User ${options.userId} is modifying locked report ${currentConversationId}`);
       }
     }
   }

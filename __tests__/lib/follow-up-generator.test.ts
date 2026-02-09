@@ -9,6 +9,18 @@ vi.mock('@/lib/abacus-llm', () => ({
   callAbacusLLM: mocks.callAbacusLLM,
 }));
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+}));
+
 describe('Follow-up Generator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -430,8 +442,6 @@ describe('Follow-up Generator', () => {
 
       mocks.callAbacusLLM.mockRejectedValue(new Error('API timeout'));
 
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       const results = await generateFollowUpSuggestions({
         userQuery: 'what is the schedule?',
         aiResponse: 'x'.repeat(300),
@@ -440,20 +450,17 @@ describe('Follow-up Generator', () => {
 
       expect(results).toHaveLength(3);
       expect(results).toContain("What tasks are on the critical path?");
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[FollowUp] Error generating suggestions:',
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'FOLLOW_UP',
+        'Error generating suggestions',
         expect.any(Error)
       );
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should log error and return templates on network failure', async () => {
       const { generateFollowUpSuggestions } = await import('@/lib/follow-up-generator');
 
       mocks.callAbacusLLM.mockRejectedValue(new Error('Network error'));
-
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const results = await generateFollowUpSuggestions({
         userQuery: 'show mep layout',
@@ -463,9 +470,7 @@ describe('Follow-up Generator', () => {
 
       expect(results).toHaveLength(3);
       expect(results).toContain("Show the routing path");
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle AI response with only whitespace', async () => {

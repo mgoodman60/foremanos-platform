@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { differenceInDays, isAfter, isBefore, addDays, parseISO, format } from 'date-fns';
+import { logger } from '@/lib/logger';
 
 // Industry benchmarks for construction projects
 const INDUSTRY_BENCHMARKS = {
@@ -462,7 +463,7 @@ export async function applyAutoFix(
 
     return { success: false, message: 'Auto-fix not available for this issue' };
   } catch (error) {
-    console.error('Error applying auto-fix:', error);
+    logger.error('SCHEDULE_HEALTH', 'Error applying auto-fix', error as Error);
     return { success: false, message: 'Failed to apply fix' };
   }
 }

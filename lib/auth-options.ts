@@ -4,6 +4,7 @@ import { prisma } from './db';
 import { logActivity } from './audit-log';
 import { sendSignInNotification } from './email-service';
 import bcrypt from 'bcryptjs';
+import { logger } from './logger';
 
 export const authOptions: NextAuthOptions = {
   // No adapter needed for JWT-only sessions (reduces DB load by 90%)
@@ -153,13 +154,13 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (e) {
           // Invalid URL, fall through to default
-          console.error('[AUTH] Invalid URL in redirect:', url);
+          logger.warn('AUTH', 'Invalid URL in redirect', { url });
         }
         
         // For any other case (external URLs, etc.), redirect to dashboard
         return defaultUrl;
       } catch (error) {
-        console.error('[AUTH] Redirect error:', error);
+        logger.error('AUTH', 'Redirect error', error as Error);
         // Fallback to a safe default
         return `${baseUrl}/dashboard`;
       }
@@ -186,7 +187,7 @@ export const authOptions: NextAuthOptions = {
               where: { id: user.id },
               data: { lastLoginAt: new Date() },
             }).catch((error: unknown) => {
-              console.error('[AUTH] Error updating lastLoginAt:', error);
+              logger.error('AUTH', 'Error updating lastLoginAt', error as Error);
               return null; // Return value to ensure Promise.all doesn't reject
             }),
 
@@ -199,7 +200,7 @@ export const authOptions: NextAuthOptions = {
                 role: user.role,
               },
             }).catch((error: unknown) => {
-              console.error('[AUTH] Error logging activity:', error);
+              logger.error('AUTH', 'Error logging activity', error as Error);
               return null;
             }),
 
@@ -209,13 +210,13 @@ export const authOptions: NextAuthOptions = {
               'N/A', // IP address not available in JWT callback
               'N/A'  // User agent not available in JWT callback
             ).catch((error: unknown) => {
-              console.error('[AUTH] Error sending sign-in notification:', error);
+              logger.error('AUTH', 'Error sending sign-in notification', error as Error);
               return null;
             }),
           ]).catch((error: unknown) => {
             // This should never fire if individual catches return values,
             // but log if it does for debugging unexpected errors
-            console.error('[AUTH] Unexpected Promise.all error:', error);
+            logger.error('AUTH', 'Unexpected Promise.all error', error as Error);
           });
         }
       }

@@ -44,17 +44,15 @@ export function streamResponse(options: StreamResponseOptions): Response {
                 const validation = validateBeforeResponse(message || '', context.chunks, fullResponse);
 
                 if (!validation.passed) {
-                  console.warn(`⚠️ [VALIDATION] Response validation failed:`);
-                  validation.issues.forEach((issue) => console.warn(`   ❌ ${issue}`));
+                  logger.warn('RESPONSE_STREAMER', 'Response validation failed', { issues: validation.issues });
                 }
 
                 if (validation.warnings.length > 0) {
-                  console.warn(`⚠️ [VALIDATION] Response warnings:`);
-                  validation.warnings.forEach((warning) => console.warn(`   ⚠️ ${warning}`));
+                  logger.warn('RESPONSE_STREAMER', 'Response warnings', { warnings: validation.warnings });
                 }
 
                 if (validation.passed || validation.warnings.length === 0) {
-                  console.log(`✅ [VALIDATION] Response passed validation checks`);
+                  logger.info('RESPONSE_STREAMER', 'Response passed validation checks');
                 }
 
                 // Save complete chat message to database
@@ -98,7 +96,7 @@ export function streamResponse(options: StreamResponseOptions): Response {
                       complexityAnalysis.complexity,
                       llmResponse.model
                     );
-                    console.log(`💾 [CACHE SAVE] Cached ${complexityAnalysis.complexity} query response (${llmResponse.model})`);
+                    logger.info('RESPONSE_STREAMER', 'Cached query response', { complexity: complexityAnalysis.complexity, model: llmResponse.model });
                   }
 
                   // Send citations and follow-up suggestions
@@ -126,10 +124,10 @@ export function streamResponse(options: StreamResponseOptions): Response {
                       )
                     );
                   } catch (metaError) {
-                    console.error('Error sending metadata:', metaError);
+                    logger.error('RESPONSE_STREAMER', 'Error sending metadata', metaError as Error);
                   }
                 } catch (dbError) {
-                  console.error('Error saving chat message:', dbError);
+                  logger.error('RESPONSE_STREAMER', 'Error saving chat message', dbError as Error);
                 }
 
                 controller.close();

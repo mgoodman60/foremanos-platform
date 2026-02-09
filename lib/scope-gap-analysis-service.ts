@@ -7,6 +7,7 @@
 import { prisma } from '@/lib/db';
 import { callAbacusLLM } from '@/lib/abacus-llm';
 import { TRADE_DISPLAY_NAMES } from '@/lib/trade-inference';
+import { logger } from '@/lib/logger';
 
 export interface ScopeGap {
   id: string;
@@ -198,7 +199,7 @@ export async function analyzeScopeGaps(
     quoteIds?: string[];
   }
 ): Promise<ScopeGapAnalysisResult> {
-  console.log(`[SCOPE-GAP] Starting analysis for project ${projectId}`);
+  logger.info('SCOPE_GAP', 'Starting analysis', { projectId });
   
   const { tradeType, quoteIds } = options || {};
   
@@ -245,12 +246,12 @@ export async function analyzeScopeGaps(
     // Parse AI response - response is an LLMResponse object with content property
     const result = parseAnalysisResponse(response.content, projectId, tradeType);
     
-    console.log(`[SCOPE-GAP] Found ${result.gaps.length} gaps, coverage score: ${result.overallCoverageScore}%`);
+    logger.info('SCOPE_GAP', 'Analysis complete', { gaps: result.gaps.length, coverageScore: result.overallCoverageScore });
     
     return result;
     
   } catch (error) {
-    console.error('[SCOPE-GAP] Analysis error:', error);
+    logger.error('SCOPE_GAP', 'Analysis error', error instanceof Error ? error : undefined);
     return {
       projectId,
       tradeType,
@@ -424,7 +425,7 @@ function parseAnalysisResponse(
     };
     
   } catch (error) {
-    console.error('[SCOPE-GAP] Parse error:', error);
+    logger.error('SCOPE_GAP', 'Parse error', error instanceof Error ? error : undefined);
     return {
       projectId,
       tradeType,

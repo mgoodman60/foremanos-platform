@@ -1,4 +1,5 @@
 // Weather integration service for construction scheduling
+import { logger } from '@/lib/logger';
 export interface WeatherForecast {
   date: string;
   temp: number;
@@ -109,7 +110,7 @@ export async function getWeatherForecast(lat: number, lon: number, days: number 
   try {
     const apiKey = process.env.OPENWEATHERMAP_API_KEY;
     if (!apiKey) {
-      console.warn('OpenWeatherMap API key not configured');
+      logger.warn('WEATHER_SERVICE', 'OpenWeatherMap API key not configured');
       return generateMockForecast(days);
     }
     
@@ -124,7 +125,7 @@ export async function getWeatherForecast(lat: number, lon: number, days: number 
     const data = await response.json();
     return parseWeatherResponse(data);
   } catch (error) {
-    console.error('Weather fetch error:', error);
+    logger.error('WEATHER_SERVICE', 'Weather fetch error', error instanceof Error ? error : new Error(String(error)));
     return generateMockForecast(days);
   }
 }
@@ -252,7 +253,7 @@ export async function geocodeLocation(location: string): Promise<{ lat: number; 
     }
     return null;
   } catch (error) {
-    console.error('Geocoding error:', error);
+    logger.error('WEATHER_SERVICE', 'Geocoding error', error instanceof Error ? error : new Error(String(error)));
     return null;
   }
 }
@@ -289,7 +290,7 @@ export async function fetchCurrentWeather(lat: number, lon: number): Promise<Wea
       workImpact: 'none'
     };
   } catch (error) {
-    console.error('Weather fetch error:', error);
+    logger.error('WEATHER_SERVICE', 'Weather fetch error', error instanceof Error ? error : new Error(String(error)));
     return null;
   }
 }

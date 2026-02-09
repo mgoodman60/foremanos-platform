@@ -8,6 +8,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
 import { getFileUrl } from './s3';
 import * as fs from 'fs';
@@ -49,7 +50,7 @@ interface ExtractionResult {
 export async function extractScheduleFromDocument(
   documentId: string
 ): Promise<ExtractionResult> {
-  console.log('[SCHEDULE_EXTRACTOR] Extracting from document:', documentId);
+  logger.info('SCHEDULE_DOCUMENT', 'Extracting from document', { documentId });
 
   const document = await prisma.document.findUnique({
     where: { id: documentId }
@@ -98,7 +99,7 @@ async function extractFromExcel(
     const content = chunks.map(c => c.content).join('\n');
     return await parseScheduleContentWithAI(content, document.name, warnings);
   } catch (error) {
-    console.error('[SCHEDULE_EXTRACTOR] Excel extraction error:', error);
+    logger.error('SCHEDULE_DOCUMENT', 'Excel extraction error', error as Error);
     warnings.push(`Excel extraction failed: ${error}`);
     return { success: false, source: document.name, extractedTasks: [], warnings };
   }
@@ -126,7 +127,7 @@ async function extractFromPDF(
     const content = chunks.map(c => c.content).join('\n');
     return await parseScheduleContentWithAI(content, document.name, warnings);
   } catch (error) {
-    console.error('[SCHEDULE_EXTRACTOR] PDF extraction error:', error);
+    logger.error('SCHEDULE_DOCUMENT', 'PDF extraction error', error as Error);
     warnings.push(`PDF extraction failed: ${error}`);
     return { success: false, source: document.name, extractedTasks: [], warnings };
   }
@@ -246,7 +247,7 @@ Return ONLY valid JSON, no explanations.`;
       };
     }
   } catch (error) {
-    console.error('[SCHEDULE_EXTRACTOR] AI parsing error:', error);
+    logger.error('SCHEDULE_DOCUMENT', 'AI parsing error', error as Error);
     warnings.push(`AI parsing failed: ${error}`);
   }
 
@@ -259,7 +260,7 @@ Return ONLY valid JSON, no explanations.`;
 export async function extractDetailedScheduleFromPlans(
   projectId: string
 ): Promise<ExtractionResult> {
-  console.log('[SCHEDULE_EXTRACTOR] Extracting detailed schedule from plans for project:', projectId);
+  logger.info('SCHEDULE_DOCUMENT', 'Extracting detailed schedule from plans', { projectId });
 
   // Get all relevant documents
   const documents = await prisma.document.findMany({
@@ -408,7 +409,7 @@ Return ONLY valid JSON.`;
       };
     }
   } catch (error) {
-    console.error('[SCHEDULE_EXTRACTOR] Detailed extraction error:', error);
+    logger.error('SCHEDULE_DOCUMENT', 'Detailed extraction error', error as Error);
     warnings.push(`Detailed extraction failed: ${error}`);
   }
 
@@ -530,7 +531,7 @@ export async function importExtractedTasks(
       imported++;
       currentDate = endDate;
     } catch (error) {
-      console.error(`[SCHEDULE_EXTRACTOR] Error importing task ${task.name}:`, error);
+      logger.error('SCHEDULE_DOCUMENT', `Error importing task ${task.name}`, error as Error);
       errors.push(`Failed to import "${task.name}": ${error}`);
       skipped++;
     }

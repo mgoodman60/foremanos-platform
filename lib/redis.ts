@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { logger } from './logger';
 
 let redis: Redis | null = null;
 let redisAvailable = false;
@@ -9,7 +10,7 @@ let redisAvailable = false;
  */
 function createRedisClient(): Redis | null {
   if (!process.env.REDIS_URL) {
-    console.warn('⚠️  REDIS_URL not configured - running without Redis caching');
+    logger.warn('REDIS', 'REDIS_URL not configured - running without Redis caching');
     return null;
   }
 
@@ -34,28 +35,28 @@ function createRedisClient(): Redis | null {
 
     // Error handling
     client.on('error', (err) => {
-      console.error('❌ Redis connection error:', err.message);
+      logger.error('REDIS', 'Connection error', err, { message: err.message });
       redisAvailable = false;
     });
 
     client.on('connect', () => {
-      console.log('✅ Redis connected successfully');
+      logger.info('REDIS', 'Connected successfully');
       redisAvailable = true;
     });
 
     client.on('ready', () => {
-      console.log('✅ Redis client ready');
+      logger.info('REDIS', 'Client ready');
       redisAvailable = true;
     });
 
     client.on('close', () => {
-      console.warn('⚠️  Redis connection closed');
+      logger.warn('REDIS', 'Connection closed');
       redisAvailable = false;
     });
 
     return client;
   } catch (error) {
-    console.error('❌ Failed to create Redis client:', error);
+    logger.error('REDIS', 'Failed to create client', error as Error);
     return null;
   }
 }
@@ -86,7 +87,7 @@ export async function getCached<T>(key: string): Promise<T | null> {
     if (!value) return null;
     return JSON.parse(value) as T;
   } catch (error) {
-    console.error(`Redis GET error for key ${key}:`, error);
+    logger.error('REDIS', 'GET error', error as Error, { key });
     return null;
   }
 }
@@ -108,7 +109,7 @@ export async function setCached(
     await redis.setex(key, ttlSeconds, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.error(`Redis SET error for key ${key}:`, error);
+    logger.error('REDIS', 'SET error', error as Error, { key });
     return false;
   }
 }
@@ -125,7 +126,7 @@ export async function deleteCached(key: string): Promise<boolean> {
     await redis.del(key);
     return true;
   } catch (error) {
-    console.error(`Redis DEL error for key ${key}:`, error);
+    logger.error('REDIS', 'DEL error', error as Error, { key });
     return false;
   }
 }
@@ -145,7 +146,7 @@ export async function clearCachePattern(pattern: string): Promise<number> {
     await redis.del(...keys);
     return keys.length;
   } catch (error) {
-    console.error(`Redis clear pattern error for ${pattern}:`, error);
+    logger.error('REDIS', 'Clear pattern error', error as Error, { pattern });
     return 0;
   }
 }
@@ -170,7 +171,7 @@ export async function incrementCounter(
     }
     return count;
   } catch (error) {
-    console.error(`Redis INCR error for key ${key}:`, error);
+    logger.error('REDIS', 'INCR error', error as Error, { key });
     return null;
   }
 }
@@ -187,7 +188,7 @@ export async function getCounter(key: string): Promise<number | null> {
     const value = await redis.get(key);
     return value ? parseInt(value, 10) : 0;
   } catch (error) {
-    console.error(`Redis GET counter error for key ${key}:`, error);
+    logger.error('REDIS', 'GET counter error', error as Error, { key });
     return null;
   }
 }
@@ -199,9 +200,9 @@ export async function disconnectRedis(): Promise<void> {
   if (redis) {
     try {
       await redis.quit();
-      console.log('✅ Redis disconnected gracefully');
+      logger.info('REDIS', 'Disconnected gracefully');
     } catch (error) {
-      console.error('❌ Error disconnecting Redis:', error);
+      logger.error('REDIS', 'Error disconnecting', error as Error);
     }
   }
 }

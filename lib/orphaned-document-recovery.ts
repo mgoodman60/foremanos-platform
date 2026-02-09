@@ -4,8 +4,11 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { processDocument } from './document-processor';
 import { ProcessingQueueStatus } from '@prisma/client';
+
+const log = createScopedLogger('ORPHAN_RECOVERY');
 
 export interface OrphanedDocument {
   id: string;
@@ -83,7 +86,7 @@ export async function findOrphanedDocuments(): Promise<OrphanedDocument[]> {
 
     return orphanedDocs;
   } catch (error) {
-    console.error('[ORPHAN RECOVERY] Error finding orphaned documents:', error);
+    log.error('Error finding orphaned documents', error as Error);
     return [];
   }
 }
@@ -93,7 +96,7 @@ export async function findOrphanedDocuments(): Promise<OrphanedDocument[]> {
  */
 export async function recoverOrphanedDocument(documentId: string): Promise<boolean> {
   try {
-    console.log(`[ORPHAN RECOVERY] Starting recovery for document ${documentId}`);
+    log.info('Starting recovery for document', { documentId });
 
     // Verify document exists and has a file
     const document = await prisma.document.findUnique({
@@ -107,17 +110,17 @@ export async function recoverOrphanedDocument(documentId: string): Promise<boole
     });
 
     if (!document) {
-      console.log(`[ORPHAN RECOVERY] Document ${documentId} not found`);
+      log.info('Document not found', { documentId });
       return false;
     }
 
     if (!document.cloud_storage_path) {
-      console.log(`[ORPHAN RECOVERY] Document ${documentId} has no file`);
+      log.info('Document has no file', { documentId });
       return false;
     }
 
     if (document.processed) {
-      console.log(`[ORPHAN RECOVERY] Document ${documentId} is already processed`);
+      log.info('Document is already processed', { documentId });
       return false;
     }
 
@@ -137,10 +140,10 @@ export async function recoverOrphanedDocument(documentId: string): Promise<boole
     // Start processing
     await processDocument(documentId);
 
-    console.log(`[ORPHAN RECOVERY] Successfully initiated recovery for ${document.name}`);
+    log.info('Successfully initiated recovery', { documentName: document.name });
     return true;
   } catch (error) {
-    console.error(`[ORPHAN RECOVERY] Error recovering document ${documentId}:`, error);
+    log.error('Error recovering document', error as Error, { documentId });
     return false;
   }
 }
@@ -151,19 +154,16 @@ export async function recoverOrphanedDocument(documentId: string): Promise<boole
  */
 export async function recoverAllOrphanedDocuments(): Promise<number> {
   try {
-    console.log('[ORPHAN RECOVERY] Starting scan for orphaned documents...');
+    log.info('Starting scan for orphaned documents');
 
     const orphanedDocs = await findOrphanedDocuments();
 
     if (orphanedDocs.length === 0) {
-      console.log('[ORPHAN RECOVERY] No orphaned documents found');
+      log.info('No orphaned documents found');
       return 0;
     }
 
-    console.log(`[ORPHAN RECOVERY] Found ${orphanedDocs.length} orphaned documents:`);
-    orphanedDocs.forEach((doc) => {
-      console.log(`  - ${doc.name} (${doc.id}) - Created: ${doc.createdAt}`);
-    });
+    log.info('Found orphaned documents', { count: orphanedDocs.length, documents: orphanedDocs.map(d => ({ name: d.name, id: d.id })) });
 
     let recoveredCount = 0;
 
@@ -177,12 +177,10 @@ export async function recoverAllOrphanedDocuments(): Promise<number> {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    console.log(
-      `[ORPHAN RECOVERY] Recovery complete: ${recoveredCount}/${orphanedDocs.length} documents recovered`
-    );
+    log.info('Recovery complete', { recoveredCount, totalOrphaned: orphanedDocs.length });
     return recoveredCount;
   } catch (error) {
-    console.error('[ORPHAN RECOVERY] Error during recovery scan:', error);
+    log.error('Error during recovery scan', error as Error);
     return 0;
   }
 }
@@ -216,7 +214,7 @@ export async function getOrphanedDocumentStats(): Promise<{
       totalOrphanedDocs: orphanedDocs,
     };
   } catch (error) {
-    console.error('[ORPHAN RECOVERY] Error getting stats:', error);
+    log.error('Error getting stats', error as Error);
     return {
       count: 0,
       oldestOrphan: null,

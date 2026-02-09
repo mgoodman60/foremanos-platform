@@ -335,6 +335,7 @@ describe('Upload Error Classification', () => {
     it('should build technicalDetails from error.code', () => {
       const error = Object.assign(new Error('test'), {
         code: 'NoSuchBucket',
+        $metadata: undefined as { httpStatusCode?: number } | undefined,
       });
       // Replicate the technicalDetails construction from the route
       const s3Meta = error.$metadata;

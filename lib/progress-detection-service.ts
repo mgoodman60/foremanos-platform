@@ -5,6 +5,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 
@@ -153,7 +154,7 @@ Provide structured analysis in JSON format.`,
       },
     };
   } catch (error) {
-    console.error('[Progress Detection] Photo analysis error:', error);
+    logger.error('PROGRESS_DETECTION', 'Photo analysis error', error instanceof Error ? error : new Error(String(error)));
     return {
       tags: [],
       detectedWork: [],
@@ -231,7 +232,7 @@ Analyze for progress on scheduled tasks.`,
 
     return detections;
   } catch (error) {
-    console.error('[Progress Detection] Report analysis error:', error);
+    logger.error('PROGRESS_DETECTION', 'Report analysis error', error instanceof Error ? error : new Error(String(error)));
     return [];
   }
 }
@@ -253,7 +254,7 @@ export async function detectProgressFromDailyReport(
     });
 
     if (!report) {
-      console.error('[Progress Detection] Report not found:', reportId);
+      logger.error('PROGRESS_DETECTION', 'Report not found', new Error('Report not found'), { reportId });
       return [];
     }
 
@@ -365,7 +366,7 @@ export async function detectProgressFromDailyReport(
             }
           }
         } catch (photoError) {
-          console.error('[Progress Detection] Error analyzing photo:', photoError);
+          logger.error('PROGRESS_DETECTION', 'Error analyzing photo', photoError instanceof Error ? photoError : new Error(String(photoError)));
         }
       }
     }
@@ -373,7 +374,7 @@ export async function detectProgressFromDailyReport(
     // Combine and deduplicate detections
     return consolidateDetections(allDetections);
   } catch (error) {
-    console.error('[Progress Detection] Error:', error);
+    logger.error('PROGRESS_DETECTION', 'Error in detectProgressFromDailyReport', error instanceof Error ? error : new Error(String(error)));
     return [];
   }
 }
@@ -592,7 +593,7 @@ export async function getSiteProgressSummary(projectId: string): Promise<{
       progressTrend,
     };
   } catch (error) {
-    console.error('[Progress Detection] Summary error:', error);
+    logger.error('PROGRESS_DETECTION', 'Summary error', error instanceof Error ? error : new Error(String(error)));
     return {
       overallProgress: 0,
       byPhase: {},

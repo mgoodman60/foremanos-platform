@@ -28,16 +28,21 @@ vi.mock('ioredis', () => ({
   default: mockRedisConstructor,
 }));
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 describe('Redis Client', () => {
   let originalEnv: NodeJS.ProcessEnv;
-  let consoleLogSpy: any;
-  let consoleErrorSpy: any;
 
   beforeEach(async () => {
     vi.clearAllMocks();
     originalEnv = { ...process.env };
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Reset module state before each test
     vi.resetModules();
@@ -45,8 +50,6 @@ describe('Redis Client', () => {
 
   afterEach(() => {
     process.env = originalEnv;
-    consoleLogSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
   });
 
   describe('connectRedis', () => {
@@ -151,7 +154,7 @@ describe('Redis Client', () => {
       // Trigger connect event
       mockRedisInstance._eventHandlers['connect']?.();
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('✅ Redis connected');
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should not log success message in test mode', async () => {
@@ -166,7 +169,7 @@ describe('Redis Client', () => {
       // Trigger connect event
       mockRedisInstance._eventHandlers['connect']?.();
 
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(mockLogger.info).not.toHaveBeenCalled();
     });
 
     it('should not log success message in production', async () => {
@@ -182,7 +185,7 @@ describe('Redis Client', () => {
       // Trigger connect event
       mockRedisInstance._eventHandlers['connect']?.();
 
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(mockLogger.info).not.toHaveBeenCalled();
     });
 
     it('should log error message on error event in development', async () => {
@@ -198,7 +201,7 @@ describe('Redis Client', () => {
       const testError = new Error('Connection timeout');
       mockRedisInstance._eventHandlers['error']?.(testError);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('❌ Redis connection error:', testError);
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should not log error message on error event in production', async () => {
@@ -214,7 +217,7 @@ describe('Redis Client', () => {
       const testError = new Error('Connection timeout');
       mockRedisInstance._eventHandlers['error']?.(testError);
 
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should log close message on close event in development', async () => {
@@ -229,7 +232,7 @@ describe('Redis Client', () => {
 
       mockRedisInstance._eventHandlers['close']?.();
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('🔌 Redis connection closed');
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should log reconnecting message in development', async () => {
@@ -244,7 +247,7 @@ describe('Redis Client', () => {
 
       mockRedisInstance._eventHandlers['reconnecting']?.();
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('🔄 Redis reconnecting...');
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should return null on connection error', async () => {
@@ -276,10 +279,7 @@ describe('Redis Client', () => {
       const { connectRedis } = await import('@/lib/redis-client');
       await connectRedis();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '❌ Failed to connect to Redis:',
-        error
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should not log error message when connection fails in test mode', async () => {
@@ -290,7 +290,7 @@ describe('Redis Client', () => {
       const { connectRedis } = await import('@/lib/redis-client');
       await connectRedis();
 
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should set isConnected to true on connect event', async () => {

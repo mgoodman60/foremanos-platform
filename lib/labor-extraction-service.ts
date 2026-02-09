@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 interface ExtractedLabor {
   tradeName: string;
@@ -112,7 +113,7 @@ If no labor data is found, return {"laborEntries": [], "totalWorkers": 0, "total
     const result: LaborExtractionResult = JSON.parse(jsonMatch[0]);
     return result;
   } catch (error) {
-    console.error('[LaborExtraction] Error:', error);
+    logger.error('LABOR_EXTRACTION', 'Error extracting labor', error as Error);
     return null;
   }
 }
@@ -155,9 +156,9 @@ async function updateBudgetItemActuals(budgetItemId: string, hoursWorked: number
       },
     });
 
-    console.log(`[LaborExtraction] Updated BudgetItem ${budgetItemId}: +${hoursWorked} hours, +$${totalCost.toFixed(2)}`);
+    logger.info('LABOR_EXTRACTION', `Updated BudgetItem`, { budgetItemId, hoursWorked, totalCost: totalCost.toFixed(2) });
   } catch (error) {
-    console.error(`[LaborExtraction] Error updating BudgetItem ${budgetItemId}:`, error);
+    logger.error('LABOR_EXTRACTION', `Error updating BudgetItem ${budgetItemId}`, error as Error);
   }
 }
 
@@ -254,7 +255,7 @@ export async function saveLaborEntries(
         linkedToBudget++;
       }
     } catch (error) {
-      console.error(`[LaborExtraction] Error saving entry for ${entry.tradeName}:`, error);
+      logger.error('LABOR_EXTRACTION', `Error saving entry for ${entry.tradeName}`, error as Error);
     }
   }
 
@@ -270,17 +271,17 @@ export async function processLaborFromDailyReport(
   reportDate: Date
 ): Promise<{ success: boolean; entriesSaved: number; linkedToBudget: number; totalLaborCost: number }> {
   try {
-    console.log(`[LaborExtraction] Processing conversation ${conversationId}`);
+    logger.info('LABOR_EXTRACTION', 'Processing conversation', { conversationId });
 
     // Extract labor data
     const laborData = await extractLaborFromReport(conversationId, projectId);
     
     if (!laborData || laborData.laborEntries.length === 0) {
-      console.log('[LaborExtraction] No labor data found in report');
+      logger.info('LABOR_EXTRACTION', 'No labor data found in report');
       return { success: true, entriesSaved: 0, linkedToBudget: 0, totalLaborCost: 0 };
     }
 
-    console.log(`[LaborExtraction] Extracted ${laborData.laborEntries.length} labor entries`);
+    logger.info('LABOR_EXTRACTION', `Extracted ${laborData.laborEntries.length} labor entries`);
 
     // Save to database and link to budget items
     const result = await saveLaborEntries(
@@ -290,7 +291,7 @@ export async function processLaborFromDailyReport(
       reportDate
     );
 
-    console.log(`[LaborExtraction] Saved ${result.savedCount} labor entries, ${result.linkedToBudget} linked to budget, $${result.totalLaborCost.toFixed(2)} total cost`);
+    logger.info('LABOR_EXTRACTION', 'Labor entries saved', { savedCount: result.savedCount, linkedToBudget: result.linkedToBudget, totalLaborCost: result.totalLaborCost.toFixed(2) });
 
     return { 
       success: true, 
@@ -299,7 +300,7 @@ export async function processLaborFromDailyReport(
       totalLaborCost: result.totalLaborCost
     };
   } catch (error) {
-    console.error('[LaborExtraction] Error processing labor:', error);
+    logger.error('LABOR_EXTRACTION', 'Error processing labor', error as Error);
     return { success: false, entriesSaved: 0, linkedToBudget: 0, totalLaborCost: 0 };
   }
 }

@@ -6,6 +6,7 @@
 import { generateLookahead } from './lookahead-service';
 import { SIMPLE_MODEL } from '@/lib/model-config';
 import { callLLM } from '@/lib/llm-providers';
+import { logger } from '@/lib/logger';
 
 interface ScheduleUpdateSuggestion {
   taskId: string;
@@ -117,7 +118,7 @@ Return ONLY a JSON object with this structure:
     const analysis = JSON.parse(contentToParse);
     return analysis;
   } catch (error) {
-    console.error('Error analyzing schedule impact:', error);
+    logger.error('SCHEDULE_ANALYZER', 'Error analyzing schedule impact', error as Error);
     // Fallback to keyword-based analysis with whatever schedule context we have
     return keywordBasedAnalysis(reportContent, scheduleContext);
   }

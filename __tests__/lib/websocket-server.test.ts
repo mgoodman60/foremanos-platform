@@ -16,8 +16,16 @@ import {
   SSEStream,
 } from '@/lib/websocket-server';
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 describe('WebSocket Server', () => {
-  let consoleErrorSpy: any;
   let testCounter = 0;
 
   // Helper to get unique project slug for test isolation
@@ -32,7 +40,6 @@ describe('WebSocket Server', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Clear all subscribers before each test
     realtimeEvents.clearSubscribers();
@@ -42,7 +49,6 @@ describe('WebSocket Server', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    consoleErrorSpy.mockRestore();
   });
 
   describe('RealtimeEventBus', () => {
@@ -237,7 +243,7 @@ describe('WebSocket Server', () => {
 
         realtimeEvents.publish(event);
 
-        expect(consoleErrorSpy).toHaveBeenCalled();
+        expect(mockLogger.error).toHaveBeenCalled();
         expect(normalCallback).toHaveBeenCalledWith(event);
       });
 
@@ -750,10 +756,7 @@ describe('WebSocket Server', () => {
 
         emitDocumentProcessed('project-1', 'doc-123', 'test.pdf', 10);
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error sending SSE event:',
-          expect.any(Error)
-        );
+        expect(mockLogger.error).toHaveBeenCalled();
 
         global.JSON.stringify = originalStringify;
 
@@ -779,10 +782,7 @@ describe('WebSocket Server', () => {
         // Advance time to trigger keep-alive
         await vi.advanceTimersByTimeAsync(30000);
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error sending SSE comment:',
-          expect.any(Error)
-        );
+        expect(mockLogger.error).toHaveBeenCalled();
 
         TextEncoder.prototype.encode = originalEncode;
 
@@ -836,7 +836,7 @@ describe('WebSocket Server', () => {
         emitDocumentProcessed('project-1', 'doc-123', 'test.pdf', 10);
 
         // Should not throw error
-        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(mockLogger.error).not.toHaveBeenCalled();
       });
     });
   });

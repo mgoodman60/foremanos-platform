@@ -5,6 +5,7 @@
  */
 
 import { PDFDocument } from 'pdf-lib';
+import { logger } from '@/lib/logger';
 
 export interface ConvertOptions {
   /** Page number to convert (1-indexed). If not specified, converts all pages */
@@ -84,7 +85,7 @@ export async function convertPdfToImages(
 
     return results;
   } catch (error: any) {
-    console.error('[PDF-UTILS] Page extraction error:', error.message);
+    logger.error('PDF_TO_IMAGE', 'Page extraction error', error as Error);
     throw new Error(`PDF page extraction failed: ${error.message}`);
   }
 }
@@ -124,7 +125,7 @@ export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
     const doc = await PDFDocument.load(pdfArray);
     return doc.getPageCount();
   } catch (error: any) {
-    console.error('[PDF-UTILS] Error getting page count:', error.message);
+    logger.error('PDF_TO_IMAGE', 'Error getting page count', error as Error);
     throw new Error(`Failed to get PDF page count: ${error.message}`);
   }
 }

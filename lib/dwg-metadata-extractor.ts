@@ -5,6 +5,7 @@
  */
 
 import { getAccessToken } from './autodesk-auth';
+import { logger } from './logger';
 
 const MD_BASE_URL = 'https://developer.api.autodesk.com/modelderivative/v2';
 
@@ -468,7 +469,7 @@ export async function extractDWGMetadata(
   urn: string,
   fileName: string
 ): Promise<DWGExtractionResult> {
-  console.log('[DWG Extractor] Starting extraction for:', fileName);
+  logger.info('DWG_METADATA', 'Starting extraction', { fileName });
   
   const result: DWGExtractionResult = {
     modelUrn: urn,
@@ -495,7 +496,7 @@ export async function extractDWGMetadata(
     const metadata = await getDWGMetadata(urn);
     
     if (!metadata || metadata.length === 0) {
-      console.log('[DWG Extractor] No metadata found, model may still be processing');
+      logger.info('DWG_METADATA', 'No metadata found, model may still be processing');
       return result;
     }
     
@@ -504,7 +505,7 @@ export async function extractDWGMetadata(
     const guid = viewable?.guid;
     
     if (!guid) {
-      console.log('[DWG Extractor] No viewable GUID found');
+      logger.warn('DWG_METADATA', 'No viewable GUID found');
       return result;
     }
     
@@ -512,7 +513,7 @@ export async function extractDWGMetadata(
     const propertiesResult = await getDWGProperties(urn, guid);
     const properties = propertiesResult.data?.collection || [];
     
-    console.log('[DWG Extractor] Retrieved properties:', properties.length);
+    logger.info('DWG_METADATA', 'Retrieved properties', { count: properties.length });
     
     // Get object tree for blocks
     const objectTree = await getDWGObjectTree(urn, guid);
@@ -543,14 +544,14 @@ export async function extractDWGMetadata(
       categoryCounts: result.layerCategories,
     };
     
-    console.log('[DWG Extractor] Extraction complete:', {
+    logger.info('DWG_METADATA', 'Extraction complete', {
       layers: result.layers.length,
       blocks: result.blocks.length,
       annotations: result.textAnnotations.length,
     });
     
   } catch (error) {
-    console.error('[DWG Extractor] Error during extraction:', error);
+    logger.error('DWG_METADATA', 'Error during extraction', error as Error);
     // Return partial result even on error
   }
   

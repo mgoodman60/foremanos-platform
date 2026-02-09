@@ -3,6 +3,8 @@
  * Handles OAuth 2.0 token management for Forge API access
  */
 
+import { logger } from '@/lib/logger';
+
 interface AuthToken {
   access_token: string;
   token_type: string;
@@ -47,7 +49,7 @@ export async function getAccessToken(): Promise<string> {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Autodesk Auth] Token request failed:', errorText);
+      logger.error('AUTODESK_AUTH', 'Token request failed', undefined, { errorText });
       throw new Error(`Failed to get Autodesk token: ${response.status}`);
     }
 
@@ -60,10 +62,10 @@ export async function getAccessToken(): Promise<string> {
       expires_at: Date.now() + (data.expires_in * 1000),
     };
 
-    console.log('[Autodesk Auth] Token obtained, expires in', data.expires_in, 'seconds');
+    logger.info('AUTODESK_AUTH', 'Token obtained', { expiresIn: data.expires_in });
     return cachedToken.access_token;
   } catch (error) {
-    console.error('[Autodesk Auth] Error getting token:', error);
+    logger.error('AUTODESK_AUTH', 'Error getting token', error instanceof Error ? error : undefined);
     throw error;
   }
 }

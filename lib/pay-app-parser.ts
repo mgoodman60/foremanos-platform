@@ -7,6 +7,7 @@ import OpenAI from 'openai';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { logger } from '@/lib/logger';
 
 let openaiInstance: OpenAI | null = null;
 
@@ -214,7 +215,7 @@ Respond ONLY with valid JSON in this exact format:
     return parsed;
     
   } catch (error) {
-    console.error('[PayAppParser] Error:', error);
+    logger.error('PAY_APP_PARSER', 'Error parsing payment application', error as Error);
     throw new Error(`Failed to parse payment application: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

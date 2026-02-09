@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { BIMExtractionResult, ElementProperty, categorizeElement } from './bim-metadata-extractor';
 
 // CSI Division mappings for BIM categories
@@ -138,7 +139,7 @@ export async function importBIMToTakeoff(
   modelId: string,
   bimData: BIMExtractionResult
 ): Promise<TakeoffImportResult> {
-  console.log(`[BIM→Takeoff] Starting import for project ${projectId}, model ${modelId}`);
+  logger.info('BIM_TAKEOFF', 'Starting import', { projectId, modelId });
   
   const errors: string[] = [];
   const categoryCount: Record<string, number> = {};
@@ -268,7 +269,7 @@ export async function importBIMToTakeoff(
     },
   });
 
-  console.log(`[BIM→Takeoff] Import complete: ${importedItems} items, ${skippedItems} skipped`);
+  logger.info('BIM_TAKEOFF', 'Import complete', { importedItems, skippedItems });
 
   return {
     takeoffId: takeoff.id,

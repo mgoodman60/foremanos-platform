@@ -6,8 +6,11 @@
  */
 
 import { prisma } from './db';
+import { createScopedLogger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+
+const log = createScopedLogger('FINISH_SCHEDULE');
 
 interface FinishScheduleEntry {
   roomNumber: string;
@@ -60,7 +63,7 @@ export async function extractFinishSchedules(
   totalFinishes: number;
   errors?: string[];
 }> {
-  console.log(`[Finish Schedule Extractor] Starting extraction for project: ${projectSlug}`);
+  log.info('Starting extraction', { projectSlug });
   
   // Get project and existing rooms
   const project = await prisma.project.findUnique({
@@ -89,7 +92,7 @@ export async function extractFinishSchedules(
     throw new Error('Project not found');
   }
 
-  console.log(`[Finish Schedule Extractor] Found ${project.Room.length} existing rooms`);
+  log.info('Found existing rooms', { count: project.Room.length });
 
   // Gather chunks that likely contain finish schedule information
   // Enhanced with construction abbreviations from actual finish schedule format
@@ -135,7 +138,7 @@ export async function extractFinishSchedules(
     }
   }
 
-  console.log(`[Finish Schedule Extractor] Found ${relevantChunks.length} chunks with finish-related content`);
+  log.info('Found chunks with finish-related content', { count: relevantChunks.length });
 
   if (relevantChunks.length === 0) {
     return {
@@ -154,7 +157,7 @@ export async function extractFinishSchedules(
   
   for (let i = 0; i < allRoomNumbers.length; i += BATCH_SIZE) {
     const batchRoomNumbers = allRoomNumbers.slice(i, i + BATCH_SIZE);
-    console.log(`[Finish Schedule Extractor] Processing batch ${Math.floor(i/BATCH_SIZE) + 1}: rooms ${batchRoomNumbers[0]} to ${batchRoomNumbers[batchRoomNumbers.length - 1]}`);
+    log.info('Processing batch', { batch: Math.floor(i/BATCH_SIZE) + 1, fromRoom: batchRoomNumbers[0], toRoom: batchRoomNumbers[batchRoomNumbers.length - 1] });
     
     const batchSchedules = await extractFinishDataWithLLM(
       relevantChunks,
@@ -170,12 +173,12 @@ export async function extractFinishSchedules(
   }
 
   const finishSchedules = allFinishSchedules;
-  console.log(`[Finish Schedule Extractor] Extracted ${finishSchedules.length} finish schedule entries total`);
+  log.info('Extracted finish schedule entries', { total: finishSchedules.length });
 
   // Extract Room Finish Legend for product specifications
-  console.log(`[Finish Schedule Extractor] Extracting Room Finish Legend for product specs...`);
+  log.info('Extracting Room Finish Legend for product specs');
   const finishLegend = await extractFinishLegend(relevantChunks);
-  console.log(`[Finish Schedule Extractor] Found ${finishLegend.size} legend entries`);
+  log.info('Found legend entries', { count: finishLegend.size });
 
   // Match and update rooms with finish data
   let matchedCount = 0;
@@ -258,10 +261,10 @@ export async function extractFinishSchedules(
         });
         matchedCount++;
         totalFinishes += finishItems.length;
-        console.log(`[Finish Schedule Extractor] Updated room ${room.roomNumber} with ${finishItems.length} finish items`);
+        log.info('Updated room with finish items', { roomNumber: room.roomNumber, finishItemCount: finishItems.length });
       }
     } else {
-      console.log(`[Finish Schedule Extractor] No matching room found for number: ${schedule.roomNumber}`);
+      log.info('No matching room found', { roomNumber: schedule.roomNumber });
     }
   }
 
@@ -365,7 +368,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.
 [{finish_entry_1}, {finish_entry_2}, ...]`;
 
   try {
-    console.log('[Finish Schedule Extractor] Calling LLM API for finish schedule extraction...');
+    log.info('Calling LLM API for finish schedule extraction');
     
     const llmResponse = await callAbacusLLM([
       {
@@ -383,7 +386,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.
     });
 
     const content = llmResponse.content;
-    console.log('[Finish Schedule Extractor] LLM API call successful');
+    log.info('LLM API call successful');
 
     if (!content) {
       return [];
@@ -408,16 +411,16 @@ Return ONLY a valid JSON array. No markdown, no extra text.
     // Try to extract JSON array
     const jsonMatch = jsonContent.match(/\[\s*[\s\S]*\]/);
     if (!jsonMatch) {
-      console.error('[Finish Schedule Extractor] Could not extract JSON from response');
+      log.error('Could not extract JSON from response');
       return [];
     }
 
     const finishSchedules = JSON.parse(jsonMatch[0]) as FinishScheduleEntry[];
-    console.log(`[Finish Schedule Extractor] Successfully parsed ${finishSchedules.length} finish schedules`);
+    log.info('Successfully parsed finish schedules', { count: finishSchedules.length });
     
     return finishSchedules;
   } catch (error: any) {
-    console.error('[Finish Schedule Extractor] Error:', error?.message || error);
+    log.error('Finish schedule extraction error', error as Error);
     return [];
   }
 }
@@ -460,7 +463,7 @@ IMPORTANT:
 Return ONLY a valid JSON array. No markdown, no extra text.`;
 
   try {
-    console.log('[Finish Schedule Extractor] Extracting Room Finish Legend...');
+    log.info('Extracting Room Finish Legend');
     
     const llmResponse = await callAbacusLLM([
       {
@@ -493,7 +496,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
     if (!jsonMatch) return new Map();
 
     const legendEntries = JSON.parse(jsonMatch[0]) as FinishLegendEntry[];
-    console.log(`[Finish Schedule Extractor] Extracted ${legendEntries.length} legend entries`);
+    log.info('Extracted legend entries', { count: legendEntries.length });
     
     // Build lookup map by code
     const legendMap = new Map<string, FinishLegendEntry>();
@@ -508,7 +511,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
     
     return legendMap;
   } catch (error: any) {
-    console.error('[Finish Schedule Extractor] Legend extraction error:', error?.message || error);
+    log.error('Legend extraction error', error as Error);
     return new Map();
   }
 }

@@ -9,6 +9,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { DEFAULT_UNIT_PRICES, REGIONAL_MULTIPLIERS } from './cost-calculation-service';
 import { CSI_DIVISION_PRICING, findPriceByCategory } from './construction-pricing-database';
 
@@ -115,7 +116,7 @@ export async function getProjectSpecificPrice(
 
     return null;
   } catch (error) {
-    console.error('[Project Pricing] Error getting price:', error);
+    logger.error('PROJECT_PRICING', 'Error getting price', error as Error);
     return null;
   }
 }
@@ -176,7 +177,7 @@ async function getBudgetBasedPrice(
 
     return null;
   } catch (error) {
-    console.error('[Project Pricing] Error getting budget price:', error);
+    logger.error('PROJECT_PRICING', 'Error getting budget price', error as Error);
     return null;
   }
 }
@@ -270,7 +271,7 @@ export async function getProjectLaborRate(
       confidence: 'low'
     };
   } catch (error) {
-    console.error('[Project Pricing] Error getting labor rate:', error);
+    logger.error('PROJECT_PRICING', 'Error getting labor rate', error as Error);
     return {
       hourlyRate: getDefaultLaborRate(tradeType),
       source: 'default',
@@ -427,7 +428,7 @@ export async function getConcreteSpecs(
       confidence: 'low'
     };
   } catch (error) {
-    console.error('[Project Pricing] Error getting concrete specs:', error);
+    logger.error('PROJECT_PRICING', 'Error getting concrete specs', error as Error);
     return {
       strength: 3000,
       pricePerCY: 165,
@@ -523,7 +524,7 @@ export async function getSiteworkSpecs(
       confidence: 'low'
     };
   } catch (error) {
-    console.error('[Project Pricing] Error getting sitework specs:', error);
+    logger.error('PROJECT_PRICING', 'Error getting sitework specs', error as Error);
     return {
       excavationPerCY: 12,
       backfillPerCY: 18,

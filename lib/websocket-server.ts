@@ -6,6 +6,8 @@
  * as Next.js API routes don't support persistent WebSocket connections natively
  */
 
+import { logger } from '@/lib/logger';
+
 export interface RealtimeEvent {
   type: 'document.processed' | 'chat.response' | 'system.notification' | 'cache.invalidated' | 'data.updated';
   projectSlug: string;
@@ -66,7 +68,7 @@ class RealtimeEventBus {
         try {
           subscriber.callback(event);
         } catch (error) {
-          console.error(`Error notifying subscriber ${subscriber.id}:`, error);
+          logger.error('WEBSOCKET', 'Error notifying subscriber', error instanceof Error ? error : undefined, { subscriberId: subscriber.id });
         }
       }
     }
@@ -271,7 +273,7 @@ export class SSEStream {
       const message = `event: ${event.type}\ndata: ${data}\n\n`;
       this.controller.enqueue(this.encoder.encode(message));
     } catch (error) {
-      console.error('Error sending SSE event:', error);
+      logger.error('WEBSOCKET', 'Error sending SSE event', error instanceof Error ? error : undefined);
     }
   }
 
@@ -285,7 +287,7 @@ export class SSEStream {
       const message = `: ${comment}\n\n`;
       this.controller.enqueue(this.encoder.encode(message));
     } catch (error) {
-      console.error('Error sending SSE comment:', error);
+      logger.error('WEBSOCKET', 'Error sending SSE comment', error instanceof Error ? error : undefined);
     }
   }
 }

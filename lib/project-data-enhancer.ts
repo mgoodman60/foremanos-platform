@@ -1,6 +1,6 @@
 /**
  * Project Data Enhancer
- * 
+ *
  * Automatically improves all aspects of project data after any document is processed.
  * This orchestrator runs enhancement modules in sequence to:
  * - Extract and reconcile budget data
@@ -9,6 +9,10 @@
  * - Update room finishes from specs
  * - Link related items across data types
  */
+
+import { createScopedLogger } from './logger';
+
+const log = createScopedLogger('PROJECT_ENHANCER');
 
 import { prisma } from './db';
 import { autoGenerateTakeoffs } from './auto-takeoff-generator';
@@ -93,7 +97,7 @@ export async function enhanceProjectData(projectSlug: string): Promise<Enhanceme
       return result;
     }
 
-    console.log(`[Enhancement] Starting project data enhancement for: ${project.name}`);
+    log.info('Starting project data enhancement', { projectName: project.name });
 
     // Module 1: Extract budget from documents if not present
     const budgetDocs = project.Document.filter(d =>
@@ -138,12 +142,12 @@ export async function enhanceProjectData(projectSlug: string): Promise<Enhanceme
     result.modulesRun.push('room_enhancement');
     result.improvements.roomsUpdated = roomResult.roomsUpdated;
 
-    console.log(`[Enhancement] Completed: ${result.modulesRun.length} modules, ${Object.values(result.improvements).reduce((a, b) => a + b, 0)} total improvements`);
+    log.info('Enhancement completed', { modulesRun: result.modulesRun.length, totalImprovements: Object.values(result.improvements).reduce((a, b) => a + b, 0) });
 
   } catch (error) {
     result.success = false;
     result.errors.push(`Enhancement failed: ${error}`);
-    console.error('[Enhancement] Error:', error);
+    log.error('Enhancement error', error as Error);
   }
 
   return result;
@@ -165,7 +169,7 @@ async function enhanceBudgetData(
 
     // If budget has items already, skip extraction
     if (budget && budget.BudgetItem.length > 0) {
-      console.log('[Enhancement] Budget already populated, skipping extraction');
+      log.info('Budget already populated, skipping extraction');
       return { itemsCreated: 0 };
     }
 
@@ -228,11 +232,11 @@ async function enhanceBudgetData(
       data: { totalBudget },
     });
 
-    console.log(`[Enhancement] Created ${itemsCreated} budget items, total: $${totalBudget.toLocaleString()}`);
+    log.info('Created budget items', { itemsCreated, totalBudget });
     return { itemsCreated };
 
   } catch (error) {
-    console.error('[Enhancement] Budget extraction error:', error);
+    log.error('Budget extraction error', error as Error);
     return { itemsCreated: 0, error: `${error}` };
   }
 }
@@ -365,7 +369,7 @@ async function reconcileTakeoffsWithBudget(
         
         // Only adjust if reasonable (0.5x to 2x)
         if (adjustmentFactor >= 0.5 && adjustmentFactor <= 2) {
-          console.log(`[Reconciliation] Adjusting ${category} by ${(adjustmentFactor * 100 - 100).toFixed(1)}% to match budget`);
+          log.info('Adjusting category to match budget', { category, adjustmentPercent: (adjustmentFactor * 100 - 100).toFixed(1) });
           
           // Update takeoff line items in this category
           for (const item of summary.items) {
@@ -382,11 +386,11 @@ async function reconcileTakeoffsWithBudget(
       }
     }
 
-    console.log(`[Enhancement] Reconciled ${itemsReconciled} takeoff line items with budget`);
+    log.info('Reconciled takeoff line items with budget', { itemsReconciled });
     return { itemsReconciled };
 
   } catch (error) {
-    console.error('[Enhancement] Reconciliation error:', error);
+    log.error('Reconciliation error', error as Error);
     return { itemsReconciled: 0 };
   }
 }
@@ -468,11 +472,11 @@ async function linkScheduleToBudget(
       }
     }
 
-    console.log(`[Enhancement] Linked ${tasksLinked} schedule tasks to budget items`);
+    log.info('Linked schedule tasks to budget items', { tasksLinked });
     return { tasksLinked };
 
   } catch (error) {
-    console.error('[Enhancement] Schedule linking error:', error);
+    log.error('Schedule linking error', error as Error);
     return { tasksLinked: 0 };
   }
 }
@@ -526,11 +530,11 @@ async function enhanceRoomData(
       }
     }
 
-    console.log(`[Enhancement] Updated ${roomsUpdated} rooms with calculated values`);
+    log.info('Updated rooms with calculated values', { roomsUpdated });
     return { roomsUpdated };
 
   } catch (error) {
-    console.error('[Enhancement] Room enhancement error:', error);
+    log.error('Room enhancement error', error as Error);
     return { roomsUpdated: 0 };
   }
 }
@@ -542,14 +546,14 @@ export async function triggerEnhancementAfterProcessing(
   projectSlug: string,
   documentName: string
 ): Promise<void> {
-  console.log(`[Enhancement] Document "${documentName}" processed, triggering project enhancement...`);
-  
+  log.info('Document processed, triggering project enhancement', { documentName, projectSlug });
+
   // Run enhancement in background
   enhanceProjectData(projectSlug)
     .then(result => {
-      console.log(`[Enhancement] Complete:`, result.improvements);
+      log.info('Enhancement complete', { improvements: result.improvements });
     })
     .catch(error => {
-      console.error(`[Enhancement] Failed:`, error);
+      log.error('Enhancement failed', error as Error);
     });
 }

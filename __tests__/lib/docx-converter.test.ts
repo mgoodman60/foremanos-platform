@@ -5,11 +5,20 @@ import { Readable } from 'stream';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock mammoth for DOCX processing
 const mockMammoth = vi.hoisted(() => ({
   extractRawText: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('mammoth', () => ({
   default: mockMammoth,
 }));
@@ -231,18 +240,12 @@ describe('DocxConverter - convertDocxToPdf', () => {
 
     it('should log error and rethrow when mammoth fails', async () => {
       const docxBuffer = createMockDocxBuffer();
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockMammoth.extractRawText.mockRejectedValue(new Error('Corrupted DOCX file'));
 
       await expect(convertDocxToPdf(docxBuffer)).rejects.toThrow('Failed to convert document to PDF');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error converting DOCX to PDF:',
-        expect.any(Error)
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle PDF generation errors', async () => {
@@ -301,16 +304,13 @@ describe('DocxConverter - convertDocxToPdf', () => {
 
     it('should properly clean up resources on error', async () => {
       const docxBuffer = createMockDocxBuffer();
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockMammoth.extractRawText.mockRejectedValue(new Error('Extraction failed'));
 
       await expect(convertDocxToPdf(docxBuffer)).rejects.toThrow('Failed to convert document to PDF');
 
       // Error should be logged
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });

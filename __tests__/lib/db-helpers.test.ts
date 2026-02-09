@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock prisma before importing the module
 const mockPrisma = vi.hoisted(() => ({
   $connect: vi.fn(),
   $queryRaw: vi.fn(),
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
@@ -292,56 +301,43 @@ describe('db-helpers', () => {
 
     it('should return default value on error', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('Database error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const result = await withErrorHandling(operation, 'test-op', 'default-value');
 
       expect(result).toBe('default-value');
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should return undefined when no default value provided', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('Database error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const result = await withErrorHandling(operation, 'test-op');
 
       expect(result).toBeUndefined();
-      consoleSpy.mockRestore();
     });
 
     it('should return array default value', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('Database error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const result = await withErrorHandling(operation, 'test-op', []);
 
       expect(result).toEqual([]);
-      consoleSpy.mockRestore();
     });
 
     it('should return null as default value', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('Database error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const result = await withErrorHandling(operation, 'test-op', null);
 
       expect(result).toBeNull();
-      consoleSpy.mockRestore();
     });
 
     it('should log error with operation name', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('Specific error'));
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await withErrorHandling(operation, 'my-operation');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[DB] my-operation failed:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 

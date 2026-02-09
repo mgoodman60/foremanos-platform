@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 
 interface RoomData {
   name: string;
@@ -23,7 +24,7 @@ export async function extractRoomsFromDocument(
   projectId: string
 ): Promise<RoomData[]> {
   try {
-    console.log(`[LOCATION_DETECTOR] Extracting rooms from document ${documentId}`);
+    logger.info('LOCATION_DETECTOR', 'Extracting rooms from document', { documentId });
 
     // Get document chunks with room data
     const chunks = await prisma.documentChunk.findMany({
@@ -66,10 +67,10 @@ export async function extractRoomsFromDocument(
       }
     }
 
-    console.log(`[LOCATION_DETECTOR] Found ${rooms.length} rooms`);
+    logger.info('LOCATION_DETECTOR', `Found ${rooms.length} rooms`);
     return rooms;
   } catch (error) {
-    console.error('[LOCATION_DETECTOR] Error:', error);
+    logger.error('LOCATION_DETECTOR', 'Error extracting rooms', error as Error);
     throw error;
   }
 }
@@ -188,7 +189,7 @@ export async function createRoomsFromExtraction(
         });
 
         if (existing) {
-          console.log(`[LOCATION_DETECTOR] Room ${roomData.roomNumber} already exists, skipping`);
+          logger.info('LOCATION_DETECTOR', `Room ${roomData.roomNumber} already exists, skipping`);
           continue;
         }
       }
@@ -209,11 +210,11 @@ export async function createRoomsFromExtraction(
 
       created++;
     } catch (error: any) {
-      console.error(`[LOCATION_DETECTOR] Error creating room ${roomData.name}:`, error.message);
+      logger.error('LOCATION_DETECTOR', `Error creating room ${roomData.name}`, undefined, { error: error.message });
     }
   }
 
-  console.log(`[LOCATION_DETECTOR] Created ${created} new rooms`);
+  logger.info('LOCATION_DETECTOR', `Created ${created} new rooms`);
   return created;
 }
 
@@ -282,7 +283,7 @@ export interface AvailableLocations {
  * STUB: Parse location data from text response
  */
 export function parseLocationResponse(text: string, availableLocations: AvailableLocations): LocationData | null {
-  console.log('[LOCATION_DETECTOR] parseLocationResponse - stub implementation');
+  logger.info('LOCATION_DETECTOR', 'parseLocationResponse - stub implementation');
   return null;
 }
 
@@ -290,7 +291,7 @@ export function parseLocationResponse(text: string, availableLocations: Availabl
  * STUB: Structure location data
  */
 export function structureLocationData(locationType: string, locationIdentifier: string, activity: string): LocationData {
-  console.log('[LOCATION_DETECTOR] structureLocationData - stub implementation');
+  logger.info('LOCATION_DETECTOR', 'structureLocationData - stub implementation');
   return {};
 }
 
@@ -298,7 +299,7 @@ export function structureLocationData(locationType: string, locationIdentifier: 
  * STUB: Validate location data
  */
 export function validateLocation(locationIdentifier: string, locationType: string): boolean {
-  console.log('[LOCATION_DETECTOR] validateLocation - stub implementation');
+  logger.info('LOCATION_DETECTOR', 'validateLocation - stub implementation');
   return true;
 }
 
@@ -306,7 +307,7 @@ export function validateLocation(locationIdentifier: string, locationType: strin
  * STUB: Find available locations in project
  */
 export async function findAvailableLocations(projectId: string): Promise<AvailableLocations> {
-  console.log('[LOCATION_DETECTOR] findAvailableLocations - stub implementation');
+  logger.info('LOCATION_DETECTOR', 'findAvailableLocations - stub implementation');
   return {
     rooms: [],
     floors: [],

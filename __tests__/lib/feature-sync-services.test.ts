@@ -4,6 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock Prisma with vi.hoisted to ensure it's available before module imports
 const mockPrisma = vi.hoisted(() => ({
   documentChunk: {
@@ -28,6 +36,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
@@ -225,7 +234,6 @@ describe('Feature Sync - syncScaleData', () => {
   });
 
   it('should log scale update for high-confidence sources', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const chunks = [
       createMockChunk({
@@ -238,11 +246,11 @@ describe('Feature Sync - syncScaleData', () => {
 
     await syncScaleData('project-1', 'doc-1', 'dwg');
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[Scale Sync] Updated project scale')
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining('Updated project scale')
     );
 
-    consoleSpy.mockRestore();
   });
 });
 
@@ -635,14 +643,12 @@ describe('Feature Sync - syncDoorData', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue(chunks);
     mockOpenAI.chat.completions.create.mockRejectedValue(new Error('API error'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await syncDoorData('project-1', 'doc-1', 'dwg');
 
     expect(result).toEqual({ created: 0, updated: 0 });
-    expect(consoleSpy).toHaveBeenCalledWith('[Door Sync] Error:', expect.any(Error));
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('Door sync error'), expect.any(Error));
 
-    consoleSpy.mockRestore();
   });
 
   it('should handle invalid JSON from AI', async () => {
@@ -882,17 +888,15 @@ describe('Feature Sync - syncMEPData', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue(chunks);
     mockOpenAI.chat.completions.create.mockRejectedValue(new Error('API error'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await syncMEPData('project-1', 'doc-1', 'dwg', 'mep_electrical');
 
     expect(result).toEqual({ items: 0 });
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[MEP Sync - mep_electrical]'),
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String),
+      expect.stringContaining('MEP sync error'),
       expect.any(Error)
     );
 
-    consoleSpy.mockRestore();
   });
 
   it('should handle invalid JSON from AI', async () => {
@@ -983,17 +987,15 @@ describe('Feature Sync - syncScheduleData', () => {
 
     mockPrisma.schedule.findFirst.mockResolvedValue(existingSchedule);
 
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const result = await syncScheduleData('project-1', 'doc-1', 'xlsx');
 
     expect(result).toEqual({ tasks: 25 });
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[Schedule Sync] Schedule already exists for this document'
+    expect(mockLogger.info).toHaveBeenCalledWith(expect.any(String),
+      'Schedule already exists for this document'
     );
     expect(mockExtractScheduleFromDocument).not.toHaveBeenCalled();
 
-    consoleSpy.mockRestore();
   });
 
   it('should trigger schedule extraction for new documents', async () => {
@@ -1027,14 +1029,12 @@ describe('Feature Sync - syncScheduleData', () => {
     mockPrisma.schedule.findFirst.mockResolvedValue(null);
     mockExtractScheduleFromDocument.mockRejectedValue(new Error('Extraction failed'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await syncScheduleData('project-1', 'doc-1', 'xlsx');
 
     expect(result).toEqual({ tasks: 0 });
-    expect(consoleSpy).toHaveBeenCalledWith('[Schedule Sync] Error:', expect.any(Error));
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('Schedule sync error'), expect.any(Error));
 
-    consoleSpy.mockRestore();
   });
 
   it('should return 0 tasks if extraction returns no tasks', async () => {
@@ -1269,14 +1269,12 @@ describe('Feature Sync - syncMaterialsData', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue(chunks);
     mockOpenAI.chat.completions.create.mockRejectedValue(new Error('API error'));
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await syncMaterialsData('project-1', 'doc-1', 'docx');
 
     expect(result).toEqual({ materials: 0 });
-    expect(consoleSpy).toHaveBeenCalledWith('[Materials Sync] Error:', expect.any(Error));
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('Materials sync error'), expect.any(Error));
 
-    consoleSpy.mockRestore();
   });
 
   it('should use max_tokens of 2000 for materials extraction', async () => {

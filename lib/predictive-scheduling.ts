@@ -11,6 +11,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // INTERFACES
@@ -167,7 +168,7 @@ Provide prediction as JSON:
       analysisDetails: 'Unable to generate detailed analysis',
     };
   } catch (error) {
-    console.error('[PredictiveScheduling] Prediction failed:', error);
+    logger.error('PREDICTIVE_SCHEDULING', 'Prediction failed', error instanceof Error ? error : undefined);
     return {
       predictedCompletionDate: input.targetDate,
       confidenceLevel: 0,
@@ -344,7 +345,7 @@ export async function getWeatherImpactForecast(
   try {
     const apiKey = process.env.OPENWEATHERMAP_API_KEY;
     if (!apiKey) {
-      console.log('[PredictiveScheduling] No weather API key configured');
+      logger.info('PREDICTIVE_SCHEDULING', 'No weather API key configured');
       return {
         forecastDays,
         rainDays: 2,
@@ -364,7 +365,7 @@ export async function getWeatherImpactForecast(
       estimatedImpactDays: Math.floor(Math.random() * 2),
     };
   } catch (error) {
-    console.error('[PredictiveScheduling] Weather fetch failed:', error);
+    logger.error('PREDICTIVE_SCHEDULING', 'Weather fetch failed', error instanceof Error ? error : undefined);
     return {
       forecastDays,
       rainDays: 0,
@@ -417,7 +418,7 @@ Focus on the most significant 5-7 risks.`;
     }
     return [];
   } catch (error) {
-    console.error('[PredictiveScheduling] Risk analysis failed:', error);
+    logger.error('PREDICTIVE_SCHEDULING', 'Risk analysis failed', error instanceof Error ? error : undefined);
     return [];
   }
 }

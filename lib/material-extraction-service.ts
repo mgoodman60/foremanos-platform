@@ -5,6 +5,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 interface ExtractedMaterial {
   materialName: string;
@@ -154,7 +155,7 @@ Common material-trade mappings:
 
     return result;
   } catch (error) {
-    console.error('[MaterialExtraction] Error:', error);
+    logger.error('MATERIAL_EXTRACTION', 'Error extracting materials', error as Error);
     return null;
   }
 }
@@ -213,9 +214,9 @@ async function updateBudgetItemMaterialCost(
       },
     });
 
-    console.log(`[MaterialExtraction] Updated BudgetItem ${budgetItemId}: +$${materialCost.toFixed(2)} material cost`);
+    logger.info('MATERIAL_EXTRACTION', 'Updated BudgetItem material cost', { budgetItemId, materialCost: materialCost.toFixed(2) });
   } catch (error) {
-    console.error(`[MaterialExtraction] Error updating BudgetItem ${budgetItemId}:`, error);
+    logger.error('MATERIAL_EXTRACTION', `Error updating BudgetItem ${budgetItemId}`, error as Error);
   }
 }
 
@@ -310,7 +311,7 @@ export async function saveMaterialEntries(
         linkedToBudget++;
       }
     } catch (error) {
-      console.error(`[MaterialExtraction] Error saving material ${material.materialName}:`, error);
+      logger.error('MATERIAL_EXTRACTION', `Error saving material ${material.materialName}`, error as Error);
     }
   }
 
@@ -326,17 +327,17 @@ export async function processMaterialsFromDailyReport(
   reportDate: Date
 ): Promise<{ success: boolean; entriesSaved: number; linkedToBudget: number; totalMaterialCost: number }> {
   try {
-    console.log(`[MaterialExtraction] Processing conversation ${conversationId}`);
+    logger.info('MATERIAL_EXTRACTION', 'Processing conversation', { conversationId });
 
     // Extract material data
     const materialData = await extractMaterialsFromReport(conversationId, projectId);
 
     if (!materialData || materialData.materials.length === 0) {
-      console.log('[MaterialExtraction] No material data found in report');
+      logger.info('MATERIAL_EXTRACTION', 'No material data found in report');
       return { success: true, entriesSaved: 0, linkedToBudget: 0, totalMaterialCost: 0 };
     }
 
-    console.log(`[MaterialExtraction] Extracted ${materialData.materials.length} material deliveries`);
+    logger.info('MATERIAL_EXTRACTION', `Extracted ${materialData.materials.length} material deliveries`);
 
     // Save to database and link to budget items
     const result = await saveMaterialEntries(
@@ -346,7 +347,7 @@ export async function processMaterialsFromDailyReport(
       reportDate
     );
 
-    console.log(`[MaterialExtraction] Saved ${result.savedCount} material entries, ${result.linkedToBudget} linked to budget, $${result.totalMaterialCost.toFixed(2)} total cost`);
+    logger.info('MATERIAL_EXTRACTION', 'Material entries saved', { savedCount: result.savedCount, linkedToBudget: result.linkedToBudget, totalMaterialCost: result.totalMaterialCost.toFixed(2) });
 
     return {
       success: true,
@@ -355,7 +356,7 @@ export async function processMaterialsFromDailyReport(
       totalMaterialCost: result.totalMaterialCost,
     };
   } catch (error) {
-    console.error('[MaterialExtraction] Error processing materials:', error);
+    logger.error('MATERIAL_EXTRACTION', 'Error processing materials', error as Error);
     return { success: false, entriesSaved: 0, linkedToBudget: 0, totalMaterialCost: 0 };
   }
 }

@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 
 interface DocumentReference {
   sourceDocumentId: string;
@@ -80,10 +81,10 @@ export async function extractCrossReferences(
       })));
     }
 
-    console.log(`[DOC_INTELLIGENCE] Found ${references.length} cross-references in document ${documentId}`);
+    logger.info('DOC_INTELLIGENCE', `Found ${references.length} cross-references`, { documentId, count: references.length });
     return references;
   } catch (error) {
-    console.error('[DOC_INTELLIGENCE] Error extracting cross-references:', error);
+    logger.error('DOC_INTELLIGENCE', 'Error extracting cross-references', error as Error, { documentId });
     return [];
   }
 }
@@ -266,11 +267,11 @@ export async function compareDocumentVersions(
 
     const summary = `Found ${changes.length} changes: ${addedChanges} additions, ${removedChanges} removals, ${modifiedChanges} modifications`;
 
-    console.log(`[DOC_INTELLIGENCE] Version comparison: ${summary}`);
+    logger.info('DOC_INTELLIGENCE', 'Version comparison complete', { summary, changeCount: changes.length });
 
     return { changes, summary };
   } catch (error: any) {
-    console.error('[DOC_INTELLIGENCE] Error comparing versions:', error);
+    logger.error('DOC_INTELLIGENCE', 'Error comparing versions', error as Error, { oldDocumentId, newDocumentId });
     throw error;
   }
 }
@@ -354,7 +355,7 @@ export async function getRelatedDocuments(
 
     return Array.from(related.values());
   } catch (error) {
-    console.error('[DOC_INTELLIGENCE] Error getting related documents:', error);
+    logger.error('DOC_INTELLIGENCE', 'Error getting related documents', error as Error, { documentId });
     return [];
   }
 }

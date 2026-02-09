@@ -5,6 +5,7 @@
 
 import { getAccessToken } from './autodesk-auth';
 import { getObjectUrn } from './autodesk-oss';
+import { logger } from './logger';
 
 const MD_BASE_URL = 'https://developer.api.autodesk.com/modelderivative/v2';
 
@@ -112,7 +113,7 @@ export async function startTranslation(
   }
 
   const result = await response.json();
-  console.log('[Model Derivative] Translation started for URN:', urn);
+  logger.info('MODEL_DERIVATIVE', 'Translation started', { urn });
 
   return {
     urn: urn,

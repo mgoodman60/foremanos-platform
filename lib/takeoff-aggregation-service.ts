@@ -7,6 +7,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from './logger';
 
 // Types
 interface AggregatedLineItem {
@@ -530,7 +531,7 @@ Only suggest merges for items that are clearly the same material.`;
       mergesSuggested: mergeSuggestions.length
     };
   } catch (error) {
-    console.error('AI enhancement error:', error);
+    logger.error('TAKEOFF_AGGREGATION', 'AI enhancement error', error as Error);
     return { enhancedItems: 0, mergesSuggested: 0 };
   }
 }

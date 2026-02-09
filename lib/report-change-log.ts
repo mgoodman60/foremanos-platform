@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import { logger } from './logger';
 
 export type ChangeType =
   | 'message_added'
@@ -49,9 +50,9 @@ export async function logReportChange(params: LogChangeParams): Promise<void> {
       },
     });
 
-    console.log(`[REPORT_CHANGE_LOG] Logged ${changeType} for conversation ${conversationId}`);
+    logger.info('REPORT_CHANGELOG', `Logged ${changeType}`, { conversationId, changeType });
   } catch (error) {
-    console.error('[REPORT_CHANGE_LOG_ERROR]', error);
+    logger.error('REPORT_CHANGELOG', 'Error logging report change', error as Error, { conversationId, changeType });
     // Don't throw - logging errors shouldn't break the main flow
   }
 }
@@ -79,7 +80,7 @@ export async function getReportChangeLog(
 
     return logs;
   } catch (error) {
-    console.error('[GET_REPORT_CHANGE_LOG_ERROR]', error);
+    logger.error('REPORT_CHANGELOG', 'Error getting report change log', error as Error, { conversationId });
     return [];
   }
 }
@@ -104,7 +105,7 @@ export async function isReportLocked(
       conversation?.isReadOnly === true
     );
   } catch (error) {
-    console.error('[IS_REPORT_LOCKED_ERROR]', error);
+    logger.error('REPORT_CHANGELOG', 'Error checking report lock status', error as Error, { conversationId });
     return false;
   }
 }
@@ -149,7 +150,7 @@ export async function canModifyLockedReport(
 
     return !!member;
   } catch (error) {
-    console.error('[CAN_MODIFY_LOCKED_REPORT_ERROR]', error);
+    logger.error('REPORT_CHANGELOG', 'Error checking modify locked report permission', error as Error, { userId, projectId });
     return false;
   }
 }

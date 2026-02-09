@@ -24,6 +24,7 @@
  */
 
 import { PDFDocument } from 'pdf-lib';
+import { logger } from './logger';
 
 // Dynamic import for sharp
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,12 +103,12 @@ export async function rasterizePdfToImages(
   } = options;
 
   try {
-    console.log(`[PDF-RASTER] Starting PDF processing (mode: ${mode})...`);
+    logger.info('PDF_RASTER', `Starting PDF processing`, { mode });
 
     // Load PDF document
     const pdfDoc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     const totalPages = pdfDoc.getPageCount();
-    console.log(`[PDF-RASTER] PDF has ${totalPages} pages`);
+    logger.info('PDF_RASTER', `PDF has ${totalPages} pages`);
 
     // Determine which pages to convert
     let pagesToConvert: number[] = [];
@@ -122,7 +123,7 @@ export async function rasterizePdfToImages(
       pagesToConvert = Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    console.log(`[PDF-RASTER] Converting pages: ${pagesToConvert.join(', ')}`);
+    logger.info('PDF_RASTER', `Converting pages: ${pagesToConvert.join(', ')}`);
 
     const results: RasterizedPage[] = [];
 
@@ -173,7 +174,7 @@ export async function rasterizePdfToImages(
             isPdfNative: true,
           });
 
-          console.log(`[PDF-RASTER] Page ${pageNum}: ${pixelWidth}x${pixelHeight} (PDF native)`);
+          logger.info('PDF_RASTER', `Page ${pageNum}: ${pixelWidth}x${pixelHeight} (PDF native)`);
         } else {
           // Placeholder Mode: Create white image with correct dimensions
           const sharp = await getSharp();
@@ -213,17 +214,17 @@ export async function rasterizePdfToImages(
             isPdfNative: false,
           });
 
-          console.log(`[PDF-RASTER] Page ${pageNum}: ${finalMetadata.width}x${finalMetadata.height} ${format} (placeholder)`);
+          logger.info('PDF_RASTER', `Page ${pageNum}: ${finalMetadata.width}x${finalMetadata.height} ${format} (placeholder)`);
         }
       } catch (pageError: any) {
-        console.error(`[PDF-RASTER] Error processing page ${pageNum}:`, pageError.message);
+        logger.error('PDF_RASTER', `Error processing page ${pageNum}`, undefined, { error: pageError.message });
         // Continue with other pages
       }
     }
 
     return results;
   } catch (error: any) {
-    console.error('[PDF-RASTER] Processing error:', error.message);
+    logger.error('PDF_RASTER', 'Processing error', undefined, { error: error.message });
     throw new Error(`PDF processing failed: ${error.message}`);
   }
 }
@@ -260,7 +261,7 @@ export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
     const doc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     return doc.getPageCount();
   } catch (error: any) {
-    console.error('[PDF-RASTER] Error getting page count:', error.message);
+    logger.error('PDF_RASTER', 'Error getting page count', undefined, { error: error.message });
     throw new Error(`Failed to get PDF page count: ${error.message}`);
   }
 }

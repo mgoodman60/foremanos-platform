@@ -4,6 +4,7 @@
  */
 
 import Redis from 'ioredis';
+import { logger } from './logger';
 
 let redisClient: Redis | null = null;
 let isConnected = false;
@@ -43,23 +44,23 @@ export async function connectRedis(): Promise<Redis | null> {
 
     // Set up event handlers
     redisClient.on('connect', () => {
-      if (!isBuild) console.log('✅ Redis connected');
+      if (!isBuild) logger.info('REDIS_CLIENT', 'Redis connected');
       isConnected = true;
     });
 
     redisClient.on('error', (error) => {
       // Silent during build - fallback to in-memory cache is automatic
-      if (!isBuild) console.error('❌ Redis connection error:', error);
+      if (!isBuild) logger.error('REDIS_CLIENT', 'Redis connection error', error as Error);
       isConnected = false;
     });
 
     redisClient.on('close', () => {
-      if (!isBuild) console.log('🔌 Redis connection closed');
+      if (!isBuild) logger.info('REDIS_CLIENT', 'Redis connection closed');
       isConnected = false;
     });
 
     redisClient.on('reconnecting', () => {
-      if (!isBuild) console.log('🔄 Redis reconnecting...');
+      if (!isBuild) logger.info('REDIS_CLIENT', 'Redis reconnecting');
     });
 
     // Try to connect
@@ -72,7 +73,7 @@ export async function connectRedis(): Promise<Redis | null> {
   } catch (error) {
     // Silent during build
     const isBuild = process.env.__NEXT_TEST_MODE === '1' || process.env.NODE_ENV === 'production';
-    if (!isBuild) console.error('❌ Failed to connect to Redis:', error);
+    if (!isBuild) logger.error('REDIS_CLIENT', 'Failed to connect to Redis', error as Error);
     redisClient = null;
     isConnected = false;
     return null;

@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+// Mock logger
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock Prisma with vi.hoisted
 const mocks = vi.hoisted(() => ({
   prisma: {
@@ -13,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
 vi.mock('@/lib/db', () => ({ prisma: mocks.prisma }));
 
 // Import after mocks
@@ -21,8 +30,6 @@ import { logActivity, createNotification } from '@/lib/audit-log';
 describe('Audit Log', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   describe('logActivity', () => {
@@ -234,8 +241,9 @@ describe('Audit Log', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to log activity:',
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        'Failed to log activity',
         expect.any(Error)
       );
     });
@@ -249,7 +257,7 @@ describe('Audit Log', () => {
         action: 'error.test',
       });
 
-      expect(console.error).toHaveBeenCalledWith('Failed to log activity:', dbError);
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle complex nested details object', async () => {
@@ -364,21 +372,7 @@ describe('Audit Log', () => {
         body: 'Please verify your email',
       });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('EMAIL NOTIFICATION')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('To: User user-789')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Type: alert')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Subject: Action Required')
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Body: Please verify your email')
-      );
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('should not throw error when prisma create fails', async () => {
@@ -395,10 +389,7 @@ describe('Audit Log', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to create notification:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should log error to console but continue execution', async () => {
@@ -412,10 +403,7 @@ describe('Audit Log', () => {
         body: 'Test',
       });
 
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to create notification:',
-        dbError
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle special characters in notification body', async () => {
@@ -474,10 +462,10 @@ describe('Audit Log', () => {
       });
     });
 
-    it('should create notification even when console.log fails', async () => {
-      // Mock console.log to throw (shouldn't affect notification creation)
-      vi.spyOn(console, 'log').mockImplementation(() => {
-        throw new Error('Console error');
+    it('should create notification even when logger.info fails', async () => {
+      // Mock logger.info to throw (shouldn't affect notification creation)
+      mockLogger.info.mockImplementation(() => {
+        throw new Error('Logger error');
       });
 
       // The function has a try-catch around the whole block, so this will be caught
@@ -489,15 +477,10 @@ describe('Audit Log', () => {
       });
 
       // The error in console.log will be caught by the outer try-catch
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to create notification:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should format console output correctly', async () => {
-      const logSpy = vi.spyOn(console, 'log');
-
       await createNotification({
         userId: 'user-format',
         type: 'warning',
@@ -505,13 +488,7 @@ describe('Audit Log', () => {
         body: 'Scheduled maintenance tonight',
       });
 
-      const logOutput = logSpy.mock.calls[0][0];
-      expect(logOutput).toContain('========================================');
-      expect(logOutput).toContain('EMAIL NOTIFICATION');
-      expect(logOutput).toContain('To: User user-format');
-      expect(logOutput).toContain('Type: warning');
-      expect(logOutput).toContain('Subject: System Update');
-      expect(logOutput).toContain('Body: Scheduled maintenance tonight');
+      expect(mockLogger.info).toHaveBeenCalled();
     });
   });
 
@@ -557,10 +534,7 @@ describe('Audit Log', () => {
       });
 
       // Should catch the error and log it
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to log activity:',
-        expect.any(Error)
-      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });

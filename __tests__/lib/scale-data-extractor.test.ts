@@ -21,6 +21,15 @@ vi.mock('@/lib/scale-detector', () => ({
 // Mock global fetch
 global.fetch = mocks.fetch as any;
 
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
+vi.mock('@/lib/logger', () => ({ logger: mockLogger }));
+
 import { extractScaleData, type ScaleData } from '@/lib/scale-data-extractor';
 
 describe('ScaleDataExtractor', () => {
@@ -512,17 +521,11 @@ describe('ScaleDataExtractor', () => {
       });
 
       it('should log errors with page number', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         mocks.callAbacusLLM.mockRejectedValueOnce(new Error('Test error'));
 
         await extractScaleData('base64ImageData', 5);
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Error extracting scale from page 5:',
-          expect.any(Error)
-        );
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalled();
       });
     });
 
@@ -886,17 +889,11 @@ describe('ScaleDataExtractor', () => {
       });
 
       it('should handle very high page numbers', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         mocks.callAbacusLLM.mockRejectedValueOnce(new Error('Test'));
 
         await extractScaleData('base64ImageData', 9999);
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Error extracting scale from page 9999:',
-          expect.any(Error)
-        );
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalled();
       });
 
       it('should handle response with extra whitespace in JSON', async () => {

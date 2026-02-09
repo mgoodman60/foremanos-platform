@@ -10,6 +10,7 @@
 
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // INTERFACES
@@ -88,7 +89,7 @@ ${specText.substring(0, 12000)}`;
     }
     return [];
   } catch (error) {
-    console.error('[SpecComplianceChecker] Extraction failed:', error);
+    logger.error('SPEC_COMPLIANCE', 'Extraction failed', error instanceof Error ? error : undefined);
     return [];
   }
 }
@@ -180,7 +181,7 @@ Analyze compliance and return JSON:
       recommendations: 'Manual review required',
     };
   } catch (error) {
-    console.error('[SpecComplianceChecker] Compliance check failed:', error);
+    logger.error('SPEC_COMPLIANCE', 'Compliance check failed', error instanceof Error ? error : undefined);
     return {
       status: 'REQUIRES_REVIEW',
       complianceScore: 0,
@@ -233,7 +234,7 @@ export async function runComplianceCheckAndStore(
       specRequirements = await extractSpecRequirements(combinedText, specSection);
     }
   } catch (error) {
-    console.error('[SpecComplianceChecker] Failed to extract spec requirements:', error);
+    logger.error('SPEC_COMPLIANCE', 'Failed to extract spec requirements', error instanceof Error ? error : undefined);
   }
 
   // Run compliance check

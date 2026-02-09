@@ -39,7 +39,7 @@ export async function checkCache(
   const cachedResult = await getCachedResponse(message, projectSlug, documentIds);
 
   if (cachedResult) {
-    console.log(`💰 [COST SAVE] Cache hit - returning cached response`);
+    logger.info('LLM_HANDLER', 'Cache hit - returning cached response');
     return { hit: true, response: cachedResult };
   }
 
@@ -58,7 +58,7 @@ export async function saveCachedResponse(
   model: string
 ): Promise<void> {
   await cacheResponse(message, response, projectSlug, documentIds, complexity as "medium" | "simple" | "complex", model);
-  console.log(`💾 [CACHE SAVE] Cached ${complexity} query response (${model})`);
+  logger.info('LLM_HANDLER', 'Cached query response', { complexity, model });
 }
 
 /**
@@ -83,7 +83,7 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
     logger.info('CHAT_API', `Model downgraded for ${tier} tier`, { requested: selectedModel, effective: effectiveModel });
   }
 
-  console.log(`🤖 [MODEL SELECTION] Using ${effectiveModel} - ${complexityAnalysis.reason}`);
+  logger.info('LLM_HANDLER', 'Model selected', { model: effectiveModel, reason: complexityAnalysis.reason });
 
   // Determine if web search should be enabled
   const useWebSearch = !!image || (context.webSearchResults && context.webSearchResults.length > 0);

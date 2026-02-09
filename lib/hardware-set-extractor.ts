@@ -10,6 +10,7 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
 
 // =============================================================================
@@ -269,7 +270,7 @@ ${specText.substring(0, 12000)}`;
 
     const jsonMatch = response.content.match(/\[\s*\{[\s\S]*\}\s*\]/);
     if (!jsonMatch) {
-      console.log('[HardwareSetExtractor] No valid JSON found in response');
+      logger.warn('HARDWARE_SET_EXTRACTOR', 'No valid JSON found in response');
       return [];
     }
 
@@ -279,7 +280,7 @@ ${specText.substring(0, 12000)}`;
       sourceType: 'spec_section' as const
     }));
   } catch (error) {
-    console.error('[HardwareSetExtractor] Spec extraction failed:', error);
+    logger.error('HARDWARE_SET_EXTRACTOR', 'Spec extraction failed', error as Error);
     return [];
   }
 }
