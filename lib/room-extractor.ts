@@ -42,13 +42,102 @@ interface ExtractionResult {
 }
 
 /**
+ * Extract rooms from DocumentChunk metadata (zero LLM calls)
+ * Reads the rooms array stored in chunk metadata during vision extraction
+ */
+export async function extractRoomsFromMetadata(
+  projectSlug: string,
+  documentId?: string
+): Promise<ExtractedRoom[]> {
+  log.info('Starting metadata-based room extraction', { projectSlug, documentId });
+
+  const whereClause: any = {
+    metadata: { not: null as any },
+  };
+
+  if (documentId) {
+    whereClause.documentId = documentId;
+  } else {
+    // Get project to find all documents
+    const project = await prisma.project.findUnique({
+      where: { slug: projectSlug },
+      select: { id: true },
+    });
+    if (!project) {
+      log.warn('Project not found for metadata extraction', { projectSlug });
+      return [];
+    }
+    whereClause.document = {
+      projectId: project.id,
+      processed: true,
+      deletedAt: null,
+    };
+  }
+
+  const chunks = await prisma.documentChunk.findMany({
+    where: whereClause,
+    select: { metadata: true, documentId: true },
+  });
+
+  const roomMap = new Map<string, ExtractedRoom>();
+
+  for (const chunk of chunks) {
+    const meta = chunk.metadata as any;
+    if (!meta?.rooms || !Array.isArray(meta.rooms)) continue;
+
+    for (const room of meta.rooms) {
+      if (!room.number && !room.name) continue;
+
+      const roomNumber = room.number || room.name || '';
+      const dedupKey = `${roomNumber}_${chunk.documentId}`;
+
+      if (roomMap.has(dedupKey)) continue;
+
+      let area: number | undefined;
+      if (room.area) {
+        const parsed = parseFloat(String(room.area).replace(/[^\d.]/g, ''));
+        if (!isNaN(parsed) && parsed > 0) {
+          area = parsed;
+        }
+      }
+
+      roomMap.set(dedupKey, {
+        roomNumber,
+        roomType: room.name || room.type || 'Unknown',
+        floor: room.floor || '1st Floor',
+        area,
+        notes: room.notes,
+      });
+    }
+  }
+
+  const rooms = Array.from(roomMap.values());
+  log.info('Metadata room extraction complete', { roomCount: rooms.length });
+  return rooms;
+}
+
+/**
  * Extract rooms and finish schedules from project documents
+ * Uses metadata-first approach, falling back to LLM only when needed
  */
 export async function extractRoomsFromDocuments(
   projectSlug: string
 ): Promise<ExtractionResult> {
   log.info('Starting extraction', { projectSlug });
-  
+
+  // Try metadata-first extraction (zero LLM calls)
+  const metadataRooms = await extractRoomsFromMetadata(projectSlug);
+  if (metadataRooms.length > 0) {
+    log.info('Using metadata-extracted rooms (no LLM needed)', { roomCount: metadataRooms.length });
+    return {
+      rooms: metadataRooms,
+      summary: `Extracted ${metadataRooms.length} rooms from document metadata (no LLM calls).`,
+      documentsProcessed: 1,
+    };
+  }
+
+  log.info('No rooms found in metadata, falling back to LLM extraction');
+
   // Get project
   const project = await prisma.project.findUnique({
     where: { slug: projectSlug },

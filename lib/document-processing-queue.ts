@@ -332,14 +332,26 @@ async function runPostProcessing(documentId: string, totalPagesProcessed: number
     logger.error('PROCESS_QUEUE', 'Intelligence extraction failed', error as Error, { documentId });
   }
 
-  // 2. Room extraction
+  // 2. Room extraction (metadata-first, LLM fallback)
   try {
-    logger.info('PROCESS_QUEUE', 'Starting room extraction', { projectSlug });
-    const { extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
-    const roomResult = await extractRoomsFromDocuments(projectSlug);
-    if (roomResult.rooms.length > 0) {
-      const saveResult = await saveExtractedRooms(projectSlug, roomResult.rooms);
-      logger.info('PROCESS_QUEUE', 'Room extraction complete', { created: saveResult.created, updated: saveResult.updated });
+    logger.info('PROCESS_QUEUE', 'Starting room extraction (metadata-first)', { projectSlug, documentId });
+    const { extractRoomsFromMetadata, extractRoomsFromDocuments, saveExtractedRooms } = await import('./room-extractor');
+
+    // Try metadata extraction first (zero LLM calls)
+    let rooms = await extractRoomsFromMetadata(projectSlug, documentId);
+    let source = 'metadata';
+
+    if (rooms.length === 0) {
+      // Fall back to full LLM extraction
+      logger.info('PROCESS_QUEUE', 'No rooms in metadata, falling back to LLM extraction', { projectSlug });
+      const roomResult = await extractRoomsFromDocuments(projectSlug);
+      rooms = roomResult.rooms;
+      source = 'llm';
+    }
+
+    if (rooms.length > 0) {
+      const saveResult = await saveExtractedRooms(projectSlug, rooms);
+      logger.info('PROCESS_QUEUE', 'Room extraction complete', { source, created: saveResult.created, updated: saveResult.updated });
     } else {
       logger.info('PROCESS_QUEUE', 'No rooms found in documents');
     }
@@ -427,7 +439,7 @@ function accumulateProviderStats(
 export async function processQueuedDocument(
   documentId: string,
   maxDurationMs: number = 270000,
-  maxConcurrency: number = 3,
+  maxConcurrency: number = 5,
   staleBatchTimeoutMs: number = 5 * 60 * 1000
 ): Promise<void> {
   const startTime = Date.now();

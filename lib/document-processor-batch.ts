@@ -750,6 +750,7 @@ function extractMetadata(data: any): any {
     hasScale: !!data.scale,
     hasDimensions: (data.dimensions?.length || 0) > 0,
     roomsCount: data.rooms?.length || 0,
+    rooms: data.rooms || null,
     notesCount: data.notes?.length || 0,
     // Enhanced extraction metadata
     visualMaterials: data.visualMaterials || null,

@@ -718,8 +718,8 @@ describe('Document Processor - Error Handling', () => {
     // Verify document was queued
     expect(queueDocumentForProcessing).toHaveBeenCalledWith('doc-1', 25, 5, 'vision-ai');
 
-    // Verify processQueuedDocument was NOT called inline (cron handles it)
-    expect(processQueuedDocument).not.toHaveBeenCalled();
+    // Verify processQueuedDocument IS called immediately (fire-and-forget, cron as safety net)
+    expect(processQueuedDocument).toHaveBeenCalledWith('doc-1');
 
     // Verify document status set to queued
     expect(mockPrisma.document.update).toHaveBeenCalledWith(

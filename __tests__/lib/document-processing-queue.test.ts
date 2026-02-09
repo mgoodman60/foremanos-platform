@@ -488,7 +488,7 @@ describe('Document Processing Queue', () => {
             pagesProcessed: 10,
             currentBatch: 2,
             metadata: expect.objectContaining({
-              concurrency: 3,
+              concurrency: 5,
               processingMode: 'concurrent',
             }),
           }),
@@ -588,7 +588,7 @@ describe('Document Processing Queue', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             metadata: expect.objectContaining({
-              concurrency: 3,
+              concurrency: 5,
               processingMode: 'concurrent',
             }),
           }),

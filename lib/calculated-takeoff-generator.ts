@@ -38,6 +38,22 @@ export async function generateTakeoffFromCalculations(
   const errors: string[] = [];
 
   try {
+    // Idempotency: delete existing auto-calculated takeoffs before creating new ones
+    await prisma.takeoffLineItem.deleteMany({
+      where: {
+        MaterialTakeoff: {
+          documentId: documentId,
+          extractedBy: 'auto-calculation',
+        },
+      },
+    });
+    await prisma.materialTakeoff.deleteMany({
+      where: {
+        documentId: documentId,
+        extractedBy: 'auto-calculation',
+      },
+    });
+
     // Create the takeoff
     const takeoff = await prisma.materialTakeoff.create({
       data: {

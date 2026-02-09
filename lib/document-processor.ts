@@ -331,11 +331,19 @@ async function processWithVision(
         },
       });
 
-      // Don't process inline — the cron job (/api/admin/process-queue) picks up
-      // queued documents every 5 minutes with a 300s timeout, which is far more
-      // reliable than trying to process inside waitUntil() with a 60s function timeout.
-      logger.info('PROCESS', `Document ${documentId} queued for cron processing`, { pages, batches: Math.ceil(pages / 5) });
-      
+      // Start processing immediately (cron remains as safety net)
+      try {
+        const { processQueuedDocument } = await import('./document-processing-queue');
+        // Fire-and-forget — don't await, let it run in background
+        processQueuedDocument(documentId).catch((err) => {
+          logger.warn('DOCUMENT_PROCESSOR', 'Immediate queue processing failed, cron will retry', { documentId, error: err?.message });
+        });
+      } catch (importErr) {
+        logger.warn('DOCUMENT_PROCESSOR', 'Failed to import processing queue for immediate start', { documentId });
+      }
+
+      logger.info('PROCESS', `Document ${documentId} queued and immediate processing triggered`, { pages, batches: Math.ceil(pages / 5) });
+
       // Return 0 - actual values will be updated as queue processes
       return { pages: 0, cost: 0 };
     }

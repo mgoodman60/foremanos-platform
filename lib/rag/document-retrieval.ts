@@ -142,17 +142,17 @@ function detectQueryIntent(query: string): string[] {
 
   // Budget/Cost related
   if (lowerQuery.match(/\b(cost|budget|price|pricing|estimate|bid|quote|payment|invoice|expense)\b/i)) {
-    intents.push('budgets');
+    intents.push('budget_cost');
   }
 
   // Schedule related
   if (lowerQuery.match(/\b(schedule|timeline|deadline|milestone|duration|gantt|critical path|phase|when|date)\b/i)) {
-    intents.push('schedules');
+    intents.push('schedule');
   }
 
   // Plans/Drawings related
   if (lowerQuery.match(/\b(plan|drawing|blueprint|sheet|elevation|section|detail|dimension|scale|layout)\b/i)) {
-    intents.push('plans');
+    intents.push('plans_drawings');
   }
 
   // Specifications related
@@ -167,7 +167,7 @@ function detectQueryIntent(query: string): string[] {
 
   // Daily Reports related
   if (lowerQuery.match(/\b(daily|log|report|inspection|progress|status|field|observation|weather)\b/i)) {
-    intents.push('reports');
+    intents.push('daily_reports');
   }
 
   return intents;

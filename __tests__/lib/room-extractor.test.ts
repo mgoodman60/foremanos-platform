@@ -19,6 +19,9 @@ const mockPrisma = vi.hoisted(() => ({
     create: vi.fn(),
     update: vi.fn(),
   },
+  documentChunk: {
+    findMany: vi.fn(),
+  },
 }));
 
 const mockLogger = vi.hoisted(() => ({
@@ -58,6 +61,8 @@ describe('room-extractor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAbbreviations.generateAbbreviationContext.mockReturnValue('');
+    // Default: no rooms in metadata, so tests fall through to LLM path
+    mockPrisma.documentChunk.findMany.mockResolvedValue([]);
   });
 
   describe('extractRoomsFromDocuments', () => {

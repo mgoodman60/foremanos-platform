@@ -7,6 +7,7 @@ import { X, CheckCircle2, Loader2 } from 'lucide-react';
 import { documentCategorySchema, type DocumentCategoryFormData } from '@/lib/schemas';
 import { getAllCategories, getCategoryLabel } from '@/lib/document-categorizer';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import { logger } from '@/lib/logger';
 
 interface DocumentCategoryModalProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function DocumentCategoryModal({
   } = useForm<DocumentCategoryFormData>({
     resolver: zodResolver(documentCategorySchema),
     defaultValues: {
-      category: 'other',
+      category: '' as unknown as DocumentCategoryFormData['category'],
     },
   });
 
@@ -96,7 +97,7 @@ export function DocumentCategoryModal({
         setValue('category', 'other');
       }
     } catch (error) {
-      console.error('Error getting category suggestion:', error);
+      logger.error('DOCUMENT_CATEGORY', 'Error getting category suggestion', error as Error);
       setValue('category', 'other');
     } finally {
       setLoading(false);
@@ -293,10 +294,10 @@ export function DocumentCategoryModal({
             </button>
             <button
               type="submit"
-              disabled={isUploading}
+              disabled={isUploading || !selectedCategory}
               className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
-                isUploading
-                  ? 'bg-orange-500 text-white opacity-75 cursor-not-allowed'
+                isUploading || !selectedCategory
+                  ? 'bg-gray-600 text-gray-400 opacity-75 cursor-not-allowed'
                   : fileName
                   ? 'bg-orange-500 text-white hover:bg-orange-600'
                   : 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg ring-2 ring-orange-500/50'

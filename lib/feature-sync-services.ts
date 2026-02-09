@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { FeatureType, DataSourceType, DATA_SOURCE_PRIORITY, recordDataSource } from './document-intelligence-router';
+import { resolveModelAlias } from '@/lib/model-config';
 
 let openaiInstance: OpenAI | null = null;
 
@@ -72,15 +73,42 @@ export async function syncRoomData(
   documentId: string,
   sourceType: DataSourceType
 ): Promise<{ updated: number; created: number }> {
-  const chunks = await prisma.documentChunk.findMany({
-    where: { documentId },
-    select: { content: true, metadata: true },
-  });
+  // Try metadata-first extraction (zero LLM calls)
+  let extractedRooms: { roomNumber: string; name: string; type: string; sqft?: number; floor?: string }[] = [];
 
-  const content = chunks.map(c => c.content).join('\n');
-  
-  // Use AI to extract room data
-  const prompt = `Extract room information from this document. Return JSON array:
+  try {
+    const { extractRoomsFromMetadata } = await import('@/lib/room-extractor');
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: { slug: true },
+    });
+    if (project?.slug) {
+      const metadataRooms = await extractRoomsFromMetadata(project.slug, documentId);
+      extractedRooms = metadataRooms.map(r => ({
+        roomNumber: r.roomNumber,
+        name: `${r.roomType} ${r.roomNumber}`,
+        type: r.roomType,
+        sqft: r.area,
+        floor: r.floor,
+      }));
+      if (extractedRooms.length > 0) {
+        logger.info('FEATURE_SYNC', 'Room sync using metadata extraction (no LLM)', { roomCount: extractedRooms.length });
+      }
+    }
+  } catch (metaErr) {
+    logger.warn('FEATURE_SYNC', 'Metadata room extraction failed, falling back to LLM', { error: (metaErr as Error).message });
+  }
+
+  // Fall back to LLM extraction if metadata yielded zero rooms
+  if (extractedRooms.length === 0) {
+    const chunks = await prisma.documentChunk.findMany({
+      where: { documentId },
+      select: { content: true, metadata: true },
+    });
+
+    const content = chunks.map(c => c.content).join('\n');
+
+    const prompt = `Extract room information from this document. Return JSON array:
 [
   { "name": "Office 101", "roomNumber": "101", "type": "Office", "sqft": 150, "floor": "1" }
 ]
@@ -90,76 +118,81 @@ ${content.substring(0, 10000)}
 
 Return ONLY JSON array.`;
 
-  try {
-    const response = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 3000,
-    });
-
-    const text = response.choices[0]?.message?.content || '';
-    const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
-
-    if (match) {
-      const rooms = JSON.parse(match[0]);
-      let created = 0, updated = 0;
-
-      for (const room of rooms) {
-        const existing = await prisma.room.findFirst({
-          where: {
-            projectId,
-            OR: [
-              { roomNumber: room.roomNumber },
-              { name: room.name },
-            ],
-          },
-        });
-
-        if (existing) {
-          // Only update if new source is higher confidence
-          const existingSource = await prisma.projectDataSource.findFirst({
-            where: { projectId, featureType: 'rooms' },
-          });
-          
-          if (!existingSource || DATA_SOURCE_PRIORITY[sourceType] > existingSource.confidence) {
-            await prisma.room.update({
-              where: { id: existing.id },
-              data: {
-                area: room.sqft || existing.area,
-                type: room.type || existing.type,
-                floorNumber: room.floor ? parseInt(room.floor) : existing.floorNumber,
-              },
-            });
-            updated++;
-          }
-        } else {
-          await prisma.room.create({
-            data: {
-              projectId,
-              name: room.name,
-              roomNumber: room.roomNumber,
-              type: room.type || 'General',
-              area: room.sqft || 0,
-              floorNumber: room.floor ? parseInt(room.floor) : 1,
-            },
-          });
-          created++;
-        }
-      }
-
-      await recordDataSource(projectId, documentId, 'rooms', sourceType, {
-        totalRooms: rooms.length,
-        created,
-        updated,
+    try {
+      const response = await getOpenAI().chat.completions.create({
+        model: resolveModelAlias('gpt-4o-mini'),
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 3000,
       });
 
-      return { created, updated };
+      const text = response.choices[0]?.message?.content || '';
+      const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
+
+      if (match) {
+        extractedRooms = JSON.parse(match[0]);
+      }
+    } catch (error) {
+      logger.error('FEATURE_SYNC', 'Room sync LLM error', error as Error);
+      return { created: 0, updated: 0 };
     }
-  } catch (error) {
-    logger.error('FEATURE_SYNC', 'Room sync error', error as Error);
   }
 
-  return { created: 0, updated: 0 };
+  if (extractedRooms.length === 0) {
+    return { created: 0, updated: 0 };
+  }
+
+  let created = 0, updated = 0;
+
+  for (const room of extractedRooms) {
+    const existing = await prisma.room.findFirst({
+      where: {
+        projectId,
+        OR: [
+          { roomNumber: room.roomNumber },
+          { name: room.name },
+        ],
+      },
+    });
+
+    if (existing) {
+      // Only update if new source is higher confidence
+      const existingSource = await prisma.projectDataSource.findFirst({
+        where: { projectId, featureType: 'rooms' },
+      });
+
+      if (!existingSource || DATA_SOURCE_PRIORITY[sourceType] > existingSource.confidence) {
+        await prisma.room.update({
+          where: { id: existing.id },
+          data: {
+            area: room.sqft || existing.area,
+            type: room.type || existing.type,
+            floorNumber: room.floor ? parseInt(room.floor) : existing.floorNumber,
+          },
+        });
+        updated++;
+      }
+    } else {
+      await prisma.room.create({
+        data: {
+          projectId,
+          name: room.name,
+          roomNumber: room.roomNumber,
+          type: room.type || 'General',
+          area: room.sqft || 0,
+          floorNumber: room.floor ? parseInt(room.floor) : 1,
+        },
+      });
+      created++;
+    }
+  }
+
+  await recordDataSource(projectId, documentId, 'rooms', sourceType, {
+    totalRooms: extractedRooms.length,
+    created,
+    updated,
+  });
+
+  return { created, updated };
 }
 
 // ============= DOOR SYNC =============

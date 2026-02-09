@@ -539,6 +539,24 @@ export async function runIntelligenceExtraction(
       // Non-blocking: don't fail the document processing if enrichment fails
     }
 
+    // Phase: Quantity Calculations (after sheet index is built)
+    try {
+      const { runQuantityCalculations } = await import('./quantity-calculation-orchestrator');
+      await runQuantityCalculations(documentId);
+      logger.info('INTELLIGENCE_ORCHESTRATOR', 'Quantity calculations completed', { documentId });
+    } catch (calcError: any) {
+      logger.warn('INTELLIGENCE_ORCHESTRATOR', 'Quantity calculations failed (non-blocking)', { documentId, error: calcError?.message });
+    }
+
+    // Phase: Auto-generate MaterialTakeoff from calculations
+    try {
+      const { generateTakeoffFromCalculations } = await import('./calculated-takeoff-generator');
+      await generateTakeoffFromCalculations(documentId, document.projectId, 'system');
+      logger.info('INTELLIGENCE_ORCHESTRATOR', 'Calculated takeoff generation completed', { documentId });
+    } catch (takeoffError: any) {
+      logger.warn('INTELLIGENCE_ORCHESTRATOR', 'Calculated takeoff generation failed (non-blocking)', { documentId, error: takeoffError?.message });
+    }
+
     result.success = true;
     logger.info('INTELLIGENCE_ORCHESTRATOR', 'Intelligence extraction completed');
 
