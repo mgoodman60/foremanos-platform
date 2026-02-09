@@ -135,7 +135,7 @@ export async function linkRegulatoryDocumentToProject(
       };
     }
 
-    if (regDoc.DocumentChunk?.length || 0 === 0) {
+    if ((regDoc.DocumentChunk?.length || 0) === 0) {
       return {
         success: false,
         error: `Regulatory document ${standard} ${version} has no chunks`,
