@@ -51,6 +51,11 @@ const MEP_ASSIGNMENTS: Record<string, MEPAssignment> = {
   'Circulation': { lights: 3 },
   'Observation/Triage': { outlets: 8, lights: 6, plumbing: 'LAV', data: 4 },
   'Obs/Triage': { outlets: 8, lights: 6, plumbing: 'LAV', data: 4 },
+  'Exterior': { outlets: 0, lights: 8 },
+  'Parking': { outlets: 0, lights: 6 },
+  'Site': { outlets: 0, lights: 4 },
+  'Roof': { outlets: 2, lights: 2 },
+  'Loading Dock': { outlets: 2, lights: 4 },
 };
 
 export async function extractDoorScheduleFromChunks(projectId: string): Promise<DoorFromSchedule[]> {

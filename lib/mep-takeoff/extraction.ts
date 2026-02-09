@@ -368,6 +368,7 @@ async function estimateMEPFromRooms(projectId: string): Promise<{
     totalCost: eP.exterior_light.price * 8,
     source: 'Building perimeter lighting',
     confidence: 65,
+    location: 'exterior',
   });
 
   // Parking lot pole lights
@@ -380,6 +381,7 @@ async function estimateMEPFromRooms(projectId: string): Promise<{
     totalCost: eP.pole_light.price * 6,
     source: 'Parking lot lighting',
     confidence: 65,
+    location: 'site',
   });
 
   // Main panel (400A) + subpanels (2x 200A)

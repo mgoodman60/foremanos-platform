@@ -22,4 +22,5 @@ export interface MEPItem {
   totalCost: number;
   source: string;
   confidence: number;
+  location?: string;
 }

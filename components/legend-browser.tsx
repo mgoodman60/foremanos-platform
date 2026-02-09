@@ -22,10 +22,11 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface LegendEntry {
-  symbol: string;
-  description: string;
+  symbolCode: string;
+  symbolDescription: string;
   category: string;
   sheetNumbers: string[];
   confidence?: number;
@@ -41,10 +42,9 @@ interface SheetLegend {
 }
 
 interface ValidationIssue {
-  symbol: string;
+  symbolCode: string;
   sheets: string[];
   descriptions: string[];
-  severity: 'high' | 'medium' | 'low';
 }
 
 interface LegendBrowserProps {
@@ -64,14 +64,14 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Electrical: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  Mechanical: 'bg-blue-100 text-blue-800 border-blue-200',
-  Plumbing: 'bg-cyan-100 text-cyan-800 border-cyan-200',
-  'Fire Protection': 'bg-red-100 text-red-800 border-red-200',
-  Architectural: 'bg-purple-100 text-purple-800 border-purple-200',
-  Structural: 'bg-green-100 text-green-800 border-green-200',
-  Civil: 'bg-orange-100 text-orange-800 border-orange-200',
-  General: 'bg-gray-100 text-gray-800 border-gray-200',
+  Electrical: 'bg-yellow-900/30 text-yellow-400 border-yellow-700',
+  Mechanical: 'bg-blue-900/30 text-blue-400 border-blue-700',
+  Plumbing: 'bg-cyan-900/30 text-cyan-400 border-cyan-700',
+  'Fire Protection': 'bg-red-900/30 text-red-400 border-red-700',
+  Architectural: 'bg-purple-900/30 text-purple-400 border-purple-700',
+  Structural: 'bg-gray-700/50 text-gray-300 border-gray-600',
+  Civil: 'bg-green-900/30 text-green-400 border-green-700',
+  General: 'bg-slate-700/50 text-slate-300 border-slate-600',
 };
 
 export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBrowserProps) {
@@ -83,8 +83,11 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
   const [extracting, setExtracting] = useState(false);
   const [stats, setStats] = useState({
     totalSymbols: 0,
+    totalLegends: 0,
     avgConfidence: 0,
+    avgSymbolsPerSheet: 0,
     coveragePercent: 0,
+    byDiscipline: {} as Record<string, number>,
   });
 
   // Load legends on mount
@@ -106,17 +109,18 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       const statsRes = await fetch(`/api/projects/${projectSlug}/legends?action=stats`);
       if (statsRes.ok) {
         const statsData = await statsRes.json();
-        setStats(statsData);
+        setStats(statsData.stats || statsData);
       }
 
       // Load validation issues
       const validationRes = await fetch(`/api/projects/${projectSlug}/legends?action=validate`);
       if (validationRes.ok) {
         const validationData = await validationRes.json();
-        setValidationIssues(validationData.issues || []);
+        const validation = validationData.validation || {};
+        setValidationIssues(validation.inconsistencies || []);
       }
     } catch (error) {
-      console.error('Failed to load legends:', error);
+      logger.error('LEGEND_BROWSER', 'Failed to load legends', error instanceof Error ? error : undefined);
       toast.error('Failed to load legend data');
     } finally {
       setLoading(false);
@@ -135,12 +139,15 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       if (!res.ok) throw new Error('Extraction failed');
 
       const data = await res.json();
+      const total = data.successCount + data.errorCount + data.skippedCount;
       toast.success(
-        `Extracted ${data.extracted} legends from ${data.processed} sheets`
+        `Extracted ${data.successCount} legends from ${total} sheets` +
+        (data.errorCount > 0 ? ` (${data.errorCount} failed)` : '') +
+        (data.skippedCount > 0 ? ` (${data.skippedCount} skipped)` : '')
       );
       loadLegends();
     } catch (error) {
-      console.error('Failed to extract legends:', error);
+      logger.error('LEGEND_BROWSER', 'Failed to extract legends', error instanceof Error ? error : undefined);
       toast.error('Failed to extract legends');
     } finally {
       setExtracting(false);
@@ -164,7 +171,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       URL.revokeObjectURL(url);
       toast.success('Legend library exported');
     } catch (error) {
-      console.error('Failed to export library:', error);
+      logger.error('LEGEND_BROWSER', 'Failed to export library', error instanceof Error ? error : undefined);
       toast.error('Failed to export library');
     }
   };
@@ -175,7 +182,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
     legends.forEach((sheet) => {
       sheet.legendEntries.forEach((entry) => {
-        const key = `${entry.symbol}:${entry.category}`;
+        const key = `${entry.symbolCode}:${entry.category}`;
         const existing = library.get(key);
 
         if (existing) {
@@ -209,8 +216,8 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (entry) =>
-          entry.symbol.toLowerCase().includes(query) ||
-          entry.description.toLowerCase().includes(query)
+          entry.symbolCode.toLowerCase().includes(query) ||
+          entry.symbolDescription.toLowerCase().includes(query)
       );
     }
 
@@ -226,8 +233,8 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
-        <span className="ml-2 text-gray-600">Loading legends...</span>
+        <RefreshCw className="h-6 w-6 animate-spin text-orange-500" />
+        <span className="ml-2 text-gray-400">Loading legends...</span>
       </div>
     );
   }
@@ -237,8 +244,8 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       {/* Header with Stats */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Legend & Symbol Library</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold text-gray-100">Legend & Symbol Library</h2>
+          <p className="text-gray-400 mt-1">
             Extracted symbols and legends from construction documents
           </p>
         </div>
@@ -256,7 +263,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
             size="sm"
             onClick={handleExtractLegends}
             disabled={extracting}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             {extracting ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -270,49 +277,49 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Symbols</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalSymbols}</p>
+              <p className="text-sm text-gray-400">Total Symbols</p>
+              <p className="text-2xl font-bold text-gray-100">{stats.totalSymbols}</p>
             </div>
-            <Layers className="h-8 w-8 text-blue-600" />
+            <Layers className="h-8 w-8 text-orange-500" />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Avg Confidence</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {Math.round(stats.avgConfidence)}%
+              <p className="text-sm text-gray-400">Avg Confidence</p>
+              <p className="text-2xl font-bold text-gray-100">
+                {Math.round(stats.avgConfidence > 1 ? stats.avgConfidence : stats.avgConfidence * 100)}%
               </p>
             </div>
-            <CheckCircle className="h-8 w-8 text-green-600" />
+            <CheckCircle className="h-8 w-8 text-green-500" />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Sheet Coverage</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-gray-400">Sheet Coverage</p>
+              <p className="text-2xl font-bold text-gray-100">
                 {Math.round(stats.coveragePercent)}%
               </p>
             </div>
-            <FileText className="h-8 w-8 text-purple-600" />
+            <FileText className="h-8 w-8 text-purple-500" />
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 bg-dark-card border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Validation Issues</p>
-              <p className="text-2xl font-bold text-gray-900">{validationIssues.length}</p>
+              <p className="text-sm text-gray-400">Validation Issues</p>
+              <p className="text-2xl font-bold text-gray-100">{validationIssues.length}</p>
             </div>
             <AlertTriangle
               className={`h-8 w-8 ${
-                validationIssues.length > 0 ? 'text-orange-600' : 'text-gray-400'
+                validationIssues.length > 0 ? 'text-orange-500' : 'text-gray-500'
               }`}
             />
           </div>
@@ -321,29 +328,29 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
       {/* Validation Issues */}
       {validationIssues.length > 0 && (
-        <Card className="p-4 bg-orange-50 border-orange-200">
+        <Card className="p-4 bg-orange-900/20 border-orange-700">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <h3 className="font-semibold text-orange-900 mb-2">
+              <h3 className="font-semibold text-orange-300 mb-2">
                 Symbol Validation Issues
               </h3>
               <div className="space-y-2">
                 {validationIssues.slice(0, 3).map((issue, idx) => (
                   <div key={idx} className="text-sm">
-                    <p className="text-orange-800">
-                      <span className="font-mono bg-white px-2 py-0.5 rounded">
-                        {issue.symbol}
+                    <p className="text-orange-400">
+                      <span className="font-mono bg-dark-surface px-2 py-0.5 rounded">
+                        {issue.symbolCode}
                       </span>{' '}
                       appears with different descriptions across {issue.sheets.length} sheets
                     </p>
-                    <p className="text-orange-700 text-xs mt-1">
+                    <p className="text-orange-500 text-xs mt-1">
                       Sheets: {issue.sheets.join(', ')}
                     </p>
                   </div>
                 ))}
                 {validationIssues.length > 3 && (
-                  <p className="text-xs text-orange-700">
+                  <p className="text-xs text-orange-500">
                     ...and {validationIssues.length - 3} more issues
                   </p>
                 )}
@@ -355,13 +362,13 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
         <Input
           type="text"
           placeholder="Search symbols or descriptions..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10 bg-dark-surface border-gray-600 text-gray-100 placeholder-gray-500"
         />
       </div>
 
@@ -371,7 +378,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
           variant={activeTab === 'all' ? 'default' : 'outline'}
           size="sm"
           onClick={() => setActiveTab('all')}
-          className={activeTab === 'all' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+          className={activeTab === 'all' ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'}
         >
           All ({legendLibrary.length})
         </Button>
@@ -384,7 +391,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
               size="sm"
               onClick={() => setActiveTab(category)}
               className={`flex items-center gap-2 ${
-                activeTab === category ? 'bg-blue-600 hover:bg-blue-700' : ''
+                activeTab === category ? 'bg-orange-500 hover:bg-orange-600' : 'border-gray-600 text-gray-300 hover:bg-dark-surface'
               }`}
             >
               {CATEGORY_ICONS[category]}
@@ -396,9 +403,9 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
       {/* Legend Cards Grid */}
       {filteredLegends.length === 0 ? (
-        <Card className="p-8 text-center">
-          <Layers className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600">
+        <Card className="p-8 text-center bg-dark-card border-gray-700">
+          <Layers className="h-12 w-12 text-gray-500 mx-auto mb-3" />
+          <p className="text-gray-400">
             {searchQuery
               ? 'No symbols match your search'
               : legendLibrary.length === 0
@@ -407,7 +414,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
           </p>
           {legendLibrary.length === 0 && (
             <Button
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white"
               onClick={handleExtractLegends}
             >
               Extract Legends Now
@@ -422,8 +429,8 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
             return (
               <Card
                 key={idx}
-                className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => onSymbolSelect?.(entry.symbol, entry.description)}
+                className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-dark-card border-gray-700"
+                onClick={() => onSymbolSelect?.(entry.symbolCode, entry.symbolDescription)}
               >
                 {/* Category Badge */}
                 <div className="flex items-center justify-between mb-3">
@@ -440,14 +447,14 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
                 {/* Symbol */}
                 <div className="mb-3">
-                  <div className="font-mono text-lg font-bold text-gray-900 bg-gray-50 p-3 rounded border border-gray-200 text-center">
-                    {entry.symbol}
+                  <div className="font-mono text-lg font-bold text-gray-100 bg-dark-surface p-3 rounded border border-gray-700 text-center">
+                    {entry.symbolCode}
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-gray-700 mb-3 line-clamp-2">
-                  {entry.description}
+                <p className="text-sm text-gray-300 mb-3 line-clamp-2">
+                  {entry.symbolDescription}
                 </p>
 
                 {/* Sheet References */}
@@ -455,7 +462,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
                   {entry.sheetNumbers.slice(0, 5).map((sheet) => (
                     <span
                       key={sheet}
-                      className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded"
+                      className="text-xs bg-blue-900/30 text-blue-400 px-2 py-0.5 rounded"
                     >
                       {sheet}
                     </span>

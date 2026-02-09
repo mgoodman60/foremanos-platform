@@ -55,6 +55,7 @@ import { WithTooltip } from '@/components/ui/icon-button';
 import { Separator } from '@/components/ui/separator';
 import { QuickActionMenu, type ActionItem } from '@/components/ui/header-action-menu';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import { TakeoffSummaryModal } from '@/components/takeoff-summary-modal';
 import { FloorPlanViewer } from '@/components/floor-plan-viewer';
 
@@ -150,26 +151,25 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
   const [showComparison, setShowComparison] = useState(false);
   const [bulkExporting, setBulkExporting] = useState(false);
 
-  // Export room as PDF
+  // Export room as PDF (server-side generation)
   const exportRoomToPDF = async (room: Room) => {
     try {
       setExportingRoomId(room.id);
       toast.loading('Generating room sheet PDF...', { id: `export-room-${room.id}` });
 
-      // Fetch complete room data from API (uses [id]/export-pdf route)
+      // Fetch server-generated PDF binary directly
       const response = await fetch(`/api/projects/${projectSlug}/rooms/${room.id}/export-pdf`);
       if (!response.ok) {
-        throw new Error('Failed to fetch room data');
+        throw new Error('Failed to generate room PDF');
       }
 
-      const roomData = await response.json();
-
-      // Dynamically import PDF generator to avoid SSR issues
-      const { generateRoomSheetPDF } = await import('@/lib/room-pdf-generator');
-      const pdfBlob = await generateRoomSheetPDF(roomData);
+      const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error('Generated PDF is empty');
+      }
 
       // Create download link
-      const url = URL.createObjectURL(pdfBlob);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `${room.roomNumber || room.name}-room-sheet-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -180,7 +180,7 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
 
       toast.success('Room sheet PDF downloaded!', { id: `export-room-${room.id}` });
     } catch (error: any) {
-      console.error('Error exporting room PDF:', error);
+      logger.error('ROOM_BROWSER', 'Error exporting room PDF', error);
       toast.error(error.message || 'Failed to export room PDF', { id: `export-room-${room.id}` });
     } finally {
       setExportingRoomId(null);
@@ -193,8 +193,8 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       setExportingDocxRoomId(room.id);
       toast.loading('Generating room sheet DOCX...', { id: `export-docx-${room.id}` });
 
-      // Fetch complete room data from API (uses same [id]/export-pdf route for data)
-      const response = await fetch(`/api/projects/${projectSlug}/rooms/${room.id}/export-pdf`);
+      // Fetch complete room data as JSON from API (uses same [id]/export-pdf route with format=json)
+      const response = await fetch(`/api/projects/${projectSlug}/rooms/${room.id}/export-pdf?format=json`);
       if (!response.ok) {
         throw new Error('Failed to fetch room data');
       }
@@ -217,7 +217,7 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
 
       toast.success('Room sheet DOCX downloaded!', { id: `export-docx-${room.id}` });
     } catch (error: any) {
-      console.error('Error exporting room DOCX:', error);
+      logger.error('ROOM_BROWSER', 'Error exporting room DOCX', error);
       toast.error(error.message || 'Failed to export room DOCX', { id: `export-docx-${room.id}` });
     } finally {
       setExportingDocxRoomId(null);

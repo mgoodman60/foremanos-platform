@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getRoomProgressSummary } from '@/lib/location-detector';
 import { getPrimaryDoorTypeForRoom } from '@/lib/door-schedule-extractor';
+import { isExteriorEquipment, isExteriorLocation } from '@/lib/exterior-equipment-classifier';
+import { logger } from '@/lib/logger';
 
 // GET /api/projects/[slug]/rooms - List all rooms
 export async function GET(
@@ -156,6 +158,22 @@ export async function GET(
       };
     });
 
+    // Split MEP into interior and exterior equipment
+    const interiorMEP = mepEquipmentList.filter(mep => {
+      if (isExteriorEquipment(mep.name?.toLowerCase() || '', mep.name || '')) return false;
+      if (mep.location && isExteriorLocation(mep.location)) return false;
+      return true;
+    });
+    const exteriorMEP = mepEquipmentList.filter(mep => !interiorMEP.includes(mep));
+
+    if (exteriorMEP.length > 0) {
+      logger.info('ROOMS_API', 'Separated exterior MEP equipment', {
+        total: mepEquipmentList.length,
+        interior: interiorMEP.length,
+        exterior: exteriorMEP.length,
+      });
+    }
+
     // Match MEP equipment to rooms
     const roomsWithMEP = rooms.map(room => {
       // Find MEP items that match this room by name, number, or location
@@ -163,7 +181,7 @@ export async function GET(
       const roomNumber = room.roomNumber?.toLowerCase() || '';
       const roomType = room.type?.toLowerCase() || '';
       
-      const matchedMEP = mepEquipmentList.filter(mep => {
+      const matchedMEP = interiorMEP.filter(mep => {
         const mepLocation = mep.location.toLowerCase();
         const mepLevel = mep.level.toLowerCase();
         const mepRoomNum = mep.roomNumber.toLowerCase();
@@ -207,13 +225,13 @@ export async function GET(
     let finalRooms = roomsWithMEP;
     
     // If we have MEP data but few room matches (less than 30% of rooms), assign based on room type
-    if (mepEquipmentList.length > 0 && roomsWithAnyMEP.length < Math.max(3, rooms.length * 0.3)) {
-      // Group MEP by trade and create pools to track assigned items
-      const mepByTrade: Record<string, typeof mepEquipmentList> = {
-        electrical: mepEquipmentList.filter(m => m.trade === 'electrical'),
-        hvac: mepEquipmentList.filter(m => m.trade === 'hvac'),
-        plumbing: mepEquipmentList.filter(m => m.trade === 'plumbing'),
-        fire_alarm: mepEquipmentList.filter(m => m.trade === 'fire_alarm')
+    if (interiorMEP.length > 0 && roomsWithAnyMEP.length < Math.max(3, rooms.length * 0.3)) {
+      // Group MEP by trade and create pools to track assigned items (interior only)
+      const mepByTrade: Record<string, typeof interiorMEP> = {
+        electrical: interiorMEP.filter(m => m.trade === 'electrical'),
+        hvac: interiorMEP.filter(m => m.trade === 'hvac'),
+        plumbing: interiorMEP.filter(m => m.trade === 'plumbing'),
+        fire_alarm: interiorMEP.filter(m => m.trade === 'fire_alarm')
       };
       
       // Track indexes for round-robin distribution
@@ -317,6 +335,40 @@ export async function GET(
       });
     }
 
+    // Add synthetic "Site / Exterior" entry for exterior MEP equipment
+    if (exteriorMEP.length > 0) {
+      finalRooms.push({
+        id: 'site-exterior',
+        name: 'Site / Exterior',
+        roomNumber: 'EXT',
+        type: 'exterior',
+        floorNumber: null,
+        area: null,
+        status: 'not_started',
+        percentComplete: 0,
+        projectId: project.id,
+        buildingId: null,
+        notes: null,
+        sourceDocumentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        FinishScheduleItem: [],
+        mepEquipment: exteriorMEP.map(mep => ({
+          id: mep.id,
+          tag: mep.tag || '',
+          name: mep.name,
+          trade: mep.trade?.toLowerCase() || 'electrical',
+          quantity: mep.quantity,
+          unit: mep.unit,
+          unitCost: mep.unitCost,
+          totalCost: mep.totalCost,
+          location: mep.location,
+          level: mep.level,
+          roomNumber: mep.roomNumber,
+        })),
+      } as any);
+    }
+
     // Get progress summary
     const summary = await getRoomProgressSummary(project.id);
 
@@ -340,7 +392,7 @@ export async function GET(
 
     return NextResponse.json({ rooms: roomsWithDoors, summary });
   } catch (error: any) {
-    console.error('Error fetching rooms:', error);
+    logger.error('ROOMS_API', 'Error fetching rooms', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch rooms', details: error.message },
       { status: 500 }
@@ -414,11 +466,11 @@ export async function POST(
       }
     });
 
-    console.log(`[ROOMS] Created room ${room.name} in project ${project.name}`);
+    logger.info('ROOMS_API', 'Created room', { roomName: room.name, projectName: project.name });
 
     return NextResponse.json({ room }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating room:', error);
+    logger.error('ROOMS_API', 'Error creating room', error as Error);
     return NextResponse.json(
       { error: 'Failed to create room', details: error.message },
       { status: 500 }

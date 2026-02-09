@@ -1,10 +1,18 @@
+/**
+ * Room Sheet PDF Export API
+ * Generates a comprehensive single-page PDF with all room data (server-side)
+ * Supports ?format=json for DOCX export consumers
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { generateRoomSheetPDF } from '@/lib/room-pdf-generator';
+import { createScopedLogger } from '@/lib/logger';
 
-// Room Sheet PDF Export API
-// Generates a comprehensive single-page PDF with all room data
+const log = createScopedLogger('ROOM_EXPORT');
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { slug: string; id: string } }
@@ -16,10 +24,18 @@ export async function GET(
     }
 
     const { slug, id: roomId } = params;
+    const format = req.nextUrl.searchParams.get('format');
 
-    // Get project
+    // Get project with clientName and projectAddress
     const project = await prisma.project.findUnique({
       where: { slug },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        clientName: true,
+        projectAddress: true,
+      },
     });
 
     if (!project) {
@@ -86,10 +102,10 @@ export async function GET(
     // Group finish schedule items by category and de-duplicate
     const finishesByCategory: Record<string, any[]> = {};
     const seenFinishes = new Set<string>();
-    
+
     (room.FinishScheduleItem || []).forEach((item: any) => {
       const category = item.category || 'Other';
-      
+
       // Create a unique key based on item properties to detect duplicates
       const uniqueKey = [
         item.finishType || '',
@@ -98,17 +114,17 @@ export async function GET(
         item.modelNumber || '',
         item.code || ''
       ].join('|').toLowerCase().trim();
-      
+
       // Skip if we've already seen this exact item
       if (seenFinishes.has(uniqueKey) && uniqueKey !== '||||') {
         return;
       }
       seenFinishes.add(uniqueKey);
-      
+
       if (!finishesByCategory[category]) {
         finishesByCategory[category] = [];
       }
-      
+
       // Clean up item names (remove underscores)
       const cleanedItem = {
         ...item,
@@ -118,7 +134,7 @@ export async function GET(
         modelNumber: item.modelNumber?.replace(/_/g, ' ')?.trim(),
         notes: item.notes?.replace(/_/g, ' ')?.trim(),
       };
-      
+
       finishesByCategory[category].push(cleanedItem);
     });
 
@@ -154,6 +170,8 @@ export async function GET(
       project: {
         name: project.name,
         slug: project.slug,
+        clientName: project.clientName || undefined,
+        address: project.projectAddress || undefined,
       },
       room: {
         id: room.id,
@@ -186,11 +204,29 @@ export async function GET(
         totalCost: takeoffItems.reduce((sum, item) => sum + (item.totalCost || 0), 0),
       },
       exportedAt: new Date().toISOString(),
+      appUrl: `${req.nextUrl.origin}/project/${slug}/rooms`,
     };
 
-    return NextResponse.json(roomData);
+    // Return JSON when ?format=json is specified (for DOCX export)
+    if (format === 'json') {
+      return NextResponse.json(roomData);
+    }
+
+    // Default: generate PDF server-side and return binary
+    const pdfBlob = await generateRoomSheetPDF(roomData);
+    const arrayBuffer = await pdfBlob.arrayBuffer();
+    const roomLabel = room.roomNumber || room.name;
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `${roomLabel}-room-sheet-${dateStr}.pdf`;
+
+    return new NextResponse(arrayBuffer, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    });
   } catch (error) {
-    console.error('[Room Export] Error:', error);
+    log.error('Failed to export room data', error as Error);
     return NextResponse.json(
       { error: 'Failed to export room data' },
       { status: 500 }

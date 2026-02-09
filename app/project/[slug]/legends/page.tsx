@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { ChevronRight, Home, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import LegendBrowser from '@/components/legend-browser';
+import { logger } from '@/lib/logger';
 
 interface Project {
   id: string;
@@ -48,7 +49,7 @@ export default function LegendsPage() {
         router.push('/dashboard');
       }
     } catch (error) {
-      console.error('Error fetching project:', error);
+      logger.error('LEGENDS_PAGE', 'Error fetching project', error as Error);
       toast.error('Failed to load project');
     } finally {
       setLoading(false);
@@ -77,16 +78,16 @@ export default function LegendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dark-surface">
       {/* Header with Breadcrumbs */}
-      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+      <header className="bg-dark-surface border-b border-gray-700 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Breadcrumbs */}
-            <nav className="flex items-center text-sm text-gray-600">
+            <nav className="flex items-center text-sm text-gray-400">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center hover:text-blue-600 transition-colors"
+                className="flex items-center text-gray-200 hover:text-orange-400 transition-colors"
               >
                 <Home className="w-4 h-4" />
                 <span className="ml-2">Dashboard</span>
@@ -94,12 +95,12 @@ export default function LegendsPage() {
               <ChevronRight className="w-4 h-4 mx-2" />
               <button
                 onClick={() => router.push(`/project/${project.slug}`)}
-                className="hover:text-blue-600 transition-colors"
+                className="text-gray-200 hover:text-orange-400 transition-colors"
               >
                 {project.name}
               </button>
               <ChevronRight className="w-4 h-4 mx-2" />
-              <span className="text-gray-900 font-medium flex items-center">
+              <span className="text-slate-50 font-medium flex items-center">
                 <BookOpen className="w-4 h-4 mr-2" />
                 Legend Library
               </span>
@@ -108,7 +109,7 @@ export default function LegendsPage() {
             {/* Back Button */}
             <button
               onClick={() => router.push(`/project/${project.slug}`)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-300 bg-dark-card border border-gray-600 rounded-lg hover:bg-dark-surface transition-colors"
             >
               Back to Project
             </button>
@@ -121,7 +122,7 @@ export default function LegendsPage() {
         <LegendBrowser
           projectSlug={slug}
           onSymbolSelect={(symbol, description) => {
-            console.log('Selected symbol:', symbol, description);
+            logger.info('LEGENDS_PAGE', 'Symbol selected', { symbol, description });
             toast.success(`Selected: ${symbol}`);
           }}
         />

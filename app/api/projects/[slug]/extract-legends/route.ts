@@ -9,6 +9,9 @@ import {
 } from '@/lib/legend-extractor';
 import { getFileUrl } from '@/lib/s3';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
+import { createScopedLogger } from '@/lib/logger';
+
+const log = createScopedLogger('LEGEND_EXTRACTION');
 
 /**
  * POST /api/projects/[slug]/extract-legends
@@ -70,18 +73,18 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
       // Skip if no cloud storage path
       if (!document.cloud_storage_path) {
-        console.log(`Skipping ${document.name} - no cloud storage path`);
+        log.info(`Skipping document - no cloud storage path`, { documentName: document.name });
         continue;
       }
 
       // Get sheet number and discipline from first chunk
       const chunk = document.DocumentChunk[0];
       if (!chunk || !chunk.sheetNumber) {
-        console.log(`Skipping ${document.name} - no sheet number`);
+        log.info(`Skipping document - no sheet number`, { documentName: document.name });
         continue;
       }
 
-      console.log(`Processing legends for ${document.name} (Sheet ${chunk.sheetNumber})...`);
+      log.info(`Processing legends`, { documentName: document.name, sheetNumber: chunk.sheetNumber });
 
       try {
         // Get the PDF file
@@ -141,7 +144,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
           errorCount++;
         }
       } catch (docError) {
-        console.error(`Error processing document ${document.id}:`, docError);
+        log.error(`Error processing document`, docError as Error, { documentId: document.id });
         results.push({
           documentId: document.id,
           documentName: document.name,
@@ -157,7 +160,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       try {
         await mergeLegendWithSymbolLibrary(slug);
       } catch (mergeError) {
-        console.error('Error merging with symbol library:', mergeError);
+        log.error('Error merging with symbol library', mergeError as Error);
       }
     }
 
@@ -170,7 +173,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       results
     });
   } catch (error) {
-    console.error('Legend extraction error:', error);
+    log.error('Legend extraction error', error as Error);
     return NextResponse.json(
       { error: 'Failed to extract legends' },
       { status: 500 }

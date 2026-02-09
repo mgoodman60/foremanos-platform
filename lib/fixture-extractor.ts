@@ -6,6 +6,7 @@
 
 import { prisma } from './db';
 import { logger } from '@/lib/logger';
+import { classifyLocation } from '@/lib/exterior-equipment-classifier';
 
 export interface FixtureExtractionResult {
   plumbingFixtureCount: number;
@@ -39,8 +40,12 @@ export async function extractFixtures(
     if (meta.plumbingFixtures?.length > 0) {
       for (const fixture of meta.plumbingFixtures) {
         const room = fixture.room || 'unassigned';
-        if (!plumbingByRoom[room]) plumbingByRoom[room] = [];
-        plumbingByRoom[room].push({
+        const locType = classifyLocation(room, fixture.type);
+        const effectiveRoom = (locType === 'exterior' || locType === 'site' || locType === 'roof')
+          ? `EXTERIOR:${room}`
+          : room;
+        if (!plumbingByRoom[effectiveRoom]) plumbingByRoom[effectiveRoom] = [];
+        plumbingByRoom[effectiveRoom].push({
           ...fixture,
           sourceSheet: chunk.sheetNumber,
         });
@@ -51,8 +56,12 @@ export async function extractFixtures(
     if (meta.electricalDevices?.length > 0) {
       for (const device of meta.electricalDevices) {
         const room = device.room || 'unassigned';
-        if (!electricalByRoom[room]) electricalByRoom[room] = [];
-        electricalByRoom[room].push({
+        const locType = classifyLocation(room, device.type);
+        const effectiveRoom = (locType === 'exterior' || locType === 'site' || locType === 'roof')
+          ? `EXTERIOR:${room}`
+          : room;
+        if (!electricalByRoom[effectiveRoom]) electricalByRoom[effectiveRoom] = [];
+        electricalByRoom[effectiveRoom].push({
           ...device,
           sourceSheet: chunk.sheetNumber,
         });
