@@ -212,10 +212,10 @@ export function SidebarNavigation() {
           {!sidebarCollapsed && <span>Settings</span>}
         </Link>
 
-        {/* AI Assistant toggle */}
+        {/* The Foreman toggle */}
         <button
           onClick={() => setAiDrawerOpen(!aiDrawerOpen)}
-          title={sidebarCollapsed ? 'AI Assistant' : undefined}
+          title={sidebarCollapsed ? 'The Foreman' : undefined}
           className={`
             w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
             transition-colors duration-150
@@ -229,7 +229,7 @@ export function SidebarNavigation() {
           style={{ minHeight: '44px' }}
         >
           <MessageSquare className="w-5 h-5 flex-shrink-0" />
-          {!sidebarCollapsed && <span>AI Assistant</span>}
+          {!sidebarCollapsed && <span>The Foreman</span>}
         </button>
 
         {/* Collapse toggle (desktop only) */}

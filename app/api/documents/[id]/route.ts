@@ -7,24 +7,47 @@ import { getFileUrl, deleteFile } from '@/lib/s3';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client, getBucketConfig } from '@/lib/aws-config';
 import { handleDocumentDeletion } from '@/lib/document-auto-sync';
+import { logger } from '@/lib/logger';
 import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
+const CONTENT_TYPE_MAP: Record<string, string> = {
+  pdf: 'application/pdf',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  doc: 'application/msword',
+  txt: 'text/plain',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  xls: 'application/vnd.ms-excel',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  svg: 'image/svg+xml',
+};
+
+function getContentType(fileType: string): string {
+  return CONTENT_TYPE_MAP[fileType.toLowerCase()] || 'application/octet-stream';
+}
+
+const PREVIEWABLE_TYPES = new Set(['pdf', 'png', 'jpg', 'jpeg', 'gif']);
+const LARGE_FILE_THRESHOLD = 50 * 1024 * 1024; // 50MB
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const documentId = params.id;
+
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
     }
 
     const userRole = session.user.role;
-    const documentId = params.id;
 
     // Fetch the document
     const document = await prisma.document.findUnique({
@@ -44,140 +67,206 @@ export async function GET(
 
     if (!document) {
       return NextResponse.json(
-        { error: 'Document not found' },
+        { error: 'Document not found', code: 'NOT_FOUND' },
         { status: 404 }
       );
     }
 
     // Check access level - admins and clients have full access, guests need guest access level
     const hasFullAccess = userRole === 'admin' || userRole === 'client';
-    const hasAccess = 
+    const hasAccess =
       hasFullAccess ||
       document.accessLevel === 'guest';
 
     if (!hasAccess) {
       return NextResponse.json(
-        { error: 'Access denied. This document requires admin or client access.' },
+        { error: 'Access denied. This document requires admin or client access.', code: 'ACCESS_DENIED' },
         { status: 403 }
       );
     }
 
-    // Check if user wants to download or view
     const url = new URL(req.url);
     const download = url.searchParams.get('download') === 'true';
+    const mode = url.searchParams.get('mode');
+
+    // Preview info mode - return metadata about whether the file can be previewed
+    if (mode === 'preview-info') {
+      const fileType = document.fileType.toLowerCase();
+      const canPreview = PREVIEWABLE_TYPES.has(fileType);
+      return NextResponse.json({
+        canPreview,
+        contentType: getContentType(fileType),
+        fileSize: document.fileSize,
+      });
+    }
+
+    // Check for storage path before proceeding
+    if (!document.cloud_storage_path && !document.filePath) {
+      return NextResponse.json(
+        { error: 'No file path available', code: 'NO_STORAGE_PATH' },
+        { status: 404 }
+      );
+    }
 
     let fileBuffer: Buffer;
 
-    // Handle S3-based documents (new approach)
+    // Handle S3-based documents
     if (document.cloud_storage_path) {
-      // For explicit downloads only, return JSON with URL
+      // For explicit downloads, return JSON with URL
       if (download) {
         const fileUrl = await getFileUrl(
           document.cloud_storage_path,
           document.isPublic || false,
-          3600 // 1 hour expiry
+          3600
         );
-        
-        // Return URL for download (anchor tag will handle it)
+
         return NextResponse.json({
           url: fileUrl,
           fileName: document.fileName,
         });
       }
 
-      // For viewing (iframe/embed), stream the file content directly
+      // For large files, redirect to signed URL instead of buffering
+      if (document.fileSize && document.fileSize > LARGE_FILE_THRESHOLD) {
+        logger.info('DOCUMENT_PREVIEW', 'Large file detected, redirecting to signed URL', {
+          documentId,
+          fileSize: document.fileSize,
+        });
+        const signedUrl = await getFileUrl(
+          document.cloud_storage_path,
+          document.isPublic || false,
+          3600
+        );
+        return NextResponse.redirect(signedUrl);
+      }
+
+      // For viewing, stream the file content with timeout
       const s3Client = createS3Client();
       const { bucketName } = getBucketConfig();
-      
+
       const command = new GetObjectCommand({
         Bucket: bucketName,
         Key: document.cloud_storage_path,
       });
 
-      const response = await s3Client.send(command);
+      const s3Promise = s3Client.send(command);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('S3_TIMEOUT')), 30000)
+      );
+
+      const response = await Promise.race([s3Promise, timeoutPromise]);
       const chunks: Uint8Array[] = [];
-      
+
       if (response.Body) {
-        for await (const chunk of response.Body as any) {
+        for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
           chunks.push(chunk);
         }
       }
-      
+
       fileBuffer = Buffer.concat(chunks);
-    } 
+    }
     // Handle legacy local files (backward compatibility)
     else if (document.filePath) {
       // Security: Prevent path traversal attacks
       const publicDir = path.resolve(process.cwd(), 'public');
       const filePath = path.resolve(publicDir, document.filePath);
 
-      // Ensure resolved path is within public directory
       if (!filePath.startsWith(publicDir + path.sep)) {
         return NextResponse.json(
-          { error: 'Invalid file path' },
+          { error: 'Invalid file path', code: 'INVALID_PATH' },
           { status: 400 }
         );
       }
 
       if (!fs.existsSync(filePath)) {
         return NextResponse.json(
-          { error: 'Document file not found on server' },
+          { error: 'Document file not found on server', code: 'FILE_NOT_FOUND' },
           { status: 404 }
         );
       }
 
       fileBuffer = fs.readFileSync(filePath);
-    } 
+    }
     else {
       return NextResponse.json(
-        { error: 'Document storage path not configured' },
+        { error: 'No file path available', code: 'NO_STORAGE_PATH' },
         { status: 404 }
       );
     }
-    
-    // Determine content type
-    const contentTypeMap: Record<string, string> = {
-      pdf: 'application/pdf',
-      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      doc: 'application/msword',
-      txt: 'text/plain',
-      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      xls: 'application/vnd.ms-excel'
-    };
 
-    let contentType = contentTypeMap[document.fileType.toLowerCase()] || 'application/octet-stream';
+    // Determine content type
+    let contentType = getContentType(document.fileType);
     let fileName = document.fileName;
 
     // Convert DOCX to PDF for viewing (but not for download)
     if (await isConversionSupported(document.fileType)) {
       try {
-        console.log(`Converting ${document.fileName} to PDF for viewing...`);
+        logger.info('DOCUMENT_PREVIEW', 'Converting document to PDF for viewing', {
+          documentId,
+          fileName: document.fileName,
+        });
         fileBuffer = await convertDocxToPdf(fileBuffer);
         contentType = 'application/pdf';
-        fileName = document.fileName.replace(/\\.(docx?|DOCX?)$/, '.pdf');
-        console.log(`Successfully converted ${document.fileName} to PDF`);
-      } catch (error) {
-        console.error('Conversion failed, serving original file:', error);
-        // Fall back to original file if conversion fails
+        fileName = document.fileName.replace(/\.(docx?|DOCX?)$/, '.pdf');
+        logger.info('DOCUMENT_PREVIEW', 'Document converted to PDF successfully', {
+          documentId,
+          fileName,
+        });
+      } catch (conversionError) {
+        logger.warn('DOCUMENT_PREVIEW', 'DOCX conversion failed', {
+          documentId,
+          error: conversionError instanceof Error ? conversionError.message : String(conversionError),
+        });
+        return NextResponse.json(
+          { error: 'Document conversion failed', code: 'CONVERSION_FAILED' },
+          { status: 422 }
+        );
       }
     }
 
     // Create response with file (for inline viewing only)
-    const response = new NextResponse(fileBuffer);
-    response.headers.set('Content-Type', contentType);
-    response.headers.set('Content-Length', fileBuffer.length.toString());
-    response.headers.set('Cache-Control', 'public, max-age=3600');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set(
+    const fileResponse = new NextResponse(fileBuffer);
+    fileResponse.headers.set('Content-Type', contentType);
+    fileResponse.headers.set('Content-Length', fileBuffer.length.toString());
+    fileResponse.headers.set('Cache-Control', 'public, max-age=3600');
+    fileResponse.headers.set('X-Content-Type-Options', 'nosniff');
+    fileResponse.headers.set(
       'Content-Disposition',
       `inline; filename="${fileName}"`
     );
-    
-    return response;
-  } catch (error) {
-    console.error('Error serving document:', error);
+
+    return fileResponse;
+  } catch (error: unknown) {
+    const err = error as Error & { name?: string; Code?: string };
+
+    // Categorized S3 errors
+    if (err.name === 'NoSuchKey' || err.Code === 'NoSuchKey') {
+      logger.warn('DOCUMENT_PREVIEW', 'File not found in S3', { documentId });
+      return NextResponse.json(
+        { error: 'File not found in storage', code: 'S3_NOT_FOUND' },
+        { status: 404 }
+      );
+    }
+
+    if (err.message === 'S3_TIMEOUT') {
+      logger.error('DOCUMENT_PREVIEW', 'S3 request timed out', err, { documentId });
+      return NextResponse.json(
+        { error: 'Storage request timed out', code: 'S3_TIMEOUT' },
+        { status: 504 }
+      );
+    }
+
+    if (err.name === 'CredentialsProviderError' || err.name === 'AccessDenied') {
+      logger.error('DOCUMENT_PREVIEW', 'S3 authentication failed', err, { documentId });
+      return NextResponse.json(
+        { error: 'Storage authentication failed', code: 'S3_AUTH_ERROR' },
+        { status: 503 }
+      );
+    }
+
+    logger.error('DOCUMENT_PREVIEW', 'Failed to serve document', err, { documentId });
     return NextResponse.json(
-      { error: 'Failed to serve document' },
+      { error: 'Failed to serve document', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
@@ -189,7 +278,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -225,7 +314,6 @@ export async function DELETE(
     }
 
     // Check if user has permission to delete
-    // Allow: admins, project owners (clients)
     const isAdmin = userRole === 'admin';
     const isProjectOwner = document.Project.ownerId === userId;
 
@@ -236,41 +324,57 @@ export async function DELETE(
       );
     }
 
-    console.log(`[Document Delete] Starting deletion of ${document.fileName} (${documentId})`);
+    logger.info('DOCUMENT_DELETE', 'Starting document deletion', {
+      documentId,
+      fileName: document.fileName,
+    });
 
     // IMPORTANT: Handle auto-sync cascade BEFORE deleting the document
-    // This re-syncs affected features from remaining documents or clears them
     let syncResult = null;
     try {
       syncResult = await handleDocumentDeletion(documentId, document.projectId);
-      console.log(`[Document Delete] Auto-sync cascade complete:`, syncResult);
-    } catch (error) {
-      console.error('[Document Delete] Auto-sync cascade error:', error);
+      logger.info('DOCUMENT_DELETE', 'Auto-sync cascade complete', {
+        documentId,
+        syncResult,
+      });
+    } catch (syncError) {
+      logger.error('DOCUMENT_DELETE', 'Auto-sync cascade error', syncError instanceof Error ? syncError : new Error(String(syncError)), {
+        documentId,
+      });
       // Continue with deletion even if sync fails
     }
 
     // Delete the document file from S3 or filesystem
     if (document.cloud_storage_path) {
-      // Delete from S3
       try {
         await deleteFile(document.cloud_storage_path);
-        console.log(`Deleted file from S3: ${document.cloud_storage_path}`);
-      } catch (error) {
-        console.error('Error deleting file from S3:', error);
+        logger.info('DOCUMENT_DELETE', 'Deleted file from S3', {
+          documentId,
+          path: document.cloud_storage_path,
+        });
+      } catch (s3Error) {
+        logger.error('DOCUMENT_DELETE', 'Error deleting file from S3', s3Error instanceof Error ? s3Error : new Error(String(s3Error)), {
+          documentId,
+          path: document.cloud_storage_path,
+        });
         // Continue with database deletion even if S3 deletion fails
       }
     } else if (document.filePath) {
       // Delete legacy local file
-      // Security: Prevent path traversal attacks
       const publicDir = path.resolve(process.cwd(), 'public');
       const filePath = path.resolve(publicDir, document.filePath);
 
-      // Ensure resolved path is within public directory before deleting
       if (filePath.startsWith(publicDir + path.sep) && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-        console.log(`Deleted legacy local file: ${filePath}`);
+        logger.info('DOCUMENT_DELETE', 'Deleted legacy local file', {
+          documentId,
+          filePath,
+        });
       } else if (!filePath.startsWith(publicDir + path.sep)) {
-        console.warn(`[Document Delete] Blocked path traversal attempt: ${document.filePath}`);
+        logger.warn('DOCUMENT_DELETE', 'Blocked path traversal attempt', {
+          documentId,
+          filePath: document.filePath,
+        });
       }
     }
 
@@ -290,7 +394,12 @@ export async function DELETE(
       }),
     ]);
 
-    console.log(`[Document Delete] Transaction complete: ${deletedChunks.count} chunks, ${deletedTakeoffs.count} takeoffs, ${deletedDataSources.count} data sources deleted`);
+    logger.info('DOCUMENT_DELETE', 'Transaction complete', {
+      documentId,
+      chunksDeleted: deletedChunks.count,
+      takeoffsDeleted: deletedTakeoffs.count,
+      dataSourcesDeleted: deletedDataSources.count,
+    });
 
     return NextResponse.json({
       success: true,
@@ -304,7 +413,9 @@ export async function DELETE(
       } : null,
     });
   } catch (error) {
-    console.error('Error deleting document:', error);
+    logger.error('DOCUMENT_DELETE', 'Error deleting document', error instanceof Error ? error : new Error(String(error)), {
+      documentId: params.id,
+    });
     return NextResponse.json(
       { error: 'Failed to delete document' },
       { status: 500 }

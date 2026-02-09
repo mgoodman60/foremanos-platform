@@ -29,17 +29,17 @@ const sections: ShortcutSection[] = [
     title: 'Actions',
     shortcuts: [
       { keys: ['Cmd', 'K'], description: 'Quick search / command palette' },
-      { keys: ['Cmd', '\\'], description: 'Toggle AI assistant' },
+      { keys: ['Cmd', '\\'], description: 'Toggle The Foreman' },
       { keys: ['U'], description: 'Upload document' },
       { keys: ['N'], description: 'New daily report' },
       { keys: ['?'], description: 'Show this shortcuts panel' },
     ],
   },
   {
-    title: 'Chat (when AI drawer is open)',
+    title: 'Chat (when Foreman drawer is open)',
     shortcuts: [
       { keys: ['Cmd', 'Enter'], description: 'Send message' },
-      { keys: ['Escape'], description: 'Close AI drawer' },
+      { keys: ['Escape'], description: 'Close Foreman drawer' },
     ],
   },
 ];

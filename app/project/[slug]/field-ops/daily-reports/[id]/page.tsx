@@ -1,5 +1,5 @@
 import DailyReportDetail from '@/components/daily-reports/DailyReportDetail';
-import { AskAiButton } from '@/components/shared/ask-ai-button';
+import { AskForemanButton } from '@/components/shared/ask-foreman-button';
 
 export default function DailyReportDetailPage({
   params
@@ -9,7 +9,7 @@ export default function DailyReportDetailPage({
   return (
     <>
       <DailyReportDetail projectSlug={params.slug} reportId={params.id} />
-      <AskAiButton label="Ask AI about this report" />
+      <AskForemanButton label="Ask the Foreman about this report" />
     </>
   );
 }

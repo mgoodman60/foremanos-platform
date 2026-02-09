@@ -3,11 +3,11 @@
 import { MessageSquare } from 'lucide-react';
 import { useProject } from '@/components/layout/project-context';
 
-interface AskAiButtonProps {
+interface AskForemanButtonProps {
   label?: string;
 }
 
-export function AskAiButton({ label = 'Ask AI about this' }: AskAiButtonProps) {
+export function AskForemanButton({ label = 'Ask the Foreman' }: AskForemanButtonProps) {
   const { setAiDrawerOpen } = useProject();
 
   return (

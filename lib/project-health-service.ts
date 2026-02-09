@@ -4,6 +4,11 @@
  */
 
 import { prisma } from './db';
+import { logger } from './logger';
+import {
+  getProjectIntelligenceMetrics,
+  calculateIntelligenceScore,
+} from './intelligence-score-calculator';
 
 export interface HealthScoreMetrics {
   // Schedule metrics
@@ -40,6 +45,7 @@ export interface HealthScoreResult {
   safetyScore: number;
   qualityScore: number;
   documentScore: number;
+  intelligenceScore?: number;
   trend: 'improving' | 'stable' | 'declining';
   changeFromPrevious: number;
   metrics: HealthScoreMetrics;
@@ -256,10 +262,10 @@ export async function calculateProjectHealth(projectId: string): Promise<HealthS
   let documentScore = 100;
   const documentsProcessed = documents.length;
   const dailyReportsSubmitted = dailyReports.filter(r => r.status === 'SUBMITTED' || r.status === 'APPROVED').length;
-  const photosUploaded = documents.filter(d => 
+  const photosUploaded = documents.filter(d =>
     d.fileType && ['jpg', 'jpeg', 'png', 'gif'].includes(d.fileType.toLowerCase())
   ).length;
-  
+
   // Expect at least 5 daily reports in 7 days (weekdays)
   if (dailyReportsSubmitted < 3) {
     documentScore -= (3 - dailyReportsSubmitted) * 10;
@@ -270,8 +276,23 @@ export async function calculateProjectHealth(projectId: string): Promise<HealthS
       actionRequired: 'Submit missing daily reports',
     });
   }
-  
+
   documentScore = Math.max(0, Math.min(100, documentScore));
+
+  // Blend in intelligence quality score (40% weight)
+  let intelligenceScoreValue: number | undefined;
+  try {
+    const intMetrics = await getProjectIntelligenceMetrics(projectId);
+    const intScore = calculateIntelligenceScore(intMetrics);
+    intelligenceScoreValue = intScore.overall;
+    documentScore = Math.round(documentScore * 0.6 + intScore.overall * 0.4);
+    documentScore = Math.max(0, Math.min(100, documentScore));
+  } catch (err) {
+    logger.warn('PROJECT_HEALTH', 'Intelligence scoring failed, using doc score only', {
+      projectId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
   
   // === CALCULATE OVERALL SCORE ===
   // Weighted average: Schedule 25%, Budget 25%, Safety 20%, Quality 20%, Docs 10%
@@ -319,6 +340,7 @@ export async function calculateProjectHealth(projectId: string): Promise<HealthS
     safetyScore: Math.round(safetyScore),
     qualityScore: Math.round(qualityScore),
     documentScore: Math.round(documentScore),
+    intelligenceScore: intelligenceScoreValue,
     trend,
     changeFromPrevious,
     metrics,

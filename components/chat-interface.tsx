@@ -59,9 +59,11 @@ interface ChatInterfaceProps {
   compact?: boolean;
   /** Context hint banner shown at top of chat when provided */
   contextHint?: string;
+  /** Pre-fill the input field with this message on mount or when changed */
+  initialInput?: string;
 }
 
-export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, mobileOpen, onMobileClose, compact, contextHint }: ChatInterfaceProps = {}) {
+export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, mobileOpen, onMobileClose, compact, contextHint, initialInput }: ChatInterfaceProps = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -157,6 +159,14 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
+
+  // Pre-fill input from initialInput prop
+  useEffect(() => {
+    if (initialInput && initialInput.trim()) {
+      setInput(initialInput);
+      inputRef.current?.focus();
+    }
+  }, [initialInput]);
 
   // Only scroll when a new message is added, not on every render
   const prevMessageCountRef = useRef(messages.length);

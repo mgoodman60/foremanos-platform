@@ -517,7 +517,7 @@ export async function saveExtractedRooms(
           name: extractedRoom.roomNumber || `Room ${roomType}`,
           roomNumber: extractedRoom.roomNumber,
           type: roomType,
-          floorNumber: extractedRoom.floor ? parseInt(extractedRoom.floor) : null,
+          floorNumber: extractedRoom.floor ? parseFloorNumber(extractedRoom.floor) : null,
           area: extractedRoom.area,
           notes: extractedRoom.notes,
           status: 'not_started',
@@ -593,4 +593,28 @@ async function createOrUpdateFinishItem(
       },
     });
   }
+}
+
+/**
+ * Parse a floor string into a numeric floor number.
+ * Handles formats like "1st Floor", "Ground", "Basement", "B1", "Level 2", etc.
+ */
+function parseFloorNumber(floor: string): number | null {
+  const direct = parseInt(floor, 10);
+  if (!isNaN(direct)) return direct;
+
+  const lower = floor.toLowerCase().trim();
+  if (lower.includes('ground') || lower === 'g') return 1;
+  if (lower.includes('basement') || lower.startsWith('b')) return 0;
+  if (lower.includes('mezzanine') || lower.includes('mezz')) return 2;
+  if (lower.includes('penthouse') || lower.includes('roof')) return 99;
+  if (lower.includes('1st') || lower.includes('first')) return 1;
+  if (lower.includes('2nd') || lower.includes('second')) return 2;
+  if (lower.includes('3rd') || lower.includes('third')) return 3;
+
+  // Try extracting number from string like "Floor 4" or "Level 5"
+  const match = lower.match(/(\d+)/);
+  if (match) return parseInt(match[1], 10);
+
+  return null;
 }

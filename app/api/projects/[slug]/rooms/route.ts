@@ -7,6 +7,26 @@ import { getPrimaryDoorTypeForRoom } from '@/lib/door-schedule-extractor';
 import { isExteriorEquipment, isExteriorLocation } from '@/lib/exterior-equipment-classifier';
 import { logger } from '@/lib/logger';
 
+// Helper to format floor number into a readable label
+function formatFloorLabel(floorNumber: number | null | undefined): string {
+  if (floorNumber === null || floorNumber === undefined) return 'Unassigned';
+  if (floorNumber === 0) return 'Basement';
+  if (floorNumber === 1) return '1st Floor';
+  if (floorNumber === 2) return '2nd Floor';
+  if (floorNumber === 3) return '3rd Floor';
+  return `${floorNumber}th Floor`;
+}
+
+// Helper to map MEPEquipmentType enum to trade
+function mapEquipmentTypeToTrade(type: string): string {
+  const t = type?.toUpperCase() || '';
+  if (['AHU','RTU','CHILLER','BOILER','FAN','VAV','FCU','EXHAUST','DAMPER','PUMP_HVAC'].some(k => t.includes(k))) return 'hvac';
+  if (['TRANSFORMER','SWITCHGEAR','PANEL','MDP','DISCONNECT','VFD','GENERATOR','UPS','LIGHTING','CONTROLS','SENSOR','METER'].some(k => t.includes(k))) return 'electrical';
+  if (['WATER_HEATER','PUMP_PLUMBING','FIXTURE','BACKFLOW','PRV'].some(k => t.includes(k))) return 'plumbing';
+  if (['FIRE_PUMP','SPRINKLER','FIRE_ALARM','SMOKE_DETECTOR'].some(k => t.includes(k))) return 'fire_alarm';
+  return 'electrical';
+}
+
 // GET /api/projects/[slug]/rooms - List all rooms
 export async function GET(
   request: NextRequest,
@@ -59,11 +79,16 @@ export async function GET(
     if (status) where.status = status;
     if (floor) where.floorNumber = parseInt(floor);
 
-    // Get rooms with finish items
+    // Get rooms with finish items (include all relevant fields)
     const rooms = await prisma.room.findMany({
       where,
       include: {
         FinishScheduleItem: {
+          select: {
+            id: true, category: true, finishType: true, material: true,
+            manufacturer: true, color: true, dimensions: true, modelNumber: true,
+            csiCode: true, status: true, isConfirmed: true,
+          },
           orderBy: { category: 'asc' }
         }
       },
@@ -75,17 +100,28 @@ export async function GET(
 
     // Fetch MEP equipment from takeoff line items
     const MEP_CATEGORIES = ['Electrical', 'electrical', 'Plumbing', 'plumbing', 'HVAC', 'hvac', 'Fire Alarm', 'fire_alarm', 'Fire Protection', 'fire_protection'];
-    
-    const mepTakeoffs = await prisma.materialTakeoff.findMany({
-      where: { projectId: project.id },
-      include: {
-        TakeoffLineItem: {
-          where: {
-            category: { in: MEP_CATEGORIES }
+
+    const [mepTakeoffs, mepEquipmentRecords] = await Promise.all([
+      prisma.materialTakeoff.findMany({
+        where: { projectId: project.id },
+        include: {
+          TakeoffLineItem: {
+            where: {
+              category: { in: MEP_CATEGORIES }
+            }
           }
         }
-      }
-    });
+      }),
+      prisma.mEPEquipment.findMany({
+        where: { projectId: project.id },
+        select: {
+          id: true, equipmentTag: true, name: true, equipmentType: true,
+          manufacturer: true, model: true, capacity: true, specifications: true,
+          level: true, room: true, gridLocation: true, status: true,
+          estimatedCost: true, notes: true,
+        },
+      }),
+    ]);
 
     // Flatten MEP items and create lookup by room/location
     const mepItems = mepTakeoffs.flatMap(t => t.TakeoffLineItem);
@@ -134,15 +170,15 @@ export async function GET(
       return name.substring(0, 50);
     };
 
-    // Transform MEP items with tags
+    // Transform takeoff MEP items with tags
     const mepEquipmentList = mepItems.map(item => {
       const trade = getTradeFromCategory(item.category);
       const prefix = trade === 'electrical' ? 'E' : trade === 'hvac' ? 'H' : trade === 'plumbing' ? 'P' : 'FA';
       tagCounters[prefix]++;
-      
+
       // Clean up item name - prioritize itemName, then category
       const displayName = cleanMEPName(item.itemName || item.category);
-      
+
       return {
         id: item.id,
         tag: `${prefix}-${String(tagCounters[prefix]).padStart(3, '0')}`,
@@ -154,17 +190,72 @@ export async function GET(
         totalCost: item.totalCost,
         location: item.location || '',
         level: item.level || '',
-        roomNumber: item.gridLocation || '' // Sometimes room info is in gridLocation
+        roomNumber: item.gridLocation || '', // Sometimes room info is in gridLocation
+        source: 'takeoff' as const,
       };
     });
 
+    // Transform MEPEquipment records into the same format
+    const mepEquipFromDB = mepEquipmentRecords.map(equip => {
+      const trade = mapEquipmentTypeToTrade(equip.equipmentType);
+      return {
+        id: equip.id,
+        tag: equip.equipmentTag,
+        name: equip.name,
+        trade,
+        type: equip.equipmentType,
+        manufacturer: equip.manufacturer,
+        model: equip.model,
+        capacity: equip.capacity,
+        specifications: equip.specifications,
+        status: equip.status,
+        estimatedCost: equip.estimatedCost,
+        notes: equip.notes,
+        location: equip.room || '',
+        level: equip.level || '',
+        roomNumber: equip.room || '',
+        gridLocation: equip.gridLocation || '',
+        source: 'mep_equipment' as const,
+      };
+    });
+
+    // Merge both MEP sources, deduplicating by tag (prefer mep_equipment over takeoff)
+    const seenTags = new Set<string>();
+    const allMEP: Array<{
+      id: string;
+      tag: string;
+      name: string;
+      trade: string;
+      location: string;
+      level: string;
+      source: 'takeoff' | 'mep_equipment';
+      [key: string]: any;
+    }> = [];
+
+    // Add MEPEquipment records first (preferred source)
+    for (const equip of mepEquipFromDB) {
+      const tagKey = equip.tag.toLowerCase();
+      if (!seenTags.has(tagKey)) {
+        seenTags.add(tagKey);
+        allMEP.push(equip);
+      }
+    }
+    // Add takeoff items that don't duplicate
+    for (const item of mepEquipmentList) {
+      const tagKey = item.tag.toLowerCase();
+      if (!seenTags.has(tagKey)) {
+        seenTags.add(tagKey);
+        allMEP.push(item);
+      }
+    }
+
     // Split MEP into interior and exterior equipment
-    const interiorMEP = mepEquipmentList.filter(mep => {
+    const interiorMEP = allMEP.filter(mep => {
       if (isExteriorEquipment(mep.name?.toLowerCase() || '', mep.name || '')) return false;
       if (mep.location && isExteriorLocation(mep.location)) return false;
       return true;
     });
-    const exteriorMEP = mepEquipmentList.filter(mep => !interiorMEP.includes(mep));
+    const exteriorMEP = allMEP.filter(mep => !interiorMEP.includes(mep));
 
     if (exteriorMEP.length > 0) {
       logger.info('ROOMS_API', 'Separated exterior MEP equipment', {
@@ -180,22 +271,23 @@ export async function GET(
       const roomName = room.name.toLowerCase();
       const roomNumber = room.roomNumber?.toLowerCase() || '';
       const roomType = room.type?.toLowerCase() || '';
-      
+
       const matchedMEP = interiorMEP.filter(mep => {
         const mepLocation = mep.location.toLowerCase();
         const mepLevel = mep.level.toLowerCase();
-        const mepRoomNum = mep.roomNumber.toLowerCase();
-        
+        const mepRoomNum = (mep as any).roomNumber?.toLowerCase() || '';
+        const mepGridLoc = (mep as any).gridLocation?.toLowerCase() || '';
+
         // Match by room number
-        if (roomNumber && (mepLocation.includes(roomNumber) || mepRoomNum.includes(roomNumber))) {
+        if (roomNumber && (mepLocation.includes(roomNumber) || mepRoomNum.includes(roomNumber) || mepGridLoc.includes(roomNumber))) {
           return true;
         }
-        
-        // Match by room name
-        if (mepLocation.includes(roomName) || mepLevel.includes(roomName)) {
+
+        // Match by room name (case-insensitive)
+        if (roomName && (mepLocation.includes(roomName) || mepLevel.includes(roomName) || mepRoomNum.includes(roomName))) {
           return true;
         }
-        
+
         // Match by room type (e.g., "bathroom" matches plumbing items)
         if (roomType.includes('bath') || roomType.includes('restroom') || roomType.includes('toilet')) {
           if (mep.trade === 'plumbing') return true;
@@ -209,12 +301,13 @@ export async function GET(
         if (roomType.includes('electrical') || roomType.includes('elec')) {
           if (mep.trade === 'electrical') return true;
         }
-        
+
         return false;
       });
 
       return {
         ...room,
+        floor: formatFloorLabel(room.floorNumber),
         mepEquipment: matchedMEP.length > 0 ? matchedMEP : undefined
       };
     });
@@ -250,7 +343,7 @@ export async function GET(
       };
 
       finalRooms = rooms.map(room => {
-        const roomMEP: typeof mepEquipmentList = [];
+        const roomMEP: (typeof allMEP)[number][] = [];
         const roomType = room.type?.toLowerCase() || '';
         const roomName = room.name.toLowerCase();
         
@@ -330,6 +423,7 @@ export async function GET(
 
         return {
           ...room,
+          floor: formatFloorLabel(room.floorNumber),
           mepEquipment: roomMEP.length > 0 ? roomMEP : undefined
         };
       });
@@ -343,6 +437,7 @@ export async function GET(
         roomNumber: 'EXT',
         type: 'exterior',
         floorNumber: null,
+        floor: 'Exterior',
         area: null,
         status: 'not_started',
         percentComplete: 0,
@@ -353,19 +448,7 @@ export async function GET(
         createdAt: new Date(),
         updatedAt: new Date(),
         FinishScheduleItem: [],
-        mepEquipment: exteriorMEP.map(mep => ({
-          id: mep.id,
-          tag: mep.tag || '',
-          name: mep.name,
-          trade: mep.trade?.toLowerCase() || 'electrical',
-          quantity: mep.quantity,
-          unit: mep.unit,
-          unitCost: mep.unitCost,
-          totalCost: mep.totalCost,
-          location: mep.location,
-          level: mep.level,
-          roomNumber: mep.roomNumber,
-        })),
+        mepEquipment: exteriorMEP,
       } as any);
     }
 

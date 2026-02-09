@@ -7,11 +7,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { extractGridSystem, findSheetsAtLocation } from '@/lib/spatial-correlation';
 import { extractMEPElements, detectAllClashes } from '@/lib/mep-path-tracer';
 import { getCustomSymbols } from '@/lib/adaptive-symbol-learning';
 import { getAnnotationStats } from '@/lib/visual-annotations';
 import { detectIsometricViews } from '@/lib/isometric-interpreter';
+import {
+  calculateIntelligenceScore,
+  getProjectIntelligenceMetrics,
+} from '@/lib/intelligence-score-calculator';
 
 export async function GET(
   request: NextRequest,
@@ -88,21 +93,35 @@ export async function GET(
 
     const allChunks = allDocChunks;
 
-    // Calculate intelligence scores
-    const intelligenceScores = {
-      spatialCorrelation: calculateSpatialScore(sheetNumbers.size),
-      mepCoordination: calculateMEPScore(mepElements.length, clashes.length),
-      symbolRecognition: calculateSymbolScore(customSymbols.length),
-      annotationActivity: calculateAnnotationScore(annotationStats),
-      overall: 0
-    };
+    // Calculate comprehensive intelligence scores
+    let intelligenceMetrics;
+    let intelligenceScore;
+    try {
+      intelligenceMetrics = await getProjectIntelligenceMetrics(project.id);
+      intelligenceScore = calculateIntelligenceScore(intelligenceMetrics);
+    } catch (err) {
+      logger.warn('INTELLIGENCE_DASHBOARD', 'Failed to calculate intelligence score, using fallback', {
+        error: err instanceof Error ? err.message : String(err),
+      });
+      intelligenceScore = {
+        overall: 0,
+        extractionQuality: 0,
+        entityCompleteness: 0,
+        classificationAccuracy: 0,
+        enrichmentSuccess: 0,
+        pipelineCoverage: 0,
+        checklist: [],
+      };
+    }
 
-    intelligenceScores.overall = Math.round(
-      (intelligenceScores.spatialCorrelation +
-       intelligenceScores.mepCoordination +
-       intelligenceScores.symbolRecognition +
-       intelligenceScores.annotationActivity) / 4
-    );
+    // Legacy scores kept for backward compatibility
+    const intelligenceScores = {
+      spatialCorrelation: intelligenceScore.extractionQuality,
+      mepCoordination: intelligenceScore.entityCompleteness,
+      symbolRecognition: intelligenceScore.classificationAccuracy,
+      annotationActivity: intelligenceScore.enrichmentSuccess,
+      overall: intelligenceScore.overall,
+    };
 
     // Build dashboard response
     const dashboard = {
@@ -203,8 +222,11 @@ export async function GET(
       recommendations: generateRecommendations(
         intelligenceScores,
         clashes.length,
-        annotationStats.openIssues
+        annotationStats.openIssues,
+        intelligenceScore.checklist
       ),
+
+      intelligenceScore,
 
       health: {
         overall: intelligenceScores.overall,
@@ -223,7 +245,7 @@ export async function GET(
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Intelligence dashboard error:', error);
+    logger.error('INTELLIGENCE_DASHBOARD', 'Failed to generate intelligence dashboard', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to generate intelligence dashboard' },
       { status: 500 }
@@ -231,34 +253,6 @@ export async function GET(
   }
 }
 
-// Helper functions
-function calculateSpatialScore(sheetCount: number): number {
-  if (sheetCount === 0) return 0;
-  if (sheetCount < 5) return 40;
-  if (sheetCount < 10) return 60;
-  if (sheetCount < 20) return 80;
-  return 95;
-}
-
-function calculateMEPScore(elementCount: number, clashCount: number): number {
-  if (elementCount === 0) return 0;
-  let score = Math.min(100, (elementCount / 50) * 100);
-  // Deduct for clashes
-  const clashPenalty = Math.min(30, clashCount * 2);
-  return Math.max(0, score - clashPenalty);
-}
-
-function calculateSymbolScore(symbolCount: number): number {
-  if (symbolCount === 0) return 50; // Base score
-  return Math.min(100, 50 + (symbolCount * 10));
-}
-
-function calculateAnnotationScore(stats: any): number {
-  if (stats.total === 0) return 60; // Base score
-  const resolutionBonus = stats.avgResolutionTime && stats.avgResolutionTime < 48 ? 20 : 0;
-  const activityBonus = Math.min(30, stats.total * 2);
-  return Math.min(100, 50 + resolutionBonus + activityBonus);
-}
 
 function generateInsights(
   mepCount: number,
@@ -299,12 +293,19 @@ function generateInsights(
 function generateRecommendations(
   scores: any,
   clashCount: number,
-  openIssues: number
+  openIssues: number,
+  checklist: Array<{ label: string; status: string; actionLabel?: string }> = []
 ): string[] {
   const recommendations: string[] = [];
 
-  if (scores.spatialCorrelation < 60) {
-    recommendations.push('Upload more drawing sheets to improve spatial correlation analysis');
+  // Generate recommendations from checklist items that need attention
+  for (const item of checklist) {
+    if (item.status === 'missing') {
+      recommendations.push(item.actionLabel ? `${item.label} - ${item.actionLabel}` : item.label);
+    } else if (item.status === 'partial') {
+      recommendations.push(item.actionLabel ? `${item.label} - ${item.actionLabel}` : item.label);
+    }
+    if (recommendations.length >= 4) break;
   }
 
   if (clashCount > 5) {
@@ -315,12 +316,8 @@ function generateRecommendations(
     recommendations.push(`${openIssues} open annotations need attention - review and assign priorities`);
   }
 
-  if (scores.symbolRecognition < 70) {
-    recommendations.push('Review and confirm custom symbols to improve recognition accuracy');
-  }
-
   if (recommendations.length === 0) {
-    recommendations.push('✅ All systems operating optimally - continue regular project monitoring');
+    recommendations.push('All systems operating optimally - continue regular project monitoring');
   }
 
   return recommendations;

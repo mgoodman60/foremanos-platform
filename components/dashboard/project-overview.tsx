@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Activity,
-  Calendar,
   DollarSign,
   FileText,
   ClipboardList,
@@ -17,9 +15,17 @@ import {
   XCircle,
   TrendingUp,
   TrendingDown,
+  LayoutGrid,
+  Grid3X3,
 } from 'lucide-react';
 import { DashboardWidget } from './dashboard-widget';
+import { DashboardGreeting } from './dashboard-greeting';
+import { QuickActionsBar } from './quick-actions-bar';
+import { CompactHealthWidget } from './compact-health-widget';
+import { ExpandedScheduleWidget } from './expanded-schedule-widget';
 import { useRouter } from 'next/navigation';
+import { useProject } from '@/components/layout/project-context';
+import { useDocumentUpload } from '@/hooks/use-document-upload';
 
 interface ProjectOverviewProps {
   projectSlug: string;
@@ -27,26 +33,6 @@ interface ProjectOverviewProps {
 }
 
 // ---- Data types ----
-
-interface HealthData {
-  overallScore: number;
-  scheduleScore: number;
-  budgetScore: number;
-  safetyScore: number;
-  qualityScore: number;
-  trend: 'improving' | 'stable' | 'declining';
-  changeFromPrevious: number;
-}
-
-interface ScheduleData {
-  overallProgress: number;
-  tasksCompleted: number;
-  totalTasks: number;
-  daysAheadBehind: number;
-  criticalPathStatus: string;
-  upcomingMilestones: { name: string; daysUntil: number }[];
-  noDataSource?: boolean;
-}
 
 interface BudgetData {
   totalBudget: number;
@@ -95,76 +81,88 @@ function formatCurrency(value: number): string {
   return `$${value.toFixed(0)}`;
 }
 
-function getHealthTrend(trend: string): 'up' | 'down' | 'stable' {
-  if (trend === 'improving') return 'up';
-  if (trend === 'declining') return 'down';
-  return 'stable';
+function BudgetSparkline({ percentSpent }: { percentSpent: number }) {
+  // Simple representative sparkline based on a budget spend curve
+  const points = [5, 12, 18, 28, 35, 50, 65].map((v) =>
+    Math.min(100, v * (percentSpent / 50 || 1))
+  );
+
+  const width = 120;
+  const height = 30;
+  const max = Math.max(...points, 1);
+  const step = width / (points.length - 1);
+
+  const pathPoints = points.map((v, i) => {
+    const x = i * step;
+    const y = height - (v / max) * height;
+    return `${x},${y}`;
+  });
+
+  return (
+    <svg width={width} height={height} className="block mt-1 mb-2">
+      <polyline
+        points={pathPoints.join(' ')}
+        fill="none"
+        stroke="#f97316"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps) {
   const router = useRouter();
+  const { session } = useProject();
+  const { triggerUpload, fileInputRef, handleFileUpload, showCategoryModal } = useDocumentUpload();
 
-  // State for each widget's data
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [healthLoading, setHealthLoading] = useState(true);
-  const [healthError, setHealthError] = useState<string | null>(null);
+  // Density toggle
+  const [density, setDensity] = useState<'compact' | 'expanded'>(() => {
+    if (typeof window === 'undefined') return 'expanded';
+    return (localStorage.getItem('dashboard_density') as 'compact' | 'expanded') || 'expanded';
+  });
 
-  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
-  const [scheduleLoading, setScheduleLoading] = useState(true);
-  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const toggleDensity = useCallback(() => {
+    setDensity((prev) => {
+      const next = prev === 'compact' ? 'expanded' : 'compact';
+      localStorage.setItem('dashboard_density', next);
+      return next;
+    });
+  }, []);
 
+  const isCompact = density === 'compact';
+
+  // State for remaining widgets
   const [budget, setBudget] = useState<BudgetData | null>(null);
   const [budgetLoading, setBudgetLoading] = useState(true);
+  const [budgetFetched, setBudgetFetched] = useState<Date | undefined>();
 
   const [documents, setDocuments] = useState<DocumentData>({ documentCount: 0, processingCount: 0 });
   const [docsLoading, setDocsLoading] = useState(true);
+  const [docsFetched, setDocsFetched] = useState<Date | undefined>();
 
   const [fieldOps, setFieldOps] = useState<FieldOpsData | null>(null);
   const [fieldOpsLoading, setFieldOpsLoading] = useState(true);
+  const [fieldOpsFetched, setFieldOpsFetched] = useState<Date | undefined>();
 
   const [submittals, setSubmittals] = useState<SubmittalData | null>(null);
   const [submittalsLoading, setSubmittalsLoading] = useState(true);
+  const [submittalsFetched, setSubmittalsFetched] = useState<Date | undefined>();
 
   const [takeoffs, setTakeoffs] = useState<TakeoffData>({ totalTakeoffs: 0, totalLineItems: 0 });
   const [takeoffsLoading, setTakeoffsLoading] = useState(true);
+  const [takeoffsFetched, setTakeoffsFetched] = useState<Date | undefined>();
 
   const [rooms, setRooms] = useState<RoomData>({ roomCount: 0 });
   const [roomsLoading, setRoomsLoading] = useState(true);
+  const [roomsFetched, setRoomsFetched] = useState<Date | undefined>();
 
   const [photos, setPhotos] = useState<PhotoData>({ photoCount: 0 });
   const [photosLoading, setPhotosLoading] = useState(true);
+  const [photosFetched, setPhotosFetched] = useState<Date | undefined>();
 
   // ---- Data fetchers ----
-
-  const fetchHealth = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/projects/${projectSlug}/health`);
-      if (res.ok) {
-        const data = await res.json();
-        setHealth(data.health);
-      } else {
-        setHealthError('Unable to load');
-      }
-    } catch {
-      setHealthError('Unable to load');
-    } finally {
-      setHealthLoading(false);
-    }
-  }, [projectSlug]);
-
-  const fetchSchedule = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/projects/${projectSlug}/schedule-metrics`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setSchedule(data);
-      }
-    } catch {
-      setScheduleError('Unable to load');
-    } finally {
-      setScheduleLoading(false);
-    }
-  }, [projectSlug]);
 
   const fetchBudget = useCallback(async () => {
     try {
@@ -185,6 +183,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
       } else {
         setBudget({ totalBudget: 0, actualCost: 0, costPerformanceIndex: 1, percentSpent: 0, hasBudget: false });
       }
+      setBudgetFetched(new Date());
     } catch {
       setBudget({ totalBudget: 0, actualCost: 0, costPerformanceIndex: 1, percentSpent: 0, hasBudget: false });
     } finally {
@@ -201,6 +200,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
           documentCount: data.totalDocuments || data.documents?.length || 0,
           processingCount: data.processingCount || data.documents?.filter((d: { status: string }) => d.status === 'processing').length || 0,
         });
+        setDocsFetched(new Date());
       }
     } catch {
       // silently fail
@@ -222,6 +222,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
           totalReports: data.total || reports.length || 0,
           pendingReports: data.pending || 0,
         });
+        setFieldOpsFetched(new Date());
       }
     } catch {
       // silently fail
@@ -241,6 +242,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
           approved: data.byStatus?.approved || 0,
           rejected: data.byStatus?.rejected || 0,
         });
+        setSubmittalsFetched(new Date());
       }
     } catch {
       // silently fail
@@ -258,6 +260,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
           totalTakeoffs: data.total || data.takeoffs?.length || 0,
           totalLineItems: data.totalLineItems || 0,
         });
+        setTakeoffsFetched(new Date());
       }
     } catch {
       // silently fail
@@ -272,6 +275,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
       if (res.ok) {
         const data = await res.json();
         setRooms({ roomCount: data.total || data.rooms?.length || 0 });
+        setRoomsFetched(new Date());
       }
     } catch {
       // silently fail
@@ -286,6 +290,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
       if (res.ok) {
         const data = await res.json();
         setPhotos({ photoCount: data.total || data.photos?.length || 0 });
+        setPhotosFetched(new Date());
       }
     } catch {
       // silently fail
@@ -296,8 +301,6 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
 
   // Fetch all data on mount
   useEffect(() => {
-    fetchHealth();
-    fetchSchedule();
     fetchBudget();
     fetchDocuments();
     fetchFieldOps();
@@ -305,249 +308,269 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
     fetchTakeoffs();
     fetchRooms();
     fetchPhotos();
-  }, [fetchHealth, fetchSchedule, fetchBudget, fetchDocuments, fetchFieldOps, fetchSubmittals, fetchTakeoffs, fetchRooms, fetchPhotos]);
+  }, [fetchBudget, fetchDocuments, fetchFieldOps, fetchSubmittals, fetchTakeoffs, fetchRooms, fetchPhotos]);
 
-  // ---- Health score color ----
-  const getScoreColor = (score: number): string => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 50) return 'text-amber-400';
-    return 'text-red-400';
-  };
-
-  // ---- Build widget data ----
-
-  const scheduleHasData = schedule && !schedule.noDataSource && schedule.totalTasks > 0;
+  const userName = session?.user?.username || undefined;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-6" role="region" aria-label="Project dashboard widgets">
-      {/* 1. Project Health */}
-      <DashboardWidget
-        title="Project Health"
-        icon={Activity}
-        iconColor="bg-green-600"
-        loading={healthLoading}
-        error={healthError || undefined}
-        primaryMetric={{
-          value: health ? health.overallScore : '--',
-          label: 'Overall health score',
-          trend: health ? getHealthTrend(health.trend) : undefined,
-          trendValue: health ? `${health.changeFromPrevious >= 0 ? '+' : ''}${health.changeFromPrevious.toFixed(1)}` : undefined,
-        }}
-        secondaryMetrics={health ? [
-          { label: 'Schedule', value: health.scheduleScore, color: getScoreColor(health.scheduleScore) },
-          { label: 'Budget', value: health.budgetScore, color: getScoreColor(health.budgetScore) },
-          { label: 'Safety', value: health.safetyScore, color: getScoreColor(health.safetyScore) },
-          { label: 'Quality', value: health.qualityScore, color: getScoreColor(health.qualityScore) },
-        ] : undefined}
-        href={`/project/${projectSlug}/reports`}
-        emptyState={{
-          message: 'Upload documents and set up schedule to see health scores.',
-          actionLabel: 'View Reports',
-          actionHref: `/project/${projectSlug}/reports`,
-        }}
+    <div className="p-6 space-y-6" role="region" aria-label="Project dashboard widgets">
+      {/* Row 0: Greeting */}
+      <DashboardGreeting
+        projectSlug={projectSlug}
+        projectId={projectId}
+        userName={userName}
       />
 
-      {/* 2. Schedule Status */}
-      <DashboardWidget
-        title="Schedule Status"
-        icon={Calendar}
-        iconColor="bg-orange-500"
-        loading={scheduleLoading}
-        error={scheduleError || undefined}
-        primaryMetric={{
-          value: scheduleHasData ? `${schedule!.overallProgress}%` : '--',
-          label: scheduleHasData
-            ? `${schedule!.tasksCompleted}/${schedule!.totalTasks} tasks complete`
-            : 'No schedule data',
-          trend: scheduleHasData
-            ? schedule!.daysAheadBehind >= 0 ? 'up' : 'down'
-            : undefined,
-          trendValue: scheduleHasData
-            ? `${Math.abs(schedule!.daysAheadBehind)}d ${schedule!.daysAheadBehind >= 0 ? 'ahead' : 'behind'}`
-            : undefined,
-        }}
-        secondaryMetrics={scheduleHasData && schedule!.upcomingMilestones.length > 0 ? [
-          {
-            label: 'Next milestone',
-            value: schedule!.upcomingMilestones[0].name,
-            icon: Calendar,
-            color: 'text-orange-400',
-          },
-          {
-            label: 'Critical path',
-            value: schedule!.criticalPathStatus === 'healthy' ? 'On Track' : schedule!.criticalPathStatus === 'warning' ? 'At Risk' : 'Critical',
-            icon: schedule!.criticalPathStatus === 'healthy' ? CheckCircle : AlertTriangle,
-            color: schedule!.criticalPathStatus === 'healthy' ? 'text-green-400' : schedule!.criticalPathStatus === 'warning' ? 'text-amber-400' : 'text-red-400',
-          },
-        ] : undefined}
-        href={`/project/${projectSlug}/schedule-budget`}
-        emptyState={{
-          message: 'Upload a schedule document to track progress.',
-          actionLabel: 'Go to Schedules',
-          actionHref: `/project/${projectSlug}/schedule-budget`,
-        }}
+      {/* Row 0b: Quick Actions */}
+      <QuickActionsBar projectSlug={projectSlug} onUpload={triggerUpload} />
+
+      {/* Hidden file input for upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx"
+        className="hidden"
+        onChange={handleFileUpload}
       />
 
-      {/* 3. Budget Overview */}
-      <DashboardWidget
-        title="Budget Overview"
-        icon={DollarSign}
-        iconColor="bg-emerald-600"
-        loading={budgetLoading}
-        primaryMetric={{
-          value: budget?.hasBudget ? formatCurrency(budget.totalBudget) : '--',
-          label: budget?.hasBudget
-            ? `${budget.percentSpent.toFixed(0)}% spent`
-            : 'No budget configured',
-          trend: budget?.hasBudget
-            ? budget.costPerformanceIndex >= 1 ? 'up' : 'down'
-            : undefined,
-          trendValue: budget?.hasBudget ? `CPI ${budget.costPerformanceIndex.toFixed(2)}` : undefined,
-        }}
-        secondaryMetrics={budget?.hasBudget ? [
-          {
-            label: 'Actual cost',
-            value: formatCurrency(budget.actualCost),
-            icon: DollarSign,
-            color: budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400',
-          },
-          {
-            label: 'CPI',
-            value: budget.costPerformanceIndex.toFixed(2),
-            icon: budget.costPerformanceIndex >= 1 ? TrendingUp : TrendingDown,
-            color: budget.costPerformanceIndex >= 1 ? 'text-green-400' : budget.costPerformanceIndex >= 0.9 ? 'text-amber-400' : 'text-red-400',
-          },
-        ] : undefined}
-        href={`/project/${projectSlug}/budget`}
-        emptyState={{
-          message: 'Set up a budget to track costs.',
-          actionLabel: 'Configure Budget',
-          actionHref: `/project/${projectSlug}/budget`,
-        }}
-      />
+      {/* Density toggle */}
+      <div className="flex justify-end">
+        <button
+          onClick={toggleDensity}
+          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+          title={density === 'compact' ? 'Switch to expanded view' : 'Switch to compact view'}
+        >
+          {density === 'compact' ? (
+            <Grid3X3 className="w-4 h-4" />
+          ) : (
+            <LayoutGrid className="w-4 h-4" />
+          )}
+          {density === 'compact' ? 'Expanded' : 'Compact'}
+        </button>
+      </div>
 
-      {/* 4. Documents */}
-      <DashboardWidget
-        title="Documents"
-        icon={FileText}
-        iconColor="bg-blue-600"
-        loading={docsLoading}
-        primaryMetric={{
-          value: documents.documentCount,
-          label: documents.processingCount > 0
-            ? `${documents.processingCount} processing`
-            : 'Total documents',
-        }}
-        secondaryMetrics={documents.processingCount > 0 ? [
-          { label: 'Processing', value: documents.processingCount, icon: Clock, color: 'text-amber-400' },
-        ] : undefined}
-        href={`/project/${projectSlug}/documents`}
-        emptyState={{
-          message: 'Upload your first construction document.',
-          actionLabel: 'Upload Document',
-          actionHref: `/project/${projectSlug}/documents`,
-        }}
-      />
+      {/* Widget Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Row 1: Health (1-col) + Schedule (2-col) */}
+        <CompactHealthWidget projectSlug={projectSlug} />
+        <ExpandedScheduleWidget projectSlug={projectSlug} />
 
-      {/* 5. Field Operations */}
-      <DashboardWidget
-        title="Field Operations"
-        icon={ClipboardList}
-        iconColor="bg-orange-600"
-        loading={fieldOpsLoading}
-        primaryMetric={{
-          value: fieldOps?.totalReports || 0,
-          label: fieldOps?.latestReportDate
-            ? `Latest: ${new Date(fieldOps.latestReportDate).toLocaleDateString()}`
-            : 'No daily reports yet',
-        }}
-        secondaryMetrics={fieldOps && fieldOps.pendingReports > 0 ? [
-          { label: 'Pending review', value: fieldOps.pendingReports, icon: Clock, color: 'text-amber-400' },
-        ] : undefined}
-        href={`/project/${projectSlug}/field-ops/daily-reports`}
-        emptyState={{
-          message: 'Submit your first daily report.',
-          actionLabel: 'Create Report',
-          actionHref: `/project/${projectSlug}/field-ops/daily-reports`,
-        }}
-      />
+        {/* Row 2: Budget + Documents + Field Ops */}
+        <DashboardWidget
+          title="Budget Overview"
+          icon={DollarSign}
+          iconColor="bg-emerald-600"
+          loading={budgetLoading}
+          compact={isCompact}
+          lastFetched={budgetFetched}
+          primaryMetric={{
+            value: budget?.hasBudget ? formatCurrency(budget.totalBudget) : '--',
+            label: budget?.hasBudget
+              ? `${budget.percentSpent.toFixed(0)}% spent`
+              : 'No budget configured',
+            trend: budget?.hasBudget
+              ? budget.costPerformanceIndex >= 1 ? 'up' : 'down'
+              : undefined,
+            trendValue: budget?.hasBudget ? `CPI ${budget.costPerformanceIndex.toFixed(2)}` : undefined,
+          }}
+          secondaryMetrics={budget?.hasBudget ? [
+            {
+              label: 'Actual cost',
+              value: formatCurrency(budget.actualCost),
+              icon: DollarSign,
+              color: budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400',
+            },
+            {
+              label: 'CPI',
+              value: budget.costPerformanceIndex.toFixed(2),
+              icon: budget.costPerformanceIndex >= 1 ? TrendingUp : TrendingDown,
+              color: budget.costPerformanceIndex >= 1 ? 'text-green-400' : budget.costPerformanceIndex >= 0.9 ? 'text-amber-400' : 'text-red-400',
+            },
+          ] : undefined}
+          customContent={
+            !isCompact && budget?.hasBudget ? (
+              <div>
+                {/* Primary metric */}
+                <div className="mb-1">
+                  <span className="text-3xl font-bold text-slate-50" aria-live="polite">
+                    {formatCurrency(budget.totalBudget)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs text-gray-400">{budget.percentSpent.toFixed(0)}% spent</span>
+                  <span className={`flex items-center gap-1 text-xs ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`}>
+                    {budget.costPerformanceIndex >= 1 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    CPI {budget.costPerformanceIndex.toFixed(2)}
+                  </span>
+                </div>
+                {/* Sparkline */}
+                <BudgetSparkline percentSpent={budget.percentSpent} />
+                {/* Secondary metrics */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className={`w-3.5 h-3.5 ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`} />
+                    <div>
+                      <p className={`text-sm font-semibold ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`}>
+                        {formatCurrency(budget.actualCost)}
+                      </p>
+                      <p className="text-xs text-gray-500">Actual cost</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {budget.costPerformanceIndex >= 1
+                      ? <TrendingUp className={`w-3.5 h-3.5 text-green-400`} />
+                      : <TrendingDown className={`w-3.5 h-3.5 ${budget.costPerformanceIndex >= 0.9 ? 'text-amber-400' : 'text-red-400'}`} />
+                    }
+                    <div>
+                      <p className={`text-sm font-semibold ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : budget.costPerformanceIndex >= 0.9 ? 'text-amber-400' : 'text-red-400'}`}>
+                        {budget.costPerformanceIndex.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-500">CPI</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : undefined
+          }
+          href={`/project/${projectSlug}/budget`}
+          emptyState={{
+            message: 'Set up a budget to track costs.',
+            actionLabel: 'Configure Budget',
+            actionHref: `/project/${projectSlug}/budget`,
+          }}
+        />
 
-      {/* 6. Submittals */}
-      <DashboardWidget
-        title="Submittals"
-        icon={FileCheck}
-        iconColor="bg-blue-500"
-        loading={submittalsLoading}
-        primaryMetric={{
-          value: submittals?.total || 0,
-          label: 'Total submittals',
-        }}
-        secondaryMetrics={submittals ? [
-          { label: 'Approved', value: submittals.approved, icon: CheckCircle, color: 'text-green-400' },
-          { label: 'Pending', value: submittals.pendingReview, icon: Clock, color: 'text-amber-400' },
-          { label: 'Rejected', value: submittals.rejected, icon: XCircle, color: 'text-red-400' },
-        ] : undefined}
-        href={`/project/${projectSlug}/mep/submittals`}
-        emptyState={{
-          message: 'No submittals tracked yet.',
-          actionLabel: 'View Submittals',
-          actionHref: `/project/${projectSlug}/mep/submittals`,
-        }}
-      />
+        <DashboardWidget
+          title="Documents"
+          icon={FileText}
+          iconColor="bg-blue-600"
+          loading={docsLoading}
+          compact={isCompact}
+          lastFetched={docsFetched}
+          primaryMetric={{
+            value: documents.documentCount,
+            label: documents.processingCount > 0
+              ? `${documents.processingCount} processing`
+              : 'Total documents',
+          }}
+          secondaryMetrics={documents.processingCount > 0 ? [
+            { label: 'Processing', value: documents.processingCount, icon: Clock, color: 'text-amber-400' },
+          ] : undefined}
+          href={`/project/${projectSlug}/documents`}
+          emptyState={{
+            message: 'Upload your first construction document.',
+            actionLabel: 'Upload Document',
+            actionHref: `/project/${projectSlug}/documents`,
+          }}
+        />
 
-      {/* 7. Material Takeoffs */}
-      <DashboardWidget
-        title="Material Takeoffs"
-        icon={Ruler}
-        iconColor="bg-yellow-600"
-        loading={takeoffsLoading}
-        primaryMetric={{
-          value: takeoffs.totalTakeoffs,
-          label: takeoffs.totalLineItems > 0 ? `${takeoffs.totalLineItems} line items` : 'Total takeoffs',
-        }}
-        href={`/project/${projectSlug}/takeoffs`}
-        emptyState={{
-          message: 'Upload floor plans to auto-generate takeoffs.',
-          actionLabel: 'View Takeoffs',
-          actionHref: `/project/${projectSlug}/takeoffs`,
-        }}
-      />
+        <DashboardWidget
+          title="Field Operations"
+          icon={ClipboardList}
+          iconColor="bg-orange-600"
+          loading={fieldOpsLoading}
+          compact={isCompact}
+          lastFetched={fieldOpsFetched}
+          primaryMetric={{
+            value: fieldOps?.totalReports || 0,
+            label: fieldOps?.latestReportDate
+              ? `Latest: ${new Date(fieldOps.latestReportDate).toLocaleDateString()}`
+              : 'No daily reports yet',
+          }}
+          secondaryMetrics={fieldOps && fieldOps.pendingReports > 0 ? [
+            { label: 'Pending review', value: fieldOps.pendingReports, icon: Clock, color: 'text-amber-400' },
+          ] : undefined}
+          href={`/project/${projectSlug}/field-ops/daily-reports`}
+          emptyState={{
+            message: 'Submit your first daily report.',
+            actionLabel: 'Create Report',
+            actionHref: `/project/${projectSlug}/field-ops/daily-reports`,
+          }}
+        />
 
-      {/* 8. Rooms & Spaces */}
-      <DashboardWidget
-        title="Rooms & Spaces"
-        icon={DoorOpen}
-        iconColor="bg-green-500"
-        loading={roomsLoading}
-        primaryMetric={{
-          value: rooms.roomCount,
-          label: 'Rooms extracted',
-        }}
-        href={`/project/${projectSlug}/rooms`}
-        emptyState={{
-          message: 'Upload floor plans to extract room data.',
-          actionLabel: 'View Rooms',
-          actionHref: `/project/${projectSlug}/rooms`,
-        }}
-      />
+        {/* Row 3: Submittals + Takeoffs + Rooms */}
+        <DashboardWidget
+          title="Submittals"
+          icon={FileCheck}
+          iconColor="bg-blue-500"
+          loading={submittalsLoading}
+          compact={isCompact}
+          lastFetched={submittalsFetched}
+          primaryMetric={{
+            value: submittals?.total || 0,
+            label: 'Total submittals',
+          }}
+          secondaryMetrics={submittals ? [
+            { label: 'Approved', value: submittals.approved, icon: CheckCircle, color: 'text-green-400' },
+            { label: 'Pending', value: submittals.pendingReview, icon: Clock, color: 'text-amber-400' },
+            { label: 'Rejected', value: submittals.rejected, icon: XCircle, color: 'text-red-400' },
+          ] : undefined}
+          href={`/project/${projectSlug}/mep/submittals`}
+          emptyState={{
+            message: 'No submittals tracked yet.',
+            actionLabel: 'View Submittals',
+            actionHref: `/project/${projectSlug}/mep/submittals`,
+          }}
+        />
 
-      {/* 9. Photos & Progress */}
-      <DashboardWidget
-        title="Photos & Progress"
-        icon={Camera}
-        iconColor="bg-purple-600"
-        loading={photosLoading}
-        primaryMetric={{
-          value: photos.photoCount,
-          label: 'Field photos',
-        }}
-        href={`/project/${projectSlug}/photos`}
-        emptyState={{
-          message: 'Capture site photos for progress tracking.',
-          actionLabel: 'Upload Photos',
-          actionHref: `/project/${projectSlug}/photos`,
-        }}
-      />
+        <DashboardWidget
+          title="Material Takeoffs"
+          icon={Ruler}
+          iconColor="bg-yellow-600"
+          loading={takeoffsLoading}
+          compact={isCompact}
+          lastFetched={takeoffsFetched}
+          primaryMetric={{
+            value: takeoffs.totalTakeoffs,
+            label: takeoffs.totalLineItems > 0 ? `${takeoffs.totalLineItems} line items` : 'Total takeoffs',
+          }}
+          href={`/project/${projectSlug}/takeoffs`}
+          emptyState={{
+            message: 'Upload floor plans to auto-generate takeoffs.',
+            actionLabel: 'View Takeoffs',
+            actionHref: `/project/${projectSlug}/takeoffs`,
+          }}
+        />
+
+        <DashboardWidget
+          title="Rooms & Spaces"
+          icon={DoorOpen}
+          iconColor="bg-green-500"
+          loading={roomsLoading}
+          compact={isCompact}
+          lastFetched={roomsFetched}
+          primaryMetric={{
+            value: rooms.roomCount,
+            label: 'Rooms extracted',
+          }}
+          href={`/project/${projectSlug}/rooms`}
+          emptyState={{
+            message: 'Upload floor plans to extract room data.',
+            actionLabel: 'View Rooms',
+            actionHref: `/project/${projectSlug}/rooms`,
+          }}
+        />
+
+        {/* Row 4: Photos */}
+        <DashboardWidget
+          title="Photos & Progress"
+          icon={Camera}
+          iconColor="bg-purple-600"
+          loading={photosLoading}
+          compact={isCompact}
+          lastFetched={photosFetched}
+          primaryMetric={{
+            value: photos.photoCount,
+            label: 'Field photos',
+          }}
+          href={`/project/${projectSlug}/photos`}
+          emptyState={{
+            message: 'Capture site photos for progress tracking.',
+            actionLabel: 'Upload Photos',
+            actionHref: `/project/${projectSlug}/photos`,
+          }}
+        />
+      </div>
     </div>
   );
 }

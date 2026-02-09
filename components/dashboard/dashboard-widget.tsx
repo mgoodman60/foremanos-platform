@@ -41,6 +41,10 @@ export interface DashboardWidgetProps {
   loading?: boolean;
   error?: string;
   emptyState?: EmptyState;
+  colSpan?: 1 | 2 | 3;
+  customContent?: React.ReactNode;
+  lastFetched?: Date;
+  compact?: boolean;
 }
 
 function TrendIndicator({ trend, value }: { trend: 'up' | 'down' | 'stable'; value?: string }) {
@@ -67,6 +71,20 @@ function WidgetSkeleton() {
   );
 }
 
+function FreshnessDot({ lastFetched }: { lastFetched?: Date }) {
+  if (!lastFetched) return <span className="w-1.5 h-1.5 rounded-full bg-gray-600 inline-block" />;
+
+  const ageMs = Date.now() - lastFetched.getTime();
+  const fiveMin = 5 * 60 * 1000;
+  const oneHour = 60 * 60 * 1000;
+
+  let color = 'bg-gray-600';
+  if (ageMs < fiveMin) color = 'bg-green-400';
+  else if (ageMs < oneHour) color = 'bg-yellow-400';
+
+  return <span className={`w-1.5 h-1.5 rounded-full ${color} inline-block`} />;
+}
+
 export function DashboardWidget({
   title,
   icon: Icon,
@@ -78,70 +96,96 @@ export function DashboardWidget({
   loading,
   error,
   emptyState,
+  colSpan,
+  customContent,
+  lastFetched,
+  compact,
 }: DashboardWidgetProps) {
+  const colSpanClass = colSpan === 2 ? 'md:col-span-2' : colSpan === 3 ? 'md:col-span-3' : '';
+
   if (loading) {
     return (
-      <article
-        aria-label={title}
-        className="bg-slate-900 border-2 border-gray-700 rounded-xl transition-all duration-250"
-      >
-        <WidgetSkeleton />
-      </article>
+      <div className={colSpanClass}>
+        <article
+          aria-label={title}
+          className="bg-slate-900 border-2 border-gray-700 rounded-xl transition-all duration-250"
+        >
+          <WidgetSkeleton />
+        </article>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <article
-        aria-label={title}
-        className="bg-slate-900 border-2 border-red-500/30 rounded-xl p-6"
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`w-10 h-10 rounded-lg ${iconColor} flex items-center justify-center`}>
-            <Icon className="w-5 h-5 text-white" />
+      <div className={colSpanClass}>
+        <article
+          aria-label={title}
+          className="bg-slate-900 border-2 border-red-500/30 rounded-xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`w-10 h-10 rounded-lg ${iconColor} flex items-center justify-center`}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
+              <FreshnessDot lastFetched={lastFetched} />
+            </div>
           </div>
-          <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
-        </div>
-        <p className="text-sm text-red-400">{error}</p>
-        <p className="text-xs text-gray-500 mt-1">Try refreshing the page</p>
-      </article>
+          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-xs text-gray-500 mt-1">Try refreshing the page</p>
+        </article>
+      </div>
     );
   }
 
   if (emptyState && primaryMetric.value === 0) {
     return (
-      <article
-        aria-label={title}
-        className="bg-slate-900 border-2 border-gray-700 rounded-xl p-6"
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`w-10 h-10 rounded-lg ${iconColor} opacity-50 flex items-center justify-center`}>
-            <Icon className="w-5 h-5 text-white" />
+      <div className={colSpanClass}>
+        <article
+          aria-label={title}
+          className="bg-slate-900 border-2 border-gray-700 rounded-xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-lg ${iconColor} opacity-50 flex items-center justify-center`}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-400">{title}</h3>
           </div>
-          <h3 className="text-sm font-semibold text-gray-400">{title}</h3>
-        </div>
-        <p className="text-sm text-gray-500 mb-3">{emptyState.message}</p>
-        {emptyState.actionLabel && emptyState.actionHref && (
-          <Link
-            href={emptyState.actionHref}
-            className="text-sm text-orange-400 hover:text-orange-300 font-medium"
-          >
-            {emptyState.actionLabel}
-          </Link>
-        )}
-      </article>
+          <p className="text-sm text-gray-500 mb-3">{emptyState.message}</p>
+          {emptyState.actionLabel && emptyState.actionHref && (
+            <Link
+              href={emptyState.actionHref}
+              className="text-sm text-orange-400 hover:text-orange-300 font-medium"
+            >
+              {emptyState.actionLabel}
+            </Link>
+          )}
+        </article>
+      </div>
     );
   }
 
-  const content = (
-    <>
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-10 h-10 rounded-lg ${iconColor} flex items-center justify-center`}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
+  const header = (
+    <div className="flex items-center gap-3 mb-4">
+      <div className={`w-10 h-10 rounded-lg ${iconColor} flex items-center justify-center`}>
+        <Icon className="w-5 h-5 text-white" />
       </div>
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
+        <FreshnessDot lastFetched={lastFetched} />
+      </div>
+    </div>
+  );
+
+  const content = customContent ? (
+    <>
+      {header}
+      {customContent}
+    </>
+  ) : (
+    <>
+      {header}
 
       {/* Primary Metric */}
       <div className="mb-1">
@@ -156,8 +200,8 @@ export function DashboardWidget({
         )}
       </div>
 
-      {/* Secondary Metrics */}
-      {secondaryMetrics && secondaryMetrics.length > 0 && (
+      {/* Secondary Metrics (hidden in compact mode) */}
+      {!compact && secondaryMetrics && secondaryMetrics.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-4">
           {secondaryMetrics.map((metric) => (
             <div key={metric.label} className="flex items-center gap-2">
@@ -175,8 +219,8 @@ export function DashboardWidget({
         </div>
       )}
 
-      {/* Actions */}
-      {actions && actions.length > 0 && (
+      {/* Actions (hidden in compact mode) */}
+      {!compact && actions && actions.length > 0 && (
         <div className="flex gap-2 pt-3 border-t border-gray-700">
           {actions.map((action) => (
             <button
@@ -208,17 +252,21 @@ export function DashboardWidget({
 
   if (href) {
     return (
-      <Link href={href} className="block">
-        <article aria-label={title} className={cardClasses}>
-          {content}
-        </article>
-      </Link>
+      <div className={colSpanClass}>
+        <Link href={href} className="block">
+          <article aria-label={title} className={cardClasses}>
+            {content}
+          </article>
+        </Link>
+      </div>
     );
   }
 
   return (
-    <article aria-label={title} className={cardClasses}>
-      {content}
-    </article>
+    <div className={colSpanClass}>
+      <article aria-label={title} className={cardClasses}>
+        {content}
+      </article>
+    </div>
   );
 }

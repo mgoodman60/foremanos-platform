@@ -22,6 +22,11 @@ import {
   Grid3X3,
   List,
   FileText,
+  Flame,
+  LayoutGrid,
+  PaintBucket,
+  Layers,
+  ArrowUpFromDot,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +34,38 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import Link from 'next/link';
+
+interface MEPItem {
+  id: string;
+  tag: string;
+  name: string;
+  trade: string;
+  type?: string;
+  manufacturer?: string;
+  model?: string;
+  capacity?: string;
+  specifications?: any;
+  status?: string;
+  estimatedCost?: number;
+  notes?: string;
+  source?: 'mep_equipment' | 'takeoff';
+  quantity?: number;
+  unit?: string;
+}
+
+interface FinishItem {
+  id: string;
+  category: string;
+  finishType?: string;
+  material?: string;
+  manufacturer?: string;
+  color?: string;
+  dimensions?: string;
+  modelNumber?: string;
+  csiCode?: string;
+  status?: string;
+  isConfirmed?: boolean;
+}
 
 interface Room {
   id: string;
@@ -44,8 +81,8 @@ interface Room {
   _count?: {
     FinishScheduleItem: number;
   };
-  mepEquipment?: any[];
-  FinishScheduleItem?: any[];
+  mepEquipment?: MEPItem[];
+  FinishScheduleItem?: FinishItem[];
   DoorScheduleItem?: any[];
 }
 
@@ -66,7 +103,8 @@ export default function RoomsPage() {
   const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'heatmap'>('grid');
+  const [expandedMEP, setExpandedMEP] = useState<string | null>(null);
   const [filters, setFilters] = useState<RoomFilters>({
     search: '',
     type: 'all',
@@ -99,6 +137,14 @@ export default function RoomsPage() {
   useEffect(() => {
     fetchRooms();
   }, [fetchRooms]);
+
+  // Sync selectedRoom when rooms array updates
+  useEffect(() => {
+    if (selectedRoom) {
+      const updated = rooms.find(r => r.id === selectedRoom.id);
+      if (updated) setSelectedRoom(updated);
+    }
+  }, [rooms]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Apply filters
   useEffect(() => {
@@ -207,6 +253,66 @@ export default function RoomsPage() {
       setExporting(null);
     }
   };
+
+  // Trade badge color mapping
+  const tradeColors: Record<string, string> = {
+    electrical: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    hvac: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    plumbing: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    fire_alarm: 'bg-red-500/20 text-red-400 border-red-500/30',
+  };
+
+  const tradeIcons: Record<string, React.ReactNode> = {
+    electrical: <Zap className="h-3 w-3" />,
+    hvac: <Wind className="h-3 w-3" />,
+    plumbing: <Droplets className="h-3 w-3" />,
+    fire_alarm: <Flame className="h-3 w-3" />,
+  };
+
+  // Heatmap colors by status
+  const heatmapColors: Record<string, string> = {
+    not_started: 'bg-gray-500/10 border-gray-600',
+    in_progress: 'bg-blue-500/10 border-blue-500/30',
+    completed: 'bg-green-500/10 border-green-500/30',
+  };
+
+  function getHeatmapColor(status: string): string {
+    return heatmapColors[status] || 'bg-amber-500/10 border-amber-500/30';
+  }
+
+  function getTradeCounts(mepEquipment: MEPItem[] | undefined): Record<string, number> {
+    return (mepEquipment || []).reduce((acc, item) => {
+      const trade = item.trade || 'electrical';
+      acc[trade] = (acc[trade] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }
+
+  function groupFinishesByCategory(items: FinishItem[]) {
+    const groups = { floor: [] as FinishItem[], wall: [] as FinishItem[], ceiling: [] as FinishItem[], other: [] as FinishItem[] };
+    items.forEach(item => {
+      const cat = (item.category || '').toLowerCase();
+      if (cat.includes('floor') || cat.includes('base')) groups.floor.push(item);
+      else if (cat.includes('wall') || cat.includes('paint')) groups.wall.push(item);
+      else if (cat.includes('ceiling')) groups.ceiling.push(item);
+      else groups.other.push(item);
+    });
+    return groups;
+  }
+
+  function estimateWallArea(roomArea: number | null): number | null {
+    if (!roomArea || roomArea <= 0) return null;
+    const perimeter = 4 * Math.sqrt(roomArea);
+    const wallHeight = 9; // standard 9ft ceiling
+    return Math.round(perimeter * wallHeight);
+  }
+
+  function paintGallons(wallAreaSF: number): { oneCoat: number; twoCoat: number } {
+    return {
+      oneCoat: Math.round((wallAreaSF / 350) * 10) / 10,
+      twoCoat: Math.round((wallAreaSF / 175) * 10) / 10,
+    };
+  }
 
   // Stats
   const stats = {
@@ -342,6 +448,7 @@ export default function RoomsPage() {
                 size="icon"
                 className={`h-9 w-9 ${viewMode === 'grid' ? 'bg-orange-500/20 text-orange-400' : 'text-gray-400'}`}
                 onClick={() => setViewMode('grid')}
+                title="Grid view"
               >
                 <Grid3X3 className="h-4 w-4" />
               </Button>
@@ -350,8 +457,18 @@ export default function RoomsPage() {
                 size="icon"
                 className={`h-9 w-9 ${viewMode === 'list' ? 'bg-orange-500/20 text-orange-400' : 'text-gray-400'}`}
                 onClick={() => setViewMode('list')}
+                title="List view"
               >
                 <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-9 w-9 ${viewMode === 'heatmap' ? 'bg-orange-500/20 text-orange-400' : 'text-gray-400'}`}
+                onClick={() => setViewMode('heatmap')}
+                title="Heatmap view"
+              >
+                <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
             
@@ -377,12 +494,12 @@ export default function RoomsPage() {
         </div>
 
         {/* Room Grid/List */}
-        {viewMode === 'grid' ? (
+        {(viewMode === 'grid' || viewMode === 'heatmap') ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredRooms.map((room) => (
               <div
                 key={room.id}
-                className={`bg-dark-subtle rounded-lg border-2 overflow-hidden hover:border-orange-500/50 transition-all cursor-pointer ${getTypeColor(room.type)}`}
+                className={`bg-dark-subtle rounded-lg border-2 overflow-hidden hover:border-orange-500/50 transition-all cursor-pointer ${viewMode === 'heatmap' ? getHeatmapColor(room.status) : getTypeColor(room.type)}`}
                 onClick={() => setSelectedRoom(room)}
               >
                 <div className="p-4">
@@ -394,28 +511,31 @@ export default function RoomsPage() {
                     {getStatusIcon(room.status)}
                   </div>
                   
-                  {room.area && (
+                  {room.area != null && room.area > 0 && (
                     <div className="text-sm text-gray-400 mb-2">{room.area} sq ft</div>
                   )}
-                  
+
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {room._count?.FinishScheduleItem && room._count.FinishScheduleItem > 0 && (
+                    {room.FinishScheduleItem && room.FinishScheduleItem.length > 0 && (
                       <Badge variant="outline" className="text-[10px] border-gray-600">
-                        {room._count.FinishScheduleItem} finishes
+                        {room.FinishScheduleItem.length} finishes
                       </Badge>
                     )}
-                    {room.mepEquipment && room.mepEquipment.length > 0 && (
-                      <Badge variant="outline" className="text-[10px] border-blue-600 text-blue-400">
-                        <Zap className="h-3 w-3 mr-1" />
-                        {room.mepEquipment.length} MEP
-                      </Badge>
-                    )}
+                    {(() => {
+                      const trades = getTradeCounts(room.mepEquipment);
+                      return Object.entries(trades).map(([trade, count]) => (
+                        <Badge key={trade} variant="outline" className={`text-[10px] ${tradeColors[trade] || 'border-gray-600 text-gray-400'}`}>
+                          {tradeIcons[trade]}
+                          <span className="ml-1">{count}</span>
+                        </Badge>
+                      ));
+                    })()}
                   </div>
                 </div>
-                
+
                 <div className="px-4 py-2 bg-dark-base border-t border-gray-700 flex items-center justify-between">
                   <span className="text-xs text-gray-500">
-                    {room.floor || `Floor ${room.floorNumber}`}
+                    {room.floor || 'Unassigned'}
                   </span>
                   <ChevronRight className="h-4 w-4 text-gray-500" />
                 </div>
@@ -447,8 +567,8 @@ export default function RoomsPage() {
                       <div className="text-sm text-gray-400">{room.name}</div>
                     </td>
                     <td className="px-4 py-3 text-gray-300">{room.type}</td>
-                    <td className="px-4 py-3 text-gray-300">{room.floor || `Floor ${room.floorNumber}`}</td>
-                    <td className="px-4 py-3 text-gray-300">{room.area ? `${room.area} SF` : '-'}</td>
+                    <td className="px-4 py-3 text-gray-300">{room.floor || 'Unassigned'}</td>
+                    <td className="px-4 py-3 text-gray-300">{room.area != null && room.area > 0 ? `${room.area} SF` : 'Not measured'}</td>
                     <td className="px-4 py-3">
                       <Badge className={getStatusColor(room.status)}>
                         {room.status.replace('_', ' ')}
@@ -505,22 +625,10 @@ export default function RoomsPage() {
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">Details</h3>
                 <div className="bg-dark-base rounded-lg p-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Name</span>
-                    <span className="text-white">{selectedRoom.name || '-'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Type</span>
-                    <span className="text-white">{selectedRoom.type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Floor</span>
-                    <span className="text-white">{selectedRoom.floor || `Floor ${selectedRoom.floorNumber}`}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Area</span>
-                    <span className="text-white">{selectedRoom.area ? `${selectedRoom.area} SF` : '-'}</span>
-                  </div>
+                  <DetailRow label="Name" value={selectedRoom.name || '-'} />
+                  <DetailRow label="Type" value={selectedRoom.type} />
+                  <DetailRow label="Floor" value={selectedRoom.floor || 'Unassigned'} />
+                  <DetailRow label="Area" value={selectedRoom.area != null && selectedRoom.area > 0 ? `${selectedRoom.area} SF` : 'Not measured'} />
                   <div className="flex justify-between">
                     <span className="text-gray-400">Status</span>
                     <Badge className={getStatusColor(selectedRoom.status)}>
@@ -529,47 +637,171 @@ export default function RoomsPage() {
                   </div>
                 </div>
               </div>
-              
-              {/* Finish Schedule */}
-              {selectedRoom.FinishScheduleItem && selectedRoom.FinishScheduleItem.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">
-                    Finish Schedule ({selectedRoom.FinishScheduleItem.length})
-                  </h3>
-                  <div className="bg-dark-base rounded-lg divide-y divide-gray-800">
-                    {selectedRoom.FinishScheduleItem.map((item: any, idx: number) => (
-                      <div key={idx} className="p-3">
-                        <div className="font-medium text-white text-sm">{item.finishType}</div>
-                        <div className="text-xs text-gray-400">{item.material}</div>
-                        {item.manufacturer && (
-                          <div className="text-xs text-gray-500">{item.manufacturer}</div>
-                        )}
-                      </div>
-                    ))}
+
+              {/* Finish Schedule - Grouped */}
+              {selectedRoom.FinishScheduleItem && selectedRoom.FinishScheduleItem.length > 0 && (() => {
+                const groups = groupFinishesByCategory(selectedRoom.FinishScheduleItem);
+                const wallArea = estimateWallArea(selectedRoom.area);
+                const gallons = wallArea ? paintGallons(wallArea) : null;
+
+                return (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-400 mb-2">
+                      Finish Schedule ({selectedRoom.FinishScheduleItem.length})
+                    </h3>
+                    <div className="space-y-3">
+                      {/* Floor Finishes */}
+                      {groups.floor.length > 0 && (
+                        <div className="bg-dark-base rounded-lg overflow-hidden">
+                          <div className="px-3 py-2 border-b border-gray-800 flex items-center gap-2">
+                            <Layers className="h-3.5 w-3.5 text-amber-400" />
+                            <span className="text-xs font-medium text-amber-400 uppercase">Floor</span>
+                          </div>
+                          <div className="divide-y divide-gray-800">
+                            {groups.floor.map((item, idx) => (
+                              <div key={idx} className="p-3">
+                                <div className="font-medium text-white text-sm">{item.finishType || item.material}</div>
+                                {item.material && item.finishType && <div className="text-xs text-gray-400">{item.material}</div>}
+                                {item.manufacturer && <div className="text-xs text-gray-500">{item.manufacturer}</div>}
+                                {item.color && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-4 h-4 rounded-full border border-gray-600" style={{ backgroundColor: item.color }} />
+                                    <span className="text-xs text-gray-400">{item.color}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                            {selectedRoom.area != null && selectedRoom.area > 0 && (
+                              <div className="px-3 py-2 text-xs text-gray-500">
+                                {selectedRoom.area} sq ft of flooring
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Wall Finishes */}
+                      {groups.wall.length > 0 && (
+                        <div className="bg-dark-base rounded-lg overflow-hidden">
+                          <div className="px-3 py-2 border-b border-gray-800 flex items-center gap-2">
+                            <PaintBucket className="h-3.5 w-3.5 text-blue-400" />
+                            <span className="text-xs font-medium text-blue-400 uppercase">Wall</span>
+                          </div>
+                          <div className="divide-y divide-gray-800">
+                            {groups.wall.map((item, idx) => (
+                              <div key={idx} className="p-3">
+                                <div className="font-medium text-white text-sm">{item.finishType || item.material}</div>
+                                {item.material && item.finishType && <div className="text-xs text-gray-400">{item.material}</div>}
+                                {item.manufacturer && <div className="text-xs text-gray-500">{item.manufacturer}</div>}
+                                {item.color && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-4 h-4 rounded-full border border-gray-600" style={{ backgroundColor: item.color }} />
+                                    <span className="text-xs text-gray-400">{item.color}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                            {wallArea && gallons && (
+                              <div className="px-3 py-2 text-xs text-gray-500 space-y-0.5">
+                                <div>~{wallArea} sq ft wall area</div>
+                                <div>~{gallons.oneCoat} gal (1 coat) / ~{gallons.twoCoat} gal (2 coats)</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Ceiling Finishes */}
+                      {groups.ceiling.length > 0 && (
+                        <div className="bg-dark-base rounded-lg overflow-hidden">
+                          <div className="px-3 py-2 border-b border-gray-800 flex items-center gap-2">
+                            <ArrowUpFromDot className="h-3.5 w-3.5 text-purple-400" />
+                            <span className="text-xs font-medium text-purple-400 uppercase">Ceiling</span>
+                          </div>
+                          <div className="divide-y divide-gray-800">
+                            {groups.ceiling.map((item, idx) => (
+                              <div key={idx} className="p-3">
+                                <div className="font-medium text-white text-sm">{item.finishType || item.material}</div>
+                                {item.material && item.finishType && <div className="text-xs text-gray-400">{item.material}</div>}
+                                {item.manufacturer && <div className="text-xs text-gray-500">{item.manufacturer}</div>}
+                              </div>
+                            ))}
+                            {selectedRoom.area != null && selectedRoom.area > 0 && (
+                              <div className="px-3 py-2 text-xs text-gray-500">
+                                {selectedRoom.area} sq ft ceiling area
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Other Finishes */}
+                      {groups.other.length > 0 && (
+                        <div className="bg-dark-base rounded-lg overflow-hidden">
+                          <div className="px-3 py-2 border-b border-gray-800">
+                            <span className="text-xs font-medium text-gray-400 uppercase">Other</span>
+                          </div>
+                          <div className="divide-y divide-gray-800">
+                            {groups.other.map((item, idx) => (
+                              <div key={idx} className="p-3">
+                                <div className="font-medium text-white text-sm">{item.finishType || item.material}</div>
+                                {item.material && item.finishType && <div className="text-xs text-gray-400">{item.material}</div>}
+                                {item.manufacturer && <div className="text-xs text-gray-500">{item.manufacturer}</div>}
+                                {item.color && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-4 h-4 rounded-full border border-gray-600" style={{ backgroundColor: item.color }} />
+                                    <span className="text-xs text-gray-400">{item.color}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {/* MEP Equipment */}
+                );
+              })()}
+
+              {/* MEP Equipment - Expandable */}
               {selectedRoom.mepEquipment && selectedRoom.mepEquipment.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-400 mb-2">
                     MEP Equipment ({selectedRoom.mepEquipment.length})
                   </h3>
                   <div className="bg-dark-base rounded-lg divide-y divide-gray-800">
-                    {selectedRoom.mepEquipment.map((equip: any, idx: number) => (
-                      <div key={idx} className="p-3 flex items-start gap-3">
-                        {equip.scheduleType?.includes('HVAC') || equip.scheduleType?.includes('Fan') ? (
-                          <Wind className="h-4 w-4 text-blue-400 mt-0.5" />
-                        ) : equip.scheduleType?.includes('Plumbing') ? (
-                          <Droplets className="h-4 w-4 text-cyan-400 mt-0.5" />
-                        ) : (
-                          <Zap className="h-4 w-4 text-yellow-400 mt-0.5" />
+                    {selectedRoom.mepEquipment.map((equip: MEPItem) => (
+                      <div key={equip.id || equip.tag}>
+                        <button
+                          onClick={() => setExpandedMEP(expandedMEP === equip.tag ? null : equip.tag)}
+                          className="w-full p-3 flex items-center gap-3 hover:bg-dark-hover transition-colors text-left"
+                        >
+                          {equip.trade === 'hvac' ? (
+                            <Wind className="h-4 w-4 text-blue-400 shrink-0" />
+                          ) : equip.trade === 'plumbing' ? (
+                            <Droplets className="h-4 w-4 text-cyan-400 shrink-0" />
+                          ) : equip.trade === 'fire_alarm' ? (
+                            <Flame className="h-4 w-4 text-red-400 shrink-0" />
+                          ) : (
+                            <Zap className="h-4 w-4 text-yellow-400 shrink-0" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-white text-sm">{equip.tag}</div>
+                            <div className="text-xs text-gray-400 truncate">{equip.name || equip.type}</div>
+                          </div>
+                          <ChevronRight className={`h-4 w-4 text-gray-500 transition-transform shrink-0 ${expandedMEP === equip.tag ? 'rotate-90' : ''}`} />
+                        </button>
+                        {expandedMEP === equip.tag && (
+                          <div className="px-3 pb-3 pl-10 space-y-2 text-xs border-b border-gray-800">
+                            {equip.manufacturer && <DetailRow label="Manufacturer" value={equip.manufacturer} />}
+                            {equip.model && <DetailRow label="Model" value={equip.model} />}
+                            {equip.capacity && <DetailRow label="Capacity" value={equip.capacity} />}
+                            {equip.estimatedCost != null && <DetailRow label="Est. Cost" value={`$${equip.estimatedCost.toLocaleString()}`} />}
+                            {equip.status && <DetailRow label="Status" value={equip.status.replace(/_/g, ' ')} />}
+                            {equip.notes && <div className="text-gray-400 italic mt-1">{equip.notes}</div>}
+                            {equip.source === 'mep_equipment' && <div className="text-green-500/60 text-[10px]">From MEP equipment records</div>}
+                          </div>
                         )}
-                        <div>
-                          <div className="font-medium text-white text-sm">{equip.tag}</div>
-                          <div className="text-xs text-gray-400">{equip.type}</div>
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -595,6 +827,15 @@ export default function RoomsPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-300">{value}</span>
     </div>
   );
 }

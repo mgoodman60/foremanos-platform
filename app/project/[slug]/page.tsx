@@ -1,12 +1,13 @@
 'use client';
 
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useProject } from '@/components/layout/project-context';
 import { ProjectOverview } from '@/components/dashboard/project-overview';
 import { RecentActivityFeed } from '@/components/dashboard/recent-activity-feed';
-import { AIInsightsCard } from '@/components/dashboard/ai-insights-card';
+import { AskForemanWidget } from '@/components/dashboard/ask-foreman-widget';
 import OnboardingChecklist from '@/components/onboarding-checklist';
 import { FeatureTip } from '@/components/feature-tip';
-import { SkeletonProjectWorkspace } from '@/components/ui/skeleton-card';
 
 function DashboardSkeleton() {
   return (
@@ -29,13 +30,55 @@ function DashboardSkeleton() {
 
 export default function ProjectPage() {
   const { project, loading } = useProject();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const touchStartY = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    setRefreshKey((k) => k + 1);
+    setTimeout(() => setRefreshing(false), 1500);
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+      const atTop = window.scrollY <= 0;
+      if (atTop && deltaY > 80 && !refreshing) {
+        handleRefresh();
+      }
+    },
+    [handleRefresh, refreshing]
+  );
 
   if (loading || !project) {
     return <DashboardSkeleton />;
   }
 
   return (
-    <div className="min-h-full">
+    <div
+      ref={containerRef}
+      className="min-h-full"
+      onTouchStart={isTouchDevice ? handleTouchStart : undefined}
+      onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
+    >
+      {/* Pull-to-refresh spinner */}
+      {refreshing && (
+        <div className="flex justify-center py-3">
+          <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
+        </div>
+      )}
+
       {/* Onboarding for new projects */}
       <div className="px-3 sm:px-6 py-2">
         <OnboardingChecklist
@@ -57,7 +100,7 @@ export default function ProjectPage() {
       </div>
 
       {/* Dashboard Widget Grid */}
-      <ProjectOverview projectSlug={project.slug} projectId={project.id} />
+      <ProjectOverview key={refreshKey} projectSlug={project.slug} projectId={project.id} />
 
       {/* Activity + Insights */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 px-6 pb-6">
@@ -65,7 +108,7 @@ export default function ProjectPage() {
           <RecentActivityFeed projectSlug={project.slug} />
         </div>
         <div>
-          <AIInsightsCard projectSlug={project.slug} projectId={project.id} />
+          <AskForemanWidget projectSlug={project.slug} projectId={project.id} />
         </div>
       </div>
     </div>

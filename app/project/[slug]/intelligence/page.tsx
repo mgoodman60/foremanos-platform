@@ -16,6 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { SkeletonIntelligenceDashboard } from '@/components/ui/skeleton-card';
+import { IntelligenceChecklist } from '@/components/documents/IntelligenceChecklist';
 import { FeatureTip } from '@/components/feature-tip';
 
 interface DashboardData {
@@ -26,6 +27,7 @@ interface DashboardData {
   insights: string[];
   recommendations: string[];
   health: any;
+  intelligenceScore?: any;
 }
 
 export default function IntelligenceDashboard() {
@@ -368,6 +370,15 @@ export default function IntelligenceDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Intelligence Quality Checklist */}
+        {dashboard.intelligenceScore && dashboard.intelligenceScore.checklist && (
+          <IntelligenceChecklist
+            checklist={dashboard.intelligenceScore.checklist}
+            overallScore={dashboard.intelligenceScore.overall}
+            projectSlug={slug}
+          />
+        )}
 
         {/* Insights & Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

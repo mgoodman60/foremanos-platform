@@ -92,7 +92,7 @@ function ProjectLayoutInner({ children }: { children: React.ReactNode }) {
           href="#ai-drawer"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg"
         >
-          Skip to AI assistant
+          Skip to The Foreman
         </a>
 
         {/* Header */}

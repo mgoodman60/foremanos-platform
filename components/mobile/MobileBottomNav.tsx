@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   FolderOpen,
@@ -21,6 +21,7 @@ import {
   User,
   LogOut,
   ChevronRight,
+  AlertCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -62,6 +63,8 @@ export function MobileBottomNav({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showCaptureMenu, setShowCaptureMenu] = useState(false);
+  const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hide nav on scroll down, show on scroll up
   useEffect(() => {
@@ -138,7 +141,7 @@ export function MobileBottomNav({
       items: [
         {
           icon: MessageSquare,
-          label: 'AI Assistant',
+          label: 'The Foreman',
           onClick: () => { onOpenAiDrawer?.(); setShowMoreMenu(false); },
         },
         {
@@ -278,14 +281,75 @@ export function MobileBottomNav({
 
             if (item.isCenter) {
               return (
-                <button
-                  key={item.id}
-                  onClick={item.onClick}
-                  aria-label="Quick capture"
-                  className="relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg bg-orange-500 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none"
-                >
-                  <Icon className="w-6 h-6 text-white" />
-                </button>
+                <div key={item.id} className="relative">
+                  {/* Long-press popover */}
+                  {showCaptureMenu && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowCaptureMenu(false)}
+                        aria-hidden="true"
+                      />
+                      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50 bg-slate-800 border border-gray-600 rounded-xl shadow-xl py-2 w-44 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
+                        <button
+                          onClick={() => { onShowCamera(); setShowCaptureMenu(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
+                          style={{ minHeight: '44px' }}
+                        >
+                          <Camera className="w-4 h-4 text-orange-400" />
+                          Photo
+                        </button>
+                        <button
+                          onClick={() => { router.push(`/project/${projectSlug}/field-ops/daily-reports?new=true`); setShowCaptureMenu(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
+                          style={{ minHeight: '44px' }}
+                        >
+                          <ClipboardList className="w-4 h-4 text-blue-400" />
+                          Daily Report
+                        </button>
+                        <button
+                          onClick={() => { router.push(`/project/${projectSlug}/field-ops/punch-list?new=true`); setShowCaptureMenu(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
+                          style={{ minHeight: '44px' }}
+                        >
+                          <AlertCircle className="w-4 h-4 text-yellow-400" />
+                          Punch List
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  <button
+                    aria-label="Quick capture (hold for options)"
+                    className="relative -mt-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg bg-orange-500 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none"
+                    onTouchStart={() => {
+                      longPressTimer.current = setTimeout(() => {
+                        longPressTimer.current = null;
+                        setShowCaptureMenu(true);
+                      }, 500);
+                    }}
+                    onTouchEnd={() => {
+                      if (longPressTimer.current) {
+                        clearTimeout(longPressTimer.current);
+                        longPressTimer.current = null;
+                        onShowCamera();
+                      }
+                    }}
+                    onTouchCancel={() => {
+                      if (longPressTimer.current) {
+                        clearTimeout(longPressTimer.current);
+                        longPressTimer.current = null;
+                      }
+                    }}
+                    onClick={(e) => {
+                      // Desktop click fallback (touch events won't fire on desktop)
+                      if (!('ontouchstart' in window)) {
+                        onShowCamera();
+                      }
+                    }}
+                  >
+                    <Icon className="w-6 h-6 text-white" />
+                  </button>
+                </div>
               );
             }
 
