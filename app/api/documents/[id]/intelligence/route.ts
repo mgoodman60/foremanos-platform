@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { checkRateLimit, createRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,16 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Rate limiting
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
     const documentId = params.id;
 
     // Fetch document with project
@@ -33,6 +44,28 @@ export async function GET(
 
     if (!document) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+
+    // Verify user has access to this project
+    const userId = session.user.id;
+    const userRole = (session.user as any).role;
+    const isAdmin = userRole === 'admin';
+
+    if (!isAdmin && document.Project) {
+      const projectAccess = await prisma.project.findFirst({
+        where: {
+          id: document.projectId,
+          OR: [
+            { ownerId: userId },
+            { ProjectMember: { some: { userId } } },
+          ],
+        },
+        select: { id: true },
+      });
+
+      if (!projectAccess) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
     }
 
     // Parallel data fetching for all intelligence types

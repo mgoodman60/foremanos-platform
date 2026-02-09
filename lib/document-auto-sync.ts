@@ -23,6 +23,8 @@ import {
   syncMaterialsData,
 } from './feature-sync-services';
 import { processUploadedBudgetDocument } from './budget-auto-sync';
+import { compareRevisions } from './revision-comparator';
+import { logger } from '@/lib/logger';
 
 export interface FeatureSyncResult {
   extracted?: boolean;
@@ -101,6 +103,29 @@ export async function processDocumentForSync(
       const message = error instanceof Error ? error.message : String(error);
       result.errors.push(`${feature}: ${message}`);
     }
+  }
+
+  // Run revision comparison (non-blocking) for plans/drawings documents
+  try {
+    const doc = await prisma.document.findUnique({
+      where: { id: documentId },
+      select: { category: true },
+    });
+    if (doc?.category === 'plans_drawings') {
+      const comparison = await compareRevisions(documentId, projectId);
+      if (comparison.hasOverlap) {
+        logger.info('AUTO_SYNC', 'Revision comparison detected overlapping sheets', {
+          documentId,
+          overlappingSheets: comparison.overlappingSheets.length,
+          diffs: comparison.diffs.length,
+        });
+      }
+    }
+  } catch (revError) {
+    logger.warn('AUTO_SYNC', 'Revision comparison failed (non-blocking)', {
+      documentId,
+      error: (revError as Error).message,
+    });
   }
 
   return result;

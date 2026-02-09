@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { checkRateLimit, createRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,16 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limiting
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+      );
     }
 
     const { searchParams } = new URL(req.url);
@@ -29,6 +40,28 @@ export async function GET(req: NextRequest) {
 
     if (!projectId) {
       return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
+    }
+
+    // Verify user has access to this project
+    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+    const isAdmin = userRole === 'admin';
+
+    if (!isAdmin) {
+      const projectAccess = await prisma.project.findFirst({
+        where: {
+          id: projectId,
+          OR: [
+            { ownerId: userId },
+            { ProjectMember: { some: { userId } } },
+          ],
+        },
+        select: { id: true },
+      });
+
+      if (!projectAccess) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
     }
 
     // Build where clause

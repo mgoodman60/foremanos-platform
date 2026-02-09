@@ -93,21 +93,21 @@ export function calculateRoomArea(room: RoomInput): CalculatedQuantity | null {
   const width = room.width ? parseDimension(room.width) : null;
   const length = room.length ? parseDimension(room.length) : null;
 
-  if (width && length) {
-    return {
-      element: `Room ${room.roomNumber} Floor Area`,
-      quantity: Math.round(width * length * 100) / 100,
-      unit: 'SF',
-      category: '09 00 00',
-      tradeType: 'Architectural',
-      dimensions: { width, length },
-      confidence: 0.8,
-      calculationMethod: 'width_x_length',
-      sourceRoom: room.roomNumber,
-    };
+  if (!width || !length || isNaN(width) || isNaN(length) || width <= 0 || length <= 0) {
+    return null;
   }
 
-  return null;
+  return {
+    element: `Room ${room.roomNumber} Floor Area`,
+    quantity: Math.round(width * length * 100) / 100,
+    unit: 'SF',
+    category: '09 00 00',
+    tradeType: 'Architectural',
+    dimensions: { width, length },
+    confidence: 0.8,
+    calculationMethod: 'width_x_length',
+    sourceRoom: room.roomNumber,
+  };
 }
 
 /**
@@ -120,35 +120,37 @@ export function calculateWallQuantities(room: RoomInput): CalculatedQuantity[] {
   const length = room.length ? parseDimension(room.length) : null;
   const height = room.ceilingHeight ? parseDimension(room.ceilingHeight) : null;
 
-  if (width && length) {
-    const perimeter = 2 * (width + length);
+  if (!width || !length || isNaN(width) || isNaN(length) || width <= 0 || length <= 0) {
+    return results;
+  }
 
+  const perimeter = 2 * (width + length);
+
+  results.push({
+    element: `Room ${room.roomNumber} Wall Perimeter`,
+    quantity: Math.round(perimeter * 100) / 100,
+    unit: 'LF',
+    category: '09 00 00',
+    tradeType: 'Architectural',
+    dimensions: { width, length },
+    confidence: 0.8,
+    calculationMethod: '2*(w+l)',
+    sourceRoom: room.roomNumber,
+  });
+
+  if (height && !isNaN(height) && height > 0) {
+    const grossWallArea = perimeter * height;
     results.push({
-      element: `Room ${room.roomNumber} Wall Perimeter`,
-      quantity: Math.round(perimeter * 100) / 100,
-      unit: 'LF',
+      element: `Room ${room.roomNumber} Gross Wall Area`,
+      quantity: Math.round(grossWallArea * 100) / 100,
+      unit: 'SF',
       category: '09 00 00',
       tradeType: 'Architectural',
-      dimensions: { width, length },
-      confidence: width && length ? 0.8 : 0.5,
-      calculationMethod: '2*(w+l)',
+      dimensions: { width, length, height },
+      confidence: 0.75,
+      calculationMethod: 'perimeter_x_height',
       sourceRoom: room.roomNumber,
     });
-
-    if (height) {
-      const grossWallArea = perimeter * height;
-      results.push({
-        element: `Room ${room.roomNumber} Gross Wall Area`,
-        quantity: Math.round(grossWallArea * 100) / 100,
-        unit: 'SF',
-        category: '09 00 00',
-        tradeType: 'Architectural',
-        dimensions: { width, length, height },
-        confidence: 0.75,
-        calculationMethod: 'perimeter_x_height',
-        sourceRoom: room.roomNumber,
-      });
-    }
   }
 
   return results;
@@ -164,23 +166,23 @@ export function calculateFootingVolume(
   const d = parseDimension(footing.depth);
   const l = parseDimension(footing.length);
 
-  if (w && d && l) {
-    const volumeCF = w * d * l;
-    const volumeCY = volumeCF / 27;
-
-    return {
-      element: footing.label || 'Footing',
-      quantity: Math.round(volumeCY * 100) / 100,
-      unit: 'CY',
-      category: '03 30 00',
-      tradeType: 'Concrete',
-      dimensions: { width: w, length: l, height: d },
-      confidence: 0.85,
-      calculationMethod: 'w_x_d_x_l_div_27',
-    };
+  if (!w || !d || !l || isNaN(w) || isNaN(d) || isNaN(l) || w <= 0 || d <= 0 || l <= 0) {
+    return null;
   }
 
-  return null;
+  const volumeCF = w * d * l;
+  const volumeCY = volumeCF / 27;
+
+  return {
+    element: footing.label || 'Footing',
+    quantity: Math.round(volumeCY * 100) / 100,
+    unit: 'CY',
+    category: '03 30 00',
+    tradeType: 'Concrete',
+    dimensions: { width: w, length: l, height: d },
+    confidence: 0.85,
+    calculationMethod: 'w_x_d_x_l_div_27',
+  };
 }
 
 /**
@@ -192,7 +194,9 @@ export function calculateSlabVolume(
   label?: string
 ): CalculatedQuantity | null {
   const t = parseDimension(thickness);
-  if (!t || !area) return null;
+  if (!t || !area || isNaN(t) || isNaN(area) || t <= 0 || area <= 0) {
+    return null;
+  }
 
   const volumeCF = area * t;
   const volumeCY = volumeCF / 27;

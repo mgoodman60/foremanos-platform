@@ -510,12 +510,22 @@ export async function runIntelligenceExtraction(
 
       const projectId = document.projectId;
 
-      await Promise.all([
+      const enrichmentResults = await Promise.allSettled([
         resolveCrossReferences(documentId),
         parseDrawingSchedules(documentId, projectId),
         extractFixtures(documentId, projectId),
         aggregateSpatialData(documentId),
       ]);
+
+      const enrichmentNames = ['crossReferences', 'scheduleParser', 'fixtureExtractor', 'spatialAggregator'];
+      enrichmentResults.forEach((result, i) => {
+        if (result.status === 'rejected') {
+          logger.warn('INTELLIGENCE', `Enrichment module ${enrichmentNames[i]} failed`, {
+            documentId,
+            error: result.reason?.message || String(result.reason),
+          });
+        }
+      });
 
       // Sheet index depends on the above completing first
       await buildSheetIndex(documentId);

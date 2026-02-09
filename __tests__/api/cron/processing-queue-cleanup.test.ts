@@ -17,15 +17,24 @@ vi.mock('@/lib/logger', () => ({
 
 import { GET } from '@/app/api/cron/processing-queue-cleanup/route';
 
+function makeRequest(cronSecret?: string) {
+  const headers = new Headers();
+  if (cronSecret) {
+    headers.set('authorization', `Bearer ${cronSecret}`);
+  }
+  return new Request('http://localhost:3000/api/cron/processing-queue-cleanup', { headers }) as any;
+}
+
 describe('Processing Queue Cleanup Cron', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.CRON_SECRET = 'test-cron-secret';
   });
 
   it('should delete old completed and failed entries', async () => {
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 5 });
 
-    const response = await GET();
+    const response = await GET(makeRequest('test-cron-secret'));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -35,10 +44,20 @@ describe('Processing Queue Cleanup Cron', () => {
     expect(mockPrisma.processingQueue.deleteMany).toHaveBeenCalledTimes(1);
   });
 
+  it('should return 401 without CRON_SECRET', async () => {
+    const response = await GET(makeRequest());
+    expect(response.status).toBe(401);
+  });
+
+  it('should return 401 with wrong CRON_SECRET', async () => {
+    const response = await GET(makeRequest('wrong-secret'));
+    expect(response.status).toBe(401);
+  });
+
   it('should handle errors gracefully', async () => {
     mockPrisma.processingQueue.deleteMany.mockRejectedValue(new Error('DB error'));
 
-    const response = await GET();
+    const response = await GET(makeRequest('test-cron-secret'));
     const body = await response.json();
 
     expect(response.status).toBe(500);
@@ -49,21 +68,20 @@ describe('Processing Queue Cleanup Cron', () => {
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
     const beforeCall = Date.now();
 
-    await GET();
+    await GET(makeRequest('test-cron-secret'));
 
     const callArgs = mockPrisma.processingQueue.deleteMany.mock.calls[0][0];
     const threshold = new Date(callArgs.where.updatedAt.lt);
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
     const expectedThreshold = beforeCall - thirtyDaysMs;
 
-    // The threshold should be approximately 30 days ago (within 5 seconds tolerance)
     expect(Math.abs(threshold.getTime() - expectedThreshold)).toBeLessThan(5000);
   });
 
   it('should filter by completed and failed statuses', async () => {
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
 
-    await GET();
+    await GET(makeRequest('test-cron-secret'));
 
     const callArgs = mockPrisma.processingQueue.deleteMany.mock.calls[0][0];
     expect(callArgs.where.status.in).toContain('completed');
@@ -73,7 +91,7 @@ describe('Processing Queue Cleanup Cron', () => {
   it('should return zero count when no entries match', async () => {
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
 
-    const response = await GET();
+    const response = await GET(makeRequest('test-cron-secret'));
     const body = await response.json();
 
     expect(response.status).toBe(200);

@@ -391,11 +391,12 @@ export async function saveExtractedRooms(
   let updated = 0;
 
   for (const extractedRoom of extractedRooms) {
-    // Check if room already exists
+    // Check if room already exists (dedup by roomNumber + sourceDocumentId to prevent cross-document contamination)
     const existing = await prisma.room.findFirst({
       where: {
         projectId: project.id,
         roomNumber: extractedRoom.roomNumber,
+        ...(sourceDocumentId ? { sourceDocumentId } : {}),
       },
     });
 
@@ -430,6 +431,7 @@ export async function saveExtractedRooms(
           area: extractedRoom.area,
           notes: extractedRoom.notes,
           status: 'not_started',
+          sourceDocumentId: sourceDocumentId || null,
         },
       });
       created++;

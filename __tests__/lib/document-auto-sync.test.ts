@@ -70,6 +70,12 @@ const mockRouter = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/document-intelligence-router', () => mockRouter);
+vi.mock('@/lib/revision-comparator', () => ({
+  compareRevisions: vi.fn().mockResolvedValue({ hasOverlap: false, overlappingSheets: [], diffs: [] }),
+}));
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
 // Import functions after mocks
 import {
@@ -626,8 +632,9 @@ describe('Document Auto-Sync - syncAllProjectDocuments', () => {
 
     mockPrisma.document.findMany.mockResolvedValue(mockDocuments);
     mockPrisma.document.findUnique
-      .mockResolvedValueOnce(mockDocuments[0])
-      .mockResolvedValueOnce(null); // Second document not found
+      .mockResolvedValueOnce(mockDocuments[0])  // doc-1 main lookup
+      .mockResolvedValueOnce({ category: 'architectural_plans' })  // doc-1 revision comparator lookup
+      .mockResolvedValueOnce(null); // doc-2 not found
 
     const result = await syncAllProjectDocuments('project-1');
 
