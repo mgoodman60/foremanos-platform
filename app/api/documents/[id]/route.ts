@@ -274,30 +274,29 @@ export async function DELETE(
       }
     }
 
-    // Delete associated document chunks
-    await prisma.documentChunk.deleteMany({
-      where: { documentId },
-    });
+    // Delete associated records in a transaction to prevent orphans
+    const [deletedChunks, deletedTakeoffs, deletedDataSources] = await prisma.$transaction([
+      prisma.documentChunk.deleteMany({
+        where: { documentId },
+      }),
+      prisma.materialTakeoff.deleteMany({
+        where: { documentId },
+      }),
+      prisma.projectDataSource.deleteMany({
+        where: { documentId },
+      }),
+      prisma.document.delete({
+        where: { id: documentId },
+      }),
+    ]);
 
-    // Clean up any remaining ProjectDataSource records
-    // (handleDocumentDeletion may have already cleaned some during resync)
-    const deletedDataSources = await prisma.projectDataSource.deleteMany({
-      where: { documentId },
-    });
-    
-    if (deletedDataSources.count > 0) {
-      console.log(`[Document Delete] Cleaned up ${deletedDataSources.count} remaining data source(s) for document ${documentId}`);
-    }
-
-    // Delete the document record
-    await prisma.document.delete({
-      where: { id: documentId },
-    });
+    console.log(`[Document Delete] Transaction complete: ${deletedChunks.count} chunks, ${deletedTakeoffs.count} takeoffs, ${deletedDataSources.count} data sources deleted`);
 
     return NextResponse.json({
       success: true,
       message: 'Document deleted successfully',
       dataSourcesCleaned: deletedDataSources.count,
+      takeoffsCleaned: deletedTakeoffs.count,
       autoSync: syncResult ? {
         featuresAffected: syncResult.featuresAffected,
         featuresResynced: syncResult.featuresResynced,

@@ -83,6 +83,14 @@ export function performQualityCheck(
     'equipment',
     'annotations',
     'symbols',
+    'visualMaterials',
+    'plumbingFixtures',
+    'electricalDevices',
+    'spatialData',
+    'constructionIntel',
+    'drawingScheduleTables',
+    'hvacData',
+    'fireProtection',
   ];
 
   let structuralFieldsFound = 0;

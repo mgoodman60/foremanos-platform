@@ -538,14 +538,16 @@ export async function processQueuedDocument(
         if (result.success && result.pagesProcessed > 0) {
           try {
             await prisma.$executeRawUnsafe(
-              `UPDATE "ProcessingQueue" SET "pagesProcessed" = "pagesProcessed" + $1, "updatedAt" = NOW() WHERE id = $2`,
+              `UPDATE "ProcessingQueue" SET "pagesProcessed" = LEAST("pagesProcessed" + $1, "totalPages"), "currentBatch" = LEAST("currentBatch" + 1, "totalBatches"), "updatedAt" = NOW() WHERE id = $2`,
               result.pagesProcessed,
               entry.id
             );
-            await prisma.document.update({
-              where: { id: documentId },
-              data: { pagesProcessed: { increment: result.pagesProcessed } },
-            });
+            await prisma.$executeRawUnsafe(
+              `UPDATE "Document" SET "pagesProcessed" = LEAST("pagesProcessed" + $1, $2) WHERE id = $3`,
+              result.pagesProcessed,
+              entry.totalPages,
+              documentId
+            );
             logger.info('PROCESS_QUEUE', `Batch ${range.batchIndex + 1} progress saved`, {
               documentId,
               batchPages: result.pagesProcessed,

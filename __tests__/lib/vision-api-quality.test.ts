@@ -28,6 +28,14 @@ describe('Vision API Quality Module', () => {
           equipment: ['HVAC-1'],
           annotations: ['Note 1'],
           symbols: ['Symbol1'],
+          visualMaterials: [{ material: 'concrete' }],
+          plumbingFixtures: [{ type: 'WC' }],
+          electricalDevices: [{ type: 'receptacle' }],
+          spatialData: { heights: ['10ft'] },
+          constructionIntel: { tradesRequired: ['Arch'] },
+          drawingScheduleTables: [{ scheduleType: 'door' }],
+          hvacData: { ductwork: ['12x12'] },
+          fireProtection: { sprinklerHeads: ['pendant'] },
         };
 
         const result = performQualityCheck(data, 1);
@@ -229,7 +237,7 @@ describe('Vision API Quality Module', () => {
     });
 
     describe('Structural Elements Scoring', () => {
-      it('should award full 40 points when all 8 structural fields present', () => {
+      it('should award full 40 points when all 16 structural fields present', () => {
         const data: ExtractedData = {
           dimensions: ['10ft'],
           gridLines: ['A'],
@@ -239,6 +247,14 @@ describe('Vision API Quality Module', () => {
           equipment: ['HVAC-1'],
           annotations: ['Note 1'],
           symbols: ['Symbol1'],
+          visualMaterials: [{ material: 'concrete' }],
+          plumbingFixtures: [{ type: 'WC' }],
+          electricalDevices: [{ type: 'receptacle' }],
+          spatialData: { heights: ['10ft'] },
+          constructionIntel: { tradesRequired: ['Arch'] },
+          drawingScheduleTables: [{ scheduleType: 'door' }],
+          hvacData: { ductwork: ['12x12'] },
+          fireProtection: { sprinklerHeads: ['pendant'] },
         };
 
         const result = performQualityCheck(data, 1, 0);
@@ -253,12 +269,12 @@ describe('Vision API Quality Module', () => {
           gridLines: ['A'],
           roomLabels: ['Room 1'],
           doors: ['D1'],
-          // 4 out of 8 fields = 20 points
+          // 4 out of 16 fields = 10 points
         };
 
         const result = performQualityCheck(data, 1, 0);
 
-        expect(result.score).toBe(20); // (4/8) * 40 = 20
+        expect(result.score).toBe(10); // (4/16) * 40 = 10
       });
 
       it('should detect when no structural elements are present', () => {
@@ -293,7 +309,7 @@ describe('Vision API Quality Module', () => {
         const result = performQualityCheck(data, 1, 0);
 
         // Only dimensions counts (has content), doors is empty array
-        expect(result.score).toBe(5); // (1/8) * 40 = 5
+        expect(result.score).toBe(2.5); // (1/16) * 40 = 2.5
       });
 
       it('should reject structural fields with N/A value', () => {
@@ -305,7 +321,7 @@ describe('Vision API Quality Module', () => {
         const result = performQualityCheck(data, 1, 0);
 
         // Only gridLines counts
-        expect(result.score).toBe(5); // (1/8) * 40 = 5
+        expect(result.score).toBe(2.5); // (1/16) * 40 = 2.5
       });
 
       it('should handle empty arrays as no structural elements', () => {

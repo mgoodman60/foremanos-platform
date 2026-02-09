@@ -519,58 +519,62 @@ model DimensionAnnotation {
 }
 
 model Document {
-  id                    String                  @id @default(cuid())
-  name                  String
-  fileName              String
-  fileType              String
-  oneDriveId            String?                 @unique
-  accessLevel           String                  @default("guest")
-  filePath              String?
-  fileUrl               String?
-  lastModified          DateTime?
-  fileSize              Int?
-  processed             Boolean                 @default(false)
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  projectId             String
-  description           String?
-  tags                  String[]
-  updatedBy             String?
-  cloud_storage_path    String?
-  isPublic              Boolean                 @default(false)
-  deletedAt             DateTime?
-  oneDriveHash          String?
-  syncSource            String?
-  pagesProcessed        Int?
-  processingCost        Float?
-  processorType         String?
-  category              DocumentCategory        @default(other)
-  fileHash              String?
-  lastProcessedHash     String?
-  processedAt           DateTime?
-  queuePriority         Int                     @default(5)
-  queueStatus           String                  @default("none")
-  queuedAt              DateTime?
-  lastProcessingError   String?
-  processingRetries     Int                     @default(0)
-  virusStatus           String?                 // "clean" | "infected" | "skipped" | "error"
-  virusScanAt           DateTime?
-  virusScanProvider     String?                 // "virustotal"
-  DetailCallout         DetailCallout[]
-  DimensionAnnotation   DimensionAnnotation[]
-  Project               Project?                @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  DocumentChunk         DocumentChunk[]
-  DoorScheduleItem      DoorScheduleItem[]
-  DrawingType           DrawingType[]
-  EnhancedAnnotation    EnhancedAnnotation[]
-  HardwareSetDefinition HardwareSetDefinition[]
-  MaterialTakeoff       MaterialTakeoff[]
-  ProcessingQueue       ProcessingQueue[]
-  ProjectDataSource     ProjectDataSource[]
-  Schedule              Schedule[]
-  SheetLegend           SheetLegend[]
-  VisualAnnotation      VisualAnnotation[]
-  WindowScheduleItem    WindowScheduleItem[]
+  id                      String                  @id @default(cuid())
+  name                    String
+  fileName                String
+  fileType                String
+  oneDriveId              String?                 @unique
+  accessLevel             String                  @default("guest")
+  filePath                String?
+  fileUrl                 String?
+  lastModified            DateTime?
+  fileSize                Int?
+  processed               Boolean                 @default(false)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  projectId               String
+  description             String?
+  tags                    String[]
+  updatedBy               String?
+  cloud_storage_path      String?
+  isPublic                Boolean                 @default(false)
+  deletedAt               DateTime?
+  oneDriveHash            String?
+  syncSource              String?
+  pagesProcessed          Int?
+  processingCost          Float?
+  processorType           String?
+  category                DocumentCategory        @default(other)
+  fileHash                String?
+  lastProcessedHash       String?
+  processedAt             DateTime?
+  queuePriority           Int                     @default(5)
+  queueStatus             String                  @default("none")
+  queuedAt                DateTime?
+  lastProcessingError     String?
+  processingRetries       Int                     @default(0)
+  virusStatus             String? // "clean" | "infected" | "skipped" | "error"
+  virusScanAt             DateTime?
+  virusScanProvider       String? // "virustotal"
+  sheetIndex              Json?
+  DetailCallout           DetailCallout[]
+  DimensionAnnotation     DimensionAnnotation[]
+  Project                 Project?                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  DocumentChunk           DocumentChunk[]
+  DoorScheduleItem        DoorScheduleItem[]
+  DrawingType             DrawingType[]
+  EnhancedAnnotation      EnhancedAnnotation[]
+  FinishScheduleSourceDoc FinishScheduleItem[]    @relation("FinishScheduleSourceDoc")
+  FloorPlanSourceDoc      FloorPlan[]             @relation("FloorPlanSourceDoc")
+  HardwareSetDefinition   HardwareSetDefinition[]
+  MaterialTakeoff         MaterialTakeoff[]
+  ProcessingQueue         ProcessingQueue[]
+  ProjectDataSource       ProjectDataSource[]
+  RoomFromSource          Room[]                  @relation("RoomSourceDoc")
+  Schedule                Schedule[]
+  SheetLegend             SheetLegend[]
+  VisualAnnotation        VisualAnnotation[]
+  WindowScheduleItem      WindowScheduleItem[]
 
   @@index([category])
   @@index([deletedAt])
@@ -715,36 +719,40 @@ model FinishScheduleItem {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   Room              Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  SourceDocument    Document?   @relation("FinishScheduleSourceDoc", fields: [sourceDocumentId], references: [id], onDelete: SetNull)
   RoomPhoto         RoomPhoto[]
 
   @@index([category])
   @@index([csiDivision])
   @@index([roomId])
+  @@index([sourceDocumentId])
   @@index([status])
 }
 
 model FloorPlan {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   projectId          String
   name               String
   floor              String?
   building           String?
   cloud_storage_path String
-  isPublic           Boolean  @default(false)
+  isPublic           Boolean   @default(false)
   imageWidth         Int?
   imageHeight        Int?
   sourceDocumentId   String?
   sourceSheetNumber  String?
   scale              String?
   description        String?
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  Project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  Project            Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  SourceDocument     Document? @relation("FloorPlanSourceDoc", fields: [sourceDocumentId], references: [id], onDelete: SetNull)
 
   @@index([floor])
   @@index([isActive])
   @@index([projectId])
+  @@index([sourceDocumentId])
 }
 
 model MaintenanceMode {
@@ -756,7 +764,7 @@ model MaintenanceMode {
 }
 
 model MaterialTakeoff {
-  id              String            @id @default(cuid())
+  id              String                @id @default(cuid())
   projectId       String
   name            String
   description     String?
@@ -765,15 +773,15 @@ model MaterialTakeoff {
   extractedBy     String?
   extractedAt     DateTime?
   totalCost       Float?
-  costUnit        String            @default("USD")
+  costUnit        String                @default("USD")
   createdBy       String
   approvedBy      String?
   approvedAt      DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  User            User              @relation(fields: [createdBy], references: [id])
-  Document        Document?         @relation(fields: [documentId], references: [id])
-  Project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  User            User                  @relation(fields: [createdBy], references: [id])
+  Document        Document?             @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  Project         Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
   TakeoffLineItem TakeoffLineItem[]
 
   @@index([createdBy])
@@ -782,28 +790,28 @@ model MaterialTakeoff {
 }
 
 model TakeoffAggregation {
-  id               String    @id @default(cuid())
+  id               String                @id @default(cuid())
   projectId        String
   name             String
   description      String?
   status           MaterialTakeoffStatus @default(draft)
   sourceSheets     Json
   sourceTakeoffs   Json?
-  totalItems       Int       @default(0)
-  totalQuantity    Float     @default(0)
+  totalItems       Int                   @default(0)
+  totalQuantity    Float                 @default(0)
   totalCost        Float?
-  costUnit         String    @default("USD")
+  costUnit         String                @default("USD")
   aggregatedData   Json?
   categorySummary  Json?
   tradeBreakdown   Json?
-  duplicatesMerged Int       @default(0)
+  duplicatesMerged Int                   @default(0)
   createdBy        String
   approvedBy       String?
   approvedAt       DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  User             User      @relation(fields: [createdBy], references: [id])
-  Project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  User             User                  @relation(fields: [createdBy], references: [id])
+  Project          Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([createdBy])
   @@index([projectId])
@@ -881,19 +889,19 @@ model ProcessingCost {
 }
 
 model ProcessingQueue {
-  id             String   @id @default(cuid())
+  id             String                @id @default(cuid())
   documentId     String
   status         ProcessingQueueStatus @default(queued)
   totalPages     Int
-  pagesProcessed Int      @default(0)
-  currentBatch   Int      @default(0)
+  pagesProcessed Int                   @default(0)
+  currentBatch   Int                   @default(0)
   totalBatches   Int
   lastError      String?
-  retriesCount   Int      @default(0)
+  retriesCount   Int                   @default(0)
   metadata       Json?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  Document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  Document       Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([documentId])
@@ -1063,18 +1071,18 @@ model ProjectBudget {
 }
 
 model ProjectInvitation {
-  id                                     String   @id @default(cuid())
+  id                                     String                  @id @default(cuid())
   projectId                              String
   inviterId                              String
   inviteeId                              String?
   inviteeEmail                           String?
   role                                   String
   status                                 ProjectInvitationStatus @default(pending)
-  createdAt                              DateTime @default(now())
+  createdAt                              DateTime                @default(now())
   expiresAt                              DateTime
-  User_ProjectInvitation_inviteeIdToUser User?    @relation("ProjectInvitation_inviteeIdToUser", fields: [inviteeId], references: [id])
-  User_ProjectInvitation_inviterIdToUser User     @relation("ProjectInvitation_inviterIdToUser", fields: [inviterId], references: [id], onDelete: Cascade)
-  Project                                Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  User_ProjectInvitation_inviteeIdToUser User?                   @relation("ProjectInvitation_inviteeIdToUser", fields: [inviteeId], references: [id])
+  User_ProjectInvitation_inviterIdToUser User                    @relation("ProjectInvitation_inviterIdToUser", fields: [inviterId], references: [id], onDelete: Cascade)
+  Project                                Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([inviteeEmail])
   @@index([inviteeId])
@@ -1171,11 +1179,13 @@ model Room {
   hotspotWidth       Float?
   hotspotX           Float?
   hotspotY           Float?
+  sourceDocumentId   String?
   DoorScheduleItem   DoorScheduleItem[]
   FinishScheduleItem FinishScheduleItem[]
   Room               Room?                @relation("RoomToRoom", fields: [buildingId], references: [id])
   other_Room         Room[]               @relation("RoomToRoom")
   Project            Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  SourceDocument     Document?            @relation("RoomSourceDoc", fields: [sourceDocumentId], references: [id], onDelete: SetNull)
   RoomPhoto          RoomPhoto[]
   WindowScheduleItem WindowScheduleItem[]
 
@@ -1183,6 +1193,7 @@ model Room {
   @@index([buildingId])
   @@index([floorPlanId])
   @@index([projectId])
+  @@index([sourceDocumentId])
   @@index([status])
   @@index([type])
 }
@@ -2214,50 +2225,50 @@ model AutodeskModel {
 }
 
 model DailyReport {
-  id                String                 @id @default(cuid())
-  projectId         String
-  reportDate        DateTime
-  reportNumber      Int
-  status            DailyReportStatus      @default(DRAFT)
-  weatherCondition  String?
-  temperatureHigh   Float?
-  temperatureLow    Float?
-  humidity          Int?
-  precipitation     Float?
-  windSpeed         Float?
-  weatherNotes      String?
-  workPerformed     String?
-  workPlanned       String?
-  delaysEncountered String?
-  delayHours        Float?
-  delayReason       String?
-  safetyIncidents   Int                    @default(0)
-  safetyNotes       String?
-  visitors          Json?
-  equipmentOnSite   Json?
-  materialsReceived Json?
-  photoIds          String[]
-  createdBy         String
-  submittedAt       DateTime?
-  submittedBy       String?
-  approvedAt        DateTime?
-  approvedBy        String?
-  rejectionReason   String?
-  rejectionNotes    String?
-  deletedAt         DateTime?
-  photos              Json?
-  onedriveExported    Boolean                @default(false)
-  onedriveExportedAt  DateTime?
-  onedriveExportPath  String?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  createdByUser     User                   @relation("DailyReportCreatedBy", fields: [createdBy], references: [id])
-  project           Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  equipmentEntries  DailyReportEquipment[]
-  laborEntries      DailyReportLabor[]
-  progressEntries   DailyReportProgress[]
-  weatherDays       WeatherDay[]
-  dailyReportChunks DailyReportChunk[]
+  id                 String                 @id @default(cuid())
+  projectId          String
+  reportDate         DateTime
+  reportNumber       Int
+  status             DailyReportStatus      @default(DRAFT)
+  weatherCondition   String?
+  temperatureHigh    Float?
+  temperatureLow     Float?
+  humidity           Int?
+  precipitation      Float?
+  windSpeed          Float?
+  weatherNotes       String?
+  workPerformed      String?
+  workPlanned        String?
+  delaysEncountered  String?
+  delayHours         Float?
+  delayReason        String?
+  safetyIncidents    Int                    @default(0)
+  safetyNotes        String?
+  visitors           Json?
+  equipmentOnSite    Json?
+  materialsReceived  Json?
+  photoIds           String[]
+  createdBy          String
+  submittedAt        DateTime?
+  submittedBy        String?
+  approvedAt         DateTime?
+  approvedBy         String?
+  rejectionReason    String?
+  rejectionNotes     String?
+  deletedAt          DateTime?
+  photos             Json?
+  onedriveExported   Boolean                @default(false)
+  onedriveExportedAt DateTime?
+  onedriveExportPath String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  createdByUser      User                   @relation("DailyReportCreatedBy", fields: [createdBy], references: [id])
+  project            Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  equipmentEntries   DailyReportEquipment[]
+  laborEntries       DailyReportLabor[]
+  progressEntries    DailyReportProgress[]
+  weatherDays        WeatherDay[]
+  dailyReportChunks  DailyReportChunk[]
 
   @@unique([projectId, reportDate])
   @@index([projectId])
@@ -3113,7 +3124,7 @@ model ProjectDataSource {
   metadata    Json?
   extractedAt DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  Document    Document? @relation(fields: [documentId], references: [id])
+  Document    Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
   Project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, featureType])
@@ -3155,7 +3166,7 @@ model DoorScheduleItem {
   updatedAt         DateTime  @updatedAt
   Project           Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   Room              Room?     @relation(fields: [roomId], references: [id])
-  Document          Document? @relation(fields: [sourceDocumentId], references: [id])
+  Document          Document? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
 
   @@unique([projectId, doorNumber])
   @@index([projectId])
@@ -3199,7 +3210,7 @@ model WindowScheduleItem {
   updatedAt         DateTime  @updatedAt
   Project           Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   Room              Room?     @relation(fields: [roomId], references: [id])
-  Document          Document? @relation(fields: [sourceDocumentId], references: [id])
+  Document          Document? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
 
   @@unique([projectId, windowNumber])
   @@index([projectId])
@@ -3802,17 +3813,17 @@ enum ComplianceStatus {
 }
 
 model DailyReportChunk {
-  id             String      @id @default(cuid())
-  dailyReportId  String
-  projectId      String
-  content        String
-  chunkIndex     Int
-  section        String
-  reportDate     DateTime
-  metadata       Json?
-  createdAt      DateTime    @default(now())
-  dailyReport    DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
-  project        Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  dailyReportId String
+  projectId     String
+  content       String
+  chunkIndex    Int
+  section       String
+  reportDate    DateTime
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([dailyReportId])
   @@index([projectId])
@@ -3821,16 +3832,16 @@ model DailyReportChunk {
 }
 
 model CrewTemplate {
-  id          String    @id @default(cuid())
-  projectId   String
-  name        String
-  entries     Json
-  createdBy   String
-  lastUsedAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user        User      @relation("CrewTemplateCreatedBy", fields: [createdBy], references: [id])
+  id         String    @id @default(cuid())
+  projectId  String
+  name       String
+  entries    Json
+  createdBy  String
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user       User      @relation("CrewTemplateCreatedBy", fields: [createdBy], references: [id])
 
   @@index([projectId])
   @@index([createdBy])

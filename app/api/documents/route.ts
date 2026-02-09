@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry-util';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,13 +92,90 @@ export async function GET(req: NextRequest) {
       'Fetch all project documents'
     );
 
-    return NextResponse.json({ 
-      documents: allDocuments,
-      accessible: documents,
-      userRole 
+    // Optional intelligence enrichment
+    const includeIntelligence = searchParams.get('include') === 'intelligence';
+    let intelligenceMap: Record<string, {
+      sheetCount: number;
+      disciplines: string[];
+      drawingTypes: Record<string, number>;
+      averageConfidence: number | null;
+      lowConfidenceCount: number;
+      dimensionCount: number;
+    }> = {};
+
+    if (includeIntelligence && allDocuments.length > 0) {
+      const docIds = allDocuments.map((d) => d.id);
+
+      const [sheetCounts, drawingTypeCounts, dimensionCounts, disciplineChunks] = await Promise.all([
+        prisma.documentChunk.groupBy({
+          by: ['documentId'],
+          where: { documentId: { in: docIds }, sheetNumber: { not: null } },
+          _count: { sheetNumber: true },
+        }),
+        prisma.drawingType.groupBy({
+          by: ['documentId', 'type'],
+          where: { documentId: { in: docIds } },
+          _count: true,
+          _avg: { confidence: true },
+        }),
+        prisma.dimensionAnnotation.groupBy({
+          by: ['documentId'],
+          where: { documentId: { in: docIds } },
+          _count: true,
+        }),
+        prisma.documentChunk.findMany({
+          where: { documentId: { in: docIds }, discipline: { not: null } },
+          select: { documentId: true, discipline: true },
+          distinct: ['documentId', 'discipline'],
+        }),
+      ]);
+
+      for (const docId of docIds) {
+        const sheetCount = sheetCounts.find((s) => s.documentId === docId)?._count?.sheetNumber || 0;
+        const typesForDoc = drawingTypeCounts.filter((d) => d.documentId === docId);
+        const drawingTypes: Record<string, number> = {};
+        let totalConfidence = 0;
+        let confidenceCount = 0;
+        for (const dt of typesForDoc) {
+          drawingTypes[dt.type] = dt._count;
+          if (dt._avg?.confidence) {
+            totalConfidence += dt._avg.confidence * dt._count;
+            confidenceCount += dt._count;
+          }
+        }
+        const dimensionCount = dimensionCounts.find((d) => d.documentId === docId)?._count || 0;
+        const docDisciplines = disciplineChunks
+          .filter((c) => c.documentId === docId)
+          .map((c) => c.discipline!)
+          .filter(Boolean);
+
+        intelligenceMap[docId] = {
+          sheetCount,
+          disciplines: docDisciplines,
+          drawingTypes,
+          averageConfidence: confidenceCount > 0 ? Math.round((totalConfidence / confidenceCount) * 100) / 100 : null,
+          lowConfidenceCount: typesForDoc.filter((d) => d._avg?.confidence != null && d._avg.confidence < 0.6).length,
+          dimensionCount,
+        };
+      }
+    }
+
+    // Build response - add intelligence per document when requested
+    const responseDocuments = includeIntelligence
+      ? allDocuments.map((doc) => ({ ...doc, intelligence: intelligenceMap[doc.id] || null }))
+      : allDocuments;
+
+    const responseAccessible = includeIntelligence
+      ? documents.map((doc) => ({ ...doc, intelligence: intelligenceMap[doc.id] || null }))
+      : documents;
+
+    return NextResponse.json({
+      documents: responseDocuments,
+      accessible: responseAccessible,
+      userRole
     });
   } catch (error: any) {
-    console.error('[API] Error fetching documents:', error);
+    logger.error('DOC_LIST', 'Error fetching documents', error);
     
     // Return more specific error messages
     if (error?.code?.startsWith('P1')) {

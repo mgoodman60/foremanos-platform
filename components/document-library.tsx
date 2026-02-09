@@ -6,6 +6,7 @@ import { primaryColors, semanticColors } from '@/lib/design-tokens';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 type DocumentCategory = string;
@@ -14,6 +15,8 @@ import DocumentPreviewModal from './document-preview-modal';
 import { DocumentCategoryModal } from './document-category-modal';
 import { useOptimisticDocuments } from '@/hooks/useOptimisticDocuments';
 import { ConfirmDialog } from './confirm-dialog';
+import DocumentIntelligenceBadges from './documents/DocumentIntelligenceBadges';
+import ExtractionFeedbackBanner from './documents/ExtractionFeedbackBanner';
 
 // CAD file extensions supported by Autodesk
 const CAD_EXTENSIONS = ['.dwg', '.dxf', '.dwf', '.dwfx', '.rvt', '.rfa', '.ifc', '.nwd', '.nwc', '.3ds', '.fbx', '.obj', '.stl', '.stp', '.step', '.iges', '.igs', '.f3d', '.skp'];
@@ -50,6 +53,14 @@ interface DocumentProgress {
   processingMode?: string;
 }
 
+interface DocumentIntelligence {
+  sheetCount: number;
+  disciplines: string[];
+  drawingTypes: Record<string, number>;
+  averageConfidence: number | null;
+  lowConfidenceCount: number;
+}
+
 interface Document {
   id: string;
   name: string;
@@ -63,6 +74,7 @@ interface Document {
   updatedAt: string;
   queueStatus?: string;
   processed?: boolean;
+  intelligence?: DocumentIntelligence | null;
 }
 
 export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: DocumentLibraryProps) {
@@ -94,6 +106,8 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
   const [progressMap, setProgressMap] = useState<Record<string, DocumentProgress>>({});
   const [lastPollTimes, setLastPollTimes] = useState<Record<string, number>>({});
+  const [completedBanners, setCompletedBanners] = useState<Array<{ docId: string; docName: string; intelligence: DocumentIntelligence }>>([]);
+  const prevProcessingIdsRef = useRef<Set<string>>(new Set());
 
   const categories = getAllCategories();
 
@@ -112,7 +126,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/documents?projectId=${projectId}`);
+      const response = await fetch(`/api/documents?projectId=${projectId}&include=intelligence`);
       if (!response.ok) throw new Error('Failed to fetch documents');
 
       const data = await response.json();
@@ -146,6 +160,31 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     fetchDocuments();
     fetchProjectSlug();
   }, [projectId]);
+
+  // Track processing IDs and detect newly completed documents for feedback banners
+  useEffect(() => {
+    const currentProcessingIds = new Set(
+      documents
+        .filter(d => d.queueStatus && d.queueStatus !== 'none' && d.queueStatus !== 'completed' && !d.processed)
+        .map(d => d.id)
+    );
+    const prevIds = prevProcessingIdsRef.current;
+
+    // Documents that were processing but are no longer (i.e., just completed)
+    for (const id of prevIds) {
+      if (!currentProcessingIds.has(id)) {
+        const doc = documents.find(d => d.id === id);
+        if (doc && doc.intelligence) {
+          setCompletedBanners(prev => {
+            if (prev.some(b => b.docId === id)) return prev;
+            return [...prev, { docId: id, docName: doc.name, intelligence: doc.intelligence as DocumentIntelligence }];
+          });
+        }
+      }
+    }
+
+    prevProcessingIdsRef.current = currentProcessingIds;
+  }, [documents]);
 
   // Poll progress for documents that are processing
   useEffect(() => {
@@ -1301,6 +1340,22 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
         )}
       </div>
 
+      {/* Extraction Feedback Banners */}
+      {completedBanners.length > 0 && projectSlug && (
+        <div className="px-3 lg:px-6 pt-3">
+          {completedBanners.map(banner => (
+            <ExtractionFeedbackBanner
+              key={banner.docId}
+              documentName={banner.docName}
+              documentId={banner.docId}
+              projectSlug={projectSlug}
+              intelligence={banner.intelligence}
+              onDismiss={() => setCompletedBanners(prev => prev.filter(b => b.docId !== banner.docId))}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Document List - Mobile & Tablet Optimized */}
         <div className="flex-1 overflow-y-auto p-3 lg:p-6 bg-dark-surface">
           {loading ? (
@@ -1413,7 +1468,11 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       {/* Document Info */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm text-slate-50 truncate">
-                          {doc.name}
+                          {projectSlug ? (
+                            <Link href={`/project/${projectSlug}/documents/${doc.id}`} className="hover:text-orange-400 transition-colors">
+                              {doc.name}
+                            </Link>
+                          ) : doc.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
                           <span className="font-medium uppercase">{doc.fileType}</span>
@@ -1423,6 +1482,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         <div className="mt-1.5">
                           {getCategoryBadge(doc.category)}
                         </div>
+                        <DocumentIntelligenceBadges intelligence={doc.intelligence ?? null} compact />
                         {/* Inline Processing Progress - Mobile Compact Stepper */}
                         {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
                           const progress = progressMap[doc.id];
@@ -1551,7 +1611,11 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                         <div className="flex-1 min-w-0 py-1">
                           <div className="flex items-start gap-2 mb-2">
                             <h3 className="font-bold text-slate-50 truncate text-lg flex-1">
-                              {doc.name}
+                              {projectSlug ? (
+                                <Link href={`/project/${projectSlug}/documents/${doc.id}`} className="hover:text-orange-400 transition-colors">
+                                  {doc.name}
+                                </Link>
+                              ) : doc.name}
                             </h3>
                             {isRecentlyUpdated(doc.updatedAt) && (
                               <span className="px-2 py-1 bg-green-900/30 text-green-400 border border-green-700 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
@@ -1576,6 +1640,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           <div className="mt-2">
                             {getCategoryBadge(doc.category)}
                           </div>
+                          <DocumentIntelligenceBadges intelligence={doc.intelligence ?? null} />
 
                           {/* Inline Processing Progress - Desktop Stepper */}
                           {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {

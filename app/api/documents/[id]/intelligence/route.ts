@@ -1,0 +1,178 @@
+/**
+ * Document Intelligence API
+ * Aggregates all extracted intelligence data for a document (Phase A/B/C results)
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Auth check
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const documentId = params.id;
+
+    // Fetch document with project
+    const document = await prisma.document.findUnique({
+      where: { id: documentId },
+      include: {
+        Project: true,
+      },
+    });
+
+    if (!document) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+
+    // Parallel data fetching for all intelligence types
+    const [
+      chunks,
+      drawingTypes,
+      dimensions,
+      detailCallouts,
+      legends,
+      annotations,
+      rooms,
+      doors,
+      windows,
+      materialTakeoffs,
+    ] = await Promise.all([
+      prisma.documentChunk.findMany({
+        where: { documentId },
+        orderBy: { pageNumber: 'asc' },
+      }),
+      prisma.drawingType.findMany({
+        where: { documentId },
+      }),
+      prisma.dimensionAnnotation.findMany({
+        where: { documentId },
+      }),
+      prisma.detailCallout.findMany({
+        where: { documentId },
+      }),
+      prisma.sheetLegend.findMany({
+        where: { documentId },
+      }),
+      prisma.enhancedAnnotation.findMany({
+        where: { documentId },
+      }),
+      prisma.room.findMany({
+        where: { sourceDocumentId: documentId },
+      }),
+      prisma.doorScheduleItem.findMany({
+        where: { sourceDocumentId: documentId },
+      }),
+      prisma.windowScheduleItem.findMany({
+        where: { sourceDocumentId: documentId },
+      }),
+      prisma.materialTakeoff.findMany({
+        where: { documentId },
+        include: { TakeoffLineItem: true },
+      }),
+    ]);
+
+    // Build sheets array from chunks
+    const sheets = chunks.map((chunk) => {
+      const metadata = chunk.metadata as any;
+      const scaleData = chunk.scaleData as any;
+
+      return {
+        sheetNumber: chunk.sheetNumber,
+        pageNumber: chunk.pageNumber,
+        discipline: chunk.discipline,
+        scale: scaleData?.scale || null,
+        titleBlockData: metadata?.titleBlockData || null,
+        spatialData: metadata?.spatialData || null,
+        visualMaterials: metadata?.visualMaterials || null,
+        plumbingFixtures: metadata?.plumbingFixtures || null,
+        electricalDevices: metadata?.electricalDevices || null,
+        drawingScheduleTables: metadata?.drawingScheduleTables || null,
+        constructionIntel: metadata?.constructionIntel || null,
+        symbolData: metadata?.symbolData || null,
+      };
+    });
+
+    // Build summary stats
+    const summary = {
+      totalSheets: sheets.length,
+      disciplineBreakdown: sheets.reduce((acc, s) => {
+        if (s.discipline) {
+          acc[s.discipline] = (acc[s.discipline] || 0) + 1;
+        }
+        return acc;
+      }, {} as Record<string, number>),
+      drawingTypeBreakdown: drawingTypes.reduce((acc, dt) => {
+        acc[dt.type] = (acc[dt.type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>),
+      averageConfidence:
+        drawingTypes.length > 0
+          ? drawingTypes.reduce((sum, dt) => sum + (dt.confidence || 0), 0) /
+            drawingTypes.length
+          : null,
+      lowConfidenceCount: drawingTypes.filter((dt) => (dt.confidence || 0) < 0.5)
+        .length,
+      fixtureCount: sheets.reduce(
+        (sum, s) =>
+          sum +
+          (s.plumbingFixtures?.length || 0) +
+          (s.electricalDevices?.length || 0),
+        0
+      ),
+      roomCount: rooms.length,
+    };
+
+    // Build processing log (handle optional fields safely)
+    const docWithProcessing = document as any;
+    const processingLog = {
+      phasesCompleted: docWithProcessing.processedPhases || [],
+      totalDuration: docWithProcessing.processingDuration || null,
+      pagesProcessed: chunks.length,
+      processingDate: docWithProcessing.processedAt || null,
+      errors: [],
+      cost: docWithProcessing.processingCost || null,
+    };
+
+    // Return aggregated intelligence data
+    return NextResponse.json({
+      document: {
+        id: document.id,
+        name: document.name,
+        fileName: document.fileName,
+        category: document.category,
+        pageCount: document.pagesProcessed || 0,
+        processed: document.processed,
+        sheetIndex: document.sheetIndex,
+      },
+      sheets,
+      drawingTypes,
+      dimensions,
+      detailCallouts,
+      legends,
+      enhancedAnnotations: annotations,
+      rooms,
+      doors,
+      windows,
+      materialTakeoffs,
+      summary,
+      processingLog,
+    });
+  } catch (error) {
+    console.error('Error fetching document intelligence:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch document intelligence' },
+      { status: 500 }
+    );
+  }
+}

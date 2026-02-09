@@ -280,60 +280,153 @@ export async function processDocumentBatch(
  * Get vision analysis prompt
  */
 function getVisionPrompt(fileName: string, pageNum: number): string {
-  return `CONSTRUCTION DOCUMENT VISUAL ANALYSIS - Page ${pageNum} of ${fileName}
+  return `CONSTRUCTION DOCUMENT ANALYSIS - Page ${pageNum} of ${fileName}
 
-You are analyzing a construction document. This could be an architectural drawing, floor plan, elevation, section, detail, schedule, or specification page.
+Analyze this construction document page. Extract ALL visible information across these categories.
+Respond with valid JSON. Include only categories that apply to this page - omit empty/irrelevant sections.
 
-CRITICAL INSTRUCTIONS FOR MAXIMUM EXTRACTION:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXTRACTION CATEGORIES:
 
-1. EXAMINE THE ENTIRE PAGE VISUALLY:
-   • Start with the title block (usually bottom-right corner or along border)
-   • Scan the main drawing area systematically from left to right
-   • Look for legends, keynotes, symbol lists (often on right side or bottom)
-   • Check for general notes sections
+1. TITLE BLOCK & SHEET INFO (bottom-right corner or border):
+   - Sheet number, title, project name, drawn by, date, revision, checker
+   - Drawing scale(s), discipline, drawing type
 
-2. FOR CONSTRUCTION DRAWINGS (PLANS/ELEVATIONS/DETAILS):
-   • Identify ALL room names and numbers visible within the drawing
-   • Extract ALL dimension strings exactly as shown (e.g., "15'-6\"", "4572mm")
-   • List ALL door/window tags (D1, W2, etc.)
-   • Record equipment and fixture tags/marks
-   • Note section cuts and detail references (circles with numbers/letters)
-   • Identify grid line references (A, B, C / 1, 2, 3)
-   • Look for revision clouds or highlighted changes
+2. SPATIAL ELEMENTS:
+   - Room names/numbers with areas if shown
+   - ALL dimension strings WITH context: what is being measured
+   - Heights: floor-to-floor, floor-to-ceiling, sill, header
+   - Thicknesses: slab, wall, insulation
+   - Spot elevations with locations
+   - Level designations with elevations
+   - Grid line labels and spacing
+   - Slopes/grades as rise/run or percentage
 
-3. FOR SCHEDULES AND TABLES:
-   • Extract ALL rows and columns of data
-   • Note headers and column names
-   • Include quantities, sizes, materials, finishes
+3. MATERIAL IDENTIFICATION (from hatching/fill patterns):
+   - Concrete (diagonal lines/stipple), steel (cross-hatch), masonry/CMU (running bond)
+   - Insulation (wavy/cloud fill), wood (grain lines), earth (dot pattern)
+   - Report: material type, hatching style, locations, confidence
 
-4. FOR SPECIFICATION PAGES:
-   • Section numbers (CSI format: 01 00 00, 03 30 00)
-   • Product specifications and standards
-   • Referenced standards (ASTM, ANSI, UL)
+4. LINE TYPE ANALYSIS:
+   - Solid thick = load-bearing walls. Dashed = concealed/above/below
+   - Demolition lines (marked for removal). New construction indicators
+   - Centerlines, property lines, setback lines
 
-RESPOND WITH VALID JSON:
+5. PLUMBING FIXTURES:
+   - Water closets, lavatories, urinals, floor drains, cleanouts, hose bibbs
+   - Fixture tag/ID, room location, connection sizes, count per room
+
+6. ELECTRICAL DEVICES:
+   - Receptacles (duplex, GFCI, dedicated), switches (single/3-way/dimmer)
+   - Light fixtures with type/tag/circuit, panels, transformers
+   - Conduit sizes and routing paths
+
+7. MECHANICAL/HVAC:
+   - Ductwork: size, CFM, material. Diffusers/registers: type, size, CFM
+   - Equipment: AHUs, RTUs, VAVs with tags and capacity
+   - Piping: chilled/hot water, steam with sizes
+
+8. FIRE PROTECTION:
+   - Sprinkler heads: type, spacing, coverage, K-factor
+   - Fire alarm: pull stations, detectors, horn/strobes
+   - Fire dampers, standpipes, extinguisher locations
+
+9. SYMBOLS & CROSS-REFERENCES:
+   - Section cut markers (direction, reference sheet)
+   - Detail callout bubbles (number, reference sheet)
+   - Elevation markers, north arrow, scale bars
+   - Revision clouds (rev number, location, what changed)
+   - Match lines (drawing continuation)
+
+10. CONSTRUCTION INTELLIGENCE:
+    - Trades required for this page
+    - Fire-rated assemblies (type, rating, location)
+    - ADA/clearance zones
+    - Construction phasing (demo vs new vs existing)
+
+11. SCHEDULE TABLES (tabular data on drawings):
+    - Door schedules, window schedules, finish schedules
+    - Equipment schedules, fixture schedules
+    - Structural member schedules, footing schedules
+    - Extract: headers[], rows[][] for each table found
+
+12. SITE & CONCRETE (if applicable):
+    - Footings: size, depth, rebar. Slabs: thickness, reinforcement
+    - Grading contours, utility trenches, pavement sections
+
+13. SPECIFICATION REFERENCES:
+    - CSI section callouts, building code references
+    - Keynote numbers with definitions
+
+14. ENHANCED SCALE:
+    - Multiple scales per page with applicable areas
+    - NTS (Not to Scale) detection
+    - Metric vs imperial identification
+
+15. SPECIAL DRAWING FEATURES:
+    - General notes: flag as project-wide
+    - Reflected ceiling plan data
+    - Life safety: exit paths, occupancy loads
+    - Roof drainage patterns
+
+JSON RESPONSE FORMAT:
 {
-  "sheetNumber": "exact sheet number from title block",
-  "sheetTitle": "sheet title/description",
-  "scale": "drawing scale(s) shown",
-  "discipline": "Architectural|Structural|Mechanical|Electrical|Plumbing|Civil|General",
-  "drawingType": "floor_plan|elevation|section|detail|schedule|specification|cover|site_plan",
-  "dimensions": [{"value": "15'-6\"", "label": "room width"}],
+  "sheetNumber": "exact sheet number",
+  "sheetTitle": "sheet title",
+  "scale": "primary scale",
+  "discipline": "Architectural|Structural|Mechanical|Electrical|Plumbing|Civil|Fire Protection|General",
+  "drawingType": "floor_plan|elevation|section|detail|schedule|specification|cover|site_plan|reflected_ceiling|roof_plan|life_safety",
+  "titleBlock": {"project": "", "drawn_by": "", "date": "", "revision": "", "checker": "", "sheet_of": ""},
+  "dimensions": [{"value": "15'-6\\"", "label": "room width", "context": "Room 101", "type": "horizontal"}],
   "rooms": [{"number": "101", "name": "LOBBY", "area": "450 SF"}],
-  "doors": ["D1", "D2", "D3"],
+  "doors": ["D1", "D2"],
   "windows": ["W1", "W2"],
   "gridLines": ["A", "B", "1", "2"],
-  "notes": ["note 1 text", "note 2 text"],
-  "legendEntries": [{"symbol": "description", "meaning": "meaning"}],
-  "titleBlock": {"project": "", "drawn_by": "", "date": "", "revision": ""},
-  "callouts": ["reference to other sheets/details"],
+  "notes": ["note text"],
+  "legendEntries": [{"symbol": "desc", "meaning": "meaning"}],
+  "callouts": ["reference to other sheets"],
   "equipment": ["tag and description"],
   "scheduleData": [],
-  "textContent": "any general text/specs visible"
+  "textContent": "visible text/specs",
+  "visualMaterials": [{"material": "concrete", "hatchingType": "diagonal lines", "locations": ["foundation"], "confidence": 0.9}],
+  "lineTypeAnalysis": {"demolitionElements": [], "newConstruction": [], "hiddenElements": [], "belowGrade": []},
+  "plumbingFixtures": [{"type": "water_closet", "tag": "WC-1", "room": "101", "count": 1, "confidence": 0.85}],
+  "electricalDevices": [{"type": "receptacle", "subtype": "duplex", "tag": "", "room": "101", "circuit": "", "count": 4, "confidence": 0.8}],
+  "spatialData": {
+    "contextualDimensions": [{"value": "15'-6\\"", "context": "Room 101 width", "type": "horizontal"}],
+    "heights": [{"value": "9'-0\\"", "type": "floor_to_ceiling", "location": "Room 101"}],
+    "thicknesses": [{"value": "8\\"", "element": "exterior wall", "location": "typical"}],
+    "spotElevations": [{"value": "+100.00'", "type": "finished_floor", "location": "Room 101"}],
+    "levels": [{"name": "Level 2", "elevation": "+14'-0\\""}],
+    "gridSpacing": [{"from": "A", "to": "B", "distance": "24'-0\\""}],
+    "slopes": [],
+    "spacing": []
+  },
+  "symbolData": {
+    "sectionCuts": [{"number": "1", "referenceSheet": "A3.01", "direction": "looking north"}],
+    "detailCallouts": [{"number": "3", "referenceSheet": "A5.01"}],
+    "elevationMarkers": [],
+    "northArrow": null,
+    "scaleBars": [],
+    "revisionClouds": [{"revNumber": "C", "location": "column grid B/3", "description": "modified column spacing"}],
+    "matchLines": []
+  },
+  "constructionIntel": {
+    "tradesRequired": ["Architectural", "Mechanical"],
+    "fireRatedAssemblies": [{"type": "wall", "rating": "2-hour", "location": "corridor"}],
+    "coordinationPoints": [],
+    "clearanceZones": [],
+    "phasing": {"demo": [], "new": [], "existing": []}
+  },
+  "drawingScheduleTables": [{"scheduleType": "door", "headers": ["Door No", "Type", "Size"], "rows": [["D101", "A", "3070"]], "sourceArea": "right side of sheet"}],
+  "hvacData": {"ductwork": [], "diffusers": [], "equipment": [], "piping": [], "controls": []},
+  "fireProtection": {"sprinklerHeads": [], "alarmDevices": [], "dampers": [], "standpipes": []},
+  "siteAndConcrete": {"footings": [], "slabDetails": [], "rebarSchedule": [], "gradingData": null},
+  "references": {"specSections": [], "codeReferences": [], "keynotes": []},
+  "enhancedScaleData": {"scales": [{"value": "1/4\\" = 1'-0\\"", "applicableArea": "main plan", "isNTS": false}]},
+  "specialDrawingData": {"isGeneralNotes": false, "ceilingPlan": null, "lifeSafety": null}
 }
 
-IMPORTANT: Extract EVERYTHING visible. More data is better. If unsure about a value, include it with your best interpretation.`;
+IMPORTANT: Extract EVERYTHING visible. Omit categories with no data rather than including empty arrays. More data is better.`;
 }
 
 /**
@@ -469,7 +562,181 @@ function formatVisionData(data: any): string {
     lines.push('TEXT CONTENT:');
     lines.push(data.textContent);
   }
-  
+
+  // Visual Materials
+  if (data.visualMaterials?.length > 0) {
+    lines.push('');
+    lines.push('VISUAL MATERIALS:');
+    data.visualMaterials.forEach((m: any) => {
+      lines.push(`  • ${m.material} (${m.hatchingType}) at ${(m.locations || []).join(', ')}`);
+    });
+  }
+
+  // Line Type Analysis
+  if (data.lineTypeAnalysis) {
+    const lta = data.lineTypeAnalysis;
+    const parts: string[] = [];
+    if (lta.demolitionElements?.length) parts.push(`${lta.demolitionElements.length} demolition elements`);
+    if (lta.newConstruction?.length) parts.push(`${lta.newConstruction.length} new construction elements`);
+    if (lta.hiddenElements?.length) parts.push(`${lta.hiddenElements.length} hidden elements`);
+    if (lta.belowGrade?.length) parts.push(`${lta.belowGrade.length} below-grade elements`);
+    if (parts.length > 0) {
+      lines.push('');
+      lines.push(`LINE ANALYSIS: ${parts.join(', ')}`);
+    }
+  }
+
+  // Plumbing Fixtures
+  if (data.plumbingFixtures?.length > 0) {
+    lines.push('');
+    lines.push('PLUMBING FIXTURES:');
+    data.plumbingFixtures.forEach((f: any) => {
+      lines.push(`  • ${f.tag || f.type} (${f.type}, Room ${f.room || 'unknown'})`);
+    });
+  }
+
+  // Electrical Devices
+  if (data.electricalDevices?.length > 0) {
+    lines.push('');
+    lines.push('ELECTRICAL DEVICES:');
+    // Summarize by type
+    const typeCounts: Record<string, number> = {};
+    data.electricalDevices.forEach((d: any) => {
+      const key = d.subtype ? `${d.type} (${d.subtype})` : d.type;
+      typeCounts[key] = (typeCounts[key] || 0) + (d.count || 1);
+    });
+    Object.entries(typeCounts).forEach(([type, count]) => {
+      lines.push(`  • ${count}x ${type}`);
+    });
+  }
+
+  // Spatial Data
+  if (data.spatialData) {
+    const sd = data.spatialData;
+    if (sd.contextualDimensions?.length > 0 || sd.heights?.length > 0 || sd.spotElevations?.length > 0) {
+      lines.push('');
+      lines.push('SPATIAL DATA:');
+      sd.contextualDimensions?.forEach((d: any) => {
+        lines.push(`  • ${d.context}: ${d.value} (${d.type})`);
+      });
+      sd.heights?.forEach((h: any) => {
+        lines.push(`  • ${h.type}: ${h.value} at ${h.location}`);
+      });
+      sd.spotElevations?.forEach((e: any) => {
+        lines.push(`  • Spot elevation: ${e.value} (${e.type}) at ${e.location}`);
+      });
+      sd.levels?.forEach((l: any) => {
+        lines.push(`  • Level: ${l.name} = ${l.elevation}`);
+      });
+      sd.gridSpacing?.forEach((g: any) => {
+        lines.push(`  • Grid ${g.from} to ${g.to}: ${g.distance}`);
+      });
+    }
+  }
+
+  // Construction Intelligence
+  if (data.constructionIntel) {
+    const ci = data.constructionIntel;
+    if (ci.tradesRequired?.length > 0) {
+      lines.push('');
+      lines.push(`TRADES: ${ci.tradesRequired.join(', ')}`);
+    }
+    if (ci.fireRatedAssemblies?.length > 0) {
+      lines.push('');
+      lines.push('FIRE RATED:');
+      ci.fireRatedAssemblies.forEach((a: any) => {
+        lines.push(`  • ${a.rating} ${a.type} at ${a.location}`);
+      });
+    }
+  }
+
+  // Symbol Data
+  if (data.symbolData) {
+    const sym = data.symbolData;
+    if (sym.revisionClouds?.length > 0) {
+      lines.push('');
+      lines.push('REVISION CLOUDS:');
+      sym.revisionClouds.forEach((r: any) => {
+        lines.push(`  • Rev ${r.revNumber} - ${r.description} at ${r.location}`);
+      });
+    }
+    if (sym.sectionCuts?.length > 0 || sym.detailCallouts?.length > 0) {
+      lines.push('');
+      lines.push('CROSS REFERENCES:');
+      sym.sectionCuts?.forEach((s: any) => {
+        lines.push(`  • Section ${s.number}/${s.referenceSheet}`);
+      });
+      sym.detailCallouts?.forEach((d: any) => {
+        lines.push(`  • Detail ${d.number}/${d.referenceSheet}`);
+      });
+    }
+  }
+
+  // Drawing Schedule Tables
+  if (data.drawingScheduleTables?.length > 0) {
+    data.drawingScheduleTables.forEach((table: any) => {
+      lines.push('');
+      lines.push(`SCHEDULE TABLE [${(table.scheduleType || 'unknown').toUpperCase()}]:`);
+      if (table.headers?.length > 0) {
+        lines.push(`  Headers: ${table.headers.join(' | ')}`);
+      }
+      table.rows?.forEach((row: any) => {
+        lines.push(`  ${Array.isArray(row) ? row.join(' | ') : JSON.stringify(row)}`);
+      });
+    });
+  }
+
+  // HVAC Data
+  if (data.hvacData) {
+    const hvac = data.hvacData;
+    const items: string[] = [];
+    if (hvac.ductwork?.length) items.push(`${hvac.ductwork.length} duct segments`);
+    if (hvac.diffusers?.length) items.push(`${hvac.diffusers.length} diffusers`);
+    if (hvac.equipment?.length) items.push(`${hvac.equipment.length} units`);
+    if (items.length > 0) {
+      lines.push('');
+      lines.push(`HVAC: ${items.join(', ')}`);
+    }
+  }
+
+  // Fire Protection
+  if (data.fireProtection) {
+    const fp = data.fireProtection;
+    const items: string[] = [];
+    if (fp.sprinklerHeads?.length) items.push(`${fp.sprinklerHeads.length} sprinkler heads`);
+    if (fp.alarmDevices?.length) items.push(`${fp.alarmDevices.length} alarm devices`);
+    if (fp.dampers?.length) items.push(`${fp.dampers.length} fire dampers`);
+    if (items.length > 0) {
+      lines.push('');
+      lines.push(`FIRE PROTECTION: ${items.join(', ')}`);
+    }
+  }
+
+  // Site & Concrete
+  if (data.siteAndConcrete) {
+    const sc = data.siteAndConcrete;
+    const items: string[] = [];
+    if (sc.footings?.length) items.push(`${sc.footings.length} footings`);
+    if (sc.slabDetails?.length) items.push(`${sc.slabDetails.length} slab details`);
+    if (sc.rebarSchedule?.length) items.push(`${sc.rebarSchedule.length} rebar entries`);
+    if (items.length > 0) {
+      lines.push('');
+      lines.push(`CONCRETE/SITE: ${items.join(', ')}`);
+    }
+  }
+
+  // References
+  if (data.references) {
+    const refs = data.references;
+    if (refs.specSections?.length > 0 || refs.codeReferences?.length > 0) {
+      lines.push('');
+      lines.push('REFERENCES:');
+      refs.specSections?.forEach((s: any) => lines.push(`  • Spec: ${s}`));
+      refs.codeReferences?.forEach((c: any) => lines.push(`  • Code: ${c}`));
+      refs.keynotes?.forEach((k: any) => lines.push(`  • Keynote: ${typeof k === 'string' ? k : `${k.number}: ${k.definition}`}`));
+    }
+  }
+
   return lines.join('\n');
 }
 
@@ -484,5 +751,20 @@ function extractMetadata(data: any): any {
     hasDimensions: (data.dimensions?.length || 0) > 0,
     roomsCount: data.rooms?.length || 0,
     notesCount: data.notes?.length || 0,
+    // Enhanced extraction metadata
+    visualMaterials: data.visualMaterials || null,
+    lineTypeAnalysis: data.lineTypeAnalysis || null,
+    plumbingFixtures: data.plumbingFixtures || null,
+    electricalDevices: data.electricalDevices || null,
+    spatialData: data.spatialData || null,
+    symbolData: data.symbolData || null,
+    constructionIntel: data.constructionIntel || null,
+    drawingScheduleTables: data.drawingScheduleTables || null,
+    hvacData: data.hvacData || null,
+    fireProtection: data.fireProtection || null,
+    siteAndConcrete: data.siteAndConcrete || null,
+    references: data.references || null,
+    enhancedScaleData: data.enhancedScaleData || null,
+    specialDrawingData: data.specialDrawingData || null,
   };
 }

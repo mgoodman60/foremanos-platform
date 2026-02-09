@@ -22,6 +22,11 @@
 
 import { prisma } from './db';
 import { logger } from '@/lib/logger';
+import { resolveCrossReferences } from '@/lib/cross-reference-resolver';
+import { parseDrawingSchedules } from '@/lib/drawing-schedule-parser';
+import { extractFixtures } from '@/lib/fixture-extractor';
+import { aggregateSpatialData } from '@/lib/spatial-data-aggregator';
+import { buildSheetIndex } from '@/lib/sheet-index-builder';
 
 export interface IntelligenceExtractionOptions {
   documentId: string;
@@ -297,6 +302,27 @@ export async function runIntelligenceExtraction(
       throw new Error('Document not found');
     }
 
+    // Clean up stale extraction records before re-extraction
+    if (!skipExisting) {
+      logger.info('INTELLIGENCE', 'Cleaning up stale extraction records before re-extraction', { documentId });
+      try {
+        await prisma.$transaction([
+          prisma.drawingType.deleteMany({ where: { documentId } }),
+          prisma.sheetLegend.deleteMany({ where: { documentId } }),
+          prisma.dimensionAnnotation.deleteMany({ where: { documentId } }),
+          prisma.detailCallout.deleteMany({ where: { documentId } }),
+          prisma.enhancedAnnotation.deleteMany({ where: { documentId } }),
+        ]);
+        logger.info('INTELLIGENCE', 'Stale extraction records cleaned up', { documentId });
+      } catch (cleanupError) {
+        logger.warn('INTELLIGENCE', 'Failed to clean up stale records, proceeding with extraction', {
+          documentId,
+          error: (cleanupError as Error).message
+        });
+        // Continue with extraction even if cleanup fails
+      }
+    }
+
     // Get chunks to process
     const whereClause: any = { documentId };
     if (pageRange) {
@@ -476,6 +502,31 @@ export async function runIntelligenceExtraction(
       
       result.phaseResults.phaseC = phaseCResult;
       logger.info('PHASE_C', 'Phase C complete', { spatialCorrelations: phaseCResult.spatialCorrelationsBuilt, mepElements: phaseCResult.mepElementsMapped, symbols: phaseCResult.symbolsLearned });
+    }
+
+    // Post-extraction enrichment
+    try {
+      logger.info('INTELLIGENCE', 'Running post-extraction enrichment', { documentId });
+
+      const projectId = document.projectId;
+
+      await Promise.all([
+        resolveCrossReferences(documentId),
+        parseDrawingSchedules(documentId, projectId),
+        extractFixtures(documentId, projectId),
+        aggregateSpatialData(documentId),
+      ]);
+
+      // Sheet index depends on the above completing first
+      await buildSheetIndex(documentId);
+
+      logger.info('INTELLIGENCE', 'Post-extraction enrichment complete', { documentId });
+    } catch (enrichmentError) {
+      logger.warn('INTELLIGENCE', 'Post-extraction enrichment failed (non-blocking)', {
+        documentId,
+        error: (enrichmentError as Error).message,
+      });
+      // Non-blocking: don't fail the document processing if enrichment fails
     }
 
     result.success = true;
