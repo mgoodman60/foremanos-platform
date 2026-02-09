@@ -76,11 +76,11 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 ### Core Directories
 
 ```
-app/api/          # 389 API routes organized by feature domain
-lib/              # 214 service modules (RAG, S3, Stripe, auth, offline-store, etc.)
-components/       # 305 React components (Shadcn/Radix UI primitives)
+app/api/          # 392 API routes organized by feature domain
+lib/              # 224 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
+components/       # 319 React components (Shadcn/Radix UI primitives + document intelligence)
 prisma/           # Database schema and migrations (112 models)
-__tests__/        # Vitest tests (179 test files: 146 lib + 26 API + 3 smoke + 1 hooks + 3 coverage gaps)
+__tests__/        # Vitest tests (183 test files: 148 lib + 28 API + 3 smoke + 1 hooks + 3 coverage gaps)
 e2e/              # Playwright E2E tests (23 spec files)
 .claude/agents/   # 24 custom Claude Code agents
 .claude/skills/   # 13 project slash commands + 24 installed skills (see below)
@@ -128,6 +128,16 @@ e2e/              # Playwright E2E tests (23 spec files)
 | `lib/crew-templates-smart-defaults.ts` | Reusable crew templates with smart defaults |
 | `lib/offline-store.ts` | IndexedDB wrapper (idb) for offline draft storage + sync queue |
 | `lib/daily-report-sync-service.ts` | Daily report cost/schedule sync with WeatherDay creation |
+| `lib/cross-reference-resolver.ts` | Resolve sheet-to-sheet references within a document |
+| `lib/drawing-schedule-parser.ts` | Parse drawing schedule tables → structured model records |
+| `lib/fixture-extractor.ts` | Extract plumbing/electrical/HVAC/fire fixtures → project records |
+| `lib/spatial-data-aggregator.ts` | Aggregate dimensional/spatial data across sheets |
+| `lib/sheet-index-builder.ts` | Build navigable sheet TOC per document |
+| `lib/revision-comparator.ts` | Detect changes between document revisions |
+| `lib/quantity-calculator.ts` | 2D/3D quantity calculation engine (areas, volumes, linear footage) |
+| `lib/quantity-calculation-orchestrator.ts` | Run calculations per room/zone, confidence scoring, CSI rollups |
+| `lib/calculated-takeoff-generator.ts` | Auto-generate MaterialTakeoff line items from calculated quantities |
+| `lib/discipline-colors.ts` | Shared discipline → color/icon mapping |
 
 ### Type Helper Files
 
@@ -173,6 +183,21 @@ Key model groups in `prisma/schema.prisma`:
 - **Field Ops**: DailyReport, FieldPhoto, PunchList, RFI, WeatherDay, CrewTemplate, SMSMapping, DailyReportChunk
 
 **Required Fields**: `Document.projectId` and `User.email` are required (non-nullable).
+
+**Document Intelligence Models**:
+- `DocumentChunk` — Per-sheet extracted content + metadata JSON (15 extraction categories stored in `metadata`)
+- `DrawingType` — Drawing type classification with confidence scores
+- `DimensionAnnotation` — Extracted dimension annotations
+- `DetailCallout` — Detail callout references (resolved cross-references)
+- `SheetLegend` — Sheet legend data
+- `EnhancedAnnotation` — Enhanced annotations from vision extraction
+- `MaterialTakeoff` → `TakeoffLineItem` — Auto-generated quantity takeoffs (cascade delete on Document)
+- `Room.sourceDocumentId` — Source tracking for cross-document dedup
+
+**Cascade Rules** (Document deletion):
+- `MaterialTakeoff` → `onDelete: Cascade` (deletes with document)
+- `DoorScheduleItem`, `WindowScheduleItem`, `FinishScheduleItem`, `FloorPlan` → `onDelete: SetNull` (preserves record, clears source)
+- `Room` → `onDelete: SetNull` on `sourceDocumentId` (preserves room, clears source)
 
 **Daily Report Models**:
 - `DailyReport` — Now includes soft delete (`deletedAt`), rejection fields, OneDrive sync fields, photos JSON
@@ -247,12 +272,113 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
 
 **Cron Jobs**:
 - Photo cleanup: `0 3 * * *` → `/api/cron/photo-cleanup` (registered in `vercel.json`)
+- ProcessingQueue cleanup: `0 4 * * *` → `/api/cron/processing-queue-cleanup` (deletes completed/failed entries >30 days)
+
+### Document Intelligence Pipeline (Feb 2026)
+
+**Sprints 1-8: Full Extraction, Enrichment, Calculations & UI (ALL SPRINTS COMPLETE)**
+
+Enhanced document processing pipeline extracting 15 categories of visual intelligence from construction plans via vision AI (Claude Opus 4.6 / GPT-5.2), with post-processing enrichment, quantity calculations, and a full document detail UI.
+
+**Pipeline Architecture**:
+```
+Upload → Vision Extraction (15 categories) → Phase A/B/C Intelligence
+    ↓
+Post-Processing Enrichment (Promise.allSettled):
+  Cross-Reference Resolver → Drawing Schedule Parser → Fixture Extractor → Spatial Data Aggregator
+    ↓
+Sheet Index Builder → Quantity Calculator → Calculated Takeoff Generator
+    ↓
+Document Detail Page (UI) + Library Badges + Search/Filter
+```
+
+**Vision Extraction Categories** (enhanced prompt in `lib/document-processor-batch.ts`):
+- Visual Materials (hatching → material identification)
+- Line Type Semantics (solid, dashed, demolition, centerline)
+- Plumbing Fixtures (WC, lavatory, floor drain, etc.)
+- Electrical Devices (receptacles, switches, light fixtures, panels)
+- Spatial Data (contextual dimensions, heights, thicknesses, spot elevations, levels, grid spacing, slopes)
+- Symbol Recognition (section cuts, detail callouts, elevation markers, revision clouds, match lines)
+- Construction Intelligence (trades, fire-rated assemblies, coordination points, phasing)
+- Site Work & Concrete (footings, slabs, rebar, grading, utilities, pavement)
+- Drawing Schedule Tables (door/window/finish/equipment/structural schedules parsed as tabular data)
+- HVAC/Mechanical (ductwork, diffusers, equipment, piping, controls)
+- Fire Protection (sprinkler heads, pipe, alarm devices, dampers, riser data)
+- Landscape & Site Features (plant schedules, irrigation, hardscape, retaining walls)
+- Enhanced Scale Data (multiple scales per page, NTS detection, graphical scale bars)
+- Specification & Code References (CSI sections, building codes, keynotes, abbreviations)
+- Special Drawing Types (general notes, RCPs, life safety, roof plans, stair/elevator details)
+
+**Post-Processing Enrichment** (called from `lib/intelligence-orchestrator.ts` after Phase C):
+- **Cross-Reference Resolver** (`lib/cross-reference-resolver.ts`): Matches detail/section/elevation references to known sheet numbers, builds sheet-to-sheet adjacency map
+- **Drawing Schedule Parser** (`lib/drawing-schedule-parser.ts`): Parses extracted schedule tables into DoorScheduleItem, WindowScheduleItem, FinishScheduleItem, MEPEquipment records with `sourceDocumentId` traceability
+- **Fixture Extractor** (`lib/fixture-extractor.ts`): Creates structured plumbing/electrical fixture records from extraction metadata, deduplicates by tag + sourceDocumentId
+- **Spatial Data Aggregator** (`lib/spatial-data-aggregator.ts`): Builds room dimension maps, level maps, grid maps across all sheets
+- **Sheet Index Builder** (`lib/sheet-index-builder.ts`): Generates navigable sheet TOC stored on Document.sheetIndex
+- Enrichment uses `Promise.allSettled` for resilience — individual module failures don't block others
+
+**Quantity Calculation Engine** (`lib/quantity-calculator.ts`):
+- 2D: room area, wall perimeter, opening areas, net wall area, fixture counts
+- 3D: slab volume, footing volume, wall volume, excavation/backfill volume
+- Auto-generates MaterialTakeoff line items with `status: 'draft'` and `confidence` scores
+- Division-by-zero guards on all calculation functions
+- CSI MasterFormat category mapping (03 30 00 Concrete, 09 00 00 Architectural, 22 00 00 Plumbing, 26 00 00 Electrical)
+
+**Revision Comparison** (`lib/revision-comparator.ts`):
+- Triggered from `lib/document-auto-sync.ts` for `plans_drawings` category documents
+- Compares sheet numbers across old and new documents in same project
+- Generates per-sheet diffs: dimensions changed, rooms added/removed, fixtures moved, notes modified
+
+**Schema Changes**:
+- `MaterialTakeoff` → `onDelete: Cascade` on Document relation
+- `DoorScheduleItem`, `WindowScheduleItem`, `FinishScheduleItem`, `FloorPlan` → `onDelete: SetNull` on Document relation
+- `Room.sourceDocumentId` added (String?, relation to Document with `onDelete: SetNull`)
+- `Document.sheetIndex` added (Json?, compiled sheet TOC)
+- Room dedup key: `roomNumber + sourceDocumentId` (prevents cross-document contamination)
+
+**API Endpoints**:
+- `GET /api/documents/[id]/intelligence` — Aggregated intelligence data (11 parallel Prisma queries, project access check, rate limiting)
+- `GET /api/documents/search` — Full-text search on DocumentChunk.content with discipline/drawingType filters, paginated
+- `GET /api/cron/processing-queue-cleanup` — Prune old ProcessingQueue entries (CRON_SECRET auth)
+
+**Document Detail Page** (`/project/[slug]/documents/[id]`):
+- Server component wrapper → `DocumentDetailPage` client component
+- `SheetNavigator` sidebar (sheets grouped by discipline with confidence indicators)
+- `SheetDetailPanel` (title block, drawing type, cross-references, dimensions, fixtures, materials, schedule tables, spatial data)
+- `IntelligenceSummary` (aggregate stats grid)
+- `ProcessingLogPanel` (phases, duration, cost, errors)
+- Responsive: 375px minimum, collapsible accordion sections on mobile
+
+**Document Library Enrichment** (`components/document-library.tsx`):
+- `DocumentIntelligenceBadges` (discipline pills, sheet count, confidence indicator per document)
+- `ExtractionFeedbackBanner` (post-processing summary with stats, auto-dismisses after 30s)
+- `DocumentFilterBar` (text search + category + discipline + drawing type + confidence filters)
+
+**Document Intelligence Components** (in `components/documents/`):
+| Component | Purpose |
+|-----------|---------|
+| `DocumentDetailPage.tsx` | Main client component — fetches intelligence API, manages sheet selection |
+| `SheetNavigator.tsx` | Left sidebar listing sheets grouped by discipline |
+| `SheetDetailPanel.tsx` | Selected sheet's full intelligence display (7 sub-panels) |
+| `TitleBlockCard.tsx` | Parsed title block data (project, drawn by, date, revision) |
+| `CrossReferenceMap.tsx` | Clickable cross-reference chips for sheet navigation |
+| `DimensionTable.tsx` | Contextual dimensions with types (horizontal, vertical, height) |
+| `FixtureTable.tsx` | Plumbing/electrical fixture table with room/tag/count |
+| `MaterialsPanel.tsx` | Hatching-derived materials with confidence indicators |
+| `ScheduleTableView.tsx` | Door/window/finish/equipment schedule table renderer |
+| `SpatialDataPanel.tsx` | Spot elevations, levels, grid spacing, slopes |
+| `ConfidenceIndicator.tsx` | Reusable green/yellow/red confidence dot with tooltip |
+| `IntelligenceSummary.tsx` | Aggregate stats grid (sheets, confidence, disciplines, rooms, fixtures) |
+| `ProcessingLogPanel.tsx` | Processing metadata (phases, duration, cost, errors) |
+| `DocumentIntelligenceBadges.tsx` | Per-document intelligence badges in library list |
+| `ExtractionFeedbackBanner.tsx` | Post-processing completion summary banner |
+| `DocumentFilterBar.tsx` | Search + multi-select filter controls for document library |
 
 ## Testing
 
-- **Vitest**: 179 test files, 7555 tests total (7516 passing, 39 skipped)
-  - 146 lib tests (`__tests__/lib/`)
-  - 26 API tests (`__tests__/api/`)
+- **Vitest**: 183 test files, 7572 tests total (7533 passing, 39 skipped)
+  - 148 lib tests (`__tests__/lib/`)
+  - 28 API tests (`__tests__/api/`)
   - 3 smoke tests (`__tests__/smoke/`)
   - 1 hooks test (`__tests__/hooks/`)
   - 3 coverage gap tests
@@ -262,7 +388,7 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
 
 ### Test Coverage
 
-146 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+148 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops, document intelligence). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
 
 **Daily Report Test Files** (Phases 1-6B):
 | File | Coverage | Tests |
@@ -281,6 +407,21 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
 | `__tests__/api/projects/daily-reports/[id]/route.test.ts` | Single report ops + downstream trigger mocks | Updated |
 | `__tests__/api/daily-reports/daily-reports-rbac.test.ts` | RBAC enforcement + trigger verification | Updated |
 
+**Document Intelligence Test Files** (Pipeline Sprints 1-8):
+| File | Coverage |
+|------|----------|
+| `__tests__/lib/cross-reference-resolver.test.ts` | Sheet-to-sheet reference resolution |
+| `__tests__/lib/drawing-schedule-parser.test.ts` | Schedule table parsing → structured records |
+| `__tests__/lib/fixture-extractor.test.ts` | Plumbing/electrical fixture extraction |
+| `__tests__/lib/spatial-data-aggregator.test.ts` | Dimensional data aggregation across sheets |
+| `__tests__/lib/sheet-index-builder.test.ts` | Sheet TOC generation |
+| `__tests__/lib/quantity-calculator.test.ts` | 2D/3D quantity calculations, dimension parsing |
+| `__tests__/lib/document-auto-sync.test.ts` | Document sync + revision comparison wiring |
+| `__tests__/lib/vision-api-quality.test.ts` | Quality scoring with 16 structural fields |
+| `__tests__/api/documents/intelligence.test.ts` | Intelligence endpoint (auth, access, data aggregation) |
+| `__tests__/api/documents/search.test.ts` | Document search endpoint (filters, pagination) |
+| `__tests__/api/cron/processing-queue-cleanup.test.ts` | Cron cleanup (CRON_SECRET auth, 30-day threshold) |
+
 ### API Test Suites
 | Directory | Coverage |
 |-----------|----------|
@@ -289,6 +430,7 @@ ForemanOS includes a comprehensive daily report system with enterprise-grade per
 | `__tests__/api/documents/` | Document CRUD operations |
 | `__tests__/api/projects/` | Project management endpoints |
 | `__tests__/api/stripe/` | Stripe webhook and checkout |
+| `__tests__/api/cron/` | Cron job endpoints (processing-queue-cleanup) |
 | `__tests__/api/projects/daily-reports/` | Daily report CRUD with RBAC enforcement |
 
 ### Smoke Tests
@@ -500,12 +642,14 @@ When a user query matches these patterns, the corresponding agent is auto-invoke
 
 ```
 document-intelligence
-    ↓ extracts data
+    ↓ extracts 15 categories (vision AI)
+    ↓ enrichment: cross-refs → schedule parser → fixture extractor → spatial aggregator
 quantity-surveyor ←→ project-controls
-    ↓ quantities        ↓ budgets/schedule
+    ↓ quantities (2D/3D calc engine)   ↓ budgets/schedule
+    ↓ auto-draft MaterialTakeoff       ↓
 field-operations ←←←
     ↓ daily reports
-data-sync (orchestrates all)
+data-sync (orchestrates all, triggers revision comparison)
     ↓
 bim-specialist ←→ photo-analyst
 ```
@@ -521,6 +665,7 @@ Redis, Stripe, and other optional services fail gracefully with in-memory fallba
 - 25+ measurement patterns
 - Notes section prioritization
 - Adaptive chunk retrieval (12-20 based on query type)
+- Scoring boosts for document intelligence content: materials, fire-rated assemblies, trades, plumbing/electrical fixtures, spatial data, hatching patterns
 
 ### Rate Limits
 Defined in `lib/rate-limiter.ts`:
