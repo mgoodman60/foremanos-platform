@@ -324,10 +324,59 @@ export async function DELETE(
       );
     }
 
+    // Check for deep cleanup option
+    const { searchParams } = new URL(req.url);
+    const cleanup = searchParams.get('cleanup') === 'true';
+
     logger.info('DOCUMENT_DELETE', 'Starting document deletion', {
       documentId,
       fileName: document.fileName,
+      cleanup,
     });
+
+    // Deep cleanup: delete extracted/derived data sourced from this document
+    let cleanupCounts = { rooms: 0, doors: 0, windows: 0, finishes: 0, floorPlans: 0, hardware: 0 };
+    if (cleanup) {
+      try {
+        const [roomResult, doorResult, windowResult, finishResult, hardwareResult] = await prisma.$transaction([
+          prisma.room.deleteMany({ where: { sourceDocumentId: documentId } }),
+          prisma.doorScheduleItem.deleteMany({ where: { sourceDocumentId: documentId } }),
+          prisma.windowScheduleItem.deleteMany({ where: { sourceDocumentId: documentId } }),
+          prisma.finishScheduleItem.deleteMany({ where: { sourceDocumentId: documentId } }),
+          prisma.hardwareSetDefinition.deleteMany({ where: { sourceDocumentId: documentId } }),
+        ]);
+        cleanupCounts.rooms = roomResult.count;
+        cleanupCounts.doors = doorResult.count;
+        cleanupCounts.windows = windowResult.count;
+        cleanupCounts.finishes = finishResult.count;
+        cleanupCounts.hardware = hardwareResult.count;
+
+        // Clean up FloorPlan records and their S3 images
+        const floorPlans = await prisma.floorPlan.findMany({
+          where: { sourceDocumentId: documentId },
+          select: { id: true, cloud_storage_path: true },
+        });
+        for (const fp of floorPlans) {
+          if (fp.cloud_storage_path) {
+            try { await deleteFile(fp.cloud_storage_path); } catch (e) {
+              logger.warn('DOCUMENT_DELETE', 'Failed to delete floor plan image from S3', {
+                floorPlanId: fp.id,
+                error: e instanceof Error ? e.message : String(e),
+              });
+            }
+          }
+        }
+        const floorPlanResult = await prisma.floorPlan.deleteMany({ where: { sourceDocumentId: documentId } });
+        cleanupCounts.floorPlans = floorPlanResult.count;
+
+        logger.info('DOCUMENT_DELETE', 'Deep cleanup complete', { documentId, cleanupCounts });
+      } catch (cleanupError) {
+        logger.error('DOCUMENT_DELETE', 'Deep cleanup error', cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError)), {
+          documentId,
+        });
+        // Continue with deletion even if cleanup fails
+      }
+    }
 
     // IMPORTANT: Handle auto-sync cascade BEFORE deleting the document
     let syncResult = null;
@@ -411,6 +460,7 @@ export async function DELETE(
         featuresResynced: syncResult.featuresResynced,
         featuresCleared: syncResult.featuresCleared,
       } : null,
+      cleanup: cleanup ? cleanupCounts : null,
     });
   } catch (error) {
     logger.error('DOCUMENT_DELETE', 'Error deleting document', error instanceof Error ? error : new Error(String(error)), {

@@ -17,6 +17,7 @@ import {
   TrendingDown,
   LayoutGrid,
   Grid3X3,
+  RefreshCw,
 } from 'lucide-react';
 import { DashboardWidget } from './dashboard-widget';
 import { DashboardGreeting } from './dashboard-greeting';
@@ -132,6 +133,29 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
   }, []);
 
   const isCompact = density === 'compact';
+
+  // Rescan state
+  const [rescanning, setRescanning] = useState(false);
+  const [rescanMessage, setRescanMessage] = useState<string | null>(null);
+
+  const handleRescan = useCallback(async () => {
+    setRescanning(true);
+    setRescanMessage(null);
+    try {
+      const res = await fetch(`/api/projects/${projectSlug}/rescan`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setRescanMessage(data.message);
+      } else {
+        setRescanMessage(data.error || 'Failed to start rescan');
+      }
+    } catch {
+      setRescanMessage('Failed to start rescan');
+    } finally {
+      setRescanning(false);
+      setTimeout(() => setRescanMessage(null), 8000);
+    }
+  }, [projectSlug]);
 
   // State for remaining widgets
   const [budget, setBudget] = useState<BudgetData | null>(null);
@@ -313,7 +337,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
   const userName = session?.user?.username || undefined;
 
   return (
-    <div className="p-6 space-y-6" role="region" aria-label="Project dashboard widgets">
+    <div className="p-5 space-y-5" role="region" aria-label="Project dashboard widgets">
       {/* Row 0: Greeting */}
       <DashboardGreeting
         projectSlug={projectSlug}
@@ -333,11 +357,22 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
         onChange={handleFileUpload}
       />
 
-      {/* Density toggle */}
-      <div className="flex justify-end">
+      {/* Toolbar: Rescan + Density toggle */}
+      <div className="flex items-center justify-end gap-3">
+        <button
+          onClick={handleRescan}
+          disabled={rescanning}
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${rescanning ? 'animate-spin' : ''}`} />
+          {rescanning ? 'Rescanning...' : 'Rescan Documents'}
+        </button>
+        {rescanMessage && (
+          <span className="text-xs text-blue-400">{rescanMessage}</span>
+        )}
         <button
           onClick={toggleDensity}
-          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-300 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
           title={density === 'compact' ? 'Switch to expanded view' : 'Switch to compact view'}
         >
           {density === 'compact' ? (
@@ -350,7 +385,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
       </div>
 
       {/* Widget Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Row 1: Health (1-col) + Schedule (2-col) */}
         <CompactHealthWidget projectSlug={projectSlug} />
         <ExpandedScheduleWidget projectSlug={projectSlug} />
@@ -392,13 +427,13 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
               <div>
                 {/* Primary metric */}
                 <div className="mb-1">
-                  <span className="text-3xl font-bold text-slate-50" aria-live="polite">
+                  <span className="text-3xl font-bold text-slate-50 tabular-nums" aria-live="polite">
                     {formatCurrency(budget.totalBudget)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs text-gray-400">{budget.percentSpent.toFixed(0)}% spent</span>
-                  <span className={`flex items-center gap-1 text-xs ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`}>
+                  <span className="text-xs text-gray-400 tabular-nums">{budget.percentSpent.toFixed(0)}% spent</span>
+                  <span className={`flex items-center gap-1 text-xs tabular-nums ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`}>
                     {budget.costPerformanceIndex >= 1 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                     CPI {budget.costPerformanceIndex.toFixed(2)}
                   </span>

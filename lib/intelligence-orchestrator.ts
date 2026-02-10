@@ -530,6 +530,54 @@ export async function runIntelligenceExtraction(
       // Sheet index depends on the above completing first
       await buildSheetIndex(documentId);
 
+      // Aggregate keynotes and note clauses from chunk metadata for downstream consumers
+      try {
+        const enrichedChunks = await prisma.documentChunk.findMany({
+          where: { documentId },
+          select: { metadata: true },
+        });
+
+        let allKeynotes: any[] = [];
+        let allNoteClauses: any[] = [];
+
+        for (const chunk of enrichedChunks) {
+          const meta = chunk.metadata as Record<string, any> | null;
+          if (!meta) continue;
+          if (meta.keynotes?.length) allKeynotes = allKeynotes.concat(meta.keynotes);
+          if (meta.noteClauses?.length) allNoteClauses = allNoteClauses.concat(meta.noteClauses);
+        }
+
+        if (allKeynotes.length > 0 || allNoteClauses.length > 0) {
+          // Store aggregated keynotes/notes on the document for downstream enrichment modules
+          const currentDoc = await prisma.document.findUnique({
+            where: { id: documentId },
+            select: { sheetIndex: true }
+          });
+          const existingIndex = (currentDoc?.sheetIndex as Record<string, any>) || {};
+
+          await prisma.document.update({
+            where: { id: documentId },
+            data: {
+              sheetIndex: {
+                ...existingIndex,
+                aggregatedKeynotes: allKeynotes,
+                aggregatedNoteClauses: allNoteClauses,
+              } as any,
+            },
+          });
+          logger.info('INTELLIGENCE', 'Aggregated keynotes and note clauses', {
+            documentId,
+            keynoteCount: allKeynotes.length,
+            noteClauseCount: allNoteClauses.length,
+          });
+        }
+      } catch (aggregationError) {
+        logger.warn('INTELLIGENCE', 'Keynote/note clause aggregation failed (non-blocking)', {
+          documentId,
+          error: (aggregationError as Error).message,
+        });
+      }
+
       logger.info('INTELLIGENCE', 'Post-extraction enrichment complete', { documentId });
     } catch (enrichmentError) {
       logger.warn('INTELLIGENCE', 'Post-extraction enrichment failed (non-blocking)', {

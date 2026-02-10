@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2, Circle } from 'lucide-react';
+import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2, Circle, RefreshCw } from 'lucide-react';
 import { primaryColors, semanticColors } from '@/lib/design-tokens';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { useSession } from 'next-auth/react';
@@ -15,6 +15,16 @@ import DocumentPreviewModal from './document-preview-modal';
 import { DocumentCategoryModal } from './document-category-modal';
 import { useOptimisticDocuments } from '@/hooks/useOptimisticDocuments';
 import { ConfirmDialog } from './confirm-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import DocumentIntelligenceBadges from './documents/DocumentIntelligenceBadges';
 import ExtractionFeedbackBanner from './documents/ExtractionFeedbackBanner';
 
@@ -104,10 +114,18 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
+  const [deletionImpact, setDeletionImpact] = useState<{
+    impact: { rooms: number; doors: number; windows: number; finishes: number; floorPlans: number; hardware: number; takeoffs: number; chunks: number };
+    hasExtractedData: boolean;
+  } | null>(null);
+  const [deletionImpactLoading, setDeletionImpactLoading] = useState(false);
+  const [cleanupExtracted, setCleanupExtracted] = useState(false);
   const [progressMap, setProgressMap] = useState<Record<string, DocumentProgress>>({});
   const [lastPollTimes, setLastPollTimes] = useState<Record<string, number>>({});
   const [completedBanners, setCompletedBanners] = useState<Array<{ docId: string; docName: string; intelligence: DocumentIntelligence }>>([]);
   const prevProcessingIdsRef = useRef<Set<string>>(new Set());
+  const [rescanningAll, setRescanningAll] = useState(false);
+  const [rescanMessage, setRescanMessage] = useState<string | null>(null);
 
   const categories = getAllCategories();
 
@@ -120,6 +138,28 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       }
     } catch (error) {
       console.error('Error fetching project slug:', error);
+    }
+  };
+
+  const handleRescanAll = async () => {
+    if (!projectSlug) return;
+    setRescanningAll(true);
+    setRescanMessage(null);
+    try {
+      const res = await fetch(`/api/projects/${projectSlug}/rescan`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setRescanMessage(data.message);
+        // Refresh document list after a delay to show updated statuses
+        setTimeout(() => fetchDocuments(), 2000);
+      } else {
+        setRescanMessage(data.error || 'Failed to start rescan');
+      }
+    } catch {
+      setRescanMessage('Failed to start rescan');
+    } finally {
+      setRescanningAll(false);
+      setTimeout(() => setRescanMessage(null), 8000);
     }
   };
 
@@ -848,19 +888,40 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     }
   };
 
-  const handleDelete = (doc: Document) => {
+  const handleDelete = async (doc: Document) => {
     setPendingDeleteDoc(doc);
     setShowDeleteConfirm(true);
+    setDeletionImpact(null);
+    setCleanupExtracted(false);
+    setDeletionImpactLoading(true);
+
+    try {
+      const response = await fetch(`/api/documents/${doc.id}/deletion-impact`);
+      if (response.ok) {
+        const data = await response.json();
+        setDeletionImpact(data);
+      }
+    } catch {
+      // Non-critical — dialog still works without impact data
+    } finally {
+      setDeletionImpactLoading(false);
+    }
   };
 
   const doDelete = async () => {
     setShowDeleteConfirm(false);
     const doc = pendingDeleteDoc;
+    const shouldCleanup = cleanupExtracted;
     setPendingDeleteDoc(null);
+    setDeletionImpact(null);
+    setCleanupExtracted(false);
     if (!doc) return;
 
     try {
-      const response = await fetch(`/api/documents/${doc.id}`, {
+      const url = shouldCleanup
+        ? `/api/documents/${doc.id}?cleanup=true`
+        : `/api/documents/${doc.id}`;
+      const response = await fetch(url, {
         method: 'DELETE',
       });
 
@@ -1211,6 +1272,19 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                   </div>
                 )}
 
+                {/* Rescan All Button */}
+                {projectSlug && userRole !== 'guest' && documents.length > 0 && (
+                  <button
+                    onClick={handleRescanAll}
+                    disabled={rescanningAll}
+                    className="flex items-center gap-2 px-3 py-2 text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors text-sm font-medium disabled:opacity-50"
+                    title="Re-process all documents in this project"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${rescanningAll ? 'animate-spin' : ''}`} />
+                    <span className="hidden sm:inline">{rescanningAll ? 'Rescanning...' : 'Rescan All'}</span>
+                  </button>
+                )}
+
                 {/* View CAD Models Button */}
                 {projectSlug && (
                   <button
@@ -1339,6 +1413,16 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           </div>
         )}
       </div>
+
+      {/* Rescan Message */}
+      {rescanMessage && (
+        <div className="px-3 lg:px-6 pt-3">
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-900/30 border border-blue-700/50 rounded-lg text-sm text-blue-300">
+            <RefreshCw className="w-4 h-4 flex-shrink-0" />
+            {rescanMessage}
+          </div>
+        </div>
+      )}
 
       {/* Extraction Feedback Banners */}
       {completedBanners.length > 0 && projectSlug && (
@@ -2047,16 +2131,74 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
         variant="destructive"
       />
 
-      <ConfirmDialog
-        open={showDeleteConfirm}
-        onConfirm={doDelete}
-        onCancel={() => { setShowDeleteConfirm(false); setPendingDeleteDoc(null); }}
-        title="Delete Document"
-        description={`Are you sure you want to delete "${pendingDeleteDoc?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="destructive"
-      />
+      <AlertDialog open={showDeleteConfirm} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setShowDeleteConfirm(false);
+          setPendingDeleteDoc(null);
+          setDeletionImpact(null);
+          setCleanupExtracted(false);
+        }
+      }}>
+        <AlertDialogContent className="bg-dark-card border-gray-700 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete Document</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400" asChild>
+              <div>
+                <p>Are you sure you want to delete &quot;{pendingDeleteDoc?.name}&quot;? This action cannot be undone.</p>
+
+                {deletionImpactLoading && (
+                  <div className="flex items-center gap-2 mt-3 text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Checking for extracted data...</span>
+                  </div>
+                )}
+
+                {deletionImpact && deletionImpact.hasExtractedData && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-sm font-medium text-amber-400">This document has extracted data:</p>
+                    <ul className="text-sm text-gray-400 space-y-1 ml-2">
+                      {deletionImpact.impact.rooms > 0 && <li>{deletionImpact.impact.rooms} room{deletionImpact.impact.rooms !== 1 ? 's' : ''}</li>}
+                      {deletionImpact.impact.doors > 0 && <li>{deletionImpact.impact.doors} door schedule item{deletionImpact.impact.doors !== 1 ? 's' : ''}</li>}
+                      {deletionImpact.impact.windows > 0 && <li>{deletionImpact.impact.windows} window schedule item{deletionImpact.impact.windows !== 1 ? 's' : ''}</li>}
+                      {deletionImpact.impact.finishes > 0 && <li>{deletionImpact.impact.finishes} finish schedule item{deletionImpact.impact.finishes !== 1 ? 's' : ''}</li>}
+                      {deletionImpact.impact.floorPlans > 0 && <li>{deletionImpact.impact.floorPlans} floor plan{deletionImpact.impact.floorPlans !== 1 ? 's' : ''}</li>}
+                      {deletionImpact.impact.hardware > 0 && <li>{deletionImpact.impact.hardware} hardware set{deletionImpact.impact.hardware !== 1 ? 's' : ''}</li>}
+                    </ul>
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={cleanupExtracted}
+                        onChange={(e) => setCleanupExtracted(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-600 bg-gray-800 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span className="text-sm text-gray-300">Also remove all extracted data (rooms, schedules, floor plans)</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setPendingDeleteDoc(null);
+                setDeletionImpact(null);
+                setCleanupExtracted(false);
+              }}
+              className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={doDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

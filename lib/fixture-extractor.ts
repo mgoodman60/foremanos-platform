@@ -109,3 +109,108 @@ export async function extractFixtures(
 
   return { plumbingFixtureCount, electricalDeviceCount, roomsWithFixtures: allRooms.size };
 }
+
+export interface FixtureScheduleEntry {
+  type: string;
+  rooms: string[];
+  count: number;
+  connectionSize: string;
+  manufacturer: string;
+}
+
+/**
+ * Process fixture schedule data from parsed drawing schedules.
+ * Creates/updates fixture records linked to rooms, deduplicating by type + sourceDocumentId.
+ */
+export async function processFixtureSchedule(
+  documentId: string,
+  projectId: string,
+  fixtureScheduleData: FixtureScheduleEntry[]
+): Promise<{ fixturesCreated: number }> {
+  logger.info('FIXTURE_EXTRACTOR', 'Processing fixture schedule data', {
+    documentId,
+    entryCount: fixtureScheduleData.length,
+  });
+
+  let fixturesCreated = 0;
+
+  const results = await Promise.allSettled(
+    fixtureScheduleData.map(async (fixture) => {
+      if (!fixture.type) return 0;
+
+      let created = 0;
+
+      for (const roomNumber of fixture.rooms) {
+        if (!roomNumber?.trim()) continue;
+
+        try {
+          const room = await prisma.room.findFirst({
+            where: { projectId, roomNumber: roomNumber.trim() },
+            select: { id: true },
+          });
+
+          if (!room) {
+            logger.info('FIXTURE_EXTRACTOR', `Room ${roomNumber} not found for fixture schedule, skipping`);
+            continue;
+          }
+
+          // Check for existing to deduplicate by type + sourceDocumentId
+          const existing = await prisma.finishScheduleItem.findFirst({
+            where: {
+              roomId: room.id,
+              category: 'fixture',
+              material: fixture.type,
+              sourceDocumentId: documentId,
+            },
+            select: { id: true },
+          });
+
+          if (existing) {
+            await prisma.finishScheduleItem.update({
+              where: { id: existing.id },
+              data: {
+                manufacturer: fixture.manufacturer || undefined,
+                dimensions: fixture.connectionSize || undefined,
+                notes: fixture.count ? `Qty: ${fixture.count}` : undefined,
+                extractedAt: new Date(),
+              },
+            });
+          } else {
+            await prisma.finishScheduleItem.create({
+              data: {
+                roomId: room.id,
+                category: 'fixture',
+                material: fixture.type,
+                manufacturer: fixture.manufacturer || null,
+                dimensions: fixture.connectionSize || null,
+                notes: fixture.count ? `Qty: ${fixture.count}` : null,
+                sourceDocumentId: documentId,
+                extractedAt: new Date(),
+              },
+            });
+            created++;
+          }
+        } catch (error) {
+          logger.warn('FIXTURE_EXTRACTOR', `Failed to process fixture ${fixture.type} for room ${roomNumber}`, {
+            error: (error as Error).message,
+          });
+        }
+      }
+
+      return created;
+    })
+  );
+
+  for (const r of results) {
+    if (r.status === 'fulfilled') {
+      fixturesCreated += r.value;
+    }
+  }
+
+  logger.info('FIXTURE_EXTRACTOR', 'Fixture schedule processing complete', {
+    documentId,
+    fixturesCreated,
+  });
+
+  return { fixturesCreated };
+}

@@ -45,12 +45,13 @@ import { toast } from 'sonner';
 
 // Inline Health Score types and fetching
 interface HealthScoreResult {
-  overallScore: number;
-  scheduleScore: number;
-  budgetScore: number;
-  safetyScore: number;
-  qualityScore: number;
-  documentScore: number;
+  overallScore: number | null;
+  scheduleScore: number | null;
+  budgetScore: number | null;
+  safetyScore: number | null;
+  qualityScore: number | null;
+  documentScore: number | null;
+  intelligenceScore?: number;
   trend: 'improving' | 'stable' | 'declining';
   changeFromPrevious: number;
   metrics: Record<string, number>;
@@ -452,14 +453,16 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
   };
 
   // Health score helpers
-  const getHealthScoreColor = (score: number) => {
+  const getHealthScoreColor = (score: number | null) => {
+    if (score === null) return 'text-gray-400';
     if (score >= 80) return 'text-green-400';
     if (score >= 60) return 'text-yellow-400';
     if (score >= 40) return 'text-orange-400';
     return 'text-red-400';
   };
 
-  const getHealthScoreBg = (score: number) => {
+  const getHealthScoreBg = (score: number | null) => {
+    if (score === null) return 'bg-gray-500/20 border-gray-500/50';
     if (score >= 80) return 'bg-green-500/20 border-green-500/50';
     if (score >= 60) return 'bg-yellow-500/20 border-yellow-500/50';
     if (score >= 40) return 'bg-orange-500/20 border-orange-500/50';
@@ -502,7 +505,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
         </div>
         <div className="flex items-center gap-2">
           <span className={`text-2xl font-bold ${getHealthScoreColor(health.overallScore)}`}>
-            {health.overallScore}
+            {health.overallScore ?? '--'}
           </span>
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
@@ -633,7 +636,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
                 <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${getHealthScoreBg(health.overallScore)}`}>
                   <Activity className={`w-3.5 h-3.5 ${getHealthScoreColor(health.overallScore)}`} />
                   <span className={`text-sm font-bold ${getHealthScoreColor(health.overallScore)}`}>
-                    {health.overallScore}
+                    {health.overallScore ?? '--'}
                   </span>
                 </div>
               )}

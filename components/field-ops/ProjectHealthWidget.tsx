@@ -9,12 +9,13 @@ import {
 import { toast } from 'sonner';
 
 interface HealthScoreResult {
-  overallScore: number;
-  scheduleScore: number;
-  budgetScore: number;
-  safetyScore: number;
-  qualityScore: number;
-  documentScore: number;
+  overallScore: number | null;
+  scheduleScore: number | null;
+  budgetScore: number | null;
+  safetyScore: number | null;
+  qualityScore: number | null;
+  documentScore: number | null;
+  intelligenceScore?: number;
   trend: 'improving' | 'stable' | 'declining';
   changeFromPrevious: number;
   metrics: Record<string, number>;
@@ -63,21 +64,24 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
     toast.success('Health score refreshed');
   };
 
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (score: number | null) => {
+    if (score === null) return 'text-gray-400';
     if (score >= 80) return 'text-green-400';
     if (score >= 60) return 'text-yellow-400';
     if (score >= 40) return 'text-orange-400';
     return 'text-red-400';
   };
 
-  const getScoreBg = (score: number) => {
+  const getScoreBg = (score: number | null) => {
+    if (score === null) return 'bg-gray-500/20 border-gray-500/50 shadow-gray-500/20';
     if (score >= 80) return 'bg-green-500/20 border-green-500/50 shadow-green-500/20';
     if (score >= 60) return 'bg-yellow-500/20 border-yellow-500/50 shadow-yellow-500/20';
     if (score >= 40) return 'bg-orange-500/20 border-orange-500/50 shadow-orange-500/20';
     return 'bg-red-500/20 border-red-500/50 shadow-red-500/20';
   };
 
-  const getScoreLabel = (score: number) => {
+  const getScoreLabel = (score: number | null) => {
+    if (score === null) return 'No Data';
     if (score >= 80) return 'Excellent';
     if (score >= 60) return 'Good';
     if (score >= 40) return 'Needs Attention';
@@ -120,19 +124,21 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
         <div className="flex items-center gap-2">
           <Activity className={`w-4 h-4 flex-shrink-0 ${getScoreColor(health.overallScore)}`} />
           <div className="min-w-0">
-            <p className="text-[10px] text-gray-300 leading-tight font-medium">Project</p>
+            <p className="text-[10px] text-gray-300 leading-tight font-medium">Operational</p>
             <p className="text-[10px] text-gray-300 leading-tight font-medium">Health</p>
           </div>
           <div className="flex flex-col items-end ml-auto">
             <p className={`text-xl font-bold leading-none ${getScoreColor(health.overallScore)}`}>
-              {health.overallScore}
+              {health.overallScore ?? '--'}
             </p>
-            <div className="flex items-center gap-0.5 mt-0.5">
-              <TrendIcon trend={health.trend} />
-              <span className="text-[9px] text-gray-300">
-                {health.changeFromPrevious >= 0 ? '+' : ''}{health.changeFromPrevious.toFixed(1)}
-              </span>
-            </div>
+            {health.overallScore !== null && (
+              <div className="flex items-center gap-0.5 mt-0.5">
+                <TrendIcon trend={health.trend} />
+                <span className="text-[9px] text-gray-300">
+                  {health.changeFromPrevious >= 0 ? '+' : ''}{health.changeFromPrevious.toFixed(1)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -145,7 +151,7 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Activity className="w-5 h-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Project Health</h2>
+          <h2 className="text-lg font-semibold text-white">Operational Health</h2>
         </div>
         <button
           onClick={handleRefresh}
@@ -162,21 +168,23 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
           <div>
             <div className="flex items-center gap-3">
               <span className={`text-5xl font-bold ${getScoreColor(health.overallScore)}`}>
-                {health.overallScore}
+                {health.overallScore ?? '--'}
               </span>
               <div className="flex flex-col">
                 <span className={`text-sm font-medium ${getScoreColor(health.overallScore)}`}>
                   {getScoreLabel(health.overallScore)}
                 </span>
-                <div className="flex items-center gap-1 mt-1">
-                  <TrendIcon trend={health.trend} />
-                  <span className="text-xs text-gray-400 capitalize">{health.trend}</span>
-                  {health.changeFromPrevious !== 0 && (
-                    <span className={`text-xs ${health.changeFromPrevious > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      ({health.changeFromPrevious >= 0 ? '+' : ''}{health.changeFromPrevious.toFixed(1)})
-                    </span>
-                  )}
-                </div>
+                {health.overallScore !== null && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <TrendIcon trend={health.trend} />
+                    <span className="text-xs text-gray-400 capitalize">{health.trend}</span>
+                    {health.changeFromPrevious !== 0 && (
+                      <span className={`text-xs ${health.changeFromPrevious > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        ({health.changeFromPrevious >= 0 ? '+' : ''}{health.changeFromPrevious.toFixed(1)})
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -274,8 +282,9 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
   );
 }
 
-function ScoreCard({ icon, label, score }: { icon: React.ReactNode; label: string; score: number }) {
-  const getColor = (s: number) => {
+function ScoreCard({ icon, label, score }: { icon: React.ReactNode; label: string; score: number | null }) {
+  const getColor = (s: number | null) => {
+    if (s === null) return 'text-gray-400 bg-gray-500/10';
     if (s >= 80) return 'text-green-400 bg-green-500/10';
     if (s >= 60) return 'text-yellow-400 bg-yellow-500/10';
     if (s >= 40) return 'text-orange-400 bg-orange-500/10';
@@ -288,7 +297,7 @@ function ScoreCard({ icon, label, score }: { icon: React.ReactNode; label: strin
         {icon}
         <span className="text-xs text-gray-300">{label}</span>
       </div>
-      <p className="text-lg font-semibold">{score}</p>
+      <p className="text-lg font-semibold">{score ?? '--'}</p>
     </div>
   );
 }

@@ -363,15 +363,44 @@ EXTRACTION CATEGORIES:
     - Pedestrian paths, plazas, parking layout
 
 13. SPECIFICATION REFERENCES:
-    - CSI section callouts, building code references
-    - Keynote numbers with definitions
+    - CSI section callouts with structured codes (division/section/subsection, e.g. "09 91 23")
+    - For each CSI reference: section code, section title, manufacturer name, product model number
+    - Building code references (IBC, NFPA, ADA, local amendments)
+    - Keynote bubbles/callouts: number, text, and referenced sheet (capture from ALL sheet types, not just general notes)
 
-14. ENHANCED SCALE:
+14. PAINT & FINISH COLORS:
+    - Actual color names and manufacturer codes (e.g. "SW 7015 Repose Gray", "BM OC-17 White Dove")
+    - Capture per room/surface: which room, which surface (floor/wall/ceiling/trim/accent), color name, code, manufacturer
+    - Look for finish schedules, room finish matrices, or callouts on plans
+
+15. ELECTRICAL PANEL SCHEDULES:
+    - Panel name/designation, total circuits, main breaker size, voltage, phase (1-phase/3-phase)
+    - Individual circuit data if visible: circuit number, load description, breaker size, load (VA/watts)
+
+16. DUCT & PIPE SIZING:
+    - Ductwork: duct ID/tag, width x height (rectangular) or diameter (round), CFM if noted
+    - Piping: pipe ID/tag, diameter, material (copper/PVC/cast iron/steel), system (domestic water/sanitary/storm/gas/fire)
+
+17. GENERAL NOTES & KEYNOTES:
+    - Parse general notes into discrete numbered clauses with category (general/structural/mechanical/electrical/plumbing/fire)
+    - For each clause: clause number, full text, category, any referenced spec sections
+    - Keynote bubbles from ALL drawing types: keynote number, definition text, sheet where used
+
+18. ENHANCED SCHEDULE TYPES (beyond door/window/finish/equipment):
+    - Plumbing fixture schedules: fixture type, rooms, count, connection sizes, manufacturer
+    - Hardware schedules: hardware group/mark, hinges, closer, lockset, pulls
+    - Structural member schedules: mark, type (beam/column/footing), size, reinforcement, elevation
+    - Lighting fixture schedules: type, wattage, mounting, count per room, manufacturer
+    - Stair schedules: stair ID, riser height, tread depth, width, flights
+    - Elevator schedules: elevator ID, capacity, speed, cab finish
+    - Roof drain schedules, louver/damper schedules, room finish schedules (with actual colors)
+
+19. ENHANCED SCALE:
     - Multiple scales per page with applicable areas
     - NTS (Not to Scale) detection
     - Metric vs imperial identification
 
-15. SPECIAL DRAWING FEATURES:
+20. SPECIAL DRAWING FEATURES:
     - General notes: flag as project-wide
     - Reflected ceiling plan data
     - Life safety: exit paths, occupancy loads
@@ -396,7 +425,6 @@ JSON RESPONSE FORMAT:
   "legendEntries": [{"symbol": "desc", "meaning": "meaning"}],
   "callouts": ["reference to other sheets"],
   "equipment": ["tag and description"],
-  "scheduleData": [],
   "textContent": "visible text/specs",
   "visualMaterials": [{"material": "concrete", "hatchingType": "diagonal lines", "locations": ["foundation"], "confidence": 0.9}],
   "lineTypeAnalysis": {"demolitionElements": [], "newConstruction": [], "hiddenElements": [], "belowGrade": []},
@@ -433,6 +461,22 @@ JSON RESPONSE FORMAT:
   "fireProtection": {"sprinklerHeads": [], "alarmDevices": [], "dampers": [], "standpipes": []},
   "siteAndConcrete": {"footings": [], "slabDetails": [], "rebarSchedule": [], "gradingData": null, "landscapeData": {"plantSchedule": [{"species": "", "quantity": 0, "sizeAtPlanting": "", "matureSpread": ""}], "existingTrees": [{"species": "", "caliper": "", "canopySpread": "", "toRemain": true}], "hardscape": [{"type": "", "material": "", "finish": "", "area": ""}], "irrigation": null, "siteFurniture": [], "retainingWalls": []}},
   "references": {"specSections": [], "codeReferences": [], "keynotes": []},
+  "finishColors": [{"room": "101", "surface": "wall", "colorName": "Repose Gray", "colorCode": "SW 7015", "manufacturer": "Sherwin-Williams"}],
+  "keynotes": [{"number": "1", "text": "Provide fire caulk at all penetrations", "sheetReference": "A2.01"}],
+  "scheduleData": {
+    "fixtureSchedule": [{"type": "water_closet", "rooms": ["101"], "count": 1, "connectionSize": "4\\"", "manufacturer": "Kohler"}],
+    "hardwareSchedule": [{"mark": "HW-1", "hinges": "3x 4.5\\" ball bearing", "closer": "LCN 4041", "lockset": "Schlage L9453", "pulls": "CRL"}],
+    "structuralSchedule": [{"mark": "B1", "type": "beam", "size": "W12x26", "reinforcement": "", "elevation": "+14'-0\\""}],
+    "lightingSchedule": [{"type": "2x4 LED troffer", "wattage": "40W", "mounting": "recessed", "countPerRoom": 4, "manufacturer": "Lithonia"}],
+    "panelSchedule": [{"panelName": "LP-1", "circuits": 42, "mainBreaker": "200A", "voltage": "120/208V", "phase": "3-phase"}],
+    "plumbingFixtureSchedule": [{"fixture": "WC", "rooms": ["101"], "count": 1, "connectionSize": "4\\""}],
+    "stairSchedule": [{"stairId": "ST-1", "riserHeight": "7\\"", "treadDepth": "11\\"", "width": "44\\"", "flights": 2}],
+    "elevatorSchedule": [{"elevatorId": "EL-1", "capacity": "3500 lbs", "speed": "200 FPM", "cabFinish": "stainless steel"}]
+  },
+  "csiReferences": [{"section": "09 91 23", "title": "Interior Painting", "manufacturer": "Sherwin-Williams", "productNumber": "Pro Industrial DTM Acrylic"}],
+  "ductSizing": [{"ductId": "D-1", "width": "24\\"", "height": "12\\"", "diameter": "", "cfm": "2400"}],
+  "pipeSizing": [{"pipeId": "DW-1", "diameter": "4\\"", "material": "cast iron", "system": "sanitary"}],
+  "noteClauses": [{"clauseNumber": "1", "text": "All dimensions to be verified in field", "category": "general", "referencedSpecs": []}],
   "enhancedScaleData": {"scales": [{"value": "1/4\\" = 1'-0\\"", "applicableArea": "main plan", "isNTS": false}]},
   "specialDrawingData": {"isGeneralNotes": false, "ceilingPlan": null, "lifeSafety": null, "roofData": {"roofType": "", "material": "", "slopePitch": "", "parapetHeight": "", "mechanicalScreening": false, "drainagePattern": "", "penetrations": []}, "exteriorElevation": {"facadeMaterials": [{"material": "", "location": "", "finish": ""}], "windowPattern": "", "entryFeatures": [], "corniceDetails": "", "buildingHeight": "", "storiesVisible": 0}, "landscapeSitePlan": {"plantBeds": [], "treeLocations": [], "hardscapeZones": [], "gradeChanges": [], "existingVegetation": []}}
 }
@@ -748,6 +792,125 @@ function formatVisionData(data: any): string {
     }
   }
 
+  // Finish Colors
+  if (data.finishColors?.length > 0) {
+    lines.push('');
+    lines.push('FINISH COLORS:');
+    data.finishColors.forEach((c: any) => {
+      lines.push(`  • Room ${c.room || 'unknown'} ${c.surface || ''}: ${c.colorName || ''} (${c.colorCode || ''}) - ${c.manufacturer || ''}`);
+    });
+  }
+
+  // Keynotes
+  if (data.keynotes?.length > 0) {
+    lines.push('');
+    lines.push('KEYNOTES:');
+    data.keynotes.forEach((k: any) => {
+      lines.push(`  • ${k.number}: ${k.text}${k.sheetReference ? ` [${k.sheetReference}]` : ''}`);
+    });
+  }
+
+  // Enhanced Schedule Data
+  if (data.scheduleData) {
+    const sd = data.scheduleData;
+    if (sd.fixtureSchedule?.length > 0) {
+      lines.push('');
+      lines.push('PLUMBING FIXTURE SCHEDULE:');
+      sd.fixtureSchedule.forEach((f: any) => {
+        lines.push(`  • ${f.type}: ${f.count}x in ${(f.rooms || []).join(', ')} (${f.connectionSize || ''}) ${f.manufacturer || ''}`);
+      });
+    }
+    if (sd.hardwareSchedule?.length > 0) {
+      lines.push('');
+      lines.push('HARDWARE SCHEDULE:');
+      sd.hardwareSchedule.forEach((h: any) => {
+        lines.push(`  • ${h.mark}: Hinges=${h.hinges || ''}, Closer=${h.closer || ''}, Lock=${h.lockset || ''}, Pulls=${h.pulls || ''}`);
+      });
+    }
+    if (sd.structuralSchedule?.length > 0) {
+      lines.push('');
+      lines.push('STRUCTURAL MEMBER SCHEDULE:');
+      sd.structuralSchedule.forEach((s: any) => {
+        lines.push(`  • ${s.mark} (${s.type}): ${s.size} ${s.reinforcement ? `reinf: ${s.reinforcement}` : ''} ${s.elevation ? `@ ${s.elevation}` : ''}`);
+      });
+    }
+    if (sd.lightingSchedule?.length > 0) {
+      lines.push('');
+      lines.push('LIGHTING FIXTURE SCHEDULE:');
+      sd.lightingSchedule.forEach((l: any) => {
+        lines.push(`  • ${l.type}: ${l.wattage}, ${l.mounting}, ${l.countPerRoom || ''}x/room ${l.manufacturer || ''}`);
+      });
+    }
+    if (sd.panelSchedule?.length > 0) {
+      lines.push('');
+      lines.push('PANEL SCHEDULE:');
+      sd.panelSchedule.forEach((p: any) => {
+        lines.push(`  • ${p.panelName}: ${p.circuits} circuits, ${p.mainBreaker} main, ${p.voltage} ${p.phase}`);
+      });
+    }
+    if (sd.plumbingFixtureSchedule?.length > 0 && !sd.fixtureSchedule?.length) {
+      lines.push('');
+      lines.push('PLUMBING FIXTURE SCHEDULE:');
+      sd.plumbingFixtureSchedule.forEach((f: any) => {
+        lines.push(`  • ${f.fixture}: ${f.count}x in ${(f.rooms || []).join(', ')} (${f.connectionSize || ''})`);
+      });
+    }
+    if (sd.stairSchedule?.length > 0) {
+      lines.push('');
+      lines.push('STAIR SCHEDULE:');
+      sd.stairSchedule.forEach((s: any) => {
+        lines.push(`  • ${s.stairId}: riser=${s.riserHeight}, tread=${s.treadDepth}, width=${s.width}, ${s.flights} flights`);
+      });
+    }
+    if (sd.elevatorSchedule?.length > 0) {
+      lines.push('');
+      lines.push('ELEVATOR SCHEDULE:');
+      sd.elevatorSchedule.forEach((e: any) => {
+        lines.push(`  • ${e.elevatorId}: ${e.capacity}, ${e.speed}, cab: ${e.cabFinish || ''}`);
+      });
+    }
+  }
+
+  // CSI References
+  if (data.csiReferences?.length > 0) {
+    lines.push('');
+    lines.push('CSI REFERENCES:');
+    data.csiReferences.forEach((r: any) => {
+      lines.push(`  • ${r.section} ${r.title}${r.manufacturer ? ` - ${r.manufacturer}` : ''}${r.productNumber ? ` (${r.productNumber})` : ''}`);
+    });
+  }
+
+  // Duct Sizing
+  if (data.ductSizing?.length > 0) {
+    lines.push('');
+    lines.push('DUCT SIZING:');
+    data.ductSizing.forEach((d: any) => {
+      const size = d.diameter ? `${d.diameter} dia` : `${d.width}x${d.height}`;
+      lines.push(`  • ${d.ductId || 'Duct'}: ${size}${d.cfm ? `, ${d.cfm} CFM` : ''}`);
+    });
+  }
+
+  // Pipe Sizing
+  if (data.pipeSizing?.length > 0) {
+    lines.push('');
+    lines.push('PIPE SIZING:');
+    data.pipeSizing.forEach((p: any) => {
+      lines.push(`  • ${p.pipeId || 'Pipe'}: ${p.diameter} ${p.material || ''} (${p.system || ''})`);
+    });
+  }
+
+  // Note Clauses
+  if (data.noteClauses?.length > 0) {
+    lines.push('');
+    lines.push('NOTE CLAUSES:');
+    data.noteClauses.forEach((n: any) => {
+      lines.push(`  • [${n.category || 'general'}] ${n.clauseNumber}: ${n.text}`);
+      if (n.referencedSpecs?.length > 0) {
+        lines.push(`    Specs: ${n.referencedSpecs.join(', ')}`);
+      }
+    });
+  }
+
   return lines.join('\n');
 }
 
@@ -778,5 +941,13 @@ function extractMetadata(data: any): any {
     references: data.references || null,
     enhancedScaleData: data.enhancedScaleData || null,
     specialDrawingData: data.specialDrawingData || null,
+    // Enhanced extraction fields (9 new categories)
+    finishColors: data.finishColors || null,
+    keynotes: data.keynotes || null,
+    scheduleData: data.scheduleData || null,
+    csiReferences: data.csiReferences || null,
+    ductSizing: data.ductSizing || null,
+    pipeSizing: data.pipeSizing || null,
+    noteClauses: data.noteClauses || null,
   };
 }

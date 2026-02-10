@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { calculateProjectHealth, saveHealthSnapshot, getHealthHistory } from '@/lib/project-health-service';
 
 export async function GET(
@@ -39,7 +40,7 @@ export async function GET(
       history,
     });
   } catch (error) {
-    console.error('[Health API] Error:', error);
+    logger.error('HEALTH_API', 'Failed to calculate health score', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to calculate health score' },
       { status: 500 }
@@ -71,7 +72,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Health API] Error saving snapshot:', error);
+    logger.error('HEALTH_API', 'Failed to save health snapshot', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to save health snapshot' },
       { status: 500 }

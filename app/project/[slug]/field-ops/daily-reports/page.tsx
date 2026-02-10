@@ -1,19 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { FileText, BarChart3, TrendingUp, Plus, ChevronLeft, ClipboardCheck } from 'lucide-react';
 import DailyReportsList from '@/components/field-ops/DailyReportsList';
 import ProjectHealthWidget from '@/components/field-ops/ProjectHealthWidget';
 import ProgressDetectionPanel from '@/components/daily-reports/ProgressDetectionPanel';
 import ReportAnalyticsDashboard from '@/components/daily-reports/ReportAnalyticsDashboard';
 import ApprovalDashboard from '@/components/daily-reports/ApprovalDashboard';
+import CreateDailyReportDialog from '@/components/daily-reports/CreateDailyReportDialog';
 
 type TabType = 'reports' | 'analytics' | 'progress' | 'approval';
 
-export default function DailyReportsPage({ params }: { params: { slug: string } }) {
+function DailyReportsContent({ params }: { params: { slug: string } }) {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>('reports');
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  // Auto-open dialog when ?new=true is in the URL
+  useEffect(() => {
+    if (searchParams.get('new') === 'true') {
+      setShowCreateDialog(true);
+    }
+  }, [searchParams]);
 
   const tabs = [
     { id: 'reports' as TabType, label: 'Reports', icon: FileText },
@@ -34,7 +45,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
           Back to Project
         </Link>
       </div>
-      
+
       <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -68,10 +79,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
           <div className="lg:col-span-2">
             <DailyReportsList
               projectSlug={params.slug}
-              onCreateNew={() => {
-                // Navigate to create new report
-                window.location.href = `/project/${params.slug}`;
-              }}
+              onCreateNew={() => setShowCreateDialog(true)}
               onSelect={(report) => {
                 setSelectedReportId(report.id);
                 setActiveTab('progress'); // Switch to progress tab
@@ -80,7 +88,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
           </div>
           <div className="space-y-6">
             <ProjectHealthWidget projectSlug={params.slug} />
-            
+
             {/* Quick Progress Detection */}
             <ProgressDetectionPanel
               projectSlug={params.slug}
@@ -103,10 +111,10 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
             <div className="bg-gray-800/50 rounded-lg border border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">AI Progress Detection</h3>
               <p className="text-gray-400 mb-6">
-                Select a daily report from the list, then click "Detect Progress" to analyze 
+                Select a daily report from the list, then click &quot;Detect Progress&quot; to analyze
                 photos and report content for schedule updates.
               </p>
-              
+
               {selectedReportId ? (
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
                   <div className="text-green-400 font-medium">Report Selected</div>
@@ -132,7 +140,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
               />
             </div>
           </div>
-          
+
           <div>
             <div className="bg-gray-800/50 rounded-lg border border-gray-700 p-4">
               <h4 className="text-white font-medium mb-3">How It Works</h4>
@@ -143,7 +151,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
                 </li>
                 <li className="flex gap-2">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">2</span>
-                  <span>Report text is parsed for progress indicators ("completed", "started", percentages)</span>
+                  <span>Report text is parsed for progress indicators (&quot;completed&quot;, &quot;started&quot;, percentages)</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">3</span>
@@ -155,7 +163,7 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
                 </li>
               </ol>
             </div>
-            
+
             <div className="mt-4 bg-gray-800/50 rounded-lg border border-gray-700 p-4">
               <h4 className="text-white font-medium mb-3">Tips for Better Detection</h4>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -185,6 +193,25 @@ export default function DailyReportsPage({ params }: { params: { slug: string } 
         <ApprovalDashboard projectSlug={params.slug} />
       )}
       </div>
+
+      {/* Create Dialog */}
+      <CreateDailyReportDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        projectSlug={params.slug}
+      />
     </div>
+  );
+}
+
+export default function DailyReportsPage({ params }: { params: { slug: string } }) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    }>
+      <DailyReportsContent params={params} />
+    </Suspense>
   );
 }

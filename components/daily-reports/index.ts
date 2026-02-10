@@ -1,4 +1,5 @@
 export { default as ApprovalDashboard } from './ApprovalDashboard';
+export { default as CreateDailyReportDialog } from './CreateDailyReportDialog';
 export { default as CrewTemplateSelector } from './CrewTemplateSelector';
 export { default as OneDriveSyncBadge } from './OneDriveSyncBadge';
 export { default as ProgressDetectionPanel } from './ProgressDetectionPanel';

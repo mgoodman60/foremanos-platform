@@ -357,15 +357,42 @@ async function clearFeatureData(projectId: string, feature: FeatureType): Promis
       logger.info('AUTO_SYNC', 'Budget source removed - manual entries preserved');
       break;
 
-    case 'rooms':
-      // Clear room count from project if tracked there
-      logger.info('AUTO_SYNC', 'Room data source cleared');
+    case 'rooms': {
+      const roomResult = await prisma.room.deleteMany({
+        where: { projectId, sourceDocumentId: null },
+      });
+      logger.info('AUTO_SYNC', 'Deleted orphaned rooms', { projectId, count: roomResult.count });
       break;
+    }
+
+    case 'doors': {
+      const doorResult = await prisma.doorScheduleItem.deleteMany({
+        where: { projectId, sourceDocumentId: null },
+      });
+      logger.info('AUTO_SYNC', 'Deleted orphaned door schedule items', { projectId, count: doorResult.count });
+      break;
+    }
+
+    case 'windows': {
+      const windowResult = await prisma.windowScheduleItem.deleteMany({
+        where: { projectId, sourceDocumentId: null },
+      });
+      logger.info('AUTO_SYNC', 'Deleted orphaned window schedule items', { projectId, count: windowResult.count });
+      break;
+    }
 
     case 'mep_electrical':
     case 'mep_plumbing':
     case 'mep_hvac':
       logger.info('AUTO_SYNC', `MEP ${feature} data source cleared`);
+      break;
+
+    case 'legends':
+    case 'dimensions':
+    case 'materials':
+    case 'scale':
+    case 'title_blocks':
+      logger.info('AUTO_SYNC', `Feature ${feature} data source cleared`);
       break;
 
     default:

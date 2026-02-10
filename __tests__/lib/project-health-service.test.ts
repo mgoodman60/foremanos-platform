@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   calculateProjectHealth,
   saveHealthSnapshot,
@@ -325,9 +325,14 @@ describe('project-health-service', () => {
     it('should determine improving trend from previous snapshot', async () => {
       mockPrisma.project.findUnique.mockResolvedValue({
         id: mockProjectId,
-        scheduleActivities: [],
+        scheduleActivities: [
+          { startDate: '2024-01-01', endDate: '2024-01-20', progress: 80 },
+        ],
       });
-      mockPrisma.projectBudget.findUnique.mockResolvedValue(null);
+      mockPrisma.projectBudget.findUnique.mockResolvedValue({
+        totalBudget: 100000,
+        actualCost: 90000,
+      });
       mockPrisma.changeOrder.findMany.mockResolvedValue([]);
       mockPrisma.invoice.findMany.mockResolvedValue([]);
       mockPrisma.rFI.findMany.mockResolvedValue([]);
@@ -342,6 +347,7 @@ describe('project-health-service', () => {
 
       const result = await calculateProjectHealth(mockProjectId);
 
+      expect(result.overallScore).not.toBeNull();
       expect(result.changeFromPrevious).toBeGreaterThan(0);
       expect(result.trend).toBe('improving');
     });
@@ -379,11 +385,12 @@ describe('project-health-service', () => {
 
       const result = await calculateProjectHealth(mockProjectId);
 
+      expect(result.overallScore).not.toBeNull();
       expect(result.changeFromPrevious).toBeLessThan(0);
       expect(result.trend).toBe('declining');
     });
 
-    it('should handle empty schedule activities', async () => {
+    it('should return null scores when no data exists', async () => {
       mockPrisma.project.findUnique.mockResolvedValue({
         id: mockProjectId,
         scheduleActivities: [],
@@ -402,7 +409,12 @@ describe('project-health-service', () => {
 
       expect(result.metrics.overdueTasks).toBe(0);
       expect(result.metrics.tasksOnTrack).toBe(0);
-      expect(result.scheduleScore).toBe(100);
+      expect(result.scheduleScore).toBeNull();
+      expect(result.budgetScore).toBeNull();
+      expect(result.safetyScore).toBeNull();
+      expect(result.qualityScore).toBeNull();
+      expect(result.documentScore).toBeNull();
+      expect(result.overallScore).toBeNull();
     });
 
     it('should count upcoming milestones', async () => {
@@ -522,6 +534,10 @@ describe('project-health-service', () => {
   });
 
   describe('getHealthColor', () => {
+    it('should return gray for null scores', () => {
+      expect(getHealthColor(null)).toBe('#6B7280');
+    });
+
     it('should return green for excellent scores (>= 80)', () => {
       expect(getHealthColor(100)).toBe('#22C55E');
       expect(getHealthColor(80)).toBe('#22C55E');
@@ -544,6 +560,10 @@ describe('project-health-service', () => {
   });
 
   describe('getHealthLabel', () => {
+    it('should return No Data for null scores', () => {
+      expect(getHealthLabel(null)).toBe('No Data');
+    });
+
     it('should return Excellent for scores >= 80', () => {
       expect(getHealthLabel(100)).toBe('Excellent');
       expect(getHealthLabel(80)).toBe('Excellent');

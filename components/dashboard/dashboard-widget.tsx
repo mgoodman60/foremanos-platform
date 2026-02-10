@@ -72,17 +72,24 @@ function WidgetSkeleton() {
 }
 
 function FreshnessDot({ lastFetched }: { lastFetched?: Date }) {
-  if (!lastFetched) return <span className="w-1.5 h-1.5 rounded-full bg-gray-600 inline-block" />;
+  if (!lastFetched) return <span className="w-2 h-2 rounded-full bg-gray-600 inline-block" />;
 
   const ageMs = Date.now() - lastFetched.getTime();
   const fiveMin = 5 * 60 * 1000;
   const oneHour = 60 * 60 * 1000;
 
   let color = 'bg-gray-600';
-  if (ageMs < fiveMin) color = 'bg-green-400';
-  else if (ageMs < oneHour) color = 'bg-yellow-400';
+  let isStale = false;
+  if (ageMs < fiveMin) {
+    color = 'bg-green-400';
+  } else if (ageMs < oneHour) {
+    color = 'bg-yellow-400';
+  } else {
+    color = 'bg-amber-400';
+    isStale = true;
+  }
 
-  return <span className={`w-1.5 h-1.5 rounded-full ${color} inline-block`} />;
+  return <span className={`w-2 h-2 rounded-full ${color} inline-block ${isStale ? 'animate-pulse' : ''}`} />;
 }
 
 export function DashboardWidget({
@@ -108,7 +115,7 @@ export function DashboardWidget({
       <div className={colSpanClass}>
         <article
           aria-label={title}
-          className="bg-slate-900 border-2 border-gray-700 rounded-xl transition-all duration-250"
+          className="bg-gray-800/40 border border-gray-700/50 rounded-xl transition-all duration-250"
         >
           <WidgetSkeleton />
         </article>
@@ -121,7 +128,7 @@ export function DashboardWidget({
       <div className={colSpanClass}>
         <article
           aria-label={title}
-          className="bg-slate-900 border-2 border-red-500/30 rounded-xl p-6"
+          className="bg-gray-800/40 border border-red-500/30 rounded-xl p-5"
         >
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-10 h-10 rounded-lg ${iconColor} flex items-center justify-center`}>
@@ -144,7 +151,7 @@ export function DashboardWidget({
       <div className={colSpanClass}>
         <article
           aria-label={title}
-          className="bg-slate-900 border-2 border-gray-700 rounded-xl p-6"
+          className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-5"
         >
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-10 h-10 rounded-lg ${iconColor} opacity-50 flex items-center justify-center`}>
@@ -156,7 +163,7 @@ export function DashboardWidget({
           {emptyState.actionLabel && emptyState.actionHref && (
             <Link
               href={emptyState.actionHref}
-              className="text-sm text-orange-400 hover:text-orange-300 font-medium"
+              className="text-sm text-orange-400 hover:text-orange-300 font-medium focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
             >
               {emptyState.actionLabel}
             </Link>
@@ -189,7 +196,7 @@ export function DashboardWidget({
 
       {/* Primary Metric */}
       <div className="mb-1">
-        <span className="text-3xl font-bold text-slate-50" aria-live="polite">
+        <span className="text-3xl font-bold text-slate-50 tabular-nums" aria-live="polite">
           {primaryMetric.value}
         </span>
       </div>
@@ -230,7 +237,7 @@ export function DashboardWidget({
                 e.stopPropagation();
                 action.onClick();
               }}
-              className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+              className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px] focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none ${
                 action.variant === 'primary'
                   ? 'bg-orange-500 hover:bg-orange-600 text-white'
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
@@ -245,9 +252,9 @@ export function DashboardWidget({
   );
 
   const cardClasses =
-    'bg-slate-900 border-2 border-gray-700 rounded-xl p-6 transition-all duration-250 ' +
+    'bg-gray-800/40 border border-gray-700/50 rounded-xl p-5 transition-all duration-250 ' +
     (href
-      ? 'hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-0.5 cursor-pointer'
+      ? 'hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-0.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none'
       : '');
 
   if (href) {

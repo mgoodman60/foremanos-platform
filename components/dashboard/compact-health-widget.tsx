@@ -9,16 +9,39 @@ interface CompactHealthWidgetProps {
 }
 
 interface HealthData {
-  overallScore: number;
-  scheduleScore: number;
-  budgetScore: number;
-  safetyScore: number;
-  qualityScore: number;
+  overallScore: number | null;
+  scheduleScore: number | null;
+  budgetScore: number | null;
+  safetyScore: number | null;
+  qualityScore: number | null;
+  documentScore: number | null;
+  intelligenceScore?: number;
   trend: 'improving' | 'stable' | 'declining';
   changeFromPrevious: number;
 }
 
-function ScoreBar({ label, score }: { label: string; score: number }) {
+interface ScoreBarProps {
+  label: string;
+  score: number | null;
+  setupHref: string;
+  setupLabel: string;
+}
+
+function ScoreBar({ label, score, setupHref, setupLabel }: ScoreBarProps) {
+  if (score === null) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] text-gray-400 w-14 shrink-0">{label}</span>
+        <a
+          href={setupHref}
+          className="flex-1 text-[10px] text-blue-400 hover:text-blue-300 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
+        >
+          {setupLabel} &rarr;
+        </a>
+      </div>
+    );
+  }
+
   const color = score >= 80 ? 'bg-green-400' : score >= 50 ? 'bg-amber-400' : 'bg-red-400';
   return (
     <div className="flex items-center gap-2">
@@ -26,7 +49,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
       <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${score}%` }} />
       </div>
-      <span className="text-[10px] text-gray-500 w-6 text-right">{score}</span>
+      <span className="text-[10px] text-gray-500 w-6 text-right tabular-nums">{score}</span>
     </div>
   );
 }
@@ -57,11 +80,13 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
     fetchHealth();
   }, [projectSlug]);
 
-  const scoreColor = !health
+  const hasScore = health?.overallScore !== null && health?.overallScore !== undefined;
+
+  const scoreColor = !health || !hasScore
     ? 'text-gray-400'
-    : health.overallScore >= 80
+    : health.overallScore! >= 80
       ? 'text-green-400'
-      : health.overallScore >= 50
+      : health.overallScore! >= 50
         ? 'text-amber-400'
         : 'text-red-400';
 
@@ -83,7 +108,7 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
 
   return (
     <DashboardWidget
-      title="Project Health"
+      title="Operational Health"
       icon={Activity}
       iconColor="bg-green-600"
       loading={loading}
@@ -91,32 +116,92 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
       colSpan={1}
       lastFetched={lastFetched}
       primaryMetric={{
-        value: health?.overallScore ?? '--',
-        label: 'Overall health score',
+        value: hasScore ? health!.overallScore! : '--',
+        label: 'Operational health score',
       }}
       href={`/project/${projectSlug}/reports`}
       customContent={
         health ? (
           <div>
-            {/* Score + Trend */}
-            <div className="flex items-end gap-3 mb-4">
-              <span className={`text-4xl font-bold ${scoreColor}`}>{health.overallScore}</span>
-              <div className={`flex items-center gap-1 pb-1 ${trendColor}`}>
-                <TrendIcon className="w-4 h-4" />
-                <span className="text-xs">
-                  {health.changeFromPrevious >= 0 ? '+' : ''}
-                  {health.changeFromPrevious.toFixed(1)}
-                </span>
-              </div>
-            </div>
+            {hasScore ? (
+              <>
+                {/* Score + Trend */}
+                <div className="flex items-end gap-3 mb-4">
+                  <span className={`text-4xl font-bold tabular-nums ${scoreColor}`}>{health.overallScore}</span>
+                  <div className={`flex items-center gap-1 pb-1 ${trendColor}`}>
+                    <TrendIcon className="w-4 h-4" />
+                    <span className="text-xs">
+                      {health.changeFromPrevious >= 0 ? '+' : ''}
+                      {health.changeFromPrevious.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Mini bars */}
-            <div className="space-y-2">
-              <ScoreBar label="Schedule" score={health.scheduleScore} />
-              <ScoreBar label="Budget" score={health.budgetScore} />
-              <ScoreBar label="Safety" score={health.safetyScore} />
-              <ScoreBar label="Quality" score={health.qualityScore} />
-            </div>
+                {/* Mini bars */}
+                <div className="space-y-2">
+                  <ScoreBar
+                    label="Schedule"
+                    score={health.scheduleScore}
+                    setupHref={`/project/${projectSlug}/schedule`}
+                    setupLabel="Add schedule"
+                  />
+                  <ScoreBar
+                    label="Budget"
+                    score={health.budgetScore}
+                    setupHref={`/project/${projectSlug}/budget`}
+                    setupLabel="Set budget"
+                  />
+                  <ScoreBar
+                    label="Safety"
+                    score={health.safetyScore}
+                    setupHref={`/project/${projectSlug}/field-ops/daily-reports`}
+                    setupLabel="Submit daily report"
+                  />
+                  <ScoreBar
+                    label="Quality"
+                    score={health.qualityScore}
+                    setupHref={`/project/${projectSlug}/punch-list`}
+                    setupLabel="Track punch items"
+                  />
+                </div>
+              </>
+            ) : (
+              /* Get Started card when no overall score */
+              <div className="text-center py-2">
+                <p className="text-sm font-medium text-gray-300 mb-3">Set Up Your Project</p>
+                <p className="text-xs text-gray-500 mb-4">Add data to see your operational health:</p>
+                <div className="space-y-2">
+                  <a
+                    href={`/project/${projectSlug}/schedule`}
+                    className="block text-[11px] text-blue-400 hover:text-blue-300 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
+                  >
+                    Add Schedule &rarr;
+                  </a>
+                  <a
+                    href={`/project/${projectSlug}/budget`}
+                    className="block text-[11px] text-blue-400 hover:text-blue-300 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
+                  >
+                    Set Budget &rarr;
+                  </a>
+                  <a
+                    href={`/project/${projectSlug}/field-ops/daily-reports`}
+                    className="block text-[11px] text-blue-400 hover:text-blue-300 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none rounded"
+                  >
+                    Submit Daily Report &rarr;
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* Intelligence badge (separate from health) */}
+            {health.intelligenceScore !== undefined && (
+              <div className="mt-3 pt-3 border-t border-gray-700">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-gray-500">Document Intelligence</span>
+                  <span className="text-[10px] text-blue-400 tabular-nums">{health.intelligenceScore}%</span>
+                </div>
+              </div>
+            )}
           </div>
         ) : undefined
       }

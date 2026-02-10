@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Flag, CloudSun, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import { DashboardWidget } from './dashboard-widget';
 import { KeyDatesTimeline } from './key-dates-timeline';
+import { ScheduleCalendarWidget } from './schedule-calendar-widget';
 
 interface ExpandedScheduleWidgetProps {
   projectSlug: string;
@@ -28,7 +29,7 @@ interface DailyReportData {
 
 function TodayChip({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
-    <div className="flex items-center gap-2 bg-slate-800 border border-gray-600 rounded-lg px-3 py-2">
+    <div className="flex items-center gap-2 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2">
       <Icon className="w-3.5 h-3.5 text-gray-400" />
       <span className="text-xs text-gray-300">{label}</span>
     </div>
@@ -64,6 +65,7 @@ function MiniSparkline({ data }: { data: number[] }) {
 }
 
 export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'upcoming'>('overview');
   const [schedule, setSchedule] = useState<ScheduleData | null>(null);
   const [dailyReport, setDailyReport] = useState<DailyReportData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,54 +157,92 @@ export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetPr
       customContent={
         hasData ? (
           <div className="space-y-4">
-            {/* "What's Happening Today?" chips */}
-            <div className="flex flex-wrap gap-2">
-              <TodayChip
-                icon={Calendar}
-                label={`${schedule!.activeTodayCount ?? schedule!.totalTasks - schedule!.tasksCompleted} tasks active`}
-              />
-              {nextMilestone && (
-                <TodayChip icon={Flag} label={`${nextMilestone.name} in ${nextMilestone.daysUntil}d`} />
-              )}
-              <TodayChip icon={CloudSun} label={weatherLabel} />
-              <TodayChip icon={Users} label={`${dailyReport?.crewCount ?? 0} on site`} />
+            {/* Tab buttons */}
+            <div className="flex gap-1" role="tablist" aria-label="Schedule view tabs">
+              <button
+                role="tab"
+                aria-selected={activeTab === 'overview'}
+                aria-controls="schedule-tab-overview"
+                onClick={() => setActiveTab('overview')}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none ${
+                  activeTab === 'overview'
+                    ? 'bg-blue-600/20 text-blue-400'
+                    : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700/50'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === 'upcoming'}
+                aria-controls="schedule-tab-upcoming"
+                onClick={() => setActiveTab('upcoming')}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none ${
+                  activeTab === 'upcoming'
+                    ? 'bg-blue-600/20 text-blue-400'
+                    : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700/50'
+                }`}
+              >
+                Upcoming
+              </button>
             </div>
 
-            {/* Progress bar */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-semibold text-slate-50">{schedule!.overallProgress}%</span>
-                <span className={`text-xs ${schedule!.daysAheadBehind >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {daysLabel}
-                </span>
-              </div>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-orange-500 rounded-full transition-all duration-700"
-                  style={{ width: `${schedule!.overallProgress}%` }}
-                />
-              </div>
-              {criticalBadge && (
-                <div className={`flex items-center gap-1 mt-1 ${criticalBadge.color}`}>
-                  <criticalBadge.Icon className="w-3 h-3" />
-                  <span className="text-xs">{criticalBadge.label}</span>
+            {activeTab === 'overview' ? (
+              <>
+                {/* "What's Happening Today?" chips */}
+                <div className="flex flex-wrap gap-2">
+                  <TodayChip
+                    icon={Calendar}
+                    label={`${schedule!.activeTodayCount ?? schedule!.totalTasks - schedule!.tasksCompleted} tasks active`}
+                  />
+                  {nextMilestone && (
+                    <TodayChip icon={Flag} label={`${nextMilestone.name} in ${nextMilestone.daysUntil}d`} />
+                  )}
+                  <TodayChip icon={CloudSun} label={weatherLabel} />
+                  <TodayChip icon={Users} label={`${dailyReport?.crewCount ?? 0} on site`} />
                 </div>
-              )}
-            </div>
 
-            {/* Key Dates Timeline */}
-            {keyDates.length > 0 && (
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Key Dates</p>
-                <KeyDatesTimeline keyDates={keyDates} />
-              </div>
-            )}
+                {/* Progress bar */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold text-slate-50 tabular-nums">{schedule!.overallProgress}%</span>
+                    <span className={`text-xs tabular-nums ${schedule!.daysAheadBehind >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {daysLabel}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-orange-500 rounded-full transition-all duration-700"
+                      style={{ width: `${schedule!.overallProgress}%` }}
+                    />
+                  </div>
+                  {criticalBadge && (
+                    <div className={`flex items-center gap-1 mt-1 ${criticalBadge.color}`}>
+                      <criticalBadge.Icon className="w-3 h-3" />
+                      <span className="text-xs">{criticalBadge.label}</span>
+                    </div>
+                  )}
+                </div>
 
-            {/* Sparkline */}
-            {velocityData.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-500">7d velocity</span>
-                <MiniSparkline data={velocityData} />
+                {/* Key Dates Timeline */}
+                {keyDates.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Key Dates</p>
+                    <KeyDatesTimeline keyDates={keyDates} />
+                  </div>
+                )}
+
+                {/* Sparkline */}
+                {velocityData.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500">7d velocity</span>
+                    <MiniSparkline data={velocityData} />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div id="schedule-tab-upcoming" role="tabpanel" aria-labelledby="tab-upcoming">
+                <ScheduleCalendarWidget projectSlug={projectSlug} />
               </div>
             )}
           </div>

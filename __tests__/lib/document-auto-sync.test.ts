@@ -905,6 +905,7 @@ describe('Document Auto-Sync - handleDocumentDeletion', () => {
 
       mockPrisma.document.findMany.mockResolvedValue([]);
       mockPrisma.project.findUnique.mockResolvedValue({ id: 'project-1' });
+      mockPrisma.room.deleteMany.mockResolvedValue({ count: 0 });
 
       const result = await handleDocumentDeletion('doc-1', 'project-1');
 

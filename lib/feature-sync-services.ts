@@ -544,6 +544,114 @@ Return ONLY JSON array.`;
   return { materials: 0 };
 }
 
+// ============= FINISH COLOR SYNC =============
+export interface FinishColorEntry {
+  room: string;
+  surface: string;
+  colorName: string;
+  colorCode: string;
+  manufacturer: string;
+}
+
+/**
+ * Sync finish color data from extraction metadata into FinishScheduleItem records.
+ * Maps surface types to finish categories and updates color/manufacturer fields.
+ */
+export async function syncFinishColors(
+  projectId: string,
+  documentId: string,
+  finishColors: FinishColorEntry[]
+): Promise<{ updated: number }> {
+  if (!finishColors || finishColors.length === 0) {
+    return { updated: 0 };
+  }
+
+  logger.info('FEATURE_SYNC', 'Syncing finish colors', {
+    projectId,
+    documentId,
+    colorEntries: finishColors.length,
+  });
+
+  let updated = 0;
+
+  // Map surface names to finish categories
+  const surfaceToCategoryMap: Record<string, string> = {
+    floor: 'flooring',
+    flooring: 'flooring',
+    wall: 'walls',
+    walls: 'walls',
+    ceiling: 'ceiling',
+    base: 'base',
+    baseboard: 'base',
+    trim: 'base',
+    door: 'door',
+    frame: 'frame',
+  };
+
+  for (const entry of finishColors) {
+    if (!entry.room || !entry.surface) continue;
+
+    const category = surfaceToCategoryMap[entry.surface.toLowerCase()] || entry.surface.toLowerCase();
+
+    try {
+      const room = await prisma.room.findFirst({
+        where: { projectId, roomNumber: entry.room },
+        select: { id: true },
+      });
+
+      if (!room) continue;
+
+      // Find the matching FinishScheduleItem
+      const finishItem = await prisma.finishScheduleItem.findFirst({
+        where: {
+          roomId: room.id,
+          category,
+        },
+        select: { id: true, color: true, manufacturer: true },
+      });
+
+      if (finishItem) {
+        // Only update if color is not already set
+        if (!finishItem.color && (entry.colorName || entry.colorCode)) {
+          await prisma.finishScheduleItem.update({
+            where: { id: finishItem.id },
+            data: {
+              color: entry.colorName
+                ? `${entry.colorName}${entry.colorCode ? ` (${entry.colorCode})` : ''}`
+                : entry.colorCode,
+              manufacturer: entry.manufacturer || finishItem.manufacturer,
+            },
+          });
+          updated++;
+        }
+      } else if (entry.colorName || entry.colorCode) {
+        // Create new finish item with color data
+        await prisma.finishScheduleItem.create({
+          data: {
+            roomId: room.id,
+            category,
+            color: entry.colorName
+              ? `${entry.colorName}${entry.colorCode ? ` (${entry.colorCode})` : ''}`
+              : entry.colorCode,
+            manufacturer: entry.manufacturer || null,
+            sourceDocumentId: documentId,
+            extractedAt: new Date(),
+          },
+        });
+        updated++;
+      }
+    } catch (error) {
+      logger.warn('FEATURE_SYNC', `Failed to sync finish color for room ${entry.room}`, {
+        error: (error as Error).message,
+        surface: entry.surface,
+      });
+    }
+  }
+
+  logger.info('FEATURE_SYNC', 'Finish color sync complete', { updated });
+  return { updated };
+}
+
 // ============= AUTO-CREATE FLOOR PLAN =============
 /**
  * Auto-create FloorPlan record from architectural floor plan sheets

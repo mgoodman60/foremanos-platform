@@ -7,12 +7,32 @@
 import { prisma } from './db';
 import { logger } from '@/lib/logger';
 
+export interface DuctSizingEntry {
+  ductId: string;
+  size: string;
+  type: string;
+  cfm?: number;
+  location?: string;
+  sourceSheet?: string;
+}
+
+export interface PipeSizingEntry {
+  pipeId: string;
+  size: string;
+  material: string;
+  system?: string;
+  location?: string;
+  sourceSheet?: string;
+}
+
 export interface SpatialAggregation {
   roomDimensions: Record<string, { width?: string; length?: string; area?: string; ceilingHeight?: string; floorElevation?: string }>;
   levels: Record<string, string>; // levelName -> elevation
   gridSpacing: Record<string, Record<string, string>>; // fromGrid -> toGrid -> distance
   aggregatedHeights: any[];
   aggregatedThicknesses: any[];
+  ductSizing: DuctSizingEntry[];
+  pipeSizing: PipeSizingEntry[];
 }
 
 /**
@@ -32,6 +52,8 @@ export async function aggregateSpatialData(documentId: string): Promise<SpatialA
     gridSpacing: {},
     aggregatedHeights: [],
     aggregatedThicknesses: [],
+    ductSizing: [],
+    pipeSizing: [],
   };
 
   for (const chunk of chunks) {
@@ -118,6 +140,36 @@ export async function aggregateSpatialData(documentId: string): Promise<SpatialA
         }
       }
     }
+
+    // Aggregate duct sizing data
+    if (sd.ductSizing?.length > 0) {
+      for (const duct of sd.ductSizing) {
+        if (!duct.size) continue;
+        result.ductSizing.push({
+          ductId: duct.ductId || duct.id || `duct-${result.ductSizing.length}`,
+          size: duct.size,
+          type: duct.type || 'rectangular',
+          cfm: duct.cfm ?? duct.airflow,
+          location: duct.location,
+          sourceSheet: chunk.sheetNumber || undefined,
+        });
+      }
+    }
+
+    // Aggregate pipe sizing data
+    if (sd.pipeSizing?.length > 0) {
+      for (const pipe of sd.pipeSizing) {
+        if (!pipe.size) continue;
+        result.pipeSizing.push({
+          pipeId: pipe.pipeId || pipe.id || `pipe-${result.pipeSizing.length}`,
+          size: pipe.size,
+          material: pipe.material || 'unknown',
+          system: pipe.system,
+          location: pipe.location,
+          sourceSheet: chunk.sheetNumber || undefined,
+        });
+      }
+    }
   }
 
   // Store aggregation on document
@@ -145,6 +197,8 @@ export async function aggregateSpatialData(documentId: string): Promise<SpatialA
     documentId,
     roomCount: Object.keys(result.roomDimensions).length,
     levelCount: Object.keys(result.levels).length,
+    ductCount: result.ductSizing.length,
+    pipeCount: result.pipeSizing.length,
   });
 
   return result;

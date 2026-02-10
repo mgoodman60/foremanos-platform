@@ -38,11 +38,27 @@ export function IntelligenceChecklist({
 
   const handleReanalyze = async () => {
     setReprocessing(true);
-    setToastMessage('Re-processing queued');
-    setTimeout(() => {
-      setReprocessing(false);
-      setToastMessage('');
-    }, 3000);
+    setToastMessage('');
+    try {
+      const res = await fetch(`/api/projects/${projectSlug}/rescan`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setToastMessage(data.message || 'Documents queued for re-analysis.');
+      } else if (res.status === 429) {
+        setToastMessage(data.error || 'Please wait before re-analyzing.');
+      } else {
+        setToastMessage(data.error || 'Failed to queue re-analysis.');
+      }
+    } catch {
+      setToastMessage('Failed to queue re-analysis. Please try again.');
+    } finally {
+      setTimeout(() => {
+        setReprocessing(false);
+        setToastMessage('');
+      }, 5000);
+    }
   };
 
   const getStatusIcon = (status: IntelligenceChecklistItem['status']) => {
