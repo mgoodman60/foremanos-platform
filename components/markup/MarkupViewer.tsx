@@ -1,0 +1,282 @@
+'use client';
+
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Undo, Redo } from 'lucide-react';
+import type { MarkupRecord, MarkupStyle } from '@/lib/markup/markup-types';
+import { MarkupToolbar } from './tools/MarkupToolbar';
+import { ColorStrokePanel } from './tools/ColorStrokePanel';
+
+interface MarkupViewerProps {
+  documentId: string;
+  projectId: string;
+  pageNumber: number;
+  totalPages: number;
+  pageHeight: number;
+  onPageChange: (page: number) => void;
+}
+
+export function MarkupViewer({
+  documentId,
+  projectId,
+  pageNumber,
+  totalPages,
+  pageHeight,
+  onPageChange,
+}: MarkupViewerProps) {
+  const [activeTool, setActiveTool] = useState('select');
+  const [scale, setScale] = useState(1);
+  const [markups, setMarkups] = useState<MarkupRecord[]>([]);
+  const [selectedMarkupId, setSelectedMarkupId] = useState<string | null>(null);
+  const [currentStyle, setCurrentStyle] = useState<MarkupStyle>({
+    color: '#FF0000',
+    strokeWidth: 2,
+    opacity: 1,
+    lineStyle: 'solid',
+  });
+  const [history, setHistory] = useState<MarkupRecord[][]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Dynamic imports for heavy components
+  const [KonvaStage, setKonvaStage] = useState<any>(null);
+  const [PDFRenderer, setPDFRenderer] = useState<any>(null);
+
+  useEffect(() => {
+    // Dynamic import for Konva overlay
+    import('./KonvaOverlayStage').then((mod) => setKonvaStage(() => mod.KonvaOverlayStage));
+    // Dynamic import for PDF renderer
+    import('./PDFPageRenderer').then((mod) => setPDFRenderer(() => mod.PDFPageRenderer));
+  }, []);
+
+  // Load markups for current page
+  useEffect(() => {
+    const loadMarkups = async () => {
+      try {
+        const response = await fetch(
+          `/api/documents/${documentId}/markups?pageNumber=${pageNumber}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setMarkups(data.markups || []);
+        }
+      } catch (error) {
+        console.error('Failed to load markups:', error);
+      }
+    };
+
+    loadMarkups();
+  }, [documentId, pageNumber]);
+
+  // Zoom handlers
+  const handleZoomIn = useCallback(() => {
+    setScale((prev) => Math.min(prev + 0.25, 4));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setScale((prev) => Math.max(prev - 0.25, 0.25));
+  }, []);
+
+  const handleZoomReset = useCallback(() => {
+    setScale(1);
+  }, []);
+
+  // Page navigation
+  const handlePrevPage = useCallback(() => {
+    if (pageNumber > 1) {
+      onPageChange(pageNumber - 1);
+    }
+  }, [pageNumber, onPageChange]);
+
+  const handleNextPage = useCallback(() => {
+    if (pageNumber < totalPages) {
+      onPageChange(pageNumber + 1);
+    }
+  }, [pageNumber, totalPages, onPageChange]);
+
+  // History management
+  const saveToHistory = useCallback((newMarkups: MarkupRecord[]) => {
+    setHistory((prev) => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push(newMarkups);
+      return newHistory;
+    });
+    setHistoryIndex((prev) => prev + 1);
+  }, [historyIndex]);
+
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      setHistoryIndex((prev) => prev - 1);
+      setMarkups(history[historyIndex - 1]);
+    }
+  }, [historyIndex, history]);
+
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex((prev) => prev + 1);
+      setMarkups(history[historyIndex + 1]);
+    }
+  }, [historyIndex, history]);
+
+  // Tool change handler
+  const handleToolChange = useCallback((toolId: string) => {
+    setActiveTool(toolId);
+    setSelectedMarkupId(null);
+  }, []);
+
+  // Style change handler
+  const handleStyleChange = useCallback((updates: Partial<MarkupStyle>) => {
+    setCurrentStyle((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  // Markup selection handler
+  const handleMarkupSelect = useCallback((id: string) => {
+    setSelectedMarkupId(id);
+    setActiveTool('select');
+  }, []);
+
+  // Ctrl+scroll zoom
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+          handleZoomIn();
+        } else {
+          handleZoomOut();
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false });
+      return () => container.removeEventListener('wheel', handleWheel);
+    }
+  }, [handleZoomIn, handleZoomOut]);
+
+  // Determine which style panel options to show
+  const showArrowheads = activeTool === 'arrow';
+  const showFill = ['rectangle', 'ellipse', 'polygon', 'cloud'].includes(activeTool);
+  const showFont = activeTool === 'text';
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Top toolbar */}
+      <div className="h-14 bg-white border-b border-gray-300 flex items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleZoomOut}
+            className="p-2 rounded hover:bg-gray-100"
+            title="Zoom Out"
+            aria-label="Zoom Out"
+          >
+            <ZoomOut size={20} />
+          </button>
+          <span className="text-sm font-medium min-w-[60px] text-center">
+            {Math.round(scale * 100)}%
+          </span>
+          <button
+            onClick={handleZoomIn}
+            className="p-2 rounded hover:bg-gray-100"
+            title="Zoom In"
+            aria-label="Zoom In"
+          >
+            <ZoomIn size={20} />
+          </button>
+          <button
+            onClick={handleZoomReset}
+            className="p-2 rounded hover:bg-gray-100"
+            title="Reset Zoom"
+            aria-label="Reset Zoom"
+          >
+            <RotateCcw size={20} />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrevPage}
+            disabled={pageNumber === 1}
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Previous Page"
+            aria-label="Previous Page"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <span className="text-sm font-medium min-w-[80px] text-center">
+            {pageNumber} / {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={pageNumber === totalPages}
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Next Page"
+            aria-label="Next Page"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleUndo}
+            disabled={historyIndex <= 0}
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Undo"
+            aria-label="Undo"
+          >
+            <Undo size={20} />
+          </button>
+          <button
+            onClick={handleRedo}
+            disabled={historyIndex >= history.length - 1}
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Redo"
+            aria-label="Redo"
+          >
+            <Redo size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left sidebar - Tools */}
+        <MarkupToolbar activeTool={activeTool} onToolChange={handleToolChange} />
+
+        {/* Center - PDF + Konva overlay */}
+        <div ref={containerRef} className="flex-1 overflow-auto bg-gray-200 relative">
+          <div className="inline-block min-w-full min-h-full p-8">
+            {PDFRenderer && (
+              <PDFRenderer documentId={documentId} pageNumber={pageNumber} scale={scale} />
+            )}
+            {KonvaStage && (
+              <KonvaStage
+                markups={markups}
+                selectedMarkupId={selectedMarkupId}
+                onMarkupSelect={handleMarkupSelect}
+                pageHeight={pageHeight}
+                scale={scale}
+                activeTool={activeTool}
+                currentStyle={currentStyle}
+                onMarkupsChange={(newMarkups: MarkupRecord[]) => {
+                  setMarkups(newMarkups);
+                  saveToHistory(newMarkups);
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Right sidebar - Style panel */}
+        <ColorStrokePanel
+          style={currentStyle}
+          onStyleChange={handleStyleChange}
+          showArrowheads={showArrowheads}
+          showFill={showFill}
+          showFont={showFont}
+        />
+      </div>
+    </div>
+  );
+}
