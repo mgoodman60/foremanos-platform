@@ -5,7 +5,6 @@ import { Send, MessageSquare, User, Trash2, Copy, Check, RefreshCw, HelpCircle, 
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import imageCompression from 'browser-image-compression';
 import { MessageContent } from './message-content';
 import { ConversationSidebar } from './conversation-sidebar';
 import { WorkflowModal } from './workflow-modal';
@@ -283,6 +282,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       let processedFile = file;
       if (file.size > 500 * 1024) {
         try {
+          const imageCompression = (await import('browser-image-compression')).default;
           processedFile = await imageCompression(file, options);
         } catch (compressionError) {
           console.warn('Compression failed, using original file:', compressionError);

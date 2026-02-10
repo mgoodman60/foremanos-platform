@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Camera, Upload, X, FlipHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
-import imageCompression from 'browser-image-compression';
 
 interface MobilePhotoCaptureProps {
   open: boolean;
@@ -123,6 +122,7 @@ export function MobilePhotoCapture({
         useWebWorker: true,
       };
       
+      const imageCompression = (await import('browser-image-compression')).default;
       const compressedBlob = await imageCompression(blob as File, options);
       
       // Create file

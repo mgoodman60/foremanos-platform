@@ -133,6 +133,20 @@ export async function GET(
         drawingScheduleTables: metadata?.drawingScheduleTables || null,
         constructionIntel: metadata?.constructionIntel || null,
         symbolData: metadata?.symbolData || null,
+        lineTypeAnalysis: metadata?.lineTypeAnalysis || null,
+        hvacData: metadata?.hvacData || null,
+        fireProtection: metadata?.fireProtection || null,
+        siteAndConcrete: metadata?.siteAndConcrete || null,
+        references: metadata?.references || null,
+        enhancedScaleData: metadata?.enhancedScaleData || null,
+        specialDrawingData: metadata?.specialDrawingData || null,
+        finishColors: metadata?.finishColors || null,
+        keynotes: metadata?.keynotes || null,
+        scheduleData: metadata?.scheduleData || null,
+        csiReferences: metadata?.csiReferences || null,
+        ductSizing: metadata?.ductSizing || null,
+        pipeSizing: metadata?.pipeSizing || null,
+        noteClauses: metadata?.noteClauses || null,
       };
     });
 

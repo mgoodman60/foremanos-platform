@@ -9,6 +9,15 @@ import MaterialsPanel from './MaterialsPanel';
 import ScheduleTableView from './ScheduleTableView';
 import SpatialDataPanel from './SpatialDataPanel';
 import ConfidenceIndicator from './ConfidenceIndicator';
+import MEPDetailPanel from './MEPDetailPanel';
+import SiteWorkPanel from './SiteWorkPanel';
+import LineTypePanel from './LineTypePanel';
+import FinishColorsPanel from './FinishColorsPanel';
+import SpecReferencesPanel from './SpecReferencesPanel';
+import EnhancedScalePanel from './EnhancedScalePanel';
+import SpecialDrawingPanel from './SpecialDrawingPanel';
+import EnhancedSchedulePanel from './EnhancedSchedulePanel';
+import SymbolDetailPanel from './SymbolDetailPanel';
 import { getDrawingTypeLabel, getDisciplineColor } from '@/lib/discipline-colors';
 
 interface Props {
@@ -139,6 +148,42 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
                 </ul>
               </div>
             )}
+            {sheet.constructionIntel.coordinationPoints?.length > 0 && (
+              <div>
+                <span className="font-medium">Coordination Points:</span>
+                <ul className="ml-4 mt-1 space-y-1">
+                  {sheet.constructionIntel.coordinationPoints.map((p: any, i: number) => (
+                    <li key={i}>{typeof p === 'string' ? p : `${p.trade || ''} - ${p.description || p.location || ''}`}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {sheet.constructionIntel.clearanceZones?.length > 0 && (
+              <div>
+                <span className="font-medium">Clearance Zones:</span>
+                <ul className="ml-4 mt-1 space-y-1">
+                  {sheet.constructionIntel.clearanceZones.map((z: any, i: number) => (
+                    <li key={i}>{typeof z === 'string' ? z : `${z.type || ''} - ${z.dimension || ''} at ${z.location || ''}`}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {sheet.constructionIntel.phasing && (
+              <div>
+                <span className="font-medium">Phasing:</span>
+                <div className="ml-4 mt-1 space-y-1">
+                  {sheet.constructionIntel.phasing.demo?.length > 0 && (
+                    <div className="text-red-600">Demo: {sheet.constructionIntel.phasing.demo.join(', ')}</div>
+                  )}
+                  {sheet.constructionIntel.phasing.new?.length > 0 && (
+                    <div className="text-green-600">New: {sheet.constructionIntel.phasing.new.join(', ')}</div>
+                  )}
+                  {sheet.constructionIntel.phasing.existing?.length > 0 && (
+                    <div className="text-gray-600">Existing: {sheet.constructionIntel.phasing.existing.join(', ')}</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </Section>
       )}
@@ -202,6 +247,83 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
               </div>
             )}
           </div>
+        </Section>
+      )}
+
+      {/* Line Type Analysis */}
+      {sheet.lineTypeAnalysis && (
+        <Section title="Line Type Analysis">
+          <LineTypePanel data={sheet.lineTypeAnalysis} />
+        </Section>
+      )}
+
+      {/* MEP Systems */}
+      {(sheet.hvacData || sheet.fireProtection || sheet.ductSizing || sheet.pipeSizing) && (
+        <Section title="MEP Systems" count={
+          (sheet.hvacData?.ductwork?.length || 0) +
+          (sheet.hvacData?.equipment?.length || 0) +
+          (sheet.fireProtection?.sprinklerHeads?.length || 0)
+        }>
+          <MEPDetailPanel
+            hvacData={sheet.hvacData}
+            fireProtection={sheet.fireProtection}
+            ductSizing={sheet.ductSizing}
+            pipeSizing={sheet.pipeSizing}
+          />
+        </Section>
+      )}
+
+      {/* Site Work & Concrete */}
+      {sheet.siteAndConcrete && (
+        <Section title="Site Work & Concrete">
+          <SiteWorkPanel data={sheet.siteAndConcrete} />
+        </Section>
+      )}
+
+      {/* Finish Colors */}
+      {sheet.finishColors?.length > 0 && (
+        <Section title="Finish Colors" count={sheet.finishColors.length}>
+          <FinishColorsPanel data={sheet.finishColors} />
+        </Section>
+      )}
+
+      {/* Spec & Code References */}
+      {(sheet.references || sheet.csiReferences || sheet.keynotes || sheet.noteClauses) && (
+        <Section title="Specifications & References">
+          <SpecReferencesPanel
+            references={sheet.references}
+            csiReferences={sheet.csiReferences}
+            keynotes={sheet.keynotes}
+            noteClauses={sheet.noteClauses}
+          />
+        </Section>
+      )}
+
+      {/* Enhanced Scale Data */}
+      {sheet.enhancedScaleData && (
+        <Section title="Scale Details">
+          <EnhancedScalePanel data={sheet.enhancedScaleData} />
+        </Section>
+      )}
+
+      {/* Special Drawing Data */}
+      {sheet.specialDrawingData && (
+        <Section title="Special Drawing Info">
+          <SpecialDrawingPanel data={sheet.specialDrawingData} />
+        </Section>
+      )}
+
+      {/* Enhanced Schedules */}
+      {sheet.scheduleData && (
+        <Section title="Additional Schedules">
+          <EnhancedSchedulePanel data={sheet.scheduleData} />
+        </Section>
+      )}
+
+      {/* Drawing Symbols */}
+      {sheet.symbolData && (
+        <Section title="Drawing Symbols">
+          <SymbolDetailPanel data={sheet.symbolData} />
         </Section>
       )}
     </div>

@@ -47,6 +47,20 @@ export async function GET(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
+    // Summary mode: return only counts of document-backed takeoffs (excludes orphans)
+    const { searchParams } = new URL(request.url);
+    const summary = searchParams.get('summary');
+    if (summary === 'true') {
+      const documentBackedWhere = { projectId: project.id, documentId: { not: null } };
+      const [total, totalLineItems] = await Promise.all([
+        prisma.materialTakeoff.count({ where: documentBackedWhere }),
+        prisma.takeoffLineItem.count({
+          where: { MaterialTakeoff: { projectId: project.id, documentId: { not: null } } }
+        })
+      ]);
+      return NextResponse.json({ total, totalLineItems });
+    }
+
     // Get all material takeoffs for the project
     const takeoffs = await prisma.materialTakeoff.findMany({
       where: { projectId: project.id },

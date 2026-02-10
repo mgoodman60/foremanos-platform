@@ -73,6 +73,15 @@ export async function GET(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
+    // Summary mode: return only count of document-backed rooms (excludes orphans)
+    const isSummaryMode = searchParams.get('summary');
+    if (isSummaryMode === 'true') {
+      const total = await prisma.room.count({
+        where: { projectId: project.id, sourceDocumentId: { not: null } }
+      });
+      return NextResponse.json({ total });
+    }
+
     // Build where clause
     const where: any = { projectId: project.id };
     if (type) where.type = type;

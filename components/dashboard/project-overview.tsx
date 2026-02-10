@@ -27,6 +27,7 @@ import { ExpandedScheduleWidget } from './expanded-schedule-widget';
 import { useRouter } from 'next/navigation';
 import { useProject } from '@/components/layout/project-context';
 import { useDocumentUpload } from '@/hooks/use-document-upload';
+import { DocumentCategoryModal } from '@/components/document-category-modal';
 
 interface ProjectOverviewProps {
   projectSlug: string;
@@ -116,7 +117,7 @@ function BudgetSparkline({ percentSpent }: { percentSpent: number }) {
 export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps) {
   const router = useRouter();
   const { session } = useProject();
-  const { triggerUpload, fileInputRef, handleFileUpload, showCategoryModal } = useDocumentUpload();
+  const { triggerUpload, fileInputRef, handleFileUpload, showCategoryModal, pendingFile, handleCategoryConfirm, handleCategoryCancel } = useDocumentUpload();
 
   // Density toggle
   const [density, setDensity] = useState<'compact' | 'expanded'>(() => {
@@ -356,6 +357,17 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
         className="hidden"
         onChange={handleFileUpload}
       />
+
+      {/* Document Category Selection Modal */}
+      {pendingFile && (
+        <DocumentCategoryModal
+          isOpen={showCategoryModal}
+          fileName={pendingFile.name}
+          fileType={pendingFile.name.split('.').pop() || 'pdf'}
+          onConfirm={handleCategoryConfirm}
+          onCancel={handleCategoryCancel}
+        />
+      )}
 
       {/* Toolbar: Rescan + Density toggle */}
       <div className="flex items-center justify-end gap-3">

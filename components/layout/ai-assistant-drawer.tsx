@@ -3,7 +3,8 @@
 import { useEffect, useCallback, useState } from 'react';
 import { X, MessageSquare } from 'lucide-react';
 import { useProject } from './project-context';
-import { ChatInterface } from '@/components/chat-interface';
+import dynamic from 'next/dynamic';
+const ChatInterface = dynamic(() => import('@/components/chat-interface').then(mod => ({ default: mod.ChatInterface })), { ssr: false });
 
 export function AIAssistantDrawer() {
   const {
