@@ -334,12 +334,11 @@ async function processWithVision(
       // Start processing immediately (cron remains as safety net)
       try {
         const { processQueuedDocument } = await import('./document-processing-queue');
-        // Fire-and-forget — don't await, let it run in background
-        processQueuedDocument(documentId).catch((err) => {
-          logger.warn('DOCUMENT_PROCESSOR', 'Immediate queue processing failed, cron will retry', { documentId, error: err?.message });
-        });
-      } catch (importErr) {
-        logger.warn('DOCUMENT_PROCESSOR', 'Failed to import processing queue for immediate start', { documentId });
+        // Await processing — keeps function alive via waitUntil() chain
+        // processQueuedDocument has its own 270s internal timeout and saves progress incrementally
+        await processQueuedDocument(documentId);
+      } catch (err: any) {
+        logger.warn('DOCUMENT_PROCESSOR', 'Immediate queue processing failed, cron will retry', { documentId, error: err?.message });
       }
 
       logger.info('PROCESS', `Document ${documentId} queued and immediate processing triggered`, { pages, batches: Math.ceil(pages / 5) });

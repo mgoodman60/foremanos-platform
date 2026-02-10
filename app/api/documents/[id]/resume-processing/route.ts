@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resumeFailedProcessing } from '@/lib/document-processing-queue';
 import { prisma } from '@/lib/db';
+import { ProcessingQueueStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,15 +30,42 @@ export async function POST(
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    // Resume processing
+    // Reset ProcessingQueue entries stuck in 'processing' status back to 'queued'
+    const stuckReset = await prisma.processingQueue.updateMany({
+      where: {
+        documentId,
+        status: ProcessingQueueStatus.processing,
+      },
+      data: {
+        status: ProcessingQueueStatus.queued,
+        updatedAt: new Date(),
+      },
+    });
+
+    if (stuckReset.count > 0) {
+      logger.info('RESUME_PROCESSING', `Reset ${stuckReset.count} stuck processing entries`, { documentId });
+    }
+
+    // Resume failed processing (resets failed entries to queued)
     await resumeFailedProcessing(documentId);
+
+    // Reset document-level queue status and clear error
+    await prisma.document.update({
+      where: { id: documentId },
+      data: {
+        queueStatus: 'queued',
+        lastProcessingError: null,
+      },
+    });
+
+    logger.info('RESUME_PROCESSING', `Processing resumed for ${document.name}`, { documentId });
 
     return NextResponse.json({
       success: true,
       message: `Processing resumed for ${document.name}`,
     });
   } catch (error: any) {
-    console.error('[RESUME PROCESSING] Error:', error);
+    logger.error('RESUME_PROCESSING', 'Failed to resume processing', error);
     return NextResponse.json(
       { error: 'Failed to resume processing' },
       { status: 500 }

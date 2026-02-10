@@ -264,7 +264,7 @@ async function runWithConcurrency<T>(
  */
 async function resetStaleBatches(
   documentId: string,
-  staleBatchTimeoutMs: number = 5 * 60 * 1000
+  staleBatchTimeoutMs: number = 15 * 60 * 1000
 ): Promise<number> {
   const staleThreshold = new Date(Date.now() - staleBatchTimeoutMs);
 
@@ -440,7 +440,7 @@ export async function processQueuedDocument(
   documentId: string,
   maxDurationMs: number = 270000,
   maxConcurrency: number = 5,
-  staleBatchTimeoutMs: number = 5 * 60 * 1000
+  staleBatchTimeoutMs: number = 15 * 60 * 1000
 ): Promise<void> {
   const startTime = Date.now();
   logger.info('PROCESS_QUEUE', `Starting concurrent processing for document ${documentId}`, { maxConcurrency, staleBatchTimeoutMs });

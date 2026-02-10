@@ -716,13 +716,13 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     try {
       // Fetch the signed URL from the API
       const response = await fetch(`/api/documents/${doc.id}?download=true`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to generate download URL');
       }
 
       const data = await response.json();
-      
+
       // If the response contains a URL, use it for download
       if (data.url) {
         const link = document.createElement('a');
@@ -737,6 +737,21 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     } catch (error) {
       console.error('Download error:', error);
       toast.error('Failed to download document');
+    }
+  };
+
+  const handleForceResume = async (documentId: string, documentName: string) => {
+    try {
+      const res = await fetch(`/api/documents/${documentId}/resume-processing`, { method: 'POST' });
+      if (res.ok) {
+        toast.success(`Resuming processing for ${documentName}`);
+        setTimeout(() => fetchDocuments(), 2000);
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to resume processing');
+      }
+    } catch {
+      toast.error('Failed to resume processing');
     }
   };
 
@@ -1627,6 +1642,17 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                   )}
                                 </div>
                               )}
+                              {/* Force Resume button - mobile */}
+                              {(stalled || isFailed) && (
+                                <button
+                                  type="button"
+                                  className="mt-2 flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg w-full justify-center min-h-[44px]"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleForceResume(doc.id, doc.name); }}
+                                >
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                  Force Resume
+                                </button>
+                              )}
                             </div>
                           );
                         })()}
@@ -1664,343 +1690,358 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
                   {/* Desktop Full View (>= 1024px) */}
                   <div className="hidden lg:block">
-                    <div className="flex items-center justify-between gap-4">
-                      {/* Document Thumbnail & Info */}
-                      <div className="flex items-start gap-4 flex-1 min-w-0">
-                        {/* Checkbox - Admin/Owner Only */}
-                        {canDeleteDocuments && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleDocSelection(doc.id);
-                            }}
-                            className="flex-shrink-0 p-2 hover:bg-dark-surface rounded transition-colors mt-1"
-                            aria-label={`Select ${doc.name}`}
-                          >
-                            {selectedDocs.has(doc.id) ? (
-                              <CheckSquare className="w-6 h-6 text-orange-500" />
-                            ) : (
-                              <Square className="w-6 h-6 text-gray-500" />
-                            )}
-                          </button>
-                        )}
-                        
-                        {/* Large Thumbnail */}
-                        <div className="flex-shrink-0">
-                          <div className="w-20 h-20 rounded-xl flex items-center justify-center border-2 border-gray-600 bg-dark-surface transition-transform hover:scale-105">
-                            {getDocumentIcon(doc.fileType)}
-                          </div>
-                        </div>
-                        {/* Document Details */}
-                        <div className="flex-1 min-w-0 py-1">
-                          <div className="flex items-start gap-2 mb-2">
-                            <h3 className="font-bold text-slate-50 truncate text-lg flex-1">
-                              {projectSlug ? (
-                                <Link href={`/project/${projectSlug}/documents/${doc.id}`} className="hover:text-orange-400 transition-colors">
-                                  {doc.name}
-                                </Link>
-                              ) : doc.name}
-                            </h3>
-                            {isRecentlyUpdated(doc.updatedAt) && (
-                              <span className="px-2 py-1 bg-green-900/30 text-green-400 border border-green-700 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                                Recently Updated
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
-                            <span className="px-3 py-1 bg-dark-surface border border-gray-600 rounded-full text-xs font-bold uppercase">
-                              {doc.fileType}
-                            </span>
-                            <span className="text-gray-600">•</span>
-                            <span className="font-medium">{formatFileSize(doc.fileSize)}</span>
-                            <span className="text-gray-600">•</span>
-                            <span className="text-xs font-medium" title={`Last modified: ${new Date(doc.updatedAt).toLocaleString()}`}>
-                              Modified {formatRelativeTime(doc.updatedAt)}
-                            </span>
-                          </div>
-                          
-                          {/* Category Badge */}
-                          <div className="mt-2">
-                            {getCategoryBadge(doc.category)}
-                          </div>
-                          <DocumentIntelligenceBadges intelligence={doc.intelligence ?? null} />
+                    <div className="space-y-0">
+                      {/* Row 1: Document info + action buttons */}
+                      <div className="flex items-center justify-between gap-4">
+                        {/* Document Thumbnail & Info */}
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          {/* Checkbox - Admin/Owner Only */}
+                          {canDeleteDocuments && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleDocSelection(doc.id);
+                              }}
+                              className="flex-shrink-0 p-2 hover:bg-dark-surface rounded transition-colors mt-1"
+                              aria-label={`Select ${doc.name}`}
+                            >
+                              {selectedDocs.has(doc.id) ? (
+                                <CheckSquare className="w-6 h-6 text-orange-500" />
+                              ) : (
+                                <Square className="w-6 h-6 text-gray-500" />
+                              )}
+                            </button>
+                          )}
 
-                          {/* Inline Processing Progress - Desktop Stepper */}
-                          {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
-                            const progress = progressMap[doc.id];
-                            const percent = progress?.percentComplete ?? 0;
-                            const phase = progress?.currentPhase || doc.queueStatus || 'queued';
-                            const stalled = isStalled(progress, lastPollTimes[doc.id]);
-                            const eta = progress?.estimatedTimeRemaining ?? 0;
-                            const isFailed = phase === 'failed';
-                            const activeIdx = getActiveStageIndex(phase);
-                            const explanation = getPhaseExplanation(phase, doc.category, progress);
-                            return (
-                              <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg space-y-3">
-                                {/* Category badge during processing */}
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    {getCategoryBadge(doc.category)}
-                                    {stalled && (
-                                      <span className="text-xs text-yellow-500 font-medium">May be paused</span>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    {percent > 0 && <span className="font-medium text-gray-400">{percent}%</span>}
-                                    {eta > 0 && phase !== 'queued' && !isFailed && (
-                                      <span>{formatETA(eta)}</span>
-                                    )}
+                          {/* Large Thumbnail */}
+                          <div className="flex-shrink-0">
+                            <div className="w-20 h-20 rounded-xl flex items-center justify-center border-2 border-gray-600 bg-dark-surface transition-transform hover:scale-105">
+                              {getDocumentIcon(doc.fileType)}
+                            </div>
+                          </div>
+                          {/* Document Details */}
+                          <div className="flex-1 min-w-0 py-1">
+                            <div className="flex items-start gap-2 mb-2">
+                              <h3 className="font-bold text-slate-50 truncate text-lg flex-1">
+                                {projectSlug ? (
+                                  <Link href={`/project/${projectSlug}/documents/${doc.id}`} className="hover:text-orange-400 transition-colors">
+                                    {doc.name}
+                                  </Link>
+                                ) : doc.name}
+                              </h3>
+                              {isRecentlyUpdated(doc.updatedAt) && (
+                                <span className="px-2 py-1 bg-green-900/30 text-green-400 border border-green-700 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                  Recently Updated
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
+                              <span className="px-3 py-1 bg-dark-surface border border-gray-600 rounded-full text-xs font-bold uppercase">
+                                {doc.fileType}
+                              </span>
+                              <span className="text-gray-600">•</span>
+                              <span className="font-medium">{formatFileSize(doc.fileSize)}</span>
+                              <span className="text-gray-600">•</span>
+                              <span className="text-xs font-medium" title={`Last modified: ${new Date(doc.updatedAt).toLocaleString()}`}>
+                                Modified {formatRelativeTime(doc.updatedAt)}
+                              </span>
+                            </div>
+
+                            {/* Category Badge */}
+                            <div className="mt-2">
+                              {getCategoryBadge(doc.category)}
+                            </div>
+                            <DocumentIntelligenceBadges intelligence={doc.intelligence ?? null} />
+
+                            {/* Visibility Controls - Desktop Only */}
+                            {canChangeVisibility && (
+                              <div className="mt-3 pt-3 border-t border-gray-700">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="text-xs font-semibold text-gray-400">Visibility:</span>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleAccessLevelChange(doc, 'admin')}
+                                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                        doc.accessLevel === 'admin'
+                                          ? 'bg-purple-600 text-white shadow-md'
+                                          : 'bg-purple-900/30 text-purple-400 border border-purple-700 hover:bg-purple-900/50'
+                                      }`}
+                                      title={getAccessLevelDescription('admin')}
+                                    >
+                                      <Lock className="w-3 h-3" />
+                                      Admin Only
+                                    </button>
+                                    <button
+                                      onClick={() => handleAccessLevelChange(doc, 'client')}
+                                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                        doc.accessLevel === 'client'
+                                          ? 'bg-blue-600 text-white shadow-md'
+                                          : 'bg-blue-900/30 text-blue-400 border border-blue-700 hover:bg-blue-900/50'
+                                      }`}
+                                      title={getAccessLevelDescription('client')}
+                                    >
+                                      <Eye className="w-3 h-3" />
+                                      Client Access
+                                    </button>
+                                    <button
+                                      onClick={() => handleAccessLevelChange(doc, 'guest')}
+                                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                        doc.accessLevel === 'guest'
+                                          ? 'bg-green-600 text-white shadow-md'
+                                          : 'bg-green-900/30 text-green-400 border border-green-700 hover:bg-green-900/50'
+                                      }`}
+                                      title={getAccessLevelDescription('guest')}
+                                    >
+                                      <Globe className="w-3 h-3" />
+                                      Guest Access
+                                    </button>
                                   </div>
                                 </div>
+                                <p className="text-xs text-gray-500 mt-1.5">
+                                  {getAccessLevelDescription(doc.accessLevel)}
+                                </p>
+                              </div>
+                            )}
 
-                                {/* Stage stepper */}
-                                <div className="flex items-center gap-1" role="list" aria-label="Processing stages">
-                                  {PROCESSING_STAGES.map((stage, idx) => {
-                                    const isActive = idx === activeIdx;
-                                    const isDone = idx < activeIdx;
-                                    const detail = isActive ? getStageDetail(stage.key, progress, doc.category) : null;
-                                    return (
-                                      <div key={stage.key} className="flex items-center flex-1 min-w-0" role="listitem">
-                                        <div className={`flex items-center gap-1.5 min-w-0 ${isActive ? 'flex-1' : ''}`}>
-                                          <div className="flex-shrink-0">
-                                            {getStageIcon(idx, activeIdx, isFailed)}
-                                          </div>
-                                          {isActive ? (
-                                            <div className="min-w-0 flex-1">
-                                              <span className="text-xs font-semibold text-slate-50 truncate block">
-                                                {stage.label}
-                                              </span>
-                                              {detail && (
-                                                <span className="text-[10px] text-gray-400 truncate block">{detail}</span>
-                                              )}
-                                            </div>
-                                          ) : (
-                                            <span className={`text-[10px] truncate hidden xl:inline ${isDone ? 'text-gray-400' : 'text-gray-600'}`}>
-                                              {stage.label}
-                                            </span>
+                            {/* Show badge only for non-admin/non-client users */}
+                            {!canChangeVisibility && (
+                              <div className="mt-2">
+                                {getAccessLevelBadge(doc.accessLevel)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons - Desktop Only */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 px-4 py-2 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-orange-500 rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
+                            aria-label={`Preview ${doc.name}`}
+                            title="Preview document"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openPreviewModal(doc);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>Preview</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
+                            aria-label={`Download ${doc.name}`}
+                            title="Download document"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDownload(doc);
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                            <span>Download</span>
+                          </button>
+
+                          {canDeleteDocuments && (
+                            <>
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
+                                aria-label={`Rename ${doc.name}`}
+                                title="Rename document"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  openRenameModal(doc);
+                                }}
+                              >
+                                <Pencil className="w-4 h-4" />
+                                <span>Rename</span>
+                              </button>
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
+                                aria-label={`Delete ${doc.name}`}
+                                title="Delete document"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleDelete(doc);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span>Delete</span>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Row 2: Full-width processing status panel (ONLY when processing) */}
+                      {doc.queueStatus && doc.queueStatus !== 'none' && doc.queueStatus !== 'completed' && !doc.processed && (() => {
+                        const progress = progressMap[doc.id];
+                        const percent = progress?.percentComplete ?? 0;
+                        const phase = progress?.currentPhase || doc.queueStatus || 'queued';
+                        const stalled = isStalled(progress, lastPollTimes[doc.id]);
+                        const eta = progress?.estimatedTimeRemaining ?? 0;
+                        const isFailed = phase === 'failed';
+                        const activeIdx = getActiveStageIndex(phase);
+                        const explanation = getPhaseExplanation(phase, doc.category, progress);
+                        return (
+                          <div className="mt-3 p-4 bg-gray-800/50 border border-gray-700 rounded-lg space-y-3">
+                            {/* Category badge during processing */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {getCategoryBadge(doc.category)}
+                                {stalled && (
+                                  <span className="text-xs text-yellow-500 font-medium">May be paused</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                {percent > 0 && <span className="font-medium text-gray-400">{percent}%</span>}
+                                {eta > 0 && phase !== 'queued' && !isFailed && (
+                                  <span>{formatETA(eta)}</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Stage stepper */}
+                            <div className="flex items-center gap-2" role="list" aria-label="Processing stages">
+                              {PROCESSING_STAGES.map((stage, idx) => {
+                                const isActive = idx === activeIdx;
+                                const isDone = idx < activeIdx;
+                                const detail = isActive ? getStageDetail(stage.key, progress, doc.category) : null;
+                                return (
+                                  <div key={stage.key} className="flex items-center flex-1 min-w-0" role="listitem">
+                                    <div className={`flex items-center gap-1.5 min-w-0 ${isActive ? 'flex-1' : ''}`}>
+                                      <div className="flex-shrink-0">
+                                        {getStageIcon(idx, activeIdx, isFailed)}
+                                      </div>
+                                      {isActive ? (
+                                        <div className="min-w-0 flex-1">
+                                          <span className="text-xs font-semibold text-slate-50 truncate block">
+                                            {stage.label}
+                                          </span>
+                                          {detail && (
+                                            <span className="text-[10px] text-gray-400 truncate block">{detail}</span>
                                           )}
                                         </div>
-                                        {idx < PROCESSING_STAGES.length - 1 && (
-                                          <div className={`h-px flex-1 mx-1 min-w-[8px] ${isDone ? 'bg-green-700' : 'bg-gray-700'}`} />
-                                        )}
+                                      ) : (
+                                        <span className={`text-[10px] truncate ${isDone ? 'text-gray-400' : 'text-gray-600'}`}>
+                                          {stage.label}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {idx < PROCESSING_STAGES.length - 1 && (
+                                      <div className={`h-px flex-1 mx-1 min-w-[8px] ${isDone ? 'bg-green-700' : 'bg-gray-700'}`} />
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Explanation text */}
+                            {explanation && (
+                              <p className="text-xs text-gray-500">{explanation}</p>
+                            )}
+
+                            {/* Progress bar */}
+                            <div
+                              className="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden"
+                              role="progressbar"
+                              aria-valuenow={percent}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
+                              aria-label={`Document processing: ${percent}%`}
+                            >
+                              <div
+                                className={`h-2.5 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : isFailed ? 'bg-red-500' : phase === 'indexing' ? 'bg-green-500' : 'bg-orange-500'}`}
+                                style={{ width: `${Math.max(2, percent)}%` }}
+                              />
+                            </div>
+
+                            {/* Concurrent batch lanes */}
+                            {progress?.concurrency && progress.concurrency > 1 && progress.activeBatches && progress.activeBatches.length > 0 && progress.totalBatches && (
+                              <div className="space-y-1" aria-label={`${progress.concurrency} concurrent batch lanes`}>
+                                <div className="text-[10px] text-gray-500 font-medium">
+                                  Batch lanes ({progress.concurrency}x parallel)
+                                </div>
+                                <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(progress.concurrency, 4)}, 1fr)` }}>
+                                  {progress.activeBatches.map((batchIdx) => {
+                                    const isFail = progress.failedBatchRanges?.some(r => r.startsWith(`${batchIdx}:`));
+                                    const isComplete = batchIdx < (progress.currentBatch ?? 0);
+                                    return (
+                                      <div key={batchIdx} className="flex items-center gap-1">
+                                        <div className="flex-1 bg-gray-700 rounded h-2 overflow-hidden">
+                                          <div
+                                            className={`h-2 rounded transition-all duration-300 ${
+                                              isFail ? 'bg-red-500' :
+                                              isComplete ? 'bg-green-600' :
+                                              'bg-orange-500 animate-pulse'
+                                            }`}
+                                            style={{ width: isComplete ? '100%' : isFail ? '100%' : '60%' }}
+                                          />
+                                        </div>
+                                        <span className={`text-[9px] flex-shrink-0 ${
+                                          isFail ? 'text-red-400' : isComplete ? 'text-green-500' : 'text-gray-400'
+                                        }`}>
+                                          B{batchIdx + 1}
+                                        </span>
                                       </div>
                                     );
                                   })}
                                 </div>
-
-                                {/* Explanation text */}
-                                {explanation && (
-                                  <p className="text-xs text-gray-500">{explanation}</p>
+                                {progress.failedBatchRanges && progress.failedBatchRanges.length > 0 && (
+                                  <div className="text-[10px] text-red-400">
+                                    Failed: {progress.failedBatchRanges.join(', ')}
+                                  </div>
                                 )}
+                              </div>
+                            )}
 
-                                {/* Progress bar */}
-                                <div
-                                  className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden"
-                                  role="progressbar"
-                                  aria-valuenow={percent}
-                                  aria-valuemin={0}
-                                  aria-valuemax={100}
-                                  aria-label={`Document processing: ${percent}%`}
+                            {/* Timing row + Force Resume */}
+                            <div className="flex items-center justify-between">
+                              {phase !== 'queued' && !isFailed && (
+                                <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                  {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && (
+                                    <span>Elapsed: {formatElapsed(progress.elapsedSeconds)}</span>
+                                  )}
+                                  {progress?.secondsPerPage != null && progress.secondsPerPage > 0 && (
+                                    <>
+                                      <span className="text-gray-600">·</span>
+                                      <span>{(60 / progress.secondsPerPage).toFixed(1)} pages/min</span>
+                                    </>
+                                  )}
+                                  {progress?.lastActivityAt && (
+                                    <>
+                                      <span className="text-gray-600">·</span>
+                                      <span>Updated {formatLastUpdate(progress.lastActivityAt)}</span>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                              {(stalled || isFailed) && (
+                                <button
+                                  type="button"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-all ml-auto"
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleForceResume(doc.id, doc.name); }}
                                 >
-                                  <div
-                                    className={`h-1.5 rounded-full transition-all duration-500 ${stalled ? 'bg-yellow-500' : isFailed ? 'bg-red-500' : phase === 'indexing' ? 'bg-green-500' : 'bg-orange-500'}`}
-                                    style={{ width: `${Math.max(2, percent)}%` }}
-                                  />
-                                </div>
-
-                                {/* Concurrent batch lanes */}
-                                {progress?.concurrency && progress.concurrency > 1 && progress.activeBatches && progress.activeBatches.length > 0 && progress.totalBatches && (
-                                  <div className="space-y-1" aria-label={`${progress.concurrency} concurrent batch lanes`}>
-                                    <div className="text-[10px] text-gray-500 font-medium">
-                                      Batch lanes ({progress.concurrency}x parallel)
-                                    </div>
-                                    <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${Math.min(progress.concurrency, 4)}, 1fr)` }}>
-                                      {progress.activeBatches.map((batchIdx) => {
-                                        const isFail = progress.failedBatchRanges?.some(r => r.startsWith(`${batchIdx}:`));
-                                        const isComplete = batchIdx < (progress.currentBatch ?? 0);
-                                        return (
-                                          <div key={batchIdx} className="flex items-center gap-1">
-                                            <div className="flex-1 bg-gray-700 rounded h-1.5 overflow-hidden">
-                                              <div
-                                                className={`h-1.5 rounded transition-all duration-300 ${
-                                                  isFail ? 'bg-red-500' :
-                                                  isComplete ? 'bg-green-600' :
-                                                  'bg-orange-500 animate-pulse'
-                                                }`}
-                                                style={{ width: isComplete ? '100%' : isFail ? '100%' : '60%' }}
-                                              />
-                                            </div>
-                                            <span className={`text-[9px] flex-shrink-0 ${
-                                              isFail ? 'text-red-400' : isComplete ? 'text-green-500' : 'text-gray-400'
-                                            }`}>
-                                              B{batchIdx + 1}
-                                            </span>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                    {progress.failedBatchRanges && progress.failedBatchRanges.length > 0 && (
-                                      <div className="text-[10px] text-red-400">
-                                        Failed: {progress.failedBatchRanges.join(', ')}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                {/* Timing row */}
-                                {phase !== 'queued' && !isFailed && (
-                                  <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                                    {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && (
-                                      <span>Elapsed: {formatElapsed(progress.elapsedSeconds)}</span>
-                                    )}
-                                    {progress?.secondsPerPage != null && progress.secondsPerPage > 0 && (
-                                      <>
-                                        <span className="text-gray-600">·</span>
-                                        <span>{(60 / progress.secondsPerPage).toFixed(1)} pages/min</span>
-                                      </>
-                                    )}
-                                    {progress?.lastActivityAt && (
-                                      <>
-                                        <span className="text-gray-600">·</span>
-                                        <span>Updated {formatLastUpdate(progress.lastActivityAt)}</span>
-                                      </>
-                                    )}
-                                  </div>
-                                )}
-
-                                {/* Failed state */}
-                                {isFailed && progress?.error && (
-                                  <p className="text-xs text-red-400">{progress.error}</p>
-                                )}
-                              </div>
-                            );
-                          })()}
-
-                          {/* Visibility Controls - Desktop Only */}
-                          {canChangeVisibility && (
-                            <div className="mt-3 pt-3 border-t border-gray-700">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-semibold text-gray-400">Visibility:</span>
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => handleAccessLevelChange(doc, 'admin')}
-                                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                                      doc.accessLevel === 'admin'
-                                        ? 'bg-purple-600 text-white shadow-md'
-                                        : 'bg-purple-900/30 text-purple-400 border border-purple-700 hover:bg-purple-900/50'
-                                    }`}
-                                    title={getAccessLevelDescription('admin')}
-                                  >
-                                    <Lock className="w-3 h-3" />
-                                    Admin Only
-                                  </button>
-                                  <button
-                                    onClick={() => handleAccessLevelChange(doc, 'client')}
-                                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                                      doc.accessLevel === 'client'
-                                        ? 'bg-blue-600 text-white shadow-md'
-                                        : 'bg-blue-900/30 text-blue-400 border border-blue-700 hover:bg-blue-900/50'
-                                    }`}
-                                    title={getAccessLevelDescription('client')}
-                                  >
-                                    <Eye className="w-3 h-3" />
-                                    Client Access
-                                  </button>
-                                  <button
-                                    onClick={() => handleAccessLevelChange(doc, 'guest')}
-                                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                                      doc.accessLevel === 'guest'
-                                        ? 'bg-green-600 text-white shadow-md'
-                                        : 'bg-green-900/30 text-green-400 border border-green-700 hover:bg-green-900/50'
-                                    }`}
-                                    title={getAccessLevelDescription('guest')}
-                                  >
-                                    <Globe className="w-3 h-3" />
-                                    Guest Access
-                                  </button>
-                                </div>
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1.5">
-                                {getAccessLevelDescription(doc.accessLevel)}
-                              </p>
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                  Force Resume
+                                </button>
+                              )}
                             </div>
-                          )}
-                          
-                          {/* Show badge only for non-admin/non-client users */}
-                          {!canChangeVisibility && (
-                            <div className="mt-2">
-                              {getAccessLevelBadge(doc.accessLevel)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
 
-                      {/* Action Buttons - Desktop Only */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <button
-                          type="button"
-                          className="flex items-center gap-2 px-4 py-2 bg-dark-card hover:bg-dark-surface border border-gray-600 text-gray-300 hover:text-orange-500 rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
-                          aria-label={`Preview ${doc.name}`}
-                          title="Preview document"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openPreviewModal(doc);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>Preview</span>
-                        </button>
-                        
-                        <button
-                          type="button"
-                          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
-                          aria-label={`Download ${doc.name}`}
-                          title="Download document"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDownload(doc);
-                          }}
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Download</span>
-                        </button>
-                        
-                        {canDeleteDocuments && (
-                          <>
-                            <button
-                              type="button"
-                              className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
-                              aria-label={`Rename ${doc.name}`}
-                              title="Rename document"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                openRenameModal(doc);
-                              }}
-                            >
-                              <Pencil className="w-4 h-4" />
-                              <span>Rename</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all transform hover:scale-105 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-dark-surface focus:outline-none"
-                              aria-label={`Delete ${doc.name}`}
-                              title="Delete document"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleDelete(doc);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              <span>Delete</span>
-                            </button>
-                          </>
-                        )}
-                      </div>
+                            {/* Failed state */}
+                            {isFailed && progress?.error && (
+                              <p className="text-xs text-red-400">{progress.error}</p>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </motion.div>

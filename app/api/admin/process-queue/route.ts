@@ -8,9 +8,10 @@ import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 900; // 15 minutes
 
-const STALE_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes — reduced from 8 to recover faster
+// Must be less than staleBatchTimeoutMs (15min) to avoid resetting active batches
+const STALE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Reset stale documents and queue entries stuck in 'processing' state.
