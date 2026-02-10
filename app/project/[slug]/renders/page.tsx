@@ -1,8 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { redirect } from 'next/navigation';
-import { RenderGallery } from '@/components/renders/RenderGallery';
-import { RenderWizard } from '@/components/renders/RenderWizard';
+import { RendersPageContent } from '@/components/renders/RendersPageContent';
 
 export default async function RendersPage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
@@ -18,8 +17,7 @@ export default async function RendersPage({ params }: { params: { slug: string }
           </p>
         </div>
       </div>
-      <RenderGallery projectSlug={params.slug} />
-      <RenderWizard projectSlug={params.slug} />
+      <RendersPageContent projectSlug={params.slug} />
     </div>
   );
 }

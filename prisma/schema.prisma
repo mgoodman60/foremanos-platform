@@ -1018,6 +1018,7 @@ model Project {
   OnboardingProgress                   OnboardingProgress[]
   PaymentApplication                   PaymentApplication[]
   Procurement                          Procurement[]
+  PresentationBoard                    PresentationBoard[]
   ProjectRender                        ProjectRender[]
   Markup                               Markup[]
   MarkupLayer                          MarkupLayer[]
@@ -1799,6 +1800,7 @@ model User {
   ProjectInvitation_ProjectInvitation_inviteeIdToUser ProjectInvitation[]        @relation("ProjectInvitation_inviteeIdToUser")
   ProjectInvitation_ProjectInvitation_inviterIdToUser ProjectInvitation[]        @relation("ProjectInvitation_inviterIdToUser")
   ProjectMember                                       ProjectMember[]
+  PresentationBoard                                   PresentationBoard[]
   ProjectRender                                       ProjectRender[]
   Markup_createdBy                                    Markup[]                   @relation("MarkupCreatedBy")
   Markup_lockedBy                                     Markup[]                   @relation("MarkupLockedBy")
@@ -3944,6 +3946,44 @@ model ProjectRender {
   @@index([createdBy])
   @@index([status])
   @@index([promptHash])
+}
+
+model PresentationBoard {
+  id              String    @id @default(cuid())
+  projectId       String
+  createdBy       String
+  title           String
+  templateId      String
+
+  projectName     String?
+  companyName     String?
+  tagline         String?   @db.Text
+  contactInfo     String?
+  dateText        String?
+
+  primaryColor    String?   @default("#F97316")
+  accentColor     String?   @default("#003B71")
+
+  companyLogoKey  String?
+  clientLogoKey   String?
+  partnerLogo1Key String?
+  partnerLogo2Key String?
+
+  renderIds       String[]
+
+  sitePhotoKey    String?
+
+  lastExportedAt  DateTime?
+  lastExportFormat String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  Project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  User            User      @relation(fields: [createdBy], references: [id])
+
+  @@index([projectId])
+  @@index([createdBy])
 }
 
 // ---------------------------------------------------------------------------
