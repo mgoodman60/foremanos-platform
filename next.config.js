@@ -14,6 +14,13 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: { unoptimized: true },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({ canvas: 'canvas' });
+    }
+    return config;
+  },
   headers: async () => [{
     source: '/:path*',
     headers: [
