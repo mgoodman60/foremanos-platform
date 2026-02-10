@@ -17,7 +17,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -32,10 +32,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const params = await context.params;
     const preset = await prisma.markupToolPreset.findFirst({
-      where: {
-        id: params.id,
-        userId: user.id,
-      },
+      where: { id: params.id, userId: user.id },
     });
 
     if (!preset) {
@@ -46,6 +43,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const updateData: Record<string, unknown> = {};
 
     if (body.name !== undefined) updateData.name = body.name;
+    if (body.shapeType !== undefined) updateData.shapeType = body.shapeType;
     if (body.style !== undefined) {
       updateData.style = body.style as Record<string, string | number | boolean | string[] | null>;
     }
@@ -70,7 +68,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -85,10 +83,7 @@ export async function DELETE(request: Request, context: RouteContext) {
 
     const params = await context.params;
     const preset = await prisma.markupToolPreset.findFirst({
-      where: {
-        id: params.id,
-        userId: user.id,
-      },
+      where: { id: params.id, userId: user.id },
     });
 
     if (!preset) {

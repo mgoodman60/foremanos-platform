@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useMarkupState } from './useMarkupState';
 import { konvaToPdf } from '@/lib/markup/geometry-utils';
 import type { MarkupRecord, MarkupGeometry } from '@/lib/markup/markup-types';
@@ -36,8 +36,8 @@ export function useDrawingTool() {
     panY,
   } = useMarkupState();
 
-  const [isDragging, setIsDragging] = useCallback(() => false, []);
-  const [dragStartPos, setDragStartPos] = useCallback(() => null as MousePosition | null, []);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState<MousePosition | null>(null);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -64,14 +64,14 @@ export function useDrawingTool() {
         }
 
         // Start drag-select
-        setIsDragging();
-        setDragStartPos();
+        setIsDragging(true);
+        setDragStartPos({ x, y });
         return;
       }
 
       if (activeTool === 'pan') {
-        setIsDragging();
-        setDragStartPos();
+        setIsDragging(true);
+        setDragStartPos({ x, y });
         return;
       }
 
@@ -200,7 +200,7 @@ export function useDrawingTool() {
         documentId,
         projectId,
         pageNumber,
-        shapeType: activeTool === 'freehand' ? 'freehand' : activeTool,
+        shapeType: activeTool as MarkupRecord['shapeType'],
         geometry,
         style: { ...activeStyle },
         status: 'open',

@@ -13,7 +13,7 @@ async function resolveContext(slug: string, documentId: string, userEmail: strin
   const user = await prisma.user.findUnique({ where: { email: userEmail }, select: { id: true } });
   if (!user) return null;
   const document = await prisma.document.findFirst({
-    where: { id: documentId, Project: { slug, OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }] } },
+    where: { id: documentId, Project: { slug, OR: [{ ownerId: user.id }, { ProjectMember: { some: { userId: user.id } } }] } },
     select: { id: true, projectId: true, name: true, cloud_storage_path: true },
   });
   if (!document) return null;
@@ -28,7 +28,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -79,7 +79,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 

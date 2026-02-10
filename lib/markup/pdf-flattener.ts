@@ -129,7 +129,6 @@ function drawLine(page: PDFPage, markup: MarkupRecord) {
     const dx = pts[pts.length - 2] - pts[pts.length - 4];
     const dy = pts[pts.length - 1] - pts[pts.length - 3];
     const angle = Math.atan2(dy, dx);
-    page.setFillColor(rgb(c.r, c.g, c.b));
     drawArrowhead(page, pts[pts.length - 2], pts[pts.length - 1], angle, style.strokeWidth * 4, c);
   }
 
@@ -153,7 +152,6 @@ function drawPolyline(page: PDFPage, markup: MarkupRecord, closed: boolean) {
   }
   if (closed) path += ' Z';
 
-  page.setLineWidth(style.strokeWidth);
   if (style.fillColor && closed && style.fillOpacity && style.fillOpacity > 0) {
     const fc = hexToRgb(style.fillColor);
     page.drawSvgPath(path, {

@@ -37,7 +37,7 @@ export default async function Page({ params }: PageProps) {
         slug,
         OR: [
           { ownerId: user.id },
-          { members: { some: { userId: user.id } } },
+          { ProjectMember: { some: { userId: user.id } } },
         ],
       },
     },

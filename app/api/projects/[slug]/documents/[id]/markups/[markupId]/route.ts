@@ -14,7 +14,7 @@ async function resolveContext(slug: string, documentId: string, userEmail: strin
   const user = await prisma.user.findUnique({ where: { email: userEmail }, select: { id: true } });
   if (!user) return null;
   const document = await prisma.document.findFirst({
-    where: { id: documentId, Project: { slug, OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }] } },
+    where: { id: documentId, Project: { slug, OR: [{ ownerId: user.id }, { ProjectMember: { some: { userId: user.id } } }] } },
     select: { id: true, projectId: true, name: true, cloud_storage_path: true },
   });
   if (!document) return null;
@@ -29,7 +29,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -46,12 +46,12 @@ export async function GET(request: Request, context: RouteContext) {
         deletedAt: null,
       },
       include: {
-        Creator: { select: { id: true, name: true, email: true } },
+        Creator: { select: { id: true, username: true, email: true } },
         Layer: { select: { id: true, name: true, color: true } },
         Replies: {
           where: { deletedAt: null },
           include: {
-            Creator: { select: { id: true, name: true, email: true } },
+            Creator: { select: { id: true, username: true, email: true } },
           },
           orderBy: { createdAt: 'asc' },
         },
@@ -77,7 +77,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -114,10 +114,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     const updateData: Record<string, unknown> = {};
 
     if (body.geometry !== undefined) {
-      updateData.geometry = body.geometry as Record<string, string | number | boolean | string[] | null>;
+      updateData.geometry = body.geometry as unknown as Record<string, string | number | boolean | string[] | null>;
     }
     if (body.style !== undefined) {
-      updateData.style = body.style as Record<string, string | number | boolean | string[] | null>;
+      updateData.style = body.style as unknown as Record<string, string | number | boolean | string[] | null>;
     }
     if (body.content !== undefined) updateData.content = body.content;
     if (body.label !== undefined) updateData.label = body.label;
@@ -142,7 +142,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       where: { id: params.markupId },
       data: updateData,
       include: {
-        Creator: { select: { id: true, name: true, email: true } },
+        Creator: { select: { id: true, username: true, email: true } },
         Layer: { select: { id: true, name: true, color: true } },
       },
     });
@@ -162,7 +162,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 

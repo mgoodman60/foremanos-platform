@@ -6,25 +6,25 @@ import type { MarkupRecord, MarkupStyle } from '@/lib/markup/markup-types';
 import { MarkupToolbar } from './tools/MarkupToolbar';
 import { ColorStrokePanel } from './tools/ColorStrokePanel';
 
-interface MarkupViewerProps {
+export interface MarkupViewerProps {
   documentId: string;
-  projectId: string;
-  pageNumber: number;
-  totalPages: number;
-  pageHeight: number;
-  onPageChange: (page: number) => void;
+  slug?: string;
+  projectId?: string;
+  onSelectionChange?: (markups: MarkupRecord[]) => void;
+  refreshKey?: number;
 }
 
 export function MarkupViewer({
   documentId,
-  projectId,
-  pageNumber,
-  totalPages,
-  pageHeight,
-  onPageChange,
+  slug,
+  onSelectionChange,
+  refreshKey,
 }: MarkupViewerProps) {
   const [activeTool, setActiveTool] = useState('select');
   const [scale, setScale] = useState(1);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageHeight, setPageHeight] = useState(792); // Default letter size
   const [markups, setMarkups] = useState<MarkupRecord[]>([]);
   const [selectedMarkupId, setSelectedMarkupId] = useState<string | null>(null);
   const [currentStyle, setCurrentStyle] = useState<MarkupStyle>({
@@ -42,30 +42,47 @@ export function MarkupViewer({
   const [PDFRenderer, setPDFRenderer] = useState<any>(null);
 
   useEffect(() => {
-    // Dynamic import for Konva overlay
     import('./KonvaOverlayStage').then((mod) => setKonvaStage(() => mod.KonvaOverlayStage));
-    // Dynamic import for PDF renderer
     import('./PDFPageRenderer').then((mod) => setPDFRenderer(() => mod.PDFPageRenderer));
   }, []);
+
+  // Fetch document info (page count)
+  useEffect(() => {
+    const fetchDocInfo = async () => {
+      try {
+        const basePath = slug
+          ? `/api/projects/${slug}/documents/${documentId}/markups/summary`
+          : `/api/documents/${documentId}`;
+        const response = await fetch(basePath);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.totalPages) setTotalPages(data.totalPages);
+        }
+      } catch {
+        // Default to 1 page
+      }
+    };
+    fetchDocInfo();
+  }, [documentId, slug]);
 
   // Load markups for current page
   useEffect(() => {
     const loadMarkups = async () => {
       try {
-        const response = await fetch(
-          `/api/documents/${documentId}/markups?pageNumber=${pageNumber}`
-        );
+        const basePath = slug
+          ? `/api/projects/${slug}/documents/${documentId}/markups`
+          : `/api/documents/${documentId}/markups`;
+        const response = await fetch(`${basePath}?pageNumber=${pageNumber}`);
         if (response.ok) {
           const data = await response.json();
           setMarkups(data.markups || []);
         }
-      } catch (error) {
-        console.error('Failed to load markups:', error);
+      } catch {
+        // Silently fail
       }
     };
-
     loadMarkups();
-  }, [documentId, pageNumber]);
+  }, [documentId, slug, pageNumber, refreshKey]);
 
   // Zoom handlers
   const handleZoomIn = useCallback(() => {
@@ -82,16 +99,12 @@ export function MarkupViewer({
 
   // Page navigation
   const handlePrevPage = useCallback(() => {
-    if (pageNumber > 1) {
-      onPageChange(pageNumber - 1);
-    }
-  }, [pageNumber, onPageChange]);
+    if (pageNumber > 1) setPageNumber((p) => p - 1);
+  }, [pageNumber]);
 
   const handleNextPage = useCallback(() => {
-    if (pageNumber < totalPages) {
-      onPageChange(pageNumber + 1);
-    }
-  }, [pageNumber, totalPages, onPageChange]);
+    if (pageNumber < totalPages) setPageNumber((p) => p + 1);
+  }, [pageNumber, totalPages]);
 
   // History management
   const saveToHistory = useCallback((newMarkups: MarkupRecord[]) => {
@@ -132,18 +145,17 @@ export function MarkupViewer({
   const handleMarkupSelect = useCallback((id: string) => {
     setSelectedMarkupId(id);
     setActiveTool('select');
-  }, []);
+    const selected = markups.filter((m) => m.id === id);
+    onSelectionChange?.(selected);
+  }, [markups, onSelectionChange]);
 
   // Ctrl+scroll zoom
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
-        if (e.deltaY < 0) {
-          handleZoomIn();
-        } else {
-          handleZoomOut();
-        }
+        if (e.deltaY < 0) handleZoomIn();
+        else handleZoomOut();
       }
     };
 
@@ -154,86 +166,42 @@ export function MarkupViewer({
     }
   }, [handleZoomIn, handleZoomOut]);
 
-  // Determine which style panel options to show
   const showArrowheads = activeTool === 'arrow';
   const showFill = ['rectangle', 'ellipse', 'polygon', 'cloud'].includes(activeTool);
   const showFont = activeTool === 'text';
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Top toolbar */}
       <div className="h-14 bg-white border-b border-gray-300 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleZoomOut}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Zoom Out"
-            aria-label="Zoom Out"
-          >
+          <button onClick={handleZoomOut} className="p-2 rounded hover:bg-gray-100" title="Zoom Out" aria-label="Zoom Out">
             <ZoomOut size={20} />
           </button>
-          <span className="text-sm font-medium min-w-[60px] text-center">
-            {Math.round(scale * 100)}%
-          </span>
-          <button
-            onClick={handleZoomIn}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Zoom In"
-            aria-label="Zoom In"
-          >
+          <span className="text-sm font-medium min-w-[60px] text-center">{Math.round(scale * 100)}%</span>
+          <button onClick={handleZoomIn} className="p-2 rounded hover:bg-gray-100" title="Zoom In" aria-label="Zoom In">
             <ZoomIn size={20} />
           </button>
-          <button
-            onClick={handleZoomReset}
-            className="p-2 rounded hover:bg-gray-100"
-            title="Reset Zoom"
-            aria-label="Reset Zoom"
-          >
+          <button onClick={handleZoomReset} className="p-2 rounded hover:bg-gray-100" title="Reset Zoom" aria-label="Reset Zoom">
             <RotateCcw size={20} />
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrevPage}
-            disabled={pageNumber === 1}
-            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Previous Page"
-            aria-label="Previous Page"
-          >
+          <button onClick={handlePrevPage} disabled={pageNumber === 1} className="p-2 rounded hover:bg-gray-100 disabled:opacity-50" title="Previous Page" aria-label="Previous Page">
             <ChevronLeft size={20} />
           </button>
-          <span className="text-sm font-medium min-w-[80px] text-center">
-            {pageNumber} / {totalPages}
-          </span>
-          <button
-            onClick={handleNextPage}
-            disabled={pageNumber === totalPages}
-            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Next Page"
-            aria-label="Next Page"
-          >
+          <span className="text-sm font-medium min-w-[80px] text-center">{pageNumber} / {totalPages}</span>
+          <button onClick={handleNextPage} disabled={pageNumber === totalPages} className="p-2 rounded hover:bg-gray-100 disabled:opacity-50" title="Next Page" aria-label="Next Page">
             <ChevronRight size={20} />
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleUndo}
-            disabled={historyIndex <= 0}
-            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Undo"
-            aria-label="Undo"
-          >
+          <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded hover:bg-gray-100 disabled:opacity-50" title="Undo" aria-label="Undo">
             <Undo size={20} />
           </button>
-          <button
-            onClick={handleRedo}
-            disabled={historyIndex >= history.length - 1}
-            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Redo"
-            aria-label="Redo"
-          >
+          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2 rounded hover:bg-gray-100 disabled:opacity-50" title="Redo" aria-label="Redo">
             <Redo size={20} />
           </button>
         </div>
@@ -241,10 +209,8 @@ export function MarkupViewer({
 
       {/* Main content area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar - Tools */}
         <MarkupToolbar activeTool={activeTool} onToolChange={handleToolChange} />
 
-        {/* Center - PDF + Konva overlay */}
         <div ref={containerRef} className="flex-1 overflow-auto bg-gray-200 relative">
           <div className="inline-block min-w-full min-h-full p-8">
             {PDFRenderer && (
@@ -268,7 +234,6 @@ export function MarkupViewer({
           </div>
         </div>
 
-        {/* Right sidebar - Style panel */}
         <ColorStrokePanel
           style={currentStyle}
           onStyleChange={handleStyleChange}

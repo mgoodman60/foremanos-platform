@@ -14,7 +14,7 @@ async function resolveContext(slug: string, documentId: string, userEmail: strin
   const user = await prisma.user.findUnique({ where: { email: userEmail }, select: { id: true } });
   if (!user) return null;
   const document = await prisma.document.findFirst({
-    where: { id: documentId, Project: { slug, OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }] } },
+    where: { id: documentId, Project: { slug, OR: [{ ownerId: user.id }, { ProjectMember: { some: { userId: user.id } } }] } },
     select: { id: true, projectId: true, name: true, cloud_storage_path: true },
   });
   if (!document) return null;
@@ -29,7 +29,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -50,7 +50,7 @@ export async function GET(request: Request, context: RouteContext) {
       },
       include: {
         Creator: {
-          select: { id: true, name: true, email: true },
+          select: { id: true, username: true, email: true },
         },
         Layer: {
           select: { id: true, name: true, color: true },
@@ -74,7 +74,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -96,8 +96,8 @@ export async function POST(request: Request, context: RouteContext) {
               projectId: ctx.projectId,
               pageNumber: markupData.pageNumber,
               shapeType: markupData.shapeType,
-              geometry: markupData.geometry as Record<string, string | number | boolean | string[] | null>,
-              style: markupData.style as Record<string, string | number | boolean | string[] | null>,
+              geometry: markupData.geometry as unknown as Record<string, string | number | boolean | string[] | null>,
+              style: markupData.style as unknown as Record<string, string | number | boolean | string[] | null>,
               content: markupData.content,
               label: markupData.label,
               status: 'open',
@@ -111,7 +111,7 @@ export async function POST(request: Request, context: RouteContext) {
               createdBy: ctx.userId,
             },
             include: {
-              Creator: { select: { id: true, name: true, email: true } },
+              Creator: { select: { id: true, username: true, email: true } },
               Layer: { select: { id: true, name: true, color: true } },
             },
           });
@@ -128,8 +128,8 @@ export async function POST(request: Request, context: RouteContext) {
         projectId: ctx.projectId,
         pageNumber: markupData.pageNumber,
         shapeType: markupData.shapeType,
-        geometry: markupData.geometry as Record<string, string | number | boolean | string[] | null>,
-        style: markupData.style as Record<string, string | number | boolean | string[] | null>,
+        geometry: markupData.geometry as unknown as Record<string, string | number | boolean | string[] | null>,
+        style: markupData.style as unknown as Record<string, string | number | boolean | string[] | null>,
         content: markupData.content,
         label: markupData.label,
         status: 'open',
@@ -143,7 +143,7 @@ export async function POST(request: Request, context: RouteContext) {
         createdBy: ctx.userId,
       },
       include: {
-        Creator: { select: { id: true, name: true, email: true } },
+        Creator: { select: { id: true, username: true, email: true } },
         Layer: { select: { id: true, name: true, color: true } },
       },
     });

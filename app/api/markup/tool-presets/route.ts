@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
-import type { MarkupStyle } from '@/lib/markup/markup-types';
 
 export async function GET(request: Request) {
   try {
@@ -14,7 +13,7 @@ export async function GET(request: Request) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -28,9 +27,7 @@ export async function GET(request: Request) {
     }
 
     const presets = await prisma.markupToolPreset.findMany({
-      where: {
-        userId: user.id,
-      },
+      where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -49,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     const rateLimitCheck = await checkRateLimit(session.user.email, RATE_LIMITS.API);
-    if (!rateLimitCheck.allowed) {
+    if (!rateLimitCheck.success) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
@@ -63,10 +60,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, style } = body;
+    const { name, shapeType, style } = body;
 
     if (!name || typeof name !== 'string') {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    if (!shapeType || typeof shapeType !== 'string') {
+      return NextResponse.json({ error: 'shapeType is required' }, { status: 400 });
     }
 
     if (!style || typeof style !== 'object') {
@@ -74,10 +75,7 @@ export async function POST(request: Request) {
     }
 
     const existing = await prisma.markupToolPreset.findFirst({
-      where: {
-        userId: user.id,
-        name: name.trim(),
-      },
+      where: { userId: user.id, name: name.trim() },
     });
 
     if (existing) {
@@ -86,8 +84,9 @@ export async function POST(request: Request) {
 
     const preset = await prisma.markupToolPreset.create({
       data: {
-        userId: user.id,
+        User: { connect: { id: user.id } },
         name: name.trim(),
+        shapeType,
         style: style as Record<string, string | number | boolean | string[] | null>,
       },
     });

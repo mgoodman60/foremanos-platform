@@ -120,6 +120,53 @@ export const prismaMock = {
     update: vi.fn().mockResolvedValue({ ...mockPasswordResetToken, used: true }),
     updateMany: vi.fn().mockResolvedValue({ count: 1 }),
   },
+  markup: {
+    findMany: vi.fn().mockResolvedValue([]),
+    findUnique: vi.fn().mockResolvedValue(null),
+    findFirst: vi.fn().mockResolvedValue(null),
+    create: vi.fn().mockResolvedValue({ id: 'markup-1' }),
+    createMany: vi.fn().mockResolvedValue({ count: 0 }),
+    update: vi.fn().mockResolvedValue({ id: 'markup-1' }),
+    delete: vi.fn().mockResolvedValue({ id: 'markup-1' }),
+    count: vi.fn().mockResolvedValue(0),
+  },
+  markupReply: {
+    findMany: vi.fn().mockResolvedValue([]),
+    create: vi.fn().mockResolvedValue({ id: 'reply-1' }),
+    update: vi.fn().mockResolvedValue({ id: 'reply-1' }),
+    delete: vi.fn().mockResolvedValue({ id: 'reply-1' }),
+    updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+  },
+  markupLayer: {
+    findMany: vi.fn().mockResolvedValue([]),
+    findUnique: vi.fn().mockResolvedValue(null),
+    create: vi.fn().mockResolvedValue({ id: 'layer-1' }),
+    update: vi.fn().mockResolvedValue({ id: 'layer-1' }),
+    delete: vi.fn().mockResolvedValue({ id: 'layer-1' }),
+  },
+  markupCalibration: {
+    findMany: vi.fn().mockResolvedValue([]),
+    findUnique: vi.fn().mockResolvedValue(null),
+    create: vi.fn().mockResolvedValue({ id: 'cal-1' }),
+    update: vi.fn().mockResolvedValue({ id: 'cal-1' }),
+    delete: vi.fn().mockResolvedValue({ id: 'cal-1' }),
+    upsert: vi.fn().mockResolvedValue({ id: 'cal-1' }),
+  },
+  markupToolPreset: {
+    findMany: vi.fn().mockResolvedValue([]),
+    findUnique: vi.fn().mockResolvedValue(null),
+    create: vi.fn().mockResolvedValue({ id: 'preset-1' }),
+    update: vi.fn().mockResolvedValue({ id: 'preset-1' }),
+    delete: vi.fn().mockResolvedValue({ id: 'preset-1' }),
+  },
+  markupSession: {
+    findMany: vi.fn().mockResolvedValue([]),
+    findUnique: vi.fn().mockResolvedValue(null),
+    create: vi.fn().mockResolvedValue({ id: 'session-1' }),
+    update: vi.fn().mockResolvedValue({ id: 'session-1' }),
+    upsert: vi.fn().mockResolvedValue({ id: 'session-1' }),
+  },
+  $transaction: vi.fn().mockImplementation(async (fn: any) => typeof fn === 'function' ? fn(prismaMock) : fn),
 };
 
 vi.mock('@/lib/db', () => ({
