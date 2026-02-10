@@ -16,6 +16,7 @@ import {
   Wrench,
   Camera,
   Box,
+  Paintbrush,
   BarChart2,
   Settings,
   MessageSquare,
@@ -101,6 +102,7 @@ export function SidebarNavigation() {
       items: [
         { label: 'Photos & Timeline', href: `/project/${slug}/photos`, icon: <Camera className="w-5 h-5" /> },
         { label: '3D Models', href: `/project/${slug}/models`, icon: <Box className="w-5 h-5" /> },
+        { label: 'Renders', href: `/project/${slug}/renders`, icon: <Paintbrush className="w-5 h-5" /> },
       ],
     },
     {

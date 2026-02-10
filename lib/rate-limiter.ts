@@ -70,6 +70,11 @@ export const RATE_LIMITS = {
     maxRequests: 60,      // 60 reads per minute
     windowSeconds: 60,
   },
+  // Render generation (expensive image API calls)
+  RENDER: {
+    maxRequests: 5,       // 5 renders per 10 minutes
+    windowSeconds: 600,
+  },
 } as const;
 
 /**

@@ -539,6 +539,88 @@ export async function runIntelligenceExtraction(
       // Non-blocking: don't fail the document processing if enrichment fails
     }
 
+    // Phase: Architectural Style Inference (for render quality)
+    try {
+      const chunks = await prisma.documentChunk.findMany({
+        where: { documentId },
+        select: { metadata: true },
+      });
+
+      const project = await prisma.project.findUnique({
+        where: { id: document.projectId },
+        select: { architecturalStyle: true },
+      });
+
+      // Only infer if not already set by user
+      if (!project?.architecturalStyle && chunks.length > 0) {
+        const styleSignals: Record<string, number> = {
+          modern: 0, traditional: 0, industrial: 0, contemporary: 0,
+          colonial: 0, craftsman: 0, mediterranean: 0, farmhouse: 0,
+        };
+
+        for (const chunk of chunks) {
+          const meta = chunk.metadata as Record<string, any> | null;
+          if (!meta) continue;
+
+          // Analyze roof data
+          const roofData = meta.specialDrawingData?.roofData;
+          if (roofData?.roofType) {
+            const roofType = roofData.roofType.toLowerCase();
+            if (roofType.includes('flat')) { styleSignals.modern += 2; styleSignals.industrial += 1; }
+            if (roofType.includes('gable')) { styleSignals.traditional += 2; styleSignals.craftsman += 1; styleSignals.farmhouse += 1; }
+            if (roofType.includes('hip')) { styleSignals.traditional += 1; styleSignals.mediterranean += 1; }
+            if (roofType.includes('mansard')) { styleSignals.traditional += 2; }
+          }
+
+          // Analyze exterior materials
+          const elevData = meta.specialDrawingData?.exteriorElevation;
+          if (elevData?.facadeMaterials) {
+            for (const facade of elevData.facadeMaterials) {
+              const mat = (facade.material || '').toLowerCase();
+              if (mat.includes('curtain wall') || mat.includes('glass')) { styleSignals.modern += 3; styleSignals.contemporary += 2; }
+              if (mat.includes('brick')) { styleSignals.traditional += 2; styleSignals.colonial += 1; }
+              if (mat.includes('stone')) { styleSignals.traditional += 1; styleSignals.mediterranean += 1; }
+              if (mat.includes('stucco')) { styleSignals.mediterranean += 2; }
+              if (mat.includes('metal') || mat.includes('steel')) { styleSignals.industrial += 2; styleSignals.modern += 1; }
+              if (mat.includes('wood') || mat.includes('cedar') || mat.includes('siding')) { styleSignals.craftsman += 2; styleSignals.farmhouse += 2; }
+              if (mat.includes('fiber cement') || mat.includes('hardie')) { styleSignals.contemporary += 1; styleSignals.farmhouse += 1; }
+            }
+          }
+
+          // Analyze visual materials for overall palette
+          if (meta.visualMaterials) {
+            for (const vm of meta.visualMaterials) {
+              const mat = (vm.material || '').toLowerCase();
+              if (mat.includes('exposed concrete') || mat.includes('board-form')) { styleSignals.industrial += 2; styleSignals.modern += 1; }
+              if (mat.includes('timber') || mat.includes('heavy timber')) { styleSignals.craftsman += 2; }
+            }
+          }
+        }
+
+        // Find the style with the highest score (min threshold of 3)
+        const sorted = Object.entries(styleSignals).sort((a, b) => b[1] - a[1]);
+        if (sorted[0][1] >= 3) {
+          const inferredStyle = sorted[0][0];
+          await prisma.project.update({
+            where: { id: document.projectId },
+            data: { architecturalStyle: inferredStyle },
+          });
+          logger.info('INTELLIGENCE', 'Inferred architectural style', {
+            documentId,
+            projectId: document.projectId,
+            inferredStyle,
+            confidence: sorted[0][1],
+            topStyles: sorted.slice(0, 3).map(([s, c]) => `${s}:${c}`),
+          });
+        }
+      }
+    } catch (styleError: any) {
+      logger.warn('INTELLIGENCE', 'Architectural style inference failed (non-blocking)', {
+        documentId,
+        error: styleError?.message,
+      });
+    }
+
     // Phase: Quantity Calculations (after sheet index is built)
     try {
       const { runQuantityCalculations } = await import('./quantity-calculation-orchestrator');

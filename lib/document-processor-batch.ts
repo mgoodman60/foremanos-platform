@@ -351,9 +351,16 @@ EXTRACTION CATEGORIES:
     - Structural member schedules, footing schedules
     - Extract: headers[], rows[][] for each table found
 
-12. SITE & CONCRETE (if applicable):
+12. SITE, CONCRETE & LANDSCAPE (if applicable):
     - Footings: size, depth, rebar. Slabs: thickness, reinforcement
     - Grading contours, utility trenches, pavement sections
+    - Plant schedules: species/cultivar, quantity, size at planting, mature spread, root ball size
+    - Existing trees to remain: species, caliper, canopy spread, protection zones
+    - Hardscape materials: pavers, concrete, gravel, stone with finish/color
+    - Irrigation zones, controller locations
+    - Site furniture: benches, bollards, bike racks, trash receptacles
+    - Retaining walls: type, height, material
+    - Pedestrian paths, plazas, parking layout
 
 13. SPECIFICATION REFERENCES:
     - CSI section callouts, building code references
@@ -368,7 +375,9 @@ EXTRACTION CATEGORIES:
     - General notes: flag as project-wide
     - Reflected ceiling plan data
     - Life safety: exit paths, occupancy loads
-    - Roof drainage patterns
+    - Roof plans: roof type (flat/gable/hip/shed/mansard), material callouts, slope/pitch values, mechanical screening, parapet heights, drainage patterns, penetration locations
+    - Exterior elevations: facade material zones (e.g. "brick lower 2 floors, curtain wall above"), window patterns (punched/ribbon/curtain wall), entry features (canopy/portico/columns/awning), cornice/parapet/fascia details, overall building height and stories visible
+    - Landscape/site plans: plant bed outlines, tree canopy locations, hardscape zones, grade changes, existing vegetation to remain
 
 JSON RESPONSE FORMAT:
 {
@@ -376,7 +385,7 @@ JSON RESPONSE FORMAT:
   "sheetTitle": "sheet title",
   "scale": "primary scale",
   "discipline": "Architectural|Structural|Mechanical|Electrical|Plumbing|Civil|Fire Protection|General",
-  "drawingType": "floor_plan|elevation|section|detail|schedule|specification|cover|site_plan|reflected_ceiling|roof_plan|life_safety",
+  "drawingType": "floor_plan|elevation|section|detail|schedule|specification|cover|site_plan|reflected_ceiling|roof_plan|life_safety|landscape",
   "titleBlock": {"project": "", "drawn_by": "", "date": "", "revision": "", "checker": "", "sheet_of": ""},
   "dimensions": [{"value": "15'-6\\"", "label": "room width", "context": "Room 101", "type": "horizontal"}],
   "rooms": [{"number": "101", "name": "LOBBY", "area": "450 SF", "floor": "1st Floor", "bounds": {"x": 12, "y": 25, "w": 18, "h": 15}}],
@@ -422,10 +431,10 @@ JSON RESPONSE FORMAT:
   "drawingScheduleTables": [{"scheduleType": "door", "headers": ["Door No", "Type", "Size"], "rows": [["D101", "A", "3070"]], "sourceArea": "right side of sheet"}],
   "hvacData": {"ductwork": [], "diffusers": [], "equipment": [], "piping": [], "controls": []},
   "fireProtection": {"sprinklerHeads": [], "alarmDevices": [], "dampers": [], "standpipes": []},
-  "siteAndConcrete": {"footings": [], "slabDetails": [], "rebarSchedule": [], "gradingData": null},
+  "siteAndConcrete": {"footings": [], "slabDetails": [], "rebarSchedule": [], "gradingData": null, "landscapeData": {"plantSchedule": [{"species": "", "quantity": 0, "sizeAtPlanting": "", "matureSpread": ""}], "existingTrees": [{"species": "", "caliper": "", "canopySpread": "", "toRemain": true}], "hardscape": [{"type": "", "material": "", "finish": "", "area": ""}], "irrigation": null, "siteFurniture": [], "retainingWalls": []}},
   "references": {"specSections": [], "codeReferences": [], "keynotes": []},
   "enhancedScaleData": {"scales": [{"value": "1/4\\" = 1'-0\\"", "applicableArea": "main plan", "isNTS": false}]},
-  "specialDrawingData": {"isGeneralNotes": false, "ceilingPlan": null, "lifeSafety": null}
+  "specialDrawingData": {"isGeneralNotes": false, "ceilingPlan": null, "lifeSafety": null, "roofData": {"roofType": "", "material": "", "slopePitch": "", "parapetHeight": "", "mechanicalScreening": false, "drainagePattern": "", "penetrations": []}, "exteriorElevation": {"facadeMaterials": [{"material": "", "location": "", "finish": ""}], "windowPattern": "", "entryFeatures": [], "corniceDetails": "", "buildingHeight": "", "storiesVisible": 0}, "landscapeSitePlan": {"plantBeds": [], "treeLocations": [], "hardscapeZones": [], "gradeChanges": [], "existingVegetation": []}}
 }
 
 IMPORTANT: Extract EVERYTHING visible. Omit categories with no data rather than including empty arrays. More data is better.`;
