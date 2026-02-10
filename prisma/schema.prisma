@@ -575,6 +575,11 @@ model Document {
   SheetLegend             SheetLegend[]
   VisualAnnotation        VisualAnnotation[]
   WindowScheduleItem      WindowScheduleItem[]
+  Markup                  Markup[]
+  MarkupReply             MarkupReply[]          @relation("MarkupReplyDocument")
+  MarkupLayer             MarkupLayer[]
+  MarkupCalibration       MarkupCalibration[]
+  MarkupSession           MarkupSession[]
 
   @@index([category])
   @@index([deletedAt])
@@ -965,6 +970,15 @@ model Project {
   scheduleAutoApplyThreshold           Float                          @default(85.0)
   scheduleRequireManualReview          Boolean                        @default(true)
   scheduleNotifyOnAutoUpdate           Boolean                        @default(true)
+  architecturalStyle                   String?
+  buildingUse                          String?
+  stories                              Int?
+  roofType                             String?
+  roofMaterial                         String?
+  exteriorMaterials                    Json?
+  exteriorColorPalette                 Json?
+  landscapingNotes                     String?                        @db.Text
+  siteContext                          String?
   AdminCorrection                      AdminCorrection[]
   AutodeskModel                        AutodeskModel[]
   BudgetSnapshot                       BudgetSnapshot[]
@@ -1004,6 +1018,11 @@ model Project {
   OnboardingProgress                   OnboardingProgress[]
   PaymentApplication                   PaymentApplication[]
   Procurement                          Procurement[]
+  ProjectRender                        ProjectRender[]
+  Markup                               Markup[]
+  MarkupLayer                          MarkupLayer[]
+  MarkupCalibration                    MarkupCalibration[]
+  MarkupSession                        MarkupSession[]
   User_Project_ownerIdToUser           User                           @relation("Project_ownerIdToUser", fields: [ownerId], references: [id], onDelete: Cascade)
   ProjectBudget                        ProjectBudget?
   ProjectDataSource                    ProjectDataSource[]
@@ -1186,6 +1205,7 @@ model Room {
   other_Room         Room[]               @relation("RoomToRoom")
   Project            Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   SourceDocument     Document?            @relation("RoomSourceDoc", fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  ProjectRender      ProjectRender[]
   RoomPhoto          RoomPhoto[]
   WindowScheduleItem WindowScheduleItem[]
 
@@ -1779,6 +1799,14 @@ model User {
   ProjectInvitation_ProjectInvitation_inviteeIdToUser ProjectInvitation[]        @relation("ProjectInvitation_inviteeIdToUser")
   ProjectInvitation_ProjectInvitation_inviterIdToUser ProjectInvitation[]        @relation("ProjectInvitation_inviterIdToUser")
   ProjectMember                                       ProjectMember[]
+  ProjectRender                                       ProjectRender[]
+  Markup_createdBy                                    Markup[]                   @relation("MarkupCreatedBy")
+  Markup_lockedBy                                     Markup[]                   @relation("MarkupLockedBy")
+  MarkupReply_createdBy                               MarkupReply[]              @relation("MarkupReplyCreatedBy")
+  MarkupLayer_createdBy                               MarkupLayer[]              @relation("MarkupLayerCreatedBy")
+  MarkupCalibration_createdBy                         MarkupCalibration[]        @relation("MarkupCalibrationCreatedBy")
+  MarkupToolPreset                                    MarkupToolPreset[]
+  MarkupSession                                       MarkupSession[]
   PunchListItem_createdBy                             PunchListItem[]            @relation("PunchListCreatedBy")
   RFI_createdBy                                       RFI[]                      @relation("RFICreatedBy")
   RFIComment                                          RFIComment[]
@@ -3860,4 +3888,202 @@ model SMSMapping {
   @@unique([projectId, phoneNumber])
   @@index([phoneNumber])
   @@index([projectId])
+}
+
+model ProjectRender {
+  id                 String   @id @default(cuid())
+  projectId          String
+  roomId             String?
+  createdBy          String
+
+  // Wizard inputs
+  viewType           String   // "exterior" | "interior" | "aerial_site"
+  style              String   // "photorealistic" | "conceptual" | "sketch" | etc.
+  cameraAngle        String?  // "eye_level" | "elevated" | "corner" | "worms_eye" | "overhead"
+  qualityTier        String   @default("high") // "draft" | "high" | "max"
+  assembledPrompt    String   @db.Text
+  promptHash         String?  // For dedup detection
+  userNotes          String?  @db.Text
+  dataSnapshot       Json?    // Full data used for prompt (reproducibility)
+  referencePhotoKeys String[]
+
+  // Site photo compositing
+  compositeMode       String?      // "standalone" | "site_composite"
+  sitePhotoKey        String?      // R2 key for uploaded site photo
+  placementBounds     Json?        // {x, y, width, height} as % of site photo
+
+  // Generation
+  status             String   @default("pending") // pending | generating | completed | failed
+  provider           String?  // "flux-2-pro" | "gpt-image-1.5" | "gpt-image-1-mini"
+  imageKey           String?  // R2 key
+  thumbnailKey       String?  // R2 key (400px wide)
+  revisedPrompt      String?  @db.Text
+  imageWidth         Int?
+  imageHeight        Int?
+  fileSizeBytes      Int?
+
+  // Tracking
+  generationTimeMs   Int?
+  estimatedCostUsd   Float?
+  errorMessage       String?
+  retryCount         Int      @default(0)
+
+  // Metadata
+  isFavorite         Boolean  @default(false)
+  title              String?
+  tags               String[]
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  Project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Room               Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  User               User     @relation(fields: [createdBy], references: [id])
+
+  @@index([projectId])
+  @@index([createdBy])
+  @@index([status])
+  @@index([promptHash])
+}
+
+// ---------------------------------------------------------------------------
+// Markup & Annotation System (Bluebeam-grade)
+// ---------------------------------------------------------------------------
+
+model Markup {
+  id               String             @id @default(cuid())
+  documentId       String
+  projectId        String
+  pageNumber       Int
+  sheetNumber      String?
+  shapeType        String
+  geometry         Json
+  style            Json
+  content          String?
+  label            String?
+  status           AnnotationStatus   @default(open)
+  priority         AnnotationPriority @default(medium)
+  tags             String[]           @default([])
+  layerId          String?
+  measurementValue Float?
+  measurementUnit  String?
+  calibrationId    String?
+  symbolId         String?
+  createdBy        String
+  lockedBy         String?
+  lockedAt         DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime?
+
+  Document         Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  Project          Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Creator          User               @relation("MarkupCreatedBy", fields: [createdBy], references: [id])
+  LockedByUser     User?              @relation("MarkupLockedBy", fields: [lockedBy], references: [id])
+  Layer            MarkupLayer?       @relation(fields: [layerId], references: [id], onDelete: SetNull)
+  Calibration      MarkupCalibration? @relation(fields: [calibrationId], references: [id], onDelete: SetNull)
+  Replies          MarkupReply[]
+
+  @@index([documentId, pageNumber, deletedAt])
+  @@index([projectId, deletedAt])
+  @@index([createdBy, deletedAt])
+  @@index([layerId, deletedAt])
+  @@index([deletedAt])
+}
+
+model MarkupReply {
+  id         String    @id @default(cuid())
+  markupId   String
+  documentId String
+  content    String
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  Markup     Markup    @relation(fields: [markupId], references: [id], onDelete: Cascade)
+  Document   Document  @relation("MarkupReplyDocument", fields: [documentId], references: [id], onDelete: Cascade)
+  Creator    User      @relation("MarkupReplyCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([markupId, deletedAt])
+}
+
+model MarkupLayer {
+  id         String   @id @default(cuid())
+  documentId String
+  projectId  String
+  name       String
+  color      String   @default("#FF0000")
+  visible    Boolean  @default(true)
+  locked     Boolean  @default(false)
+  opacity    Float    @default(1.0)
+  sortOrder  Int      @default(0)
+  scope      String   @default("document")
+  createdBy  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  Project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Creator    User     @relation("MarkupLayerCreatedBy", fields: [createdBy], references: [id])
+  Markups    Markup[]
+
+  @@unique([documentId, name])
+}
+
+model MarkupCalibration {
+  id                  String   @id @default(cuid())
+  documentId          String
+  projectId           String
+  pageNumber          Int
+  point1X             Float
+  point1Y             Float
+  point2X             Float
+  point2Y             Float
+  realDistance         Float
+  realUnit            String   @default("ft")
+  pdfUnitsPerRealUnit Float    @default(0)
+  confidence          Float    @default(1.0)
+  createdBy           String
+  createdAt           DateTime @default(now())
+
+  Document            Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  Project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Creator             User     @relation("MarkupCalibrationCreatedBy", fields: [createdBy], references: [id])
+  Markups             Markup[]
+
+  @@unique([documentId, pageNumber])
+}
+
+model MarkupToolPreset {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  shapeType String
+  style     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+model MarkupSession {
+  id              String   @id @default(cuid())
+  documentId      String
+  projectId       String
+  userId          String
+  sessionId       String
+  markupsCreated  Int      @default(0)
+  markupsEdited   Int      @default(0)
+  markupsDeleted  Int      @default(0)
+  startedAt       DateTime @default(now())
+  lastActiveAt    DateTime @default(now())
+
+  Document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  Project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, sessionId])
 }
