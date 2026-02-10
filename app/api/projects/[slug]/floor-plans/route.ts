@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { getFileUrl } from '@/lib/s3';
+import { logger } from '@/lib/logger';
 
 // GET /api/projects/[slug]/floor-plans - List all floor plans
 export async function GET(
@@ -67,11 +69,19 @@ export async function GET(
       ]
     });
 
-    return NextResponse.json({ floorPlans });
-  } catch (error) {
-    console.error('Error fetching floor plans:', error);
+    // Generate signed URLs for floor plan images
+    const floorPlansWithUrls = await Promise.all(
+      floorPlans.map(async (fp) => ({
+        ...fp,
+        imageUrl: fp.cloud_storage_path ? await getFileUrl(fp.cloud_storage_path, fp.isPublic || false) : null,
+      }))
+    );
+
+    return NextResponse.json({ floorPlans: floorPlansWithUrls });
+  } catch (error: any) {
+    logger.error('FLOOR_PLANS_API', 'Error fetching floor plans', error as Error);
     return NextResponse.json(
-      { error: 'Failed to fetch floor plans' },
+      { error: 'Failed to fetch floor plans', details: error.message },
       { status: 500 }
     );
   }
@@ -156,10 +166,10 @@ export async function POST(
     });
 
     return NextResponse.json({ floorPlan }, { status: 201 });
-  } catch (error) {
-    console.error('Error creating floor plan:', error);
+  } catch (error: any) {
+    logger.error('FLOOR_PLANS_API', 'Error creating floor plan', error as Error);
     return NextResponse.json(
-      { error: 'Failed to create floor plan' },
+      { error: 'Failed to create floor plan', details: error.message },
       { status: 500 }
     );
   }

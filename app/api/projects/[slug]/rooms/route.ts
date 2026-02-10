@@ -79,7 +79,7 @@ export async function GET(
     if (status) where.status = status;
     if (floor) where.floorNumber = parseInt(floor);
 
-    // Get rooms with finish items (include all relevant fields)
+    // Get rooms with finish items (include all relevant fields including hotspot coordinates)
     const rooms = await prisma.room.findMany({
       where,
       include: {

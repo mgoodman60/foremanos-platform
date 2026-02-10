@@ -76,18 +76,18 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 ### Core Directories
 
 ```
-app/api/              # 392 API routes organized by feature domain
-lib/                  # 224 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
+app/api/              # 406 API routes organized by feature domain
+lib/                  # 277 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
   lib/rag/            # 19 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
   lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
   lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
-components/           # 319 React components (Shadcn/Radix UI primitives + document intelligence)
+components/           # 337 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
 prisma/               # Database schema and migrations (112 models)
-__tests__/            # Vitest tests (222 test files: 187 lib + 32 API + 3 smoke)
+__tests__/            # Vitest tests (225 test files: 182 lib + 32 API + 3 smoke)
 e2e/                  # Playwright E2E tests (23 spec files)
 .claude/agents/       # 24 custom Claude Code agents
-.claude/skills/       # 13 project slash commands + 24 installed skills (see below)
+.claude/skills/       # 14 project slash commands + 24 installed skills (see below)
 ```
 
 ### Key Service Modules
@@ -122,6 +122,7 @@ e2e/                  # Playwright E2E tests (23 spec files)
 | `lib/report-finalization.ts` | Barrel re-export → `lib/report-finalization/` (8 modules: types, validation, pdf-generation, document-library, onedrive-export, rag-indexing, schedule-processing, orchestrator) |
 | `lib/logger.ts` | Structured logging utility with context and metadata |
 | `lib/intelligence-orchestrator.ts` | Phase A/B/C intelligence extraction orchestration |
+| `lib/intelligence-score-calculator.ts` | 5-dimension intelligence scoring engine with checklist generation |
 | `lib/schedule-extractor-ai.ts` | AI-powered schedule/Gantt chart extraction |
 | `lib/daily-report-permissions.ts` | Role-based access control for daily reports (VIEWER, REPORTER, SUPERVISOR, ADMIN) |
 | `lib/weather-day-tracker.ts` | Weather day tracking with schedule push-out for outdoor tasks |
@@ -379,6 +380,8 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 | `DocumentIntelligenceBadges.tsx` | Per-document intelligence badges in library list |
 | `ExtractionFeedbackBanner.tsx` | Post-processing completion summary banner |
 | `DocumentFilterBar.tsx` | Search + multi-select filter controls for document library |
+| `IntelligenceChecklist.tsx` | 9-item actionable checklist with progress bar and re-analyze button |
+| `markup-annotation.tsx` | Markup annotation overlay for document viewing |
 
 ### Codebase Health Sprint (Feb 2026) — ALL 5 SPRINTS COMPLETE
 
@@ -392,10 +395,42 @@ Comprehensive codebase quality initiative addressing TypeScript errors, logging,
 
 **Key outcomes**: Zero TS errors, zero `console.log` in `lib/`, no file exceeds ~900 lines, 221→222 test files, 7572→8706 tests. All barrel re-exports preserve original import paths — zero consumer changes needed.
 
+### Dashboard Polish Sprint (Feb 2026) — COMPLETE
+
+Full dashboard refinement: branding, widget reorganization, intelligence scoring, document preview, room browser enhancements, and mobile polish. 5-agent team execution (foreman-chat, dashboard-widgets, intelligence-fix, preview-fix, room-browser).
+
+**30 files changed**: 21 modified + 9 new + 1 deleted, +3,427/-685 lines
+
+**Key changes**:
+- **Foreman branding**: All "AI Assistant"/"Ask AI" → "The Foreman"/"Ask the Foreman" across FAB, drawer, sidebar, mobile, skip links, keyboard shortcuts
+- **FAB upgrade**: Circle → pill with animated glow ring (`@keyframes foreman-glow`), `aiDrawerPrefill` custom event for pre-fill
+- **AskForemanWidget**: Dashboard card with conversation history, quick prompts, input → drawer pre-fill
+- **Dashboard reorg**: `DashboardGreeting` (time-aware), `QuickActionsBar` (4 pills), `CompactHealthWidget` (1-col), `ExpandedScheduleWidget` (2-col with "What's Happening Today?" bar)
+- **New widgets**: `KeyDatesTimeline`, budget sparkline, data freshness dots, density toggle (localStorage `dashboard_density`)
+- **Intelligence scoring**: 5-dimension engine replacing sheet-count scoring (`lib/intelligence-score-calculator.ts`), `IntelligenceChecklist` UI, health integration (60/40 blend)
+- **Document preview**: Fetch-first with blob URLs, content-type routing, structured API error codes, 30s timeout
+- **Room browser**: Floor labels, area display, MEPEquipment table merge, expandable details, finish grouping (floor/wall/ceiling with paint gallons), heatmap view, trade badges
+- **Mobile**: Capture long-press menu (Photo/Daily Report/Punch List), pull-to-refresh
+
+**Dashboard Components** (in `components/dashboard/`):
+| Component | Purpose |
+|-----------|---------|
+| `project-overview.tsx` | Main dashboard grid with density toggle and budget sparkline |
+| `dashboard-widget.tsx` | Widget shell with `colSpan`, `customContent`, `lastFetched`, `compact` props |
+| `dashboard-greeting.tsx` | Time-aware greeting with project completion % and attention items |
+| `quick-actions-bar.tsx` | 4 pill buttons: Upload Doc, New Daily Report, Open Schedule, Ask the Foreman |
+| `ask-foreman-widget.tsx` | Chat card with conversations, quick prompts, input → drawer pre-fill |
+| `compact-health-widget.tsx` | 1-col health score with mini progress bars and freshness dot |
+| `expanded-schedule-widget.tsx` | 2-col schedule with "Today" bar, key dates, 7-day velocity sparkline |
+| `key-dates-timeline.tsx` | Horizontal scrollable timeline with color-coded urgency dots |
+| `ai-insights-card.tsx` | Legacy AI insights card (replaced by AskForemanWidget on dashboard) |
+| `empty-states.tsx` | Empty state displays for widgets |
+| `recent-activity-feed.tsx` | Recent project activity feed |
+
 ## Testing
 
-- **Vitest**: 222 test files, 8706 tests total (8706 passing, 41 skipped)
-  - 187 lib tests (`__tests__/lib/`)
+- **Vitest**: 225 test files, 8845 tests total (8845 passing, 41 skipped)
+  - 182 lib tests (`__tests__/lib/`)
   - 32 API tests (`__tests__/api/`)
   - 3 smoke tests (`__tests__/smoke/`)
   - 1 hooks test (`__tests__/hooks/`)
@@ -406,7 +441,7 @@ Comprehensive codebase quality initiative addressing TypeScript errors, logging,
 
 ### Test Coverage
 
-187 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops, document intelligence, MEP, analytics, drawing intelligence). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
+182 lib test files in `__tests__/lib/` with comprehensive coverage across all major modules (core infra, auth, documents, budget, schedule, takeoffs, integrations, field ops, document intelligence, MEP, analytics, drawing intelligence). Run specific tests with `npm test -- __tests__/lib/<module>.test.ts --run`.
 
 **Daily Report Test Files** (Phases 1-6B):
 | File | Coverage | Tests |
@@ -439,6 +474,7 @@ Comprehensive codebase quality initiative addressing TypeScript errors, logging,
 | `__tests__/api/documents/intelligence.test.ts` | Intelligence endpoint (auth, access, data aggregation) |
 | `__tests__/api/documents/search.test.ts` | Document search endpoint (filters, pagination) |
 | `__tests__/api/cron/processing-queue-cleanup.test.ts` | Cron cleanup (CRON_SECRET auth, 30-day threshold) |
+| `__tests__/lib/intelligence-score-calculator.test.ts` | 5-dimension scoring engine, checklist generation, Prisma metrics (50 tests) |
 
 **Codebase Health Sprint 4 Test Files** (Critical Business Logic):
 | File | Tests | Coverage |

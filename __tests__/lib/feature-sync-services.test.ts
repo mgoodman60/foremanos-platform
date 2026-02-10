@@ -498,15 +498,17 @@ describe('Feature Sync - syncRoomData', () => {
 
     await syncRoomData('project-1', 'doc-1', 'dwg');
 
-    expect(mockPrisma.room.findFirst).toHaveBeenCalledWith({
-      where: {
-        projectId: 'project-1',
-        OR: [
-          { roomNumber: '101' },
-          { name: 'Office Suite' },
-        ],
-      },
-    });
+    expect(mockPrisma.room.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          projectId: 'project-1',
+          OR: [
+            { roomNumber: '101' },
+            { name: 'Office Suite' },
+          ],
+        },
+      })
+    );
   });
 
   it('should record data source after extraction', async () => {

@@ -293,6 +293,8 @@ EXTRACTION CATEGORIES:
 
 2. SPATIAL ELEMENTS:
    - Room names/numbers with areas if shown
+   - For each room: approximate bounding box as percentage of image (x%, y%, width%, height%)
+   - Floor level if identifiable from context, sheet number, or title block
    - ALL dimension strings WITH context: what is being measured
    - Heights: floor-to-floor, floor-to-ceiling, sill, header
    - Thicknesses: slab, wall, insulation
@@ -377,7 +379,7 @@ JSON RESPONSE FORMAT:
   "drawingType": "floor_plan|elevation|section|detail|schedule|specification|cover|site_plan|reflected_ceiling|roof_plan|life_safety",
   "titleBlock": {"project": "", "drawn_by": "", "date": "", "revision": "", "checker": "", "sheet_of": ""},
   "dimensions": [{"value": "15'-6\\"", "label": "room width", "context": "Room 101", "type": "horizontal"}],
-  "rooms": [{"number": "101", "name": "LOBBY", "area": "450 SF"}],
+  "rooms": [{"number": "101", "name": "LOBBY", "area": "450 SF", "floor": "1st Floor", "bounds": {"x": 12, "y": 25, "w": 18, "h": 15}}],
   "doors": ["D1", "D2"],
   "windows": ["W1", "W2"],
   "gridLines": ["A", "B", "1", "2"],

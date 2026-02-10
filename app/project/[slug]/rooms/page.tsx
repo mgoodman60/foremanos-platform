@@ -27,6 +27,7 @@ import {
   PaintBucket,
   Layers,
   ArrowUpFromDot,
+  Map,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { FloorPlanRoomView } from '@/components/rooms/FloorPlanRoomView';
 
 interface MEPItem {
   id: string;
@@ -78,6 +80,11 @@ interface Room {
   status: string;
   percentComplete: number;
   notes: string | null;
+  hotspotX?: number;
+  hotspotY?: number;
+  hotspotWidth?: number;
+  hotspotHeight?: number;
+  floorPlanId?: string;
   _count?: {
     FinishScheduleItem: number;
   };
@@ -103,7 +110,7 @@ export default function RoomsPage() {
   const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'heatmap'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'floorplan'>('grid');
   const [expandedMEP, setExpandedMEP] = useState<string | null>(null);
   const [filters, setFilters] = useState<RoomFilters>({
     search: '',
@@ -464,11 +471,11 @@ export default function RoomsPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-9 w-9 ${viewMode === 'heatmap' ? 'bg-orange-500/20 text-orange-400' : 'text-gray-400'}`}
-                onClick={() => setViewMode('heatmap')}
-                title="Heatmap view"
+                className={`h-9 w-9 ${viewMode === 'floorplan' ? 'bg-orange-500/20 text-orange-400' : 'text-gray-400'}`}
+                onClick={() => setViewMode('floorplan')}
+                title="Floor Plan view"
               >
-                <LayoutGrid className="h-4 w-4" />
+                <Map className="h-4 w-4" />
               </Button>
             </div>
             
@@ -493,13 +500,22 @@ export default function RoomsPage() {
           </span>
         </div>
 
-        {/* Room Grid/List */}
-        {(viewMode === 'grid' || viewMode === 'heatmap') ? (
+        {/* Room Grid/List/FloorPlan */}
+        {viewMode === 'floorplan' ? (
+          <FloorPlanRoomView
+            projectSlug={slug}
+            rooms={filteredRooms}
+            allRooms={rooms}
+            selectedRoom={selectedRoom}
+            onRoomSelect={(room) => setSelectedRoom(room)}
+            onRoomsChange={fetchRooms}
+          />
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredRooms.map((room) => (
               <div
                 key={room.id}
-                className={`bg-dark-subtle rounded-lg border-2 overflow-hidden hover:border-orange-500/50 transition-all cursor-pointer ${viewMode === 'heatmap' ? getHeatmapColor(room.status) : getTypeColor(room.type)}`}
+                className={`bg-dark-subtle rounded-lg border-2 overflow-hidden hover:border-orange-500/50 transition-all cursor-pointer ${getTypeColor(room.type)}`}
                 onClick={() => setSelectedRoom(room)}
               >
                 <div className="p-4">
@@ -510,7 +526,7 @@ export default function RoomsPage() {
                     </div>
                     {getStatusIcon(room.status)}
                   </div>
-                  
+
                   {room.area != null && room.area > 0 && (
                     <div className="text-sm text-gray-400 mb-2">{room.area} sq ft</div>
                   )}
@@ -542,7 +558,7 @@ export default function RoomsPage() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : viewMode === 'list' ? (
           <div className="bg-dark-subtle rounded-lg border border-gray-800 overflow-hidden">
             <table className="w-full">
               <thead>
@@ -594,7 +610,7 @@ export default function RoomsPage() {
               </tbody>
             </table>
           </div>
-        )}
+        ) : null}
 
         {filteredRooms.length === 0 && (
           <div className="text-center py-12 text-gray-400">

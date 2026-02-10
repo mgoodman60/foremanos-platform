@@ -11,8 +11,35 @@ import { getCSIDivisionByNumber, type CSIDivision } from './csi-divisions';
 import { callAbacusLLM } from './abacus-llm';
 import { generateAbbreviationContext } from './construction-abbreviations';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { parseSheetNumber } from './sheet-number-parser';
 
 const log = createScopedLogger('ROOM_EXTRACTOR');
+
+/**
+ * Infer floor level from sheet number
+ * Uses sheet-number-parser to extract level digit (A-101 → "1st Floor")
+ */
+function inferFloorFromSheet(sheetNumber: string): string {
+  const parsed = parseSheetNumber(sheetNumber);
+  if (!parsed) {
+    return '1st Floor';
+  }
+
+  const levelMap: Record<string, string> = {
+    '0': 'Basement',
+    '1': '1st Floor',
+    '2': '2nd Floor',
+    '3': '3rd Floor',
+    '4': '4th Floor',
+    '5': '5th Floor',
+    '6': '6th Floor',
+    '7': '7th Floor',
+    '8': '8th Floor',
+    '9': '9th Floor',
+  };
+
+  return levelMap[parsed.level] || `${parsed.level}th Floor`;
+}
 
 interface ExtractedRoom {
   roomNumber: string;
@@ -21,6 +48,10 @@ interface ExtractedRoom {
   area?: number;
   notes?: string;
   finishItems?: ExtractedFinishItem[];
+  hotspotX?: number;
+  hotspotY?: number;
+  hotspotWidth?: number;
+  hotspotHeight?: number;
 }
 
 interface ExtractedFinishItem {
@@ -76,7 +107,7 @@ export async function extractRoomsFromMetadata(
 
   const chunks = await prisma.documentChunk.findMany({
     where: whereClause,
-    select: { metadata: true, documentId: true },
+    select: { metadata: true, documentId: true, sheetNumber: true },
   });
 
   const roomMap = new Map<string, ExtractedRoom>();
@@ -101,12 +132,25 @@ export async function extractRoomsFromMetadata(
         }
       }
 
+      // Extract floor from room data or infer from sheet number
+      const floor = room.floor || (chunk.sheetNumber ? inferFloorFromSheet(chunk.sheetNumber) : '1st Floor');
+
+      // Extract bounding box if present
+      const hotspotX = room.bounds?.x ?? undefined;
+      const hotspotY = room.bounds?.y ?? undefined;
+      const hotspotWidth = room.bounds?.w ?? undefined;
+      const hotspotHeight = room.bounds?.h ?? undefined;
+
       roomMap.set(dedupKey, {
         roomNumber,
         roomType: room.name || room.type || 'Unknown',
-        floor: room.floor || '1st Floor',
+        floor,
         area,
         notes: room.notes,
+        hotspotX,
+        hotspotY,
+        hotspotWidth,
+        hotspotHeight,
       });
     }
   }
@@ -488,6 +532,14 @@ export async function saveExtractedRooms(
         roomNumber: extractedRoom.roomNumber,
         ...(sourceDocumentId ? { sourceDocumentId } : {}),
       },
+      select: {
+        id: true,
+        type: true,
+        hotspotX: true,
+        hotspotY: true,
+        hotspotWidth: true,
+        hotspotHeight: true,
+      },
     });
 
     if (existing) {
@@ -498,6 +550,11 @@ export async function saveExtractedRooms(
           type: extractedRoom.roomType || existing.type || 'Unknown',
           area: extractedRoom.area,
           notes: extractedRoom.notes,
+          // Only fill hotspot fields if not already manually set
+          ...(extractedRoom.hotspotX != null && existing.hotspotX == null ? { hotspotX: extractedRoom.hotspotX } : {}),
+          ...(extractedRoom.hotspotY != null && existing.hotspotY == null ? { hotspotY: extractedRoom.hotspotY } : {}),
+          ...(extractedRoom.hotspotWidth != null && existing.hotspotWidth == null ? { hotspotWidth: extractedRoom.hotspotWidth } : {}),
+          ...(extractedRoom.hotspotHeight != null && existing.hotspotHeight == null ? { hotspotHeight: extractedRoom.hotspotHeight } : {}),
         },
       });
       updated++;
@@ -522,6 +579,10 @@ export async function saveExtractedRooms(
           notes: extractedRoom.notes,
           status: 'not_started',
           sourceDocumentId: sourceDocumentId || null,
+          hotspotX: extractedRoom.hotspotX,
+          hotspotY: extractedRoom.hotspotY,
+          hotspotWidth: extractedRoom.hotspotWidth,
+          hotspotHeight: extractedRoom.hotspotHeight,
         },
       });
       created++;

@@ -74,7 +74,17 @@ export async function syncRoomData(
   sourceType: DataSourceType
 ): Promise<{ updated: number; created: number }> {
   // Try metadata-first extraction (zero LLM calls)
-  let extractedRooms: { roomNumber: string; name: string; type: string; sqft?: number; floor?: string }[] = [];
+  let extractedRooms: {
+    roomNumber: string;
+    name: string;
+    type: string;
+    sqft?: number;
+    floor?: string;
+    hotspotX?: number;
+    hotspotY?: number;
+    hotspotWidth?: number;
+    hotspotHeight?: number;
+  }[] = [];
 
   try {
     const { extractRoomsFromMetadata } = await import('@/lib/room-extractor');
@@ -90,6 +100,10 @@ export async function syncRoomData(
         type: r.roomType,
         sqft: r.area,
         floor: r.floor,
+        hotspotX: r.hotspotX,
+        hotspotY: r.hotspotY,
+        hotspotWidth: r.hotspotWidth,
+        hotspotHeight: r.hotspotHeight,
       }));
       if (extractedRooms.length > 0) {
         logger.info('FEATURE_SYNC', 'Room sync using metadata extraction (no LLM)', { roomCount: extractedRooms.length });
@@ -152,6 +166,16 @@ Return ONLY JSON array.`;
           { name: room.name },
         ],
       },
+      select: {
+        id: true,
+        area: true,
+        type: true,
+        floorNumber: true,
+        hotspotX: true,
+        hotspotY: true,
+        hotspotWidth: true,
+        hotspotHeight: true,
+      },
     });
 
     if (existing) {
@@ -171,6 +195,26 @@ Return ONLY JSON array.`;
         });
         updated++;
       }
+
+      // Always try to fill empty hotspot fields regardless of source priority
+      if (
+        existing.hotspotX == null &&
+        room.hotspotX != null &&
+        room.hotspotY != null &&
+        room.hotspotWidth != null &&
+        room.hotspotHeight != null
+      ) {
+        await prisma.room.update({
+          where: { id: existing.id },
+          data: {
+            hotspotX: room.hotspotX,
+            hotspotY: room.hotspotY,
+            hotspotWidth: room.hotspotWidth,
+            hotspotHeight: room.hotspotHeight,
+          },
+        });
+        logger.info('FEATURE_SYNC', 'Filled hotspot data for room', { roomNumber: room.roomNumber });
+      }
     } else {
       await prisma.room.create({
         data: {
@@ -180,6 +224,10 @@ Return ONLY JSON array.`;
           type: room.type || 'General',
           area: room.sqft || 0,
           floorNumber: room.floor ? parseInt(room.floor) : 1,
+          hotspotX: room.hotspotX,
+          hotspotY: room.hotspotY,
+          hotspotWidth: room.hotspotWidth,
+          hotspotHeight: room.hotspotHeight,
         },
       });
       created++;
@@ -191,6 +239,51 @@ Return ONLY JSON array.`;
     created,
     updated,
   });
+
+  // Auto-create FloorPlan for architectural floor plan documents
+  try {
+    const chunks = await prisma.documentChunk.findFirst({
+      where: { documentId },
+      select: {
+        sheetNumber: true,
+        discipline: true,
+        drawingType: true,
+        scaleRatio: true,
+      },
+    });
+
+    if (chunks) {
+      const floorPlanId = await autoCreateFloorPlan(projectId, documentId, {
+        sheetNumber: chunks.sheetNumber || undefined,
+        discipline: chunks.discipline || undefined,
+        drawingType: chunks.drawingType || undefined,
+        scaleRatio: chunks.scaleRatio || undefined,
+      });
+
+      // Update created rooms with floorPlanId if FloorPlan was created
+      if (floorPlanId && created > 0) {
+        const { parseSheetNumber } = await import('./sheet-number-parser');
+        const parsed = chunks.sheetNumber ? parseSheetNumber(chunks.sheetNumber) : null;
+        const level = parsed?.level;
+
+        if (level) {
+          await prisma.room.updateMany({
+            where: {
+              projectId,
+              floorPlanId: null,
+              floorNumber: parseInt(level),
+            },
+            data: {
+              floorPlanId,
+            },
+          });
+          logger.info('FEATURE_SYNC', 'Linked rooms to FloorPlan', { floorPlanId, roomCount: created });
+        }
+      }
+    }
+  } catch (fpError) {
+    logger.warn('FEATURE_SYNC', 'FloorPlan auto-create failed (non-blocking)', { error: (fpError as Error).message });
+  }
 
   return { created, updated };
 }
@@ -449,4 +542,92 @@ Return ONLY JSON array.`;
   }
 
   return { materials: 0 };
+}
+
+// ============= AUTO-CREATE FLOOR PLAN =============
+/**
+ * Auto-create FloorPlan record from architectural floor plan sheets
+ * Called from syncRoomData after extracting rooms
+ * @returns FloorPlan ID if created, null otherwise
+ */
+export async function autoCreateFloorPlan(
+  projectId: string,
+  documentId: string,
+  chunk: { sheetNumber?: string; discipline?: string; drawingType?: string; scaleRatio?: number }
+): Promise<string | null> {
+  try {
+    // Only trigger for architectural floor plans
+    if (chunk.discipline !== 'Architectural' && chunk.discipline !== 'A') {
+      return null;
+    }
+
+    if (chunk.drawingType !== 'floor_plan') {
+      return null;
+    }
+
+    if (!chunk.sheetNumber) {
+      logger.warn('FEATURE_SYNC', 'Cannot auto-create FloorPlan without sheet number');
+      return null;
+    }
+
+    // Parse sheet number to get floor level
+    const { parseSheetNumber } = await import('./sheet-number-parser');
+    const parsed = parseSheetNumber(chunk.sheetNumber);
+    if (!parsed) {
+      logger.warn('FEATURE_SYNC', 'Failed to parse sheet number for FloorPlan', { sheetNumber: chunk.sheetNumber });
+      return null;
+    }
+
+    const level = parsed.level; // '1', '2', '3', etc.
+
+    // Check if FloorPlan already exists for this floor
+    const existing = await prisma.floorPlan.findFirst({
+      where: {
+        projectId,
+        floor: level,
+        isActive: true,
+      },
+    });
+
+    if (existing) {
+      logger.info('FEATURE_SYNC', 'FloorPlan already exists for this floor', { floor: level });
+      return existing.id;
+    }
+
+    // Get document to access cloud_storage_path
+    const document = await prisma.document.findUnique({
+      where: { id: documentId },
+      select: { cloud_storage_path: true },
+    });
+
+    if (!document?.cloud_storage_path) {
+      logger.warn('FEATURE_SYNC', 'Cannot auto-create FloorPlan without document cloud_storage_path');
+      return null;
+    }
+
+    // Create FloorPlan
+    const floorPlan = await prisma.floorPlan.create({
+      data: {
+        projectId,
+        name: `Floor ${level} Plan`,
+        floor: level,
+        sourceDocumentId: documentId,
+        sourceSheetNumber: chunk.sheetNumber,
+        cloud_storage_path: document.cloud_storage_path,
+        scale: chunk.scaleRatio?.toString(),
+        isActive: true,
+      },
+    });
+
+    logger.info('FEATURE_SYNC', 'Auto-created FloorPlan', {
+      floorPlanId: floorPlan.id,
+      floor: level,
+      sheetNumber: chunk.sheetNumber,
+    });
+
+    return floorPlan.id;
+  } catch (error) {
+    logger.error('FEATURE_SYNC', 'Error auto-creating FloorPlan', error as Error);
+    return null;
+  }
 }
