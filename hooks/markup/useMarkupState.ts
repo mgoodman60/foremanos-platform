@@ -31,7 +31,7 @@ export interface MarkupState {
   panY: number;
 
   // Drawing state
-  activeTool: 'select' | 'line' | 'arrow' | 'polyline' | 'rectangle' | 'ellipse' | 'freehand' | 'text' | 'eraser' | 'pan';
+  activeTool: 'select' | 'line' | 'arrow' | 'polyline' | 'polygon' | 'rectangle' | 'ellipse' | 'freehand' | 'highlighter' | 'text' | 'eraser' | 'pan' | 'cloud' | 'distance' | 'area' | 'stamp';
   activeStyle: MarkupStyle;
   isDrawing: boolean;
   drawingPoints: number[];

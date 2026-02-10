@@ -78,7 +78,7 @@ export function useDrawingTool() {
       // Start drawing
       if (activeTool === 'line' || activeTool === 'arrow' || activeTool === 'rectangle' || activeTool === 'ellipse') {
         startDrawing([pdfCoords.x, pdfCoords.y]);
-      } else if (activeTool === 'freehand') {
+      } else if (activeTool === 'freehand' || activeTool === 'highlighter') {
         startDrawing([pdfCoords.x, pdfCoords.y]);
       } else if (activeTool === 'polyline') {
         if (!isDrawing) {
@@ -149,7 +149,7 @@ export function useDrawingTool() {
 
       const pdfCoords = konvaToPdf(x, y, pageHeight, zoom);
 
-      if (activeTool === 'freehand') {
+      if (activeTool === 'freehand' || activeTool === 'highlighter') {
         updateDrawingPoints([...drawingPoints, pdfCoords.x, pdfCoords.y]);
       } else if (activeTool === 'line' || activeTool === 'arrow' || activeTool === 'rectangle' || activeTool === 'ellipse') {
         // Update end point
@@ -191,7 +191,7 @@ export function useDrawingTool() {
           width: Math.abs(x2 - x1),
           height: Math.abs(y2 - y1),
         };
-      } else if (activeTool === 'freehand') {
+      } else if (activeTool === 'freehand' || activeTool === 'highlighter') {
         geometry = { points: drawingPoints };
       }
 

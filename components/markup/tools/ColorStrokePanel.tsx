@@ -39,6 +39,7 @@ interface ColorStrokePanelProps {
   showArrowheads?: boolean;
   showFill?: boolean;
   showFont?: boolean;
+  isHighlighter?: boolean;
 }
 
 export function ColorStrokePanel({
@@ -47,12 +48,23 @@ export function ColorStrokePanel({
   showArrowheads = false,
   showFill = false,
   showFont = false,
+  isHighlighter = false,
 }: ColorStrokePanelProps) {
   return (
     <div className="w-64 bg-gray-100 border-l border-gray-300 p-4 space-y-4 overflow-y-auto">
+      {/* Highlighter mode indicator */}
+      {isHighlighter && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
+          <p className="text-xs font-medium text-yellow-800">Highlighter Mode</p>
+          <p className="text-xs text-yellow-600 mt-0.5">Draw to highlight areas on the plan. Rendered at 5x width with transparency.</p>
+        </div>
+      )}
+
       {/* Color Swatches */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Stroke Color</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {isHighlighter ? 'Highlight Color' : 'Stroke Color'}
+        </label>
         <div className="grid grid-cols-6 gap-2">
           {PRESET_COLORS.map((color) => (
             <button
@@ -69,19 +81,24 @@ export function ColorStrokePanel({
         </div>
       </div>
 
-      {/* Stroke Width */}
+      {/* Stroke Width / Highlighter Thickness */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Stroke Width: {style.strokeWidth}px
+          {isHighlighter
+            ? `Thickness: ${style.strokeWidth * 5}px`
+            : `Stroke Width: ${style.strokeWidth}px`}
         </label>
         <input
           type="range"
-          min="1"
-          max="10"
+          min={isHighlighter ? 2 : 1}
+          max={isHighlighter ? 12 : 10}
           value={style.strokeWidth}
           onChange={(e) => onStyleChange({ strokeWidth: Number(e.target.value) })}
           className="w-full"
         />
+        {isHighlighter && (
+          <p className="text-xs text-gray-500 mt-1">Effective width: {style.strokeWidth * 5}px</p>
+        )}
       </div>
 
       {/* Opacity */}
@@ -99,8 +116,8 @@ export function ColorStrokePanel({
         />
       </div>
 
-      {/* Line Style */}
-      <div>
+      {/* Line Style -- hidden for highlighter since it's always solid */}
+      {!isHighlighter && <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Line Style</label>
         <div className="grid grid-cols-2 gap-2">
           {LINE_STYLES.map((ls) => (
@@ -120,7 +137,7 @@ export function ColorStrokePanel({
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Fill Color (conditional) */}
       {showFill && (

@@ -130,10 +130,46 @@ export function MarkupViewer({
     }
   }, [historyIndex, history]);
 
-  // Tool change handler
+  // Store the user's "normal" style so we can restore it after highlighter
+  const normalStyleRef = useRef<MarkupStyle>({
+    color: '#FF0000',
+    strokeWidth: 2,
+    opacity: 1,
+    lineStyle: 'solid' as const,
+  });
+
+  // Tool change handler — auto-set style defaults per tool
   const handleToolChange = useCallback((toolId: string) => {
-    setActiveTool(toolId);
+    setActiveTool((prevTool) => {
+      // Save current style when leaving non-highlighter tools
+      if (prevTool !== 'highlighter') {
+        setCurrentStyle((s) => {
+          normalStyleRef.current = { ...s };
+          return s;
+        });
+      }
+      return toolId;
+    });
     setSelectedMarkupId(null);
+
+    // Apply tool-specific style defaults
+    if (toolId === 'highlighter') {
+      setCurrentStyle((prev) => ({
+        ...prev,
+        color: '#FFFF00',       // Yellow default for highlighting
+        strokeWidth: 4,         // Will be rendered at 5x (20px effective)
+        opacity: 0.3,           // Semi-transparent
+        lineStyle: 'solid' as const,
+      }));
+    } else if (toolId === 'line' || toolId === 'arrow' || toolId === 'freehand') {
+      // Restore normal style when switching to line-type tools
+      setCurrentStyle((prev) => ({
+        ...normalStyleRef.current,
+        // Keep any fill settings the user may have set
+        fillColor: prev.fillColor,
+        fillOpacity: prev.fillOpacity,
+      }));
+    }
   }, []);
 
   // Style change handler
@@ -169,6 +205,7 @@ export function MarkupViewer({
   const showArrowheads = activeTool === 'arrow';
   const showFill = ['rectangle', 'ellipse', 'polygon', 'cloud'].includes(activeTool);
   const showFont = activeTool === 'text';
+  const isHighlighter = activeTool === 'highlighter';
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -240,6 +277,7 @@ export function MarkupViewer({
           showArrowheads={showArrowheads}
           showFill={showFill}
           showFont={showFont}
+          isHighlighter={isHighlighter}
         />
       </div>
     </div>
