@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { ONE_SENIOR_CARE_BUDGET } from '@/lib/budget-parser';
+import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +12,14 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
+    // Rate limit
+    const rateLimitId = getRateLimitIdentifier(session.user.id, getClientIp(request));
+    const rateLimitResult = await checkRateLimit(rateLimitId, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    }
+
     const { projectId, documentId } = await request.json();
     
     if (!projectId) {
@@ -73,7 +82,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Log the import
-    console.log(`[Budget Import] Imported ${budgetItems.length} budget items for project ${projectId}`);
+    logger.info('BUDGET_IMPORT', `Imported ${budgetItems.length} budget items`, { projectId });
     
     return NextResponse.json({
       success: true,
@@ -92,7 +101,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Budget Import Error]', error);
+    logger.error('BUDGET_IMPORT', 'Failed to import budget', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to import budget' },
       { status: 500 }
@@ -159,7 +168,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[Budget Fetch Error]', error);
+    logger.error('BUDGET_IMPORT', 'Failed to fetch budget', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to fetch budget' },
       { status: 500 }

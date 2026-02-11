@@ -11,7 +11,7 @@
     "@typescript-eslint/no-namespace": "warn",
     "@typescript-eslint/no-var-requires": "warn",
     "@typescript-eslint/ban-types": "warn",
-    "react/no-unescaped-entities": "warn",
+    "react/no-unescaped-entities": "error",
     "prefer-const": "warn"
   },
   "ignorePatterns": ["*.d.ts"]

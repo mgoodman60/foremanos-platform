@@ -790,6 +790,7 @@ model MaterialTakeoff {
   TakeoffLineItem TakeoffLineItem[]
 
   @@index([createdBy])
+  @@index([documentId])
   @@index([projectId])
   @@index([status])
 }

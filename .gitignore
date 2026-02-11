@@ -55,6 +55,7 @@ test-results/
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+*.bak
 
 # Abacus AI specific
 .abacus.donotdelete
@@ -66,7 +67,7 @@ public/regulatory-documents/*.pdf
 *.mp3
 assets/tour/video_temp/
 
-# Package lock (use yarn.lock instead)
-package-lock.json
+# Package lock
+# (package-lock.json is tracked in git)
 .vercel
 .env*.local

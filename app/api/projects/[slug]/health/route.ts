@@ -26,7 +26,7 @@ export async function GET(
 
     const { searchParams } = new URL(request.url);
     const includeHistory = searchParams.get('history') === 'true';
-    const historyDays = parseInt(searchParams.get('days') || '30');
+    const historyDays = Math.min(Math.max(parseInt(searchParams.get('days') || '30') || 30, 1), 365);
 
     const health = await calculateProjectHealth(project.id);
     

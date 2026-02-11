@@ -12,6 +12,7 @@ import { suggestDocumentCategory } from '@/lib/document-categorizer';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
 import { processDocument } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { DocumentCategory } from '@prisma/client';
 import { waitUntil } from '@vercel/functions';
 
@@ -44,6 +45,13 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit
+    const rateLimitId = getRateLimitIdentifier(session.user.id, getClientIp(request));
+    const rateLimitResult = await checkRateLimit(rateLimitId, RATE_LIMITS.UPLOAD);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
     const s3Check = validateS3Config();

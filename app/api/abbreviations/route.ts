@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 import {
   ALL_CONSTRUCTION_ABBREVIATIONS,
   expandAbbreviation,
@@ -26,6 +27,10 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get('query') || '';
     const category = searchParams.get('category') || '';
     const abbr = searchParams.get('abbr') || '';
+
+    if (query.length > 200) {
+      return NextResponse.json({ error: 'Query too long' }, { status: 400 });
+    }
 
     switch (action) {
       case 'list': {
@@ -88,7 +93,7 @@ export async function GET(req: NextRequest) {
     }
 
   } catch (error) {
-    console.error('[ABBREVIATIONS API] Error:', error);
+    logger.error('ABBREVIATIONS_API', 'Error handling abbreviation request', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

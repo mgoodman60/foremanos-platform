@@ -16,6 +16,7 @@ import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
 import { logger } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { DocumentCategory } from '@prisma/client';
 import { waitUntil } from '@vercel/functions';
 
@@ -66,6 +67,13 @@ export async function POST(request: Request) {
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 1b. Rate limit
+    const rateLimitId = getRateLimitIdentifier(session.user.id, getClientIp(request));
+    const rateLimitResult = await checkRateLimit(rateLimitId, RATE_LIMITS.UPLOAD);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
     // 2. Validate request body

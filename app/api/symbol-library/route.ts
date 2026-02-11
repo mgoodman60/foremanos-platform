@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 import {
   ALL_STANDARD_SYMBOLS,
   getSymbolsByTrade,
@@ -28,6 +29,10 @@ export async function GET(req: NextRequest) {
     const trade = searchParams.get('trade') || '';
     const category = searchParams.get('category') || '';
     const code = searchParams.get('code') || '';
+
+    if (query.length > 200) {
+      return NextResponse.json({ error: 'Query too long' }, { status: 400 });
+    }
 
     switch (action) {
       case 'list': {
@@ -99,7 +104,7 @@ export async function GET(req: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Symbol library error:', error);
+    logger.error('SYMBOL_LIBRARY', 'Error handling symbol library request', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Failed to get symbols' },
       { status: 500 }

@@ -85,6 +85,12 @@ vi.mock('@/lib/logger', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   createScopedLogger: vi.fn().mockReturnValue({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
 }));
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({ success: true, remaining: 10 }),
+  RATE_LIMITS: { UPLOAD: { maxRequests: 10, windowMs: 60000 }, API: { maxRequests: 60, windowMs: 60000 }, AUTH: { maxRequests: 5, windowMs: 300000 }, CHAT: { maxRequests: 20, windowMs: 60000 } },
+  getClientIp: vi.fn().mockReturnValue('127.0.0.1'),
+  getRateLimitIdentifier: vi.fn().mockReturnValue('test-user'),
+}));
 
 import { POST } from '@/app/api/documents/confirm-upload/route';
 

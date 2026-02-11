@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity, createNotification } from '@/lib/audit-log';
 import { sendApprovalEmail, sendRejectionEmail } from '@/lib/email-service';
+import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,13 @@ export async function POST(request: NextRequest) {
         { error: 'Forbidden' },
         { status: 403 }
       );
+    }
+
+    // Rate limit
+    const rateLimitId = getRateLimitIdentifier(session.user.id, getClientIp(request));
+    const rateLimitResult = await checkRateLimit(rateLimitId, RATE_LIMITS.AUTH);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
     const body = await request.json();
@@ -118,7 +127,7 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('Error approving/rejecting user:', error);
+    logger.error('ADMIN_APPROVE', 'Error approving/rejecting user', error instanceof Error ? error : undefined);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

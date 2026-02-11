@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { initializeRegulatoryDocumentsForProject } from '@/lib/regulatory-documents';
 import { namespacePIN } from '@/lib/guest-pin-utils';
+import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +30,13 @@ export async function POST(request: Request) {
     // Only admin and client can create projects
     if (session.user.role !== 'admin' && session.user.role !== 'client') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Rate limit
+    const rateLimitId = getRateLimitIdentifier(session.user.id, getClientIp(request));
+    const rateLimitResult = await checkRateLimit(rateLimitId, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
     const { name, guestUsername, guestPassword } = await request.json();
@@ -127,17 +136,13 @@ export async function POST(request: Request) {
     // This runs in background - don't wait for it
     initializeRegulatoryDocumentsForProject(project.id)
       .then((result) => {
-        console.log(
-          `[ProjectCreation] Linked ${result.documentsLinked} regulatory documents to project ${project.id}`
-        );
+        logger.info('PROJECT_CREATION', `Linked ${result.documentsLinked} regulatory documents`, { projectId: project.id });
         if (result.documentsNeedingProcessing > 0) {
-          console.log(
-            `[ProjectCreation] ${result.documentsNeedingProcessing} regulatory documents need processing`
-          );
+          logger.info('PROJECT_CREATION', `${result.documentsNeedingProcessing} regulatory documents need processing`, { projectId: project.id });
         }
       })
       .catch((error) => {
-        console.error('[ProjectCreation] Failed to initialize regulatory documents:', error);
+        logger.error('PROJECT_CREATION', 'Failed to initialize regulatory documents', error instanceof Error ? error : undefined, { projectId: project.id });
       });
 
     return NextResponse.json(
@@ -152,7 +157,7 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating project:', error);
+    logger.error('PROJECT_CREATION', 'Error creating project', error instanceof Error ? error : undefined);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
