@@ -13,6 +13,7 @@ export default function ModelsPage() {
   const { data: session, status } = useSession() || {};
   const [project, setProject] = useState<{ name: string; slug: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [forgeConfigured, setForgeConfigured] = useState<boolean | null>(null);
 
   const slug = params?.slug as string;
 
@@ -33,7 +34,17 @@ export default function ModelsPage() {
       }
     };
 
+    const checkForge = async () => {
+      try {
+        const res = await fetch('/api/autodesk/token');
+        setForgeConfigured(res.status !== 503);
+      } catch {
+        setForgeConfigured(false);
+      }
+    };
+
     fetchProject();
+    checkForge();
   }, [slug, router]);
 
   if (status === 'loading' || loading) {
@@ -97,46 +108,71 @@ export default function ModelsPage() {
 
       {/* Main Content */}
       <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Info Banner */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl">
-          <div className="flex items-start gap-4">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Box className="w-6 h-6 text-blue-400" />
-            </div>
-            <div>
-              <h3 className="text-white font-medium">View CAD & BIM Models in 3D</h3>
-              <p className="text-gray-400 text-sm mt-1">
-                Upload Revit (.rvt), AutoCAD (.dwg), IFC, SketchUp (.skp), and other CAD/BIM files 
-                to view them in an interactive 3D viewer. Pan, zoom, rotate, and isolate elements.
+        {forgeConfigured === false ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="max-w-md text-center p-8 bg-dark-subtle border border-gray-700 rounded-xl">
+              <Box className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-white mb-2">3D Model Viewer Not Configured</h2>
+              <p className="text-gray-400 text-sm mb-4">
+                The Autodesk Forge integration is not set up for this environment.
+                Contact your administrator to configure the AUTODESK_CLIENT_ID and
+                AUTODESK_CLIENT_SECRET environment variables.
               </p>
+              <a
+                href="https://aps.autodesk.com/developer/documentation"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                <Info className="w-4 h-4" />
+                Autodesk Platform Services Docs
+              </a>
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Info Banner */}
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <Box className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">View CAD & BIM Models in 3D</h3>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Upload Revit (.rvt), AutoCAD (.dwg), IFC, SketchUp (.skp), and other CAD/BIM files
+                    to view them in an interactive 3D viewer. Pan, zoom, rotate, and isolate elements.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-        {/* Model Viewer Panel */}
-        <ModelViewerPanel projectSlug={slug} />
+            {/* Model Viewer Panel */}
+            <ModelViewerPanel projectSlug={slug} />
 
-        {/* Help Section */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
-            <h4 className="text-white font-medium mb-2">Supported Formats</h4>
-            <p className="text-gray-400 text-sm">
-              DWG, DXF, RVT, RFA, IFC, NWD, 3DS, FBX, OBJ, STL, STEP, SKP, and more.
-            </p>
-          </div>
-          <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
-            <h4 className="text-white font-medium mb-2">Processing Time</h4>
-            <p className="text-gray-400 text-sm">
-              Files are processed in the cloud. Small files take 1-2 minutes, larger BIM models may take 5-10 minutes.
-            </p>
-          </div>
-          <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
-            <h4 className="text-white font-medium mb-2">Viewer Controls</h4>
-            <p className="text-gray-400 text-sm">
-              Left-click to orbit, right-click to pan, scroll to zoom. Use toolbar for fit-to-view and isolation.
-            </p>
-          </div>
-        </div>
+            {/* Help Section */}
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
+                <h4 className="text-white font-medium mb-2">Supported Formats</h4>
+                <p className="text-gray-400 text-sm">
+                  DWG, DXF, RVT, RFA, IFC, NWD, 3DS, FBX, OBJ, STL, STEP, SKP, and more.
+                </p>
+              </div>
+              <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
+                <h4 className="text-white font-medium mb-2">Processing Time</h4>
+                <p className="text-gray-400 text-sm">
+                  Files are processed in the cloud. Small files take 1-2 minutes, larger BIM models may take 5-10 minutes.
+                </p>
+              </div>
+              <div className="p-4 bg-dark-subtle border border-gray-700 rounded-xl">
+                <h4 className="text-white font-medium mb-2">Viewer Controls</h4>
+                <p className="text-gray-400 text-sm">
+                  Left-click to orbit, right-click to pan, scroll to zoom. Use toolbar for fit-to-view and isolation.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
