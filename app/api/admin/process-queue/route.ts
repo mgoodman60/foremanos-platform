@@ -8,7 +8,7 @@ import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 900; // 15 minutes
+export const maxDuration = 300; // 5 minutes (Vercel Pro max: 800s; queue runs every 5 min via cron)
 
 // Must be less than staleBatchTimeoutMs (15min) to avoid resetting active batches
 const STALE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
