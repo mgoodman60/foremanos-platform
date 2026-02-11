@@ -21,6 +21,9 @@ const mockPrisma = vi.hoisted(() => ({
     deleteMany: vi.fn(),
     create: vi.fn(),
   },
+  room: {
+    findMany: vi.fn(),
+  },
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
@@ -42,7 +45,9 @@ import { extractMEPTakeoffs } from '@/lib/mep-takeoff/extraction';
 
 describe('MEP Takeoff Extraction', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    // Default room mock to return empty array (for tests that reach room estimation)
+    mockPrisma.room.findMany.mockResolvedValue([]);
   });
 
   describe('extractMEPTakeoffs', () => {
@@ -80,9 +85,7 @@ describe('MEP Takeoff Extraction', () => {
         ],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({
         id: 'user-id',
@@ -124,9 +127,7 @@ describe('MEP Takeoff Extraction', () => {
         ],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -160,9 +161,7 @@ describe('MEP Takeoff Extraction', () => {
         ],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -241,9 +240,7 @@ describe('MEP Takeoff Extraction', () => {
         ],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -270,13 +267,11 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([
+      mockPrisma.room.findMany.mockResolvedValueOnce([
           { id: 'room1', type: 'Office', name: 'Room 101', area: 200 },
           { id: 'room2', type: 'Toilet', name: 'Restroom', area: 80 },
           { id: 'room3', type: 'Kitchen', name: 'Break Room', area: 150 },
-        ]),
-      };
+        ]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -313,9 +308,7 @@ describe('MEP Takeoff Extraction', () => {
         ],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -339,11 +332,9 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([
+      mockPrisma.room.findMany.mockResolvedValueOnce([
           { id: 'room1', type: 'Office', name: 'Room 101', area: 200 },
-        ]),
-      };
+        ]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({
         id: 'user-id',
@@ -378,9 +369,7 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce({
@@ -407,11 +396,9 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([
+      mockPrisma.room.findMany.mockResolvedValueOnce([
           { id: 'room1', type: 'Office', name: 'Office', area: 200 },
-        ]),
-      };
+        ]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -473,11 +460,9 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([
+      mockPrisma.room.findMany.mockResolvedValueOnce([
           { id: 'room1', name: 'Room 1', area: 100 },
-        ]),
-      };
+        ]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);
@@ -499,9 +484,7 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst
         .mockResolvedValueOnce(null) // system user
@@ -521,9 +504,7 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([]),
-      };
+      mockPrisma.room.findMany.mockResolvedValueOnce([]);
 
       mockPrisma.user.findFirst
         .mockResolvedValueOnce(null) // system user not found
@@ -548,11 +529,9 @@ describe('MEP Takeoff Extraction', () => {
         Document: [],
       });
 
-      mockPrisma.room = {
-        findMany: vi.fn().mockResolvedValueOnce([
+      mockPrisma.room.findMany.mockResolvedValueOnce([
           { id: 'room1', name: 'Room 1', area: 100 },
-        ]),
-      };
+        ]);
 
       mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'user-id' });
       mockPrisma.materialTakeoff.findFirst.mockResolvedValueOnce(null);

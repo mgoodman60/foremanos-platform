@@ -666,7 +666,7 @@ describe('dimension-intelligence', () => {
       const results = await searchDimensions('proj-1', { query: 'north' });
 
       expect(results).toHaveLength(1);
-      expect(results[0].context).toContain('North');
+      expect((results[0] as any).context).toContain('North');
     });
 
     it('should filter by type', async () => {

@@ -37,7 +37,6 @@ export const stripe = {
 };
 
 // Subscription tier to Stripe price ID mapping
-// TODO: Replace these with your actual Stripe Price IDs after creating products in Stripe Dashboard
 export const STRIPE_PRICE_IDS = {
   starter_monthly: process.env.STRIPE_PRICE_STARTER_MONTHLY || 'price_starter_monthly',
   starter_annual: process.env.STRIPE_PRICE_STARTER_ANNUAL || 'price_starter_annual',

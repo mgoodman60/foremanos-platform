@@ -108,7 +108,7 @@ describe('workflow-service', () => {
       const mockTemplate = {
         id: 'workflow-123',
         name: 'Commercial Construction',
-        projectType: 'commercial' as ProjectType,
+        projectType: 'new_construction' as ProjectType,
         tradeType: 'general_contractor' as TradeType,
         isActive: true,
         WorkflowStep: [],
@@ -116,12 +116,12 @@ describe('workflow-service', () => {
 
       mockPrisma.workflowTemplate.findFirst.mockResolvedValueOnce(mockTemplate);
 
-      const result = await getWorkflowTemplate('commercial', 'general_contractor');
+      const result = await getWorkflowTemplate('new_construction', 'general_contractor');
 
       expect(result).toEqual(mockTemplate);
       expect(mockPrisma.workflowTemplate.findFirst).toHaveBeenCalledWith({
         where: {
-          projectType: 'commercial',
+          projectType: 'new_construction',
           tradeType: 'general_contractor',
           isActive: true,
         },
@@ -136,7 +136,7 @@ describe('workflow-service', () => {
     it('should return null if no matching template found', async () => {
       mockPrisma.workflowTemplate.findFirst.mockResolvedValueOnce(null);
 
-      const result = await getWorkflowTemplate('residential', 'electrical');
+      const result = await getWorkflowTemplate('renovation', 'electrical');
 
       expect(result).toBeNull();
     });
@@ -148,14 +148,14 @@ describe('workflow-service', () => {
         {
           id: 'workflow-1',
           name: 'General Contractor Workflow',
-          projectType: 'commercial',
+          projectType: 'new_construction',
           priority: 10,
           WorkflowStep: [{ id: 'step1' }, { id: 'step2' }],
         },
         {
           id: 'workflow-2',
           name: 'Electrical Workflow',
-          projectType: 'commercial',
+          projectType: 'new_construction',
           priority: 5,
           WorkflowStep: [{ id: 'step3' }],
         },
@@ -163,12 +163,12 @@ describe('workflow-service', () => {
 
       mockPrisma.workflowTemplate.findMany.mockResolvedValueOnce(mockTemplates);
 
-      const result = await getAvailableWorkflows('commercial');
+      const result = await getAvailableWorkflows('new_construction');
 
       expect(result).toHaveLength(2);
       expect(mockPrisma.workflowTemplate.findMany).toHaveBeenCalledWith({
         where: {
-          projectType: 'commercial',
+          projectType: 'new_construction',
           isActive: true,
         },
         include: {
@@ -184,7 +184,7 @@ describe('workflow-service', () => {
     it('should return empty array on error', async () => {
       mockPrisma.workflowTemplate.findMany.mockRejectedValueOnce(new Error('Database error'));
 
-      const result = await getAvailableWorkflows('commercial');
+      const result = await getAvailableWorkflows('new_construction');
 
       expect(result).toEqual([]);
       expect(mockLogger.error).toHaveBeenCalled();
@@ -196,7 +196,7 @@ describe('workflow-service', () => {
       const mockData = {
         name: 'New Workflow',
         description: 'Test workflow',
-        projectType: 'commercial' as ProjectType,
+        projectType: 'new_construction' as ProjectType,
         tradeType: 'general_contractor' as TradeType,
         steps: [
           {
@@ -236,7 +236,7 @@ describe('workflow-service', () => {
     it('should handle optional step fields', async () => {
       const mockData = {
         name: 'Simple Workflow',
-        projectType: 'residential' as ProjectType,
+        projectType: 'renovation' as ProjectType,
         tradeType: 'plumbing' as TradeType,
         steps: [
           {
@@ -262,7 +262,7 @@ describe('workflow-service', () => {
 
       const mockData = {
         name: 'Test',
-        projectType: 'commercial' as ProjectType,
+        projectType: 'new_construction' as ProjectType,
         tradeType: 'general_contractor' as TradeType,
         steps: [],
       };

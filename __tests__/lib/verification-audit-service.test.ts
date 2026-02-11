@@ -42,6 +42,8 @@ describe('verification-audit-service', () => {
     it('should create audit log for single submittal verification', async () => {
       const mockReport = {
         submittalId: 'submittal-1',
+        submittalNumber: 'SUB-001',
+        verifiedAt: new Date(),
         totalLineItems: 10,
         sufficientCount: 7,
         insufficientCount: 2,
@@ -49,6 +51,7 @@ describe('verification-audit-service', () => {
         noRequirementCount: 0,
         overallStatus: 'REVIEW_NEEDED' as const,
         lineItemResults: [],
+        criticalShortages: [],
       };
 
       mockPrisma.verificationAuditLog.create.mockResolvedValue({
@@ -92,6 +95,8 @@ describe('verification-audit-service', () => {
     it('should calculate results summary correctly', async () => {
       const mockReport = {
         submittalId: 'submittal-1',
+        submittalNumber: 'SUB-001',
+        verifiedAt: new Date(),
         totalLineItems: 15,
         sufficientCount: 10,
         insufficientCount: 3,
@@ -99,6 +104,7 @@ describe('verification-audit-service', () => {
         noRequirementCount: 0,
         overallStatus: 'FAIL' as const,
         lineItemResults: [],
+        criticalShortages: [],
       };
 
       let capturedSummary: ResultsSummary | undefined;
@@ -131,6 +137,8 @@ describe('verification-audit-service', () => {
 
         const mockReport = {
           submittalId: 'submittal-1',
+          submittalNumber: 'SUB-001',
+          verifiedAt: new Date(),
           totalLineItems: 5,
           sufficientCount: 5,
           insufficientCount: 0,
@@ -138,6 +146,7 @@ describe('verification-audit-service', () => {
           noRequirementCount: 0,
           overallStatus: input,
           lineItemResults: [],
+          criticalShortages: [],
         };
 
         await createVerificationAuditLog('project-1', 'user-1', 'John Doe', mockReport);
@@ -155,6 +164,8 @@ describe('verification-audit-service', () => {
     it('should record custom verification type', async () => {
       const mockReport = {
         submittalId: 'submittal-1',
+        submittalNumber: 'SUB-001',
+        verifiedAt: new Date(),
         totalLineItems: 10,
         sufficientCount: 10,
         insufficientCount: 0,
@@ -162,6 +173,7 @@ describe('verification-audit-service', () => {
         noRequirementCount: 0,
         overallStatus: 'PASS' as const,
         lineItemResults: [],
+        criticalShortages: [],
       };
 
       mockPrisma.verificationAuditLog.create.mockResolvedValue({ id: 'log-1' });
@@ -171,14 +183,14 @@ describe('verification-audit-service', () => {
         'user-1',
         'John Doe',
         mockReport,
-        'AUTO_SUBMITTAL_UPDATE',
+        'RE_VERIFICATION',
         'auto-sync'
       );
 
       expect(mockPrisma.verificationAuditLog.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            verificationType: 'AUTO_SUBMITTAL_UPDATE',
+            verificationType: 'RE_VERIFICATION',
             triggerReason: 'auto-sync',
           }),
         })
@@ -191,6 +203,8 @@ describe('verification-audit-service', () => {
       const mockReports = [
         {
           submittalId: 'submittal-1',
+          submittalNumber: 'SUB-001',
+          verifiedAt: new Date(),
           totalLineItems: 5,
           sufficientCount: 4,
           insufficientCount: 1,
@@ -198,9 +212,12 @@ describe('verification-audit-service', () => {
           noRequirementCount: 0,
           overallStatus: 'FAIL' as const,
           lineItemResults: [{ lineItemId: '1', status: 'SUFFICIENT' }],
+          criticalShortages: [],
         },
         {
           submittalId: 'submittal-2',
+          submittalNumber: 'SUB-002',
+          verifiedAt: new Date(),
           totalLineItems: 3,
           sufficientCount: 3,
           insufficientCount: 0,
@@ -208,6 +225,7 @@ describe('verification-audit-service', () => {
           noRequirementCount: 0,
           overallStatus: 'PASS' as const,
           lineItemResults: [{ lineItemId: '2', status: 'SUFFICIENT' }],
+          criticalShortages: [],
         },
       ];
 
@@ -217,7 +235,7 @@ describe('verification-audit-service', () => {
         'project-1',
         'user-1',
         'John Doe',
-        mockReports
+        mockReports as any
       );
 
       expect(logId).toBe('bulk-log-1');
@@ -268,6 +286,8 @@ describe('verification-audit-service', () => {
 
         const formattedReports = reports.map(r => ({
           submittalId: 'submittal-1',
+          submittalNumber: 'SUB-001',
+          verifiedAt: new Date(),
           totalLineItems: r.totalLineItems,
           sufficientCount: r.sufficient,
           insufficientCount: r.insufficient,
@@ -275,6 +295,7 @@ describe('verification-audit-service', () => {
           noRequirementCount: r.noRequirement,
           overallStatus: r.overallStatus,
           lineItemResults: r.lineItemResults,
+          criticalShortages: [] as any[],
         }));
 
         await createBulkVerificationAuditLog('project-1', 'user-1', 'John Doe', formattedReports);
@@ -293,6 +314,8 @@ describe('verification-audit-service', () => {
       const mockReports = [
         {
           submittalId: 'submittal-1',
+          submittalNumber: 'SUB-001',
+          verifiedAt: new Date(),
           totalLineItems: 2,
           sufficientCount: 2,
           insufficientCount: 0,
@@ -303,9 +326,12 @@ describe('verification-audit-service', () => {
             { lineItemId: '1', status: 'SUFFICIENT' },
             { lineItemId: '2', status: 'SUFFICIENT' },
           ],
+          criticalShortages: [],
         },
         {
           submittalId: 'submittal-2',
+          submittalNumber: 'SUB-002',
+          verifiedAt: new Date(),
           totalLineItems: 1,
           sufficientCount: 1,
           insufficientCount: 0,
@@ -315,6 +341,7 @@ describe('verification-audit-service', () => {
           lineItemResults: [
             { lineItemId: '3', status: 'SUFFICIENT' },
           ],
+          criticalShortages: [],
         },
       ];
 
@@ -324,7 +351,7 @@ describe('verification-audit-service', () => {
         return Promise.resolve({ id: 'log-1' });
       });
 
-      await createBulkVerificationAuditLog('project-1', 'user-1', 'John Doe', mockReports);
+      await createBulkVerificationAuditLog('project-1', 'user-1', 'John Doe', mockReports as any);
 
       expect(capturedLineItemResults).toHaveLength(3);
     });
@@ -563,7 +590,7 @@ describe('verification-audit-service', () => {
 
       await expect(
         createManualOverride('project-1', 'nonexistent', 'user-1', 'John Doe', {
-          overrideType: 'STATUS_OVERRIDE',
+          overrideType: 'STATUS_CHANGE',
           newStatus: 'SUFFICIENT',
           justification: 'Test',
         })
@@ -581,7 +608,7 @@ describe('verification-audit-service', () => {
       mockPrisma.submittalLineItem.update.mockResolvedValue({});
 
       await createManualOverride('project-1', 'item-1', 'user-1', 'John Doe', {
-        overrideType: 'STATUS_OVERRIDE',
+        overrideType: 'STATUS_CHANGE',
         newStatus: 'SUFFICIENT',
         justification: 'Status change only',
       });
@@ -821,6 +848,8 @@ describe('verification-audit-service', () => {
     it('should handle zero line items in report', async () => {
       const mockReport = {
         submittalId: 'submittal-1',
+        submittalNumber: 'SUB-001',
+        verifiedAt: new Date(),
         totalLineItems: 0,
         sufficientCount: 0,
         insufficientCount: 0,
@@ -828,6 +857,7 @@ describe('verification-audit-service', () => {
         noRequirementCount: 0,
         overallStatus: 'PASS' as const,
         lineItemResults: [],
+        criticalShortages: [],
       };
 
       mockPrisma.verificationAuditLog.create.mockResolvedValue({ id: 'log-1' });

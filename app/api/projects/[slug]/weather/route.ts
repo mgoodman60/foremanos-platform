@@ -61,11 +61,14 @@ export async function GET(
 
     if (forDailyReport) {
       const weatherData = await autoPopulateDailyReportWeather(lat, lon);
+      if (!weatherData) {
+        return NextResponse.json({ error: 'Weather data unavailable' });
+      }
       return NextResponse.json({
         ...weatherData,
         location: locationInfo,
         coordinates: { lat, lon }
-      } || { error: 'Weather data unavailable' });
+      });
     }
 
     const forecast = await getProjectWeather(params.slug);
