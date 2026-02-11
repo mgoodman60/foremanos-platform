@@ -261,7 +261,7 @@ export default function JobCostReport() {
   if (loading) {
     return (
       <div className="bg-dark-card rounded-lg p-8 text-center">
-        <RefreshCw className="h-8 w-8 animate-spin mx-auto text-blue-400" />
+        <RefreshCw aria-hidden="true" className="h-8 w-8 animate-spin mx-auto text-blue-400" />
         <p className="mt-2 text-gray-400">Loading job cost data...</p>
       </div>
     );
@@ -273,17 +273,17 @@ export default function JobCostReport() {
       <div className="bg-dark-card rounded-lg p-4 border border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5 text-blue-400" />
+            <FileSpreadsheet aria-hidden="true" className="h-5 w-5 text-blue-400" />
             <h2 className="text-lg font-semibold">Job Cost Category Totals Report</h2>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
-              <Download className="h-4 w-4 mr-1" /> Export CSV
+              <Download aria-hidden="true" className="h-4 w-4 mr-1" /> Export CSV
             </Button>
             <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-1" /> Import
+                  <Upload aria-hidden="true" className="h-4 w-4 mr-1" /> Import
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-dark-card border-gray-700 text-white">
@@ -331,7 +331,7 @@ export default function JobCostReport() {
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
               <DialogTrigger asChild>
                 <Button size="sm">
-                  <Plus className="h-4 w-4 mr-1" /> Add Item
+                  <Plus aria-hidden="true" className="h-4 w-4 mr-1" /> Add Item
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-dark-card border-gray-700 text-white max-w-lg">
@@ -449,7 +449,7 @@ export default function JobCostReport() {
       {/* Filters */}
       <div className="flex items-center gap-4 bg-dark-card rounded-lg p-3 border border-gray-700">
         <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-gray-400" />
+          <Search aria-hidden="true" className="h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search items..."
             value={searchTerm}
@@ -472,10 +472,10 @@ export default function JobCostReport() {
         </Select>
         <div className="flex gap-2 ml-auto">
           <Button variant="ghost" size="sm" onClick={expandAll}>
-            <ChevronDown className="h-4 w-4 mr-1" /> Expand All
+            <ChevronDown aria-hidden="true" className="h-4 w-4 mr-1" /> Expand All
           </Button>
           <Button variant="ghost" size="sm" onClick={collapseAll}>
-            <ChevronUp className="h-4 w-4 mr-1" /> Collapse All
+            <ChevronUp aria-hidden="true" className="h-4 w-4 mr-1" /> Collapse All
           </Button>
         </div>
       </div>
@@ -671,9 +671,9 @@ export default function JobCostReport() {
       {/* Empty State */}
       {filteredGroups.length === 0 && (
         <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
-          <FileSpreadsheet className="h-12 w-12 mx-auto text-gray-500 mb-3" />
+          <FileSpreadsheet aria-hidden="true" className="h-12 w-12 mx-auto text-gray-400 mb-3" />
           <p className="text-gray-400">No budget items found.</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Add items manually or import from a Walker Company PDF.
           </p>
         </div>

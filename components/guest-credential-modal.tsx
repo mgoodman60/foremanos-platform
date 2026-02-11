@@ -184,7 +184,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
         <div className="sticky top-0 bg-client-primary text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Shield className="w-6 h-6" />
+              <Shield aria-hidden="true" className="w-6 h-6" />
               <div>
                 <h2 id="guest-credential-modal-title" className="text-xl font-bold">Guest Credential Management</h2>
                 <p className="text-blue-100 text-sm mt-1">{projectName}</p>
@@ -211,7 +211,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
             {/* Current Credentials */}
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
               <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-                <Key className="w-5 h-5 text-client-primary" />
+                <Key aria-hidden="true" className="w-5 h-5 text-client-primary" />
                 Current Guest Credentials
               </h3>
               <div className="space-y-2 text-sm">
@@ -310,7 +310,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
                     disabled={updating}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <RefreshCw aria-hidden="true" className="w-4 h-4 mr-2" />
                     Generate
                   </Button>
                 </div>
@@ -337,7 +337,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
             {guestData?.activityLogs && guestData.activityLogs.length > 0 && (
               <div className="border-t pt-6">
                 <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-client-primary" />
+                  <Clock aria-hidden="true" className="w-5 h-5 text-client-primary" />
                   Recent Guest Login Activity
                 </h3>
                 <div className="space-y-2">

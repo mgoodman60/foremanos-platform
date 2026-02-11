@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface DailyReportHistoryProps {
   projectSlug: string;
@@ -110,16 +111,21 @@ export function DailyReportHistory({
     }
   };
 
+  const containerRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
+
   if (!isOpen) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="daily-report-history-dialog-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="daily-report-history-dialog-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div>
@@ -152,7 +158,7 @@ export function DailyReportHistory({
                 <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-900/30 rounded-lg">
-                      <FileText className="h-5 w-5 text-blue-400" />
+                      <FileText aria-hidden="true" className="h-5 w-5 text-blue-400" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-slate-50">{stats.total}</p>
@@ -164,7 +170,7 @@ export function DailyReportHistory({
                 <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-900/30 rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-green-400" />
+                      <CheckCircle aria-hidden="true" className="h-5 w-5 text-green-400" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-slate-50">{stats.finalized}</p>
@@ -176,7 +182,7 @@ export function DailyReportHistory({
                 <div className="bg-dark-card border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-orange-900/30 rounded-lg">
-                      <Clock className="h-5 w-5 text-orange-400" />
+                      <Clock aria-hidden="true" className="h-5 w-5 text-orange-400" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-slate-50">{stats.inProgress}</p>
@@ -190,7 +196,7 @@ export function DailyReportHistory({
               {groupedReports.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-blue-500/30">
-                    <Calendar className="w-10 h-10 text-blue-400" />
+                    <Calendar aria-hidden="true" className="w-10 h-10 text-blue-400" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-50 mb-2">
                     No Daily Reports Yet
@@ -211,7 +217,7 @@ export function DailyReportHistory({
                     <div key={group.monthKey}>
                       {/* Month Header */}
                       <div className="flex items-center gap-2 mb-4">
-                        <Calendar className="h-5 w-5 text-orange-500" />
+                        <Calendar aria-hidden="true" className="h-5 w-5 text-orange-500" />
                         <h3 className="text-lg font-bold text-slate-50">{group.monthLabel}</h3>
                         <div className="flex-1 h-px bg-gray-700"></div>
                       </div>
@@ -234,19 +240,19 @@ export function DailyReportHistory({
                                   </p>
                                   {report.finalized ? (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400 border border-green-700">
-                                      <CheckCircle className="h-3 w-3" />
+                                      <CheckCircle aria-hidden="true" className="h-3 w-3" />
                                       Finalized
                                     </span>
                                   ) : (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-900/30 text-blue-400 border border-blue-700">
-                                      <Clock className="h-3 w-3" />
+                                      <Clock aria-hidden="true" className="h-3 w-3" />
                                       In Progress
                                     </span>
                                   )}
                                 </div>
 
                                 {/* Metadata */}
-                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                <div className="flex items-center gap-3 text-xs text-gray-400">
                                   <span>{report.messageCount} messages</span>
                                   <span>•</span>
                                   <span>Created by {report.createdBy}</span>
@@ -295,7 +301,7 @@ export function DailyReportHistory({
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-700 bg-dark-surface">
           <div className="flex items-center gap-2 text-sm text-gray-400">
-            <TrendingUp className="h-4 w-4" />
+            <TrendingUp aria-hidden="true" className="h-4 w-4" />
             <span>Showing {stats.total} reports</span>
           </div>
           <Button

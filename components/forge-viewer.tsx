@@ -171,7 +171,7 @@ export default function ForgeViewer({ urn, onViewerReady, onError, className = '
     return (
       <div className={`flex items-center justify-center bg-gray-900 text-white rounded-lg p-8 ${className}`}>
         <div className="text-center">
-          <Box className="w-12 h-12 mx-auto mb-4 text-red-400" />
+          <Box aria-hidden="true" className="w-12 h-12 mx-auto mb-4 text-red-400" />
           <p className="text-red-400 font-medium">{error}</p>
           <p className="text-gray-400 text-sm mt-2">Please try refreshing the page</p>
         </div>
@@ -188,7 +188,7 @@ export default function ForgeViewer({ urn, onViewerReady, onError, className = '
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm">
           <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto" />
+            <Loader2 aria-hidden="true" className="w-12 h-12 animate-spin text-blue-500 mx-auto" />
             <p className="text-white mt-4">Loading 3D Model...</p>
             <p className="text-gray-400 text-sm mt-1">This may take a moment</p>
           </div>

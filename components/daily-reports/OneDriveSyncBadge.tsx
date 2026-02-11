@@ -58,7 +58,7 @@ export default function OneDriveSyncBadge({
         className="inline-flex items-center gap-1 text-xs"
         style={{ color: neutralColors.slate[400] }}
       >
-        <Cloud className="h-3 w-3" />
+        <Cloud aria-hidden="true" className="h-3 w-3" />
         Not synced
       </span>
     );
@@ -77,7 +77,7 @@ export default function OneDriveSyncBadge({
               className="inline-flex items-center gap-1 text-xs font-medium cursor-default"
               style={{ color: semanticColors.success[600] }}
             >
-              <Check className="h-3 w-3" />
+              <Check aria-hidden="true" className="h-3 w-3" />
               Synced
             </span>
           </TooltipTrigger>

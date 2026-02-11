@@ -100,7 +100,7 @@ export default function WeatherDayWidget({ projectSlug }: WeatherDayWidgetProps)
   if (!data || data.totalDays === 0) {
     return (
       <div className="text-center py-6">
-        <CloudRain className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+        <CloudRain className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p className="text-gray-400 text-sm">No weather days recorded</p>
       </div>
     );
@@ -293,7 +293,7 @@ export default function WeatherDayWidget({ projectSlug }: WeatherDayWidgetProps)
                 </div>
               ) : ledger.length === 0 ? (
                 <div className="text-center py-8">
-                  <CloudRain className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <CloudRain className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-400 text-sm">No weather day records found</p>
                 </div>
               ) : (

@@ -150,7 +150,7 @@ export function RequirementAutoImport({
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-600/20 rounded-lg">
-            <FileSpreadsheet className="w-5 h-5 text-blue-400" />
+            <FileSpreadsheet className="w-5 h-5 text-blue-400" aria-hidden="true" />
           </div>
           <div>
             <h4 className="text-white font-medium">Auto-Import Requirements</h4>
@@ -166,9 +166,9 @@ export function RequirementAutoImport({
             </span>
           )}
           {expanded ? (
-            <ChevronDown className="w-5 h-5 text-gray-400" />
+            <ChevronDown className="w-5 h-5 text-gray-400" aria-hidden="true" />
           ) : (
-            <ChevronRight className="w-5 h-5 text-gray-400" />
+            <ChevronRight className="w-5 h-5 text-gray-400" aria-hidden="true" />
           )}
         </div>
       </div>
@@ -178,14 +178,14 @@ export function RequirementAutoImport({
           {/* Category Selection */}
           {loadingCategories ? (
             <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+              <Loader2 className="w-5 h-5 animate-spin text-blue-400" aria-hidden="true" />
               <span className="ml-2 text-gray-400">Loading categories...</span>
             </div>
           ) : categories.length === 0 ? (
             <div className="text-center py-4">
-              <Package className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+              <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" aria-hidden="true" />
               <p className="text-gray-400">No schedule data found</p>
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-400 text-sm">
                 Upload door, window, or equipment schedules first
               </p>
             </div>
@@ -193,7 +193,7 @@ export function RequirementAutoImport({
             <>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-gray-400" />
+                  <Filter className="w-4 h-4 text-gray-400" aria-hidden="true" />
                   <span className="text-gray-300 text-sm">Select categories:</span>
                 </div>
                 <div className="flex gap-2">
@@ -238,10 +238,10 @@ export function RequirementAutoImport({
                         {cat.label}
                       </span>
                       {selectedCategories.includes(cat.category) && (
-                        <Check className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                        <Check className="w-4 h-4 text-blue-400 flex-shrink-0" aria-hidden="true" />
                       )}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-400 mt-1">
                       {cat.itemCount} items
                     </div>
                   </button>
@@ -272,12 +272,12 @@ export function RequirementAutoImport({
                     handleImport();
                   }}
                   disabled={loading || selectedCategories.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400 text-white rounded-lg transition-colors"
                 >
                   {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                   ) : (
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4" aria-hidden="true" />
                   )}
                   Import Requirements
                 </button>
@@ -296,9 +296,9 @@ export function RequirementAutoImport({
             >
               <div className="flex items-start gap-3">
                 {importResult.errors.length > 0 ? (
-                  <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                  <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" aria-hidden="true" />
                 ) : (
-                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" aria-hidden="true" />
                 )}
                 <div className="flex-1">
                   <p className="text-white text-sm">

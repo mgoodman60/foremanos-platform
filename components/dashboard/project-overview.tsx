@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation';
 import { useProject } from '@/components/layout/project-context';
 import { useDocumentUpload } from '@/hooks/use-document-upload';
 import { DocumentCategoryModal } from '@/components/document-category-modal';
+import { primaryColors } from '@/lib/design-tokens';
 
 interface ProjectOverviewProps {
   projectSlug: string;
@@ -105,7 +106,7 @@ function BudgetSparkline({ percentSpent }: { percentSpent: number }) {
       <polyline
         points={pathPoints.join(' ')}
         fill="none"
-        stroke="#f97316"
+        stroke={primaryColors.orange[500]}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -460,7 +461,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
                       <p className={`text-sm font-semibold ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400'}`}>
                         {formatCurrency(budget.actualCost)}
                       </p>
-                      <p className="text-xs text-gray-500">Actual cost</p>
+                      <p className="text-xs text-gray-400">Actual cost</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -472,7 +473,7 @@ export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps
                       <p className={`text-sm font-semibold ${budget.costPerformanceIndex >= 1 ? 'text-green-400' : budget.costPerformanceIndex >= 0.9 ? 'text-amber-400' : 'text-red-400'}`}>
                         {budget.costPerformanceIndex.toFixed(2)}
                       </p>
-                      <p className="text-xs text-gray-500">CPI</p>
+                      <p className="text-xs text-gray-400">CPI</p>
                     </div>
                   </div>
                 </div>

@@ -48,7 +48,7 @@ export function TakeoffActions({
               onClick={onSelectAllUnverified}
               className="border-gray-600 text-xs"
             >
-              <CheckCheck className="mr-1 h-3 w-3" />
+              <CheckCheck className="mr-1 h-3 w-3" aria-hidden="true" />
               Select All Unverified
             </Button>
           ) : (
@@ -58,7 +58,7 @@ export function TakeoffActions({
               onClick={onClearSelection}
               className="text-xs text-gray-400"
             >
-              <X className="mr-1 h-3 w-3" />
+              <X className="mr-1 h-3 w-3" aria-hidden="true" />
               Clear Selection
             </Button>
           )}
@@ -70,7 +70,7 @@ export function TakeoffActions({
             disabled={bulkVerifying}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
-            <CheckCircle2 className="mr-1 h-4 w-4" />
+            <CheckCircle2 className="mr-1 h-4 w-4" aria-hidden="true" />
             {bulkVerifying ? 'Verifying...' : `Verify ${selectedItems.size} Items`}
           </Button>
         )}

@@ -28,13 +28,13 @@ function timeAgo(dateString: string): string {
 function getViewTypeIcon(viewType: string) {
   switch (viewType?.toLowerCase()) {
     case 'exterior':
-      return <Building2 className="h-3.5 w-3.5" />;
+      return <Building2 className="h-3.5 w-3.5" aria-hidden="true" />;
     case 'interior':
-      return <Home className="h-3.5 w-3.5" />;
+      return <Home className="h-3.5 w-3.5" aria-hidden="true" />;
     case 'aerial':
-      return <Plane className="h-3.5 w-3.5" />;
+      return <Plane className="h-3.5 w-3.5" aria-hidden="true" />;
     default:
-      return <Building2 className="h-3.5 w-3.5" />;
+      return <Building2 className="h-3.5 w-3.5" aria-hidden="true" />;
   }
 }
 
@@ -49,7 +49,7 @@ function getStatusBadge(status: string) {
     case 'generating':
       return (
         <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px]">
-          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+          <Loader2 className="h-3 w-3 mr-1 animate-spin" aria-hidden="true" />
           Generating
         </Badge>
       );
@@ -112,9 +112,9 @@ export function RenderGalleryCard({ render, onClick }: RenderGalleryCardProps) {
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 flex items-center justify-center">
             {render.status === 'generating' ? (
-              <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-blue-400" aria-hidden="true" />
             ) : (
-              <Building2 className="h-8 w-8 text-gray-600" />
+              <Building2 className="h-8 w-8 text-gray-600" aria-hidden="true" />
             )}
           </div>
         )}
@@ -130,8 +130,9 @@ export function RenderGalleryCard({ render, onClick }: RenderGalleryCardProps) {
             className={`h-5 w-5 transition-colors ${
               render.isFavorite
                 ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-500 opacity-0 group-hover:opacity-100'
+                : 'text-gray-400 opacity-0 group-hover:opacity-100'
             }`}
+            aria-hidden="true"
           />
         </div>
       </div>
@@ -161,7 +162,7 @@ export function RenderGalleryCard({ render, onClick }: RenderGalleryCardProps) {
           )}
 
           {/* Time */}
-          <span className="text-[10px] text-gray-500 ml-auto">
+          <span className="text-[10px] text-gray-400 ml-auto">
             {timeAgo(render.createdAt)}
           </span>
         </div>

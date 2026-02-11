@@ -386,7 +386,7 @@ export default function DailyReportTemplate({
       <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-dark-card border-gray-700 text-gray-100">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-slate-50 flex items-center gap-2">
-            <Calendar className="h-6 w-6 text-blue-400" />
+            <Calendar aria-hidden="true" className="h-6 w-6 text-blue-400" />
             Daily Report Template
             <SyncStatusIndicator status={syncStatus} className="ml-2" />
           </DialogTitle>
@@ -403,7 +403,7 @@ export default function DailyReportTemplate({
             className="mt-2 w-full sm:w-auto min-h-[44px] border-gray-700 text-gray-300 hover:bg-dark-surface"
             onClick={handleQuickEntry}
           >
-            <ClipboardCopy className="w-4 h-4 mr-2" />
+            <ClipboardCopy aria-hidden="true" className="w-4 h-4 mr-2" />
             Same as yesterday
           </Button>
         )}
@@ -423,7 +423,7 @@ export default function DailyReportTemplate({
             </div>
           ) : carryoverAvailable ? (
             <div className="flex items-center gap-2 text-green-400 text-sm">
-              <Sparkles className="w-4 h-4" />
+              <Sparkles aria-hidden="true" className="w-4 h-4" />
               Pre-filled from yesterday
             </div>
           ) : null}
@@ -443,7 +443,7 @@ export default function DailyReportTemplate({
             </div>
             <div>
               <Label className="text-gray-300 flex items-center gap-2">
-                <Users className="h-4 w-4" />
+                <Users aria-hidden="true" className="h-4 w-4" />
                 Crew Size
               </Label>
               <Input
@@ -470,7 +470,7 @@ export default function DailyReportTemplate({
               {loadingCarryover ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <ClipboardCopy className="w-4 h-4 mr-2" />
+                <ClipboardCopy aria-hidden="true" className="w-4 h-4 mr-2" />
               )}
               Same as Yesterday
             </Button>
@@ -486,7 +486,7 @@ export default function DailyReportTemplate({
           {/* Weather */}
           <div className="space-y-3">
             <Label className="text-gray-300 flex items-center gap-2">
-              <CloudRain className="h-4 w-4" />
+              <CloudRain aria-hidden="true" className="h-4 w-4" />
               Weather Conditions
             </Label>
             {currentWeather && (
@@ -531,7 +531,7 @@ export default function DailyReportTemplate({
           <div className="space-y-3">
             <Label className="text-gray-300 font-semibold">Today's Scheduled Tasks</Label>
             {todayTasks.length === 0 ? (
-              <div className="text-gray-500 text-sm py-4 text-center border border-dashed border-gray-700 rounded">
+              <div className="text-gray-400 text-sm py-4 text-center border border-dashed border-gray-700 rounded">
                 No tasks scheduled for today
               </div>
             ) : (
@@ -560,7 +560,7 @@ export default function DailyReportTemplate({
                 ))}
               </div>
             )}
-            <div className="text-xs text-gray-500 mt-2">
+            <div className="text-xs text-gray-400 mt-2">
               Tip: Check completed tasks or mark as in-progress
             </div>
           </div>
@@ -584,7 +584,7 @@ export default function DailyReportTemplate({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-gray-300 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                <AlertTriangle aria-hidden="true" className="h-4 w-4 text-orange-500" />
                 Delays & Issues
               </Label>
               <Button
@@ -675,7 +675,7 @@ export default function DailyReportTemplate({
             onClick={handleSubmit}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 min-h-[44px] p-3 sm:p-2 sm:min-h-0"
           >
-            <Send className="h-4 w-4" />
+            <Send aria-hidden="true" className="h-4 w-4" />
             Submit Report
           </Button>
         </div>

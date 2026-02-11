@@ -32,7 +32,7 @@ import {
   Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { semanticColors, neutralColors } from '@/lib/design-tokens';
+import { semanticColors, neutralColors, chartColors, secondaryColors } from '@/lib/design-tokens';
 
 // Types for resource data
 export interface LaborEntry {
@@ -98,16 +98,16 @@ interface WeeklyResourceData {
 const TRADE_COLORS: Record<string, string> = {
   'Electrical': semanticColors.info[500],
   'Plumbing': semanticColors.success[500],
-  'HVAC': '#8B5CF6', // purple/violet
+  'HVAC': chartColors.palette[4],
   'Framing': semanticColors.warning[500],
   'Concrete': neutralColors.gray[500],
-  'Drywall': '#EC4899', // pink
-  'Painting': '#14B8A6', // teal
+  'Drywall': chartColors.palette[5],
+  'Painting': chartColors.palette[6],
   'Roofing': semanticColors.error[500],
-  'Masonry': '#78350F', // brown
-  'Flooring': '#84CC16', // lime
+  'Masonry': neutralColors.gray[800],
+  'Flooring': semanticColors.success[400],
   'General Labor': neutralColors.slate[600],
-  'Superintendent': '#0EA5E9', // sky
+  'Superintendent': secondaryColors.blue[400],
   'default': neutralColors.slate[400]
 };
 
@@ -292,7 +292,7 @@ export function ResourceHistogram({
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-400" />
+              <BarChart3 className="h-5 w-5 text-blue-400" aria-hidden="true" />
               <h3 className="text-sm font-semibold text-gray-200">Resource Histogram</h3>
               <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px]">
                 {uniqueTrades.length} Trades
@@ -347,13 +347,13 @@ export function ResourceHistogram({
           <div className="grid grid-cols-4 gap-3">
             <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                <Users className="h-3 w-3" />
+                <Users className="h-3 w-3" aria-hidden="true" />
                 Peak Staffing
               </div>
               <div className="text-lg font-semibold text-gray-200">
                 {Math.max(...filteredData.map(w => Math.max(w.totalPlannedWorkers, w.totalActualWorkers)))}
               </div>
-              <div className="text-[10px] text-gray-500">
+              <div className="text-[10px] text-gray-400">
                 workers/week
               </div>
             </div>
@@ -361,9 +361,9 @@ export function ResourceHistogram({
             <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                 {summaryStats.variance >= 0 ? (
-                  <TrendingUp className="h-3 w-3 text-amber-400" />
+                  <TrendingUp className="h-3 w-3 text-amber-400" aria-hidden="true" />
                 ) : (
-                  <TrendingDown className="h-3 w-3 text-green-400" />
+                  <TrendingDown className="h-3 w-3 text-green-400" aria-hidden="true" />
                 )}
                 Variance
               </div>
@@ -373,27 +373,27 @@ export function ResourceHistogram({
               )}>
                 {summaryStats.variance > 0 ? '+' : ''}{summaryStats.variance.toFixed(0)}
               </div>
-              <div className="text-[10px] text-gray-500">
+              <div className="text-[10px] text-gray-400">
                 {summaryStats.variancePercent > 0 ? '+' : ''}{summaryStats.variancePercent.toFixed(1)}% from plan
               </div>
             </div>
             
             <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                <AlertTriangle className="h-3 w-3 text-orange-400" />
+                <AlertTriangle className="h-3 w-3 text-orange-400" aria-hidden="true" />
                 Overtime
               </div>
               <div className="text-lg font-semibold text-orange-400">
                 {summaryStats.totalOvertime.toFixed(0)}h
               </div>
-              <div className="text-[10px] text-gray-500">
+              <div className="text-[10px] text-gray-400">
                 total OT hours
               </div>
             </div>
             
             <div className="bg-dark-card rounded-lg p-3">
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                <HardHat className="h-3 w-3" />
+                <HardHat className="h-3 w-3" aria-hidden="true" />
                 Labor Cost
               </div>
               <div className={cn(
@@ -402,7 +402,7 @@ export function ResourceHistogram({
               )}>
                 ${(summaryStats.totalActualCost / 1000).toFixed(0)}k
               </div>
-              <div className="text-[10px] text-gray-500">
+              <div className="text-[10px] text-gray-400">
                 {summaryStats.costVariance > 0 ? '+' : ''}
                 ${(summaryStats.costVariance / 1000).toFixed(1)}k vs plan
               </div>
@@ -412,7 +412,7 @@ export function ResourceHistogram({
           {/* Histogram Chart */}
           <div className="relative">
             {/* Y-axis labels */}
-            <div className="absolute left-0 top-0 bottom-6 w-8 flex flex-col justify-between text-[10px] text-gray-500">
+            <div className="absolute left-0 top-0 bottom-6 w-8 flex flex-col justify-between text-[10px] text-gray-400">
               <span>{maxWorkers}</span>
               <span>{Math.round(maxWorkers / 2)}</span>
               <span>0</span>
@@ -496,7 +496,7 @@ export function ResourceHistogram({
                 {filteredData.map((week, idx) => (
                   <div 
                     key={idx} 
-                    className="flex-1 min-w-[40px] max-w-[60px] text-center text-[10px] text-gray-500"
+                    className="flex-1 min-w-[40px] max-w-[60px] text-center text-[10px] text-gray-400"
                   >
                     {format(week.weekStart, 'M/d')}
                   </div>
@@ -508,7 +508,7 @@ export function ResourceHistogram({
           {/* Trade Legend */}
           {selectedTrade === 'all' && uniqueTrades.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-700">
-              <span className="text-[10px] text-gray-500">Trades:</span>
+              <span className="text-[10px] text-gray-400">Trades:</span>
               {uniqueTrades.slice(0, 8).map(trade => (
                 <div key={trade} className="flex items-center gap-1">
                   <div 
@@ -519,7 +519,7 @@ export function ResourceHistogram({
                 </div>
               ))}
               {uniqueTrades.length > 8 && (
-                <span className="text-[10px] text-gray-500">+{uniqueTrades.length - 8} more</span>
+                <span className="text-[10px] text-gray-400">+{uniqueTrades.length - 8} more</span>
               )}
             </div>
           )}

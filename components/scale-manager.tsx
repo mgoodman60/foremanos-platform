@@ -141,7 +141,7 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Ruler className="h-6 w-6 text-blue-500" />
+          <Ruler className="h-6 w-6 text-blue-500" aria-hidden="true" />
           <h2 className="text-2xl font-bold text-gray-100">Scale Manager</h2>
         </div>
         <button
@@ -149,7 +149,7 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
           disabled={isExtracting}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-4 w-4" aria-hidden="true" />
           {isExtracting ? 'Extracting...' : 'Extract Scales'}
         </button>
       </div>
@@ -160,7 +160,7 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
           {/* Total Sheets */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <FileText className="h-5 w-5 text-blue-500" />
+              <FileText className="h-5 w-5 text-blue-500" aria-hidden="true" />
               <span className="text-2xl font-bold text-gray-100">
                 {stats.totalSheets}
               </span>
@@ -171,14 +171,14 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
           {/* Sheets with Scales */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <CheckCircle2 className="h-5 w-5 text-green-500" aria-hidden="true" />
               <span className="text-2xl font-bold text-gray-100">
                 {stats.sheetsWithScales}
               </span>
             </div>
             <p className="text-sm text-gray-400">With Scales</p>
             {stats.totalSheets > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1">
                 {Math.round((stats.sheetsWithScales / stats.totalSheets) * 100)}% coverage
               </p>
             )}
@@ -187,7 +187,7 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
           {/* Multiple Scales */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <Layers className="h-5 w-5 text-amber-500" />
+              <Layers className="h-5 w-5 text-amber-500" aria-hidden="true" />
               <span className="text-2xl font-bold text-gray-100">
                 {stats.sheetsWithMultipleScales}
               </span>
@@ -198,14 +198,14 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
           {/* Most Common Scale */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="h-5 w-5 text-purple-500" />
+              <TrendingUp className="h-5 w-5 text-purple-500" aria-hidden="true" />
               <span className="text-2xl font-bold text-gray-100">
                 {stats.mostCommonScale ? `1:${stats.mostCommonScale.ratio}` : 'N/A'}
               </span>
             </div>
             <p className="text-sm text-gray-400">Most Common</p>
             {stats.mostCommonScale && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1">
                 Used in {stats.mostCommonScale.count} sheets
               </p>
             )}
@@ -217,7 +217,7 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
       {stats && Object.keys(stats.byType).length > 0 && (
         <div className="bg-dark-card border border-gray-700 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-blue-500" />
+            <Calculator className="h-5 w-5 text-blue-500" aria-hidden="true" />
             Scale Types Distribution
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -258,9 +258,9 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
       {/* Scales List */}
       {filteredScales.length === 0 ? (
         <div className="text-center py-12 bg-dark-card border border-gray-700 rounded-lg">
-          <Ruler className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+          <Ruler className="h-12 w-12 text-gray-600 mx-auto mb-3" aria-hidden="true" />
           <p className="text-gray-400 mb-2">No scales found</p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-400 mb-4">
             Click "Extract Scales" to analyze your drawings
           </p>
         </div>
@@ -289,7 +289,7 @@ function ScaleCard({ scale }: { scale: ScaleInfo }) {
           <h3 className="text-lg font-semibold text-gray-100">
             {scale.sheetNumber}
           </h3>
-          <p className="text-xs text-gray-500 truncate">
+          <p className="text-xs text-gray-400 truncate">
             {scale.documentName}
           </p>
         </div>
@@ -326,7 +326,7 @@ function ScaleCard({ scale }: { scale: ScaleInfo }) {
 
       {/* Quick Info */}
       <div className="mt-3 pt-3 border-t border-gray-700">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-400">
           {getScaleDescription(scale)}
         </p>
       </div>

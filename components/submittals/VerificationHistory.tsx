@@ -183,7 +183,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" aria-hidden="true" />
       </div>
     );
   }
@@ -200,7 +200,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <History className="w-4 h-4" />
+          <History className="w-4 h-4" aria-hidden="true" />
           Verification History
           <span className="px-2 py-0.5 text-xs bg-slate-700 rounded-full">{totalCount}</span>
         </button>
@@ -212,7 +212,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <FileEdit className="w-4 h-4" />
+          <FileEdit className="w-4 h-4" aria-hidden="true" />
           Pending Overrides
           {pendingOverrides.length > 0 && (
             <span className="px-2 py-0.5 text-xs bg-amber-500 text-black font-bold rounded-full">
@@ -226,7 +226,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
         <div className="space-y-3">
           {logs.length === 0 ? (
             <div className="text-center py-8 text-slate-400">
-              <History className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <History className="w-12 h-12 mx-auto mb-3 opacity-50" aria-hidden="true" />
               <p>No verification history yet</p>
               <p className="text-sm mt-1">Run a verification to see results here</p>
             </div>
@@ -249,14 +249,14 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                     >
                       <div className="flex-shrink-0">
                         {isExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-slate-400" />
+                          <ChevronDown className="w-5 h-5 text-slate-400" aria-hidden="true" />
                         ) : (
-                          <ChevronRight className="w-5 h-5 text-slate-400" />
+                          <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />
                         )}
                       </div>
 
                       <div className="flex-shrink-0">
-                        <StatusIcon className={`w-8 h-8 ${statusConfig.text}`} />
+                        <StatusIcon className={`w-8 h-8 ${statusConfig.text}`} aria-hidden="true" />
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -275,16 +275,16 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                         </div>
                         <div className="flex items-center gap-4 mt-1 text-sm text-slate-400">
                           <span className="flex items-center gap-1">
-                            <User className="w-3 h-3" />
+                            <User className="w-3 h-3" aria-hidden="true" />
                             {log.triggeredByName || 'System'}
                           </span>
                           <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
+                            <Calendar className="w-3 h-3" aria-hidden="true" />
                             {format(new Date(log.startedAt), 'MMM d, yyyy h:mm a')}
                           </span>
                           {log.durationMs && (
                             <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
+                              <Clock className="w-3 h-3" aria-hidden="true" />
                               {log.durationMs}ms
                             </span>
                           )}
@@ -304,7 +304,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                         </div>
                         {log.overrideCount > 0 && (
                           <div className="px-2 py-1 bg-purple-900/50 border border-purple-600 rounded text-xs text-purple-400">
-                            <FileEdit className="w-3 h-3 inline mr-1" />
+                            <FileEdit className="w-3 h-3 inline mr-1" aria-hidden="true" />
                             {log.overrideCount}
                           </div>
                         )}
@@ -316,7 +316,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                       <div className="border-t border-slate-700 p-4">
                         {loadingDetails ? (
                           <div className="flex items-center justify-center py-4">
-                            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                            <Loader2 className="w-6 h-6 animate-spin text-blue-500" aria-hidden="true" />
                           </div>
                         ) : expandedLogDetails ? (
                           <div className="space-y-4">
@@ -384,7 +384,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                                         <span>By: {override.overriddenByName}</span>
                                         {override.approved ? (
                                           <span className="text-emerald-400 flex items-center gap-1">
-                                            <Shield className="w-3 h-3" /> Approved by {override.approvedByName}
+                                            <Shield className="w-3 h-3" aria-hidden="true" /> Approved by {override.approvedByName}
                                           </span>
                                         ) : (
                                           <span className="text-amber-400">Pending approval</span>
@@ -444,7 +444,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
         <div className="space-y-3">
           {pendingOverrides.length === 0 ? (
             <div className="text-center py-8 text-slate-400">
-              <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" aria-hidden="true" />
               <p>No pending overrides</p>
               <p className="text-sm mt-1">All manual overrides have been reviewed</p>
             </div>
@@ -488,7 +488,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                       className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg 
                         flex items-center gap-1 text-sm font-medium transition-colors"
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle className="w-4 h-4" aria-hidden="true" />
                       Approve
                     </button>
                     <button
@@ -496,7 +496,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                       className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg 
                         flex items-center gap-1 text-sm font-medium transition-colors"
                     >
-                      <XCircle className="w-4 h-4" />
+                      <XCircle className="w-4 h-4" aria-hidden="true" />
                       Reject
                     </button>
                   </div>

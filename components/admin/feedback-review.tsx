@@ -180,7 +180,7 @@ export function AdminFeedbackReview({ projectSlug }: AdminFeedbackReviewProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
+            <Brain aria-hidden="true" className="h-5 w-5" />
             Teach the Chatbot
           </CardTitle>
           <CardDescription>
@@ -229,9 +229,9 @@ export function AdminFeedbackReview({ projectSlug }: AdminFeedbackReviewProps) {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       {fb.rating === 1 ? (
-                        <ThumbsUp className="h-4 w-4 text-green-500" />
+                        <ThumbsUp aria-hidden="true" className="h-4 w-4 text-green-500" />
                       ) : (
-                        <ThumbsDown className="h-4 w-4 text-red-500" />
+                        <ThumbsDown aria-hidden="true" className="h-4 w-4 text-red-500" />
                       )}
                       <Badge variant={fb.correction ? 'default' : 'outline'}>
                         {fb.correction ? 'Has Correction' : 'Needs Review'}
@@ -251,7 +251,7 @@ export function AdminFeedbackReview({ projectSlug }: AdminFeedbackReviewProps) {
                     size="sm"
                     onClick={() => openCorrectionDialog(fb)}
                   >
-                    <Brain className="h-4 w-4 mr-2" />
+                    <Brain aria-hidden="true" className="h-4 w-4 mr-2" />
                     {fb.correction ? 'View Correction' : 'Add Correction'}
                   </Button>
                 </div>
@@ -386,7 +386,7 @@ export function AdminFeedbackReview({ projectSlug }: AdminFeedbackReviewProps) {
               Cancel
             </Button>
             <Button onClick={saveCorrection} disabled={saving}>
-              <Save className="h-4 w-4 mr-2" />
+              <Save aria-hidden="true" className="h-4 w-4 mr-2" />
               {saving ? 'Saving...' : 'Save Correction'}
             </Button>
           </DialogFooter>

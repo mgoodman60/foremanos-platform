@@ -79,7 +79,7 @@ export function ProcessingProgressCard({
     return (
       <div className={`bg-dark-card border border-gray-700 rounded-lg p-6 ${className}`}>
         <div className="flex items-center justify-center space-x-2">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+          <Loader2 className="h-5 w-5 animate-spin text-blue-400" aria-hidden="true" />
           <span className="text-gray-300">Loading processing status...</span>
         </div>
       </div>
@@ -90,7 +90,7 @@ export function ProcessingProgressCard({
     return (
       <div className={`bg-dark-card border border-red-500 rounded-lg p-6 ${className}`}>
         <div className="flex items-center space-x-2 text-red-400">
-          <XCircle className="h-5 w-5" />
+          <XCircle className="h-5 w-5" aria-hidden="true" />
           <span>{error || 'Failed to load processing stats'}</span>
         </div>
       </div>
@@ -120,13 +120,13 @@ export function ProcessingProgressCard({
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-dark-surface rounded-lg">
-            <FileText className="h-6 w-6 text-blue-400" />
+            <FileText className="h-6 w-6 text-blue-400" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-100">{stats.documentName}</h3>
             <div className="flex items-center space-x-2 mt-1">
               <div className={`flex items-center space-x-1 ${config.bg} ${config.color} px-2 py-1 rounded text-sm`}>
-                <StatusIcon className={`h-3 w-3 ${stats.status === 'processing' ? 'animate-spin' : ''}`} />
+                <StatusIcon className={`h-3 w-3 ${stats.status === 'processing' ? 'animate-spin' : ''}`} aria-hidden="true" />
                 <span className="font-medium">{config.label}</span>
               </div>
               {stats.estimatedCompletionTime && isProcessing && (
@@ -167,7 +167,7 @@ export function ProcessingProgressCard({
       {stats.providerBreakdown.length > 0 && (
         <div className="mb-4">
           <div className="flex items-center space-x-2 mb-3">
-            <TrendingUp className="h-4 w-4 text-blue-400" />
+            <TrendingUp className="h-4 w-4 text-blue-400" aria-hidden="true" />
             <span className="text-sm font-medium text-gray-300">AI Provider Distribution</span>
           </div>
           <div className="space-y-2">
@@ -182,7 +182,7 @@ export function ProcessingProgressCard({
                     <span className="text-gray-300">{provider.provider}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-gray-400">{provider.pagesProcessed} pages</span>
-                      <span className="text-gray-500">•</span>
+                      <span className="text-gray-400">•</span>
                       <span className="text-gray-400">{provider.avgTimePerPage.toFixed(1)}s/page</span>
                     </div>
                   </div>
@@ -203,7 +203,7 @@ export function ProcessingProgressCard({
       {isFailed && stats.lastError && (
         <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
           <div className="flex items-start space-x-2">
-            <XCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+            <XCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
             <div className="text-sm text-red-300">
               <p className="font-medium mb-1">Processing Failed</p>
               <p className="text-red-400/80">{stats.lastError}</p>
@@ -216,7 +216,7 @@ export function ProcessingProgressCard({
       {isComplete && (
         <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
           <div className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-400" />
+            <CheckCircle className="h-4 w-4 text-green-400" aria-hidden="true" />
             <span className="text-sm text-green-300 font-medium">
               Processing completed successfully!
             </span>
@@ -229,7 +229,7 @@ export function ProcessingProgressCard({
         <span>Started: {new Date(stats.startedAt).toLocaleString()}</span>
         {isProcessing && (
           <div className="flex items-center space-x-1">
-            <Loader2 className="h-3 w-3 animate-spin" />
+            <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
             <span>Processing...</span>
           </div>
         )}

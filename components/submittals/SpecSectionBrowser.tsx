@@ -135,7 +135,7 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
     return (
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-6">
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" aria-hidden="true" />
           <span className="ml-2 text-slate-400">Loading spec sections...</span>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-blue-400" />
+          <BookOpen className="w-5 h-5 text-blue-400" aria-hidden="true" />
           Specification Sections
         </h3>
         <span className="text-sm text-slate-400">
@@ -157,7 +157,7 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" aria-hidden="true" />
         <input
           type="text"
           value={searchTerm}
@@ -185,9 +185,9 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
                 >
                   <div className="flex items-center gap-2">
                     {expandedDivisions.has(division) ? (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                      <ChevronRight className="w-4 h-4 text-slate-400" aria-hidden="true" />
                     )}
                     <span className="text-slate-300 font-medium">
                       Division {division}: {data.divisionTitle}
@@ -215,13 +215,13 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
                             flex items-center justify-between ${selectedSection === section.number ? 'bg-slate-700' : ''}`}
                         >
                           <div className="flex items-center gap-2">
-                            <Hash className="w-3 h-3 text-slate-500" />
+                            <Hash className="w-3 h-3 text-slate-500" aria-hidden="true" />
                             <span className="text-slate-300">{section.number}</span>
                             <span className="text-slate-500">{section.title}</span>
                           </div>
                           {(section.submittalsCount ?? 0) > 0 && (
                             <span className="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <LinkIcon className="w-3 h-3" />
+                              <LinkIcon className="w-3 h-3" aria-hidden="true" />
                               {section.submittalsCount}
                             </span>
                           )}
@@ -238,13 +238,13 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
         {selectedSection && (
           <div className="w-80 bg-slate-800 border-2 border-slate-600 rounded-lg p-3">
             <h4 className="font-medium text-white mb-3 flex items-center gap-2">
-              <FileCheck className="w-4 h-4 text-blue-400" />
+              <FileCheck className="w-4 h-4 text-blue-400" aria-hidden="true" />
               Submittals for {selectedSection}
             </h4>
 
             {loadingSubmittals ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
+                <Loader2 className="w-5 h-5 text-blue-400 animate-spin" aria-hidden="true" />
               </div>
             ) : linkedSubmittals.length === 0 ? (
               <p className="text-slate-500 text-sm text-center py-4">
@@ -268,7 +268,7 @@ export default function SpecSectionBrowser({ projectSlug }: SpecSectionBrowserPr
                           {submittal.title}
                         </p>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-slate-500" />
+                      <ExternalLink className="w-4 h-4 text-slate-500" aria-hidden="true" />
                     </div>
                     <div className="flex items-center gap-2 mt-2">
                       <span className={`px-2 py-0.5 rounded text-xs ${STATUS_COLORS[submittal.status.toLowerCase()] || STATUS_COLORS.draft}`}>

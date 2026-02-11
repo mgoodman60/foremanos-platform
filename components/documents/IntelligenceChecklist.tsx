@@ -64,11 +64,11 @@ export function IntelligenceChecklist({
   const getStatusIcon = (status: IntelligenceChecklistItem['status']) => {
     switch (status) {
       case 'complete':
-        return <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />;
+        return <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-green-400 flex-shrink-0" />;
       case 'partial':
-        return <AlertCircle className="h-5 w-5 text-yellow-400 flex-shrink-0" />;
+        return <AlertCircle aria-hidden="true" className="h-5 w-5 text-yellow-400 flex-shrink-0" />;
       case 'missing':
-        return <Circle className="h-5 w-5 text-gray-500 flex-shrink-0" />;
+        return <Circle aria-hidden="true" className="h-5 w-5 text-gray-400 flex-shrink-0" />;
     }
   };
 

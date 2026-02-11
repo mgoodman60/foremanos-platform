@@ -163,25 +163,25 @@ export function SyncStatusBanner({
       bg: 'bg-green-500/10',
       border: 'border-green-500/30',
       text: 'text-green-400',
-      icon: <CheckCircle className="w-4 h-4" />,
+      icon: <CheckCircle className="w-4 h-4" aria-hidden="true" />,
     },
     syncing: {
       bg: 'bg-blue-500/10',
       border: 'border-blue-500/30',
       text: 'text-blue-400',
-      icon: <RefreshCw className="w-4 h-4 animate-spin" />,
+      icon: <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />,
     },
     error: {
       bg: 'bg-red-500/10',
       border: 'border-red-500/30',
       text: 'text-red-400',
-      icon: <WifiOff className="w-4 h-4" />,
+      icon: <WifiOff className="w-4 h-4" aria-hidden="true" />,
     },
     stale: {
       bg: 'bg-yellow-500/10',
       border: 'border-yellow-500/30',
       text: 'text-yellow-400',
-      icon: <Clock className="w-4 h-4" />,
+      icon: <Clock className="w-4 h-4" aria-hidden="true" />,
     },
   };
 
@@ -218,7 +218,7 @@ export function SyncStatusBanner({
       <span className={cn('flex-1 text-sm', style.text)}>
         {getMessage()}
         {retrying && retryCount > 0 && (
-          <span className="ml-2 text-xs text-gray-500">
+          <span className="ml-2 text-xs text-gray-400">
             (Retry {retryCount}/3)
           </span>
         )}
@@ -241,7 +241,7 @@ export function SyncStatusBanner({
           >
             {retrying ? (
               <>
-                <RefreshCw className="w-3 h-3 inline mr-1 animate-spin" />
+                <RefreshCw className="w-3 h-3 inline mr-1 animate-spin" aria-hidden="true" />
                 Retrying...
               </>
             ) : (
@@ -265,7 +265,7 @@ export function SyncStatusBanner({
           >
             {retrying ? (
               <>
-                <RefreshCw className="w-3 h-3 inline mr-1 animate-spin" />
+                <RefreshCw className="w-3 h-3 inline mr-1 animate-spin" aria-hidden="true" />
                 Syncing...
               </>
             ) : (
@@ -279,7 +279,7 @@ export function SyncStatusBanner({
           <button
             type="button"
             onClick={handleDismiss}
-            className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
+            className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />

@@ -52,7 +52,7 @@ export default function MEPNavigation({ projectSlug }: MEPNavigationProps) {
                 }
               `}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4" aria-hidden="true" />
               {tab.name}
             </Link>
           );

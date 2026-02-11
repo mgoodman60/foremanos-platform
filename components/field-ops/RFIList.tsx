@@ -110,7 +110,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <MessageSquare className="w-5 h-5 text-purple-400" />
+          <MessageSquare aria-hidden="true" className="w-5 h-5 text-purple-400" />
           <h2 className="text-lg font-semibold text-white">RFIs</h2>
           <span className="text-sm text-gray-400">({rfis.length})</span>
         </div>
@@ -131,7 +131,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
               onClick={onCreateNew}
               className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium text-white transition-colors"
             >
-              <Plus className="w-4 h-4" />
+              <Plus aria-hidden="true" className="w-4 h-4" />
               New RFI
             </button>
           )}
@@ -142,7 +142,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
       <div className="divide-y divide-gray-700">
         {rfis.length === 0 ? (
           <div className="p-8 text-center">
-            <MessageSquare className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+            <MessageSquare aria-hidden="true" className="w-12 h-12 text-gray-600 mx-auto mb-3" />
             <p className="text-gray-400">No RFIs yet</p>
             {onCreateNew && (
               <button
@@ -168,7 +168,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
                     <PriorityBadge priority={rfi.priority} />
                     {rfi.dueDate && isOverdue(rfi.dueDate) && rfi.status !== 'CLOSED' && (
                       <span className="flex items-center gap-1 text-xs text-red-400">
-                        <AlertCircle className="w-3 h-3" />
+                        <AlertCircle aria-hidden="true" className="w-3 h-3" />
                         Overdue
                       </span>
                     )}
@@ -177,29 +177,29 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
                   <h3 className="text-white font-medium mb-1">{rfi.title}</h3>
                   <p className="text-sm text-gray-400 line-clamp-2 mb-2">{rfi.question}</p>
                   
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-4 text-xs text-gray-400">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
+                      <Calendar aria-hidden="true" className="w-3 h-3" />
                       {formatDistanceToNow(new Date(rfi.createdAt), { addSuffix: true })}
                     </span>
                     
                     {rfi.assignedToName && (
                       <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
+                        <User aria-hidden="true" className="w-3 h-3" />
                         {rfi.assignedToName}
                       </span>
                     )}
                     
                     {rfi.dueDate && (
                       <span className={`flex items-center gap-1 ${isOverdue(rfi.dueDate) ? 'text-red-400' : ''}`}>
-                        <Clock className="w-3 h-3" />
+                        <Clock aria-hidden="true" className="w-3 h-3" />
                         Due {format(new Date(rfi.dueDate), 'MMM d')}
                       </span>
                     )}
                     
                     {rfi.comments.length > 0 && (
                       <span className="flex items-center gap-1">
-                        <MessageSquare className="w-3 h-3" />
+                        <MessageSquare aria-hidden="true" className="w-3 h-3" />
                         {rfi.comments.length}
                       </span>
                     )}
@@ -214,7 +214,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
                             ? 'bg-red-500/20 text-red-400 border-red-500/30' 
                             : 'bg-green-500/20 text-green-400 border-green-500/30'
                         }`}>
-                          <DollarSign className="w-3 h-3" />
+                          <DollarSign aria-hidden="true" className="w-3 h-3" />
                           {rfi.costImpact > 0 ? '+' : ''}${Math.abs(rfi.costImpact).toLocaleString()}
                         </span>
                       )}
@@ -224,7 +224,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
                             ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' 
                             : 'bg-green-500/20 text-green-400 border-green-500/30'
                         }`}>
-                          <CalendarClock className="w-3 h-3" />
+                          <CalendarClock aria-hidden="true" className="w-3 h-3" />
                           {rfi.scheduleImpact > 0 ? '+' : ''}{rfi.scheduleImpact} days
                         </span>
                       )}
@@ -232,7 +232,7 @@ export default function RFIList({ projectSlug, onCreateNew, onSelect }: RFIListP
                   )}
                 </div>
                 
-                <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+                <ChevronRight aria-hidden="true" className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
               </div>
             </div>
           ))

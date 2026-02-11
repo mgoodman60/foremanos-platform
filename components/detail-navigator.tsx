@@ -184,7 +184,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading callouts...</span>
         </CardContent>
       </Card>
@@ -196,13 +196,13 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
       <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
-            <Navigation className="h-5 w-5" />
+            <Navigation aria-hidden="true" className="h-5 w-5" />
             Detail Callout Navigator
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Navigation className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <Navigation aria-hidden="true" className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">No callouts extracted yet</p>
             <Button
               onClick={handleExtractCallouts}
@@ -211,12 +211,12 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
             >
               {extracting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
                   Extracting...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw aria-hidden="true" className="mr-2 h-4 w-4" />
                   Extract Callouts
                 </>
               )}
@@ -238,7 +238,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                 <p className="text-sm text-gray-400">Total Callouts</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.totalCallouts}</p>
               </div>
-              <Navigation className="h-8 w-8 text-orange-500" />
+              <Navigation aria-hidden="true" className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -250,7 +250,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                 <p className="text-sm text-gray-400">Sheets w/ Callouts</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.sheetsWithCallouts}</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
+              <FileText aria-hidden="true" className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -262,7 +262,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                 <p className="text-sm text-gray-400">Linked</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.linkedCount}</p>
               </div>
-              <ExternalLink className="h-8 w-8 text-green-500" />
+              <ExternalLink aria-hidden="true" className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -276,7 +276,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                   {Math.round(stats.linkageRate)}%
                 </p>
               </div>
-              <Layers className="h-8 w-8 text-purple-500" />
+              <Layers aria-hidden="true" className="h-8 w-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -287,7 +287,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-gray-100 flex items-center gap-2">
-              <Navigation className="h-5 w-5" />
+              <Navigation aria-hidden="true" className="h-5 w-5" />
               Detail Callout Navigator
             </CardTitle>
             <Button
@@ -308,7 +308,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
           {/* Search and Filter */}
           <div className="flex gap-2 mt-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search callouts..."
                 value={searchQuery}
@@ -389,9 +389,9 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                             <p className="text-sm text-gray-300 mb-2">{callout.description}</p>
                           )}
 
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-4 text-xs text-gray-400">
                             <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
+                              <MapPin aria-hidden="true" className="h-3 w-3" />
                               Sheet {callout.sheetNumber}
                             </span>
                             {callout.scale && (
@@ -433,9 +433,9 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                           {crossRef.sourceSheetNumber}
                         </Badge>
                         {crossRef.bidirectional ? (
-                          <ArrowRight className="h-4 w-4 text-green-500" />
+                          <ArrowRight aria-hidden="true" className="h-4 w-4 text-green-500" />
                         ) : (
-                          <ArrowRight className="h-4 w-4 text-gray-500" />
+                          <ArrowRight aria-hidden="true" className="h-4 w-4 text-gray-400" />
                         )}
                         <Badge className="bg-purple-500 text-white">
                           {crossRef.targetSheetNumber}
@@ -469,7 +469,7 @@ export default function DetailNavigator({ projectSlug }: DetailNavigatorProps) {
                           </Badge>
                           <p className="text-2xl font-bold text-gray-100">{count as number}</p>
                         </div>
-                        <Navigation className="h-8 w-8 text-gray-500" />
+                        <Navigation aria-hidden="true" className="h-8 w-8 text-gray-400" />
                       </div>
                     </CardContent>
                   </Card>

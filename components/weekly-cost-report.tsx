@@ -144,7 +144,7 @@ export default function WeeklyCostReport() {
           </CardHeader>
           <CardContent className="pt-0">
             {reports.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No reports generated yet</p>
+              <p className="text-gray-400 text-center py-4">No reports generated yet</p>
             ) : (
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {reports.map((report) => (
@@ -162,11 +162,11 @@ export default function WeeklyCostReport() {
                         <div className="text-white text-sm font-medium">
                           Week of {format(new Date(report.weekStartDate), 'MMM d')}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-400">
                           {format(new Date(report.generatedAt), 'MMM d, h:mm a')}
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-gray-500" />
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
                   </button>
                 ))}

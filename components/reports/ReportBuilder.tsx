@@ -16,14 +16,14 @@ interface ReportSection {
 }
 
 const AVAILABLE_SECTIONS: ReportSection[] = [
-  { id: 'kpis', name: 'Key Performance Indicators', description: 'SPI, CPI, progress metrics', icon: <Activity className="w-4 h-4" /> },
-  { id: 'schedule', name: 'Schedule Analytics', description: 'Task status, milestones, delays', icon: <Calendar className="w-4 h-4" /> },
-  { id: 'budget', name: 'Budget Breakdown', description: 'Cost by division, variances', icon: <DollarSign className="w-4 h-4" /> },
-  { id: 'resources', name: 'Resource Utilization', description: 'Labor, equipment, materials', icon: <Users className="w-4 h-4" /> },
-  { id: 'mep', name: 'MEP Status', description: 'Mechanical, electrical, plumbing', icon: <Wrench className="w-4 h-4" /> },
-  { id: 'documents', name: 'Document Analytics', description: 'Upload trends, processing status', icon: <FileStack className="w-4 h-4" /> },
-  { id: 'trends', name: 'Progress Trends', description: 'Historical progress charts', icon: <TrendingUp className="w-4 h-4" /> },
-  { id: 'team', name: 'Team Performance', description: 'Crew productivity, hours logged', icon: <Users className="w-4 h-4" /> }
+  { id: 'kpis', name: 'Key Performance Indicators', description: 'SPI, CPI, progress metrics', icon: <Activity className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'schedule', name: 'Schedule Analytics', description: 'Task status, milestones, delays', icon: <Calendar className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'budget', name: 'Budget Breakdown', description: 'Cost by division, variances', icon: <DollarSign className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'resources', name: 'Resource Utilization', description: 'Labor, equipment, materials', icon: <Users className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'mep', name: 'MEP Status', description: 'Mechanical, electrical, plumbing', icon: <Wrench className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'documents', name: 'Document Analytics', description: 'Upload trends, processing status', icon: <FileStack className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'trends', name: 'Progress Trends', description: 'Historical progress charts', icon: <TrendingUp className="w-4 h-4" aria-hidden="true" /> },
+  { id: 'team', name: 'Team Performance', description: 'Crew productivity, hours logged', icon: <Users className="w-4 h-4" aria-hidden="true" /> }
 ];
 
 interface ReportBuilderProps {
@@ -151,10 +151,10 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-white">{section.name}</span>
                       {selectedSections.includes(section.id) && (
-                        <Check className="w-4 h-4 text-blue-400" />
+                        <Check className="w-4 h-4 text-blue-400" aria-hidden="true" />
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{section.description}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{section.description}</p>
                   </div>
                 </button>
               ))}
@@ -173,7 +173,7 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
                     : 'border-gray-600 text-gray-400 hover:border-gray-500'
                 }`}
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4" aria-hidden="true" />
                 JSON
               </button>
               <button
@@ -184,7 +184,7 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
                     : 'border-gray-600 text-gray-400 hover:border-gray-500'
                 }`}
               >
-                <Table className="w-4 h-4" />
+                <Table className="w-4 h-4" aria-hidden="true" />
                 CSV
               </button>
             </div>
@@ -197,18 +197,18 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">Report Contents</h3>
             {selectedSections.length === 0 ? (
-              <p className="text-gray-500 text-sm">No sections selected</p>
+              <p className="text-gray-400 text-sm">No sections selected</p>
             ) : (
               <div className="space-y-2">
                 {selectedSections.map((sectionId, index) => {
                   const section = AVAILABLE_SECTIONS.find(s => s.id === sectionId);
                   return (
                     <div key={sectionId} className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-500">{index + 1}.</span>
+                      <span className="text-gray-400">{index + 1}.</span>
                       <span className="text-white">{section?.name}</span>
                       <button
                         onClick={() => toggleSection(sectionId)}
-                        className="ml-auto text-gray-500 hover:text-red-400"
+                        className="ml-auto text-gray-400 hover:text-red-400"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -227,12 +227,12 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
           >
             {generating ? (
               <>
-                <Clock className="w-5 h-5 animate-spin" />
+                <Clock className="w-5 h-5 animate-spin" aria-hidden="true" />
                 Generating...
               </>
             ) : (
               <>
-                <FileText className="w-5 h-5" />
+                <FileText className="w-5 h-5" aria-hidden="true" />
                 Generate Report
               </>
             )}
@@ -244,7 +244,7 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
               onClick={handleDownload}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors"
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-5 h-5" aria-hidden="true" />
               Download {reportFormat}
             </button>
           )}
@@ -256,7 +256,7 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
         <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Generated Report Preview</h3>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-400">
               Generated at {new Date(generatedReport.generatedAt).toLocaleString()}
             </span>
           </div>
@@ -279,7 +279,7 @@ export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderP
                       {Object.entries(section.data || {}).map(([key, value]) => (
                         <div key={key} className="text-center">
                           <p className="text-lg font-bold text-white">{String(value)}</p>
-                          <p className="text-xs text-gray-500">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                          <p className="text-xs text-gray-400">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
                         </div>
                       ))}
                     </div>

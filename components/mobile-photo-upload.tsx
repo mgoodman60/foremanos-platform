@@ -243,7 +243,7 @@ export function MobilePhotoUpload({
           disabled={isUploading}
           className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
-          <Camera className="h-6 w-6" />
+          <Camera className="h-6 w-6" aria-hidden="true" />
           <span>Take Photo</span>
         </button>
 
@@ -261,7 +261,7 @@ export function MobilePhotoUpload({
           disabled={isUploading}
           className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-dark-card hover:bg-dark-hover text-slate-50 border border-gray-600 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
-          <ImageIcon className="h-6 w-6" />
+          <ImageIcon className="h-6 w-6" aria-hidden="true" />
           <span>Choose Photos</span>
         </button>
       </div>
@@ -279,7 +279,7 @@ export function MobilePhotoUpload({
                 disabled={isUploading || photos.every((p) => p.uploaded)}
                 className="bg-orange-500 hover:bg-orange-600 text-white text-sm"
               >
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-4 w-4 mr-2" aria-hidden="true" />
                 Upload All ({photos.filter((p) => !p.uploaded && !p.uploading).length})
               </Button>
             )}
@@ -312,13 +312,13 @@ export function MobilePhotoUpload({
                     )}
                     {photo.uploaded && (
                       <div className="flex flex-col items-center gap-2">
-                        <CheckCircle className="h-8 w-8 text-green-400" />
+                        <CheckCircle className="h-8 w-8 text-green-400" aria-hidden="true" />
                         <p className="text-xs text-green-400">Uploaded</p>
                       </div>
                     )}
                     {photo.error && (
                       <div className="flex flex-col items-center gap-2 px-2">
-                        <AlertCircle className="h-8 w-8 text-red-400" />
+                        <AlertCircle className="h-8 w-8 text-red-400" aria-hidden="true" />
                         <p className="text-xs text-red-400 text-center">{photo.error}</p>
                         <Button
                           onClick={() => handleRetryPhoto(photo.id)}

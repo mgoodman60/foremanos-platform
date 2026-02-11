@@ -127,7 +127,7 @@ export function ToolPresetManager({ currentStyle, onLoadPreset }: ToolPresetMana
           <div className="border-t pt-4">
             <h4 className="font-semibold mb-3 text-sm">Saved Presets</h4>
             {presets.length === 0 ? (
-              <p className="text-sm text-gray-500">No presets saved</p>
+              <p className="text-sm text-gray-400">No presets saved</p>
             ) : (
               <div className="space-y-2">
                 {presets.map((preset) => (

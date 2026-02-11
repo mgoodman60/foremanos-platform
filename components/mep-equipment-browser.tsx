@@ -460,7 +460,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       {/* Header */}
       <div className="flex items-center justify-between border-b border-dark-hover p-4">
         <div className="flex items-center gap-2">
-          <Wrench className="h-5 w-5 text-blue-500" />
+          <Wrench className="h-5 w-5 text-blue-500" aria-hidden="true" />
           <h2 className="text-lg font-semibold">MEP Equipment Browser</h2>
         </div>
         <div className="flex items-center gap-2">
@@ -472,9 +472,9 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             className="border-blue-600 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
           >
             {extracting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             ) : (
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
             )}
             {extracting ? 'Extracting...' : 'Extract MEP'}
           </Button>
@@ -485,7 +485,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             disabled={filteredEquipment.length === 0}
             className="border-dark-hover text-gray-300 hover:bg-dark-card hover:text-white"
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="mr-2 h-4 w-4" aria-hidden="true" />
             Export CSV
           </Button>
           <Button
@@ -494,7 +494,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             onClick={handleOpenLocationAssignment}
             className="border-green-600 text-green-400 hover:bg-green-500/20 hover:text-green-300"
           >
-            <MapPinned className="mr-2 h-4 w-4" />
+            <MapPinned className="mr-2 h-4 w-4" aria-hidden="true" />
             Assign Locations
           </Button>
           {onClose && (
@@ -535,7 +535,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
       <div className="space-y-3 border-b border-dark-hover p-4">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
           <Input
             placeholder="Search equipment tags, types, locations..."
             value={searchQuery}
@@ -580,7 +580,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             onClick={() => setShowConflicts(!showConflicts)}
             className={showConflicts ? 'bg-red-500 hover:bg-red-600' : 'border-red-700 text-red-400 hover:bg-red-500/20'}
           >
-            <AlertTriangle className="mr-2 h-4 w-4" />
+            <AlertTriangle className="mr-2 h-4 w-4" aria-hidden="true" />
             {showConflicts ? 'Hide' : 'Show'} Conflicts ({conflicts.length})
           </Button>
         )}
@@ -597,7 +597,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             }}
             className="w-full text-orange-500 hover:text-orange-400 hover:bg-dark-card"
           >
-            <X className="mr-2 h-4 w-4" />
+            <X className="mr-2 h-4 w-4" aria-hidden="true" />
             Clear Filters
           </Button>
         )}
@@ -608,7 +608,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
         {loading ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <Loader2 className="animate-spin text-orange-500 h-8 w-8 mb-2 inline-block" />
+              <Loader2 className="animate-spin text-orange-500 h-8 w-8 mb-2 inline-block" aria-hidden="true" />
               <p className="text-sm text-gray-400">Loading MEP equipment...</p>
             </div>
           </div>
@@ -618,7 +618,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             <h3 className="text-sm font-semibold text-gray-300 mb-3">MEP Coordination Conflicts</h3>
             {conflicts.length === 0 ? (
               <div className="text-center py-8">
-                <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-green-500" />
+                <CheckCircle2 className="mx-auto mb-3 h-12 w-12 text-green-500" aria-hidden="true" />
                 <p className="text-sm text-gray-400">No conflicts detected</p>
               </div>
             ) : (
@@ -628,7 +628,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                   className="rounded-lg border border-red-700 bg-dark-card p-4"
                 >
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-1 h-5 w-5 text-red-500 flex-shrink-0" />
+                    <AlertTriangle className="mt-1 h-5 w-5 text-red-500 flex-shrink-0" aria-hidden="true" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="font-medium text-slate-50">{conflict.description}</h4>
@@ -646,7 +646,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <MapPin className="h-3 w-3" />
+                        <MapPin className="h-3 w-3" aria-hidden="true" />
                         <span>{conflict.location}</span>
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1">
@@ -665,13 +665,13 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
         ) : filteredEquipment.length === 0 ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <Wrench className="mx-auto mb-3 h-12 w-12 text-gray-600" />
+              <Wrench className="mx-auto mb-3 h-12 w-12 text-gray-600" aria-hidden="true" />
               <p className="text-sm text-gray-400">
                 {searchQuery || selectedTrade !== 'all' || selectedStatus !== 'all'
                   ? 'No equipment matches your filters'
                   : 'No MEP equipment found'}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-400">
                 {searchQuery || selectedTrade !== 'all' || selectedStatus !== 'all'
                   ? 'Try adjusting your filters'
                   : 'Click the button below to extract MEP data from project documents'}
@@ -683,9 +683,9 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                   className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   {extracting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                   ) : (
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
                   )}
                   {extracting ? 'Extracting MEP Data...' : 'Extract MEP Data'}
                 </Button>
@@ -720,10 +720,10 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                     ) : (
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     )}
-                    <TradeIcon className={`h-5 w-5 ${config.color}`} />
+                    <TradeIcon className={`h-5 w-5 ${config.color}`} aria-hidden="true" />
                     <span className="font-medium text-slate-50">{config.label}</span>
                     <span className="text-xs text-gray-400">({eqList.length})</span>
-                    <div className="ml-auto text-xs text-gray-500">{config.description}</div>
+                    <div className="ml-auto text-xs text-gray-400">{config.description}</div>
                   </button>
 
                   {/* Equipment List */}
@@ -793,7 +793,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                               <div className="border-t border-dark-hover bg-dark-subtle p-4">
                                 {/* Tag and Type */}
                                 <div className="flex items-center gap-2 mb-3">
-                                  <span className="text-xs font-mono text-gray-500">{eq.tag}</span>
+                                  <span className="text-xs font-mono text-gray-400">{eq.tag}</span>
                                   {eq.type && eq.type !== eq.trade && (
                                     <span className="text-xs text-gray-400">• {eq.type}</span>
                                   )}
@@ -822,16 +822,16 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                                 )}
 
                                 {/* Location & Sheet */}
-                                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 mb-3">
+                                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 mb-3">
                                   {eq.location && (
                                     <div className="flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />
+                                      <MapPin className="h-3 w-3" aria-hidden="true" />
                                       <span>{eq.location}</span>
                                     </div>
                                   )}
                                   {eq.sheetReference && (
                                     <div className="flex items-center gap-1">
-                                      <FileText className="h-3 w-3" />
+                                      <FileText className="h-3 w-3" aria-hidden="true" />
                                       <span>{eq.sheetReference}</span>
                                     </div>
                                   )}
@@ -841,7 +841,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                                 {hasRoomData && (
                                   <div className="mt-3 border-t border-dark-hover pt-3">
                                     <h5 className="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />
+                                      <MapPin className="h-3 w-3" aria-hidden="true" />
                                       Quantity by Location
                                     </h5>
                                     <div className="grid gap-1">
@@ -852,7 +852,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                                         >
                                           <span className="text-gray-300">
                                             {rb.room}
-                                            {rb.level && <span className="text-gray-500 ml-1">({rb.level})</span>}
+                                            {rb.level && <span className="text-gray-400 ml-1">({rb.level})</span>}
                                           </span>
                                           <Badge variant="outline" className="text-xs text-blue-400 border-blue-700">
                                             {rb.quantity} {eq.specifications?.unit || 'EA'}
@@ -868,7 +868,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                                   <div className="mt-3 border-t border-dark-hover pt-3">
                                     <h5 className="text-xs font-semibold text-gray-400 mb-2">Notes</h5>
                                     {eq.notes.map((note, idx) => (
-                                      <p key={idx} className="text-xs text-gray-500 italic">
+                                      <p key={idx} className="text-xs text-gray-400 italic">
                                         • {note}
                                       </p>
                                     ))}
@@ -893,7 +893,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-dark-surface border-dark-hover text-slate-50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <MapPinned className="h-5 w-5 text-green-500" />
+              <MapPinned className="h-5 w-5 text-green-500" aria-hidden="true" />
               Assign Room Locations to MEP Equipment
             </DialogTitle>
           </DialogHeader>
@@ -933,22 +933,22 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             {item.category?.toLowerCase().includes('electric') && (
-                              <Zap className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+                              <Zap className="h-4 w-4 text-yellow-500 flex-shrink-0" aria-hidden="true" />
                             )}
                             {item.category?.toLowerCase().includes('plumb') && (
-                              <Droplets className="h-4 w-4 text-cyan-500 flex-shrink-0" />
+                              <Droplets className="h-4 w-4 text-cyan-500 flex-shrink-0" aria-hidden="true" />
                             )}
                             {item.category?.toLowerCase().includes('hvac') && (
-                              <Wrench className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                              <Wrench className="h-4 w-4 text-blue-500 flex-shrink-0" aria-hidden="true" />
                             )}
                             {(item.category?.toLowerCase().includes('fire') || item.category?.toLowerCase().includes('alarm')) && (
-                              <Flame className="h-4 w-4 text-red-500 flex-shrink-0" />
+                              <Flame className="h-4 w-4 text-red-500 flex-shrink-0" aria-hidden="true" />
                             )}
                             <span className="font-medium text-sm truncate">
                               {formatItemName(item.itemName || item.description || 'Unknown')}
                             </span>
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-gray-400 mt-1">
                             {item.category ?? ''} • Qty: {String(item.quantity ?? '')} {item.unit ?? ''}
                           </div>
                         </div>
@@ -977,8 +977,8 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
                     ))}
                   
                   {locationData.items.filter(item => !item.location).length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                    <div className="text-center py-8 text-gray-400">
+                      <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-green-500" aria-hidden="true" />
                       <p>All MEP items have locations assigned!</p>
                     </div>
                   )}
@@ -987,7 +987,7 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             </div>
           ) : (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" aria-hidden="true" />
             </div>
           )}
 
@@ -1006,12 +1006,12 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             >
               {assigningLocations ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                   Auto-Assigning...
                 </>
               ) : (
                 <>
-                  <Sparkles className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
                   Auto-Assign All ({locationData?.stats?.withoutLocation || 0})
                 </>
               )}
@@ -1023,12 +1023,12 @@ export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowse
             >
               {assigningLocations ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                   Assigning...
                 </>
               ) : (
                 <>
-                  <MapPinned className="mr-2 h-4 w-4" />
+                  <MapPinned className="mr-2 h-4 w-4" aria-hidden="true" />
                   Assign Selected ({Object.keys(selectedAssignments).length})
                 </>
               )}

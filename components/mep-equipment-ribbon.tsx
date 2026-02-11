@@ -22,7 +22,7 @@ export function MEPEquipmentRibbon({ projectSlug, projectId }: MEPEquipmentRibbo
           variant="outline"
           className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
         >
-          <Wrench className="h-4 w-4" />
+          <Wrench className="h-4 w-4" aria-hidden="true" />
           <span>MEP Equipment</span>
         </Button>
       </div>

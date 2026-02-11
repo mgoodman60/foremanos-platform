@@ -88,7 +88,7 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-blue-500" />
+            <Brain aria-hidden="true" className="h-5 w-5 text-blue-500" />
             <div>
               <CardTitle>Intelligence Extraction</CardTitle>
               <CardDescription className="mt-1">
@@ -185,12 +185,12 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
           >
             {extracting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
                 Extracting...
               </>
             ) : (
               <>
-                <Brain className="mr-2 h-4 w-4" />
+                <Brain aria-hidden="true" className="mr-2 h-4 w-4" />
                 Extract All Phases
               </>
             )}
@@ -204,12 +204,12 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
           >
             {extracting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
                 Extracting...
               </>
             ) : (
               <>
-                <CheckCircle2 className="mr-2 h-4 w-4" />
+                <CheckCircle2 aria-hidden="true" className="mr-2 h-4 w-4" />
                 Phase C Only
               </>
             )}
@@ -219,7 +219,7 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
         {/* Info Box */}
         <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
           <div className="flex gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <AlertCircle aria-hidden="true" className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
             <div className="space-y-1 text-sm">
               <p className="text-amber-200 font-medium">Intelligence Extraction Info</p>
               <ul className="text-gray-400 space-y-1 list-disc list-inside">

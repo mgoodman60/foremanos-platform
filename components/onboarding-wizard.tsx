@@ -48,21 +48,21 @@ const steps = [
         <h3 className="text-xl font-bold text-white">What You Can Do</h3>
         <div className="space-y-3">
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <FolderPlus className="w-5 h-5 text-client-primary mt-0.5" />
+            <FolderPlus className="w-5 h-5 text-client-primary mt-0.5" aria-hidden="true" />
             <div>
               <h4 className="font-semibold text-white">Manage Projects</h4>
               <p className="text-sm text-gray-300">Create and organize multiple construction projects</p>
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <FileUp className="w-5 h-5 text-client-primary mt-0.5" />
+            <FileUp className="w-5 h-5 text-client-primary mt-0.5" aria-hidden="true" />
             <div>
               <h4 className="font-semibold text-white">Upload Documents</h4>
               <p className="text-sm text-gray-300">Store plans, specs, schedules, and more</p>
             </div>
           </div>
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <MessageSquare className="w-5 h-5 text-client-primary mt-0.5" />
+            <MessageSquare className="w-5 h-5 text-client-primary mt-0.5" aria-hidden="true" />
             <div>
               <h4 className="font-semibold text-white">AI-Powered Chat</h4>
               <p className="text-sm text-gray-300">Ask questions and get instant answers from your documents</p>
@@ -163,7 +163,7 @@ const steps = [
     icon: CheckCircle2,
     content: (
       <div className="space-y-4 text-center">
-        <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto" />
+        <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto" aria-hidden="true" />
         <h3 className="text-2xl font-bold text-white">Ready to Get Started!</h3>
         <p className="text-gray-300 leading-relaxed">
           You now know the basics of ForemanOS. Start creating projects, uploading documents, and asking questions.
@@ -209,7 +209,7 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
         <DialogHeader className="sticky top-0 z-10 bg-dark-card pb-4 border-b border-gray-700">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-client-primary bg-opacity-10 rounded-lg">
-              <Icon className="w-6 h-6 text-client-primary" />
+              <Icon className="w-6 h-6 text-client-primary" aria-hidden="true" />
             </div>
             <DialogTitle className="text-xl">{step.title}</DialogTitle>
           </div>
@@ -244,7 +244,7 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
                 onClick={handleBack}
                 className="border-gray-600 text-gray-300"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                 Back
               </Button>
             )}
@@ -257,7 +257,7 @@ export function OnboardingWizard({ isOpen, onComplete }: OnboardingWizardProps) 
               ) : (
                 <>
                   Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                 </>
               )}
             </Button>

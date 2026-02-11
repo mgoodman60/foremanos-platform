@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Layer, Rect, Transformer } from 'react-konva';
 import { useMarkupState } from '@/hooks/markup/useMarkupState';
+import { secondaryColors, backgroundColors } from '@/lib/design-tokens';
 import type Konva from 'konva';
 
 interface SelectionLayerProps {
@@ -61,7 +62,7 @@ export function SelectionLayer({
           width={selectionWidth}
           height={selectionHeight}
           fill="rgba(59, 130, 246, 0.1)"
-          stroke="#3B82F6"
+          stroke={secondaryColors.blue[500]}
           strokeWidth={1}
           dash={[4, 4]}
         />
@@ -88,10 +89,10 @@ export function SelectionLayer({
           'middle-right',
         ]}
         rotateEnabled={true}
-        borderStroke="#3B82F6"
+        borderStroke={secondaryColors.blue[500]}
         borderStrokeWidth={2}
-        anchorStroke="#3B82F6"
-        anchorFill="#FFFFFF"
+        anchorStroke={secondaryColors.blue[500]}
+        anchorFill={backgroundColors.light.base}
         anchorSize={8}
         anchorCornerRadius={2}
       />

@@ -215,7 +215,7 @@ export default function AIRenderPanel({
       <div className="p-3 border-b border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" />
+            <Sparkles className="w-4 h-4 text-purple-400" aria-hidden="true" />
             <h3 className="text-sm font-semibold text-white">AI Realistic Render</h3>
           </div>
           <button
@@ -247,7 +247,7 @@ export default function AIRenderPanel({
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  <opt.icon className="w-3 h-3" />
+                  <opt.icon className="w-3 h-3" aria-hidden="true" />
                   {opt.label}
                 </button>
               ))}
@@ -332,7 +332,7 @@ export default function AIRenderPanel({
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  <TreePine className="w-3 h-3" />
+                  <TreePine className="w-3 h-3" aria-hidden="true" />
                   {opt.charAt(0).toUpperCase() + opt.slice(1)}
                 </button>
               ))}
@@ -351,7 +351,7 @@ export default function AIRenderPanel({
                     : 'bg-gray-700 text-gray-400 border border-transparent'
                 }`}
               >
-                <Car className="w-3 h-3" />
+                <Car className="w-3 h-3" aria-hidden="true" />
                 Vehicles
               </button>
               <button
@@ -374,7 +374,7 @@ export default function AIRenderPanel({
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="Override with your own description..."
-              className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1.5 text-xs text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1.5 text-xs text-white placeholder:text-gray-400 focus:outline-none focus:border-purple-500 resize-none"
               rows={2}
             />
           </div>
@@ -382,7 +382,7 @@ export default function AIRenderPanel({
           {/* Generated Prompt Preview */}
           {!customPrompt && (
             <div className="bg-gray-900/50 rounded p-2">
-              <label className="text-xs text-gray-500 block mb-1">Generated Prompt:</label>
+              <label className="text-xs text-gray-400 block mb-1">Generated Prompt:</label>
               <p className="text-xs text-gray-400 italic">{buildPrompt()}</p>
             </div>
           )}
@@ -398,12 +398,12 @@ export default function AIRenderPanel({
         >
           {generating ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
               Generating...
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" aria-hidden="true" />
               Generate Render
             </>
           )}
@@ -414,8 +414,8 @@ export default function AIRenderPanel({
       <div className="flex-1 overflow-y-auto p-3">
         {renders.length === 0 ? (
           <div className="text-center py-8">
-            <ImageIcon className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">No renders yet</p>
+            <ImageIcon className="w-12 h-12 text-gray-600 mx-auto mb-2" aria-hidden="true" />
+            <p className="text-sm text-gray-400">No renders yet</p>
             <p className="text-xs text-gray-600 mt-1">
               Configure settings and click Generate
             </p>
@@ -468,7 +468,7 @@ export default function AIRenderPanel({
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">
                     {render.settings.style} • {render.settings.timeOfDay}
                   </p>
                 </div>
@@ -504,7 +504,7 @@ export default function AIRenderPanel({
                     onClick={() => handleDownload(selectedRender)}
                     className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-sm"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4" aria-hidden="true" />
                     Download
                   </button>
                   <button
@@ -515,7 +515,7 @@ export default function AIRenderPanel({
                     }}
                     className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm"
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-4 h-4" aria-hidden="true" />
                     Use Settings
                   </button>
                 </div>

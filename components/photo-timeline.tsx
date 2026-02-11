@@ -269,7 +269,7 @@ function TimelinePhotoCard({ photo }: TimelinePhotoCardProps) {
             className="object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
             <p className="text-sm">Failed to load</p>
           </div>
         )}

@@ -227,7 +227,7 @@ export function MobileFieldView({
       <div className="sticky top-0 z-10 bg-dark-surface pb-4 space-y-3">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search tasks, locations, subs..."
             value={searchQuery}
@@ -251,9 +251,9 @@ export function MobileFieldView({
                   : 'bg-dark-card border-gray-700'
               )}
             >
-              {period === 'today' && <Calendar className="h-3 w-3 mr-1" />}
-              {period === 'critical' && <Flag className="h-3 w-3 mr-1" />}
-              {period === 'overdue' && <AlertTriangle className="h-3 w-3 mr-1" />}
+              {period === 'today' && <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />}
+              {period === 'critical' && <Flag className="h-3 w-3 mr-1" aria-hidden="true" />}
+              {period === 'overdue' && <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" />}
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Button>
           ))}
@@ -263,7 +263,7 @@ export function MobileFieldView({
         <div className="flex items-center justify-between">
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-[160px] bg-dark-card border-gray-700 h-10">
-              <Filter className="h-4 w-4 mr-2 text-gray-400" />
+              <Filter className="h-4 w-4 mr-2 text-gray-400" aria-hidden="true" />
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -292,9 +292,9 @@ export function MobileFieldView({
       <div className="space-y-3">
         {sortedTasks.length === 0 ? (
           <Card className="bg-dark-card border-gray-700 p-8 text-center">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
+            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" aria-hidden="true" />
             <p className="text-gray-300">No tasks match your filters</p>
-            <p className="text-sm text-gray-500 mt-1">Try adjusting your search or filters</p>
+            <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filters</p>
           </Card>
         ) : (
           sortedTasks.map(task => {
@@ -322,7 +322,7 @@ export function MobileFieldView({
                           CRITICAL
                         </Badge>
                       )}
-                      <span className="text-xs text-gray-500">{task.taskId}</span>
+                      <span className="text-xs text-gray-400">{task.taskId}</span>
                     </div>
                     <h3 className="font-medium text-gray-200 text-base leading-tight">{task.name}</h3>
                     
@@ -330,18 +330,18 @@ export function MobileFieldView({
                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-gray-400">
                       {task.location && (
                         <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
+                          <MapPin className="h-3 w-3" aria-hidden="true" />
                           {task.location}
                         </span>
                       )}
                       {task.subcontractor && (
                         <span className="flex items-center gap-1">
-                          <Wrench className="h-3 w-3" />
+                          <Wrench className="h-3 w-3" aria-hidden="true" />
                           {task.subcontractor.companyName}
                         </span>
                       )}
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="h-3 w-3" aria-hidden="true" />
                         {format(new Date(task.endDate), 'M/d')}
                       </span>
                     </div>
@@ -352,7 +352,7 @@ export function MobileFieldView({
                     variant="outline" 
                     className={cn('flex-shrink-0', statusConfig.bg, statusConfig.color, 'border-0')}
                   >
-                    <StatusIcon className="h-3 w-3 mr-1" />
+                    <StatusIcon className="h-3 w-3 mr-1" aria-hidden="true" />
                     {statusConfig.label}
                   </Badge>
                 </div>
@@ -399,7 +399,7 @@ export function MobileFieldView({
                         onClick={() => handleQuickStatusChange(task, 'in_progress')}
                         className="flex-1 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 h-10"
                       >
-                        <Play className="h-4 w-4 mr-1" />
+                        <Play className="h-4 w-4 mr-1" aria-hidden="true" />
                         Start
                       </Button>
                     )}
@@ -411,7 +411,7 @@ export function MobileFieldView({
                         onClick={() => handleQuickStatusChange(task, 'completed')}
                         className="flex-1 bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20 h-10"
                       >
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        <CheckCircle2 className="h-4 w-4 mr-1" aria-hidden="true" />
                         Complete
                       </Button>
                     )}
@@ -430,13 +430,13 @@ export function MobileFieldView({
                 {/* Urgency Warning */}
                 {urgency === 'overdue' && (
                   <div className="mt-3 p-2 bg-orange-500/10 border border-orange-500/30 rounded text-xs text-orange-400 flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                     <span>Overdue by {Math.abs(differenceInDays(new Date(task.endDate), new Date()))} day(s)</span>
                   </div>
                 )}
                 {urgency === 'due-today' && task.status !== 'completed' && (
                   <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs text-yellow-400 flex items-center gap-2">
-                    <Zap className="h-4 w-4 flex-shrink-0" />
+                    <Zap className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                     <span>Due today!</span>
                   </div>
                 )}
@@ -457,7 +457,7 @@ export function MobileFieldView({
             <div className="space-y-4 py-2">
               <div>
                 <p className="text-sm font-medium text-gray-300 mb-1">{selectedTask.name}</p>
-                <p className="text-xs text-gray-500">{selectedTask.taskId}</p>
+                <p className="text-xs text-gray-400">{selectedTask.taskId}</p>
               </div>
               
               {/* Status Select */}
@@ -489,7 +489,7 @@ export function MobileFieldView({
                   onChange={(e) => setNewProgress(parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
                 />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
                   <span>0%</span>
                   <span>50%</span>
                   <span>100%</span>
@@ -519,7 +519,7 @@ export function MobileFieldView({
               className="bg-orange-500 hover:bg-orange-600"
             >
               {updating === selectedTask?.id ? (
-                <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                <><RefreshCw className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" /> Saving...</>
               ) : (
                 'Save Update'
               )}

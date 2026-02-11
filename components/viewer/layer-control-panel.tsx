@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Layers, Eye, EyeOff, ChevronDown, ChevronRight, Search, Palette, Sliders, RotateCcw, Filter, Check, Square, CheckSquare } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
+import { semanticColors, chartColors, primaryColors, neutralColors } from '@/lib/design-tokens';
 
 interface LayerInfo {
   name: string;
@@ -23,16 +24,16 @@ interface LayerControlPanelProps {
 
 // Layer category colors for visual coding
 const CATEGORY_COLORS: Record<string, string> = {
-  'Contours': '#4ade80',      // green
-  'Grading': '#f59e0b',       // amber
-  'Erosion': '#ef4444',       // red
-  'Utilities': '#8b5cf6',     // purple
-  'Structures': '#3b82f6',    // blue
-  'Text': '#a78bfa',          // violet
-  'Dimensions': '#f97316',    // orange
-  'Boundaries': '#ec4899',    // pink
-  'Hatches': '#6366f1',       // indigo
-  'Other': '#94a3b8',         // slate
+  'Contours': semanticColors.success[400],
+  'Grading': semanticColors.warning[500],
+  'Erosion': semanticColors.error[500],
+  'Utilities': chartColors.palette[4],
+  'Structures': chartColors.neutral,
+  'Text': chartColors.palette[4],
+  'Dimensions': primaryColors.orange[500],
+  'Boundaries': chartColors.palette[5],
+  'Hatches': chartColors.palette[4],
+  'Other': neutralColors.slate[400],
 };
 
 // Common layer name patterns for auto-categorization
@@ -294,7 +295,7 @@ export default function LayerControlPanel({
       <div className="p-3 border-b border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-400" />
+            <Layers className="w-4 h-4 text-cyan-400" aria-hidden="true" />
             <h3 className="text-sm font-semibold text-white">Layer Controls</h3>
           </div>
           <span className="text-xs text-gray-400">
@@ -304,13 +305,13 @@ export default function LayerControlPanel({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search layers..."
-            className="w-full bg-gray-900 border border-gray-600 rounded pl-8 pr-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-gray-900 border border-gray-600 rounded pl-8 pr-3 py-1.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-cyan-500"
           />
         </div>
       </div>
@@ -321,14 +322,14 @@ export default function LayerControlPanel({
           onClick={showAllLayers}
           className="flex items-center gap-1 px-2 py-1 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded text-xs transition-colors"
         >
-          <Eye className="w-3 h-3" />
+          <Eye className="w-3 h-3" aria-hidden="true" />
           Show All
         </button>
         <button
           onClick={hideAllLayers}
           className="flex items-center gap-1 px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded text-xs transition-colors"
         >
-          <EyeOff className="w-3 h-3" />
+          <EyeOff className="w-3 h-3" aria-hidden="true" />
           Hide All
         </button>
         {selectedLayers.size > 0 && (
@@ -336,7 +337,7 @@ export default function LayerControlPanel({
             onClick={isolateSelected}
             className="flex items-center gap-1 px-2 py-1 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 rounded text-xs transition-colors"
           >
-            <Filter className="w-3 h-3" />
+            <Filter className="w-3 h-3" aria-hidden="true" />
             Isolate ({selectedLayers.size})
           </button>
         )}
@@ -344,7 +345,7 @@ export default function LayerControlPanel({
           onClick={() => setSelectedLayers(new Set())}
           className="flex items-center gap-1 px-2 py-1 bg-gray-600/20 hover:bg-gray-600/30 text-gray-400 rounded text-xs transition-colors"
         >
-          <RotateCcw className="w-3 h-3" />
+          <RotateCcw className="w-3 h-3" aria-hidden="true" />
           Reset
         </button>
       </div>
@@ -352,7 +353,7 @@ export default function LayerControlPanel({
       {/* Global Opacity Control */}
       <div className="p-2 border-b border-gray-700">
         <div className="flex items-center gap-2">
-          <Sliders className="w-3 h-3 text-gray-400" />
+          <Sliders className="w-3 h-3 text-gray-400" aria-hidden="true" />
           <span className="text-xs text-gray-400">Opacity</span>
           <input
             type="range"
@@ -373,7 +374,7 @@ export default function LayerControlPanel({
             <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : sortedCategories.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 text-sm">
+          <div className="text-center py-8 text-gray-400 text-sm">
             No layers found
           </div>
         ) : (
@@ -392,9 +393,9 @@ export default function LayerControlPanel({
                   className="w-full flex items-center gap-2 p-2 bg-gray-700/50 hover:bg-gray-700 transition-colors"
                 >
                   {isExpanded ? (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
                   )}
                   <div
                     className="w-3 h-3 rounded-full"
@@ -412,7 +413,7 @@ export default function LayerControlPanel({
                       toggleCategory(category);
                     }}
                     className={`p-1 rounded hover:bg-gray-600 transition-colors ${
-                      allVisible ? 'text-green-400' : someVisible ? 'text-yellow-400' : 'text-gray-500'
+                      allVisible ? 'text-green-400' : someVisible ? 'text-yellow-400' : 'text-gray-400'
                     }`}
                     title={allVisible ? 'Hide category' : 'Show category'}
                   >
@@ -450,14 +451,14 @@ export default function LayerControlPanel({
 
                         {/* Layer name */}
                         <span className={`text-xs flex-1 truncate ${
-                          layer.visible ? 'text-gray-200' : 'text-gray-500'
+                          layer.visible ? 'text-gray-200' : 'text-gray-400'
                         }`}>
                           {layer.name}
                         </span>
 
                         {/* Element count */}
                         {layer.elementCount > 0 && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-400">
                             {layer.elementCount}
                           </span>
                         )}
@@ -466,7 +467,7 @@ export default function LayerControlPanel({
                         <button
                           onClick={() => toggleLayer(layer.name)}
                           className={`p-1 rounded hover:bg-gray-600 transition-colors ${
-                            layer.visible ? 'text-green-400' : 'text-gray-500'
+                            layer.visible ? 'text-green-400' : 'text-gray-400'
                           }`}
                         >
                           {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -488,7 +489,7 @@ export default function LayerControlPanel({
           {Object.entries(CATEGORY_COLORS).slice(0, 6).map(([cat, color]) => (
             <div key={cat} className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-              <span className="text-xs text-gray-500 truncate">{cat}</span>
+              <span className="text-xs text-gray-400 truncate">{cat}</span>
             </div>
           ))}
         </div>

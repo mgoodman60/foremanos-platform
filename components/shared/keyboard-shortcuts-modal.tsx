@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface ShortcutEntry {
   keys: string[];
@@ -135,11 +136,7 @@ function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
   const isMac = typeof navigator !== 'undefined' && navigator.platform?.includes('Mac');
   const modKey = isMac ? 'Cmd' : 'Ctrl';
 
-  // Focus trap: focus the close button when modal opens
-  const closeRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    closeRef.current?.focus();
-  }, []);
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose();
@@ -151,15 +148,15 @@ function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
-      aria-label="Keyboard shortcuts"
+      aria-labelledby="keyboard-shortcuts-title"
     >
       <div
+        ref={containerRef}
         className="bg-slate-900 border border-gray-700 rounded-xl max-w-lg w-full max-h-[80vh] overflow-y-auto motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-100">Keyboard Shortcuts</h2>
+          <h2 id="keyboard-shortcuts-title" className="text-lg font-semibold text-gray-100">Keyboard Shortcuts</h2>
           <button
-            ref={closeRef}
             onClick={onClose}
             className="p-2 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
             aria-label="Close shortcuts panel"
@@ -171,7 +168,7 @@ function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
         <div className="px-6 py-4 space-y-6">
           {sections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                 {section.title}
               </h3>
               <div className="space-y-2">
@@ -185,7 +182,7 @@ function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
                       {shortcut.keys.map((key, i) => {
                         const displayKey = key === 'Cmd' ? modKey : key;
                         if (displayKey === 'then') {
-                          return <span key={i} className="text-xs text-gray-500 mx-1">then</span>;
+                          return <span key={i} className="text-xs text-gray-400 mx-1">then</span>;
                         }
                         return (
                           <kbd
@@ -205,7 +202,7 @@ function KeyboardShortcutsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="px-6 py-3 border-t border-gray-700">
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-gray-400 text-center">
             Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-800 border border-gray-600 rounded">?</kbd> to toggle this panel
           </p>
         </div>

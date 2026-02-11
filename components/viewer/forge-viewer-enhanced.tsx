@@ -389,7 +389,7 @@ const ForgeViewerEnhanced = forwardRef<ViewerHandle, ForgeViewerEnhancedProps>(
       return (
         <div className={`flex items-center justify-center bg-gray-900 text-white rounded-lg p-8 ${className}`}>
           <div className="text-center">
-            <Box className="w-12 h-12 mx-auto mb-4 text-red-400" />
+            <Box className="w-12 h-12 mx-auto mb-4 text-red-400" aria-hidden="true" />
             <p className="text-red-400 font-medium">{error}</p>
             <p className="text-gray-400 text-sm mt-2">Please try refreshing the page</p>
           </div>
@@ -404,7 +404,7 @@ const ForgeViewerEnhanced = forwardRef<ViewerHandle, ForgeViewerEnhancedProps>(
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90 backdrop-blur-sm">
             <div className="text-center">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto" />
+              <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto" aria-hidden="true" />
               <p className="text-white mt-4">Loading 3D Model...</p>
               <div className="w-48 h-1.5 bg-gray-700 rounded-full mt-3 overflow-hidden">
                 <div 

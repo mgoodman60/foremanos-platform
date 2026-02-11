@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { chartColors, semanticColors } from '@/lib/design-tokens';
 
 interface Room {
   id: string;
@@ -428,7 +429,7 @@ export function InteractivePlanViewer({
           key={`col-${i}`}
           x={i + 10}
           y={20}
-          fill="#3B82F6"
+          fill={chartColors.neutral}
           fontSize={14 / zoom}
           fontWeight="bold"
         >
@@ -444,7 +445,7 @@ export function InteractivePlanViewer({
           key={`row-${i}`}
           x={10}
           y={i + 20}
-          fill="#3B82F6"
+          fill={chartColors.neutral}
           fontSize={14 / zoom}
           fontWeight="bold"
         >
@@ -488,7 +489,7 @@ export function InteractivePlanViewer({
               width={boundsWidth}
               height={boundsHeight}
               fill={isSelected ? "rgba(34, 197, 94, 0.25)" : "rgba(34, 197, 94, 0.1)"}
-              stroke="#22C55E"
+              stroke={semanticColors.success[500]}
               strokeWidth={isSelected ? 3 / zoom : 2 / zoom}
               strokeDasharray={isSelected ? '5,5' : 'none'}
               onClick={() => handleAnnotationSelect(isSelected ? null : annotation.id, annotation)}
@@ -498,7 +499,7 @@ export function InteractivePlanViewer({
             <text
               x={boundsX + boundsWidth / 2}
               y={boundsY + boundsHeight / 2}
-              fill="#22C55E"
+              fill={semanticColors.success[500]}
               fontSize={12 / zoom}
               fontWeight="bold"
               textAnchor="middle"
@@ -518,10 +519,10 @@ export function InteractivePlanViewer({
       }
 
       if (annotation.type === 'equipment') {
-        const color = annotation.data.trade === 'HVAC' ? '#3B82F6' :
-                     annotation.data.trade === 'Electrical' ? '#F59E0B' :
-                     annotation.data.trade === 'Plumbing' ? '#06B6D4' :
-                     '#EF4444';
+        const color = annotation.data.trade === 'HVAC' ? chartColors.trades.hvac :
+                     annotation.data.trade === 'Electrical' ? chartColors.trades.electrical :
+                     annotation.data.trade === 'Plumbing' ? chartColors.trades.plumbing :
+                     chartColors.trades.fireProtection;
 
         return (
           <g key={annotation.id}>
@@ -560,7 +561,7 @@ export function InteractivePlanViewer({
               y={y - 6 / zoom}
               width={12 / zoom}
               height={12 / zoom}
-              fill="#A855F7"
+              fill={chartColors.palette[4]}
               stroke="white"
               strokeWidth={2 / zoom}
               onClick={() => setSelectedAnnotation(isSelected ? null : annotation.id)}
@@ -570,7 +571,7 @@ export function InteractivePlanViewer({
             <text
               x={x}
               y={y - 15 / zoom}
-              fill="#A855F7"
+              fill={chartColors.palette[4]}
               fontSize={9 / zoom}
               textAnchor="middle"
             >
@@ -816,11 +817,11 @@ export function InteractivePlanViewer({
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="mb-3 text-gray-500">
+                  <div className="mb-3 text-gray-400">
                     <Layers className="mx-auto h-16 w-16" />
                   </div>
                   <p className="text-sm text-gray-400">Failed to load document image</p>
-                  <p className="mt-2 text-xs text-gray-500">The document may need to be re-processed or the file format is not supported</p>
+                  <p className="mt-2 text-xs text-gray-400">The document may need to be re-processed or the file format is not supported</p>
                 </div>
               )}
 
@@ -966,7 +967,7 @@ export function InteractivePlanViewer({
                                                         <span className="font-medium">{item.itemName}</span>
                                                       </div>
                                                       {item.description && (
-                                                        <p className="mt-1 text-gray-500 line-clamp-2">
+                                                        <p className="mt-1 text-gray-400 line-clamp-2">
                                                           {item.description}
                                                         </p>
                                                       )}
@@ -992,11 +993,11 @@ export function InteractivePlanViewer({
                                 </>
                               ) : (
                                 <div className="rounded-md bg-dark-card p-4 text-center">
-                                  <Box className="mx-auto h-8 w-8 text-gray-500" />
+                                  <Box className="mx-auto h-8 w-8 text-gray-400" />
                                   <p className="mt-2 text-sm text-gray-400">
                                     No takeoff items found for this room
                                   </p>
-                                  <p className="mt-1 text-xs text-gray-500">
+                                  <p className="mt-1 text-xs text-gray-400">
                                     Items will appear here when extracted from plans
                                   </p>
                                 </div>
@@ -1005,7 +1006,7 @@ export function InteractivePlanViewer({
                           )}
 
                           {!loadingTakeoffs && !roomTakeoffs && (
-                            <div className="text-center text-sm text-gray-500">
+                            <div className="text-center text-sm text-gray-400">
                               Unable to load takeoffs
                             </div>
                           )}

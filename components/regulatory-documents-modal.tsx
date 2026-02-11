@@ -229,7 +229,7 @@ export function RegulatoryDocumentsModal({
                       </Badge>
                       <div>
                         <p className="font-medium">{doc.standard}</p>
-                        <p className="text-sm text-gray-500">{doc.jurisdiction}</p>
+                        <p className="text-sm text-gray-400">{doc.jurisdiction}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export function RegulatoryDocumentsModal({
                       ) : (
                         <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
                       )}
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-400">
                         {doc.pagesProcessed} pages
                       </span>
                     </div>
@@ -330,7 +330,7 @@ export function RegulatoryDocumentsModal({
                           </Badge>
                           <div>
                             <p className="font-medium">{code.standard}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-400">
                               {code.description}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">

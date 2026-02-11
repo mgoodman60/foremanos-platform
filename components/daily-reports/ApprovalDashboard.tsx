@@ -150,7 +150,7 @@ export default function ApprovalDashboard({ projectSlug }: ApprovalDashboardProp
       case 'windy':
         return <Wind className="w-4 h-4 text-gray-400" />;
       default:
-        return <Sun className="w-4 h-4 text-gray-500" />;
+        return <Sun className="w-4 h-4 text-gray-400" />;
     }
   };
 

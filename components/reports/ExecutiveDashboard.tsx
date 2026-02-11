@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { toast } from 'sonner';
-import { neutralColors, chartColors } from '@/lib/design-tokens';
+import { neutralColors, chartColors, backgroundColors, borderColors, textColors } from '@/lib/design-tokens';
 
 interface KPICardProps {
   title: string;
@@ -38,10 +38,10 @@ function KPICard({ title, value, subtitle, trend, trendValue, status, icon }: KP
   return (
     <div className={`p-4 rounded-lg border ${status ? statusColors[status] : 'border-gray-700 bg-gray-800/50'}`}>
       <div className="flex items-start justify-between">
-        <div className="text-gray-400">{icon}</div>
+        <div className="text-gray-400" aria-hidden="true">{icon}</div>
         {trend && (
           <div className={`flex items-center gap-1 text-sm ${trendColors[trend]}`}>
-            <TrendIcon className="w-3 h-3" />
+            <TrendIcon className="w-3 h-3" aria-hidden="true" />
             {trendValue}
           </div>
         )}
@@ -49,7 +49,7 @@ function KPICard({ title, value, subtitle, trend, trendValue, status, icon }: KP
       <div className="mt-3">
         <p className="text-2xl font-bold text-white">{value}</p>
         <p className="text-sm text-gray-400">{title}</p>
-        {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
       </div>
     </div>
   );
@@ -116,7 +116,7 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
   const getSPIStatus = (spi: number) => spi >= 0.95 ? 'good' : spi >= 0.85 ? 'warning' : 'critical';
   const getCPIStatus = (cpi: number) => cpi >= 0.95 ? 'good' : cpi >= 0.85 ? 'warning' : 'critical';
 
-  const PIE_COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+  const PIE_COLORS = chartColors.palette.slice(0, 6);
 
   return (
     <div className="space-y-6">
@@ -131,7 +131,7 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
           disabled={refreshing}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
           Refresh
         </button>
       </div>
@@ -177,12 +177,12 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
           <h3 className="text-lg font-semibold text-white mb-4">Progress vs Plan</h3>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={trends}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+              <XAxis dataKey="date" stroke={neutralColors.gray[400]} fontSize={12} />
+              <YAxis stroke={neutralColors.gray[400]} fontSize={12} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
-                labelStyle={{ color: '#F3F4F6' }}
+                contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}`, borderRadius: '8px' }}
+                labelStyle={{ color: textColors.dark.primary }}
               />
               <Area type="monotone" dataKey="plannedProgress" name="Planned" stroke={neutralColors.slate[500]} fill={neutralColors.slate[700]} fillOpacity={0.3} />
               <Area type="monotone" dataKey="actualProgress" name="Actual" stroke={chartColors.neutral} fill={chartColors.neutral} fillOpacity={0.3} />
@@ -211,7 +211,7 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}`, borderRadius: '8px' }}
                   formatter={(value) => value !== undefined ? [`$${Number(value).toLocaleString()}`, 'Budget'] : ['', '']}
                 />
               </PieChart>
@@ -275,11 +275,11 @@ export default function ExecutiveDashboard({ projectId, projectSlug }: Executive
         <h3 className="text-lg font-semibold text-white mb-4">Earned Value Metrics</h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={trends.slice(-6)}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
-            <YAxis stroke="#9CA3AF" fontSize={12} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+            <XAxis dataKey="date" stroke={neutralColors.gray[400]} fontSize={12} />
+            <YAxis stroke={neutralColors.gray[400]} fontSize={12} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
             <Tooltip
-              contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
+              contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}`, borderRadius: '8px' }}
               formatter={(value) => value !== undefined ? [`$${Number(value).toLocaleString()}`, ''] : ['', '']}
             />
             <Bar dataKey="plannedCost" name="Planned Value (PV)" fill={neutralColors.slate[500]} />

@@ -136,14 +136,14 @@ export default function SectionTools({
       {/* Header */}
       <div className="p-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Scissors className="w-5 h-5 text-purple-400" />
+          <Scissors className="w-5 h-5 text-purple-400" aria-hidden="true" />
           <h3 className="text-white font-medium">Section / Clipping</h3>
         </div>
         <button
           onClick={() => setShowPanel(!showPanel)}
           className="text-gray-400 hover:text-white"
         >
-          <ChevronDown className={`w-5 h-5 transition-transform ${showPanel ? '' : '-rotate-90'}`} />
+          <ChevronDown className={`w-5 h-5 transition-transform ${showPanel ? '' : '-rotate-90'}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -259,7 +259,7 @@ export default function SectionTools({
 
           {/* Empty State */}
           {sections.length === 0 && (
-            <div className="p-4 text-center text-gray-500 text-sm">
+            <div className="p-4 text-center text-gray-400 text-sm">
               <p>No section planes active</p>
               <p className="text-xs mt-1">Click X, Y, or Z to add a cutting plane</p>
             </div>

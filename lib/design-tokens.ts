@@ -444,6 +444,92 @@ export const helpers = {
 } as const;
 
 /**
+ * Tailwind-Compatible Color Export
+ *
+ * Restructured color tokens for consumption by tailwind.config.ts.
+ * These add semantic color aliases alongside existing HSL-based colors.
+ */
+export const tailwindColors = {
+  brand: {
+    50: primaryColors.orange[50],
+    100: primaryColors.orange[100],
+    200: primaryColors.orange[200],
+    300: primaryColors.orange[300],
+    400: primaryColors.orange[400],
+    500: primaryColors.orange[500],
+    600: primaryColors.orange[600],
+    700: primaryColors.orange[700],
+    800: primaryColors.orange[800],
+    900: primaryColors.orange[900],
+  },
+  'brand-blue': {
+    50: secondaryColors.blue[50],
+    100: secondaryColors.blue[100],
+    200: secondaryColors.blue[200],
+    300: secondaryColors.blue[300],
+    400: secondaryColors.blue[400],
+    500: secondaryColors.blue[500],
+    600: secondaryColors.blue[600],
+    700: secondaryColors.blue[700],
+    800: secondaryColors.blue[800],
+    900: secondaryColors.blue[900],
+  },
+  success: {
+    50: semanticColors.success[50],
+    100: semanticColors.success[100],
+    200: semanticColors.success[200],
+    300: semanticColors.success[300],
+    400: semanticColors.success[400],
+    500: semanticColors.success[500],
+    600: semanticColors.success[600],
+    700: semanticColors.success[700],
+    800: semanticColors.success[800],
+    900: semanticColors.success[900],
+  },
+  warning: {
+    50: semanticColors.warning[50],
+    100: semanticColors.warning[100],
+    200: semanticColors.warning[200],
+    300: semanticColors.warning[300],
+    400: semanticColors.warning[400],
+    500: semanticColors.warning[500],
+    600: semanticColors.warning[600],
+    700: semanticColors.warning[700],
+    800: semanticColors.warning[800],
+    900: semanticColors.warning[900],
+  },
+  error: {
+    50: semanticColors.error[50],
+    100: semanticColors.error[100],
+    200: semanticColors.error[200],
+    300: semanticColors.error[300],
+    400: semanticColors.error[400],
+    500: semanticColors.error[500],
+    600: semanticColors.error[600],
+    700: semanticColors.error[700],
+    800: semanticColors.error[800],
+    900: semanticColors.error[900],
+  },
+  info: {
+    50: semanticColors.info[50],
+    100: semanticColors.info[100],
+    200: semanticColors.info[200],
+    300: semanticColors.info[300],
+    400: semanticColors.info[400],
+    500: semanticColors.info[500],
+    600: semanticColors.info[600],
+    700: semanticColors.info[700],
+    800: semanticColors.info[800],
+    900: semanticColors.info[900],
+  },
+  'trade-electrical': chartColors.trades.electrical,
+  'trade-plumbing': chartColors.trades.plumbing,
+  'trade-hvac': chartColors.trades.hvac,
+  'trade-fire': chartColors.trades.fireProtection,
+  'trade-mechanical': chartColors.trades.mechanical,
+} as const;
+
+/**
  * Export all tokens as a single object for convenience
  */
 export const designTokens = {

@@ -338,7 +338,7 @@ export default function ReportTemplatesLibrary({ projectSlug, projectName }: Rep
                     <p className="text-gray-400 text-sm mt-1 line-clamp-2">
                       {template.description}
                     </p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {template.frequency}
@@ -462,7 +462,7 @@ export default function ReportTemplatesLibrary({ projectSlug, projectName }: Rep
               <button
                 onClick={handleGenerate}
                 disabled={generating || config.sections.length === 0}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-gray-400 text-white rounded-lg font-medium transition-colors"
               >
                 {generating ? (
                   <>
@@ -544,7 +544,7 @@ export default function ReportTemplatesLibrary({ projectSlug, projectName }: Rep
               <div className="max-w-3xl mx-auto">
                 <div className="text-center mb-8">
                   <h1 className="text-2xl font-bold text-gray-900">{generatedReport.title}</h1>
-                  <p className="text-gray-500 mt-2">
+                  <p className="text-gray-400 mt-2">
                     {projectName || 'Project Report'} • {format(new Date(), 'MMMM d, yyyy')}
                   </p>
                 </div>
@@ -558,7 +558,7 @@ export default function ReportTemplatesLibrary({ projectSlug, projectName }: Rep
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {Object.entries(section.data || {}).map(([key, value]) => (
                           <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                            <p className="text-gray-500 text-sm capitalize">
+                            <p className="text-gray-400 text-sm capitalize">
                               {key.replace(/([A-Z])/g, ' $1').trim()}
                             </p>
                             <p className="text-xl font-bold text-gray-900">

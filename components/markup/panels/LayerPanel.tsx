@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import type { MarkupLayerRecord } from '@/lib/markup/markup-types';
 import { logger } from '@/lib/logger';
+import { secondaryColors } from '@/lib/design-tokens';
 
 interface LayerPanelProps {
   slug: string;
@@ -123,7 +124,7 @@ export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps)
       const res = await fetch(`/api/projects/${slug}/documents/${documentId}/layers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), color: '#3B82F6' }),
+        body: JSON.stringify({ name: name.trim(), color: secondaryColors.blue[500] }),
       });
       if (!res.ok) {
         const error = await res.json();
@@ -144,7 +145,7 @@ export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps)
   if (loading) {
     return (
       <div className="w-[260px] border-l bg-white p-4">
-        <div className="text-sm text-gray-500">Loading layers...</div>
+        <div className="text-sm text-gray-400">Loading layers...</div>
       </div>
     );
   }
@@ -196,7 +197,7 @@ export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps)
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 w-16">Opacity</span>
+              <span className="text-xs text-gray-400 w-16">Opacity</span>
               <Slider
                 value={[layer.opacity * 100]}
                 onValueChange={(values) => handleOpacityChange(layer.id, values[0] / 100)}
@@ -205,7 +206,7 @@ export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps)
                 step={1}
                 className="flex-1"
               />
-              <span className="text-xs text-gray-500 w-8">{Math.round(layer.opacity * 100)}%</span>
+              <span className="text-xs text-gray-400 w-8">{Math.round(layer.opacity * 100)}%</span>
             </div>
           </div>
         ))}

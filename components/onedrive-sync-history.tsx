@@ -29,28 +29,28 @@ export default function OneDriveSyncHistory({ syncHistory, onClose }: OneDriveSy
       case 'success':
         return (
           <Badge variant="default" className="bg-green-600">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
+            <CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
             Success
           </Badge>
         );
       case 'failed':
         return (
           <Badge variant="destructive">
-            <XCircle className="h-3 w-3 mr-1" />
+            <XCircle className="h-3 w-3 mr-1" aria-hidden="true" />
             Failed
           </Badge>
         );
       case 'partial':
         return (
           <Badge variant="default" className="bg-yellow-600">
-            <AlertCircle className="h-3 w-3 mr-1" />
+            <AlertCircle className="h-3 w-3 mr-1" aria-hidden="true" />
             Partial
           </Badge>
         );
       case 'in_progress':
         return (
           <Badge variant="secondary">
-            <Clock className="h-3 w-3 mr-1 animate-spin" />
+            <Clock className="h-3 w-3 mr-1 animate-spin" aria-hidden="true" />
             In Progress
           </Badge>
         );
@@ -101,7 +101,7 @@ export default function OneDriveSyncHistory({ syncHistory, onClose }: OneDriveSy
                       {getTriggerBadge(entry.triggerType)}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-4 w-4" aria-hidden="true" />
                       {formatDuration(entry.startedAt, entry.completedAt)}
                     </div>
                   </div>
@@ -114,28 +114,28 @@ export default function OneDriveSyncHistory({ syncHistory, onClose }: OneDriveSy
                   {/* Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <FileUp className="h-4 w-4 text-green-600" />
+                      <FileUp className="h-4 w-4 text-green-600" aria-hidden="true" />
                       <div>
                         <p className="font-medium">{entry.filesAdded}</p>
                         <p className="text-xs text-muted-foreground">Added</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <FileDown className="h-4 w-4 text-blue-600" />
+                      <FileDown className="h-4 w-4 text-blue-600" aria-hidden="true" />
                       <div>
                         <p className="font-medium">{entry.filesUpdated}</p>
                         <p className="text-xs text-muted-foreground">Updated</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <FileX className="h-4 w-4 text-red-600" />
+                      <FileX className="h-4 w-4 text-red-600" aria-hidden="true" />
                       <div>
                         <p className="font-medium">{entry.filesDeleted}</p>
                         <p className="text-xs text-muted-foreground">Deleted</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <FileCheck className="h-4 w-4 text-gray-600" />
+                      <FileCheck className="h-4 w-4 text-gray-600" aria-hidden="true" />
                       <div>
                         <p className="font-medium">{entry.filesSkipped}</p>
                         <p className="text-xs text-muted-foreground">Skipped</p>

@@ -145,10 +145,10 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'critical': return <AlertCircle className="h-5 w-5 text-red-400" />;
-      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-400" />;
-      case 'info': return <Info className="h-5 w-5 text-blue-400" />;
-      default: return <Info className="h-5 w-5 text-gray-400" />;
+      case 'critical': return <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />;
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-400" aria-hidden="true" />;
+      case 'info': return <Info className="h-5 w-5 text-blue-400" aria-hidden="true" />;
+      default: return <Info className="h-5 w-5 text-gray-400" aria-hidden="true" />;
     }
   };
 
@@ -163,9 +163,9 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
 
   const getTrendIcon = (trend?: string) => {
     switch (trend) {
-      case 'improving': return <TrendingUp className="h-4 w-4 text-green-400" />;
-      case 'declining': return <TrendingDown className="h-4 w-4 text-red-400" />;
-      default: return <Minus className="h-4 w-4 text-gray-400" />;
+      case 'improving': return <TrendingUp className="h-4 w-4 text-green-400" aria-hidden="true" />;
+      case 'declining': return <TrendingDown className="h-4 w-4 text-red-400" aria-hidden="true" />;
+      default: return <Minus className="h-4 w-4 text-gray-400" aria-hidden="true" />;
     }
   };
 
@@ -184,10 +184,10 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
     return (
       <Card className="p-8 bg-dark-subtle border-gray-700">
         <div className="text-center text-gray-400">
-          <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-500" />
+          <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-400" aria-hidden="true" />
           <p>Unable to generate health report</p>
           <Button onClick={fetchHealthReport} variant="outline" className="mt-4">
-            <RefreshCw className="h-4 w-4 mr-2" /> Retry
+            <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" /> Retry
           </Button>
         </div>
       </Card>
@@ -215,7 +215,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
             
             <div>
               <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                <Activity className="h-5 w-5 text-orange-400" />
+                <Activity className="h-5 w-5 text-orange-400" aria-hidden="true" />
                 Schedule Health Analysis
               </h2>
               <p className="text-gray-400 text-sm mt-1">
@@ -236,7 +236,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
           </div>
           
           <Button onClick={fetchHealthReport} variant="outline" size="sm" className="border-gray-600">
-            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+            <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" /> Refresh
           </Button>
         </div>
       </Card>
@@ -251,7 +251,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
             </div>
             <div className="flex items-end gap-2">
               <span className="text-2xl font-bold text-white">{metric.value}%</span>
-              <span className="text-xs text-gray-500 mb-1">/ {metric.target}%</span>
+              <span className="text-xs text-gray-400 mb-1">/ {metric.target}%</span>
             </div>
             <div className="mt-2">
               <Progress
@@ -273,7 +273,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
         <Card className="bg-dark-subtle border-gray-700">
           <div className="p-4 border-b border-gray-700">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+              <AlertTriangle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
               Issues Detected ({report.issues.length})
             </h3>
           </div>
@@ -289,7 +289,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
 
                       {issue.affectedTasks.length > 0 && (
                         <div className="mt-2">
-                          <span className="text-xs text-gray-500">Affected: </span>
+                          <span className="text-xs text-gray-400">Affected: </span>
                           <span className="text-xs text-gray-300">
                             {issue.affectedTasks.slice(0, 3).join(', ')}
                             {issue.affectedTasks.length > 3 && ` +${issue.affectedTasks.length - 3} more`}
@@ -300,13 +300,13 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                       {issue.suggestedFix && (
                         <div className="mt-2 p-2 bg-dark-base rounded text-sm">
                           <span className="text-orange-400 flex items-center gap-1">
-                            <Lightbulb className="h-3 w-3" /> Suggestion:
+                            <Lightbulb className="h-3 w-3" aria-hidden="true" /> Suggestion:
                           </span>
                           <span className="text-gray-300 ml-4">{issue.suggestedFix}</span>
                         </div>
                       )}
                       
-                      <div className="mt-2 text-xs text-gray-500">
+                      <div className="mt-2 text-xs text-gray-400">
                         <span className="font-medium">Impact:</span> {issue.impact}
                       </div>
                     </div>
@@ -322,7 +322,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                       {applyingFix === issue.id ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                       ) : (
-                        <><Zap className="h-3 w-3 mr-1" /> Auto-Fix</>
+                        <><Zap className="h-3 w-3 mr-1" aria-hidden="true" /> Auto-Fix</>
                       )}
                     </Button>
                   )}
@@ -338,13 +338,13 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
         {/* Recommendations */}
         <Card className="p-4 bg-dark-subtle border-gray-700">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-            <Lightbulb className="h-5 w-5 text-yellow-400" />
+            <Lightbulb className="h-5 w-5 text-yellow-400" aria-hidden="true" />
             Recommendations
           </h3>
           <div className="space-y-3">
             {report.recommendations.map((rec, idx) => (
               <div key={idx} className="flex items-start gap-2 text-sm">
-                <ArrowRight className="h-4 w-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                <ArrowRight className="h-4 w-4 text-orange-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <span className="text-gray-300">{rec}</span>
               </div>
             ))}
@@ -354,7 +354,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
         {/* Industry Benchmarks */}
         <Card className="p-4 bg-dark-subtle border-gray-700">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-            <BarChart3 className="h-5 w-5 text-blue-400" />
+            <BarChart3 className="h-5 w-5 text-blue-400" aria-hidden="true" />
             Industry Benchmarks
           </h3>
           <div className="space-y-4">
@@ -364,7 +364,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                   <span className="text-gray-400">{benchmark.metric}</span>
                   <div className="flex items-center gap-3">
                     <span className="text-white font-medium">{benchmark.yourValue}%</span>
-                    <span className="text-gray-500">vs {benchmark.industryAvg}% avg</span>
+                    <span className="text-gray-400">vs {benchmark.industryAvg}% avg</span>
                   </div>
                 </div>
                 <div className="relative h-2 bg-gray-700 rounded">
@@ -377,7 +377,7 @@ export default function ScheduleHealthAnalyzer({ projectSlug }: ScheduleHealthAn
                     style={{ width: `${Math.min(benchmark.yourValue, 100)}%` }}
                   />
                 </div>
-                <div className="text-xs text-gray-500 mt-1 text-right">
+                <div className="text-xs text-gray-400 mt-1 text-right">
                   {benchmark.percentile}th percentile
                 </div>
               </div>

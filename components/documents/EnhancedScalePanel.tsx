@@ -43,9 +43,9 @@ export default function EnhancedScalePanel({ data }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Scale</th>
-                <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Applicable Area</th>
-                <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Status</th>
+                <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Scale</th>
+                <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Applicable Area</th>
+                <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Status</th>
               </tr>
             </thead>
             <tbody>

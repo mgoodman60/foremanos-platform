@@ -261,13 +261,13 @@ export default function RFIDetailModal({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <MessageSquare className="w-5 h-5 text-purple-400" />
+              <MessageSquare aria-hidden="true" className="w-5 h-5 text-purple-400" />
               <DialogTitle className="text-white">RFI-{rfi.rfiNumber}</DialogTitle>
               <StatusBadge status={rfi.status} />
               <PriorityBadge priority={rfi.priority} />
               {isOverdue && (
                 <span className="flex items-center gap-1 text-xs text-red-400">
-                  <AlertCircle className="w-3 h-3" />
+                  <AlertCircle aria-hidden="true" className="w-3 h-3" />
                   Overdue
                 </span>
               )}
@@ -454,7 +454,7 @@ export default function RFIDetailModal({
                   disabled={isSaving}
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save aria-hidden="true" className="w-4 h-4" />
                   {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -471,31 +471,31 @@ export default function RFIDetailModal({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 {rfi.assignedToName && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <User className="w-4 h-4" />
+                    <User aria-hidden="true" className="w-4 h-4" />
                     <span>Assigned to: <span className="text-white">{rfi.assignedToName}</span></span>
                   </div>
                 )}
                 {rfi.ballInCourt && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <User className="w-4 h-4" />
+                    <User aria-hidden="true" className="w-4 h-4" />
                     <span>Ball in court: <span className="text-white">{rfi.ballInCourt}</span></span>
                   </div>
                 )}
                 {rfi.dueDate && (
                   <div className={`flex items-center gap-2 ${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
-                    <Clock className="w-4 h-4" />
+                    <Clock aria-hidden="true" className="w-4 h-4" />
                     <span>Due: <span className={isOverdue ? 'text-red-400' : 'text-white'}>{format(new Date(rfi.dueDate), 'MMM d, yyyy')}</span></span>
                   </div>
                 )}
                 {rfi.specSection && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <FileText className="w-4 h-4" />
+                    <FileText aria-hidden="true" className="w-4 h-4" />
                     <span>Spec: <span className="text-white">{rfi.specSection}</span></span>
                   </div>
                 )}
                 {rfi.drawingRef && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <FileText className="w-4 h-4" />
+                    <FileText aria-hidden="true" className="w-4 h-4" />
                     <span>Drawing: <span className="text-white">{rfi.drawingRef}</span></span>
                   </div>
                 )}
@@ -512,7 +512,7 @@ export default function RFIDetailModal({
                           ? 'bg-red-500/20 text-red-400 border-red-500/30'
                           : 'bg-green-500/20 text-green-400 border-green-500/30'
                       }`}>
-                        <DollarSign className="w-4 h-4" />
+                        <DollarSign aria-hidden="true" className="w-4 h-4" />
                         {rfi.costImpact > 0 ? '+' : ''}${Math.abs(rfi.costImpact).toLocaleString()}
                       </span>
                     )}
@@ -522,7 +522,7 @@ export default function RFIDetailModal({
                           ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
                           : 'bg-green-500/20 text-green-400 border-green-500/30'
                       }`}>
-                        <CalendarClock className="w-4 h-4" />
+                        <CalendarClock aria-hidden="true" className="w-4 h-4" />
                         {rfi.scheduleImpact > 0 ? '+' : ''}{rfi.scheduleImpact} days
                       </span>
                     )}
@@ -537,10 +537,10 @@ export default function RFIDetailModal({
               {rfi.response ? (
                 <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4 text-purple-400" />
+                    <CheckCircle aria-hidden="true" className="w-4 h-4 text-purple-400" />
                     <h4 className="text-sm font-medium text-purple-400">Response</h4>
                     {rfi.respondedAt && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         {format(new Date(rfi.respondedAt), 'MMM d, yyyy')}
                       </span>
                     )}
@@ -569,7 +569,7 @@ export default function RFIDetailModal({
                       disabled={isSaving}
                       className="flex items-center gap-2 px-4 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm text-white disabled:opacity-50"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send aria-hidden="true" className="w-4 h-4" />
                       {isSaving ? 'Submitting...' : 'Submit Response'}
                     </button>
                   </div>
@@ -586,7 +586,7 @@ export default function RFIDetailModal({
               {/* Comments Section */}
               <div className="border-t border-gray-700 pt-4">
                 <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
+                  <MessageSquare aria-hidden="true" className="w-4 h-4" />
                   Comments ({rfi.comments.length})
                 </h4>
 
@@ -597,7 +597,7 @@ export default function RFIDetailModal({
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm font-medium text-white">{comment.user?.username || 'Unknown'}</span>
                           {comment.createdAt && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-400">
                               {format(new Date(comment.createdAt), 'MMM d, h:mm a')}
                             </span>
                           )}
@@ -641,7 +641,7 @@ export default function RFIDetailModal({
                     disabled={isSaving}
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors disabled:opacity-50"
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle aria-hidden="true" className="w-4 h-4" />
                     Close RFI
                   </button>
                 </div>

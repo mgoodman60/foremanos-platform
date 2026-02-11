@@ -184,7 +184,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
       <DialogContent className="bg-dark-card border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5 text-orange-500" />
+            <FileSpreadsheet aria-hidden="true" className="h-5 w-5 text-orange-500" />
             Import Budget from Document
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -205,9 +205,9 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
               </div>
             ) : documents.length === 0 ? (
               <div className="text-center py-8">
-                <FileText className="h-12 w-12 mx-auto text-gray-500 mb-2" />
+                <FileText aria-hidden="true" className="h-12 w-12 mx-auto text-gray-400 mb-2" />
                 <p className="text-gray-400">No budget documents found</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   Upload a budget PDF or Excel file first
                 </p>
               </div>
@@ -232,7 +232,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{doc.name}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-400">
                           {new Date(doc.createdAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -260,7 +260,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                 </>
               ) : (
                 <>
-                  <DollarSign className="h-4 w-4 mr-2" />
+                  <DollarSign aria-hidden="true" className="h-4 w-4 mr-2" />
                   Extract Budget Items
                 </>
               )}
@@ -288,13 +288,13 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                     <div className="text-2xl font-bold text-white">
                       {formatCurrency(extractionResult.totalBudget)}
                     </div>
-                    <div className="text-xs text-gray-500">Total Budget</div>
+                    <div className="text-xs text-gray-400">Total Budget</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-white">
                       {extractionResult.itemCount}
                     </div>
-                    <div className="text-xs text-gray-500">Line Items</div>
+                    <div className="text-xs text-gray-400">Line Items</div>
                   </div>
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       {item.costCode && (
-                        <span className="text-xs text-gray-500 font-mono">{item.costCode}</span>
+                        <span className="text-xs text-gray-400 font-mono">{item.costCode}</span>
                       )}
                       <span className="truncate">{item.name}</span>
                     </div>
@@ -319,7 +319,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
                   </div>
                 ))}
                 {extractionResult.itemCount > 10 && (
-                  <div className="text-xs text-gray-500 text-center py-1">
+                  <div className="text-xs text-gray-400 text-center py-1">
                     +{extractionResult.itemCount - 10} more items
                   </div>
                 )}
@@ -327,7 +327,7 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
 
               {extractionResult.confidence < 70 && (
                 <div className="flex items-start gap-2 p-3 bg-yellow-900/20 border border-yellow-700 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle aria-hidden="true" className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-300">
                     Low confidence extraction. Please review the items carefully before importing.
                   </div>

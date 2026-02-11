@@ -124,9 +124,10 @@ export function ProjectHeader() {
 
               {showSettingsMenu && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowSettingsMenu(false)} />
-                  <div className="absolute right-0 top-full mt-1 w-56 bg-slate-900 border border-gray-700 rounded-lg shadow-xl z-50 py-1">
+                  <div className="fixed inset-0 z-40" onClick={() => setShowSettingsMenu(false)} onKeyDown={(e) => e.key === 'Escape' && setShowSettingsMenu(false)} role="button" tabIndex={-1} aria-label="Close overlay" />
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-slate-900 border border-gray-700 rounded-lg shadow-xl z-50 py-1" role="menu" aria-label="Settings menu">
                     <button
+                      role="menuitem"
                       onClick={() => { modals.setShowOneDriveSettings(true); setShowSettingsMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                     >
@@ -134,6 +135,7 @@ export function ProjectHeader() {
                       OneDrive Settings
                     </button>
                     <button
+                      role="menuitem"
                       onClick={() => { modals.setShowLogoUpload(true); setShowSettingsMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                     >
@@ -141,6 +143,7 @@ export function ProjectHeader() {
                       Company Logo
                     </button>
                     <button
+                      role="menuitem"
                       onClick={() => { modals.setShowFinalizationSettings(true); setShowSettingsMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                     >
@@ -149,6 +152,7 @@ export function ProjectHeader() {
                     </button>
                     <div className="border-t border-gray-700 my-1" />
                     <button
+                      role="menuitem"
                       onClick={() => { router.push(`/project/${slug}/settings`); setShowSettingsMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                     >
@@ -156,6 +160,7 @@ export function ProjectHeader() {
                       Project Settings
                     </button>
                     <button
+                      role="menuitem"
                       onClick={() => { router.push(`/project/${slug}/templates`); setShowSettingsMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                     >
@@ -189,17 +194,18 @@ export function ProjectHeader() {
 
             {showUserMenu && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                <div className="absolute right-0 top-full mt-1 w-52 bg-slate-900 border border-gray-700 rounded-lg shadow-xl z-50 py-1">
+                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} onKeyDown={(e) => e.key === 'Escape' && setShowUserMenu(false)} role="button" tabIndex={-1} aria-label="Close overlay" />
+                <div className="absolute right-0 top-full mt-1 w-52 bg-slate-900 border border-gray-700 rounded-lg shadow-xl z-50 py-1" role="menu" aria-label="User menu">
                   <div className="px-4 py-2 border-b border-gray-700">
                     <p className="text-sm font-medium text-slate-50 truncate">
                       {session?.user?.username || session?.user?.email || 'User'}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-gray-400 truncate">
                       {session?.user?.email}
                     </p>
                   </div>
                   <button
+                    role="menuitem"
                     onClick={() => { router.push('/profile'); setShowUserMenu(false); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                   >
@@ -207,6 +213,7 @@ export function ProjectHeader() {
                     Profile
                   </button>
                   <button
+                    role="menuitem"
                     onClick={() => { router.push('/dashboard'); setShowUserMenu(false); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                   >
@@ -215,6 +222,7 @@ export function ProjectHeader() {
                   </button>
                   <div className="border-t border-gray-700 my-1" />
                   <button
+                    role="menuitem"
                     onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-gray-800 transition-colors"
                     data-testid="logout-button"

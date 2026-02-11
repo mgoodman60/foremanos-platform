@@ -234,7 +234,7 @@ export default function ProgressDetectionPanel({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-400">Detected Updates</span>
-                <span className="text-gray-500">{selectedUpdates.size} selected</span>
+                <span className="text-gray-400">{selectedUpdates.size} selected</span>
               </div>
 
               {detections.map((detection, idx) => (
@@ -275,7 +275,7 @@ export default function ProgressDetectionPanel({
                         <span className="text-gray-400 text-sm">
                           {detection.currentProgress}%
                         </span>
-                        <span className="text-gray-500">→</span>
+                        <span className="text-gray-400">→</span>
                         <span className="text-green-400 font-medium">
                           {detection.suggestedProgress}%
                         </span>
@@ -285,7 +285,7 @@ export default function ProgressDetectionPanel({
                       </div>
 
                       {detection.evidence.length > 0 && (
-                        <div className="mt-1 text-xs text-gray-500">
+                        <div className="mt-1 text-xs text-gray-400">
                           Evidence: {detection.evidence.slice(0, 2).join(', ')}
                         </div>
                       )}

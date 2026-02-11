@@ -262,7 +262,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Check className="h-6 w-6 text-green-400" />
+            <Check aria-hidden="true" className="h-6 w-6 text-green-400" />
             Labor & Material Review
           </h2>
           <p className="text-gray-400 text-sm mt-1">
@@ -275,7 +275,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
           onClick={fetchData}
           className="text-gray-400 hover:text-white"
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw aria-hidden="true" className="h-4 w-4 mr-2" />
           Refresh
         </Button>
       </div>
@@ -289,7 +289,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                 <p className="text-sm text-gray-400">Labor Pending</p>
                 <p className="text-2xl font-bold text-yellow-400">{pendingLaborCount}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-400/30" />
+              <Clock aria-hidden="true" className="h-8 w-8 text-yellow-400/30" />
             </div>
           </CardContent>
         </Card>
@@ -300,7 +300,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                 <p className="text-sm text-gray-400">Labor Approved</p>
                 <p className="text-2xl font-bold text-green-400">{data.laborApproved.length}</p>
               </div>
-              <Check className="h-8 w-8 text-green-400/30" />
+              <Check aria-hidden="true" className="h-8 w-8 text-green-400/30" />
             </div>
           </CardContent>
         </Card>
@@ -311,7 +311,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                 <p className="text-sm text-gray-400">Materials Pending</p>
                 <p className="text-2xl font-bold text-yellow-400">{pendingMaterialCount}</p>
               </div>
-              <Package className="h-8 w-8 text-yellow-400/30" />
+              <Package aria-hidden="true" className="h-8 w-8 text-yellow-400/30" />
             </div>
           </CardContent>
         </Card>
@@ -322,7 +322,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                 <p className="text-sm text-gray-400">Materials Received</p>
                 <p className="text-2xl font-bold text-green-400">{data.materialsReceived.length}</p>
               </div>
-              <Package className="h-8 w-8 text-green-400/30" />
+              <Package aria-hidden="true" className="h-8 w-8 text-green-400/30" />
             </div>
           </CardContent>
         </Card>
@@ -334,19 +334,19 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
           <CardHeader className="pb-0">
             <TabsList className="bg-dark-surface border border-gray-600">
               <TabsTrigger value="labor-pending" className="data-[state=active]:bg-yellow-600">
-                <Users className="h-4 w-4 mr-2" />
+                <Users aria-hidden="true" className="h-4 w-4 mr-2" />
                 Labor Pending {pendingLaborCount > 0 && <Badge className="ml-2 bg-yellow-600">{pendingLaborCount}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="labor-approved" className="data-[state=active]:bg-green-600">
-                <Check className="h-4 w-4 mr-2" />
+                <Check aria-hidden="true" className="h-4 w-4 mr-2" />
                 Labor Approved
               </TabsTrigger>
               <TabsTrigger value="material-pending" className="data-[state=active]:bg-yellow-600">
-                <Package className="h-4 w-4 mr-2" />
+                <Package aria-hidden="true" className="h-4 w-4 mr-2" />
                 Materials Pending {pendingMaterialCount > 0 && <Badge className="ml-2 bg-yellow-600">{pendingMaterialCount}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="material-received" className="data-[state=active]:bg-green-600">
-                <Check className="h-4 w-4 mr-2" />
+                <Check aria-hidden="true" className="h-4 w-4 mr-2" />
                 Materials Received
               </TabsTrigger>
             </TabsList>
@@ -357,7 +357,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             <TabsContent value="labor-pending">
               {data.laborPending.length === 0 ? (
                 <div className="text-center py-12 text-gray-400">
-                  <Check className="h-12 w-12 mx-auto mb-4 text-green-400" />
+                  <Check aria-hidden="true" className="h-12 w-12 mx-auto mb-4 text-green-400" />
                   <p>All labor entries have been reviewed!</p>
                 </div>
               ) : (
@@ -384,7 +384,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                           onClick={() => handleApprove('labor', Array.from(selectedItems))}
                           disabled={processing}
                         >
-                          <Check className="h-4 w-4 mr-1" /> Approve Selected
+                          <Check aria-hidden="true" className="h-4 w-4 mr-1" /> Approve Selected
                         </Button>
                         <Button
                           size="sm"
@@ -392,7 +392,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                           onClick={() => handleReject('labor', Array.from(selectedItems))}
                           disabled={processing}
                         >
-                          <X className="h-4 w-4 mr-1" /> Reject Selected
+                          <X aria-hidden="true" className="h-4 w-4 mr-1" /> Reject Selected
                         </Button>
                       </div>
                     )}
@@ -420,11 +420,11 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                                 {getConfidenceBadge(entry.confidence)}
                               </div>
                               <div className="text-sm text-gray-400 mt-1">
-                                <span className="mr-4"><Calendar className="h-3 w-3 inline mr-1" />{format(new Date(entry.date), 'MMM d, yyyy')}</span>
-                                <span className="mr-4"><Clock className="h-3 w-3 inline mr-1" />{entry.hoursWorked} hrs @ {formatCurrency(entry.hourlyRate)}/hr</span>
+                                <span className="mr-4"><Calendar aria-hidden="true" className="h-3 w-3 inline mr-1" />{format(new Date(entry.date), 'MMM d, yyyy')}</span>
+                                <span className="mr-4"><Clock aria-hidden="true" className="h-3 w-3 inline mr-1" />{entry.hoursWorked} hrs @ {formatCurrency(entry.hourlyRate)}/hr</span>
                               </div>
                               {entry.description && (
-                                <p className="text-sm text-gray-500 mt-1 italic">{entry.description}</p>
+                                <p className="text-sm text-gray-400 mt-1 italic">{entry.description}</p>
                               )}
                               {entry.budgetItem && (
                                 <p className="text-xs text-blue-400 mt-1">→ {entry.budgetItem.name}</p>
@@ -469,7 +469,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             <TabsContent value="labor-approved">
               {data.laborApproved.length === 0 ? (
                 <div className="text-center py-12 text-gray-400">
-                  <Clock className="h-12 w-12 mx-auto mb-4" />
+                  <Clock aria-hidden="true" className="h-12 w-12 mx-auto mb-4" />
                   <p>No approved labor entries yet.</p>
                 </div>
               ) : (
@@ -478,7 +478,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                     <div key={entry.id} className="p-4 rounded-lg border border-gray-700 bg-dark-surface">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-400" />
+                          <Check aria-hidden="true" className="h-4 w-4 text-green-400" />
                           <span className="font-medium text-white">{entry.workerName}</span>
                           <Badge className="bg-blue-600/20 text-blue-400">{entry.tradeType || 'General'}</Badge>
                           <span className="text-sm text-gray-400">{format(new Date(entry.date), 'MMM d')}</span>
@@ -496,7 +496,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             <TabsContent value="material-pending">
               {data.materialsPending.length === 0 ? (
                 <div className="text-center py-12 text-gray-400">
-                  <Check className="h-12 w-12 mx-auto mb-4 text-green-400" />
+                  <Check aria-hidden="true" className="h-12 w-12 mx-auto mb-4 text-green-400" />
                   <p>All material entries have been reviewed!</p>
                 </div>
               ) : (
@@ -523,7 +523,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                           onClick={() => handleApprove('material', Array.from(selectedItems))}
                           disabled={processing}
                         >
-                          <Check className="h-4 w-4 mr-1" /> Approve Selected
+                          <Check aria-hidden="true" className="h-4 w-4 mr-1" /> Approve Selected
                         </Button>
                         <Button
                           size="sm"
@@ -531,7 +531,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                           onClick={() => handleReject('material', Array.from(selectedItems))}
                           disabled={processing}
                         >
-                          <X className="h-4 w-4 mr-1" /> Reject Selected
+                          <X aria-hidden="true" className="h-4 w-4 mr-1" /> Reject Selected
                         </Button>
                       </div>
                     )}
@@ -560,11 +560,11 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                               </div>
                               <div className="text-sm text-gray-400 mt-1">
                                 <span className="mr-4">#{entry.procurementNumber}</span>
-                                {entry.vendorName && <span className="mr-4"><Building2 className="h-3 w-3 inline mr-1" />{entry.vendorName}</span>}
+                                {entry.vendorName && <span className="mr-4"><Building2 aria-hidden="true" className="h-3 w-3 inline mr-1" />{entry.vendorName}</span>}
                                 {entry.quantity && <span>{entry.quantity} {entry.unit}</span>}
                               </div>
                               {entry.actualDelivery && (
-                                <p className="text-xs text-gray-500 mt-1">Delivered: {format(new Date(entry.actualDelivery), 'MMM d, yyyy')}</p>
+                                <p className="text-xs text-gray-400 mt-1">Delivered: {format(new Date(entry.actualDelivery), 'MMM d, yyyy')}</p>
                               )}
                               {entry.budgetItem && (
                                 <p className="text-xs text-blue-400 mt-1">→ {entry.budgetItem.name}</p>
@@ -611,7 +611,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
             <TabsContent value="material-received">
               {data.materialsReceived.length === 0 ? (
                 <div className="text-center py-12 text-gray-400">
-                  <Package className="h-12 w-12 mx-auto mb-4" />
+                  <Package aria-hidden="true" className="h-12 w-12 mx-auto mb-4" />
                   <p>No received materials yet.</p>
                 </div>
               ) : (
@@ -620,7 +620,7 @@ export default function LaborMaterialReview({ projectSlug }: LaborMaterialReview
                     <div key={entry.id} className="p-4 rounded-lg border border-gray-700 bg-dark-surface">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-400" />
+                          <Check aria-hidden="true" className="h-4 w-4 text-green-400" />
                           <span className="font-medium text-white">{entry.description}</span>
                           <Badge className="bg-purple-600/20 text-purple-400">{entry.itemType}</Badge>
                           {entry.vendorName && <span className="text-sm text-gray-400">{entry.vendorName}</span>}

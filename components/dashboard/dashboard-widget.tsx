@@ -140,7 +140,7 @@ export function DashboardWidget({
             </div>
           </div>
           <p className="text-sm text-red-400">{error}</p>
-          <p className="text-xs text-gray-500 mt-1">Try refreshing the page</p>
+          <p className="text-xs text-gray-400 mt-1">Try refreshing the page</p>
         </article>
       </div>
     );
@@ -159,7 +159,7 @@ export function DashboardWidget({
             </div>
             <h3 className="text-sm font-semibold text-gray-400">{title}</h3>
           </div>
-          <p className="text-sm text-gray-500 mb-3">{emptyState.message}</p>
+          <p className="text-sm text-gray-400 mb-3">{emptyState.message}</p>
           {emptyState.actionLabel && emptyState.actionHref && (
             <Link
               href={emptyState.actionHref}
@@ -219,7 +219,7 @@ export function DashboardWidget({
                 <p className={`text-sm font-semibold ${metric.color || 'text-slate-50'}`}>
                   {metric.value}
                 </p>
-                <p className="text-xs text-gray-500">{metric.label}</p>
+                <p className="text-xs text-gray-400">{metric.label}</p>
               </div>
             </div>
           ))}

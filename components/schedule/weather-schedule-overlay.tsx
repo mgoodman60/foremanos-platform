@@ -62,13 +62,13 @@ interface WeatherScheduleOverlayProps {
 
 const getWeatherIcon = (condition: string, size = 'h-5 w-5') => {
   switch (condition) {
-    case 'clear': return <Sun className={cn(size, 'text-yellow-400')} />;
-    case 'cloudy': return <Cloud className={cn(size, 'text-gray-400')} />;
-    case 'rain': return <CloudRain className={cn(size, 'text-blue-400')} />;
-    case 'snow': return <CloudSnow className={cn(size, 'text-blue-200')} />;
-    case 'storm': return <CloudLightning className={cn(size, 'text-purple-400')} />;
-    case 'fog': return <CloudFog className={cn(size, 'text-gray-500')} />;
-    default: return <Cloud className={cn(size, 'text-gray-400')} />;
+    case 'clear': return <Sun className={cn(size, 'text-yellow-400')} aria-hidden="true" />;
+    case 'cloudy': return <Cloud className={cn(size, 'text-gray-400')} aria-hidden="true" />;
+    case 'rain': return <CloudRain className={cn(size, 'text-blue-400')} aria-hidden="true" />;
+    case 'snow': return <CloudSnow className={cn(size, 'text-blue-200')} aria-hidden="true" />;
+    case 'storm': return <CloudLightning className={cn(size, 'text-purple-400')} aria-hidden="true" />;
+    case 'fog': return <CloudFog className={cn(size, 'text-gray-400')} aria-hidden="true" />;
+    default: return <Cloud className={cn(size, 'text-gray-400')} aria-hidden="true" />;
   }
 };
 
@@ -178,7 +178,7 @@ export function WeatherScheduleOverlay({
     return (
       <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex items-center justify-center gap-3 py-8 text-gray-400">
-          <RefreshCw className="h-5 w-5 animate-spin" />
+          <RefreshCw className="h-5 w-5 animate-spin" aria-hidden="true" />
           <span>Loading weather data from project location...</span>
         </div>
       </Card>
@@ -189,7 +189,7 @@ export function WeatherScheduleOverlay({
     return (
       <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex flex-col items-center justify-center gap-4 py-8">
-          <MapPin className="h-12 w-12 text-yellow-500" />
+          <MapPin className="h-12 w-12 text-yellow-500" aria-hidden="true" />
           <div className="text-center">
             <h3 className="text-lg font-semibold text-gray-200">Project Location Not Set</h3>
             <p className="text-sm text-gray-400 mt-1">Set the project location to get accurate weather forecasts</p>
@@ -199,7 +199,7 @@ export function WeatherScheduleOverlay({
             className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10"
             onClick={() => window.location.href = `/project/${projectSlug}/settings`}
           >
-            <MapPin className="h-4 w-4 mr-2" />
+            <MapPin className="h-4 w-4 mr-2" aria-hidden="true" />
             Configure Location
           </Button>
         </div>
@@ -211,10 +211,10 @@ export function WeatherScheduleOverlay({
     return (
       <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex flex-col items-center justify-center gap-4 py-8">
-          <AlertTriangle className="h-12 w-12 text-red-500" />
+          <AlertTriangle className="h-12 w-12 text-red-500" aria-hidden="true" />
           <p className="text-red-400">{error}</p>
           <Button variant="outline" onClick={loadWeatherData}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
             Retry
           </Button>
         </div>
@@ -228,13 +228,13 @@ export function WeatherScheduleOverlay({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-500/20 rounded-lg">
-            <Cloud className="h-6 w-6 text-blue-400" />
+            <Cloud className="h-6 w-6 text-blue-400" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-200">Weather Forecast Overlay</h3>
             {location && (
               <p className="text-sm text-gray-400 flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
+                <MapPin className="h-3 w-3" aria-hidden="true" />
                 {location.city}, {location.state}
               </p>
             )}
@@ -266,27 +266,27 @@ export function WeatherScheduleOverlay({
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
-          <Sun className="h-5 w-5 text-green-400 mx-auto mb-1" />
+          <Sun className="h-5 w-5 text-green-400 mx-auto mb-1" aria-hidden="true" />
           <p className="text-2xl font-bold text-green-400">{stats.goodDays}</p>
           <p className="text-xs text-gray-400">Good Days</p>
         </div>
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
-          <Cloud className="h-5 w-5 text-yellow-400 mx-auto mb-1" />
+          <Cloud className="h-5 w-5 text-yellow-400 mx-auto mb-1" aria-hidden="true" />
           <p className="text-2xl font-bold text-yellow-400">{stats.moderateDays}</p>
           <p className="text-xs text-gray-400">Moderate</p>
         </div>
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
-          <CloudRain className="h-5 w-5 text-red-400 mx-auto mb-1" />
+          <CloudRain className="h-5 w-5 text-red-400 mx-auto mb-1" aria-hidden="true" />
           <p className="text-2xl font-bold text-red-400">{stats.badDays}</p>
           <p className="text-xs text-gray-400">Poor Days</p>
         </div>
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-center">
-          <Thermometer className="h-5 w-5 text-blue-400 mx-auto mb-1" />
+          <Thermometer className="h-5 w-5 text-blue-400 mx-auto mb-1" aria-hidden="true" />
           <p className="text-2xl font-bold text-blue-400">{stats.avgTemp}°</p>
           <p className="text-xs text-gray-400">Avg Temp</p>
         </div>
         <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-center">
-          <Droplets className="h-5 w-5 text-purple-400 mx-auto mb-1" />
+          <Droplets className="h-5 w-5 text-purple-400 mx-auto mb-1" aria-hidden="true" />
           <p className="text-2xl font-bold text-purple-400">{stats.totalPrecip}"</p>
           <p className="text-xs text-gray-400">Total Precip</p>
         </div>
@@ -316,11 +316,11 @@ export function WeatherScheduleOverlay({
                       <div className="text-center">
                         <p className={cn(
                           'text-xs font-medium',
-                          isToday ? 'text-blue-400' : weekend ? 'text-gray-500' : 'text-gray-400'
+                          isToday ? 'text-blue-400' : weekend ? 'text-gray-400' : 'text-gray-400'
                         )}>
                           {isToday ? 'Today' : dayOfWeek}
                         </p>
-                        <p className="text-xs text-gray-500">{format(dayDate, 'M/d')}</p>
+                        <p className="text-xs text-gray-400">{format(dayDate, 'M/d')}</p>
                         
                         <div className="my-2 flex justify-center">
                           {getWeatherIcon(day.condition, 'h-8 w-8')}
@@ -329,7 +329,7 @@ export function WeatherScheduleOverlay({
                         <p className="text-sm font-semibold text-gray-200">
                           {Math.round(day.tempMax)}°
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           {Math.round(day.tempMin)}°
                         </p>
                         
@@ -348,11 +348,11 @@ export function WeatherScheduleOverlay({
                       <p className="text-sm text-gray-400 capitalize">{day.description}</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="flex items-center gap-1">
-                          <Wind className="h-3 w-3 text-gray-500" />
+                          <Wind className="h-3 w-3 text-gray-400" aria-hidden="true" />
                           <span className="text-gray-400">{Math.round(day.windSpeed)} mph</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Droplets className="h-3 w-3 text-gray-500" />
+                          <Droplets className="h-3 w-3 text-gray-400" aria-hidden="true" />
                           <span className="text-gray-400">{day.humidity}%</span>
                         </div>
                       </div>
@@ -377,7 +377,7 @@ export function WeatherScheduleOverlay({
       {affectedTasks.length > 0 && (
         <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="h-5 w-5 text-orange-400" />
+            <AlertTriangle className="h-5 w-5 text-orange-400" aria-hidden="true" />
             <h4 className="font-semibold text-orange-400">
               {affectedTasks.length} Task{affectedTasks.length > 1 ? 's' : ''} May Be Affected by Weather
             </h4>
@@ -389,13 +389,13 @@ export function WeatherScheduleOverlay({
                   {task.isCritical && <span className="text-red-400 mr-1">●</span>}
                   {task.name}
                 </span>
-                <span className="text-gray-500">
+                <span className="text-gray-400">
                   {format(new Date(task.startDate), 'M/d')} - {format(new Date(task.endDate), 'M/d')}
                 </span>
               </div>
             ))}
             {affectedTasks.length > 5 && (
-              <p className="text-xs text-gray-500">+ {affectedTasks.length - 5} more tasks</p>
+              <p className="text-xs text-gray-400">+ {affectedTasks.length - 5} more tasks</p>
             )}
           </div>
         </div>

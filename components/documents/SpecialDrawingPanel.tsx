@@ -35,13 +35,13 @@ export default function SpecialDrawingPanel({ data }: Props) {
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             {ceilingPlan.gridType && (
               <>
-                <span className="text-gray-500">Grid Type</span>
+                <span className="text-gray-400">Grid Type</span>
                 <span className="text-gray-900">{ceilingPlan.gridType}</span>
               </>
             )}
             {ceilingPlan.heights && (
               <>
-                <span className="text-gray-500">Heights</span>
+                <span className="text-gray-400">Heights</span>
                 <span className="text-gray-900">
                   {Array.isArray(ceilingPlan.heights) ? ceilingPlan.heights.join(', ') : ceilingPlan.heights}
                 </span>
@@ -49,7 +49,7 @@ export default function SpecialDrawingPanel({ data }: Props) {
             )}
             {ceilingPlan.materials && (
               <>
-                <span className="text-gray-500">Materials</span>
+                <span className="text-gray-400">Materials</span>
                 <span className="text-gray-900">
                   {Array.isArray(ceilingPlan.materials) ? ceilingPlan.materials.join(', ') : ceilingPlan.materials}
                 </span>
@@ -97,25 +97,25 @@ export default function SpecialDrawingPanel({ data }: Props) {
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             {roofData.roofType && (
               <>
-                <span className="text-gray-500">Type</span>
+                <span className="text-gray-400">Type</span>
                 <span className="text-gray-900">{roofData.roofType}</span>
               </>
             )}
             {roofData.slope && (
               <>
-                <span className="text-gray-500">Slope</span>
+                <span className="text-gray-400">Slope</span>
                 <span className="text-gray-900">{roofData.slope}</span>
               </>
             )}
             {roofData.material && (
               <>
-                <span className="text-gray-500">Material</span>
+                <span className="text-gray-400">Material</span>
                 <span className="text-gray-900">{roofData.material}</span>
               </>
             )}
             {roofData.drainage && (
               <>
-                <span className="text-gray-500">Drainage</span>
+                <span className="text-gray-400">Drainage</span>
                 <span className="text-gray-900">{roofData.drainage}</span>
               </>
             )}
@@ -129,13 +129,13 @@ export default function SpecialDrawingPanel({ data }: Props) {
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             {exteriorElevation.orientation && (
               <>
-                <span className="text-gray-500">Orientation</span>
+                <span className="text-gray-400">Orientation</span>
                 <span className="text-gray-900">{exteriorElevation.orientation}</span>
               </>
             )}
             {exteriorElevation.materials && (
               <>
-                <span className="text-gray-500">Materials</span>
+                <span className="text-gray-400">Materials</span>
                 <span className="text-gray-900">
                   {Array.isArray(exteriorElevation.materials) ? exteriorElevation.materials.join(', ') : exteriorElevation.materials}
                 </span>
@@ -143,7 +143,7 @@ export default function SpecialDrawingPanel({ data }: Props) {
             )}
             {exteriorElevation.heights && (
               <>
-                <span className="text-gray-500">Heights</span>
+                <span className="text-gray-400">Heights</span>
                 <span className="text-gray-900">
                   {Array.isArray(exteriorElevation.heights) ? exteriorElevation.heights.join(', ') : exteriorElevation.heights}
                 </span>

@@ -110,7 +110,7 @@ export default function ElementPropertiesPanel({
     return (
       <div className={`bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden ${className}`}>
         <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-2">
-          <Info className="w-4 h-4 text-blue-400" />
+          <Info className="w-4 h-4 text-blue-400" aria-hidden="true" />
           <span className="text-sm font-medium text-white">Element Properties</span>
         </div>
         <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
@@ -124,11 +124,11 @@ export default function ElementPropertiesPanel({
     return (
       <div className={`bg-dark-subtle border border-gray-700 rounded-xl overflow-hidden ${className}`}>
         <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-2">
-          <Info className="w-4 h-4 text-blue-400" />
+          <Info className="w-4 h-4 text-blue-400" aria-hidden="true" />
           <span className="text-sm font-medium text-white">Element Properties</span>
         </div>
         <div className="flex items-center justify-center h-32">
-          <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-gray-400 animate-spin" aria-hidden="true" />
         </div>
       </div>
     );
@@ -139,7 +139,7 @@ export default function ElementPropertiesPanel({
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700">
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-blue-400" />
+          <Info className="w-4 h-4 text-blue-400" aria-hidden="true" />
           <span className="text-sm font-medium text-white">Element Properties</span>
         </div>
         {properties && (
@@ -163,7 +163,7 @@ export default function ElementPropertiesPanel({
                     onClick={() => copyValue(properties.dbId)}
                     className="p-0.5 hover:bg-gray-700 rounded"
                   >
-                    <Copy className="w-3 h-3 text-gray-500" />
+                    <Copy className="w-3 h-3 text-gray-400" />
                   </button>
                 </div>
                 <div className="text-gray-400">External ID</div>
@@ -174,7 +174,7 @@ export default function ElementPropertiesPanel({
                       onClick={() => copyValue(properties.externalId!)}
                       className="p-0.5 hover:bg-gray-700 rounded flex-shrink-0"
                     >
-                      <Copy className="w-3 h-3 text-gray-500" />
+                      <Copy className="w-3 h-3 text-gray-400" />
                     </button>
                   )}
                 </div>
@@ -191,12 +191,12 @@ export default function ElementPropertiesPanel({
                     className="w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-700/30 transition-colors"
                   >
                     {expandedGroups.has(category) ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     )}
                     <span className="text-sm text-gray-300 font-medium">{category}</span>
-                    <span className="text-xs text-gray-500 ml-auto">{props.length}</span>
+                    <span className="text-xs text-gray-400 ml-auto">{props.length}</span>
                   </button>
 
                   {expandedGroups.has(category) && (
@@ -220,7 +220,7 @@ export default function ElementPropertiesPanel({
                               onClick={() => copyValue(prop.displayValue)}
                               className="p-0.5 hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity"
                             >
-                              <Copy className="w-3 h-3 text-gray-500" />
+                              <Copy className="w-3 h-3 text-gray-400" />
                             </button>
                           </div>
                         </div>
@@ -235,7 +235,7 @@ export default function ElementPropertiesPanel({
 
       {/* Selection count */}
       {selectedIds.length > 1 && (
-        <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500">
+        <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-400">
           {selectedIds.length} elements selected (showing first)
         </div>
       )}

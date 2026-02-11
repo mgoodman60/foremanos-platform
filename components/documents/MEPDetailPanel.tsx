@@ -18,7 +18,7 @@ function ArrayTable({ title, items, columns }: {
 
   return (
     <div>
-      <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+      <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
         {title} ({items.length})
       </h5>
       <div className="overflow-x-auto rounded-lg border">

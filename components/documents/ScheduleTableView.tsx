@@ -55,7 +55,7 @@ export default function ScheduleTableView({ table }: Props) {
               <tr>
                 <td
                   colSpan={table.headers.length}
-                  className="px-3 py-4 text-center text-gray-500"
+                  className="px-3 py-4 text-center text-gray-400"
                 >
                   No data
                 </td>

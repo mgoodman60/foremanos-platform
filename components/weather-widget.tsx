@@ -183,7 +183,7 @@ export default function WeatherWidget({
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sun className="w-5 h-5 text-orange-500" />
+          <Sun className="w-5 h-5 text-orange-500" aria-hidden="true" />
           <h3 className="text-lg font-semibold text-slate-50">Weather Intelligence</h3>
         </div>
         <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export default function WeatherWidget({
               onClick={() => setShowAlerts(!showAlerts)}
               className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
             >
-              <AlertTriangle className="w-4 h-4" />
+              <AlertTriangle className="w-4 h-4" aria-hidden="true" />
               {alerts.length} {alerts.length === 1 ? 'Alert' : 'Alerts'}
             </button>
           )}
@@ -238,7 +238,7 @@ export default function WeatherWidget({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-orange-500/10 rounded-xl">
-              <WeatherIcon className="w-10 h-10 text-orange-500" />
+              <WeatherIcon className="w-10 h-10 text-orange-500" aria-hidden="true" />
             </div>
             <div>
               <div className="text-4xl font-bold text-slate-50">
@@ -266,7 +266,7 @@ export default function WeatherWidget({
         <div className="grid grid-cols-3 gap-4">
           <div className="p-3 bg-dark-surface rounded-lg">
             <div className="flex items-center gap-2 mb-1">
-              <Wind className="w-4 h-4 text-cyan-400" />
+              <Wind className="w-4 h-4 text-cyan-400" aria-hidden="true" />
               <span className="text-xs text-gray-400">Wind</span>
             </div>
             <p className="text-lg font-semibold text-slate-50">
@@ -276,7 +276,7 @@ export default function WeatherWidget({
 
           <div className="p-3 bg-dark-surface rounded-lg">
             <div className="flex items-center gap-2 mb-1">
-              <Droplets className="w-4 h-4 text-blue-400" />
+              <Droplets className="w-4 h-4 text-blue-400" aria-hidden="true" />
               <span className="text-xs text-gray-400">Humidity</span>
             </div>
             <p className="text-lg font-semibold text-slate-50">
@@ -286,7 +286,7 @@ export default function WeatherWidget({
 
           <div className="p-3 bg-dark-surface rounded-lg">
             <div className="flex items-center gap-2 mb-1">
-              <CloudRain className="w-4 h-4 text-indigo-400" />
+              <CloudRain className="w-4 h-4 text-indigo-400" aria-hidden="true" />
               <span className="text-xs text-gray-400">Precip</span>
             </div>
             <p className="text-lg font-semibold text-slate-50">
@@ -303,7 +303,7 @@ export default function WeatherWidget({
       {weekForecast.length > 0 && (
         <div className="px-6 py-4 border-t border-gray-700">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-4 h-4 text-gray-400" />
+            <Calendar className="w-4 h-4 text-gray-400" aria-hidden="true" />
             <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
               This Week
             </h4>
@@ -319,7 +319,7 @@ export default function WeatherWidget({
                   <p className="text-xs text-gray-400 mb-2">
                     {getDayName(snapshot.snapshotTime)}
                   </p>
-                  <DayIcon className="w-6 h-6 mx-auto mb-2 text-orange-500" />
+                  <DayIcon className="w-6 h-6 mx-auto mb-2 text-orange-500" aria-hidden="true" />
                   <p className="text-sm font-semibold text-slate-50">
                     {Math.round(snapshot.temperature)}°
                   </p>

@@ -71,7 +71,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
   };
 
   const getRouteIcon = (route: string) => {
-    return <Route className="h-3 w-3" />;
+    return <Route className="h-3 w-3" aria-hidden="true" />;
   };
 
   if (compact && !expanded) {
@@ -83,7 +83,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Route className="h-4 w-4 text-blue-400" />
+              <Route className="h-4 w-4 text-blue-400" aria-hidden="true" />
               <span className="text-sm font-medium text-gray-200">
                 MEP Path Analysis: {pathData.equipment.length} equipment
               </span>
@@ -108,7 +108,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Route className="h-5 w-5 text-blue-400" />
+            <Route className="h-5 w-5 text-blue-400" aria-hidden="true" />
             <h3 className="font-semibold text-gray-200">MEP Path Analysis</h3>
           </div>
           {compact && (
@@ -167,9 +167,9 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
               </div>
 
               {/* Arrow & Distance */}
-              <div className="flex items-center gap-1 text-gray-500">
+              <div className="flex items-center gap-1 text-gray-400">
                 {getRouteIcon(segment.route)}
-                <ArrowRight className="h-3 w-3" />
+                <ArrowRight className="h-3 w-3" aria-hidden="true" />
                 <span className="text-xs">{segment.distance.toFixed(1)}'</span>
               </div>
 
@@ -185,7 +185,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
 
               {/* Conflict Indicator */}
               {segment.conflicts.length > 0 && (
-                <AlertCircle className="h-4 w-4 text-orange-400 flex-shrink-0" />
+                <AlertCircle className="h-4 w-4 text-orange-400 flex-shrink-0" aria-hidden="true" />
               )}
             </div>
           ))}
@@ -195,7 +195,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
         {pathData.conflicts.length > 0 && (
           <div className="border-t border-gray-700 pt-3">
             <div className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-orange-400" />
+              <AlertCircle className="h-4 w-4 text-orange-400" aria-hidden="true" />
               Conflicts Detected ({pathData.conflicts.length})
             </div>
             <div className="space-y-1.5">
@@ -206,12 +206,12 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
                   </span>
                   <div className="flex-1">
                     <div className="text-gray-300">{conflict.description}</div>
-                    <div className="text-gray-500 mt-0.5">{conflict.location}</div>
+                    <div className="text-gray-400 mt-0.5">{conflict.location}</div>
                   </div>
                 </div>
               ))}
               {pathData.conflicts.length > 3 && (
-                <div className="text-xs text-gray-500 text-center py-1">
+                <div className="text-xs text-gray-400 text-center py-1">
                   +{pathData.conflicts.length - 3} more conflicts
                 </div>
               )}
@@ -223,7 +223,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
         {pathData.efficiency < 70 && (
           <div className="mt-3 bg-orange-500/10 border border-orange-500/20 rounded-lg p-2">
             <div className="flex items-start gap-2">
-              <Zap className="h-4 w-4 text-orange-400 flex-shrink-0 mt-0.5" />
+              <Zap className="h-4 w-4 text-orange-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="text-xs text-gray-300">
                 <span className="font-medium">Optimization Suggested:</span> This path could be more
                 efficient. Consider reordering equipment or adjusting routing.
@@ -235,7 +235,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
         {pathData.efficiency >= 80 && (
           <div className="mt-3 bg-green-500/10 border border-green-500/20 rounded-lg p-2">
             <div className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="text-xs text-gray-300">
                 <span className="font-medium">Optimal Path:</span> This routing is highly efficient
                 with minimal conflicts.

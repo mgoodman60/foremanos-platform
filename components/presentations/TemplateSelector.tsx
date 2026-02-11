@@ -61,6 +61,7 @@ export function TemplateSelector({ selectedTemplate, onSelect }: TemplateSelecto
               'shrink-0',
               selectedTemplate === id ? 'text-primary' : 'text-muted-foreground'
             )}
+            aria-hidden="true"
           />
           <div className="min-w-0">
             <div className="text-sm font-medium">{name}</div>

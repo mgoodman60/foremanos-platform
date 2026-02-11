@@ -381,9 +381,9 @@ export default function TakeoffAggregation() {
             </div>
           ) : aggregations.length === 0 ? (
             <div className="bg-dark-surface rounded-lg p-6 border border-gray-700 text-center">
-              <FileSpreadsheet className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+              <FileSpreadsheet className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-400">No aggregations yet</p>
-              <p className="text-sm text-gray-500 mt-1">Create one to consolidate takeoffs</p>
+              <p className="text-sm text-gray-400 mt-1">Create one to consolidate takeoffs</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -572,7 +572,7 @@ export default function TakeoffAggregation() {
                                 {item.mergedCount} sheets
                               </span>
                             ) : (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-400">
                                 {item.sources[0]?.sheetNumber || '1 source'}
                               </span>
                             )}
@@ -591,9 +591,9 @@ export default function TakeoffAggregation() {
             </div>
           ) : (
             <div className="bg-dark-surface rounded-lg p-8 border border-gray-700 text-center">
-              <Layers className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              <Layers className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-400">Select an aggregation to view details</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Or create a new one to consolidate takeoffs from multiple sheets
               </p>
             </div>
@@ -640,7 +640,7 @@ export default function TakeoffAggregation() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Select Sheets</label>
                 <div className="bg-gray-800/50 rounded-lg border border-gray-600 p-3 max-h-40 overflow-y-auto">
                   {availableSheets.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-2">No sheets available</p>
+                    <p className="text-sm text-gray-400 text-center py-2">No sheets available</p>
                   ) : (
                     <div className="space-y-2">
                       {availableSheets.map(sheet => (
@@ -660,14 +660,14 @@ export default function TakeoffAggregation() {
                           <span className="text-sm text-white">{sheet.sheetNumber}</span>
                           <span className="text-xs text-gray-400">({sheet.itemCount} items)</span>
                           {sheet.documentName && (
-                            <span className="text-xs text-gray-500 truncate">{sheet.documentName}</span>
+                            <span className="text-xs text-gray-400 truncate">{sheet.documentName}</span>
                           )}
                         </label>
                       ))}
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   {selectedSheets.length} sheets selected
                 </p>
               </div>
@@ -677,7 +677,7 @@ export default function TakeoffAggregation() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Or Select Takeoffs</label>
                 <div className="bg-gray-800/50 rounded-lg border border-gray-600 p-3 max-h-40 overflow-y-auto">
                   {availableTakeoffs.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-2">No takeoffs available</p>
+                    <p className="text-sm text-gray-400 text-center py-2">No takeoffs available</p>
                   ) : (
                     <div className="space-y-2">
                       {availableTakeoffs.map(takeoff => (

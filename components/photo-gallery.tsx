@@ -239,7 +239,7 @@ export function PhotoGallery({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Camera className="h-12 w-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-sm">No photos uploaded yet</p>
+        <p className="text-gray-400 text-sm">No photos uploaded yet</p>
       </div>
     );
   }
@@ -486,9 +486,9 @@ export function PhotoGallery({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {selectedPhoto.trade && (
                       <div className="flex items-start gap-2">
-                        <Briefcase className="h-4 w-4 text-gray-500 mt-0.5" />
+                        <Briefcase className="h-4 w-4 text-gray-400 mt-0.5" />
                         <div>
-                          <p className="text-xs text-gray-500">Trade</p>
+                          <p className="text-xs text-gray-400">Trade</p>
                           <p className="text-sm font-medium capitalize">
                             {selectedPhoto.trade}
                           </p>
@@ -497,9 +497,9 @@ export function PhotoGallery({
                     )}
                     {selectedPhoto.workType && (
                       <div className="flex items-start gap-2">
-                        <Camera className="h-4 w-4 text-gray-500 mt-0.5" />
+                        <Camera className="h-4 w-4 text-gray-400 mt-0.5" />
                         <div>
-                          <p className="text-xs text-gray-500">Work Type</p>
+                          <p className="text-xs text-gray-400">Work Type</p>
                           <p className="text-sm font-medium capitalize">
                             {selectedPhoto.workType}
                           </p>
@@ -508,9 +508,9 @@ export function PhotoGallery({
                     )}
                     {selectedPhoto.location && (
                       <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
                         <div>
-                          <p className="text-xs text-gray-500">Location</p>
+                          <p className="text-xs text-gray-400">Location</p>
                           <p className="text-sm font-medium">
                             {selectedPhoto.location}
                           </p>
@@ -551,7 +551,7 @@ export function PhotoGallery({
                 )}
 
                 {/* Technical Details */}
-                <div className="text-xs text-gray-500 space-y-1">
+                <div className="text-xs text-gray-400 space-y-1">
                   {selectedPhoto.uploadedAt && (
                     <div className="flex items-center gap-2">
                       <Calendar className="h-3 w-3" />

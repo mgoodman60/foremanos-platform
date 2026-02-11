@@ -53,14 +53,14 @@ interface LegendBrowserProps {
 }
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  Electrical: <Zap className="h-4 w-4" />,
-  Mechanical: <Package className="h-4 w-4" />,
-  Plumbing: <Droplets className="h-4 w-4" />,
-  'Fire Protection': <Flame className="h-4 w-4" />,
-  Architectural: <Building2 className="h-4 w-4" />,
-  Structural: <Grid3x3 className="h-4 w-4" />,
-  Civil: <Ruler className="h-4 w-4" />,
-  General: <Layers className="h-4 w-4" />,
+  Electrical: <Zap aria-hidden="true" className="h-4 w-4" />,
+  Mechanical: <Package aria-hidden="true" className="h-4 w-4" />,
+  Plumbing: <Droplets aria-hidden="true" className="h-4 w-4" />,
+  'Fire Protection': <Flame aria-hidden="true" className="h-4 w-4" />,
+  Architectural: <Building2 aria-hidden="true" className="h-4 w-4" />,
+  Structural: <Grid3x3 aria-hidden="true" className="h-4 w-4" />,
+  Civil: <Ruler aria-hidden="true" className="h-4 w-4" />,
+  General: <Layers aria-hidden="true" className="h-4 w-4" />,
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -233,7 +233,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <RefreshCw className="h-6 w-6 animate-spin text-orange-500" />
+        <RefreshCw aria-hidden="true" className="h-6 w-6 animate-spin text-orange-500" />
         <span className="ml-2 text-gray-400">Loading legends...</span>
       </div>
     );
@@ -256,7 +256,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
             onClick={handleExportLibrary}
             disabled={legendLibrary.length === 0}
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download aria-hidden="true" className="h-4 w-4 mr-2" />
             Export Library
           </Button>
           <Button
@@ -266,9 +266,9 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             {extracting ? (
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              <RefreshCw aria-hidden="true" className="h-4 w-4 mr-2 animate-spin" />
             ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw aria-hidden="true" className="h-4 w-4 mr-2" />
             )}
             {extracting ? 'Extracting...' : 'Extract Legends'}
           </Button>
@@ -283,7 +283,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
               <p className="text-sm text-gray-400">Total Symbols</p>
               <p className="text-2xl font-bold text-gray-100">{stats.totalSymbols}</p>
             </div>
-            <Layers className="h-8 w-8 text-orange-500" />
+            <Layers aria-hidden="true" className="h-8 w-8 text-orange-500" />
           </div>
         </Card>
 
@@ -295,7 +295,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
                 {Math.round(stats.avgConfidence > 1 ? stats.avgConfidence : stats.avgConfidence * 100)}%
               </p>
             </div>
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle aria-hidden="true" className="h-8 w-8 text-green-500" />
           </div>
         </Card>
 
@@ -307,7 +307,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
                 {Math.round(stats.coveragePercent)}%
               </p>
             </div>
-            <FileText className="h-8 w-8 text-purple-500" />
+            <FileText aria-hidden="true" className="h-8 w-8 text-purple-500" />
           </div>
         </Card>
 
@@ -318,8 +318,9 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
               <p className="text-2xl font-bold text-gray-100">{validationIssues.length}</p>
             </div>
             <AlertTriangle
+              aria-hidden="true"
               className={`h-8 w-8 ${
-                validationIssues.length > 0 ? 'text-orange-500' : 'text-gray-500'
+                validationIssues.length > 0 ? 'text-orange-500' : 'text-gray-400'
               }`}
             />
           </div>
@@ -330,7 +331,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       {validationIssues.length > 0 && (
         <Card className="p-4 bg-orange-900/20 border-orange-700">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+            <AlertTriangle aria-hidden="true" className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <h3 className="font-semibold text-orange-300 mb-2">
                 Symbol Validation Issues
@@ -362,7 +363,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           type="text"
           placeholder="Search symbols or descriptions..."
@@ -404,7 +405,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
       {/* Legend Cards Grid */}
       {filteredLegends.length === 0 ? (
         <Card className="p-8 text-center bg-dark-card border-gray-700">
-          <Layers className="h-12 w-12 text-gray-500 mx-auto mb-3" />
+          <Layers aria-hidden="true" className="h-12 w-12 text-gray-400 mx-auto mb-3" />
           <p className="text-gray-400">
             {searchQuery
               ? 'No symbols match your search'
@@ -439,7 +440,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
                     {entry.category}
                   </Badge>
                   {entry.confidence && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-400">
                       {Math.round(entry.confidence)}% confidence
                     </span>
                   )}
@@ -468,7 +469,7 @@ export default function LegendBrowser({ projectSlug, onSymbolSelect }: LegendBro
                     </span>
                   ))}
                   {entry.sheetNumbers.length > 5 && (
-                    <span className="text-xs text-gray-500 px-2 py-0.5">
+                    <span className="text-xs text-gray-400 px-2 py-0.5">
                       +{entry.sheetNumbers.length - 5} more
                     </span>
                   )}

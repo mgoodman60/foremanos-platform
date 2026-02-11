@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { semanticColors, primaryColors, secondaryColors, chartColors, backgroundColors } from '@/lib/design-tokens';
 
 type Tool = 'select' | 'pen' | 'highlighter' | 'rectangle' | 'circle' | 'arrow' | 'text' | 'comment' | 'eraser';
 
@@ -56,13 +57,13 @@ interface MarkupAnnotationProps {
 }
 
 const COLORS = [
-  '#EF4444', // red
-  '#F97316', // orange
-  '#EAB308', // yellow
-  '#22C55E', // green
-  '#3B82F6', // blue
-  '#8B5CF6', // purple
-  '#000000', // black
+  semanticColors.error[500],   // red
+  primaryColors.orange[500],   // orange
+  semanticColors.warning[500], // yellow
+  semanticColors.success[500], // green
+  secondaryColors.blue[500],   // blue
+  chartColors.palette[4],      // purple
+  '#000000',                   // black
 ];
 
 const STROKE_WIDTHS = [2, 4, 6, 8];
@@ -79,7 +80,7 @@ export default function MarkupAnnotation({
   const containerRef = useRef<HTMLDivElement>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>(initialAnnotations);
   const [currentTool, setCurrentTool] = useState<Tool>('pen');
-  const [currentColor, setCurrentColor] = useState('#EF4444');
+  const [currentColor, setCurrentColor] = useState<string>(semanticColors.error[500]);
   const [strokeWidth, setStrokeWidth] = useState(4);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentAnnotation, setCurrentAnnotation] = useState<Annotation | null>(null);
@@ -129,7 +130,7 @@ export default function MarkupAnnotation({
     canvas.height = containerRef.current?.clientHeight || 600;
 
     // Clear canvas
-    ctx.fillStyle = '#1F2328';
+    ctx.fillStyle = backgroundColors.dark.card;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Apply transformations
@@ -259,7 +260,7 @@ export default function MarkupAnnotation({
           ctx.beginPath();
           ctx.arc(annotation.x, annotation.y, 12, 0, 2 * Math.PI);
           ctx.fill();
-          ctx.fillStyle = '#FFFFFF';
+          ctx.fillStyle = backgroundColors.light.base;
           ctx.font = 'bold 14px sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -451,15 +452,15 @@ export default function MarkupAnnotation({
   };
 
   const tools: { tool: Tool; icon: React.ReactNode; label: string }[] = [
-    { tool: 'select', icon: <Move className="h-4 w-4" />, label: 'Pan/Select' },
-    { tool: 'pen', icon: <Pencil className="h-4 w-4" />, label: 'Pen' },
-    { tool: 'highlighter', icon: <Highlighter className="h-4 w-4" />, label: 'Highlighter' },
-    { tool: 'rectangle', icon: <Square className="h-4 w-4" />, label: 'Rectangle' },
-    { tool: 'circle', icon: <Circle className="h-4 w-4" />, label: 'Circle' },
-    { tool: 'arrow', icon: <ArrowRight className="h-4 w-4" />, label: 'Arrow' },
-    { tool: 'text', icon: <Type className="h-4 w-4" />, label: 'Text' },
-    { tool: 'comment', icon: <MessageSquare className="h-4 w-4" />, label: 'Comment' },
-    { tool: 'eraser', icon: <Eraser className="h-4 w-4" />, label: 'Eraser' },
+    { tool: 'select', icon: <Move aria-hidden="true" className="h-4 w-4" />, label: 'Pan/Select' },
+    { tool: 'pen', icon: <Pencil aria-hidden="true" className="h-4 w-4" />, label: 'Pen' },
+    { tool: 'highlighter', icon: <Highlighter aria-hidden="true" className="h-4 w-4" />, label: 'Highlighter' },
+    { tool: 'rectangle', icon: <Square aria-hidden="true" className="h-4 w-4" />, label: 'Rectangle' },
+    { tool: 'circle', icon: <Circle aria-hidden="true" className="h-4 w-4" />, label: 'Circle' },
+    { tool: 'arrow', icon: <ArrowRight aria-hidden="true" className="h-4 w-4" />, label: 'Arrow' },
+    { tool: 'text', icon: <Type aria-hidden="true" className="h-4 w-4" />, label: 'Text' },
+    { tool: 'comment', icon: <MessageSquare aria-hidden="true" className="h-4 w-4" />, label: 'Comment' },
+    { tool: 'eraser', icon: <Eraser aria-hidden="true" className="h-4 w-4" />, label: 'Eraser' },
   ];
 
   return (
@@ -586,7 +587,7 @@ export default function MarkupAnnotation({
             onClick={handleExport}
             className="border-gray-600 text-gray-300"
           >
-            <Download className="h-4 w-4 mr-1" />
+            <Download aria-hidden="true" className="h-4 w-4 mr-1" />
             Export
           </Button>
           {onSave && !readOnly && (
@@ -596,7 +597,7 @@ export default function MarkupAnnotation({
               disabled={isSaving}
               className="bg-orange-500 hover:bg-orange-600"
             >
-              <Save className="h-4 w-4 mr-1" />
+              <Save aria-hidden="true" className="h-4 w-4 mr-1" />
               {isSaving ? 'Saving...' : 'Save'}
             </Button>
           )}
@@ -686,7 +687,7 @@ export default function MarkupAnnotation({
       </div>
 
       {/* Status Bar */}
-      <div className="px-3 py-1.5 border-t border-gray-700 flex items-center justify-between text-xs text-gray-500">
+      <div className="px-3 py-1.5 border-t border-gray-700 flex items-center justify-between text-xs text-gray-400">
         <span>{annotations.length} annotation{annotations.length !== 1 ? 's' : ''}</span>
         <span>{documentName}</span>
       </div>

@@ -220,7 +220,7 @@ export const evmColors = {
   plannedValue: chartColors.neutral,    // Blue - Planned Value (PV/BCWS)
   earnedValue: chartColors.positive,    // Green - Earned Value (EV/BCWP)
   actualCost: chartColors.warning,      // Amber - Actual Cost (AC/ACWP)
-  budgetLine: '#8B5CF6',                // Purple - Budget at Completion (BAC)
+  budgetLine: chartColors.palette[4],    // Purple - Budget at Completion (BAC)
   forecastLine: chartColors.negative,   // Red - Estimate at Completion (EAC)
 } as const;
 

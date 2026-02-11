@@ -270,7 +270,7 @@ export default function ProcurementTracker() {
       {atRisk.length > 0 && (
         <Card className="p-4 bg-red-900/20 border-red-700">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-5 w-5 text-red-400" />
+            <AlertTriangle className="h-5 w-5 text-red-400" aria-hidden="true" />
             <span className="font-medium text-red-400">{atRisk.length} Items at Risk</span>
           </div>
           <div className="space-y-1">
@@ -289,7 +289,7 @@ export default function ProcurementTracker() {
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-4">
         <Button onClick={() => { resetForm(); setEditingItem(null); setShowAddModal(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Add Item
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Add Item
         </Button>
 
         <Input
@@ -316,7 +316,7 @@ export default function ProcurementTracker() {
       <div className="space-y-3">
         {filteredItems.length === 0 ? (
           <Card className="p-8 bg-dark-card border-gray-700 text-center text-gray-400">
-            <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <Package className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
             <p>No procurement items found</p>
           </Card>
         ) : (
@@ -331,17 +331,17 @@ export default function ProcurementTracker() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className={`p-2 rounded-lg ${config.color}`}>
-                      <StatusIcon className="h-5 w-5 text-white" />
+                      <StatusIcon className="h-5 w-5 text-white" aria-hidden="true" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 font-mono">
+                        <span className="text-xs text-gray-400 font-mono">
                           {item.procurementNumber}
                         </span>
                         <h3 className="font-semibold text-white">{item.description}</h3>
                         {isUrgent && !['RECEIVED', 'INSTALLED', 'CANCELLED'].includes(item.status) && (
                           <Badge className="bg-red-600 text-white">
-                            <AlertTriangle className="h-3 w-3 mr-1" /> Urgent
+                            <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" /> Urgent
                           </Badge>
                         )}
                       </div>
@@ -361,7 +361,7 @@ export default function ProcurementTracker() {
                       <div className="flex items-center gap-4 mt-2 text-sm">
                         {item.requiredDate && (
                           <span className={`flex items-center gap-1 ${isUrgent ? 'text-red-400' : 'text-gray-400'}`}>
-                            <Calendar className="h-4 w-4" />
+                            <Calendar className="h-4 w-4" aria-hidden="true" />
                             Required: {format(new Date(item.requiredDate), 'MMM d, yyyy')}
                             {daysUntilRequired !== null && (
                               <span className="text-xs">
@@ -372,7 +372,7 @@ export default function ProcurementTracker() {
                         )}
                         {item.budgetedCost && (
                           <span className="text-gray-400">
-                            <DollarSign className="h-4 w-4 inline" />
+                            <DollarSign className="h-4 w-4 inline" aria-hidden="true" />
                             Budget: {formatCurrency(item.budgetedCost)}
                           </span>
                         )}

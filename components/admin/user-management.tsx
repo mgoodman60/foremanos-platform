@@ -233,13 +233,13 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
               className="bg-orange-500 hover:bg-orange-600 text-white"
               size="sm"
             >
-              <UserPlus className="h-4 w-4 mr-2" />
+              <UserPlus aria-hidden="true" className="h-4 w-4 mr-2" />
               Create User
             </Button>
           </div>
           <div className="flex gap-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search users..."
@@ -265,8 +265,8 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
         {/* User List */}
         <div className="space-y-2">
           {filteredUsers.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <Search className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <div className="text-center py-12 text-gray-400">
+              <Search aria-hidden="true" className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p>No users found</p>
             </div>
           ) : (
@@ -294,7 +294,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                       )}
                     </div>
                     <p className="text-sm text-gray-600 truncate">{user.email}</p>
-                    <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                    <div className="flex gap-4 mt-2 text-xs text-gray-400">
                       <span>
                         Joined {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
                       </span>
@@ -324,7 +324,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                       }}
                       title="Change subscription tier"
                     >
-                      <Crown className="h-4 w-4 mr-1" />
+                      <Crown aria-hidden="true" className="h-4 w-4 mr-1" />
                       Tier
                     </Button>
                     {user.role === 'pending' && !user.approved && (
@@ -338,7 +338,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                             setActionType('approve');
                           }}
                         >
-                          <UserCheck className="h-4 w-4 mr-1" />
+                          <UserCheck aria-hidden="true" className="h-4 w-4 mr-1" />
                           Approve
                         </Button>
                         <Button
@@ -350,7 +350,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                             setActionType('reject');
                           }}
                         >
-                          <UserX className="h-4 w-4 mr-1" />
+                          <UserX aria-hidden="true" className="h-4 w-4 mr-1" />
                           Reject
                         </Button>
                       </>
@@ -423,7 +423,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
         <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-50">
-              <Crown className="h-5 w-5 text-purple-400" />
+              <Crown aria-hidden="true" className="h-5 w-5 text-purple-400" />
               Change Subscription Tier
             </DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -502,33 +502,33 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 placeholder="user@example.com"
                 required
-                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-400"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-50 mb-1">
-                Username <span className="text-gray-500">(optional)</span>
+                Username <span className="text-gray-400">(optional)</span>
               </label>
               <Input
                 type="text"
                 value={newUserUsername}
                 onChange={(e) => setNewUserUsername(e.target.value)}
                 placeholder="Auto-generated from email"
-                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-400"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-50 mb-1">
-                Password <span className="text-gray-500">(optional)</span>
+                Password <span className="text-gray-400">(optional)</span>
               </label>
               <Input
                 type="password"
                 value={newUserPassword}
                 onChange={(e) => setNewUserPassword(e.target.value)}
                 placeholder="Auto-generated if empty"
-                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-500"
+                className="bg-dark-surface border-gray-600 text-gray-300 placeholder:text-gray-400"
               />
             </div>
 
@@ -593,7 +593,7 @@ export function UserManagement({ users: initialUsers, onRefresh }: UserManagemen
         <DialogContent className="sm:max-w-md bg-dark-card border-gray-700">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-50">
-              <UserCheck className="h-5 w-5 text-green-400" />
+              <UserCheck aria-hidden="true" className="h-5 w-5 text-green-400" />
               User Created Successfully
             </DialogTitle>
             <DialogDescription className="text-gray-400">

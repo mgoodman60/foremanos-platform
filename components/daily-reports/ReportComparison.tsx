@@ -84,7 +84,7 @@ function ReportColumn({ report, label }: { report: DailyReport | null; label: st
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-800/50 p-4 flex flex-col items-center justify-center min-h-[300px]">
         <FileText className="w-10 h-10 text-gray-600 mb-3" />
-        <p className="text-gray-500 text-sm">No previous report</p>
+        <p className="text-gray-400 text-sm">No previous report</p>
       </div>
     );
   }
@@ -108,7 +108,7 @@ function ReportColumn({ report, label }: { report: DailyReport | null; label: st
               })}
             </span>
           </div>
-          <span className="text-xs text-gray-500 mt-1 block">
+          <span className="text-xs text-gray-400 mt-1 block">
             Report #{report.reportNumber}
           </span>
         </div>
@@ -278,7 +278,7 @@ export default function ReportComparison({ projectSlug, reportId }: ReportCompar
       {previousReport && (
         <div className="flex flex-wrap gap-4 p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
           <div className="flex items-center gap-2">
-            <Users className="w-3.5 h-3.5 text-gray-500" />
+            <Users className="w-3.5 h-3.5 text-gray-400" />
             <span className="text-xs text-gray-400">Crew:</span>
             <DeltaIndicator
               current={currentReport.crewSize}
@@ -287,7 +287,7 @@ export default function ReportComparison({ projectSlug, reportId }: ReportCompar
           </div>
           {currentReport.laborHours !== undefined && previousReport.laborHours !== undefined && (
             <div className="flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5 text-gray-500" />
+              <Clock className="w-3.5 h-3.5 text-gray-400" />
               <span className="text-xs text-gray-400">Hours:</span>
               <DeltaIndicator
                 current={currentReport.laborHours}
@@ -298,7 +298,7 @@ export default function ReportComparison({ projectSlug, reportId }: ReportCompar
           )}
           {currentReport.weatherCondition !== previousReport.weatherCondition && (
             <div className="flex items-center gap-2">
-              <CloudRain className="w-3.5 h-3.5 text-gray-500" />
+              <CloudRain className="w-3.5 h-3.5 text-gray-400" />
               <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-yellow-500/50 text-yellow-400">
                 Weather changed
               </Badge>
@@ -314,7 +314,7 @@ export default function ReportComparison({ projectSlug, reportId }: ReportCompar
           <ReportColumn report={currentReport} label="Current" />
         </div>
         <div>
-          <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Previous Report</p>
+          <p className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Previous Report</p>
           <ReportColumn report={previousReport} label="Previous" />
         </div>
       </div>

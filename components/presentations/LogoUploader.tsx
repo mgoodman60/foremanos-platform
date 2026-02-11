@@ -128,9 +128,9 @@ export function LogoUploader({
           className={cn('h-10 gap-2 text-xs', uploading && 'opacity-50')}
         >
           {uploading ? (
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" aria-hidden="true" />
           ) : (
-            <Upload size={14} />
+            <Upload size={14} aria-hidden="true" />
           )}
           {label}
         </Button>

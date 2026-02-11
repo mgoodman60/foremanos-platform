@@ -85,7 +85,7 @@ const STATUS_CONFIG: Record<ChangeOrderStatus, { label: string; color: string; i
   UNDER_REVIEW: { label: 'Under Review', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30', icon: Eye },
   APPROVED: { label: 'Approved', color: 'bg-green-500/20 text-green-400 border-green-500/30', icon: CheckCircle2 },
   REJECTED: { label: 'Rejected', color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: XCircle },
-  VOIDED: { label: 'Voided', color: 'bg-gray-600/20 text-gray-500 border-gray-600/30', icon: XCircle },
+  VOIDED: { label: 'Voided', color: 'bg-gray-600/20 text-gray-400 border-gray-600/30', icon: XCircle },
 };
 
 const formatCurrency = (amount: number) => {
@@ -286,7 +286,7 @@ export default function ChangeOrderManager({ projectSlug, budgetId }: ChangeOrde
                 <div>
                   <p className="text-xs text-gray-400">Pending</p>
                   <p className="text-2xl font-bold text-yellow-400">{summary.pending}</p>
-                  <p className="text-xs text-gray-500">{formatCurrency(summary.totalPendingValue)}</p>
+                  <p className="text-xs text-gray-400">{formatCurrency(summary.totalPendingValue)}</p>
                 </div>
                 <Clock className="w-8 h-8 text-yellow-500/50" />
               </div>
@@ -298,7 +298,7 @@ export default function ChangeOrderManager({ projectSlug, budgetId }: ChangeOrde
                 <div>
                   <p className="text-xs text-gray-400">Approved</p>
                   <p className="text-2xl font-bold text-green-400">{summary.approved}</p>
-                  <p className="text-xs text-gray-500">{formatCurrency(summary.totalApprovedValue)}</p>
+                  <p className="text-xs text-gray-400">{formatCurrency(summary.totalApprovedValue)}</p>
                 </div>
                 <CheckCircle2 className="w-8 h-8 text-green-500/50" />
               </div>
@@ -368,7 +368,7 @@ export default function ChangeOrderManager({ projectSlug, budgetId }: ChangeOrde
         </CardHeader>
         <CardContent>
           {filteredOrders.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-400">
               <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>No change orders found</p>
               {changeOrders.length === 0 && (
@@ -405,7 +405,7 @@ export default function ChangeOrderManager({ projectSlug, budgetId }: ChangeOrde
                         <div className="flex items-center gap-2 mt-1">
                           <StatusBadge status={co.status} />
                           {co.budgetItem && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-400">
                               {co.budgetItem.costCode || co.budgetItem.name}
                             </span>
                           )}

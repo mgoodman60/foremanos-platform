@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { getFileUrl } from '@/lib/s3';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface Photo {
   id: string;
@@ -311,14 +312,19 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }
     }
   };
 
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   return (
     <div
       className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="photo-library-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="photo-library-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg w-full max-w-7xl h-[90vh] flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
@@ -639,7 +645,7 @@ function PhotoCard({ photo, selected, onToggleSelect }: PhotoCardProps) {
             className="object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
             <p className="text-sm">Failed to load</p>
           </div>
         )}

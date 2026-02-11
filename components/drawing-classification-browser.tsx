@@ -196,7 +196,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-50 flex items-center gap-2">
-              <Layers className="h-8 w-8 text-blue-400" />
+              <Layers aria-hidden="true" className="h-8 w-8 text-blue-400" />
               Drawing Classification
             </h1>
             <p className="text-gray-400 mt-1">
@@ -210,9 +210,9 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50 transition-colors"
             >
               {classifying ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw aria-hidden="true" className="h-4 w-4" />
               )}
               Classify Drawings
             </button>
@@ -251,7 +251,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
         <div className="bg-dark-card border border-gray-700 rounded-lg p-4 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search by sheet number or title..."
@@ -323,13 +323,13 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
       {/* Results */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-blue-400" />
         </div>
       ) : filteredResults.length === 0 ? (
         <div className="text-center py-12">
-          <FileText className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+          <FileText aria-hidden="true" className="h-16 w-16 text-gray-600 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-400 mb-2">No Drawings Found</h3>
-          <p className="text-gray-500">
+          <p className="text-gray-400">
             {results.length === 0
               ? 'Click "Classify Drawings" to analyze your project drawings'
               : 'Try adjusting your filters or search term'}
@@ -369,14 +369,14 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
                 {/* Classification */}
                 <div className="space-y-2">
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Type</div>
+                    <div className="text-xs text-gray-400 mb-1">Type</div>
                     <div className="text-sm font-medium text-slate-50">
                       {DRAWING_TYPE_LABELS[classification.type] || classification.type}
                     </div>
                   </div>
 
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Discipline</div>
+                    <div className="text-xs text-gray-400 mb-1">Discipline</div>
                     <div className="text-sm font-medium text-purple-400">
                       {SUBTYPE_LABELS[classification.subtype] || classification.subtype}
                     </div>
@@ -384,7 +384,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
 
                   {classification.features.length > 0 && (
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">Key Features</div>
+                      <div className="text-xs text-gray-400 mb-1">Key Features</div>
                       <div className="flex flex-wrap gap-1">
                         {classification.features.slice(0, 3).map((feature, i) => (
                           <span
@@ -400,7 +400,7 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
 
                   {classification.reasoning && (
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">Reasoning</div>
+                      <div className="text-xs text-gray-400 mb-1">Reasoning</div>
                       <div className="text-xs text-gray-400 line-clamp-2">
                         {classification.reasoning}
                       </div>

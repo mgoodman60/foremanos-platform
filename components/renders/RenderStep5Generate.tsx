@@ -202,7 +202,7 @@ export function RenderStep5Generate({
     return (
       <div className="flex flex-col items-center gap-4 py-8">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-          <AlertTriangle size={32} className="text-destructive" />
+          <AlertTriangle size={32} className="text-destructive" aria-hidden="true" />
         </div>
         <div className="text-center">
           <h3 className="text-base font-semibold">Generation Failed</h3>
@@ -213,7 +213,7 @@ export function RenderStep5Generate({
             Try Again
           </Button>
           <Button variant="outline" onClick={onBack} className="min-h-[44px]">
-            <ArrowLeft size={16} className="mr-1" />
+            <ArrowLeft size={16} className="mr-1" aria-hidden="true" />
             Back
           </Button>
         </div>
@@ -249,7 +249,7 @@ export function RenderStep5Generate({
             }}
             className="min-h-[44px]"
           >
-            <Download size={16} className="mr-1" />
+            <Download size={16} className="mr-1" aria-hidden="true" />
             Download
           </Button>
           <Button
@@ -257,14 +257,14 @@ export function RenderStep5Generate({
             onClick={handleRegenerate}
             className="min-h-[44px]"
           >
-            <RefreshCw size={16} className="mr-1" />
+            <RefreshCw size={16} className="mr-1" aria-hidden="true" />
             Regenerate
           </Button>
           <Button
             onClick={handleSaveAndClose}
             className="min-h-[44px]"
           >
-            <Check size={16} className="mr-1" />
+            <Check size={16} className="mr-1" aria-hidden="true" />
             {saveToProject ? 'Save to Gallery' : 'Done'}
           </Button>
         </div>
@@ -297,9 +297,9 @@ export function RenderStep5Generate({
                 )}
               >
                 {isCompleted ? (
-                  <Check size={14} className="shrink-0 text-green-500" />
+                  <Check size={14} className="shrink-0 text-green-500" aria-hidden="true" />
                 ) : isActive ? (
-                  <Loader2 size={14} className="shrink-0 animate-spin text-primary" />
+                  <Loader2 size={14} className="shrink-0 animate-spin text-primary" aria-hidden="true" />
                 ) : (
                   <div className="h-3.5 w-3.5 shrink-0" />
                 )}
@@ -320,7 +320,7 @@ export function RenderStep5Generate({
   return (
     <div className="flex flex-col items-center gap-6 py-8">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-        <Sparkles size={32} className="text-primary" />
+        <Sparkles size={32} className="text-primary" aria-hidden="true" />
       </div>
 
       <div>
@@ -361,7 +361,7 @@ export function RenderStep5Generate({
           onClick={onBack}
           className="min-h-[44px]"
         >
-          <ArrowLeft size={16} className="mr-1" />
+          <ArrowLeft size={16} className="mr-1" aria-hidden="true" />
           Back
         </Button>
         <Button
@@ -372,12 +372,12 @@ export function RenderStep5Generate({
         >
           {buttonDisabled ? (
             <>
-              <Loader2 size={16} className="mr-2 animate-spin" />
+              <Loader2 size={16} className="mr-2 animate-spin" aria-hidden="true" />
               Generating...
             </>
           ) : (
             <>
-              <Sparkles size={16} className="mr-2" />
+              <Sparkles size={16} className="mr-2" aria-hidden="true" />
               Generate Render
             </>
           )}

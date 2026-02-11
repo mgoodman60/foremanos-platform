@@ -99,6 +99,7 @@ export function RenderStep2Style({
                 'shrink-0 transition-colors',
                 style === value ? '' : 'text-muted-foreground'
               )}
+              aria-hidden="true"
             />
             <div className="min-w-0">
               <div className="text-sm font-medium">{label}</div>

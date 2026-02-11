@@ -20,35 +20,35 @@ const QUICK_REPORTS: QuickReportType[] = [
     id: 'EXECUTIVE_SUMMARY', 
     name: 'Executive Summary', 
     description: 'High-level overview for stakeholders',
-    icon: <Briefcase className="w-5 h-5" />,
+    icon: <Briefcase className="w-5 h-5" aria-hidden="true" />,
     color: 'bg-blue-500'
   },
-  { 
-    id: 'PROGRESS_REPORT', 
-    name: 'Progress Report', 
+  {
+    id: 'PROGRESS_REPORT',
+    name: 'Progress Report',
     description: 'Weekly or monthly progress update',
-    icon: <TrendingUp className="w-5 h-5" />,
+    icon: <TrendingUp className="w-5 h-5" aria-hidden="true" />,
     color: 'bg-green-500'
   },
-  { 
-    id: 'COST_REPORT', 
-    name: 'Cost Report', 
+  {
+    id: 'COST_REPORT',
+    name: 'Cost Report',
     description: 'Budget status and EVM metrics',
-    icon: <DollarSign className="w-5 h-5" />,
+    icon: <DollarSign className="w-5 h-5" aria-hidden="true" />,
     color: 'bg-yellow-500'
   },
-  { 
-    id: 'MEP_REPORT', 
-    name: 'MEP Status Report', 
+  {
+    id: 'MEP_REPORT',
+    name: 'MEP Status Report',
     description: 'MEP systems installation progress',
-    icon: <Wrench className="w-5 h-5" />,
+    icon: <Wrench className="w-5 h-5" aria-hidden="true" />,
     color: 'bg-purple-500'
   },
-  { 
-    id: 'RESOURCE_REPORT', 
-    name: 'Resource Report', 
+  {
+    id: 'RESOURCE_REPORT',
+    name: 'Resource Report',
     description: 'Team utilization and allocation',
-    icon: <Users className="w-5 h-5" />,
+    icon: <Users className="w-5 h-5" aria-hidden="true" />,
     color: 'bg-cyan-500'
   }
 ];
@@ -128,12 +128,12 @@ export default function QuickReports({ projectId, projectSlug }: QuickReportsPro
             >
               {generating === report.id ? (
                 <>
-                  <Clock className="w-4 h-4 animate-spin" />
+                  <Clock className="w-4 h-4 animate-spin" aria-hidden="true" />
                   Generating...
                 </>
               ) : (
                 <>
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4" aria-hidden="true" />
                   Generate & Download
                 </>
               )}
@@ -153,10 +153,10 @@ export default function QuickReports({ projectId, projectSlug }: QuickReportsPro
                 className="flex items-center justify-between p-3 bg-gray-900 rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-gray-400" />
+                  <FileText className="w-5 h-5 text-gray-400" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-medium text-white">{report.title}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-400">
                       {new Date(report.generatedAt).toLocaleString()}
                     </p>
                   </div>
@@ -185,7 +185,7 @@ export default function QuickReports({ projectId, projectSlug }: QuickReportsPro
 
       {/* Scheduled Reports Notice */}
       <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-        <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+        <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
         <div>
           <p className="text-sm text-blue-400 font-medium">Automated Reports</p>
           <p className="text-sm text-gray-400 mt-1">

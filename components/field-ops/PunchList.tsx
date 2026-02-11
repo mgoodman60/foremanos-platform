@@ -128,7 +128,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ClipboardList className="w-5 h-5 text-orange-400" />
+            <ClipboardList aria-hidden="true" className="w-5 h-5 text-orange-400" />
             <h2 className="text-lg font-semibold text-white">Punch List</h2>
           </div>
           <div className="flex items-center gap-3">
@@ -159,7 +159,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
                 onClick={onCreateNew}
                 className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-sm font-medium text-white transition-colors"
               >
-                <Plus className="w-4 h-4" />
+                <Plus aria-hidden="true" className="w-4 h-4" />
                 Add Item
               </button>
             )}
@@ -170,7 +170,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
         <div className="divide-y divide-gray-700">
           {items.length === 0 ? (
             <div className="p-8 text-center">
-              <ClipboardList className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <ClipboardList aria-hidden="true" className="w-12 h-12 text-gray-600 mx-auto mb-3" />
               <p className="text-gray-400">No punch list items</p>
               {onCreateNew && (
                 <button
@@ -195,7 +195,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-gray-400 text-sm">#{item.itemNumber}</span>
                       <StatusBadge status={item.status} />
-                      <span className="text-xs text-gray-500 uppercase">{item.category}</span>
+                      <span className="text-xs text-gray-400 uppercase">{item.category}</span>
                     </div>
                     
                     <h3 className="text-white font-medium mb-1">{item.title}</h3>
@@ -203,10 +203,10 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
                       <p className="text-sm text-gray-400 line-clamp-1 mb-2">{item.description}</p>
                     )}
                     
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-gray-400">
                       {item.location && (
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
+                          <MapPin aria-hidden="true" className="w-3 h-3" />
                           {item.location}
                           {item.floor && ` · ${item.floor}`}
                           {item.room && ` · ${item.room}`}
@@ -215,28 +215,28 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
                       
                       {item.assignedToName && (
                         <span className="flex items-center gap-1">
-                          <User className="w-3 h-3" />
+                          <User aria-hidden="true" className="w-3 h-3" />
                           {item.assignedToName}
                         </span>
                       )}
                       
                       {item.dueDate && (
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar aria-hidden="true" className="w-3 h-3" />
                           {format(new Date(item.dueDate), 'MMM d')}
                         </span>
                       )}
                       
                       {item.photoIds.length > 0 && (
                         <span className="flex items-center gap-1">
-                          <Camera className="w-3 h-3" />
+                          <Camera aria-hidden="true" className="w-3 h-3" />
                           {item.photoIds.length}
                         </span>
                       )}
                     </div>
                   </div>
                   
-                  <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+                  <ChevronRight aria-hidden="true" className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
                 </div>
               </div>
             ))

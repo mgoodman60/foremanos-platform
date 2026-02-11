@@ -142,14 +142,14 @@ export default function MeasurementTools({
       {/* Tool Header */}
       <div className="p-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Ruler className="w-5 h-5 text-yellow-400" />
+          <Ruler className="w-5 h-5 text-yellow-400" aria-hidden="true" />
           <h3 className="text-white font-medium">Measurement Tools</h3>
         </div>
         <button
           onClick={() => setShowResults(!showResults)}
           className="text-gray-400 hover:text-white"
         >
-          <ChevronDown className={`w-5 h-5 transition-transform ${showResults ? '' : '-rotate-90'}`} />
+          <ChevronDown className={`w-5 h-5 transition-transform ${showResults ? '' : '-rotate-90'}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -164,7 +164,7 @@ export default function MeasurementTools({
           }`}
           title="Distance (Point-to-Point)"
         >
-          <Ruler className="w-4 h-4" />
+          <Ruler className="w-4 h-4" aria-hidden="true" />
           <span className="text-sm">Distance</span>
         </button>
 
@@ -177,7 +177,7 @@ export default function MeasurementTools({
           }`}
           title="Angle Measurement"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-4 h-4" aria-hidden="true" />
           <span className="text-sm">Angle</span>
         </button>
 
@@ -190,7 +190,7 @@ export default function MeasurementTools({
           }`}
           title="Area Measurement"
         >
-          <Square className="w-4 h-4" />
+          <Square className="w-4 h-4" aria-hidden="true" />
           <span className="text-sm">Area</span>
         </button>
       </div>
@@ -239,7 +239,7 @@ export default function MeasurementTools({
                 className="px-3 py-2 border-t border-gray-800 flex items-center justify-between hover:bg-gray-800/50"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-500">#{idx + 1}</span>
+                  <span className="text-gray-400">#{idx + 1}</span>
                   {getTypeIcon(m.type)}
                   <span className="text-white font-mono">{formatValue(m)}</span>
                 </div>

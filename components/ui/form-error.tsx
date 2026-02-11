@@ -231,7 +231,7 @@ export function FormFieldWrapper({
       {helpText && !error && (
         <p
           id={`${name}-help`}
-          className="text-sm text-gray-500 dark:text-gray-300"
+          className="text-sm text-gray-400 dark:text-gray-300"
         >
           {helpText}
         </p>

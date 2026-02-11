@@ -57,7 +57,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <main id="main-content" className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -148,6 +148,6 @@ export default function ChatPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

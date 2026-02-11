@@ -235,7 +235,7 @@ export default function TradeClarificationPanel({
                     )}
                   </div>
                   {task.tradeClarificationNote && (
-                    <div className="text-xs text-gray-500 mt-1 italic">
+                    <div className="text-xs text-gray-400 mt-1 italic">
                       Note: {task.tradeClarificationNote}
                     </div>
                   )}
@@ -323,7 +323,7 @@ export default function TradeClarificationPanel({
                     {editingTask.inferredTradeType.replace(/_/g, ' ')}
                   </Badge>
                   {editingTask.tradeInferenceConfidence && (
-                    <span className="text-gray-500">
+                    <span className="text-gray-400">
                       {editingTask.tradeInferenceConfidence}% confidence
                     </span>
                   )}

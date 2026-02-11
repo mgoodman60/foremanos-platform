@@ -506,7 +506,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
                       <div className="text-xs text-gray-400">Near-Critical</div>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-3">
+                  <p className="text-xs text-gray-400 mt-3">
                     Near-critical tasks have ≤5 days float and could become critical with minor delays.
                   </p>
                 </Card>
@@ -535,7 +535,7 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
                       </div>
                     ))}
                     {analysis.tradeBreakdowns.length > 4 && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         +{analysis.tradeBreakdowns.length - 4} more trades
                       </p>
                     )}
@@ -644,11 +644,11 @@ export function ScheduleAICoach({ projectSlug, scheduleId, tasks, onTasksAdded }
                                       <Plus className="h-3 w-3 text-green-400" />
                                       <span className="text-gray-300">{task.name}</span>
                                       <Badge variant="outline" className="text-[10px]">{task.trade}</Badge>
-                                      <span className="text-gray-500">{task.duration}d</span>
+                                      <span className="text-gray-400">{task.duration}d</span>
                                     </div>
                                   ))}
                                   {improvement.proposedTasks.length > 3 && (
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-gray-400">
                                       +{improvement.proposedTasks.length - 3} more tasks
                                     </p>
                                   )}

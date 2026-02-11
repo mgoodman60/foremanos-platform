@@ -190,7 +190,7 @@ export default function BudgetVarianceWidget({
             value={Math.min(data.percentSpent, 100)} 
             className="mt-2 h-2"
           />
-          <div className="flex justify-between mt-1 text-xs text-gray-500">
+          <div className="flex justify-between mt-1 text-xs text-gray-400">
             <span>{data.percentSpent.toFixed(1)}% spent</span>
             <span>{data.percentComplete.toFixed(1)}% complete</span>
           </div>
@@ -225,7 +225,7 @@ export default function BudgetVarianceWidget({
             </Button>
           </div>
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-400">
           Last updated: {lastRefresh.toLocaleTimeString()}
         </p>
       </CardHeader>
@@ -286,7 +286,7 @@ export default function BudgetVarianceWidget({
               />
             )}
           </div>
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-gray-400">
             <span>0%</span>
             <span className="text-green-400">▐ {data.percentComplete.toFixed(1)}% complete</span>
             <span>100%</span>

@@ -164,7 +164,7 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
           onClick={() => setShowDialog(true)}
           className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus aria-hidden="true" className="w-4 h-4 mr-2" />
           Add Item
         </Button>
       </div>
@@ -172,14 +172,14 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
       {items.length === 0 ? (
         <Card className="bg-dark-card border-gray-700">
           <CardContent className="py-12 text-center">
-            <DollarSign className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+            <DollarSign aria-hidden="true" className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <p className="text-gray-400 mb-4">No budget items yet</p>
             <Button
               onClick={() => setShowDialog(true)}
               variant="outline"
               className="border-gray-700"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus aria-hidden="true" className="w-4 h-4 mr-2" />
               Create First Item
             </Button>
           </CardContent>
@@ -218,25 +218,25 @@ export default function BudgetItemsManager({ budgetId }: BudgetItemsManagerProps
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Budgeted</p>
+                      <p className="text-xs text-gray-400 mb-1">Budgeted</p>
                       <p className="text-lg font-semibold text-slate-50">
                         {formatCurrency(item.budgetedAmount)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Actual Cost</p>
+                      <p className="text-xs text-gray-400 mb-1">Actual Cost</p>
                       <p className="text-lg font-semibold text-slate-50">
                         {formatCurrency(item.actualCost)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Variance</p>
+                      <p className="text-xs text-gray-400 mb-1">Variance</p>
                       <p className={`text-lg font-semibold ${variance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {formatCurrency(variance)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Variance %</p>
+                      <p className="text-xs text-gray-400 mb-1">Variance %</p>
                       <p className={`text-lg font-semibold ${variance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {variancePercentage}%
                       </p>

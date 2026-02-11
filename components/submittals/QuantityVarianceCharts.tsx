@@ -22,7 +22,7 @@ import {
   TrendingUp,
   Package,
 } from 'lucide-react';
-import { semanticColors, neutralColors, chartColors } from '@/lib/design-tokens';
+import { semanticColors, neutralColors, chartColors, textColors } from '@/lib/design-tokens';
 
 interface LineItem {
   id: string;
@@ -85,7 +85,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
     return Object.entries(counts).map(([status, count]) => ({
       name: STATUS_LABELS[status] || status,
       value: count,
-      color: COLORS[status as keyof typeof COLORS] || '#475569',
+      color: COLORS[status as keyof typeof COLORS] || neutralColors.slate[600],
     }));
   }, [lineItems]);
 
@@ -161,7 +161,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
   if (lineItems.length === 0) {
     return (
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-8 text-center">
-        <BarChart3 className="w-12 h-12 mx-auto mb-4 text-slate-500" />
+        <BarChart3 className="w-12 h-12 mx-auto mb-4 text-slate-500" aria-hidden="true" />
         <p className="text-slate-400">No line items to visualize</p>
         <p className="text-sm text-slate-500 mt-1">Add line items and run verification to see charts</p>
       </div>
@@ -173,7 +173,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
       {/* Chart Type Selector */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-blue-400" />
+          <BarChart3 className="w-5 h-5 text-blue-400" aria-hidden="true" />
           Quantity Analysis
         </h3>
         <div className="flex items-center gap-1 bg-slate-800 rounded-lg p-1">
@@ -185,7 +185,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <PieChartIcon className="w-4 h-4" />
+            <PieChartIcon className="w-4 h-4" aria-hidden="true" />
             Status
           </button>
           <button
@@ -196,7 +196,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className="w-4 h-4" aria-hidden="true" />
             Comparison
           </button>
           <button
@@ -207,7 +207,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <TrendingUp className="w-4 h-4" />
+            <TrendingUp className="w-4 h-4" aria-hidden="true" />
             Variance
           </button>
         </div>
@@ -250,7 +250,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 }}
               />
               <Legend
-                wrapperStyle={{ color: '#94a3b8' }}
+                wrapperStyle={{ color: neutralColors.slate[400] }}
                 formatter={(value) => <span className="text-slate-300">{value}</span>}
               />
             </PieChart>
@@ -339,18 +339,18 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
       {!compact && byCategory.length > 1 && (
         <div className="mt-6">
           <h4 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-            <Package className="w-4 h-4" />
+            <Package className="w-4 h-4" aria-hidden="true" />
             By Trade Category
           </h4>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={byCategory} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis type="number" stroke="#94a3b8" />
-                <YAxis 
-                  dataKey="category" 
-                  type="category" 
-                  stroke="#94a3b8" 
+                <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.slate[700]} />
+                <XAxis type="number" stroke={neutralColors.slate[400]} />
+                <YAxis
+                  dataKey="category"
+                  type="category"
+                  stroke={neutralColors.slate[400]}
                   width={90}
                   tick={{ fontSize: 11 }}
                 />

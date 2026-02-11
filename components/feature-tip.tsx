@@ -108,7 +108,7 @@ export function FeatureTip({
   const iconColor = {
     default: 'text-blue-400',
     highlight: 'text-orange-500',
-    minimal: 'text-gray-500',
+    minimal: 'text-gray-400',
   };
 
   return (
@@ -126,7 +126,7 @@ export function FeatureTip({
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div className={cn('flex-shrink-0 mt-0.5', iconColor[variant])}>
-          <Lightbulb className="w-5 h-5" />
+          <Lightbulb aria-hidden="true" className="w-5 h-5" />
         </div>
 
         {/* Content */}
@@ -136,7 +136,7 @@ export function FeatureTip({
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors"
+              className="flex-shrink-0 text-gray-400 hover:text-gray-300 transition-colors"
               aria-label="Dismiss tip"
             >
               <X className="w-4 h-4" />
@@ -154,7 +154,7 @@ export function FeatureTip({
               )}
             >
               Learn more
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink aria-hidden="true" className="w-3 h-3" />
             </a>
           )}
         </div>
@@ -254,7 +254,7 @@ export function FeatureTipTour({
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5 text-orange-500">
-          <Lightbulb className="w-5 h-5" />
+          <Lightbulb aria-hidden="true" className="w-5 h-5" />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -286,7 +286,7 @@ export function FeatureTipTour({
               className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors"
             >
               Learn more
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink aria-hidden="true" className="w-3 h-3" />
             </a>
           )}
 
@@ -295,7 +295,7 @@ export function FeatureTipTour({
             <button
               type="button"
               onClick={handleSkip}
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
             >
               Skip tour
             </button>
@@ -307,7 +307,7 @@ export function FeatureTipTour({
               {currentStep < steps.length - 1 ? (
                 <>
                   Next
-                  <ChevronRight className="w-3 h-3" />
+                  <ChevronRight aria-hidden="true" className="w-3 h-3" />
                 </>
               ) : (
                 'Got it!'

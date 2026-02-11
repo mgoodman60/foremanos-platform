@@ -133,7 +133,7 @@ export default function ContingencyTracker() {
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 text-center text-gray-400">
-          <Shield className="h-8 w-8 mx-auto mb-2 text-gray-500" />
+          <Shield aria-hidden="true" className="h-8 w-8 mx-auto mb-2 text-gray-400" />
           <p>Budget not configured</p>
         </CardContent>
       </Card>
@@ -145,7 +145,7 @@ export default function ContingencyTracker() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">
-            <Shield className="h-5 w-5 text-blue-400" />
+            <Shield aria-hidden="true" className="h-5 w-5 text-blue-400" />
             Contingency Tracking
           </CardTitle>
           <Button
@@ -153,7 +153,7 @@ export default function ContingencyTracker() {
             onClick={() => setShowAddModal(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            <Plus className="h-4 w-4 mr-1" /> Use
+            <Plus aria-hidden="true" className="h-4 w-4 mr-1" /> Use
           </Button>
         </div>
       </CardHeader>
@@ -180,7 +180,7 @@ export default function ContingencyTracker() {
               Remaining: <span className={getStatusColor(data.percentUsed)}>{formatCurrency(data.remaining)}</span>
             </span>
           </div>
-          <div className="text-center mt-1 text-xs text-gray-500">
+          <div className="text-center mt-1 text-xs text-gray-400">
             Total: {formatCurrency(data.totalContingency)}
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function ContingencyTracker() {
           <div className={`p-3 rounded-lg mb-4 flex items-center gap-2 ${
             data.percentUsed >= 90 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
           }`}>
-            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <AlertTriangle aria-hidden="true" className="h-5 w-5 flex-shrink-0" />
             <span className="text-sm">
               {data.percentUsed >= 90
                 ? 'Critical: Contingency nearly exhausted!'
@@ -212,7 +212,7 @@ export default function ContingencyTracker() {
                       -{formatCurrency(usage.amount)}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-400 mt-1">
                     {format(new Date(usage.usedDate), 'MMM d, yyyy')}
                     {usage.approvedBy && ` • ${usage.approvedBy}`}
                   </div>

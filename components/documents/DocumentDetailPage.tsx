@@ -63,7 +63,7 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
             className="ml-auto flex items-center gap-1 text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] justify-center"
             aria-label="Retry loading document intelligence"
           >
-            <RefreshCw className="h-4 w-4" /> Retry
+            <RefreshCw aria-hidden="true" className="h-4 w-4" /> Retry
           </button>
         </div>
       </div>
@@ -81,14 +81,14 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
         <div className="flex items-center gap-3">
           <Link
             href={`/project/${projectSlug}/documents`}
-            className="text-gray-500 hover:text-gray-700 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="text-gray-400 hover:text-gray-700 min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Back to documents"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft aria-hidden="true" className="h-5 w-5" />
           </Link>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold text-gray-900 truncate">{data.document?.name}</h1>
-            <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+            <div className="flex items-center gap-2 text-sm text-gray-400 flex-wrap">
               <FileText className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
               <span className="truncate">{data.document?.fileName}</span>
               {data.document?.category && (
@@ -152,7 +152,7 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
               onNavigateSheet={(sheet: string) => setSelectedSheet(sheet)}
             />
           ) : (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-400">
               {data.sheets?.length > 0 ? 'Select a sheet to view details' : 'No sheets extracted'}
             </div>
           )}

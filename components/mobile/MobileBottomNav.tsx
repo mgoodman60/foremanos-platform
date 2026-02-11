@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import {
   LayoutDashboard,
   FolderOpen,
@@ -82,18 +83,7 @@ export function MobileBottomNav({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Close More menu on Escape
-  useEffect(() => {
-    if (!showMoreMenu) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setShowMoreMenu(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showMoreMenu]);
+  const moreMenuRef = useFocusTrap({ isActive: showMoreMenu, onEscape: () => setShowMoreMenu(false) });
 
   const moreMenuSections: MoreMenuSection[] = [
     {
@@ -223,13 +213,14 @@ export function MobileBottomNav({
       {/* More Menu Full-Screen Overlay */}
       {showMoreMenu && (
         <div
+          ref={moreMenuRef}
           className="fixed inset-0 bg-slate-900/98 z-40 md:hidden motion-safe:animate-in motion-safe:fade-in overflow-y-auto"
           role="dialog"
           aria-modal="true"
-          aria-label="More menu"
+          aria-labelledby="mobile-more-menu-title"
         >
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            <h2 className="text-lg font-semibold text-gray-100">More</h2>
+            <h2 id="mobile-more-menu-title" className="text-lg font-semibold text-gray-100">More</h2>
             <button
               onClick={() => setShowMoreMenu(false)}
               className="p-2 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
@@ -242,7 +233,7 @@ export function MobileBottomNav({
           <div className="px-6 pb-24 space-y-6">
             {moreMenuSections.map((section) => (
               <div key={section.title}>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                   {section.title}
                 </h3>
                 <div className="space-y-1">
@@ -255,9 +246,9 @@ export function MobileBottomNav({
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
                         style={{ minHeight: '48px' }}
                       >
-                        <Icon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <Icon className="w-5 h-5 text-gray-400 flex-shrink-0" aria-hidden="true" />
                         <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
-                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                        <ChevronRight className="w-4 h-4 text-gray-600" aria-hidden="true" />
                       </button>
                     );
                   })}
@@ -296,7 +287,7 @@ export function MobileBottomNav({
                           className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
                           style={{ minHeight: '44px' }}
                         >
-                          <Camera className="w-4 h-4 text-orange-400" />
+                          <Camera className="w-4 h-4 text-orange-400" aria-hidden="true" />
                           Photo
                         </button>
                         <button
@@ -304,7 +295,7 @@ export function MobileBottomNav({
                           className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
                           style={{ minHeight: '44px' }}
                         >
-                          <ClipboardList className="w-4 h-4 text-blue-400" />
+                          <ClipboardList className="w-4 h-4 text-blue-400" aria-hidden="true" />
                           Daily Report
                         </button>
                         <button
@@ -312,7 +303,7 @@ export function MobileBottomNav({
                           className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
                           style={{ minHeight: '44px' }}
                         >
-                          <AlertCircle className="w-4 h-4 text-yellow-400" />
+                          <AlertCircle className="w-4 h-4 text-yellow-400" aria-hidden="true" />
                           Punch List
                         </button>
                       </div>
@@ -347,7 +338,7 @@ export function MobileBottomNav({
                       }
                     }}
                   >
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-6 h-6 text-white" aria-hidden="true" />
                   </button>
                 </div>
               );
@@ -363,7 +354,7 @@ export function MobileBottomNav({
                 }`}
                 style={{ minHeight: '48px' }}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5" aria-hidden="true" />
                 <span className="text-[10px] mt-1 font-medium">{item.label}</span>
                 {item.badge && (
                   <span

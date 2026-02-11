@@ -181,7 +181,7 @@ export function MobilePhotoCapture({
                 onClick={startCamera}
                 className="bg-orange-500 hover:bg-orange-600 text-white h-16 text-lg"
               >
-                <Camera className="w-6 h-6 mr-3" />
+                <Camera className="w-6 h-6 mr-3" aria-hidden="true" />
                 Take Photo with Camera
               </Button>
               
@@ -190,7 +190,7 @@ export function MobilePhotoCapture({
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-dark-surface h-16 text-lg"
               >
-                <Upload className="w-6 h-6 mr-3" />
+                <Upload className="w-6 h-6 mr-3" aria-hidden="true" />
                 Choose from Gallery
               </Button>
               

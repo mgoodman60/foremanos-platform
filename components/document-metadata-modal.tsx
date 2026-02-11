@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { documentMetadataSchema, type DocumentMetadataFormData } from '@/lib/schemas';
 import { FormError } from '@/components/ui/form-error';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface DocumentMetadataModalProps {
   documentId: string;
@@ -90,9 +91,12 @@ export function DocumentMetadataModal({
     }
   };
 
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
       <div
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="document-metadata-modal-title"
@@ -101,7 +105,7 @@ export function DocumentMetadataModal({
         <div className="bg-client-primary text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <FileText className="w-6 h-6" />
+              <FileText aria-hidden="true" className="w-6 h-6" />
               <div>
                 <h2 id="document-metadata-modal-title" className="text-xl font-bold">Edit Document Metadata</h2>
                 <p className="text-blue-100 text-sm mt-1">{documentName}</p>
@@ -134,7 +138,7 @@ export function DocumentMetadataModal({
           {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              <Tag className="w-4 h-4 inline mr-1" />
+              <Tag aria-hidden="true" className="w-4 h-4 inline mr-1" />
               Tags
             </label>
 
@@ -215,7 +219,7 @@ export function DocumentMetadataModal({
                 'Saving...'
               ) : (
                 <>
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save aria-hidden="true" className="w-4 h-4 mr-2" />
                   Save Changes
                 </>
               )}

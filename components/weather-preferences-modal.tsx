@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { X, CloudRain, Wind, Thermometer, Eye, Bell, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { weatherPreferencesSchema, type WeatherPreferencesFormData } from '@/lib/schemas';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface WeatherPreferencesModalProps {
   projectId: string;
@@ -86,11 +87,14 @@ export default function WeatherPreferencesModal({
     }
   };
 
+  const containerRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
       <div
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="weather-preferences-modal-title"

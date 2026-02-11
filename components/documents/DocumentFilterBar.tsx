@@ -48,7 +48,7 @@ function MultiSelect({ label, options, selected, onChange }: {
             {selected.length}
           </span>
         )}
-        <ChevronDown className="h-3 w-3" />
+        <ChevronDown aria-hidden="true" className="h-3 w-3" />
       </button>
       {open && (
         <div
@@ -167,7 +167,7 @@ export default function DocumentFilterBar({
       {hasFilters && (
         <button
           onClick={clearAll}
-          className="text-sm text-gray-500 hover:text-gray-700 px-2 min-h-[36px]"
+          className="text-sm text-gray-400 hover:text-gray-700 px-2 min-h-[36px]"
         >
           Clear all
         </button>

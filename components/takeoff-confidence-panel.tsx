@@ -147,7 +147,7 @@ export function TakeoffConfidencePanel({ item, onVerify }: TakeoffConfidencePane
                 <span className="text-sm font-medium text-gray-300">
                   {item.confidence}%
                 </span>
-                <Info className="w-4 h-4 text-gray-500 hover:text-gray-300" />
+                <Info className="w-4 h-4 text-gray-400 hover:text-gray-300" />
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -184,7 +184,7 @@ export function TakeoffConfidencePanel({ item, onVerify }: TakeoffConfidencePane
                         <span className="text-sm text-gray-300">{factor.name}</span>
                         <span className="text-sm text-green-400">+{factor.score}</span>
                       </div>
-                      <span className="text-xs text-gray-500">{factor.reason}</span>
+                      <span className="text-xs text-gray-400">{factor.reason}</span>
                     </div>
                   </div>
                 ))}
@@ -306,14 +306,14 @@ export function TakeoffConfidencePanel({ item, onVerify }: TakeoffConfidencePane
               <Card className="bg-gray-800/50 border-gray-700 p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Extracted Quantity</p>
+                    <p className="text-sm text-gray-400">Extracted Quantity</p>
                     <p className="text-xl font-semibold text-white">
                       {item.quantity.toLocaleString()} {item.unit}
                     </p>
                   </div>
                   {item.scaleUsed && (
                     <div>
-                      <p className="text-sm text-gray-500">Scale Used</p>
+                      <p className="text-sm text-gray-400">Scale Used</p>
                       <p className="text-lg text-gray-300">{item.scaleUsed}</p>
                     </div>
                   )}
@@ -479,7 +479,7 @@ export function TakeoffConfidenceSummary({ stats }: ConfidenceSummaryProps) {
             title={`Very Low (<50%): ${stats.confidenceDistribution.veryLow}`}
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-gray-400">
           <span>High ({stats.confidenceDistribution.high})</span>
           <span>Medium ({stats.confidenceDistribution.medium})</span>
           <span>Low ({stats.confidenceDistribution.low})</span>

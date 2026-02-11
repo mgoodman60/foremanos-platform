@@ -184,7 +184,7 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-white" />
+              <Sparkles className="h-4 w-4 text-white" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-gray-100 flex items-center gap-2">
@@ -247,9 +247,9 @@ export default function OnboardingChecklist({ projectSlug, onRefresh, onOpenDocu
                 <div className="flex items-start gap-2">
                   <div className="flex-shrink-0 mt-0.5">
                     {step.completed ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" />
                     ) : (
-                      <Circle className="h-4 w-4 text-gray-500" />
+                      <Circle className="h-4 w-4 text-gray-400" aria-hidden="true" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

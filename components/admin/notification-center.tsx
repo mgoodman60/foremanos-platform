@@ -84,7 +84,7 @@ export function NotificationCenter() {
         className="relative"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Bell className="h-5 w-5" />
+        <Bell aria-hidden="true" className="h-5 w-5" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -122,8 +122,8 @@ export function NotificationCenter() {
 
               <ScrollArea className="h-[400px]">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <div className="p-8 text-center text-gray-400">
+                    <Bell aria-hidden="true" className="h-12 w-12 mx-auto mb-3 opacity-30" />
                     <p>No notifications yet</p>
                   </div>
                 ) : (
@@ -166,7 +166,7 @@ export function NotificationCenter() {
                               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                               onClick={() => markAsRead(notification.id)}
                             >
-                              <Check className="h-3 w-3 mr-1" />
+                              <Check aria-hidden="true" className="h-3 w-3 mr-1" />
                               Mark as read
                             </Button>
                           )}
@@ -176,7 +176,7 @@ export function NotificationCenter() {
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             onClick={() => deleteNotification(notification.id)}
                           >
-                            <Trash2 className="h-3 w-3 mr-1" />
+                            <Trash2 aria-hidden="true" className="h-3 w-3 mr-1" />
                             Delete
                           </Button>
                         </div>

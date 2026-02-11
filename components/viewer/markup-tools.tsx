@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import { semanticColors, primaryColors, secondaryColors, chartColors, backgroundColors } from '@/lib/design-tokens';
 
 interface Markup {
   id: string;
@@ -28,13 +29,13 @@ interface MarkupToolsProps {
 }
 
 const COLORS = [
-  { name: 'Red', value: '#EF4444' },
-  { name: 'Orange', value: '#F97316' },
-  { name: 'Yellow', value: '#EAB308' },
-  { name: 'Green', value: '#22C55E' },
-  { name: 'Blue', value: '#3B82F6' },
-  { name: 'Purple', value: '#A855F7' },
-  { name: 'White', value: '#FFFFFF' },
+  { name: 'Red', value: semanticColors.error[500] },
+  { name: 'Orange', value: primaryColors.orange[500] },
+  { name: 'Yellow', value: semanticColors.warning[500] },
+  { name: 'Green', value: semanticColors.success[500] },
+  { name: 'Blue', value: secondaryColors.blue[500] },
+  { name: 'Purple', value: chartColors.palette[4] },
+  { name: 'White', value: backgroundColors.light.base },
 ];
 
 const CATEGORIES = [
@@ -229,14 +230,14 @@ export default function MarkupTools({
       {/* Header */}
       <div className="p-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Pencil className="w-5 h-5 text-orange-400" />
+          <Pencil className="w-5 h-5 text-orange-400" aria-hidden="true" />
           <h3 className="text-white font-medium">Markup & Annotations</h3>
         </div>
         <button
           onClick={() => setShowPanel(!showPanel)}
           className="text-gray-400 hover:text-white"
         >
-          <ChevronDown className={`w-5 h-5 transition-transform ${showPanel ? '' : '-rotate-90'}`} />
+          <ChevronDown className={`w-5 h-5 transition-transform ${showPanel ? '' : '-rotate-90'}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -264,7 +265,7 @@ export default function MarkupTools({
                   className="w-4 h-4 rounded-full border border-gray-600"
                   style={{ backgroundColor: selectedColor }}
                 />
-                <Palette className="w-4 h-4 text-gray-400" />
+                <Palette className="w-4 h-4 text-gray-400" aria-hidden="true" />
               </button>
 
               {showColorPicker && (
@@ -301,7 +302,7 @@ export default function MarkupTools({
                       : 'bg-gray-800 hover:bg-gray-700'
                   }`}
                 >
-                  <cat.icon className={`w-3 h-3 ${cat.color}`} />
+                  <cat.icon className={`w-3 h-3 ${cat.color}`} aria-hidden="true" />
                   <span className="text-gray-300">{cat.name}</span>
                 </button>
               ))}
@@ -315,7 +316,7 @@ export default function MarkupTools({
               disabled={isLoading}
               className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm">Save</span>
             </button>
             <button

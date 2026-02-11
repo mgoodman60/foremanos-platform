@@ -88,14 +88,14 @@ export function AskForemanWidget({ projectSlug, projectId }: AskForemanWidgetPro
         {/* Recent conversations */}
         {recentConversations.length > 0 && (
           <div className="space-y-1.5">
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Recent</span>
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Recent</span>
             {recentConversations.map((conv) => (
               <button
                 key={conv.id}
                 onClick={() => setAiDrawerOpen(true)}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors truncate"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                <MessageSquare className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                 <span className="truncate">{conv.title}</span>
               </button>
             ))}

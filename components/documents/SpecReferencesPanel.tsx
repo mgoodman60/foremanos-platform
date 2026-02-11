@@ -47,14 +47,14 @@ export default function SpecReferencesPanel({ references, csiReferences, keynote
     <div className="space-y-4 mt-3">
       {hasSpecSections && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Spec Sections</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Spec Sections</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Section</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Title</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Description</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Section</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Title</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Description</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,12 +73,12 @@ export default function SpecReferencesPanel({ references, csiReferences, keynote
 
       {hasCodeRefs && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Code References</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Code References</h4>
           <ul className="space-y-1">
             {codeReferences.map((ref: any, i: number) => (
               <li key={i} className="text-xs text-gray-700">
                 <span className="font-medium text-gray-900">{ref.code} {ref.section}</span>
-                {ref.requirement && <span className="text-gray-500"> — {ref.requirement}</span>}
+                {ref.requirement && <span className="text-gray-400"> — {ref.requirement}</span>}
               </li>
             ))}
           </ul>
@@ -87,7 +87,7 @@ export default function SpecReferencesPanel({ references, csiReferences, keynote
 
       {hasCsi && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">CSI References</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">CSI References</h4>
           <div className="space-y-2">
             {Object.entries(csiByDivision).map(([division, refs]) => (
               <div key={division}>
@@ -110,7 +110,7 @@ export default function SpecReferencesPanel({ references, csiReferences, keynote
 
       {hasKeynotes && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Keynotes</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Keynotes</h4>
           <ol className="space-y-1">
             {keynotes.map((kn: any, i: number) => (
               <li key={i} className="flex items-start gap-2 text-xs">
@@ -129,7 +129,7 @@ export default function SpecReferencesPanel({ references, csiReferences, keynote
 
       {hasNoteClauses && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Note Clauses</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Note Clauses</h4>
           <div className="space-y-2">
             {Object.entries(clausesByCategory).map(([category, clauses]) => (
               <div key={category}>

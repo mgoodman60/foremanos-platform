@@ -205,7 +205,7 @@ export function MessageSearch({
         )}
 
         {query.trim().length > 0 && totalMatches === 0 && !isSearching && (
-          <span className="text-xs text-gray-500 whitespace-nowrap">No matches</span>
+          <span className="text-xs text-gray-400 whitespace-nowrap">No matches</span>
         )}
 
         <button

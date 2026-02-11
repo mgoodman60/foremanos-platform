@@ -51,15 +51,15 @@ export default function SymbolDetailPanel({ data }: Props) {
       {/* Section Cuts */}
       {sectionCuts.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Section Cuts</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Section Cuts</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Number</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Ref Sheet</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Direction</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Location</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Number</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Ref Sheet</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Direction</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Location</th>
                 </tr>
               </thead>
               <tbody>
@@ -80,14 +80,14 @@ export default function SymbolDetailPanel({ data }: Props) {
       {/* Elevation Markers */}
       {elevationMarkers.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Elevation Markers</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Elevation Markers</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Number</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Ref Sheet</th>
-                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-500">Direction</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Number</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Ref Sheet</th>
+                  <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-400">Direction</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,7 +107,7 @@ export default function SymbolDetailPanel({ data }: Props) {
       {/* Revision Clouds */}
       {revisionClouds.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Revision Clouds</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Revision Clouds</h4>
           <div className="space-y-1.5">
             {revisionClouds.map((rc: any, i: number) => (
               <div key={i} className="rounded border border-yellow-200 bg-yellow-50 px-3 py-1.5 text-xs">
@@ -126,12 +126,12 @@ export default function SymbolDetailPanel({ data }: Props) {
       {/* Match Lines */}
       {matchLines.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Match Lines</h4>
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Match Lines</h4>
           <ul className="space-y-1">
             {matchLines.map((ml: any, i: number) => (
               <li key={i} className="text-xs text-gray-700">
                 <span className="text-blue-600">{ml.referenceSheet}</span>
-                {ml.direction && <span className="text-gray-500"> — {ml.direction}</span>}
+                {ml.direction && <span className="text-gray-400"> — {ml.direction}</span>}
                 {ml.location && <span className="text-gray-400"> ({ml.location})</span>}
               </li>
             ))}

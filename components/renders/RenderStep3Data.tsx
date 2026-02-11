@@ -110,7 +110,7 @@ export function RenderStep3Data({
   if (loading) {
     return (
       <div className="flex min-h-[200px] flex-col items-center justify-center gap-3">
-        <Loader2 size={24} className="animate-spin text-muted-foreground" />
+        <Loader2 size={24} className="animate-spin text-muted-foreground" aria-hidden="true" />
         <p className="text-sm text-muted-foreground">Loading project data...</p>
       </div>
     );
@@ -139,13 +139,13 @@ export function RenderStep3Data({
             {completeness.items.map((item) => (
               <li key={item.key} className="flex items-center gap-2 text-xs">
                 {item.status === 'available' && (
-                  <Check size={14} className="shrink-0 text-green-500" />
+                  <Check size={14} className="shrink-0 text-green-500" aria-hidden="true" />
                 )}
                 {item.status === 'partial' && (
-                  <AlertTriangle size={14} className="shrink-0 text-yellow-500" />
+                  <AlertTriangle size={14} className="shrink-0 text-yellow-500" aria-hidden="true" />
                 )}
                 {item.status === 'missing' && (
-                  <X size={14} className="shrink-0 text-red-500" />
+                  <X size={14} className="shrink-0 text-red-500" aria-hidden="true" />
                 )}
                 <span className="text-muted-foreground">
                   {item.label}

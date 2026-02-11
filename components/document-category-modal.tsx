@@ -174,7 +174,7 @@ export function DocumentCategoryModal({
                   </div>
                   <div>
                     <p className="text-gray-300 font-medium">Analyzing document...</p>
-                    <p className="text-xs text-gray-500">AI is categorizing your document</p>
+                    <p className="text-xs text-gray-400">AI is categorizing your document</p>
                   </div>
                 </div>
               </div>
@@ -286,7 +286,7 @@ export function DocumentCategoryModal({
               disabled={isUploading}
               className={`px-4 py-2 text-sm transition-colors ${
                 isUploading
-                  ? 'text-gray-500 cursor-not-allowed'
+                  ? 'text-gray-400 cursor-not-allowed'
                   : 'text-gray-400 hover:text-slate-50'
               }`}
             >

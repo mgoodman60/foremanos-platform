@@ -77,10 +77,10 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-700 pb-3">
         <span className="text-sm font-medium text-gray-200 flex items-center gap-2">
-          <Pencil className="h-4 w-4 text-orange-400" />
+          <Pencil className="h-4 w-4 text-orange-400" aria-hidden="true" />
           Edit Task
         </span>
-        <span className="text-xs text-gray-500 font-mono">{task.taskId}</span>
+        <span className="text-xs text-gray-400 font-mono">{task.taskId}</span>
       </div>
 
       {/* Task Name */}
@@ -100,7 +100,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-            <CalendarDays className="h-3 w-3" />
+            <CalendarDays className="h-3 w-3" aria-hidden="true" />
             Start Date
           </label>
           <Input
@@ -113,7 +113,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
         </div>
         <div>
           <label className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+            <Clock className="h-3 w-3" aria-hidden="true" />
             Duration (days)
           </label>
           <Input
@@ -137,7 +137,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
       <div>
         <label className="text-xs text-gray-400 mb-2 flex items-center justify-between">
           <span className="flex items-center gap-1">
-            <Percent className="h-3 w-3" />
+            <Percent className="h-3 w-3" aria-hidden="true" />
             Progress
           </span>
           <span className={cn(
@@ -184,7 +184,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
           className="flex-1 text-gray-400 hover:text-gray-200"
           disabled={saving}
         >
-          <X className="h-4 w-4 mr-1" />
+          <X className="h-4 w-4 mr-1" aria-hidden="true" />
           Cancel
         </Button>
         <Button
@@ -196,7 +196,7 @@ export function InlineTaskEditor({ task, onSave, onCancel }: InlineTaskEditorPro
           {saving ? (
             <span className="animate-spin mr-1">⏳</span>
           ) : (
-            <Check className="h-4 w-4 mr-1" />
+            <Check className="h-4 w-4 mr-1" aria-hidden="true" />
           )}
           Save
         </Button>

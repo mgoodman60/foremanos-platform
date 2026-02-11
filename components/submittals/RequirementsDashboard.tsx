@@ -147,7 +147,7 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" aria-hidden="true" />
       </div>
     );
   }
@@ -158,7 +158,7 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-white flex items-center gap-2">
-            <Package className="w-6 h-6 text-blue-400" />
+            <Package className="w-6 h-6 text-blue-400" aria-hidden="true" />
             Project Quantity Requirements
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -174,14 +174,14 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
               className={`px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 transition-colors
                 ${viewMode === 'live' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
-              <Zap className="w-3.5 h-3.5" /> Live
+              <Zap className="w-3.5 h-3.5" aria-hidden="true" /> Live
             </button>
             <button
               onClick={() => setViewMode('database')}
               className={`px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 transition-colors
                 ${viewMode === 'database' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
-              <Database className="w-3.5 h-3.5" /> Saved
+              <Database className="w-3.5 h-3.5" aria-hidden="true" /> Saved
             </button>
           </div>
           
@@ -194,9 +194,9 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
               border-2 border-emerald-500 disabled:border-slate-600"
           >
             {syncing ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Syncing...</>
+              <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Syncing...</>
             ) : (
-              <><RefreshCw className="w-4 h-4" /> Sync from Project Data</>
+              <><RefreshCw className="w-4 h-4" aria-hidden="true" /> Sync from Project Data</>
             )}
           </button>
         </div>
@@ -229,7 +229,7 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
       {/* Requirements by Category */}
       {Object.keys(byCategory).length === 0 ? (
         <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-12 text-center">
-          <Package className="w-12 h-12 mx-auto mb-4 text-slate-500" />
+          <Package className="w-12 h-12 mx-auto mb-4 text-slate-500" aria-hidden="true" />
           <p className="text-slate-300 font-medium">No requirements found</p>
           <p className="text-sm text-slate-500 mt-1">
             Upload door schedules, window schedules, or material takeoffs to see requirements
@@ -258,7 +258,7 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-black/20 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <CategoryIcon className="w-5 h-5 text-white" />
+                    <CategoryIcon className="w-5 h-5 text-white" aria-hidden="true" />
                     <span className="text-white font-semibold">{config.label}</span>
                     <span className="px-2 py-0.5 bg-black/30 rounded text-slate-300 text-sm">
                       {items.length} items
@@ -266,9 +266,9 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
                   </div>
                   <div className="flex items-center gap-4">
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
+                      <ChevronDown className="w-5 h-5 text-slate-400" aria-hidden="true" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-slate-400" />
+                      <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />
                     )}
                   </div>
                 </button>

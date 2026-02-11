@@ -42,7 +42,7 @@ function getDotColor(dateStr: string): string {
 export function KeyDatesTimeline({ keyDates }: KeyDatesTimelineProps) {
   if (!keyDates || keyDates.length === 0) {
     return (
-      <p className="text-xs text-gray-500">No key dates scheduled</p>
+      <p className="text-xs text-gray-400">No key dates scheduled</p>
     );
   }
 
@@ -66,7 +66,7 @@ export function KeyDatesTimeline({ keyDates }: KeyDatesTimelineProps) {
             <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">
               {getRelativeLabel(kd.date)}
             </span>
-            <span className="text-[10px] text-gray-500 whitespace-nowrap max-w-[68px] truncate">
+            <span className="text-[10px] text-gray-400 whitespace-nowrap max-w-[68px] truncate">
               {kd.name}
             </span>
           </div>

@@ -175,7 +175,7 @@ export function ScheduleStatsBar({ projectSlug, onFilterClick }: ScheduleStatsBa
               </p>
             </div>
             <div className={cn('p-2 rounded-lg relative', stat.iconBgColor)}>
-              <stat.icon className={cn('h-5 w-5', stat.iconColor)} />
+              <stat.icon className={cn('h-5 w-5', stat.iconColor)} aria-hidden="true" />
               {stat.pulse && (
                 <span className="absolute -top-1 -right-1 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />

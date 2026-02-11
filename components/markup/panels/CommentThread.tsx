@@ -90,7 +90,7 @@ export function CommentThread({ slug, documentId, markupId, currentUserId }: Com
   };
 
   if (loading) {
-    return <div className="p-4 text-sm text-gray-500">Loading comments...</div>;
+    return <div className="p-4 text-sm text-gray-400">Loading comments...</div>;
   }
 
   return (
@@ -99,14 +99,14 @@ export function CommentThread({ slug, documentId, markupId, currentUserId }: Com
 
       <div className="space-y-3 mb-4">
         {replies.length === 0 ? (
-          <p className="text-sm text-gray-500">No comments yet</p>
+          <p className="text-sm text-gray-400">No comments yet</p>
         ) : (
           replies.map((reply) => (
             <div key={reply.id} className="border rounded p-3 bg-gray-50">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="text-sm font-medium">{reply.Creator.name}</p>
-                  <p className="text-xs text-gray-500">{getRelativeTime(reply.createdAt)}</p>
+                  <p className="text-xs text-gray-400">{getRelativeTime(reply.createdAt)}</p>
                 </div>
                 {reply.createdBy === currentUserId && (
                   <button

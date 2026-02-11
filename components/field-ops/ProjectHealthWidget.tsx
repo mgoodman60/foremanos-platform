@@ -89,15 +89,15 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
   };
 
   const TrendIcon = ({ trend }: { trend: string }) => {
-    if (trend === 'improving') return <TrendingUp className="w-4 h-4 text-green-400" />;
-    if (trend === 'declining') return <TrendingDown className="w-4 h-4 text-red-400" />;
-    return <Minus className="w-4 h-4 text-gray-400" />;
+    if (trend === 'improving') return <TrendingUp aria-hidden="true" className="w-4 h-4 text-green-400" />;
+    if (trend === 'declining') return <TrendingDown aria-hidden="true" className="w-4 h-4 text-red-400" />;
+    return <Minus aria-hidden="true" className="w-4 h-4 text-gray-400" />;
   };
 
   const AlertIcon = ({ type }: { type: string }) => {
-    if (type === 'critical') return <AlertCircle className="w-4 h-4 text-red-400" />;
-    if (type === 'warning') return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
-    return <Info className="w-4 h-4 text-blue-400" />;
+    if (type === 'critical') return <AlertCircle aria-hidden="true" className="w-4 h-4 text-red-400" />;
+    if (type === 'warning') return <AlertTriangle aria-hidden="true" className="w-4 h-4 text-yellow-400" />;
+    return <Info aria-hidden="true" className="w-4 h-4 text-blue-400" />;
   };
 
   if (loading) {
@@ -150,7 +150,7 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Activity className="w-5 h-5 text-blue-400" />
+          <Activity aria-hidden="true" className="w-5 h-5 text-blue-400" />
           <h2 className="text-lg font-semibold text-white">Operational Health</h2>
         </div>
         <button
@@ -193,27 +193,27 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
         {/* Score Breakdown */}
         <div className="grid grid-cols-5 gap-3 mb-6">
           <ScoreCard
-            icon={<Calendar className="w-4 h-4" />}
+            icon={<Calendar aria-hidden="true" className="w-4 h-4" />}
             label="Schedule"
             score={health.scheduleScore}
           />
           <ScoreCard
-            icon={<DollarSign className="w-4 h-4" />}
+            icon={<DollarSign aria-hidden="true" className="w-4 h-4" />}
             label="Budget"
             score={health.budgetScore}
           />
           <ScoreCard
-            icon={<Shield className="w-4 h-4" />}
+            icon={<Shield aria-hidden="true" className="w-4 h-4" />}
             label="Safety"
             score={health.safetyScore}
           />
           <ScoreCard
-            icon={<CheckSquare className="w-4 h-4" />}
+            icon={<CheckSquare aria-hidden="true" className="w-4 h-4" />}
             label="Quality"
             score={health.qualityScore}
           />
           <ScoreCard
-            icon={<FileText className="w-4 h-4" />}
+            icon={<FileText aria-hidden="true" className="w-4 h-4" />}
             label="Docs"
             score={health.documentScore}
           />
@@ -239,7 +239,7 @@ export default function ProjectHealthWidget({ projectSlug, compact = false }: Pr
                     <p className="text-xs text-gray-400 mt-1">{alert.actionRequired}</p>
                   )}
                 </div>
-                <span className="text-xs text-gray-500">{alert.category}</span>
+                <span className="text-xs text-gray-400">{alert.category}</span>
               </div>
             ))}
           </div>

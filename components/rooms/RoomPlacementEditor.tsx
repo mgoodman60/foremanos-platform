@@ -267,7 +267,7 @@ export function RoomPlacementEditor({
           {/* Unplaced rooms */}
           {unplacedRooms.length > 0 && (
             <div className="p-3 border-b border-gray-800">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-2">
+              <div className="text-xs font-medium text-gray-400 uppercase mb-2">
                 Unplaced ({unplacedRooms.length})
               </div>
               <div className="space-y-1">
@@ -287,7 +287,7 @@ export function RoomPlacementEditor({
                         <div className="text-xs text-gray-400 truncate">{room.name}</div>
                       </div>
                       {selectedRoomId === room.id && (
-                        <MousePointer2 className="h-3 w-3 text-orange-400 ml-2 shrink-0" />
+                        <MousePointer2 className="h-3 w-3 text-orange-400 ml-2 shrink-0" aria-hidden="true" />
                       )}
                     </div>
                   </button>
@@ -299,7 +299,7 @@ export function RoomPlacementEditor({
           {/* Placed rooms */}
           {placedRooms.length > 0 && (
             <div className="p-3">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-2">
+              <div className="text-xs font-medium text-gray-400 uppercase mb-2">
                 Placed ({placedRooms.length})
               </div>
               <div className="space-y-1">
@@ -308,7 +308,7 @@ export function RoomPlacementEditor({
                     key={room.id}
                     className="flex items-center gap-2 p-2 rounded bg-dark-base border border-gray-700"
                   >
-                    <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0" />
+                    <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0" aria-hidden="true" />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium text-white truncate">
                         {room.roomNumber}
@@ -318,7 +318,7 @@ export function RoomPlacementEditor({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-gray-500 hover:text-red-400"
+                      className="h-6 w-6 text-gray-400 hover:text-red-400"
                       onClick={() => handleRemovePlacement(room.id)}
                     >
                       <X className="h-3 w-3" />
@@ -338,9 +338,9 @@ export function RoomPlacementEditor({
             disabled={saving || Object.keys(placements).length === 0}
           >
             {saving ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4 mr-2" aria-hidden="true" />
             )}
             Save All Placements
           </Button>
@@ -359,7 +359,7 @@ export function RoomPlacementEditor({
         {/* Toolbar */}
         <div className="p-3 border-b border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-orange-500" />
+            <MapPin className="h-4 w-4 text-orange-500" aria-hidden="true" />
             <span className="text-sm font-medium text-white">Floor Plan Editor</span>
             {selectedRoomId && (
               <Badge className="bg-orange-500/20 text-orange-400 text-xs">

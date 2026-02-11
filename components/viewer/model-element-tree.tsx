@@ -173,9 +173,9 @@ export default function ModelElementTree({
               className="p-0.5 hover:bg-gray-600 rounded"
             >
               {isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-gray-400" />
+                <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
               )}
             </button>
           ) : (
@@ -183,10 +183,10 @@ export default function ModelElementTree({
           )}
 
           {/* Icon */}
-          <Box className={`w-4 h-4 flex-shrink-0 ${isSearchResult ? 'text-yellow-400' : 'text-gray-500'}`} />
+          <Box className={`w-4 h-4 flex-shrink-0 ${isSearchResult ? 'text-yellow-400' : 'text-gray-400'}`} aria-hidden="true" />
 
           {/* Name */}
-          <span className={`flex-1 text-sm truncate ${isHidden ? 'text-gray-500 line-through' : 'text-white'}`}>
+          <span className={`flex-1 text-sm truncate ${isHidden ? 'text-gray-400 line-through' : 'text-white'}`}>
             {node.name}
           </span>
 
@@ -244,7 +244,7 @@ export default function ModelElementTree({
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-blue-400" />
+          <Layers className="w-4 h-4 text-blue-400" aria-hidden="true" />
           <span className="text-sm font-medium text-white">Model Elements</span>
         </div>
         <button
@@ -258,7 +258,7 @@ export default function ModelElementTree({
       {/* Search */}
       <div className="px-3 py-2 border-b border-gray-700">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <input
             type="text"
             value={searchQuery}
@@ -287,7 +287,7 @@ export default function ModelElementTree({
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-32">
-            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" aria-hidden="true" />
           </div>
         ) : tree ? (
           <div className="py-2">
@@ -302,7 +302,7 @@ export default function ModelElementTree({
 
       {/* Stats footer */}
       {tree && (
-        <div className="px-4 py-2 border-t border-gray-700 flex items-center justify-between text-xs text-gray-500">
+        <div className="px-4 py-2 border-t border-gray-700 flex items-center justify-between text-xs text-gray-400">
           <span>{selectedIds.length > 0 ? `${selectedIds.length} selected` : 'No selection'}</span>
           <span>{hiddenIds.size > 0 ? `${hiddenIds.size} hidden` : ''}</span>
         </div>

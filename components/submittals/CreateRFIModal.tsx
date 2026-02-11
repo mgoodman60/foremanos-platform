@@ -86,7 +86,7 @@ export default function CreateRFIModal({ projectSlug, shortage, onClose, onCreat
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800">
           <div className="flex items-center gap-3">
-            <FileQuestion className="w-5 h-5 text-blue-400" />
+            <FileQuestion className="w-5 h-5 text-blue-400" aria-hidden="true" />
             <h2 id="create-rfi-title" className="text-lg font-semibold text-white">Create RFI from Shortage</h2>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-slate-700 rounded">
@@ -97,7 +97,7 @@ export default function CreateRFIModal({ projectSlug, shortage, onClose, onCreat
         {/* Shortage Summary */}
         <div className="px-5 py-3 bg-red-950/50 border-b border-red-900">
           <div className="flex items-center gap-2 text-red-400">
-            <AlertTriangle className="w-4 h-4" />
+            <AlertTriangle className="w-4 h-4" aria-hidden="true" />
             <span className="font-medium">Shortage: {shortage.productName}</span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
@@ -218,9 +218,9 @@ export default function CreateRFIModal({ projectSlug, shortage, onClose, onCreat
               text-white rounded-lg flex items-center gap-2 transition-colors font-medium"
           >
             {submitting ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</>
+              <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Creating...</>
             ) : (
-              <><Send className="w-4 h-4" /> Create RFI</>
+              <><Send className="w-4 h-4" aria-hidden="true" /> Create RFI</>
             )}
           </button>
         </div>

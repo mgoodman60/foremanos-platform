@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow, format } from 'date-fns';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface Photo {
   id: string;
@@ -449,7 +450,7 @@ export default function PhotoDocumentationHub({ projectSlug }: PhotoDocumentatio
         <div className="text-center py-16">
           <Camera className="w-12 h-12 text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400">No photos found</p>
-          <p className="text-gray-500 text-sm mt-1">Try adjusting your filters or upload new photos</p>
+          <p className="text-gray-400 text-sm mt-1">Try adjusting your filters or upload new photos</p>
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -474,7 +475,7 @@ export default function PhotoDocumentationHub({ projectSlug }: PhotoDocumentatio
                 <h3 className="text-white font-medium">
                   {format(new Date(date), 'EEEE, MMMM d, yyyy')}
                 </h3>
-                <span className="text-gray-500 text-sm">({datePhotos.length} photos)</span>
+                <span className="text-gray-400 text-sm">({datePhotos.length} photos)</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {datePhotos.map(photo => (
@@ -603,7 +604,7 @@ function PhotoCard({
           <p className="text-white text-sm truncate">
             {photo.caption || photo.location || 'No caption'}
           </p>
-          <p className="text-gray-500 text-xs">
+          <p className="text-gray-400 text-xs">
             {formatDistanceToNow(new Date(photo.takenAt || photo.uploadedAt), { addSuffix: true })}
           </p>
         </div>
@@ -639,14 +640,19 @@ function LinkPhotosModal({
     { key: 'room', label: 'Rooms', icon: Building2, count: rooms.length },
   ];
 
+  const linkContainerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="photo-link-dialog-title"
     >
-      <div className="bg-slate-900 border-2 border-slate-600 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
+      <div
+        ref={linkContainerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="photo-link-dialog-title"
+        className="bg-slate-900 border-2 border-slate-600 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
+      >
         <div className="p-4 border-b border-slate-700 flex items-center justify-between">
           <div>
             <h3 id="photo-link-dialog-title" className="text-lg font-semibold text-white">Link Photos</h3>
@@ -760,14 +766,19 @@ function PhotoPreviewModal({
   getEntityIcon: (type: string) => React.ReactNode;
   getEntityColor: (type: string) => string;
 }) {
+  const previewContainerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="photo-preview-dialog-title"
     >
-      <div className="relative max-w-4xl w-full mx-4">
+      <div
+        ref={previewContainerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="photo-preview-dialog-title"
+        className="relative max-w-4xl w-full mx-4"
+      >
         <button
           onClick={onClose}
           className="absolute -top-10 right-0 text-white hover:text-gray-300"

@@ -1262,7 +1262,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       {/* Header - Streamlined with Dropdown Menus */}
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
-          <Calculator className="h-5 w-5 text-orange-500" />
+          <Calculator className="h-5 w-5 text-orange-500" aria-hidden="true" />
           <h2 className="text-lg font-semibold">Material Takeoff</h2>
         </div>
         <div className="flex items-center gap-2">
@@ -1275,7 +1275,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
                 onClick={() => setShowAddModal(true)}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Add Item</span>
               </Button>
             </WithTooltip>
@@ -1382,7 +1382,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
         <div className="border-b border-yellow-600/50 p-3 bg-yellow-900/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
               <div>
                 <span className="text-sm font-medium text-yellow-400">
                   {costSummary.unpricedItems.length.toLocaleString()} items need pricing
@@ -1400,9 +1400,9 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {importingBudget ? (
-                  <RefreshCw className="mr-1 h-4 w-4 animate-spin" />
+                  <RefreshCw className="mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <FileText className="mr-1 h-4 w-4" />
+                  <FileText className="mr-1 h-4 w-4" aria-hidden="true" />
                 )}
                 {importingBudget ? 'Importing...' : 'Import from Budget'}
               </Button>
@@ -1414,9 +1414,9 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
                 className="border-yellow-600 text-yellow-400 hover:bg-yellow-900/30"
               >
                 {calculating ? (
-                  <RefreshCw className="mr-1 h-4 w-4 animate-spin" />
+                  <RefreshCw className="mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Calculator className="mr-1 h-4 w-4" />
+                  <Calculator className="mr-1 h-4 w-4" aria-hidden="true" />
                 )}
                 {calculating ? 'Calculating...' : 'Auto-Calculate'}
               </Button>
@@ -1450,15 +1450,15 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
         ) : !selectedTakeoff ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <Calculator className="mx-auto mb-3 h-12 w-12 text-gray-600" />
+              <Calculator className="mx-auto mb-3 h-12 w-12 text-gray-600" aria-hidden="true" />
               <p className="text-sm text-gray-400">No material takeoffs found</p>
-              <p className="mt-2 text-xs text-gray-500">Process floor plans to extract quantities</p>
+              <p className="mt-2 text-xs text-gray-400">Process floor plans to extract quantities</p>
             </div>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <Package className="mx-auto mb-3 h-12 w-12 text-gray-600" />
+              <Package className="mx-auto mb-3 h-12 w-12 text-gray-600" aria-hidden="true" />
               <p className="text-sm text-gray-400">
                 {searchQuery || filterCategory !== 'all' || filterVerified !== 'all'
                   ? 'No items match your filters'
@@ -1557,7 +1557,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
+            <div className="flex items-center gap-4 text-xs text-gray-400">
               <span>{costSummary.pricedItemCount || 0}/{costSummary.itemCount || 0} items priced</span>
               {costSummary.unpricedItems?.length > 0 && (
                 <span className="text-yellow-500">

@@ -284,7 +284,7 @@ export function BulkUploadModal({
             <p className="text-gray-600 mb-2">
               Drag and drop photos here, or click to select
             </p>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-400 mb-4">
               Upload up to {MAX_FILES} photos at once (max 10MB each)
             </p>
             <Button

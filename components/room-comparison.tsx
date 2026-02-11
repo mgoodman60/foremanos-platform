@@ -140,7 +140,7 @@ export default function RoomComparison({ projectSlug, onClose }: RoomComparisonP
         </div>
         {onClose && (
           <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded">
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-gray-400" />
           </button>
         )}
       </div>
@@ -149,7 +149,7 @@ export default function RoomComparison({ projectSlug, onClose }: RoomComparisonP
       <div className="p-4 border-b bg-gray-50">
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <label className="block text-xs text-gray-500 mb-1">Room A</label>
+            <label className="block text-xs text-gray-400 mb-1">Room A</label>
             <select
               value={leftRoomId}
               onChange={(e) => setLeftRoomId(e.target.value)}
@@ -169,11 +169,11 @@ export default function RoomComparison({ projectSlug, onClose }: RoomComparisonP
             className="mt-5 p-2 border rounded-lg hover:bg-white"
             title="Swap rooms"
           >
-            <ArrowLeftRight className="h-4 w-4 text-gray-500" />
+            <ArrowLeftRight className="h-4 w-4 text-gray-400" />
           </button>
 
           <div className="flex-1">
-            <label className="block text-xs text-gray-500 mb-1">Room B</label>
+            <label className="block text-xs text-gray-400 mb-1">Room B</label>
             <select
               value={rightRoomId}
               onChange={(e) => setRightRoomId(e.target.value)}
@@ -205,7 +205,7 @@ export default function RoomComparison({ projectSlug, onClose }: RoomComparisonP
                 </div>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-xs text-gray-500">
+                    <tr className="border-b text-xs text-gray-400">
                       <th className="py-2 px-4 text-left w-1/4">Item</th>
                       <th className="py-2 px-4 text-left w-1/3 bg-blue-50">
                         {leftRoom.roomNumber}
@@ -246,7 +246,7 @@ export default function RoomComparison({ projectSlug, onClose }: RoomComparisonP
           })}
         </div>
       ) : (
-        <div className="p-8 text-center text-gray-500">
+        <div className="p-8 text-center text-gray-400">
           Select two rooms to compare their finish schedules.
         </div>
       )}

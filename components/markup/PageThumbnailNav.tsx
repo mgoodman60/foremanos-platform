@@ -81,7 +81,7 @@ export function PageThumbnailNav({ documentId, totalPages, currentPage, onPageCh
               />
             ) : (
               <div className="w-full aspect-[8.5/11] bg-gray-200 flex items-center justify-center">
-                <span className="text-xs text-gray-500">{pageNumber}</span>
+                <span className="text-xs text-gray-400">{pageNumber}</span>
               </div>
             )}
 

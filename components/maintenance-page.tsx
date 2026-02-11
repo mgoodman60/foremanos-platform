@@ -12,8 +12,8 @@ export function MaintenancePage({ message }: MaintenancePageProps) {
       <div className="max-w-2xl w-full bg-dark-card border border-gray-700 rounded-lg shadow-2xl p-8 text-center">
         <div className="mb-6 flex justify-center">
           <div className="relative">
-            <Construction className="w-24 h-24 text-orange-500" />
-            <RefreshCw className="w-8 h-8 text-orange-500 absolute bottom-0 right-0 animate-spin" />
+            <Construction className="w-24 h-24 text-orange-500" aria-hidden="true" />
+            <RefreshCw className="w-8 h-8 text-orange-500 absolute bottom-0 right-0 animate-spin" aria-hidden="true" />
           </div>
         </div>
         

@@ -95,9 +95,9 @@ export function PresentationExportBar({
         className="gap-2"
       >
         {exportingPng ? (
-          <Loader2 size={14} className="animate-spin" />
+          <Loader2 size={14} className="animate-spin" aria-hidden="true" />
         ) : (
-          <Download size={14} />
+          <Download size={14} aria-hidden="true" />
         )}
         PNG
       </Button>
@@ -110,9 +110,9 @@ export function PresentationExportBar({
         className="gap-2"
       >
         {exportingPdf ? (
-          <Loader2 size={14} className="animate-spin" />
+          <Loader2 size={14} className="animate-spin" aria-hidden="true" />
         ) : (
-          <Download size={14} />
+          <Download size={14} aria-hidden="true" />
         )}
         PDF
       </Button>

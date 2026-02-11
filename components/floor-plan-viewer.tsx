@@ -33,6 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { chartColors, semanticColors, primaryColors } from '@/lib/design-tokens';
 
 interface Room {
   id: string;
@@ -482,29 +483,29 @@ export function FloorPlanViewer({
     
     // Category-based colors
     if (lowerName.includes('sv') || lowerName.includes('survey') || lowerName.includes('pnt')) {
-      return '#10B981'; // Green - survey points
+      return chartColors.positive; // Green - survey points
     }
     if (lowerName.includes('grading') || lowerName.includes('grade') || lowerName.includes('elev')) {
-      return '#F59E0B'; // Amber - grading
+      return chartColors.warning; // Amber - grading
     }
     if (lowerName.includes('util') || lowerName.includes('storm') || lowerName.includes('water') || lowerName.includes('sewer')) {
-      return '#3B82F6'; // Blue - utilities
+      return chartColors.neutral; // Blue - utilities
     }
     if (lowerName.includes('pav') || lowerName.includes('curb') || lowerName.includes('road') || lowerName.includes('drive')) {
-      return '#8B5CF6'; // Purple - paving
+      return chartColors.palette[4]; // Purple - paving
     }
     if (lowerName.includes('land') || lowerName.includes('tree') || lowerName.includes('plant')) {
-      return '#22C55E'; // Green - landscaping
+      return semanticColors.success[500]; // Green - landscaping
     }
     if (lowerName.includes('bldg') || lowerName.includes('build') || lowerName.includes('struct')) {
-      return '#EC4899'; // Pink - building
+      return chartColors.palette[5]; // Pink - building
     }
     if (lowerName.includes('elec') || lowerName.includes('light')) {
-      return '#FACC15'; // Yellow - electrical
+      return semanticColors.warning[400]; // Yellow - electrical
     }
-    
+
     // Fallback: cycle through colors based on index
-    const fallbackColors = ['#6366F1', '#14B8A6', '#F97316', '#EF4444', '#A855F7', '#06B6D4'];
+    const fallbackColors = [chartColors.palette[6], chartColors.palette[7], primaryColors.orange[500], chartColors.negative, chartColors.palette[4], chartColors.trades.plumbing];
     return fallbackColors[index % fallbackColors.length];
   };
 
@@ -783,12 +784,12 @@ export function FloorPlanViewer({
                             style={{ backgroundColor: getLayerColor(layer.name, idx) }}
                           />
                           <span className="text-xs text-gray-300 truncate flex-1">{layer.name}</span>
-                          <span className="text-[10px] text-gray-500">{layer.objectCount}</span>
+                          <span className="text-[10px] text-gray-400">{layer.objectCount}</span>
                         </div>
                       ))}
                     </div>
                     {dwgData.layers.length > (expanded ? 20 : 6) && (
-                      <span className="text-xs text-gray-500">+{dwgData.layers.length - (expanded ? 20 : 6)} more layers</span>
+                      <span className="text-xs text-gray-400">+{dwgData.layers.length - (expanded ? 20 : 6)} more layers</span>
                     )}
                   </div>
                   
@@ -808,7 +809,7 @@ export function FloorPlanViewer({
                           </div>
                         ))}
                         {dwgData.blocks.length > (expanded ? 12 : 4) && (
-                          <span className="text-xs text-gray-500 self-center">+{dwgData.blocks.length - (expanded ? 12 : 4)} more</span>
+                          <span className="text-xs text-gray-400 self-center">+{dwgData.blocks.length - (expanded ? 12 : 4)} more</span>
                         )}
                       </div>
                     </div>
@@ -847,7 +848,7 @@ export function FloorPlanViewer({
                   )}
                 </div>
               ) : floorRooms.length === 0 ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
                   <Building2 className="h-12 w-12 mb-2 opacity-50" />
                   <p className="text-sm">No floor plan or room data available</p>
                   <p className="text-xs mt-1">Upload a floor plan image or extract rooms from documents</p>
@@ -856,7 +857,7 @@ export function FloorPlanViewer({
                 /* Auto-generated room grid - LAST RESORT */
                 <div className="p-3 h-full flex flex-col">
                   <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
                       <Grid3X3 className="h-3 w-3" />
                       <span>Auto-generated layout (no floor plan uploaded)</span>
                     </div>
@@ -1145,7 +1146,7 @@ export function FloorPlanViewer({
                     />
                   ) : (
                     <div className="flex items-center gap-1">
-                      <Ruler className="h-4 w-4 text-gray-500" />
+                      <Ruler className="h-4 w-4 text-gray-400" />
                       <span className="text-white">
                         {selectedRoom.area ? `${selectedRoom.area.toFixed(0)} sq ft` : '-'}
                       </span>

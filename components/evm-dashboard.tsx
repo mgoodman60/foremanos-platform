@@ -116,9 +116,9 @@ export default function EVMDashboard() {
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="py-12 text-center">
-          <BarChart3 className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+          <BarChart3 aria-hidden="true" className="w-12 h-12 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-400 mb-2">Project budget not configured</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             Configure your project budget to track Earned Value Management metrics
           </p>
         </CardContent>
@@ -150,7 +150,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
+              <Calendar aria-hidden="true" className="w-4 h-4 mr-2" />
               Planned Value (PV)
             </CardTitle>
           </CardHeader>
@@ -158,7 +158,7 @@ export default function EVMDashboard() {
             <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.plannedValue)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Budgeted cost of work scheduled
             </p>
           </CardContent>
@@ -168,7 +168,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <CheckCircle2 className="w-4 h-4 mr-2" />
+              <CheckCircle2 aria-hidden="true" className="w-4 h-4 mr-2" />
               Earned Value (EV)
             </CardTitle>
           </CardHeader>
@@ -176,7 +176,7 @@ export default function EVMDashboard() {
             <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.earnedValue)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Budgeted cost of work performed
             </p>
           </CardContent>
@@ -186,7 +186,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <DollarSign className="w-4 h-4 mr-2" />
+              <DollarSign aria-hidden="true" className="w-4 h-4 mr-2" />
               Actual Cost (AC)
             </CardTitle>
           </CardHeader>
@@ -194,7 +194,7 @@ export default function EVMDashboard() {
             <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.actualCost)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Actual cost of work performed
             </p>
           </CardContent>
@@ -204,7 +204,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <BarChart3 className="w-4 h-4 mr-2" />
+              <BarChart3 aria-hidden="true" className="w-4 h-4 mr-2" />
               Budget at Completion
             </CardTitle>
           </CardHeader>
@@ -212,7 +212,7 @@ export default function EVMDashboard() {
             <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(budget.total)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Total project budget
             </p>
           </CardContent>
@@ -233,9 +233,9 @@ export default function EVMDashboard() {
               </div>
               <div className="flex items-center gap-2">
                 {current.costPerformanceIndex >= 1.0 ? (
-                  <ArrowUpRight className="w-5 h-5 text-green-400" />
+                  <ArrowUpRight aria-hidden="true" className="w-5 h-5 text-green-400" />
                 ) : (
-                  <ArrowDownRight className="w-5 h-5 text-red-400" />
+                  <ArrowDownRight aria-hidden="true" className="w-5 h-5 text-red-400" />
                 )}
                 <Badge variant={current.costPerformanceIndex >= 1.0 ? "default" : "destructive"}>
                   {current.costPerformanceIndex >= 1.0 ? 'Under Budget' : 'Over Budget'}
@@ -254,7 +254,7 @@ export default function EVMDashboard() {
                 className="h-2"
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {current.costPerformanceIndex >= 1.0
                 ? `For every $1 spent, you're getting $${current.costPerformanceIndex.toFixed(2)} worth of work`
                 : `You're spending $${(1 / current.costPerformanceIndex).toFixed(2)} for every $1 worth of work`
@@ -275,9 +275,9 @@ export default function EVMDashboard() {
               </div>
               <div className="flex items-center gap-2">
                 {current.schedulePerformanceIndex >= 1.0 ? (
-                  <ArrowUpRight className="w-5 h-5 text-green-400" />
+                  <ArrowUpRight aria-hidden="true" className="w-5 h-5 text-green-400" />
                 ) : (
-                  <ArrowDownRight className="w-5 h-5 text-red-400" />
+                  <ArrowDownRight aria-hidden="true" className="w-5 h-5 text-red-400" />
                 )}
                 <Badge variant={current.schedulePerformanceIndex >= 1.0 ? "default" : "destructive"}>
                   {current.schedulePerformanceIndex >= 1.0 ? 'Ahead of Schedule' : 'Behind Schedule'}
@@ -296,7 +296,7 @@ export default function EVMDashboard() {
                 className="h-2"
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {current.schedulePerformanceIndex >= 1.0
                 ? `You're completing work ${((current.schedulePerformanceIndex - 1) * 100).toFixed(0)}% faster than planned`
                 : `You're ${((1 - current.schedulePerformanceIndex) * 100).toFixed(0)}% behind schedule`
@@ -312,7 +312,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <Activity className="w-4 h-4 mr-2" />
+              <Activity aria-hidden="true" className="w-4 h-4 mr-2" />
               Estimate at Completion (EAC)
             </CardTitle>
           </CardHeader>
@@ -320,7 +320,7 @@ export default function EVMDashboard() {
             <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.estimateAtCompletion)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Projected total cost at completion
             </p>
           </CardContent>
@@ -330,7 +330,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <TrendingUp className="w-4 h-4 mr-2" />
+              <TrendingUp aria-hidden="true" className="w-4 h-4 mr-2" />
               Estimate to Complete (ETC)
             </CardTitle>
           </CardHeader>
@@ -338,7 +338,7 @@ export default function EVMDashboard() {
             <div className="text-2xl font-bold text-slate-50">
               {formatCurrency(current.estimateToComplete)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Estimated cost to finish remaining work
             </p>
           </CardContent>
@@ -348,7 +348,7 @@ export default function EVMDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-gray-400 flex items-center">
-              <AlertTriangle className="w-4 h-4 mr-2" />
+              <AlertTriangle aria-hidden="true" className="w-4 h-4 mr-2" />
               Variance at Completion (VAC)
             </CardTitle>
           </CardHeader>
@@ -356,7 +356,7 @@ export default function EVMDashboard() {
             <div className={`text-2xl font-bold ${getPerformanceColor(current.varianceAtCompletion, true)}`}>
               {formatCurrency(current.varianceAtCompletion)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               {current.varianceAtCompletion >= 0
                 ? 'Expected to finish under budget'
                 : 'Expected to finish over budget'
@@ -390,11 +390,11 @@ export default function EVMDashboard() {
 
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
             <div>
-              <p className="text-xs text-gray-500">Actual Cost to Date</p>
+              <p className="text-xs text-gray-400">Actual Cost to Date</p>
               <p className="text-lg font-semibold text-slate-50">{formatCurrency(current.actualCost)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Remaining Budget</p>
+              <p className="text-xs text-gray-400">Remaining Budget</p>
               <p className="text-lg font-semibold text-slate-50">
                 {formatCurrency(budget.total - current.actualCost)}
               </p>

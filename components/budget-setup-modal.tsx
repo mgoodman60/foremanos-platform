@@ -90,7 +90,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
       <DialogContent className="bg-dark-card border-gray-700 text-slate-50 max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-slate-50 flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-amber-400" />
+            <DollarSign aria-hidden="true" className="w-5 h-5 text-amber-400" />
             Create Project Budget
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -121,7 +121,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
             </div>
             <FormError error={errors.totalBudget} fieldName="totalBudget" />
             {!errors.totalBudget && (
-              <p id="totalBudget-help" className="text-xs text-gray-500 mt-1">
+              <p id="totalBudget-help" className="text-xs text-gray-400 mt-1">
                 Enter the total approved budget for the project
               </p>
             )}
@@ -148,7 +148,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
             </div>
             <FormError error={errors.contingency} fieldName="contingency" />
             {!errors.contingency && (
-              <p id="contingency-help" className="text-xs text-gray-500 mt-1">
+              <p id="contingency-help" className="text-xs text-gray-400 mt-1">
                 Optional contingency amount for unexpected costs
               </p>
             )}
@@ -171,7 +171,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
             </div>
             <FormError error={errors.baselineDate} fieldName="baselineDate" />
             {!errors.baselineDate && (
-              <p id="baselineDate-help" className="text-xs text-gray-500 mt-1">
+              <p id="baselineDate-help" className="text-xs text-gray-400 mt-1">
                 The date when this budget was approved/baselined
               </p>
             )}
@@ -189,7 +189,7 @@ export default function BudgetSetupModal({ isOpen, onClose, onSuccess }: BudgetS
               disabled
               aria-describedby="currency-help"
             />
-            <p id="currency-help" className="text-xs text-gray-500 mt-1">
+            <p id="currency-help" className="text-xs text-gray-400 mt-1">
               Currently only USD is supported
             </p>
           </div>

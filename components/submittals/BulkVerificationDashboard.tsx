@@ -183,7 +183,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" aria-hidden="true" />
       </div>
     );
   }
@@ -194,7 +194,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-blue-400" />
+            <BarChart3 className="w-6 h-6 text-blue-400" aria-hidden="true" />
             Project-Wide Verification Dashboard
           </h2>
           <p className="text-sm text-slate-400 mt-1">
@@ -205,25 +205,25 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
           <button
             onClick={handleBulkVerify}
             disabled={verifying || (projectSummary?.withLineItems || 0) === 0}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400
               text-white rounded-xl flex items-center gap-2 transition-colors font-semibold shadow-lg"
           >
             {verifying ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Verifying All...</>
+              <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Verifying All...</>
             ) : (
-              <><RefreshCw className="w-5 h-5" /> Verify All Submittals</>
+              <><RefreshCw className="w-5 h-5" aria-hidden="true" /> Verify All Submittals</>
             )}
           </button>
           <button
             onClick={handleExportProjectReport}
             disabled={exporting || (projectSummary?.totalSubmittals || 0) === 0}
-            className="px-5 py-3 bg-slate-700 hover:bg-slate-600 disabled:bg-gray-800 disabled:text-gray-500
+            className="px-5 py-3 bg-slate-700 hover:bg-slate-600 disabled:bg-gray-800 disabled:text-gray-400
               text-white rounded-xl flex items-center gap-2 transition-colors font-semibold border border-slate-500"
           >
             {exporting ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Exporting...</>
+              <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Exporting...</>
             ) : (
-              <><Download className="w-5 h-5" /> Export Report</>
+              <><Download className="w-5 h-5" aria-hidden="true" /> Export Report</>
             )}
           </button>
         </div>
@@ -242,28 +242,28 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
           </div>
           <div className="bg-emerald-950 border-2 border-emerald-500 rounded-xl p-4">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-6 h-6 text-emerald-400" />
+              <CheckCircle className="w-6 h-6 text-emerald-400" aria-hidden="true" />
               <p className="text-3xl font-bold text-emerald-400">{projectSummary.passCount}</p>
             </div>
             <p className="text-sm text-emerald-300 font-medium">Passing</p>
           </div>
           <div className="bg-red-950 border-2 border-red-500 rounded-xl p-4">
             <div className="flex items-center gap-2">
-              <XCircle className="w-6 h-6 text-red-400" />
+              <XCircle className="w-6 h-6 text-red-400" aria-hidden="true" />
               <p className="text-3xl font-bold text-red-400">{projectSummary.failCount}</p>
             </div>
             <p className="text-sm text-red-300 font-medium">Failing</p>
           </div>
           <div className="bg-amber-950 border-2 border-amber-500 rounded-xl p-4">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-amber-400" />
+              <AlertTriangle className="w-6 h-6 text-amber-400" aria-hidden="true" />
               <p className="text-3xl font-bold text-amber-400">{projectSummary.reviewCount}</p>
             </div>
             <p className="text-sm text-amber-300 font-medium">Needs Review</p>
           </div>
           <div className="bg-slate-800 border-2 border-slate-500 rounded-xl p-4">
             <div className="flex items-center gap-2">
-              <HelpCircle className="w-6 h-6 text-slate-400" />
+              <HelpCircle className="w-6 h-6 text-slate-400" aria-hidden="true" />
               <p className="text-3xl font-bold text-slate-300">{projectSummary.notVerifiedCount}</p>
             </div>
             <p className="text-sm text-slate-400 font-medium">Not Verified</p>
@@ -342,7 +342,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <CheckCircle className="w-4 h-4" />
+          <CheckCircle className="w-4 h-4" aria-hidden="true" />
           Pass ({submittals.filter(s => s.verificationStatus === 'PASS').length})
         </button>
         <button
@@ -353,7 +353,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <XCircle className="w-4 h-4" />
+          <XCircle className="w-4 h-4" aria-hidden="true" />
           Fail ({submittals.filter(s => s.verificationStatus === 'FAIL').length})
         </button>
         <button
@@ -364,7 +364,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <AlertTriangle className="w-4 h-4" />
+          <AlertTriangle className="w-4 h-4" aria-hidden="true" />
           Review ({submittals.filter(s => s.verificationStatus === 'REVIEW_NEEDED').length})
         </button>
       </div>
@@ -373,7 +373,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
       <div className="space-y-3">
         {filteredSubmittals.length === 0 ? (
           <div className="text-center py-12 bg-slate-900 border-2 border-slate-600 rounded-xl">
-            <ClipboardList className="w-12 h-12 mx-auto mb-4 text-slate-500" />
+            <ClipboardList className="w-12 h-12 mx-auto mb-4 text-slate-500" aria-hidden="true" />
             <p className="text-slate-300 font-medium">No submittals match this filter</p>
           </div>
         ) : (
@@ -390,7 +390,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
               >
                 <div className="flex items-center gap-4">
                   <div className="p-2 rounded-lg bg-black/30">
-                    <StatusIcon className={`w-6 h-6 ${config.text}`} />
+                    <StatusIcon className={`w-6 h-6 ${config.text}`} aria-hidden="true" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -437,7 +437,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
                     </div>
                   )}
 
-                  <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" />
+                  <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" aria-hidden="true" />
                 </div>
               </Link>
             );
@@ -453,7 +453,7 @@ export default function BulkVerificationDashboard({ projectSlug }: BulkVerificat
             .map(r => (
               <div key={r.submittalId} className="bg-red-950 border-2 border-red-500 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <AlertOctagon className="w-5 h-5 text-red-400" />
+                  <AlertOctagon className="w-5 h-5 text-red-400" aria-hidden="true" />
                   <h4 className="font-semibold text-red-400">
                     Critical Shortages in {r.submittalNumber}
                   </h4>

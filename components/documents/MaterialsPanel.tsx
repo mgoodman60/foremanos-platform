@@ -16,7 +16,7 @@ interface Props {
 
 export default function MaterialsPanel({ materials }: Props) {
   if (!materials || materials.length === 0) {
-    return <div className="text-sm text-gray-500 py-2">No materials detected</div>;
+    return <div className="text-sm text-gray-400 py-2">No materials detected</div>;
   }
 
   return (

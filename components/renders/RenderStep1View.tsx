@@ -138,6 +138,7 @@ export function RenderStep1View({
                 'transition-colors',
                 viewType === value ? '' : 'text-muted-foreground'
               )}
+              aria-hidden="true"
             />
             <div>
               <div className="text-sm font-medium">{label}</div>
@@ -224,7 +225,7 @@ export function RenderStep1View({
               )}
               aria-pressed={compositeMode === 'site_composite'}
             >
-              <MapPin size={18} />
+              <MapPin size={18} aria-hidden="true" />
               Place on Site Photo
             </button>
             {compositeMode === 'site_composite' && (
@@ -321,7 +322,7 @@ function SitePhotoUploader({
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
           )}
         >
-          <Upload size={32} className="text-muted-foreground" />
+          <Upload size={32} className="text-muted-foreground" aria-hidden="true" />
           <div className="text-center">
             <p className="text-sm font-medium">Upload Site Photo</p>
             <p className="text-xs text-muted-foreground">

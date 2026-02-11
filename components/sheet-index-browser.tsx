@@ -168,7 +168,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">No sheets indexed yet</p>
             <Button
               onClick={handleExtractTitleBlocks}
@@ -274,7 +274,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
           {/* Search and Filter */}
           <div className="flex gap-2 mt-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search sheets..."
                 value={searchQuery}
@@ -324,7 +324,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-300 mb-1">{sheet.sheetTitle}</p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
                           <span className="flex items-center gap-1">
                             <FileText className="h-3 w-3" />
                             {sheet.documentName}

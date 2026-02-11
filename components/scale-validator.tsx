@@ -215,7 +215,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
                   {statistics?.totalSheets || 0}
                 </p>
               </div>
-              <BarChart3 className="h-8 w-8 text-blue-600" />
+              <BarChart3 className="h-8 w-8 text-blue-600" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -229,7 +229,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
                   {statistics ? Math.round(statistics.coverage) : 0}%
                 </p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <CheckCircle2 className="h-8 w-8 text-green-600" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -243,7 +243,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
                   {statistics ? Math.round(statistics.avgConfidence) : 0}%
                 </p>
               </div>
-              <Ruler className="h-8 w-8 text-purple-600" />
+              <Ruler className="h-8 w-8 text-purple-600" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -257,7 +257,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
                   {validation?.issues?.length || 0}
                 </p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
+              <AlertTriangle className="h-8 w-8 text-orange-600" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -268,7 +268,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <AlertTriangle className="h-5 w-5 text-orange-600" aria-hidden="true" />
               <span>Scale Validation Issues</span>
             </CardTitle>
           </CardHeader>
@@ -296,7 +296,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
                 </div>
               ))}
               {validation.issues.length > 5 && (
-                <p className="text-sm text-gray-500 text-center">
+                <p className="text-sm text-gray-400 text-center">
                   ...and {validation.issues.length - 5} more issues
                 </p>
               )}
@@ -309,7 +309,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Calculator className="h-5 w-5" />
+            <Calculator className="h-5 w-5" aria-hidden="true" />
             <span>Measurement Converter</span>
           </CardTitle>
         </CardHeader>
@@ -368,7 +368,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
             onClick={loadData}
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
             Refresh
           </Button>
           <Button
@@ -376,14 +376,14 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
             onClick={exportScales}
             disabled={scales.length === 0}
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
             Export Scales
           </Button>
           <Button
             onClick={handleExtractScales}
             disabled={extracting}
           >
-            <Ruler className={`h-4 w-4 mr-2 ${extracting ? 'animate-pulse' : ''}`} />
+            <Ruler className={`h-4 w-4 mr-2 ${extracting ? 'animate-pulse' : ''}`} aria-hidden="true" />
             {extracting ? 'Extracting...' : 'Extract Scales'}
           </Button>
         </div>
@@ -393,7 +393,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
       {scales.length === 0 && (
         <Card>
           <CardContent className="py-16 text-center">
-            <Ruler className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <Ruler className="h-12 w-12 mx-auto text-gray-400 mb-4" aria-hidden="true" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No Scale Data Available
             </h3>
@@ -401,7 +401,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
               Extract scales from your documents to see validation and statistics.
             </p>
             <Button onClick={handleExtractScales} disabled={extracting}>
-              <Ruler className="h-4 w-4 mr-2" />
+              <Ruler className="h-4 w-4 mr-2" aria-hidden="true" />
               Extract Scales Now
             </Button>
           </CardContent>
@@ -453,7 +453,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
 
                   {/* Document Name */}
                   <div className="pt-2 border-t border-gray-200">
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-gray-400 truncate">
                       {scale.documentName}
                     </p>
                   </div>

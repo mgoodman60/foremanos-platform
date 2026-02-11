@@ -86,12 +86,12 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
 
   const WeatherIcon = ({ condition }: { condition: string | null }) => {
     switch (condition?.toLowerCase()) {
-      case 'sunny': case 'clear': return <Sun className="w-4 h-4 text-yellow-400" />;
-      case 'cloudy': case 'overcast': return <Cloud className="w-4 h-4 text-gray-400" />;
-      case 'rainy': case 'rain': return <CloudRain className="w-4 h-4 text-blue-400" />;
-      case 'snow': case 'snowy': return <CloudSnow className="w-4 h-4 text-blue-200" />;
-      case 'windy': return <Wind className="w-4 h-4 text-gray-400" />;
-      default: return <Sun className="w-4 h-4 text-gray-500" />;
+      case 'sunny': case 'clear': return <Sun aria-hidden="true" className="w-4 h-4 text-yellow-400" />;
+      case 'cloudy': case 'overcast': return <Cloud aria-hidden="true" className="w-4 h-4 text-gray-400" />;
+      case 'rainy': case 'rain': return <CloudRain aria-hidden="true" className="w-4 h-4 text-blue-400" />;
+      case 'snow': case 'snowy': return <CloudSnow aria-hidden="true" className="w-4 h-4 text-blue-200" />;
+      case 'windy': return <Wind aria-hidden="true" className="w-4 h-4 text-gray-400" />;
+      default: return <Sun aria-hidden="true" className="w-4 h-4 text-gray-400" />;
     }
   };
 
@@ -131,7 +131,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <FileText className="w-5 h-5 text-blue-400" />
+          <FileText aria-hidden="true" className="w-5 h-5 text-blue-400" />
           <h2 className="text-lg font-semibold text-white">Daily Reports</h2>
           <span className="text-sm text-gray-400">({reports.length})</span>
         </div>
@@ -151,7 +151,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
               onClick={onCreateNew}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors"
             >
-              <Plus className="w-4 h-4" />
+              <Plus aria-hidden="true" className="w-4 h-4" />
               New Report
             </button>
           )}
@@ -162,7 +162,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
       <div className="divide-y divide-gray-700">
         {reports.length === 0 ? (
           <div className="p-8 text-center">
-            <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+            <FileText aria-hidden="true" className="w-12 h-12 text-gray-600 mx-auto mb-3" />
             <p className="text-gray-400">No daily reports yet</p>
             {onCreateNew && (
               <button
@@ -201,7 +201,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
                       />
                     )}
                     <span className="text-gray-400 text-sm flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
+                      <Calendar aria-hidden="true" className="w-3.5 h-3.5" />
                       {format(new Date(report.reportDate), 'MMM d, yyyy')}
                     </span>
                   </div>
@@ -217,20 +217,20 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
                     
                     {/* Workers */}
                     <span className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5" />
+                      <Users aria-hidden="true" className="w-3.5 h-3.5" />
                       {getTotalWorkers(report.laborEntries)} workers
                     </span>
                     
                     {/* Hours */}
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
+                      <Clock aria-hidden="true" className="w-3.5 h-3.5" />
                       {getTotalHours(report.laborEntries).toFixed(0)} hrs
                     </span>
                     
                     {/* Safety */}
                     {report.safetyIncidents > 0 && (
                       <span className="flex items-center gap-1 text-red-400">
-                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <AlertTriangle aria-hidden="true" className="w-3.5 h-3.5" />
                         {report.safetyIncidents} incident(s)
                       </span>
                     )}
@@ -238,7 +238,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
                     {/* Delays */}
                     {report.delayHours && report.delayHours > 0 && (
                       <span className="flex items-center gap-1 text-yellow-400">
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock aria-hidden="true" className="w-3.5 h-3.5" />
                         {report.delayHours}hr delay
                       </span>
                     )}
@@ -274,9 +274,9 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
                         className="p-1.5 rounded-lg text-green-400 hover:bg-green-500/20 transition-colors disabled:opacity-50"
                       >
                         {actionLoading === report.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                         ) : (
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle aria-hidden="true" className="w-4 h-4" />
                         )}
                       </button>
                       <button
@@ -285,11 +285,11 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
                         aria-label={`Reject Report #${report.reportNumber}`}
                         className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                       >
-                        <XCircle className="w-4 h-4" />
+                        <XCircle aria-hidden="true" className="w-4 h-4" />
                       </button>
                     </div>
                   )}
-                  <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-gray-300 transition-colors" />
+                  <ChevronRight aria-hidden="true" className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
                 </div>
               </div>
             </div>

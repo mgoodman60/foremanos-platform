@@ -35,7 +35,7 @@ export default function FieldOpsNavigation({ projectSlug }: FieldOpsNavigationPr
                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
             }`}
           >
-            <Icon className="w-4 h-4" />
+            <Icon aria-hidden="true" className="w-4 h-4" />
             {tab.label}
           </Link>
         );

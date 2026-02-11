@@ -294,16 +294,17 @@ export function ConversationSidebar({
 
         {compactOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setCompactOpen(false)} />
-            <div className="absolute left-3 right-3 top-full mt-1 bg-dark-card border border-gray-700 rounded-lg shadow-xl z-50 max-h-[300px] overflow-y-auto">
+            <div className="fixed inset-0 z-40" onClick={() => setCompactOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setCompactOpen(false)} role="button" tabIndex={-1} aria-label="Close overlay" />
+            <div className="absolute left-3 right-3 top-full mt-1 bg-dark-card border border-gray-700 rounded-lg shadow-xl z-50 max-h-[300px] overflow-y-auto" role="menu" aria-label="Conversations">
               {loading ? (
-                <div className="p-3 text-sm text-gray-500">Loading...</div>
+                <div className="p-3 text-sm text-gray-400">Loading...</div>
               ) : conversations.length === 0 ? (
-                <div className="p-3 text-sm text-gray-500">No conversations yet</div>
+                <div className="p-3 text-sm text-gray-400">No conversations yet</div>
               ) : (
                 conversations.map(conv => (
                   <button
                     key={conv.id}
+                    role="menuitem"
                     onClick={() => {
                       onConversationSelect(conv.id);
                       setCompactOpen(false);
@@ -315,13 +316,13 @@ export function ConversationSidebar({
                     }`}
                   >
                     {conv.conversationType === 'daily_report' ? (
-                      <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                      <Calendar aria-hidden="true" className="w-3.5 h-3.5 flex-shrink-0" />
                     ) : (
-                      <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+                      <MessageSquare aria-hidden="true" className="w-3.5 h-3.5 flex-shrink-0" />
                     )}
                     <span className="truncate">{conv.title}</span>
                     {conv.finalized && (
-                      <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 ml-auto" />
+                      <CheckCircle aria-hidden="true" className="w-3 h-3 text-green-500 flex-shrink-0 ml-auto" />
                     )}
                   </button>
                 ))
@@ -406,7 +407,7 @@ export function ConversationSidebar({
             className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors focus:outline-none focus:bg-dark-card"
           >
             <div className="flex items-center gap-2">
-              <LayoutDashboard className="h-4 w-4 text-orange-500" />
+              <LayoutDashboard aria-hidden="true" className="h-4 w-4 text-orange-500" />
               <span className="text-sm font-semibold text-slate-50">Project Dashboard</span>
             </div>
             <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${dashboardExpanded ? '' : '-rotate-90'}`} />
@@ -448,7 +449,7 @@ export function ConversationSidebar({
                       variant="outline"
                       className="flex-1 flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white hover:border-green-500 py-2 transition-all focus:ring-2 focus:ring-green-500"
                     >
-                      <ImageIcon className="h-4 w-4" />
+                      <ImageIcon aria-hidden="true" className="h-4 w-4" />
                       <span>Photo Library</span>
                     </Button>
                     <Button
@@ -466,7 +467,7 @@ export function ConversationSidebar({
                     variant="outline"
                     className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white hover:border-blue-500 py-2 transition-all focus:ring-2 focus:ring-blue-500"
                   >
-                    <Calendar className="h-4 w-4" />
+                    <Calendar aria-hidden="true" className="h-4 w-4" />
                     <span>Photo Timeline</span>
                   </Button>
                 </div>
@@ -482,7 +483,7 @@ export function ConversationSidebar({
             className="w-full flex items-center justify-between p-3 hover:bg-dark-card transition-colors focus:outline-none focus:bg-dark-card"
           >
             <div className="flex items-center gap-2">
-              <History className="h-4 w-4 text-orange-500" />
+              <History aria-hidden="true" className="h-4 w-4 text-orange-500" />
               <span className="text-sm font-semibold text-slate-50">Chat History</span>
             </div>
             <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${historyExpanded ? '' : '-rotate-90'}`} />
@@ -495,7 +496,7 @@ export function ConversationSidebar({
                 variant="outline"
                 className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white hover:border-orange-500 py-2 transition-all focus:ring-2 focus:ring-orange-500"
               >
-                <Plus className="h-4 w-4" />
+                <Plus aria-hidden="true" className="h-4 w-4" />
                 <span>New Conversation</span>
               </Button>
             </div>
@@ -508,7 +509,7 @@ export function ConversationSidebar({
                   disabled={loadingDailyReport}
                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 active:from-blue-800 active:to-blue-700 text-white py-3 rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-dark-surface disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Calendar className="h-5 w-5" />
+                  <Calendar aria-hidden="true" className="h-5 w-5" />
                   <span className="font-semibold">
                     {loadingDailyReport ? 'Opening...' : "Today's Daily Report"}
                   </span>
@@ -535,7 +536,7 @@ export function ConversationSidebar({
                 <div className="flex items-center justify-center min-h-[200px] px-4">
                   <div className="text-center max-w-xs">
                     <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-orange-500/30">
-                      <MessageSquare className="w-8 h-8 text-orange-400" />
+                      <MessageSquare aria-hidden="true" className="w-8 h-8 text-orange-400" />
                     </div>
                     <h3 className="text-base font-bold text-slate-50 mb-2">
                       No Conversations Yet
@@ -547,7 +548,7 @@ export function ConversationSidebar({
                       onClick={onNewConversation}
                       className="bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus aria-hidden="true" className="h-4 w-4 mr-2" />
                       Start First Conversation
                     </Button>
                   </div>
@@ -615,11 +616,11 @@ export function ConversationSidebar({
                     {/* Icon based on conversation type */}
                     <div className="relative">
                       {conv.conversationType === 'daily_report' ? (
-                        <Calendar className={`h-4 w-4 mt-0.5 flex-shrink-0 ${conv.finalized ? 'text-green-500' : 'text-blue-400'}`} />
+                        <Calendar aria-hidden="true" className={`h-4 w-4 mt-0.5 flex-shrink-0 ${conv.finalized ? 'text-green-500' : 'text-blue-400'}`} />
                       ) : conv.isSystemManaged ? (
-                        <Shield className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                        <Shield aria-hidden="true" className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
                       ) : (
-                        <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <MessageSquare aria-hidden="true" className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -630,13 +631,13 @@ export function ConversationSidebar({
                         {/* Pinned indicator */}
                         {conv.isPinned && (
                           <div className="flex-shrink-0">
-                            <Pin className="h-3 w-3 text-orange-500" />
+                            <Pin aria-hidden="true" className="h-3 w-3 text-orange-500" />
                           </div>
                         )}
                         {/* Read-only indicator */}
                         {conv.isReadOnly && (
                           <div className="flex-shrink-0">
-                            <Lock className="h-3 w-3 text-gray-500" />
+                            <Lock aria-hidden="true" className="h-3 w-3 text-gray-400" />
                           </div>
                         )}
                         {/* Daily Report Status Badge */}
@@ -644,19 +645,19 @@ export function ConversationSidebar({
                           <div className="flex-shrink-0">
                             {conv.finalized ? (
                               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-900/30 text-green-400 border border-green-700">
-                                <CheckCircle className="h-2.5 w-2.5" />
+                                <CheckCircle aria-hidden="true" className="h-2.5 w-2.5" />
                                 Finalized
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-900/30 text-blue-400 border border-blue-700">
-                                <Clock className="h-2.5 w-2.5" />
+                                <Clock aria-hidden="true" className="h-2.5 w-2.5" />
                                 In Progress
                               </span>
                             )}
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         {conv.messageCount} message{conv.messageCount !== 1 ? 's' : ''} •{' '}
                         {conv.conversationType === 'daily_report' && conv.lastActivityAt
                           ? `Active ${format(new Date(conv.lastActivityAt), 'h:mm a')}`
@@ -712,7 +713,7 @@ export function ConversationSidebar({
 
       {/* Footer */}
       <div className="p-3 border-t border-gray-700 bg-dark-surface">
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs text-gray-400 text-center">
           {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
         </p>
       </div>

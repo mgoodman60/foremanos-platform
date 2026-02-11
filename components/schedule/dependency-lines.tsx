@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { neutralColors, semanticColors } from '@/lib/design-tokens';
 
 interface Task {
   id: string;
@@ -127,7 +128,7 @@ export function DependencyLines({
           refY="3.5"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#6B7280" />
+          <polygon points="0 0, 10 3.5, 0 7" fill={neutralColors.gray[500]} />
         </marker>
         <marker
           id="arrowhead-critical"
@@ -137,7 +138,7 @@ export function DependencyLines({
           refY="3.5"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#EF4444" />
+          <polygon points="0 0, 10 3.5, 0 7" fill={semanticColors.error[500]} />
         </marker>
       </defs>
       
@@ -154,7 +155,7 @@ export function DependencyLines({
               <path
                 d={path}
                 fill="none"
-                stroke="#EF4444"
+                stroke={semanticColors.error[500]}
                 strokeWidth="4"
                 strokeOpacity="0.3"
                 className="animate-pulse"
@@ -165,7 +166,7 @@ export function DependencyLines({
             <path
               d={path}
               fill="none"
-              stroke={isCriticalLine ? '#EF4444' : '#6B7280'}
+              stroke={isCriticalLine ? semanticColors.error[500] : neutralColors.gray[500]}
               strokeWidth={isCriticalLine ? 2 : 1.5}
               strokeDasharray={isCriticalLine ? undefined : '4,2'}
               markerEnd={isCriticalLine ? 'url(#arrowhead-critical)' : 'url(#arrowhead)'}

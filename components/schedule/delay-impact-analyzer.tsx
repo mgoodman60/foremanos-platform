@@ -66,12 +66,12 @@ interface DelayImpactAnalyzerProps {
 
 const getDelayTypeIcon = (type: string) => {
   switch (type) {
-    case 'weather': return <CloudRain className="h-4 w-4" />;
-    case 'material': return <Package className="h-4 w-4" />;
-    case 'labor': return <Users className="h-4 w-4" />;
-    case 'inspection': return <CheckCircle2 className="h-4 w-4" />;
-    case 'change_order': return <Target className="h-4 w-4" />;
-    default: return <Clock className="h-4 w-4" />;
+    case 'weather': return <CloudRain className="h-4 w-4" aria-hidden="true" />;
+    case 'material': return <Package className="h-4 w-4" aria-hidden="true" />;
+    case 'labor': return <Users className="h-4 w-4" aria-hidden="true" />;
+    case 'inspection': return <CheckCircle2 className="h-4 w-4" aria-hidden="true" />;
+    case 'change_order': return <Target className="h-4 w-4" aria-hidden="true" />;
+    default: return <Clock className="h-4 w-4" aria-hidden="true" />;
   }
 };
 
@@ -180,7 +180,7 @@ export function DelayImpactAnalyzer({
     return (
       <Card className="bg-dark-card border-gray-700 p-6">
         <div className="flex items-center justify-center gap-3 py-8 text-gray-400">
-          <RefreshCw className="h-5 w-5 animate-spin" />
+          <RefreshCw className="h-5 w-5 animate-spin" aria-hidden="true" />
           <span>Analyzing schedule delays...</span>
         </div>
       </Card>
@@ -193,7 +193,7 @@ export function DelayImpactAnalyzer({
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-orange-500/20 rounded-lg">
-            <TrendingDown className="h-6 w-6 text-orange-400" />
+            <TrendingDown className="h-6 w-6 text-orange-400" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-200">Delay Impact Analysis</h3>
@@ -213,7 +213,7 @@ export function DelayImpactAnalyzer({
           metrics.projectedDelay > 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-green-500/10 border-green-500/30'
         )}>
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className={cn('h-4 w-4', metrics.projectedDelay > 0 ? 'text-red-400' : 'text-green-400')} />
+            <Calendar className={cn('h-4 w-4', metrics.projectedDelay > 0 ? 'text-red-400' : 'text-green-400')} aria-hidden="true" />
             <span className="text-xs text-gray-400">Projected Delay</span>
           </div>
           <p className={cn('text-2xl font-bold', metrics.projectedDelay > 0 ? 'text-red-400' : 'text-green-400')}>
@@ -223,18 +223,18 @@ export function DelayImpactAnalyzer({
         
         <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-4 w-4 text-orange-400" />
+            <AlertTriangle className="h-4 w-4 text-orange-400" aria-hidden="true" />
             <span className="text-xs text-gray-400">Delayed Tasks</span>
           </div>
           <p className="text-2xl font-bold text-orange-400">
             {metrics.delayedTasks}
-            <span className="text-sm text-gray-500 font-normal"> / {metrics.totalTasks}</span>
+            <span className="text-sm text-gray-400 font-normal"> / {metrics.totalTasks}</span>
           </p>
         </div>
         
         <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-2 mb-2">
-            <Activity className="h-4 w-4 text-red-400" />
+            <Activity className="h-4 w-4 text-red-400" aria-hidden="true" />
             <span className="text-xs text-gray-400">Critical Delayed</span>
           </div>
           <p className="text-2xl font-bold text-red-400">{metrics.criticalDelayed}</p>
@@ -242,7 +242,7 @@ export function DelayImpactAnalyzer({
         
         <div className="bg-dark-surface rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="h-4 w-4 text-blue-400" />
+            <Clock className="h-4 w-4 text-blue-400" aria-hidden="true" />
             <span className="text-xs text-gray-400">Avg Float</span>
           </div>
           <p className="text-2xl font-bold text-blue-400">{metrics.avgFloat} days</p>
@@ -280,8 +280,8 @@ export function DelayImpactAnalyzer({
                 );
               })
             ) : (
-              <div className="text-center py-6 text-gray-500">
-                <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
+              <div className="text-center py-6 text-gray-400">
+                <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" aria-hidden="true" />
                 <p>No significant delays detected</p>
               </div>
             )}
@@ -341,7 +341,7 @@ export function DelayImpactAnalyzer({
                           <span>{format(parseISO(delay.startDate), 'MMM d, yyyy')}</span>
                           {delay.endDate && (
                             <>
-                              <ChevronRight className="h-3 w-3" />
+                              <ChevronRight className="h-3 w-3" aria-hidden="true" />
                               <span>{format(parseISO(delay.endDate), 'MMM d, yyyy')}</span>
                             </>
                           )}
@@ -358,14 +358,14 @@ export function DelayImpactAnalyzer({
                       >
                         {delay.daysImpact}d impact
                       </Badge>
-                      <p className="text-xs text-gray-500 mt-1 capitalize">{delay.status}</p>
+                      <p className="text-xs text-gray-400 mt-1 capitalize">{delay.status}</p>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <BarChart3 className="h-8 w-8 mx-auto mb-2" />
+              <div className="text-center py-8 text-gray-400">
+                <BarChart3 className="h-8 w-8 mx-auto mb-2" aria-hidden="true" />
                 <p>No delay events recorded</p>
                 <p className="text-xs mt-1">Delays will be tracked automatically from daily reports</p>
               </div>
@@ -383,10 +383,10 @@ export function DelayImpactAnalyzer({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-400" />
+                      <CheckCircle2 className="h-5 w-5 text-green-400" aria-hidden="true" />
                       <div>
                         <p className="font-medium text-gray-300">{delay.description}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-400">
                           Resolved after {delay.daysImpact} day{delay.daysImpact > 1 ? 's' : ''}
                         </p>
                       </div>
@@ -398,8 +398,8 @@ export function DelayImpactAnalyzer({
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Clock className="h-8 w-8 mx-auto mb-2" />
+              <div className="text-center py-8 text-gray-400">
+                <Clock className="h-8 w-8 mx-auto mb-2" aria-hidden="true" />
                 <p>No resolved delays yet</p>
               </div>
             )}

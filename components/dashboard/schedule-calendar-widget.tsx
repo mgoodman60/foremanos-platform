@@ -255,7 +255,7 @@ export function ScheduleCalendarWidget({ projectSlug }: ScheduleCalendarWidgetPr
                 {group.dayName}
               </span>
               {!isEmpty && (
-                <span className="text-[10px] text-gray-500 tabular-nums">
+                <span className="text-[10px] text-gray-400 tabular-nums">
                   {group.tasks.length + group.milestones.length} item{group.tasks.length + group.milestones.length !== 1 ? 's' : ''}
                 </span>
               )}

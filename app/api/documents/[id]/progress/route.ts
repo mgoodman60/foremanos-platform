@@ -74,7 +74,7 @@ export async function GET(
       currentPhase = 'failed';
     } else if (queueEntry?.status === 'processing') {
       if (pagesProcessed === 0) {
-        currentPhase = 'extracting';
+        currentPhase = 'analyzing';
       } else if (percentComplete < 80) {
         currentPhase = 'analyzing';
       } else {

@@ -403,7 +403,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
 
             return (
               <div key={category}>
-                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                <h4 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
                   {categoryLabels[category]}
                 </h4>
                 <div className="space-y-2">

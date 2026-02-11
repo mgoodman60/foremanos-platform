@@ -195,7 +195,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading dimensions...</span>
         </CardContent>
       </Card>
@@ -207,13 +207,13 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
       <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
-            <Ruler className="h-5 w-5" />
+            <Ruler aria-hidden="true" className="h-5 w-5" />
             Dimension Browser
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Ruler className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <Ruler aria-hidden="true" className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">No dimensions extracted yet</p>
             <Button
               onClick={handleExtractDimensions}
@@ -222,12 +222,12 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
             >
               {extracting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
                   Extracting...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw aria-hidden="true" className="mr-2 h-4 w-4" />
                   Extract Dimensions
                 </>
               )}
@@ -249,7 +249,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                 <p className="text-sm text-gray-400">Total Dimensions</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.totalDimensions}</p>
               </div>
-              <Ruler className="h-8 w-8 text-orange-500" />
+              <Ruler aria-hidden="true" className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -261,7 +261,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                 <p className="text-sm text-gray-400">Critical</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.criticalCount}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -273,7 +273,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                 <p className="text-sm text-gray-400">Chains</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.chainCount}</p>
               </div>
-              <Link className="h-8 w-8 text-blue-500" />
+              <Link aria-hidden="true" className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -292,9 +292,9 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                 </p>
               </div>
               {invalidChains.length === 0 ? (
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle aria-hidden="true" className="h-8 w-8 text-green-500" />
               ) : (
-                <AlertTriangle className="h-8 w-8 text-red-500" />
+                <AlertTriangle aria-hidden="true" className="h-8 w-8 text-red-500" />
               )}
             </div>
           </CardContent>
@@ -306,7 +306,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-gray-100 flex items-center gap-2">
-              <Ruler className="h-5 w-5" />
+              <Ruler aria-hidden="true" className="h-5 w-5" />
               Dimension Browser
             </CardTitle>
             <Button
@@ -327,7 +327,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
           {/* Search and Filter */}
           <div className="flex gap-2 mt-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search dimensions..."
                 value={searchQuery}
@@ -408,12 +408,12 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                             <p className="text-sm text-gray-300 mb-2">{dim.context}</p>
                           )}
 
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-4 text-xs text-gray-400">
                             <span>Sheet {dim.sheetNumber}</span>
                             <span>Value: {formatDimension(dim)}</span>
                             {dim.chainId && (
                               <span className="flex items-center gap-1">
-                                <Link className="h-3 w-3" />
+                                <Link aria-hidden="true" className="h-3 w-3" />
                                 Chain {dim.chainId}
                               </span>
                             )}
@@ -446,9 +446,9 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                           </Badge>
                           <span className="text-sm text-gray-400">Sheet {chain.sheetNumber}</span>
                           {chain.valid ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <CheckCircle aria-hidden="true" className="h-4 w-4 text-green-500" />
                           ) : (
-                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                            <AlertTriangle aria-hidden="true" className="h-4 w-4 text-red-500" />
                           )}
                         </div>
                         <span className="font-mono text-gray-100">
@@ -460,16 +460,16 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                         {chain.dimensions.map((dim: Dimension, dimIdx: number) => (
                           <div key={dimIdx} className="flex items-center gap-2 text-sm">
                             <span className="text-gray-400">#{dimIdx + 1}</span>
-                            <ArrowRight className="h-3 w-3 text-gray-500" />
+                            <ArrowRight aria-hidden="true" className="h-3 w-3 text-gray-400" />
                             <span className="font-mono text-gray-200">{dim.originalText}</span>
-                            <span className="text-gray-500">({formatDimension(dim)})</span>
+                            <span className="text-gray-400">({formatDimension(dim)})</span>
                           </div>
                         ))}
                       </div>
 
                       {!chain.valid && chain.errorMessage && (
                         <div className="mt-3 p-2 bg-red-900/20 border border-red-800 rounded text-sm text-red-300">
-                          <AlertTriangle className="h-4 w-4 inline mr-2" />
+                          <AlertTriangle aria-hidden="true" className="h-4 w-4 inline mr-2" />
                           {chain.errorMessage}
                         </div>
                       )}
@@ -483,9 +483,9 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
             <TabsContent value="errors">
               {invalidChains.length === 0 ? (
                 <div className="text-center py-12">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                  <CheckCircle aria-hidden="true" className="h-12 w-12 text-green-500 mx-auto mb-4" />
                   <p className="text-gray-300 text-lg">All dimension chains are valid!</p>
-                  <p className="text-gray-500 text-sm mt-2">No validation errors found.</p>
+                  <p className="text-gray-400 text-sm mt-2">No validation errors found.</p>
                 </div>
               ) : (
                 <ScrollArea className="h-[500px]">
@@ -496,7 +496,7 @@ export default function DimensionBrowser({ projectSlug }: DimensionBrowserProps)
                         className="p-4 bg-red-950/30 border border-red-900 rounded-lg"
                       >
                         <div className="flex items-center gap-2 mb-3">
-                          <AlertTriangle className="h-5 w-5 text-red-500" />
+                          <AlertTriangle aria-hidden="true" className="h-5 w-5 text-red-500" />
                           <span className="font-bold text-gray-100">Chain {chain.chainId}</span>
                           <Badge variant="outline" className="border-gray-600 text-gray-300">
                             Sheet {chain.sheetNumber}

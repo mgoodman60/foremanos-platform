@@ -283,7 +283,7 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Box className="w-5 h-5 text-blue-400" />
+          <Box className="w-5 h-5 text-blue-400" aria-hidden="true" />
           <h2 className="text-lg font-semibold text-white">3D Model Viewer</h2>
           <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
             Autodesk Forge
@@ -298,7 +298,7 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
             disabled={uploading}
           />
           <span className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4" aria-hidden="true" />
             Upload Model
           </span>
         </label>
@@ -324,7 +324,7 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
                 : 'border-gray-600 hover:border-gray-500'
             }`}
           >
-            <FileType className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+            <FileType className="w-8 h-8 text-gray-400 mx-auto mb-2" aria-hidden="true" />
             <p className="text-sm text-gray-400">Drop CAD/BIM files here</p>
           </div>
 
@@ -332,11 +332,11 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
           <div className="flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center h-32">
-                <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
+                <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" aria-hidden="true" />
               </div>
             ) : models.length === 0 ? (
               <div className="text-center py-8">
-                <Box className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <Box className="w-12 h-12 text-gray-600 mx-auto mb-3" aria-hidden="true" />
                 <p className="text-gray-400 text-sm">No models uploaded yet</p>
               </div>
             ) : (
@@ -359,10 +359,10 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
                             {model.fileName}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                           <span>{formatSize(model.fileSize)}</span>
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="w-3 h-3" aria-hidden="true" />
                             {new Date(model.createdAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -372,7 +372,7 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
                           e.stopPropagation();
                           handleDelete(model);
                         }}
-                        className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-gray-500 transition-all"
+                        className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-gray-400 transition-all"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -392,19 +392,19 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
                           <>
                             {(model.totalLayers ?? 0) > 0 && (
                               <span className="text-xs text-green-400 flex items-center gap-1">
-                                <Layers className="w-3 h-3" />
+                                <Layers className="w-3 h-3" aria-hidden="true" />
                                 {model.totalLayers} layers
                               </span>
                             )}
                             {(model.totalBlocks ?? 0) > 0 && (
                               <span className="text-xs text-blue-400 flex items-center gap-1">
-                                <Box className="w-3 h-3" />
+                                <Box className="w-3 h-3" aria-hidden="true" />
                                 {model.totalBlocks} blocks
                               </span>
                             )}
                             {(model.totalAnnotations ?? 0) > 0 && (
                               <span className="text-xs text-purple-400 flex items-center gap-1">
-                                <Info className="w-3 h-3" />
+                                <Info className="w-3 h-3" aria-hidden="true" />
                                 {model.totalAnnotations} notes
                               </span>
                             )}
@@ -412,7 +412,7 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
                         ) : (
                           // BIM-specific display
                           <span className="text-xs text-green-400 flex items-center gap-1">
-                            <Database className="w-3 h-3" />
+                            <Database className="w-3 h-3" aria-hidden="true" />
                             {model.takeoffItems || 0} items extracted
                           </span>
                         )}
@@ -426,13 +426,13 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
                         }}
                         className="mt-2 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
                       >
-                        <Zap className="w-3 h-3" />
+                        <Zap className="w-3 h-3" aria-hidden="true" />
                         Extract Data
                       </button>
                     )}
                     {model.status === 'failed' && (
                       <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" /> Conversion failed
+                        <AlertCircle className="w-3 h-3" aria-hidden="true" /> Conversion failed
                       </p>
                     )}
                   </div>
@@ -644,22 +644,22 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <Box className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <Box className="w-16 h-16 text-gray-600 mx-auto mb-4" aria-hidden="true" />
                 <p className="text-gray-400 text-lg">Select a model to view</p>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-400 text-sm mt-1">
                   Or upload a CAD/BIM file to get started
                 </p>
-                <div className="mt-6 grid grid-cols-3 gap-4 max-w-md mx-auto text-xs text-gray-500">
+                <div className="mt-6 grid grid-cols-3 gap-4 max-w-md mx-auto text-xs text-gray-400">
                   <div className="flex flex-col items-center p-3 bg-gray-800/50 rounded-lg">
-                    <Layers className="w-5 h-5 text-blue-400 mb-2" />
+                    <Layers className="w-5 h-5 text-blue-400 mb-2" aria-hidden="true" />
                     <span>Section Planes</span>
                   </div>
                   <div className="flex flex-col items-center p-3 bg-gray-800/50 rounded-lg">
-                    <Box className="w-5 h-5 text-green-400 mb-2" />
+                    <Box className="w-5 h-5 text-green-400 mb-2" aria-hidden="true" />
                     <span>Measurements</span>
                   </div>
                   <div className="flex flex-col items-center p-3 bg-gray-800/50 rounded-lg">
-                    <Info className="w-5 h-5 text-purple-400 mb-2" />
+                    <Info className="w-5 h-5 text-purple-400 mb-2" aria-hidden="true" />
                     <span>Properties</span>
                   </div>
                 </div>

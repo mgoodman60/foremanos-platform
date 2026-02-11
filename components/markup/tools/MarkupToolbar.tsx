@@ -114,7 +114,7 @@ export function MarkupToolbar({ activeTool, onToolChange }: MarkupToolbarProps) 
                 title={tool.label}
                 aria-label={tool.label}
               >
-                <Icon size={18} />
+                <Icon size={18} aria-hidden="true" />
               </button>
             );
           })}

@@ -178,7 +178,7 @@ export default function ScheduleAnalysis() {
   if (!hasSchedule) {
     return (
       <Card className="p-8 bg-dark-card border-gray-700 text-center">
-        <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+        <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" aria-hidden="true" />
         <h3 className="text-lg font-semibold text-white mb-2">No Active Schedule</h3>
         <p className="text-gray-400">Create a schedule to enable analysis features</p>
       </Card>
@@ -192,7 +192,7 @@ export default function ScheduleAnalysis() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="bg-blue-600 p-3 rounded-lg">
-              <Calendar className="h-6 w-6 text-white" />
+              <Calendar className="h-6 w-6 text-white" aria-hidden="true" />
             </div>
             <div>
               <h3 className="font-semibold text-white">{schedule?.name}</h3>
@@ -203,15 +203,15 @@ export default function ScheduleAnalysis() {
           </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => runAction('calculate_cpm')} disabled={analyzing}>
-              <Activity className="h-4 w-4 mr-2" />
+              <Activity className="h-4 w-4 mr-2" aria-hidden="true" />
               Run CPM
             </Button>
             <Button size="sm" onClick={() => runAction('generate_forecast')} disabled={analyzing}>
-              <TrendingUp className="h-4 w-4 mr-2" />
+              <TrendingUp className="h-4 w-4 mr-2" aria-hidden="true" />
               Forecast
             </Button>
             <Button size="sm" variant="outline" onClick={() => setShowBaselineModal(true)}>
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4 mr-2" aria-hidden="true" />
               Save Baseline
             </Button>
           </div>
@@ -222,7 +222,7 @@ export default function ScheduleAnalysis() {
       {cpm && (
         <Card className="p-4 bg-dark-card border-gray-700">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-purple-400" />
+            <GitBranch className="h-5 w-5 text-purple-400" aria-hidden="true" />
             Critical Path Analysis
           </h3>
           
@@ -257,7 +257,7 @@ export default function ScheduleAnalysis() {
                         {task?.name || taskId}
                       </Badge>
                       {i < Math.min(5, cpm.criticalPath.length - 1) && (
-                        <ArrowRight className="h-4 w-4 text-gray-500 mx-1" />
+                        <ArrowRight className="h-4 w-4 text-gray-400 mx-1" aria-hidden="true" />
                       )}
                     </div>
                   );
@@ -275,7 +275,7 @@ export default function ScheduleAnalysis() {
       {forecast && (
         <Card className="p-4 bg-dark-card border-gray-700">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-            <Target className="h-5 w-5 text-yellow-400" />
+            <Target className="h-5 w-5 text-yellow-400" aria-hidden="true" />
             Schedule Forecast
           </h3>
 
@@ -318,7 +318,7 @@ export default function ScheduleAnalysis() {
               <ul className="space-y-1">
                 {forecast.riskFactors.map((factor, i) => (
                   <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                    <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                     {factor}
                   </li>
                 ))}
@@ -332,7 +332,7 @@ export default function ScheduleAnalysis() {
               <ul className="space-y-1">
                 {forecast.recoveryActions.map((action, i) => (
                   <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                     {action}
                   </li>
                 ))}
@@ -410,7 +410,7 @@ export default function ScheduleAnalysis() {
                     {format(new Date(b.capturedAt), 'MMM d, yyyy')} • {b.totalTasks} tasks
                   </div>
                 </div>
-                <span className="text-gray-500">#{b.baselineNumber}</span>
+                <span className="text-gray-400">#{b.baselineNumber}</span>
               </div>
             ))}
           </div>
@@ -423,7 +423,7 @@ export default function ScheduleAnalysis() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white">Resource Utilization</h3>
             <Button size="sm" variant="outline" onClick={() => runAction('level_resources')} disabled={analyzing}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${analyzing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${analyzing ? 'animate-spin' : ''}`} aria-hidden="true" />
               Level Resources
             </Button>
           </div>
@@ -457,11 +457,11 @@ export default function ScheduleAnalysis() {
       <Card className="p-4 bg-dark-card border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-white flex items-center gap-2">
-            <Link className="h-5 w-5 text-blue-400" />
+            <Link className="h-5 w-5 text-blue-400" aria-hidden="true" />
             Schedule-Budget Integration
           </h3>
           <Button size="sm" onClick={() => runAction('link_to_budget')} disabled={analyzing}>
-            <Link className="h-4 w-4 mr-2" />
+            <Link className="h-4 w-4 mr-2" aria-hidden="true" />
             Link Tasks to Budget
           </Button>
         </div>

@@ -151,11 +151,11 @@ export default function DocumentProcessingMonitor({
   };
 
   const getMonitorStageIcon = (idx: number, activeIdx: number, failed: boolean) => {
-    if (failed && idx === activeIdx) return <X className="w-3.5 h-3.5 text-red-500" />;
-    if (failed && idx > activeIdx) return <Circle className="w-3.5 h-3.5 text-gray-600" />;
-    if (idx < activeIdx) return <CheckCircle2 className="w-3.5 h-3.5" style={{ color: semanticColors.success[500] }} />;
-    if (idx === activeIdx) return <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: primaryColors.orange[500] }} />;
-    return <Circle className="w-3.5 h-3.5 text-gray-600" />;
+    if (failed && idx === activeIdx) return <X aria-hidden="true" className="w-3.5 h-3.5 text-red-500" />;
+    if (failed && idx > activeIdx) return <Circle aria-hidden="true" className="w-3.5 h-3.5 text-gray-600" />;
+    if (idx < activeIdx) return <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" style={{ color: semanticColors.success[500] }} />;
+    if (idx === activeIdx) return <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" style={{ color: primaryColors.orange[500] }} />;
+    return <Circle aria-hidden="true" className="w-3.5 h-3.5 text-gray-600" />;
   };
 
   const formatTimeRemaining = (seconds: number): string => {
@@ -189,17 +189,17 @@ export default function DocumentProcessingMonitor({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+        return <CheckCircle2 aria-hidden="true" className="w-5 h-5 text-green-500" />;
       case 'pending':
       case 'processing':
       case 'queued':
-        return <Clock className="w-5 h-5 text-blue-500 animate-pulse" />;
+        return <Clock aria-hidden="true" className="w-5 h-5 text-blue-500 animate-pulse" />;
       case 'failed':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle aria-hidden="true" className="w-5 h-5 text-red-500" />;
       case 'none':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle aria-hidden="true" className="w-5 h-5 text-yellow-500" />;
       default:
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle aria-hidden="true" className="w-5 h-5 text-yellow-500" />;
     }
   };
 
@@ -252,7 +252,7 @@ export default function DocumentProcessingMonitor({
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <RefreshCw className="w-6 h-6 animate-spin text-blue-500" />
+        <RefreshCw aria-hidden="true" className="w-6 h-6 animate-spin text-blue-500" />
         <span className="ml-2 text-gray-400">Loading processing status...</span>
       </div>
     );
@@ -290,7 +290,7 @@ export default function DocumentProcessingMonitor({
               <div className="text-sm text-gray-400">Total Pages Processed</div>
               <div className="text-xl font-bold text-white">{stats.totalPages.toLocaleString()}</div>
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-400">
               Last updated: {lastRefresh.toLocaleTimeString()}
               <button
                 onClick={() => fetchStatus()}
@@ -309,7 +309,7 @@ export default function DocumentProcessingMonitor({
         <h3 className="text-lg font-semibold text-white mb-4">Document Processing Status</h3>
         {documents.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
-            <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <FileText aria-hidden="true" className="w-12 h-12 mx-auto mb-2 opacity-50" />
             <p>No documents found</p>
           </div>
         ) : (
@@ -392,7 +392,7 @@ export default function DocumentProcessingMonitor({
                           </div>
 
                           {/* Stats row */}
-                          <div className="flex justify-between text-xs text-gray-500">
+                          <div className="flex justify-between text-xs text-gray-400">
                             <span className="flex items-center gap-2">
                               <span>{pagesProcessed}/{totalPages} pages ({percent}%)</span>
                               {doc.queueInfo && <span>· Batch {doc.queueInfo.currentBatch + 1}/{doc.queueInfo.totalBatches}</span>}

@@ -150,7 +150,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Network className="h-5 w-5" />
+                <Network aria-hidden="true" className="h-5 w-5" />
                 Cross-Reference Map
               </CardTitle>
               <CardDescription>
@@ -166,7 +166,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
           <div className="flex gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search sheets..."
                   value={searchQuery}
@@ -214,7 +214,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
+                        <FileText aria-hidden="true" className="h-4 w-4" />
                         <span className="font-medium">{sheet}</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
@@ -243,7 +243,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
           <CardContent>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {filteredRelationships.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">
+                <p className="text-center text-gray-400 py-8">
                   No relationships found
                 </p>
               ) : (
@@ -258,7 +258,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
                       </Badge>
                       <div className="flex items-center gap-2 flex-1">
                         <span className="font-medium">{rel.sheet1}</span>
-                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                        <ArrowRight aria-hidden="true" className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">{rel.sheet2}</span>
                       </div>
                       <Badge variant="outline">
@@ -269,7 +269,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
                     {/* Strength indicator */}
                     <div className="mt-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Strength:</span>
+                        <span className="text-xs text-gray-400">Strength:</span>
                         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-blue-500 transition-all"
@@ -294,12 +294,12 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
                               key={refIdx}
                               className="text-xs text-gray-600 flex items-center gap-2"
                             >
-                              <Layers className="h-3 w-3" />
+                              <Layers aria-hidden="true" className="h-3 w-3" />
                               <span>{ref.referenceText}</span>
                             </div>
                           ))}
                           {rel.references.length > 3 && (
-                            <p className="text-xs text-gray-500 italic">
+                            <p className="text-xs text-gray-400 italic">
                               +{rel.references.length - 3} more
                             </p>
                           )}
@@ -333,7 +333,7 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
                   onClick={() => setSelectedSheet(sheet)}
                   className="flex items-center gap-2"
                 >
-                  <FileText className="h-3 w-3" />
+                  <FileText aria-hidden="true" className="h-3 w-3" />
                   {sheet}
                 </Button>
               ))}

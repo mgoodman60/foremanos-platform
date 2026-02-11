@@ -294,7 +294,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     )}
                     <span className="font-medium text-white">{getCategoryName(category)}</span>
-                    <span className="text-xs text-gray-500">({prices.length} items)</span>
+                    <span className="text-xs text-gray-400">({prices.length} items)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {prices.some(p => p.isProjectSpecific) && (
@@ -319,7 +319,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                             <span className="text-sm text-white">
                               {price.subCategory || 'General'}
                             </span>
-                            <span className="text-xs text-gray-500">per {price.unit}</span>
+                            <span className="text-xs text-gray-400">per {price.unit}</span>
                             {price.isProjectSpecific && (
                               <span className="text-xs px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded">
                                 Project
@@ -339,7 +339,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
                               {formatCurrency(price.unitCost)}
                             </div>
                             {price.laborRate && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-400">
                                 Labor: {formatCurrency(price.laborRate)}/hr
                               </div>
                             )}
@@ -402,7 +402,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
             ))}
             
             {Object.keys(pricesByCategory).length === 0 && (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-gray-400">
                 <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No unit prices configured</p>
                 <p className="text-sm">Click "Add Price" to create custom pricing</p>
@@ -414,7 +414,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
 
       {/* Footer */}
       <div className="p-4 border-t border-dark-hover bg-dark-card">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-400">
           💡 Project-specific prices override default rates. Default prices are based on 2024 national averages.
         </p>
       </div>

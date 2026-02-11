@@ -357,7 +357,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-300">No Schedule Data Available</h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-400">
                   {hasUnparsedDocs
                     ? 'Schedule document found! Click "Parse Schedule" to extract tasks and milestones.'
                     : noSourceMessage}
@@ -489,10 +489,10 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
       return (
         <div className="bg-dark-surface rounded-lg p-3 border border-dark-hover/50 min-w-[120px]">
           <div className="flex items-center gap-2 mb-1">
-            <Activity className="w-4 h-4 text-gray-500" />
+            <Activity className="w-4 h-4 text-gray-400" />
             <span className="text-xs text-gray-400">Health</span>
           </div>
-          <p className="text-xs text-gray-500">Unable to calculate</p>
+          <p className="text-xs text-gray-400">Unable to calculate</p>
         </div>
       );
     }
@@ -784,7 +784,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               <span className="text-xs font-medium text-gray-300 group-hover:text-orange-500 transition-colors">Budget Status</span>
               <div className="flex items-center gap-1">
                 <DollarSign className="h-4 w-4 text-green-500" />
-                <ChevronRight className="h-3 w-3 text-gray-500 group-hover:text-orange-500 transition-colors" />
+                <ChevronRight className="h-3 w-3 text-gray-400 group-hover:text-orange-500 transition-colors" />
               </div>
             </div>
             {budgetMetrics?.hasBudget ? (
@@ -806,8 +806,8 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
               </div>
             ) : (
               <div className="space-y-1">
-                <div className="text-sm font-semibold text-gray-500">Not Set</div>
-                <div className="text-[10px] text-gray-500">Click to configure</div>
+                <div className="text-sm font-semibold text-gray-400">Not Set</div>
+                <div className="text-[10px] text-gray-400">Click to configure</div>
               </div>
             )}
           </div>
@@ -966,7 +966,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
             </div>
             {/* Scroll hint if many dates */}
             {metrics.keyDates.length > 5 && (
-              <div className="text-xs text-gray-500 mt-1 text-right">
+              <div className="text-xs text-gray-400 mt-1 text-right">
                 ← Scroll for more →
               </div>
             )}

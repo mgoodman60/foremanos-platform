@@ -47,7 +47,7 @@ export function RenderActionBar({
         className="border-gray-700 text-gray-300"
         aria-label="Download render"
       >
-        <Download className="h-4 w-4 mr-1.5" />
+        <Download className="h-4 w-4 mr-1.5" aria-hidden="true" />
         Download
       </Button>
 
@@ -60,7 +60,7 @@ export function RenderActionBar({
             className="border-gray-700 text-gray-300"
             aria-label="Regenerate render"
           >
-            <RefreshCw className="h-4 w-4 mr-1.5" />
+            <RefreshCw className="h-4 w-4 mr-1.5" aria-hidden="true" />
             Regenerate
           </Button>
         </AlertDialogTrigger>
@@ -93,7 +93,7 @@ export function RenderActionBar({
         className="border-gray-700 text-gray-300"
         aria-label="Adjust and retry"
       >
-        <Pencil className="h-4 w-4 mr-1.5" />
+        <Pencil className="h-4 w-4 mr-1.5" aria-hidden="true" />
         Adjust
       </Button>
 

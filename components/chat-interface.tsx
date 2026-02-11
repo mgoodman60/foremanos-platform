@@ -1132,12 +1132,12 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               >
                 {isFinalizingReport ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                    <Loader2 aria-hidden="true" className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                     <span className="hidden sm:inline">Submitting...</span>
                   </>
                 ) : (
                   <>
-                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <Check aria-hidden="true" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">Submit Report</span>
                     <span className="sm:hidden">Submit</span>
                   </>
@@ -1149,7 +1149,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
              currentConversation?.finalized && (
               <>
                 <div className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-gray-700 text-gray-300 rounded-lg text-xs sm:text-sm font-medium">
-                  <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <Lock aria-hidden="true" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Submitted</span>
                 </div>
                 <button
@@ -1157,7 +1157,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                   className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-all transform hover:scale-105"
                   title="Export using template"
                 >
-                  <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <FileText aria-hidden="true" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Export Template</span>
                 </button>
               </>
@@ -1173,25 +1173,27 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                 <Download className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               {showExportMenu && messages.length > 0 && (
-                <div className="absolute right-0 top-full mt-2 bg-dark-card border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[140px] animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute right-0 top-full mt-2 bg-dark-card border border-gray-700 rounded-lg shadow-xl py-1 z-50 min-w-[140px] animate-in fade-in zoom-in-95 duration-200" role="menu" aria-label="Export options">
                   <button
+                    role="menuitem"
                     onClick={() => {
                       exportChat('txt');
                       setShowExportMenu(false);
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors flex items-center gap-2"
                   >
-                    <FileText className="w-4 h-4" />
+                    <FileText aria-hidden="true" className="w-4 h-4" />
                     Export as TXT
                   </button>
                   <button
+                    role="menuitem"
                     onClick={() => {
                       exportChat('json');
                       setShowExportMenu(false);
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-dark-surface transition-colors flex items-center gap-2"
                   >
-                    <FileText className="w-4 h-4" />
+                    <FileText aria-hidden="true" className="w-4 h-4" />
                     Export as JSON
                   </button>
                 </div>
@@ -1247,7 +1249,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         {isDragging && (
           <div className="absolute inset-0 bg-orange-500 bg-opacity-90 z-50 flex items-center justify-center animate-in fade-in">
             <div className="text-center text-white">
-              <ImagePlus className="w-16 h-16 mx-auto mb-4 animate-bounce" />
+              <ImagePlus aria-hidden="true" className="w-16 h-16 mx-auto mb-4 animate-bounce" />
               <p className="text-2xl font-bold uppercase tracking-wider">Drop Image Here</p>
               <p className="text-lg mt-2">Release to upload</p>
             </div>
@@ -1399,7 +1401,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                     <WithTooltip tooltip={copiedId === message.id ? "Copied!" : "Copy to clipboard"}>
                       <button
                         onClick={() => copyMessage(message.content, message.id)}
-                        className="text-gray-500 hover:text-orange-500 transition-colors p-1 focus:ring-2 focus:ring-orange-500 focus:outline-none rounded"
+                        className="text-gray-400 hover:text-orange-500 transition-colors p-1 focus:ring-2 focus:ring-orange-500 focus:outline-none rounded"
                         aria-label="Copy message"
                       >
                         {copiedId === message.id ? (
@@ -1417,7 +1419,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                         className={`p-1 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none rounded ${
                           feedbackGiven[message.id] === 1
                             ? 'text-green-500'
-                            : 'text-gray-500 hover:text-green-500'
+                            : 'text-gray-400 hover:text-green-500'
                         } disabled:cursor-not-allowed`}
                         aria-label="Helpful response"
                       >
@@ -1431,7 +1433,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
                         className={`p-1 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none rounded ${
                           feedbackGiven[message.id] === -1
                             ? 'text-red-500'
-                            : 'text-gray-500 hover:text-red-500'
+                            : 'text-gray-400 hover:text-red-500'
                         } disabled:cursor-not-allowed`}
                         aria-label="Not helpful response"
                       >
@@ -1466,7 +1468,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
             </div>
             <div className="bg-dark-card text-slate-50 shadow-md rounded-lg p-3 border border-gray-700">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+                <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin text-orange-500" />
                 <span className="text-sm text-gray-300">AI is thinking...</span>
               </div>
             </div>
@@ -1487,7 +1489,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               className="text-xs sm:text-sm text-orange-500 hover:underline flex items-center gap-1 focus:ring-2 focus:ring-orange-500 focus:outline-none rounded px-1.5 sm:px-2 py-1"
               aria-label="Retry sending message"
             >
-              <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+              <RefreshCw aria-hidden="true" className="w-3 h-3 sm:w-4 sm:h-4" />
               Retry
             </button>
           </div>
@@ -1496,7 +1498,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         {/* Read-Only Indicator */}
         {isReadOnly && (
           <div className="mb-2 p-2.5 bg-yellow-900/20 border border-yellow-700 rounded-lg flex items-center gap-2">
-            <Lock className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+            <Lock aria-hidden="true" className="w-4 h-4 text-yellow-500 flex-shrink-0" />
             <p className="text-xs sm:text-sm text-yellow-200">
               This conversation is read-only. {currentConversation?.conversationType === 'daily_report' && 'Historical daily report chats cannot be modified.'}
             </p>
@@ -1656,7 +1658,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
       {/* Analyzing indicator */}
       {analyzingSchedule && (
         <div className="fixed bottom-24 right-6 bg-dark-card border border-blue-500 rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
-          <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+          <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin text-blue-400" />
           <span className="text-sm text-gray-300">Analyzing schedule impacts...</span>
         </div>
       )}

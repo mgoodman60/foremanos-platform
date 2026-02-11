@@ -468,7 +468,7 @@ export function WorkflowModal({
         {/* Header */}
         <div className="bg-dark-surface px-6 py-4 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Target className="w-6 h-6 text-orange-500" />
+            <Target className="w-6 h-6 text-orange-500" aria-hidden="true" />
             <div>
               <h2 id="workflow-modal-title" className="text-xl font-bold text-white">
                 {selectedWorkflow ? selectedWorkflow.name : 'Daily Report Workflows'}
@@ -493,7 +493,7 @@ export function WorkflowModal({
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+              <Loader2 className="w-8 h-8 text-orange-500 animate-spin" aria-hidden="true" />
             </div>
           ) : !selectedWorkflow ? (
             /* Workflow Selection */
@@ -516,7 +516,7 @@ export function WorkflowModal({
                         {workflow.description}
                       </p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors" aria-hidden="true" />
                   </div>
                 </button>
               ))}
@@ -552,7 +552,7 @@ export function WorkflowModal({
                     <div className="mt-3 pt-3 border-t border-blue-700/50">
                       {weatherData.alerts.map((alert: any, idx: number) => (
                         <div key={idx} className="flex items-start gap-2 text-yellow-400 text-sm">
-                          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
                           <span>{alert.title}: {alert.message}</span>
                         </div>
                       ))}
@@ -565,7 +565,7 @@ export function WorkflowModal({
               {scheduleContext && scheduleContext.todayTasks && scheduleContext.todayTasks.length > 0 && (
                 <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4">
                   <h3 className="text-sm font-semibold text-blue-400 mb-2 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
+                    <AlertCircle className="w-4 h-4" aria-hidden="true" />
                     Today's Scheduled Activities
                   </h3>
                   <ul className="text-sm text-gray-300 space-y-1">
@@ -588,7 +588,7 @@ export function WorkflowModal({
                   )}
                   {renderInput(step)}
                   {responses[step.id] && (
-                    <Check className="w-5 h-5 text-green-500 inline-block ml-2" />
+                    <Check className="w-5 h-5 text-green-500 inline-block ml-2" aria-hidden="true" />
                   )}
                 </div>
               ))}
@@ -625,7 +625,7 @@ export function WorkflowModal({
             >
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                   Saving...
                 </>
               ) : (

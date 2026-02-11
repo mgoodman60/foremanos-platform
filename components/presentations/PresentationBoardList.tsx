@@ -71,7 +71,7 @@ export function PresentationBoardList({
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
           )}
         >
-          <Plus size={28} />
+          <Plus size={28} aria-hidden="true" />
           <span className="text-sm font-medium">New Board</span>
         </button>
 
@@ -88,7 +88,7 @@ export function PresentationBoardList({
             )}
           >
             <div className="flex items-center justify-center w-full py-4 text-muted-foreground">
-              <Presentation size={32} />
+              <Presentation size={32} aria-hidden="true" />
             </div>
             <div className="mt-auto w-full">
               <div className="text-sm font-medium text-foreground truncate">

@@ -183,7 +183,7 @@ export default function SMSConfigPanel({ projectSlug }: SMSConfigPanelProps) {
               className="h-8 w-8 mx-auto mb-2"
               style={{ color: neutralColors.slate[300] }}
             />
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               No phone numbers configured. Add a mapping to enable SMS
               reporting.
             </p>
@@ -298,9 +298,9 @@ export default function SMSConfigPanel({ projectSlug }: SMSConfigPanelProps) {
           className="gap-1.5"
         >
           {adding ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <Loader2 aria-hidden="true" className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Plus className="h-3.5 w-3.5" />
+            <Plus aria-hidden="true" className="h-3.5 w-3.5" />
           )}
           Add Mapping
         </Button>

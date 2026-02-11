@@ -152,7 +152,7 @@ export default function CashFlowChart() {
             <div className="text-xl font-bold text-blue-400">
               {formatCurrency(costForecast.ac)}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-400">
               {costForecast.percentComplete.toFixed(1)}% complete
             </div>
           </Card>
@@ -182,9 +182,9 @@ export default function CashFlowChart() {
             </div>
             <div className="flex items-center gap-1 text-xs">
               {costForecast.cpi >= 1 ? (
-                <><ArrowUpRight className="h-3 w-3 text-green-400" /> Efficient</>
+                <><ArrowUpRight className="h-3 w-3 text-green-400" aria-hidden="true" /> Efficient</>
               ) : (
-                <><ArrowDownRight className="h-3 w-3 text-red-400" /> Over spending</>
+                <><ArrowDownRight className="h-3 w-3 text-red-400" aria-hidden="true" /> Over spending</>
               )}
             </div>
           </Card>
@@ -196,9 +196,9 @@ export default function CashFlowChart() {
             </div>
             <div className="flex items-center gap-1 text-xs">
               {costForecast.spi >= 1 ? (
-                <><ArrowUpRight className="h-3 w-3 text-green-400" /> Ahead</>
+                <><ArrowUpRight className="h-3 w-3 text-green-400" aria-hidden="true" /> Ahead</>
               ) : (
-                <><ArrowDownRight className="h-3 w-3 text-red-400" /> Behind</>
+                <><ArrowDownRight className="h-3 w-3 text-red-400" aria-hidden="true" /> Behind</>
               )}
             </div>
           </Card>
@@ -209,13 +209,13 @@ export default function CashFlowChart() {
       {costForecast && (
         <div className="flex items-center gap-4">
           <Badge className={`${costForecast.costHealthStatus === 'ON_BUDGET' ? 'bg-green-600' : costForecast.costHealthStatus === 'AT_RISK' ? 'bg-yellow-600' : 'bg-red-600'}`}>
-            {costForecast.costHealthStatus === 'ON_BUDGET' && <CheckCircle className="h-3 w-3 mr-1" />}
-            {costForecast.costHealthStatus !== 'ON_BUDGET' && <AlertTriangle className="h-3 w-3 mr-1" />}
+            {costForecast.costHealthStatus === 'ON_BUDGET' && <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />}
+            {costForecast.costHealthStatus !== 'ON_BUDGET' && <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" />}
             {costForecast.costHealthStatus.replace('_', ' ')}
           </Badge>
           <Badge className={`${costForecast.scheduleHealthStatus === 'ON_SCHEDULE' ? 'bg-green-600' : costForecast.scheduleHealthStatus === 'AT_RISK' ? 'bg-yellow-600' : 'bg-red-600'}`}>
-            {costForecast.scheduleHealthStatus === 'ON_SCHEDULE' && <CheckCircle className="h-3 w-3 mr-1" />}
-            {costForecast.scheduleHealthStatus !== 'ON_SCHEDULE' && <AlertTriangle className="h-3 w-3 mr-1" />}
+            {costForecast.scheduleHealthStatus === 'ON_SCHEDULE' && <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />}
+            {costForecast.scheduleHealthStatus !== 'ON_SCHEDULE' && <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" />}
             {costForecast.scheduleHealthStatus.replace('_', ' ')}
           </Badge>
         </div>
@@ -228,7 +228,7 @@ export default function CashFlowChart() {
           <ul className="space-y-1">
             {costForecast.recommendations.map((rec, i) => (
               <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                <Target className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                <Target className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 {rec}
               </li>
             ))}
@@ -250,7 +250,7 @@ export default function CashFlowChart() {
             </SelectContent>
           </Select>
           <Button onClick={handleRegenerate} disabled={generating} size="sm">
-            <RefreshCw className={`h-4 w-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${generating ? 'animate-spin' : ''}`} aria-hidden="true" />
             Regenerate
           </Button>
         </div>
@@ -261,7 +261,7 @@ export default function CashFlowChart() {
         {cashFlowData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-gray-400">
             <div className="text-center">
-              <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
               <p>No cash flow data available</p>
               <Button onClick={handleRegenerate} className="mt-4" disabled={generating}>
                 Generate Forecast

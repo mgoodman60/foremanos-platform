@@ -52,13 +52,13 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-        <Clock className="h-5 w-5 text-gray-400" />
+        <Clock aria-hidden="true" className="h-5 w-5 text-gray-400" />
       </div>
       <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-4">
           {activities.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Clock className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <div className="text-center py-8 text-gray-400">
+              <Clock aria-hidden="true" className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p>No recent activity</p>
             </div>
           ) : (
@@ -74,7 +74,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className={`p-2 rounded-lg ${color} flex-shrink-0`}>
-                    <Icon className="h-4 w-4" />
+                    <Icon aria-hidden="true" className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">
@@ -86,7 +86,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                       </p>
                     )}
                     {activity.details && activity.details.approvedUser && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         User: {activity.details.approvedUser}
                       </p>
                     )}

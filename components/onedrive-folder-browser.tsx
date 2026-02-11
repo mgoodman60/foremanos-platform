@@ -118,7 +118,7 @@ export default function OneDriveFolderBrowser({
         <div className="space-y-4">
           {/* Current Path */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Home className="h-4 w-4" />
+            <Home className="h-4 w-4" aria-hidden="true" />
             <span className="font-mono">{currentPath}</span>
           </div>
 
@@ -130,7 +130,7 @@ export default function OneDriveFolderBrowser({
               onClick={handleNavigateUp}
               className="w-full justify-start"
             >
-              <ChevronRight className="h-4 w-4 mr-2 rotate-180" />
+              <ChevronRight className="h-4 w-4 mr-2 rotate-180" aria-hidden="true" />
               Go Up
             </Button>
           )}
@@ -139,7 +139,7 @@ export default function OneDriveFolderBrowser({
           <ScrollArea className="h-[400px] border rounded-lg">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
               </div>
             ) : folders.length === 0 ? (
               <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
@@ -157,7 +157,7 @@ export default function OneDriveFolderBrowser({
                     onClick={() => setSelectedFolder(folder)}
                     onDoubleClick={() => handleFolderClick(folder)}
                   >
-                    <Folder className="h-5 w-5 text-blue-600" />
+                    <Folder className="h-5 w-5 text-blue-600" aria-hidden="true" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{folder.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{folder.path}</p>
@@ -194,7 +194,7 @@ export default function OneDriveFolderBrowser({
           <Button onClick={handleSave} disabled={!selectedFolder || saving}>
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                 Saving...
               </>
             ) : (

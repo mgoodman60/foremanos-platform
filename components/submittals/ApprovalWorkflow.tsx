@@ -138,7 +138,7 @@ export default function ApprovalWorkflow({
     return (
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-6">
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" aria-hidden="true" />
           <span className="ml-2 text-slate-400">Loading approval workflow...</span>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function ApprovalWorkflow({
       {/* Header with Current Status */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Clock className="w-5 h-5 text-blue-400" />
+          <Clock className="w-5 h-5 text-blue-400" aria-hidden="true" />
           Approval Workflow
         </h3>
         <div className={`px-3 py-1.5 rounded-lg border-2 ${statusBadge.bg} ${statusBadge.border}`}>
@@ -176,9 +176,9 @@ export default function ApprovalWorkflow({
                   hover:border-white/20`}
               >
                 {performing === action ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4" aria-hidden="true" />
                 )}
                 {config.label}
               </button>
@@ -190,7 +190,7 @@ export default function ApprovalWorkflow({
       {/* No Actions Available */}
       {availableActions.length === 0 && (
         <div className="flex items-center gap-2 text-slate-400 py-2">
-          <AlertTriangle className="w-4 h-4" />
+          <AlertTriangle className="w-4 h-4" aria-hidden="true" />
           <span className="text-sm">No actions available for current status</span>
         </div>
       )}
@@ -201,7 +201,7 @@ export default function ApprovalWorkflow({
           onClick={() => setExpandedHistory(!expandedHistory)}
           className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors w-full"
         >
-          {expandedHistory ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          {expandedHistory ? <ChevronDown className="w-4 h-4" aria-hidden="true" /> : <ChevronRight className="w-4 h-4" aria-hidden="true" />}
           <span className="font-medium">Approval History</span>
           <span className="text-xs bg-slate-700 px-2 py-0.5 rounded-full">{history.length}</span>
         </button>
@@ -221,7 +221,7 @@ export default function ApprovalWorkflow({
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 ${config?.color || 'text-slate-400'}`} />
+                        <Icon className={`w-4 h-4 ${config?.color || 'text-slate-400'}`} aria-hidden="true" />
                         <span className="font-medium text-white">{config?.label || entry.action}</span>
                       </div>
                       <span className="text-xs text-slate-500">
@@ -229,14 +229,14 @@ export default function ApprovalWorkflow({
                       </span>
                     </div>
                     <div className="mt-1 flex items-center gap-2 text-sm text-slate-400">
-                      <User className="w-3 h-3" />
+                      <User className="w-3 h-3" aria-hidden="true" />
                       <span>{entry.performerName || 'Unknown'}</span>
                       <span className="text-slate-600">•</span>
                       <span>{entry.fromStatus} → {entry.toStatus}</span>
                     </div>
                     {entry.comments && (
                       <div className="mt-2 flex items-start gap-2 text-sm bg-slate-900 p-2 rounded">
-                        <MessageSquare className="w-3 h-3 text-slate-500 mt-0.5 flex-shrink-0" />
+                        <MessageSquare className="w-3 h-3 text-slate-500 mt-0.5 flex-shrink-0" aria-hidden="true" />
                         <span className="text-slate-300">{entry.comments}</span>
                       </div>
                     )}

@@ -95,7 +95,7 @@ export function PropertiesPanel({ slug, documentId, selectedMarkups, onUpdate }:
   if (selectedMarkups.length === 0) {
     return (
       <div className="border-t bg-white p-4 h-[200px] flex items-center justify-center">
-        <p className="text-sm text-gray-500">Select a markup to view properties</p>
+        <p className="text-sm text-gray-400">Select a markup to view properties</p>
       </div>
     );
   }

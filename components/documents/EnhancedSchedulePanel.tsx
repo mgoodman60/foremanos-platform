@@ -33,7 +33,7 @@ export default function EnhancedSchedulePanel({ data }: Props) {
 
         return (
           <div key={key}>
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
               {SCHEDULE_LABELS[key]}
               <span className="ml-1.5 text-gray-400 font-normal">({rows.length})</span>
             </h4>
@@ -44,7 +44,7 @@ export default function EnhancedSchedulePanel({ data }: Props) {
                     {headers.map((h) => (
                       <th
                         key={h}
-                        className="text-left py-1.5 px-2 text-xs font-medium text-gray-500 whitespace-nowrap"
+                        className="text-left py-1.5 px-2 text-xs font-medium text-gray-400 whitespace-nowrap"
                       >
                         {formatHeader(h)}
                       </th>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Filter,
   ChevronDown,
   HardDrive,
@@ -17,6 +17,7 @@ import {
   Cpu
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface Equipment {
   id: string;
@@ -156,7 +157,7 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg 
             flex items-center gap-2 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4" aria-hidden="true" />
           Add Equipment
         </button>
       </div>
@@ -164,7 +165,7 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <input
             type="text"
             value={search}
@@ -243,14 +244,14 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
                       {eq.capacity && <span>• {eq.capacity}</span>}
                     </div>
                     {(eq.level || eq.room) && (
-                      <div className="flex items-center gap-1 mt-2 text-sm text-gray-500">
-                        <MapPin className="w-3 h-3" />
+                      <div className="flex items-center gap-1 mt-2 text-sm text-gray-400">
+                        <MapPin className="w-3 h-3" aria-hidden="true" />
                         {eq.level}{eq.room && ` - ${eq.room}`}
                       </div>
                     )}
                     {eq.system && (
-                      <div className="flex items-center gap-1 mt-1 text-sm text-gray-500">
-                        <Cpu className="w-3 h-3" />
+                      <div className="flex items-center gap-1 mt-1 text-sm text-gray-400">
+                        <Cpu className="w-3 h-3" aria-hidden="true" />
                         {eq.system.systemNumber} - {eq.system.name}
                       </div>
                     )}
@@ -271,7 +272,7 @@ export default function EquipmentList({ projectSlug }: EquipmentListProps) {
                 </span>
                 {eq.estimatedCost && (
                   <span className="text-green-400 flex items-center gap-1">
-                    <DollarSign className="w-3 h-3" />
+                    <DollarSign className="w-3 h-3" aria-hidden="true" />
                     {eq.estimatedCost.toLocaleString()}
                   </span>
                 )}
@@ -316,6 +317,8 @@ function AddEquipmentModal({
     createMaintenanceSchedules: true,
   });
 
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -324,11 +327,14 @@ function AddEquipmentModal({
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="mep-equipment-add-dialog-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mep-equipment-add-dialog-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 id="mep-equipment-add-dialog-title" className="text-lg font-medium text-white">Add Equipment</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close dialog">

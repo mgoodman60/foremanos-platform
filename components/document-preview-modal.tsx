@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Download, Loader2, ZoomIn, ZoomOut, AlertTriangle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface DocumentPreviewModalProps {
   document: {
@@ -28,17 +29,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
   const [contentType, setContentType] = useState<string>('');
   const [zoom, setZoom] = useState(100);
 
-  // Handle ESC key to close modal
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    window.document.addEventListener('keydown', handleEscape);
-    return () => window.document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  const containerRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
 
   // Clean up blob URL when it changes or component unmounts
   useEffect(() => {
@@ -159,6 +150,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
@@ -229,7 +221,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
         <div className="flex-1 overflow-hidden bg-dark-surface flex items-center justify-center">
           {loading && !error && (
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+              <Loader2 aria-hidden="true" className="w-8 h-8 animate-spin text-orange-500" />
               <p className="text-gray-400">Loading preview...</p>
             </div>
           )}
@@ -237,13 +229,13 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
           {error && (
             <div className="flex flex-col items-center gap-3 max-w-md text-center px-4">
               <div className="w-16 h-16 bg-dark-card rounded-full flex items-center justify-center border-2 border-red-500/30">
-                <AlertTriangle className="w-8 h-8 text-red-500" />
+                <AlertTriangle aria-hidden="true" className="w-8 h-8 text-red-500" />
               </div>
               <h4 className="text-lg font-semibold text-slate-50">Preview Error</h4>
               {errorDetails && (
                 <>
                   <p className="text-sm text-gray-400">{errorDetails.message}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-400">
                     Error code: {errorDetails.code}{errorDetails.status > 0 ? ` (HTTP ${errorDetails.status})` : ''}
                   </p>
                 </>
@@ -259,7 +251,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
                   onClick={handleOpenInNewTab}
                   className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink aria-hidden="true" className="w-4 h-4" />
                   Open in New Tab
                 </button>
               </div>
@@ -293,7 +285,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
               {!canPreview && (
                 <div className="flex flex-col items-center gap-3 max-w-md text-center px-4">
                   <div className="w-16 h-16 bg-dark-card rounded-full flex items-center justify-center border-2 border-gray-700">
-                    <Download className="w-8 h-8 text-gray-400" />
+                    <Download aria-hidden="true" className="w-8 h-8 text-gray-400" />
                   </div>
                   <h4 className="text-lg font-semibold text-slate-50">Preview Not Available</h4>
                   <p className="text-sm text-gray-400">
@@ -310,7 +302,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
                       onClick={handleOpenInNewTab}
                       className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      <ExternalLink aria-hidden="true" className="w-4 h-4" />
                       Open in New Tab
                     </button>
                   </div>
@@ -322,7 +314,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
 
         {/* Footer */}
         <div className="p-3 border-t border-gray-700 bg-dark-card">
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-gray-400 text-center">
             Press <kbd className="px-2 py-1 bg-dark-surface border border-gray-600 rounded text-gray-400">ESC</kbd> to close preview
           </p>
         </div>

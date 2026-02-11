@@ -8,6 +8,7 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { finalizationSettingsSchema, type FinalizationSettingsFormData, COMMON_TIMEZONES } from '@/lib/schemas';
 import { FormError } from '@/components/ui/form-error';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface FinalizationSettingsModalProps {
   projectSlug: string;
@@ -129,11 +130,14 @@ export function FinalizationSettingsModal({
     }
   };
 
+  const containerRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
       <div
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="finalization-settings-modal-title"
@@ -170,7 +174,7 @@ export function FinalizationSettingsModal({
               {/* Info Banner */}
               <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircle aria-hidden="true" className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm text-blue-200 leading-relaxed">
                       Daily reports are automatically finalized based on the time you set below.
@@ -183,7 +187,7 @@ export function FinalizationSettingsModal({
               {/* Timezone Setting */}
               <div className="space-y-2">
                 <label htmlFor="timezone" className="flex items-center gap-2 text-sm font-medium text-slate-50">
-                  <Globe className="h-4 w-4 text-orange-500" />
+                  <Globe aria-hidden="true" className="h-4 w-4 text-orange-500" />
                   Project Timezone
                 </label>
                 <Controller
@@ -211,7 +215,7 @@ export function FinalizationSettingsModal({
                 />
                 <FormError error={errors.timezone} fieldName="timezone" />
                 {!errors.timezone && (
-                  <p id="timezone-help" className="text-xs text-gray-500">
+                  <p id="timezone-help" className="text-xs text-gray-400">
                     All daily reports for this project will use this timezone for finalization
                   </p>
                 )}
@@ -220,7 +224,7 @@ export function FinalizationSettingsModal({
               {/* Finalization Time Setting */}
               <div className="space-y-2">
                 <label htmlFor="finalizationTime" className="flex items-center gap-2 text-sm font-medium text-slate-50">
-                  <Clock className="h-4 w-4 text-orange-500" />
+                  <Clock aria-hidden="true" className="h-4 w-4 text-orange-500" />
                   Auto-Finalize Time
                 </label>
                 <Controller
@@ -248,7 +252,7 @@ export function FinalizationSettingsModal({
                 />
                 <FormError error={errors.finalizationTime} fieldName="finalizationTime" />
                 {!errors.finalizationTime && (
-                  <p id="finalizationTime-help" className="text-xs text-gray-500">
+                  <p id="finalizationTime-help" className="text-xs text-gray-400">
                     Daily reports will be finalized at this time if no user activity for 5 minutes
                   </p>
                 )}
@@ -257,7 +261,7 @@ export function FinalizationSettingsModal({
               {/* Daily Reports Folder ID Setting */}
               <div className="space-y-2">
                 <label htmlFor="dailyReportsFolderId" className="flex items-center gap-2 text-sm font-medium text-slate-50">
-                  <Folder className="h-4 w-4 text-orange-500" />
+                  <Folder aria-hidden="true" className="h-4 w-4 text-orange-500" />
                   Document Library Folder (Optional)
                 </label>
                 <input
@@ -273,7 +277,7 @@ export function FinalizationSettingsModal({
                 />
                 <FormError error={errors.dailyReportsFolderId} fieldName="dailyReportsFolderId" />
                 {!errors.dailyReportsFolderId && (
-                  <p id="dailyReportsFolderId-help" className="text-xs text-gray-500">
+                  <p id="dailyReportsFolderId-help" className="text-xs text-gray-400">
                     Folder ID where finalized PDFs will be saved. Leave blank to auto-create.
                   </p>
                 )}
@@ -284,19 +288,19 @@ export function FinalizationSettingsModal({
                 <h3 className="text-sm font-medium text-slate-50 mb-3">Preview</h3>
                 <div className="space-y-2 text-sm text-gray-300">
                   <p>
-                    <span className="text-gray-500">Timezone:</span>{' '}
+                    <span className="text-gray-400">Timezone:</span>{' '}
                     <span className="font-medium">
                       {TIMEZONE_LABELS[timezone] || timezone}
                     </span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Auto-finalize at:</span>{' '}
+                    <span className="text-gray-400">Auto-finalize at:</span>{' '}
                     <span className="font-medium">
                       {TIME_OPTIONS.find((t) => t.value === finalizationTime)?.label || finalizationTime}
                     </span>
                   </p>
                   <p>
-                    <span className="text-gray-500">Save to folder:</span>{' '}
+                    <span className="text-gray-400">Save to folder:</span>{' '}
                     <span className="font-medium">
                       {dailyReportsFolderId || 'Daily Reports (auto-created)'}
                     </span>
@@ -329,7 +333,7 @@ export function FinalizationSettingsModal({
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save aria-hidden="true" className="h-4 w-4 mr-2" />
                   Save Settings
                 </>
               )}

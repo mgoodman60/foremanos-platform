@@ -291,7 +291,7 @@ export function DisciplineOverlayPanel({
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <div className="flex items-center gap-2">
-              <Layers className="w-5 h-5 text-orange-500" />
+              <Layers className="w-5 h-5 text-orange-500" aria-hidden="true" />
               <h3 className="font-semibold text-white">MEP Layers</h3>
             </div>
             <Button
@@ -314,7 +314,7 @@ export function DisciplineOverlayPanel({
 
             {error && (
               <div className="flex items-center gap-2 p-3 bg-red-900/20 border border-red-800 rounded-lg text-sm text-red-300">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+                <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>{error}</span>
               </div>
             )}
@@ -362,7 +362,7 @@ export function DisciplineOverlayPanel({
                       {layer.visible ? (
                         <Eye className="w-4 h-4 text-orange-500" />
                       ) : (
-                        <EyeOff className="w-4 h-4 text-gray-500" />
+                        <EyeOff className="w-4 h-4 text-gray-400" />
                       )}
                     </Button>
                   </div>
@@ -405,7 +405,7 @@ export function DisciplineOverlayPanel({
 
                   {layer.loading && (
                     <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
                       <span>Loading overlay...</span>
                     </div>
                   )}

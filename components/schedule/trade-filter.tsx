@@ -108,14 +108,14 @@ export function TradeFilter({
             className
           )}
         >
-          <Filter className="h-4 w-4" />
+          <Filter className="h-4 w-4" aria-hidden="true" />
           <span>Trade Filter</span>
           {isFiltered && (
             <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-orange-500/20 text-orange-400">
               {selectedCount}
             </Badge>
           )}
-          <ChevronDown className="h-3 w-3 ml-1" />
+          <ChevronDown className="h-3 w-3 ml-1" aria-hidden="true" />
         </Button>
       </PopoverTrigger>
       
@@ -156,7 +156,7 @@ export function TradeFilter({
                 <span className="text-xs font-semibold text-gray-400 uppercase">
                   {formatTrade(tradeType)}
                 </span>
-                <span className="text-xs text-gray-500">({tradeList.length})</span>
+                <span className="text-xs text-gray-400">({tradeList.length})</span>
               </div>
               
               {/* Subcontractors in this trade */}
@@ -175,7 +175,7 @@ export function TradeFilter({
                       {trade.companyName || trade.name}
                     </div>
                     {trade.taskCount !== undefined && (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-400">
                         {trade.taskCount} task{trade.taskCount !== 1 ? 's' : ''}
                       </div>
                     )}
@@ -186,7 +186,7 @@ export function TradeFilter({
           ))}
           
           {trades.length === 0 && (
-            <div className="px-4 py-8 text-center text-gray-500 text-sm">
+            <div className="px-4 py-8 text-center text-gray-400 text-sm">
               No trades available
             </div>
           )}
@@ -205,7 +205,7 @@ export function TradeFilter({
                 className="h-6 px-2 text-xs text-orange-400 hover:text-orange-300"
                 onClick={handleClearAll}
               >
-                <X className="h-3 w-3 mr-1" />
+                <X className="h-3 w-3 mr-1" aria-hidden="true" />
                 Clear Filter
               </Button>
             </div>
@@ -250,7 +250,7 @@ export function TradeFilterBadges({
               'cursor-pointer transition-all text-xs',
               isSelected
                 ? 'bg-gray-700 border-gray-600 text-gray-200'
-                : 'bg-transparent border-gray-700 text-gray-500 opacity-50'
+                : 'bg-transparent border-gray-700 text-gray-400 opacity-50'
             )}
             onClick={() => onToggle(trade.id)}
           >

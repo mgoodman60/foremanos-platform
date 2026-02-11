@@ -196,7 +196,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+        <Loader2 aria-hidden="true" className="w-8 h-8 animate-spin text-blue-400" />
         <span className="ml-3 text-gray-400">Loading dashboard...</span>
       </div>
     );
@@ -205,7 +205,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
   if (!metrics) {
     return (
       <div className="text-center py-12">
-        <AlertTriangle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+        <AlertTriangle aria-hidden="true" className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
         <p className="text-gray-400">Unable to load dashboard data</p>
         <button
           onClick={() => fetchDashboardData()}
@@ -223,14 +223,14 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
       <div className="flex items-center justify-between print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <BarChart3 className="w-7 h-7 text-blue-400" />
+            <BarChart3 aria-hidden="true" className="w-7 h-7 text-blue-400" />
             Executive Dashboard
           </h2>
           {projectName && (
             <p className="text-lg text-gray-300 mt-1">{projectName}</p>
           )}
           {lastUpdated && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-400 mt-1">
               Last updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}
             </p>
           )}
@@ -242,9 +242,9 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-50"
           >
             {exporting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
             ) : (
-              <Download className="w-4 h-4" />
+              <Download aria-hidden="true" className="w-4 h-4" />
             )}
             Export PDF
           </button>
@@ -252,7 +252,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             onClick={handlePrint}
             className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
           >
-            <Printer className="w-4 h-4" />
+            <Printer aria-hidden="true" className="w-4 h-4" />
             Print
           </button>
           <button
@@ -260,7 +260,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             disabled={refreshing}
             className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw aria-hidden="true" className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>
@@ -273,7 +273,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             ? 'bg-red-900/30 border border-red-700/50' 
             : 'bg-yellow-900/30 border border-yellow-700/50'
         }`}>
-          <Bell className={`w-5 h-5 ${metrics.alerts.critical > 0 ? 'text-red-400' : 'text-yellow-400'}`} />
+          <Bell aria-hidden="true" className={`w-5 h-5 ${metrics.alerts.critical > 0 ? 'text-red-400' : 'text-yellow-400'}`} />
           <span className="text-white text-sm">
             {metrics.alerts.critical > 0 && (
               <span className="text-red-400 font-medium">{metrics.alerts.critical} critical alert{metrics.alerts.critical !== 1 ? 's' : ''}</span>
@@ -288,7 +288,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             href={`/project/${projectSlug}/budget`}
             className="ml-auto text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
           >
-            View Alerts <ChevronRight className="w-4 h-4" />
+            View Alerts <ChevronRight aria-hidden="true" className="w-4 h-4" />
           </Link>
         </div>
       )}
@@ -298,7 +298,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         {/* Schedule Health */}
         <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 border border-blue-700/50 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <Calendar className="w-5 h-5 text-blue-400" />
+            <Calendar aria-hidden="true" className="w-5 h-5 text-blue-400" />
             <span className="text-2xl font-bold text-white">
               {metrics.schedule.percentComplete}%
             </span>
@@ -307,12 +307,12 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
           <div className="mt-2 flex items-center gap-2 text-xs">
             {metrics.schedule.tasksDelayed > 0 ? (
               <span className="text-red-400 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
+                <AlertTriangle aria-hidden="true" className="w-3 h-3" />
                 {metrics.schedule.tasksDelayed} delayed
               </span>
             ) : (
               <span className="text-emerald-400 flex items-center gap-1">
-                <CheckCircle className="w-3 h-3" />
+                <CheckCircle aria-hidden="true" className="w-3 h-3" />
                 On track
               </span>
             )}
@@ -322,13 +322,13 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         {/* Budget Status */}
         <div className="bg-gradient-to-br from-emerald-900/50 to-emerald-800/30 border border-emerald-700/50 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <DollarSign className="w-5 h-5 text-emerald-400" />
+            <DollarSign aria-hidden="true" className="w-5 h-5 text-emerald-400" />
             <span className={`text-2xl font-bold ${getVarianceColor(metrics.budget.variance)}`}>
               {metrics.budget.variance > 0 ? '+' : ''}{metrics.budget.variance.toFixed(1)}%
             </span>
           </div>
           <p className="text-sm text-gray-400">Budget Variance</p>
-          <div className="mt-2 text-xs text-gray-500">
+          <div className="mt-2 text-xs text-gray-400">
             {formatCurrency(metrics.budget.spent)} of {formatCurrency(metrics.budget.totalBudget)}
           </div>
         </div>
@@ -336,7 +336,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         {/* Submittals */}
         <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border border-purple-700/50 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <FileCheck className="w-5 h-5 text-purple-400" />
+            <FileCheck aria-hidden="true" className="w-5 h-5 text-purple-400" />
             <span className="text-2xl font-bold text-white">
               {metrics.submittals.pending}
             </span>
@@ -353,7 +353,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         {/* Weather */}
         <div className="bg-gradient-to-br from-cyan-900/50 to-cyan-800/30 border border-cyan-700/50 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <Cloud className="w-5 h-5 text-cyan-400" />
+            <Cloud aria-hidden="true" className="w-5 h-5 text-cyan-400" />
             <span className="text-2xl font-bold text-white">
               {metrics.weather.temp}°F
             </span>
@@ -373,14 +373,14 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         <div className="bg-slate-900 border-2 border-slate-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-400" />
+              <Calendar aria-hidden="true" className="w-5 h-5 text-blue-400" />
               Schedule Status
             </h3>
             <Link
               href={`/project/${projectSlug}/schedules`}
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
             >
-              View <ChevronRight className="w-4 h-4" />
+              View <ChevronRight aria-hidden="true" className="w-4 h-4" />
             </Link>
           </div>
           <div className="space-y-3">
@@ -404,7 +404,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             </div>
             {metrics.schedule.endDate && (
               <div className="pt-2 border-t border-slate-700">
-                <span className="text-gray-500 text-sm">Target Completion:</span>
+                <span className="text-gray-400 text-sm">Target Completion:</span>
                 <span className="text-white ml-2">
                   {format(new Date(metrics.schedule.endDate), 'MMM d, yyyy')}
                 </span>
@@ -417,14 +417,14 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         <div className="bg-slate-900 border-2 border-slate-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-emerald-400" />
+              <DollarSign aria-hidden="true" className="w-5 h-5 text-emerald-400" />
               Budget Status
             </h3>
             <Link
               href={`/project/${projectSlug}/budget`}
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
             >
-              View <ChevronRight className="w-4 h-4" />
+              View <ChevronRight aria-hidden="true" className="w-4 h-4" />
             </Link>
           </div>
           <div className="space-y-3">
@@ -454,7 +454,7 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
                   style={{ width: `${Math.min((metrics.budget.spent / metrics.budget.totalBudget) * 100, 100)}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>{((metrics.budget.spent / metrics.budget.totalBudget) * 100).toFixed(0)}% spent</span>
                 <span>{formatCurrency(metrics.budget.totalBudget - metrics.budget.spent)} remaining</span>
               </div>
@@ -466,14 +466,14 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
         <div className="bg-slate-900 border-2 border-slate-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <HardHat className="w-5 h-5 text-orange-400" />
+              <HardHat aria-hidden="true" className="w-5 h-5 text-orange-400" />
               Field Operations
             </h3>
             <Link
               href={`/project/${projectSlug}/field-ops`}
               className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
             >
-              View <ChevronRight className="w-4 h-4" />
+              View <ChevronRight aria-hidden="true" className="w-4 h-4" />
             </Link>
           </div>
           <div className="space-y-3">
@@ -502,13 +502,13 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
             {/* Labor Summary */}
             <div className="pt-2 border-t border-slate-700">
               <div className="flex items-center gap-2 text-sm">
-                <Users className="w-4 h-4 text-blue-400" />
+                <Users aria-hidden="true" className="w-4 h-4 text-blue-400" />
                 <span className="text-gray-400">
                   {metrics.labor.crewsOnSite} crews / {metrics.labor.totalWorkers} workers
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm mt-1">
-                <Clock className="w-4 h-4 text-blue-400" />
+                <Clock aria-hidden="true" className="w-4 h-4 text-blue-400" />
                 <span className="text-gray-400">
                   {metrics.labor.hoursThisWeek.toLocaleString()} hours this week
                 </span>
@@ -522,12 +522,12 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
       <div className="bg-slate-900 border-2 border-slate-700 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Activity className="w-5 h-5 text-blue-400" />
+            <Activity aria-hidden="true" className="w-5 h-5 text-blue-400" />
             Recent Activity
           </h3>
         </div>
         {activities.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No recent activity</p>
+          <p className="text-gray-400 text-center py-4">No recent activity</p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {activities.map((activity) => (
@@ -543,18 +543,18 @@ export default function ExecutiveDashboard({ projectSlug }: ExecutiveDashboardPr
                   activity.type === 'daily_report' ? 'bg-cyan-600/20 text-cyan-400' :
                   'bg-slate-600/20 text-slate-400'
                 }`}>
-                  {activity.type === 'submittal' && <FileCheck className="w-4 h-4" />}
-                  {activity.type === 'rfi' && <FileText className="w-4 h-4" />}
-                  {activity.type === 'schedule' && <Calendar className="w-4 h-4" />}
-                  {activity.type === 'budget' && <DollarSign className="w-4 h-4" />}
-                  {activity.type === 'daily_report' && <Wrench className="w-4 h-4" />}
-                  {activity.type === 'document' && <FileText className="w-4 h-4" />}
+                  {activity.type === 'submittal' && <FileCheck aria-hidden="true" className="w-4 h-4" />}
+                  {activity.type === 'rfi' && <FileText aria-hidden="true" className="w-4 h-4" />}
+                  {activity.type === 'schedule' && <Calendar aria-hidden="true" className="w-4 h-4" />}
+                  {activity.type === 'budget' && <DollarSign aria-hidden="true" className="w-4 h-4" />}
+                  {activity.type === 'daily_report' && <Wrench aria-hidden="true" className="w-4 h-4" />}
+                  {activity.type === 'document' && <FileText aria-hidden="true" className="w-4 h-4" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium">{activity.action}</p>
                   <p className="text-gray-400 text-xs truncate">{activity.description}</p>
                 </div>
-                <span className="text-gray-500 text-xs whitespace-nowrap">
+                <span className="text-gray-400 text-xs whitespace-nowrap">
                   {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                 </span>
               </div>

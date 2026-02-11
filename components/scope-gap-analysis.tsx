@@ -223,9 +223,9 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
       {/* No Analysis Yet */}
       {!analysis && !loading && (
         <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
-          <FileSearch className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+          <FileSearch className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-400">No analysis run yet</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Click "Run Analysis" to compare quotes against project requirements
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
         <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
           <RefreshCw className="h-12 w-12 text-amber-400 mx-auto mb-4 animate-spin" />
           <p className="text-gray-400">Analyzing scope coverage...</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-400 mt-1">
             Comparing quotes against schedule, budget, and specifications
           </p>
         </div>
@@ -384,7 +384,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
                       <div className="px-4 pb-4 pt-0 space-y-3 border-t border-gray-700/50">
                         {gap.quoteReference && (
                           <div className="mt-3">
-                            <div className="text-xs text-gray-500 uppercase tracking-wide">Quote Reference</div>
+                            <div className="text-xs text-gray-400 uppercase tracking-wide">Quote Reference</div>
                             <div className="text-gray-300 text-sm mt-1">{gap.quoteReference}</div>
                           </div>
                         )}
@@ -463,7 +463,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
           )}
 
           {/* Analysis Meta */}
-          <div className="text-center text-xs text-gray-500">
+          <div className="text-center text-xs text-gray-400">
             Analysis performed on {new Date(analysis.analysisDate).toLocaleString()}
             {analysis.tradeType && ` • Trade: ${TRADE_LABELS[analysis.tradeType] || analysis.tradeType}`}
           </div>

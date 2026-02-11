@@ -49,7 +49,7 @@ function ScoreBar({ label, score, setupHref, setupLabel }: ScoreBarProps) {
       <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${score}%` }} />
       </div>
-      <span className="text-[10px] text-gray-500 w-6 text-right tabular-nums">{score}</span>
+      <span className="text-[10px] text-gray-400 w-6 text-right tabular-nums">{score}</span>
     </div>
   );
 }
@@ -169,7 +169,7 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
               /* Get Started card when no overall score */
               <div className="text-center py-2">
                 <p className="text-sm font-medium text-gray-300 mb-3">Set Up Your Project</p>
-                <p className="text-xs text-gray-500 mb-4">Add data to see your operational health:</p>
+                <p className="text-xs text-gray-400 mb-4">Add data to see your operational health:</p>
                 <div className="space-y-2">
                   <a
                     href={`/project/${projectSlug}/schedule`}
@@ -197,7 +197,7 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
             {health.intelligenceScore !== undefined && (
               <div className="mt-3 pt-3 border-t border-gray-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-gray-500">Document Intelligence</span>
+                  <span className="text-[10px] text-gray-400">Document Intelligence</span>
                   <span className="text-[10px] text-blue-400 tabular-nums">{health.intelligenceScore}%</span>
                 </div>
               </div>

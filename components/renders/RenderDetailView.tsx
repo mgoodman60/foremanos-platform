@@ -5,6 +5,7 @@ import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RenderActionBar } from './RenderActionBar';
 import type { ProjectRender } from './RenderGallery';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface RenderDetailViewProps {
   render: ProjectRender;
@@ -25,6 +26,8 @@ export function RenderDetailView({
   const [metadataOpen, setMetadataOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
+
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
 
   const handleDownload = async () => {
     try {
@@ -100,9 +103,10 @@ export function RenderDetailView({
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 z-50 flex"
       role="dialog"
-      aria-label="Render detail view"
+      aria-labelledby="render-detail-title"
       aria-modal="true"
     >
       {/* Backdrop */}
@@ -116,7 +120,7 @@ export function RenderDetailView({
       <div className="relative ml-auto w-full max-w-3xl bg-dark-subtle border-l border-gray-800 overflow-y-auto flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
-          <h2 className="text-lg font-semibold text-white truncate">
+          <h2 id="render-detail-title" className="text-lg font-semibold text-white truncate">
             {render.title ||
               `${render.viewType} - ${render.style} Render`}
           </h2>
@@ -158,7 +162,7 @@ export function RenderDetailView({
                 className={`w-full ${imageZoomed ? 'h-full object-contain' : 'object-cover'}`}
               />
             ) : (
-              <div className="aspect-video flex items-center justify-center text-gray-500">
+              <div className="aspect-video flex items-center justify-center text-gray-400">
                 No image available
               </div>
             )}
@@ -244,7 +248,7 @@ export function RenderDetailView({
                 aria-label="Assembled prompt"
               />
             ) : (
-              <p className="text-sm text-gray-500">No prompt data available</p>
+              <p className="text-sm text-gray-400">No prompt data available</p>
             )}
             {render.revisedPrompt && (
               <div className="mt-3">
@@ -270,7 +274,7 @@ export function RenderDetailView({
                 {JSON.stringify(render.dataSnapshot, null, 2)}
               </pre>
             ) : (
-              <p className="text-sm text-gray-500">No data snapshot available</p>
+              <p className="text-sm text-gray-400">No data snapshot available</p>
             )}
           </CollapsiblePanel>
         </div>
@@ -300,9 +304,9 @@ function CollapsiblePanel({
       >
         {title}
         {open ? (
-          <ChevronDown className="h-4 w-4 text-gray-500" />
+          <ChevronDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
         ) : (
-          <ChevronRight className="h-4 w-4 text-gray-500" />
+          <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
         )}
       </button>
       {open && <div className="px-4 pb-4">{children}</div>}
@@ -313,7 +317,7 @@ function CollapsiblePanel({
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-400">{label}</span>
       <span className="text-gray-300">{value}</span>
     </div>
   );

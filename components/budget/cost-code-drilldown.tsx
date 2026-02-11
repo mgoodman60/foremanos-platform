@@ -174,9 +174,9 @@ export default function CostCodeDrilldown({
   };
 
   const getVarianceIcon = (variance: number) => {
-    if (variance > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (variance < 0) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Minus className="h-4 w-4 text-gray-500" />;
+    if (variance > 0) return <TrendingUp aria-hidden="true" className="h-4 w-4 text-green-500" />;
+    if (variance < 0) return <TrendingDown aria-hidden="true" className="h-4 w-4 text-red-500" />;
+    return <Minus aria-hidden="true" className="h-4 w-4 text-gray-400" />;
   };
 
   const getVarianceColor = (variance: number) => {
@@ -236,15 +236,15 @@ export default function CostCodeDrilldown({
                 className="p-0.5 hover:bg-gray-700 rounded"
               >
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <ChevronDown aria-hidden="true" className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                  <ChevronRight aria-hidden="true" className="h-4 w-4 text-gray-400" />
                 )}
               </button>
             ) : (
               <span className="w-5" />
             )}
-            <span className="text-xs font-mono text-gray-500 w-20">{item.costCode}</span>
+            <span className="text-xs font-mono text-gray-400 w-20">{item.costCode}</span>
             <span className="text-sm text-gray-200 truncate">{item.name}</span>
           </div>
 
@@ -285,7 +285,7 @@ export default function CostCodeDrilldown({
                 '[&>div]:bg-green-500'
               )}
             />
-            <span className="text-xs text-gray-500 mt-0.5 block text-center">
+            <span className="text-xs text-gray-400 mt-0.5 block text-center">
               {progressPercent.toFixed(0)}%
             </span>
           </div>
@@ -323,12 +323,12 @@ export default function CostCodeDrilldown({
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-green-400" />
+          <DollarSign aria-hidden="true" className="h-5 w-5 text-green-400" />
           Cost Code Drill-Down
         </h3>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -357,7 +357,7 @@ export default function CostCodeDrilldown({
             size="sm"
             className="border-gray-600 text-gray-300"
           >
-            <Download className="h-4 w-4 mr-1" />
+            <Download aria-hidden="true" className="h-4 w-4 mr-1" />
             Export
           </Button>
         </div>

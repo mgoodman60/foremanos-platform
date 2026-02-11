@@ -125,7 +125,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
         {/* Main Ribbon */}
         <div className="absolute top-10 -right-20 bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white py-3 px-28 transform rotate-45 shadow-2xl">
           <div className="flex items-center justify-center gap-2.5 font-black tracking-[0.2em] text-sm uppercase">
-            <Shield className="w-5 h-5 drop-shadow-lg" />
+            <Shield aria-hidden="true" className="w-5 h-5 drop-shadow-lg" />
             <span className="drop-shadow-lg">SECURE LOGIN</span>
           </div>
         </div>
@@ -168,7 +168,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
             Username
           </label>
           <div className="relative">
-            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 pointer-events-none" aria-hidden="true" />
+            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6 pointer-events-none" aria-hidden="true" />
             <input
               {...register('username')}
               ref={(e) => {
@@ -195,7 +195,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
             Password
           </label>
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-6 h-6 pointer-events-none" aria-hidden="true" />
+            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6 pointer-events-none" aria-hidden="true" />
             <input
               {...register('password')}
               id="password"
@@ -216,7 +216,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
               aria-label={showPassword ? "Hide password" : "Show password"}
               tabIndex={0}
             >
-              {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+              {showPassword ? <EyeOff aria-hidden="true" className="w-6 h-6" /> : <Eye aria-hidden="true" className="w-6 h-6" />}
             </button>
           </div>
           <FormError error={errors.password} fieldName="password" />
@@ -254,7 +254,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              <Shield className="w-5 h-5" />
+              <Shield aria-hidden="true" className="w-5 h-5" />
               Sign In Securely
             </span>
           )}
@@ -266,7 +266,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
         <div className="bg-dark-surface rounded-xl p-6 md:p-8 border-2 border-gray-700 shadow-sm">
           {/* Guest Access Header */}
           <div className="flex items-center justify-center gap-3 mb-4">
-            <HardHat className="w-8 h-8 text-orange-500" />
+            <HardHat aria-hidden="true" className="w-8 h-8 text-orange-500" />
             <h3 className="text-2xl font-bold text-gray-100">Guest Access</h3>
           </div>
           
@@ -281,7 +281,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
                 Job Pin
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5 pointer-events-none" aria-hidden="true" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" aria-hidden="true" />
                 <input
                   {...registerGuest('jobPin')}
                   id="guest-jobPin"
@@ -312,7 +312,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <HardHat className="w-5 h-5" />
+                  <HardHat aria-hidden="true" className="w-5 h-5" />
                   Sign In as Guest
                 </span>
               )}
@@ -320,7 +320,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
           </form>
 
           <div className="mt-4 pt-4 border-t border-gray-700">
-            <p className="text-xs text-center text-gray-500 leading-relaxed">
+            <p className="text-xs text-center text-gray-400 leading-relaxed">
               Guest access is password-free. Just enter your assigned Job Pin.
             </p>
           </div>
@@ -328,7 +328,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
       </div>
 
       <div className="mt-6 pt-4">
-        <p className="text-xs text-center text-gray-500 leading-relaxed">
+        <p className="text-xs text-center text-gray-400 leading-relaxed">
           Need help? Contact your project administrator for access credentials.
         </p>
       </div>

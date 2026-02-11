@@ -31,7 +31,7 @@ export function RoomCard({ roomId, onView }: RoomCardProps) {
   return (
     <Card className="inline-flex items-center gap-2 p-2 bg-green-500/10 border-green-500/30 my-1 mx-1">
       <div className="p-1.5 rounded bg-green-500/20">
-        <Home className="h-4 w-4 text-green-400" />
+        <Home aria-hidden="true" className="h-4 w-4 text-green-400" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium text-green-300">Room {roomId.substring(0, 8)}</div>
@@ -59,7 +59,7 @@ export function MaterialCard({ materialId, onView }: MaterialCardProps) {
   return (
     <Card className="inline-flex items-center gap-2 p-2 bg-purple-500/10 border-purple-500/30 my-1 mx-1">
       <div className="p-1.5 rounded bg-purple-500/20">
-        <Package className="h-4 w-4 text-purple-400" />
+        <Package aria-hidden="true" className="h-4 w-4 text-purple-400" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium text-purple-300">Material {materialId.substring(0, 8)}</div>
@@ -124,7 +124,7 @@ export function MEPCard({ callout, onView }: MEPCardProps) {
   return (
     <Card className={`inline-flex items-center gap-2 p-2 my-1 mx-1 ${colorClasses[color as keyof typeof colorClasses]}`}>
       <div className={`p-1.5 rounded ${iconColorClasses[color as keyof typeof iconColorClasses]}`}>
-        <Zap className="h-4 w-4" />
+        <Zap aria-hidden="true" className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium">{callout}</div>
@@ -156,7 +156,7 @@ export function ShowOnPlanButton({ documentId, pageNumber, onView }: ShowOnPlanB
       size="sm"
       className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white my-1 mx-1"
     >
-      <MapPin className="h-3.5 w-3.5" />
+      <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
       <span className="text-xs">Show on Plan (Page {pageNumber})</span>
     </Button>
   );
@@ -170,11 +170,11 @@ interface NavigationSuggestionProps {
 
 export function NavigationSuggestion({ type, label, onNavigate }: NavigationSuggestionProps) {
   const icons = {
-    room: <Home className="h-4 w-4" />,
-    material: <Package className="h-4 w-4" />,
-    mep: <Zap className="h-4 w-4" />,
-    plan: <MapPin className="h-4 w-4" />,
-    navigator: <ExternalLink className="h-4 w-4" />
+    room: <Home aria-hidden="true" className="h-4 w-4" />,
+    material: <Package aria-hidden="true" className="h-4 w-4" />,
+    mep: <Zap aria-hidden="true" className="h-4 w-4" />,
+    plan: <MapPin aria-hidden="true" className="h-4 w-4" />,
+    navigator: <ExternalLink aria-hidden="true" className="h-4 w-4" />
   };
 
   const colors = {

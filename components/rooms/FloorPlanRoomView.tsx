@@ -249,11 +249,11 @@ export function FloorPlanRoomView({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-3 w-3 text-green-500" />;
+        return <CheckCircle2 className="h-3 w-3 text-green-500" aria-hidden="true" />;
       case 'in_progress':
-        return <Clock className="h-3 w-3 text-blue-500" />;
+        return <Clock className="h-3 w-3 text-blue-500" aria-hidden="true" />;
       default:
-        return <Circle className="h-3 w-3 text-gray-400" />;
+        return <Circle className="h-3 w-3 text-gray-400" aria-hidden="true" />;
     }
   };
 
@@ -276,7 +276,7 @@ export function FloorPlanRoomView({
   if (!currentFloorPlan) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Upload className="h-16 w-16 text-gray-600 mb-4" />
+        <Upload className="h-16 w-16 text-gray-600 mb-4" aria-hidden="true" />
         <h3 className="text-lg font-medium text-white mb-2">No Floor Plan Available</h3>
         <p className="text-sm text-gray-400 max-w-md">
           Upload a floor plan to see rooms spatially and manage room placement
@@ -415,7 +415,7 @@ export function FloorPlanRoomView({
               className="border-gray-700 text-gray-300"
               onClick={() => setIsEditingPlacement(true)}
             >
-              <Edit3 className="h-4 w-4 mr-2" />
+              <Edit3 className="h-4 w-4 mr-2" aria-hidden="true" />
               Edit Placement
             </Button>
           </div>
@@ -481,14 +481,14 @@ export function FloorPlanRoomView({
                       </div>
                       <div className="text-xs text-gray-400">{room.name}</div>
                       {room.area != null && room.area > 0 && (
-                        <div className="text-xs text-gray-500">{room.area} sq ft</div>
+                        <div className="text-xs text-gray-400">{room.area} sq ft</div>
                       )}
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-400">
                         {room.percentComplete}% complete
                       </div>
                       {room.mepEquipment && room.mepEquipment.length > 0 && (
                         <div className="flex items-center gap-1 pt-1 border-t border-gray-700">
-                          <span className="text-[10px] text-gray-500">MEP:</span>
+                          <span className="text-[10px] text-gray-400">MEP:</span>
                           {Object.entries(getTradeCounts(room.mepEquipment))
                             .slice(0, 3)
                             .map(([trade, count]) => (
@@ -503,7 +503,7 @@ export function FloorPlanRoomView({
                         </div>
                       )}
                       {room.FinishScheduleItem && room.FinishScheduleItem.length > 0 && (
-                        <div className="text-[10px] text-gray-500">
+                        <div className="text-[10px] text-gray-400">
                           {room.FinishScheduleItem.length} finishes
                         </div>
                       )}
@@ -560,19 +560,19 @@ export function FloorPlanRoomView({
             {colorMode === 'trade' && (
               <>
                 <div className="flex items-center gap-1.5">
-                  <Zap className="h-3 w-3 text-yellow-400" />
+                  <Zap className="h-3 w-3 text-yellow-400" aria-hidden="true" />
                   <span className="text-gray-400">Electrical</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Wind className="h-3 w-3 text-blue-400" />
+                  <Wind className="h-3 w-3 text-blue-400" aria-hidden="true" />
                   <span className="text-gray-400">HVAC</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Droplets className="h-3 w-3 text-cyan-400" />
+                  <Droplets className="h-3 w-3 text-cyan-400" aria-hidden="true" />
                   <span className="text-gray-400">Plumbing</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Flame className="h-3 w-3 text-red-400" />
+                  <Flame className="h-3 w-3 text-red-400" aria-hidden="true" />
                   <span className="text-gray-400">Fire Alarm</span>
                 </div>
               </>

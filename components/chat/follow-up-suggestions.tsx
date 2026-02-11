@@ -35,7 +35,7 @@ export function FollowUpSuggestions({
                        rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
                        focus:outline-none focus:ring-2 focus:ring-blue-500/50"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-gray-500 group-hover:text-blue-400 transition-colors" />
+            <HelpCircle className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-400 transition-colors" />
             <span className="truncate max-w-[250px]">{suggestion}</span>
             <ArrowRight className="w-3 h-3 text-gray-600 group-hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100" />
           </button>

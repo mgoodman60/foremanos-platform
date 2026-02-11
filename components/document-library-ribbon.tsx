@@ -89,18 +89,18 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
   };
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.includes('image')) return <FileImage className="h-4 w-4" />;
-    return <FileText className="h-4 w-4" />;
+    if (fileType.includes('image')) return <FileImage aria-hidden="true" className="h-4 w-4" />;
+    return <FileText aria-hidden="true" className="h-4 w-4" />;
   };
 
   const getAccessIcon = (accessLevel: string) => {
     switch (accessLevel) {
       case 'admin':
-        return <Lock className="h-3 w-3 text-purple-400" />;
+        return <Lock aria-hidden="true" className="h-3 w-3 text-purple-400" />;
       case 'client':
-        return <Shield className="h-3 w-3 text-blue-400" />;
+        return <Shield aria-hidden="true" className="h-3 w-3 text-blue-400" />;
       case 'guest':
-        return <Globe className="h-3 w-3 text-green-400" />;
+        return <Globe aria-hidden="true" className="h-3 w-3 text-green-400" />;
       default:
         return null;
     }
@@ -127,9 +127,9 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
             ) : (
               <ChevronRight className="h-4 w-4 text-gray-400" />
             )}
-            <FileText className="h-4 w-4 text-orange-500" />
+            <FileText aria-hidden="true" className="h-4 w-4 text-orange-500" />
             <span className="text-sm font-semibold text-slate-50">Documents</span>
-            <span className="text-xs text-gray-500">({documents.length})</span>
+            <span className="text-xs text-gray-400">({documents.length})</span>
           </div>
         </button>
 
@@ -139,12 +139,12 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
             {loading ? (
               <div className="p-4 text-center">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
-                <p className="text-xs text-gray-500 mt-2">Loading documents...</p>
+                <p className="text-xs text-gray-400 mt-2">Loading documents...</p>
               </div>
             ) : documents.length === 0 ? (
               <div className="p-4 text-center">
-                <FileText className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-xs text-gray-500">No documents yet</p>
+                <FileText aria-hidden="true" className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+                <p className="text-xs text-gray-400">No documents yet</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-700">
@@ -165,7 +165,7 @@ export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRi
                           {getAccessIcon(doc.accessLevel)}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] text-gray-500">
+                          <p className="text-[10px] text-gray-400">
                             {formatFileSize(doc.fileSize)}
                           </p>
                         </div>

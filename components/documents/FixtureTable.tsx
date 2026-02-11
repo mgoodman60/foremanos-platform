@@ -12,20 +12,20 @@ export default function FixtureTable({ plumbing, electrical }: Props) {
   const hasElectrical = electrical && electrical.length > 0;
 
   if (!hasPlumbing && !hasElectrical) {
-    return <p className="text-sm text-gray-500 italic">No fixtures extracted</p>;
+    return <p className="text-sm text-gray-400 italic">No fixtures extracted</p>;
   }
 
   return (
     <div className="space-y-4 pt-2">
       {hasPlumbing && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Plumbing Fixtures ({plumbing!.length})
           </h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm" role="table">
               <thead>
-                <tr className="text-xs text-gray-500 border-b">
+                <tr className="text-xs text-gray-400 border-b">
                   <th className="text-left pb-2 pr-4">Type</th>
                   <th className="text-left pb-2 pr-4">Symbol</th>
                   <th className="text-left pb-2 pr-4">Location</th>
@@ -49,13 +49,13 @@ export default function FixtureTable({ plumbing, electrical }: Props) {
 
       {hasElectrical && (
         <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Electrical Devices ({electrical!.length})
           </h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm" role="table">
               <thead>
-                <tr className="text-xs text-gray-500 border-b">
+                <tr className="text-xs text-gray-400 border-b">
                   <th className="text-left pb-2 pr-4">Type</th>
                   <th className="text-left pb-2 pr-4">Symbol</th>
                   <th className="text-left pb-2 pr-4">Location</th>

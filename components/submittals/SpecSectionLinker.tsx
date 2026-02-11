@@ -213,7 +213,7 @@ export default function SpecSectionLinker({
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-purple-600/20 rounded-lg">
-            <Library className="w-5 h-5 text-purple-400" />
+            <Library className="w-5 h-5 text-purple-400" aria-hidden="true" />
           </div>
           <div className="text-left">
             <h4 className="text-white font-medium">Specification References</h4>
@@ -233,9 +233,9 @@ export default function SpecSectionLinker({
             </span>
           )}
           {expanded ? (
-            <ChevronDown className="w-5 h-5 text-slate-400" />
+            <ChevronDown className="w-5 h-5 text-slate-400" aria-hidden="true" />
           ) : (
-            <ChevronRight className="w-5 h-5 text-slate-400" />
+            <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />
           )}
         </div>
       </button>
@@ -245,7 +245,7 @@ export default function SpecSectionLinker({
         <div className="border-t border-slate-700 p-4 space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+              <Loader2 className="w-5 h-5 animate-spin text-purple-400" aria-hidden="true" />
               <span className="ml-2 text-slate-400">Loading spec data...</span>
             </div>
           ) : (
@@ -258,7 +258,7 @@ export default function SpecSectionLinker({
                     onClick={() => setShowPicker(true)}
                     className="text-purple-400 hover:text-purple-300 text-sm flex items-center gap-1"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4" aria-hidden="true" />
                     {currentSpecSection ? 'Change' : 'Add'}
                   </button>
                 </div>
@@ -322,7 +322,7 @@ export default function SpecSectionLinker({
                         className="flex items-center justify-between p-2 bg-slate-800 rounded-lg"
                       >
                         <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-slate-400" />
+                          <FileText className="w-4 h-4 text-slate-400" aria-hidden="true" />
                           <span className="text-slate-300 text-sm">{doc.name}</span>
                           {doc.pages.length > 0 && (
                             <span className="text-slate-500 text-xs">
@@ -403,7 +403,7 @@ function SpecSectionPickerModal({
         {/* Search */}
         <div className="p-4 border-b border-slate-700">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
             <input
               type="text"
               value={searchTerm}

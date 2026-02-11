@@ -41,7 +41,7 @@ interface Props {
 
 export default function SpatialDataPanel({ data }: Props) {
   if (!data) {
-    return <div className="text-sm text-gray-500 py-2">No spatial data available</div>;
+    return <div className="text-sm text-gray-400 py-2">No spatial data available</div>;
   }
 
   const hasData = Object.values(data).some(
@@ -49,7 +49,7 @@ export default function SpatialDataPanel({ data }: Props) {
   );
 
   if (!hasData) {
-    return <div className="text-sm text-gray-500 py-2">No spatial data available</div>;
+    return <div className="text-sm text-gray-400 py-2">No spatial data available</div>;
   }
 
   return (

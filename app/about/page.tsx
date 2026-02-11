@@ -10,7 +10,7 @@ import { Footer } from '@/components/landing/footer';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <main id="main-content" className="min-h-screen bg-white">
       <LandingHeader />
 
       {/* Hero Section */}
@@ -527,6 +527,6 @@ export default function AboutPage() {
 
       {/* Footer */}
       <Footer />
-    </div>
+    </main>
   );
 }

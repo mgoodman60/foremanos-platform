@@ -166,9 +166,9 @@ export default function TemplateExportDialog({
             </div>
           ) : templates.length === 0 ? (
             <div className="text-center py-8">
-              <FileText className="h-12 w-12 text-gray-500 mx-auto mb-3" />
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-400 mb-2">No templates available</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Upload a template for this document type to enable template exports
               </p>
             </div>
@@ -206,7 +206,7 @@ export default function TemplateExportDialog({
                             {selectedTemplate.description}
                           </p>
                         )}
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-gray-400 mt-2">
                           Format: .{selectedTemplate.fileFormat.toUpperCase()}
                         </p>
                       </div>

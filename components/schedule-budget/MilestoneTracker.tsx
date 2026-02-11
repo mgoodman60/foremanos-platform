@@ -239,7 +239,7 @@ export default function MilestoneTracker() {
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-4">
         <Button onClick={() => { resetForm(); setEditingMilestone(null); setShowAddModal(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Add Milestone
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Add Milestone
         </Button>
         
         <Select value={filter} onValueChange={setFilter}>
@@ -262,7 +262,7 @@ export default function MilestoneTracker() {
       <div className="space-y-3">
         {filteredMilestones.length === 0 ? (
           <Card className="p-8 bg-dark-card border-gray-700 text-center text-gray-400">
-            <Flag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <Flag className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
             <p>No milestones found</p>
           </Card>
         ) : (
@@ -276,7 +276,7 @@ export default function MilestoneTracker() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className={`p-2 rounded-lg ${config.color}`}>
-                      <StatusIcon className="h-5 w-5 text-white" />
+                      <StatusIcon className="h-5 w-5 text-white" aria-hidden="true" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -286,7 +286,7 @@ export default function MilestoneTracker() {
                         )}
                         {m.paymentLinked && (
                           <Badge className="bg-green-600 text-white">
-                            <DollarSign className="h-3 w-3 mr-1" />
+                            <DollarSign className="h-3 w-3 mr-1" aria-hidden="true" />
                             ${m.paymentAmount?.toLocaleString()}
                           </Badge>
                         )}
@@ -296,12 +296,12 @@ export default function MilestoneTracker() {
                       )}
                       <div className="flex items-center gap-4 mt-2 text-sm">
                         <span className="text-gray-400">
-                          <Calendar className="h-4 w-4 inline mr-1" />
+                          <Calendar className="h-4 w-4 inline mr-1" aria-hidden="true" />
                           Planned: {format(new Date(m.plannedDate), 'MMM d, yyyy')}
                         </span>
                         {m.actualDate && (
                           <span className="text-green-400">
-                            <Check className="h-4 w-4 inline mr-1" />
+                            <Check className="h-4 w-4 inline mr-1" aria-hidden="true" />
                             Completed: {format(new Date(m.actualDate), 'MMM d, yyyy')}
                           </span>
                         )}

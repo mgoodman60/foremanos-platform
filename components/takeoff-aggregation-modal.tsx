@@ -344,7 +344,7 @@ export function TakeoffAggregationModal({
                                     )}
                                   </div>
                                   {item.sources.length > 1 && (
-                                    <div className="text-xs text-gray-500 mt-1">
+                                    <div className="text-xs text-gray-400 mt-1">
                                       From: {item.sources.map(s => s.sheetNumber || s.takeoffName).join(', ')}
                                     </div>
                                   )}
@@ -438,7 +438,7 @@ export function TakeoffAggregationModal({
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   {mergeStrategy === 'smart' && 'Uses AI to detect similar items across sheets and merges them intelligently'}
                   {mergeStrategy === 'sum_all' && 'Only merges items with exactly matching names, categories, and units'}
                   {mergeStrategy === 'keep_separate' && 'Keeps all items separate, useful for comparing sheet-by-sheet'}

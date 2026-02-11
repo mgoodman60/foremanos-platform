@@ -127,13 +127,13 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'critical':
-        return <AlertTriangle className="h-4 w-4" />;
+        return <AlertTriangle aria-hidden="true" className="h-4 w-4" />;
       case 'important':
-        return <Star className="h-4 w-4" />;
+        return <Star aria-hidden="true" className="h-4 w-4" />;
       case 'informational':
-        return <Info className="h-4 w-4" />;
+        return <Info aria-hidden="true" className="h-4 w-4" />;
       default:
-        return <Info className="h-4 w-4" />;
+        return <Info aria-hidden="true" className="h-4 w-4" />;
     }
   };
 
@@ -225,7 +225,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-6 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 aria-hidden="true" className="h-8 w-8 animate-spin text-orange-500" />
           <span className="ml-2 text-gray-300">Loading annotations...</span>
         </CardContent>
       </Card>
@@ -237,13 +237,13 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
       <Card className="bg-dark-card border-gray-700">
         <CardHeader>
           <CardTitle className="text-gray-100 flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <FileText aria-hidden="true" className="h-5 w-5" />
             Annotation Browser
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <FileText aria-hidden="true" className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">No annotations extracted yet</p>
             <Button
               onClick={handleExtractAnnotations}
@@ -252,12 +252,12 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
             >
               {extracting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
                   Extracting...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw aria-hidden="true" className="mr-2 h-4 w-4" />
                   Extract Annotations
                 </>
               )}
@@ -279,7 +279,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
                 <p className="text-sm text-gray-400">Total Annotations</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.totalAnnotations}</p>
               </div>
-              <FileText className="h-8 w-8 text-orange-500" />
+              <FileText aria-hidden="true" className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -291,7 +291,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
                 <p className="text-sm text-gray-400">Critical</p>
                 <p className="text-2xl font-bold text-gray-100">{stats.byPriority?.critical || 0}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -303,7 +303,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
                 <p className="text-sm text-gray-400">Requirements</p>
                 <p className="text-2xl font-bold text-gray-100">{allRequirements.length}</p>
               </div>
-              <List className="h-8 w-8 text-blue-500" />
+              <List aria-hidden="true" className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -315,7 +315,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
                 <p className="text-sm text-gray-400">Keywords</p>
                 <p className="text-2xl font-bold text-gray-100">{Object.keys(keywordCounts).length}</p>
               </div>
-              <Tag className="h-8 w-8 text-purple-500" />
+              <Tag aria-hidden="true" className="h-8 w-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -326,7 +326,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-gray-100 flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+              <FileText aria-hidden="true" className="h-5 w-5" />
               Annotation Browser
             </CardTitle>
             <Button
@@ -347,7 +347,7 @@ export default function AnnotationBrowser({ projectSlug }: AnnotationBrowserProp
           {/* Search */}
           <div className="mt-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search annotations..."
                 value={searchQuery}

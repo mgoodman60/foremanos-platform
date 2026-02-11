@@ -243,7 +243,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" aria-hidden="true" />
       </div>
     );
   }
@@ -283,32 +283,32 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-blue-400" />
+            <Calculator className="w-5 h-5 text-blue-400" aria-hidden="true" />
             Quantity Verification
           </h2>
           <div className="flex items-center gap-2">
             <button
               onClick={handleVerify}
               disabled={verifying || lineItems.length === 0}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400
                 text-white rounded-lg flex items-center gap-2 transition-colors font-medium"
             >
               {verifying ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</>
+                <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Verifying...</>
               ) : (
-                <><RefreshCw className="w-4 h-4" /> Verify Against Project Data</>
+                <><RefreshCw className="w-4 h-4" aria-hidden="true" /> Verify Against Project Data</>
               )}
             </button>
             <button
               onClick={handleExportPDF}
               disabled={exporting || lineItems.length === 0}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-gray-800 disabled:text-gray-500
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-gray-800 disabled:text-gray-400
                 text-white rounded-lg flex items-center gap-2 transition-colors font-medium border border-slate-500"
             >
               {exporting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Exporting...</>
+                <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Exporting...</>
               ) : (
-                <><Download className="w-4 h-4" /> Export PDF</>
+                <><Download className="w-4 h-4" aria-hidden="true" /> Export PDF</>
               )}
             </button>
           </div>
@@ -349,7 +349,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <Package className="w-4 h-4" />
+          <Package className="w-4 h-4" aria-hidden="true" />
           Line Items
           <span className="px-2 py-0.5 text-xs bg-slate-700 rounded-full">{stats.total}</span>
         </button>
@@ -361,7 +361,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <Calculator className="w-4 h-4" />
+          <Calculator className="w-4 h-4" aria-hidden="true" />
           Charts
         </button>
         <button
@@ -372,7 +372,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <History className="w-4 h-4" />
+          <History className="w-4 h-4" aria-hidden="true" />
           Audit Trail
         </button>
         <button
@@ -383,7 +383,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <ClipboardCheck className="w-4 h-4" />
+          <ClipboardCheck className="w-4 h-4" aria-hidden="true" />
           Approval
         </button>
         <button
@@ -394,7 +394,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
           }`}
         >
-          <Library className="w-4 h-4" />
+          <Library className="w-4 h-4" aria-hidden="true" />
           Specs
         </button>
       </div>
@@ -428,7 +428,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
           {/* Line Items Header */}
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Package className="w-5 h-5 text-blue-400" />
+              <Package className="w-5 h-5 text-blue-400" aria-hidden="true" />
               Submittal Line Items
             </h2>
             <div className="flex items-center gap-2">
@@ -437,7 +437,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg
                   flex items-center gap-2 transition-colors font-medium border-2 border-emerald-400"
               >
-                <FileSpreadsheet className="w-4 h-4" />
+                <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
                 Auto-Import from Schedules
               </button>
               <button
@@ -445,7 +445,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
                   flex items-center gap-2 transition-colors font-medium"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4" aria-hidden="true" />
                 Add Line Item
               </button>
             </div>
@@ -456,7 +456,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
             <div className="flex items-center gap-3 flex-wrap">
               {/* Search */}
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" aria-hidden="true" />
                 <input
                   type="text"
                   value={searchTerm}
@@ -468,7 +468,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
               </div>
               {/* Status Filter */}
               <div className="flex items-center gap-1">
-                <Filter className="w-4 h-4 text-slate-500" />
+                <Filter className="w-4 h-4 text-slate-500" aria-hidden="true" />
                 {(['all', 'SUFFICIENT', 'INSUFFICIENT', 'EXCESS', 'UNVERIFIED'] as const).map(status => (
                   <button
                     key={status}
@@ -493,7 +493,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
           {/* Line Items List */}
           {lineItems.length === 0 ? (
         <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-12 text-center">
-          <FileCheck className="w-12 h-12 mx-auto mb-4 text-slate-500" />
+          <FileCheck className="w-12 h-12 mx-auto mb-4 text-slate-500" aria-hidden="true" />
           <p className="text-slate-300 font-medium">No line items added yet</p>
           <p className="text-sm text-slate-500 mt-1">
             Add products and materials to verify quantities against project requirements
@@ -503,7 +503,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
             className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
               flex items-center gap-2 mx-auto transition-colors"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             Add First Line Item
           </button>
         </div>
@@ -535,7 +535,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
                   <div className="flex items-start gap-4">
                     {/* Status Icon */}
                     <div className={`p-2 rounded-lg bg-black/30`}>
-                      <StatusIcon className={`w-5 h-5 ${config.text}`} />
+                      <StatusIcon className={`w-5 h-5 ${config.text}`} aria-hidden="true" />
                     </div>
 
                     {/* Main Content */}
@@ -589,9 +589,9 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
                     {/* Expand Arrow */}
                     <div className="p-1">
                       {isExpanded ? (
-                        <ChevronDown className="w-5 h-5 text-slate-400" />
+                        <ChevronDown className="w-5 h-5 text-slate-400" aria-hidden="true" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-slate-400" />
+                        <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />
                       )}
                     </div>
                   </div>

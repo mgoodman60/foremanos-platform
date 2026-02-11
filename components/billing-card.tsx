@@ -64,21 +64,21 @@ export function BillingCard({ subscription }: BillingCardProps) {
       case 'active':
         return (
           <Badge className="bg-green-500">
-            <CheckCircle className="w-3 h-3 mr-1" />
+            <CheckCircle aria-hidden="true" className="w-3 h-3 mr-1" />
             Active
           </Badge>
         );
       case 'past_due':
         return (
           <Badge className="bg-yellow-500">
-            <AlertCircle className="w-3 h-3 mr-1" />
+            <AlertCircle aria-hidden="true" className="w-3 h-3 mr-1" />
             Past Due
           </Badge>
         );
       case 'canceled':
         return (
           <Badge className="bg-red-500">
-            <XCircle className="w-3 h-3 mr-1" />
+            <XCircle aria-hidden="true" className="w-3 h-3 mr-1" />
             Canceled
           </Badge>
         );
@@ -97,7 +97,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-slate-50">
-              <CreditCard className="w-5 h-5 text-gray-300" />
+              <CreditCard aria-hidden="true" className="w-5 h-5 text-gray-300" />
               Subscription & Billing
             </CardTitle>
             <CardDescription className="text-gray-400">Manage your subscription and usage</CardDescription>
@@ -114,7 +114,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
               <p className="font-semibold text-lg text-slate-50">{getTierDisplay()} Plan</p>
               {subscription.billing.cancelAtPeriodEnd && (
                 <p className="text-sm text-yellow-400 mt-1">
-                  <AlertCircle className="w-3 h-3 inline mr-1" />
+                  <AlertCircle aria-hidden="true" className="w-3 h-3 inline mr-1" />
                   Cancels on {new Date(subscription.billing.end!).toLocaleDateString()}
                 </p>
               )}
@@ -152,7 +152,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
             {/* Reset Date */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-400 flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
+                <Calendar aria-hidden="true" className="w-4 h-4" />
                 Resets on
               </span>
               <span className="font-medium text-gray-300">

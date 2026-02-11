@@ -63,7 +63,7 @@ export function RenderStep4Photos({
         <Label>Project Photos</Label>
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 size={16} className="animate-spin" />
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
             Loading photos...
           </div>
         ) : photos.length > 0 ? (
@@ -93,7 +93,7 @@ export function RenderStep4Photos({
                   {selected && (
                     <div className="absolute inset-0 flex items-center justify-center bg-primary/30">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                        <Check size={16} />
+                        <Check size={16} aria-hidden="true" />
                       </div>
                     </div>
                   )}
@@ -120,7 +120,7 @@ export function RenderStep4Photos({
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
           )}
         >
-          <ImagePlus size={32} className="text-muted-foreground" />
+          <ImagePlus size={32} className="text-muted-foreground" aria-hidden="true" />
           <span className="text-sm text-muted-foreground">
             Click to upload or drag and drop
           </span>
@@ -145,7 +145,7 @@ export function RenderStep4Photos({
                 key={`${name}-${i}`}
                 className="flex items-center gap-2 text-xs text-muted-foreground"
               >
-                <Check size={12} className="text-green-500" />
+                <Check size={12} className="text-green-500" aria-hidden="true" />
                 {name}
               </li>
             ))}

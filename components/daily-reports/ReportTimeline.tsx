@@ -115,7 +115,7 @@ export default function ReportTimeline({ reportId, projectSlug, reportData }: Re
       </h3>
 
       {displayEntries.length === 0 ? (
-        <p className="text-gray-500 text-sm">No activity yet</p>
+        <p className="text-gray-400 text-sm">No activity yet</p>
       ) : (
         <div className="relative">
           {/* Timeline line */}
@@ -139,7 +139,7 @@ export default function ReportTimeline({ reportId, projectSlug, reportData }: Re
                     <p className="text-sm text-gray-200">{config.label}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       {entry.user && (
-                        <span className="text-xs text-gray-500">{entry.user}</span>
+                        <span className="text-xs text-gray-400">{entry.user}</span>
                       )}
                       <span className="text-xs text-gray-600">
                         {format(new Date(entry.timestamp), 'MMM d, yyyy h:mm a')}

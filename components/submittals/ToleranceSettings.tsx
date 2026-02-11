@@ -119,7 +119,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        <Loader2 className="w-6 h-6 animate-spin text-blue-500" aria-hidden="true" />
       </div>
     );
   }
@@ -130,7 +130,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-slate-800 rounded-lg">
-            <Settings className="w-5 h-5 text-blue-400" />
+            <Settings className="w-5 h-5 text-blue-400" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Tolerance Settings</h3>
@@ -144,9 +144,9 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
             text-white rounded-lg flex items-center gap-2 transition-colors font-medium"
         >
           {saving ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+            <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Saving...</>
           ) : (
-            <><Save className="w-4 h-4" /> Save Settings</>
+            <><Save className="w-4 h-4" aria-hidden="true" /> Save Settings</>
           )}
         </button>
       </div>
@@ -154,7 +154,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
       {/* Shortage Tolerance */}
       <div className="bg-slate-900 border border-red-900 rounded-xl p-5">
         <h4 className="text-base font-semibold text-red-400 flex items-center gap-2 mb-4">
-          <AlertTriangle className="w-5 h-5" />
+          <AlertTriangle className="w-5 h-5" aria-hidden="true" />
           Shortage Tolerance
         </h4>
         <p className="text-sm text-slate-400 mb-4">
@@ -163,7 +163,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-slate-300 mb-2 flex items-center gap-2">
-              <Percent className="w-4 h-4" /> Allowed Shortage (%)
+              <Percent className="w-4 h-4" aria-hidden="true" /> Allowed Shortage (%)
             </label>
             <input
               type="number"
@@ -178,7 +178,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
           </div>
           <div>
             <label className="block text-sm text-slate-300 mb-2 flex items-center gap-2">
-              <Hash className="w-4 h-4" /> Allowed Shortage (Units)
+              <Hash className="w-4 h-4" aria-hidden="true" /> Allowed Shortage (Units)
             </label>
             <input
               type="number"
@@ -196,7 +196,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
       {/* Excess Tolerance */}
       <div className="bg-slate-900 border border-amber-900 rounded-xl p-5">
         <h4 className="text-base font-semibold text-amber-400 flex items-center gap-2 mb-4">
-          <CheckCircle className="w-5 h-5" />
+          <CheckCircle className="w-5 h-5" aria-hidden="true" />
           Excess Tolerance
         </h4>
         <p className="text-sm text-slate-400 mb-4">
@@ -205,7 +205,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-slate-300 mb-2 flex items-center gap-2">
-              <Percent className="w-4 h-4" /> Flag Excess Above (%)
+              <Percent className="w-4 h-4" aria-hidden="true" /> Flag Excess Above (%)
             </label>
             <input
               type="number"
@@ -219,7 +219,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
           </div>
           <div>
             <label className="block text-sm text-slate-300 mb-2 flex items-center gap-2">
-              <Hash className="w-4 h-4" /> Flag Excess Above (Units)
+              <Hash className="w-4 h-4" aria-hidden="true" /> Flag Excess Above (Units)
             </label>
             <input
               type="number"
@@ -237,7 +237,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
       {/* Auto-Reverification Settings */}
       <div className="bg-slate-900 border border-blue-900 rounded-xl p-5">
         <h4 className="text-base font-semibold text-blue-400 flex items-center gap-2 mb-4">
-          <Zap className="w-5 h-5" />
+          <Zap className="w-5 h-5" aria-hidden="true" />
           Auto-Reverification
         </h4>
         <p className="text-sm text-slate-400 mb-4">
@@ -302,7 +302,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
           className="w-full flex items-center justify-between text-white"
         >
           <div className="flex items-center gap-2">
-            <RefreshCw className="w-5 h-5 text-slate-400" />
+            <RefreshCw className="w-5 h-5 text-slate-400" aria-hidden="true" />
             <span className="font-semibold">Trade-Specific Overrides</span>
           </div>
           <span className="text-sm text-slate-400">

@@ -203,7 +203,7 @@ export function WhatIfScenarios({
               : "border-gray-600 hover:border-purple-500 hover:text-purple-400"
           )}
         >
-          <Beaker className={cn("h-4 w-4", isActive && "animate-pulse")} />
+          <Beaker className={cn("h-4 w-4", isActive && "animate-pulse")} aria-hidden="true" />
           What-If Mode
           {isActive && (
             <Badge variant="secondary" className="bg-purple-800 text-purple-200 ml-1">
@@ -226,7 +226,7 @@ export function WhatIfScenarios({
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-400" />
+                <Sparkles className="h-5 w-5 text-purple-400" aria-hidden="true" />
                 <span className="text-sm font-medium text-gray-200">Scenario Sandbox</span>
               </div>
               <div className="text-xs text-gray-400">
@@ -244,9 +244,9 @@ export function WhatIfScenarios({
                       key={`${change.taskId}-${idx}`}
                       className="flex items-center gap-2 text-xs bg-dark-card rounded px-2 py-1.5"
                     >
-                      <GitBranch className="h-3 w-3 text-purple-400 flex-shrink-0" />
+                      <GitBranch className="h-3 w-3 text-purple-400 flex-shrink-0" aria-hidden="true" />
                       <span className="text-gray-300 truncate flex-1">{change.taskName}</span>
-                      <ArrowRight className="h-3 w-3 text-gray-500" />
+                      <ArrowRight className="h-3 w-3 text-gray-400" aria-hidden="true" />
                       <span
                         className={cn(
                           "font-medium",
@@ -266,7 +266,7 @@ export function WhatIfScenarios({
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                    <Layers className="h-3 w-3" />
+                    <Layers className="h-3 w-3" aria-hidden="true" />
                     Tasks Affected
                   </div>
                   <div className="text-lg font-semibold text-gray-200">
@@ -276,9 +276,9 @@ export function WhatIfScenarios({
                 <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
                     {impactSummary.criticalPathImpact > 0 ? (
-                      <TrendingUp className="h-3 w-3 text-red-400" />
+                      <TrendingUp className="h-3 w-3 text-red-400" aria-hidden="true" />
                     ) : (
-                      <TrendingDown className="h-3 w-3 text-green-400" />
+                      <TrendingDown className="h-3 w-3 text-green-400" aria-hidden="true" />
                     )}
                     Critical Path
                   </div>
@@ -294,7 +294,7 @@ export function WhatIfScenarios({
                 </div>
                 <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                    <Clock className="h-3 w-3" />
+                    <Clock className="h-3 w-3" aria-hidden="true" />
                     Total Days Shifted
                   </div>
                   <div className="text-lg font-semibold text-amber-400">
@@ -303,7 +303,7 @@ export function WhatIfScenarios({
                 </div>
                 <div className="bg-dark-card rounded-lg p-3">
                   <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                    <CalendarDays className="h-3 w-3" />
+                    <CalendarDays className="h-3 w-3" aria-hidden="true" />
                     New End Date
                   </div>
                   <div className="text-lg font-semibold text-gray-200">
@@ -322,7 +322,7 @@ export function WhatIfScenarios({
                   disabled={isApplying}
                   className="bg-green-600 hover:bg-green-700 gap-1"
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                   Apply Changes
                 </Button>
                 <Button
@@ -331,7 +331,7 @@ export function WhatIfScenarios({
                   onClick={() => setShowSaveDialog(true)}
                   className="gap-1 border-gray-600"
                 >
-                  <Save className="h-3.5 w-3.5" />
+                  <Save className="h-3.5 w-3.5" aria-hidden="true" />
                   Save Scenario
                 </Button>
                 <Button
@@ -340,15 +340,15 @@ export function WhatIfScenarios({
                   onClick={() => setShowDiscardDialog(true)}
                   className="gap-1 text-red-400 hover:text-red-300 hover:bg-red-900/20"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                   Discard
                 </Button>
               </div>
             )}
 
             {pendingChanges.length === 0 && (
-              <div className="text-center py-4 text-gray-500 text-sm">
-                <Beaker className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="text-center py-4 text-gray-400 text-sm">
+                <Beaker className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
                 Drag tasks on the timeline to simulate changes
               </div>
             )}
@@ -360,7 +360,7 @@ export function WhatIfScenarios({
       {savedScenarios.length > 0 && (
         <Card className="bg-dark-surface border-gray-700 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <History className="h-4 w-4 text-gray-400" />
+            <History className="h-4 w-4 text-gray-400" aria-hidden="true" />
             <span className="text-sm font-medium text-gray-300">Saved Scenarios</span>
           </div>
           <div className="space-y-2">
@@ -374,7 +374,7 @@ export function WhatIfScenarios({
                     {scenario.name}
                   </div>
                   {scenario.description && (
-                    <div className="text-xs text-gray-500 truncate">
+                    <div className="text-xs text-gray-400 truncate">
                       {scenario.description}
                     </div>
                   )}

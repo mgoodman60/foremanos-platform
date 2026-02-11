@@ -249,7 +249,7 @@ export function TakeoffLineItemEditModal({
               {item.extractedFrom && (
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-gray-400" />
-                  <span className="text-xs text-gray-500">From: {item.extractedFrom}</span>
+                  <span className="text-xs text-gray-400">From: {item.extractedFrom}</span>
                 </div>
               )}
             </div>

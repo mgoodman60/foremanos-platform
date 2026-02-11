@@ -555,7 +555,7 @@ export function TakeoffBudgetSyncModal({
                                     {formatCurrency(data.takeoffTotal)}
                                   </div>
                                 </div>
-                                <ArrowRight className="h-4 w-4 text-gray-500" />
+                                <ArrowRight className="h-4 w-4 text-gray-400" />
                                 <div className="text-right">
                                   <div className="text-sm text-gray-400">Budget</div>
                                   <div className="font-medium text-white">

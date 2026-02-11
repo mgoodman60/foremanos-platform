@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Droplets, Zap, Wind, Flame, type LucideIcon } from 'lucide-react';
+import { chartColors, neutralColors } from '@/lib/design-tokens';
 
 interface Room {
   id: string;
@@ -39,25 +40,25 @@ interface MarkerConfig {
 const MARKER_CONFIGS: Record<string, MarkerConfig> = {
   plumbing: {
     icon: Droplets,
-    color: '#06B6D4',
+    color: chartColors.trades.plumbing,
     bgColor: 'rgba(6, 182, 212, 0.2)',
     label: 'Plumbing',
   },
   electrical: {
     icon: Zap,
-    color: '#F59E0B',
+    color: chartColors.trades.electrical,
     bgColor: 'rgba(245, 158, 11, 0.2)',
     label: 'Electrical',
   },
   hvac: {
     icon: Wind,
-    color: '#3B82F6',
+    color: chartColors.trades.hvac,
     bgColor: 'rgba(59, 130, 246, 0.2)',
     label: 'HVAC',
   },
   fire_alarm: {
     icon: Flame,
-    color: '#EF4444',
+    color: chartColors.trades.fireProtection,
     bgColor: 'rgba(239, 68, 68, 0.2)',
     label: 'Fire Protection',
   },
@@ -183,6 +184,7 @@ export function EquipmentMarkerOverlay({
                         className="shrink-0"
                         size={markerSize * 0.5}
                         color={config.color}
+                        aria-hidden="true"
                       />
                     </div>
 
@@ -204,7 +206,7 @@ export function EquipmentMarkerOverlay({
                         style={{
                           borderLeft: '4px solid transparent',
                           borderRight: '4px solid transparent',
-                          borderTop: '4px solid #111827',
+                          borderTop: `4px solid ${neutralColors.gray[900]}`,
                         }}
                       />
                     </div>

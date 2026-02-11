@@ -362,7 +362,7 @@ export function TakeoffLaborPlanning({
                                   <tr key={req.takeoffItemId} className="border-t border-gray-800 hover:bg-dark-hover">
                                     <td className="p-2 pl-10 text-white">
                                       <div className="truncate max-w-[200px]">{req.itemName}</div>
-                                      <div className="text-xs text-gray-500">{req.category}</div>
+                                      <div className="text-xs text-gray-400">{req.category}</div>
                                     </td>
                                     <td className="p-2 text-right text-gray-300">
                                       {req.quantity.toFixed(1)} {req.unit}
@@ -390,7 +390,7 @@ export function TakeoffLaborPlanning({
                 <div className="space-y-4">
                   {links.length === 0 ? (
                     <div className="text-center py-12">
-                      <Link2 className="h-12 w-12 text-gray-500 mx-auto mb-3" />
+                      <Link2 className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                       <h3 className="text-lg font-medium text-white">No Schedule Links Found</h3>
                       <p className="text-gray-400">No matching schedule tasks were found for this takeoff</p>
                     </div>
@@ -481,7 +481,7 @@ export function TakeoffLaborPlanning({
                               <div className="text-right">
                                 <div className="flex items-center gap-2">
                                   <span className="text-gray-400">{sug.currentDuration}d</span>
-                                  <span className="text-gray-500">→</span>
+                                  <span className="text-gray-400">→</span>
                                   <span className={sug.laborDelta > 0 ? 'text-red-400' : 'text-green-400'}>
                                     {sug.suggestedDuration}d
                                   </span>

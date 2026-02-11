@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  FileCheck, 
+import {
+  Plus,
+  Search,
+  FileCheck,
   Calendar,
   AlertTriangle,
   CheckCircle,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface Submittal {
   id: string;
@@ -201,7 +202,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg 
             flex items-center gap-2 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4" aria-hidden="true" />
           New Submittal
         </button>
       </div>
@@ -209,7 +210,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <input
             type="text"
             value={search}
@@ -278,7 +279,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
                         {sub.submittedBy && <span>• {sub.submittedBy}</span>}
                       </div>
                       {(sub.equipment || sub.system) && (
-                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
                           {sub.equipment && (
                             <span>{sub.equipment.equipmentTag} - {sub.equipment.name}</span>
                           )}
@@ -295,7 +296,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
                     </span>
                     {overdue && (
                       <span className="px-2 py-1 bg-red-900 text-red-300 text-xs rounded flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> Overdue
+                        <AlertTriangle className="w-3 h-3" aria-hidden="true" /> Overdue
                       </span>
                     )}
                   </div>
@@ -304,13 +305,13 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
                   <div className="flex items-center gap-4 text-sm text-gray-400">
                     {sub.dueDate && (
                       <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
+                        <Calendar className="w-3 h-3" aria-hidden="true" />
                         Due: {new Date(sub.dueDate).toLocaleDateString()}
                       </span>
                     )}
                     {sub.reviewerName && (
                       <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
+                        <User className="w-3 h-3" aria-hidden="true" />
                         {sub.reviewerName}
                       </span>
                     )}
@@ -324,7 +325,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
                       className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded
                         flex items-center gap-1 transition-colors border border-slate-500"
                     >
-                      <Eye className="w-3 h-3" /> View
+                      <Eye className="w-3 h-3" aria-hidden="true" /> View
                     </Link>
                     {['SUBMITTED', 'UNDER_REVIEW'].includes(sub.status) && (
                       <button
@@ -332,7 +333,7 @@ export default function SubmittalList({ projectSlug }: SubmittalListProps) {
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded
                           flex items-center gap-1 transition-colors"
                       >
-                        <Edit className="w-3 h-3" /> Review
+                        <Edit className="w-3 h-3" aria-hidden="true" /> Review
                       </button>
                     )}
                   </div>
@@ -373,6 +374,8 @@ function AddSubmittalModal({ onClose, onSubmit }: { onClose: () => void; onSubmi
     contactEmail: '',
   });
 
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -381,11 +384,14 @@ function AddSubmittalModal({ onClose, onSubmit }: { onClose: () => void; onSubmi
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="mep-submittal-add-dialog-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mep-submittal-add-dialog-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full"
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 id="mep-submittal-add-dialog-title" className="text-lg font-medium text-white">New Submittal</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close dialog">
@@ -501,6 +507,8 @@ function ReviewSubmittalModal({
     resubmitDue: '',
   });
 
+  const reviewContainerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -509,11 +517,14 @@ function ReviewSubmittalModal({
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="mep-submittal-review-dialog-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
+      <div
+        ref={reviewContainerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mep-submittal-review-dialog-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full"
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
             <h3 id="mep-submittal-review-dialog-title" className="text-lg font-medium text-white">Review Submittal</h3>

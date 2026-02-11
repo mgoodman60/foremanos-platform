@@ -116,7 +116,7 @@ export function CommandPalette({
       {
         id: 'nav-dashboard',
         label: 'Go to Dashboard',
-        icon: <Home className="w-4 h-4" />,
+        icon: <Home aria-hidden="true" className="w-4 h-4" />,
         shortcut: 'G D',
         keywords: ['home', 'main', 'projects'],
         action: () => router.push('/dashboard'),
@@ -128,7 +128,7 @@ export function CommandPalette({
         {
           id: 'nav-chat',
           label: 'Open Chat',
-          icon: <MessageSquare className="w-4 h-4" />,
+          icon: <MessageSquare aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'G C',
           keywords: ['assistant', 'ai', 'help'],
           action: () => router.push(`/project/${projectSlug}`),
@@ -136,7 +136,7 @@ export function CommandPalette({
         {
           id: 'nav-intelligence',
           label: 'Intelligence Dashboard',
-          icon: <Layers className="w-4 h-4" />,
+          icon: <Layers aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'G I',
           keywords: ['analytics', 'insights', 'analysis'],
           action: () => router.push(`/project/${projectSlug}/intelligence`),
@@ -144,7 +144,7 @@ export function CommandPalette({
         {
           id: 'nav-schedule',
           label: 'Project Schedule',
-          icon: <Calendar className="w-4 h-4" />,
+          icon: <Calendar aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'G S',
           keywords: ['timeline', 'tasks', 'gantt'],
           action: () => router.push(`/project/${projectSlug}/schedules`),
@@ -152,7 +152,7 @@ export function CommandPalette({
         {
           id: 'nav-budget',
           label: 'Budget Management',
-          icon: <DollarSign className="w-4 h-4" />,
+          icon: <DollarSign aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'G B',
           keywords: ['cost', 'finances', 'money'],
           action: () => router.push(`/project/${projectSlug}/budget`),
@@ -160,7 +160,7 @@ export function CommandPalette({
         {
           id: 'nav-takeoffs',
           label: 'Material Takeoffs',
-          icon: <Ruler className="w-4 h-4" />,
+          icon: <Ruler aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'G T',
           keywords: ['quantities', 'measurements', 'materials'],
           action: () => router.push(`/project/${projectSlug}/takeoffs`),
@@ -168,14 +168,14 @@ export function CommandPalette({
         {
           id: 'nav-mep',
           label: 'MEP Equipment',
-          icon: <Wrench className="w-4 h-4" />,
+          icon: <Wrench aria-hidden="true" className="w-4 h-4" />,
           keywords: ['mechanical', 'electrical', 'plumbing'],
           action: () => router.push(`/project/${projectSlug}/mep`),
         },
         {
           id: 'nav-reports',
           label: 'Reports & Analytics',
-          icon: <BarChart2 className="w-4 h-4" />,
+          icon: <BarChart2 aria-hidden="true" className="w-4 h-4" />,
           keywords: ['data', 'charts', 'export'],
           action: () => router.push(`/project/${projectSlug}/reports`),
         }
@@ -196,7 +196,7 @@ export function CommandPalette({
         quickActions.push({
           id: 'action-documents',
           label: 'Open Document Library',
-          icon: <FileText className="w-4 h-4" />,
+          icon: <FileText aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'D',
           keywords: ['files', 'pdf', 'browse'],
           action: onOpenDocumentLibrary,
@@ -206,7 +206,7 @@ export function CommandPalette({
       quickActions.push({
         id: 'action-upload',
         label: 'Upload Document',
-        icon: <Upload className="w-4 h-4" />,
+        icon: <Upload aria-hidden="true" className="w-4 h-4" />,
         shortcut: 'U',
         keywords: ['add', 'new', 'file'],
         action: () => {
@@ -224,7 +224,7 @@ export function CommandPalette({
         quickActions.push({
           id: 'action-weather',
           label: 'Weather Intelligence',
-          icon: <CloudRain className="w-4 h-4" />,
+          icon: <CloudRain aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'W',
           keywords: ['forecast', 'rain', 'delays'],
           action: onOpenWeather,
@@ -235,7 +235,7 @@ export function CommandPalette({
         quickActions.push({
           id: 'action-photos',
           label: 'Photo Library',
-          icon: <ImageIcon className="w-4 h-4" />,
+          icon: <ImageIcon aria-hidden="true" className="w-4 h-4" />,
           shortcut: 'P',
           keywords: ['images', 'site', 'pictures'],
           action: onOpenPhotoLibrary,
@@ -246,7 +246,7 @@ export function CommandPalette({
         quickActions.push({
           id: 'action-reports',
           label: 'Daily Report History',
-          icon: <History className="w-4 h-4" />,
+          icon: <History aria-hidden="true" className="w-4 h-4" />,
           keywords: ['log', 'daily', 'past'],
           action: onOpenReportHistory,
         });
@@ -268,14 +268,14 @@ export function CommandPalette({
           {
             id: 'team-subcontractors',
             label: 'Subcontractors',
-            icon: <Users className="w-4 h-4" />,
+            icon: <Users aria-hidden="true" className="w-4 h-4" />,
             keywords: ['subs', 'vendors', 'contractors'],
             action: () => router.push(`/project/${projectSlug}/subcontractors`),
           },
           {
             id: 'team-crews',
             label: 'Crew Management',
-            icon: <Users className="w-4 h-4" />,
+            icon: <Users aria-hidden="true" className="w-4 h-4" />,
             keywords: ['workers', 'labor', 'staff'],
             action: () => router.push(`/project/${projectSlug}/crews`),
           },
@@ -292,7 +292,7 @@ export function CommandPalette({
           {
             id: 'admin-dashboard',
             label: 'Admin Dashboard',
-            icon: <Settings className="w-4 h-4" />,
+            icon: <Settings aria-hidden="true" className="w-4 h-4" />,
             keywords: ['settings', 'manage', 'control'],
             action: () => router.push('/admin'),
           },
@@ -308,7 +308,7 @@ export function CommandPalette({
         {
           id: 'help-docs',
           label: 'Documentation',
-          icon: <BookOpen className="w-4 h-4" />,
+          icon: <BookOpen aria-hidden="true" className="w-4 h-4" />,
           shortcut: '?',
           keywords: ['guide', 'manual', 'faq'],
           action: () => window.open('https://docs.foremanos.com', '_blank'),
@@ -316,7 +316,7 @@ export function CommandPalette({
         {
           id: 'help-support',
           label: 'Contact Support',
-          icon: <HelpCircle className="w-4 h-4" />,
+          icon: <HelpCircle aria-hidden="true" className="w-4 h-4" />,
           keywords: ['help', 'issue', 'problem'],
           action: () => window.open('mailto:support@foremanos.com', '_blank'),
         },
@@ -337,7 +337,7 @@ export function CommandPalette({
         className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 hover:text-gray-300 border border-gray-700 hover:border-gray-600 rounded-lg bg-dark-surface transition-colors"
         aria-label="Open command palette"
       >
-        <Search className="w-3.5 h-3.5" />
+        <Search aria-hidden="true" className="w-3.5 h-3.5" />
         <span>Search</span>
         <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-gray-600 bg-dark-card px-1.5 font-mono text-[10px] font-medium text-gray-400">
           <span className="text-xs">

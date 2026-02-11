@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2, Circle, RefreshCw } from 'lucide-react';
 import { primaryColors, semanticColors } from '@/lib/design-tokens';
 import { WithTooltip } from '@/components/ui/icon-button';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -98,6 +99,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const renameModalRef = useFocusTrap({ isActive: renameModalOpen, onEscape: () => { setRenameModalOpen(false); setRenameDocument(null); setNewDocumentName(''); } });
   const [showBulkAccessMenu, setShowBulkAccessMenu] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
@@ -252,7 +254,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     };
 
     fetchProgress();
-    const interval = setInterval(fetchProgress, 5000);
+    const interval = setInterval(fetchProgress, 3000);
     return () => clearInterval(interval);
   }, [documents.map(d => `${d.id}:${d.queueStatus}`).join(',')]);
 
@@ -681,7 +683,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
           parts.push(`${progress.concurrency} parallel`);
         }
         if (progress.currentBatch != null && progress.totalBatches != null) {
-          parts.push(`Batch ${progress.currentBatch} of ${progress.totalBatches}`);
+          parts.push(`Batch ${(progress.currentBatch ?? 0) + 1} of ${progress.totalBatches}`);
         }
         if (progress.pagesProcessed != null && progress.totalPages) {
           parts.push(`${progress.pagesProcessed}/${progress.totalPages} pages`);
@@ -1148,7 +1150,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
               <p className="text-sm text-gray-300 mb-2">File will be categorized after drop</p>
             )}
             <p className="text-sm text-gray-400">PDF, DOCX, XLSX, images, or CAD files (.dwg, .rvt, .ifc)</p>
-            <p className="text-xs text-gray-500 mt-1">Maximum file size: 200MB</p>
+            <p className="text-xs text-gray-400 mt-1">Maximum file size: 200MB</p>
           </div>
         </div>
       )}
@@ -1546,7 +1548,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           {selectedDocs.has(doc.id) ? (
                             <CheckSquare className="w-5 h-5 text-orange-500" />
                           ) : (
-                            <Square className="w-5 h-5 text-gray-500" />
+                            <Square className="w-5 h-5 text-gray-400" />
                           )}
                         </button>
                       )}
@@ -1559,7 +1561,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                           ) : doc.fileType.toLowerCase() === 'docx' || doc.fileType.toLowerCase() === 'doc' ? (
                             <FileText className="w-5 h-5 text-blue-500" />
                           ) : (
-                            <File className="w-5 h-5 text-gray-500" />
+                            <File className="w-5 h-5 text-gray-400" />
                           )}
                         </div>
                       </div>
@@ -1601,7 +1603,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                   {isFailed ? (
                                     <X className="w-3 h-3 text-red-500 flex-shrink-0" />
                                   ) : (
-                                    <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" style={{ color: stalled ? '#EAB308' : primaryColors.orange[500] }} />
+                                    <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" style={{ color: stalled ? semanticColors.warning[500] : primaryColors.orange[500] }} />
                                   )}
                                   <span className="font-medium text-slate-200 truncate">
                                     {isFailed ? 'Failed' : activeStage?.label || 'Processing'}
@@ -1609,11 +1611,11 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                   {progress?.concurrency && progress.concurrency > 1 && (
                                     <span className="text-orange-400 font-semibold flex-shrink-0">({progress.concurrency}x)</span>
                                   )}
-                                  {detail && <span className="text-gray-500 truncate">{detail}</span>}
+                                  {detail && <span className="text-gray-400 truncate">{detail}</span>}
                                 </span>
                                 <span className="flex items-center gap-1.5 flex-shrink-0">
                                   {percent > 0 && <span>{percent}%</span>}
-                                  {eta > 0 && !isFailed && <span className="text-gray-500">{formatETA(eta)}</span>}
+                                  {eta > 0 && !isFailed && <span className="text-gray-400">{formatETA(eta)}</span>}
                                 </span>
                               </div>
                               {stalled && (
@@ -1635,7 +1637,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                               </div>
                               {/* Elapsed time for mobile */}
                               {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && phase !== 'queued' && !isFailed && (
-                                <div className="text-[10px] text-gray-500">
+                                <div className="text-[10px] text-gray-400">
                                   {formatElapsed(progress.elapsedSeconds)} elapsed
                                   {progress?.secondsPerPage != null && progress.secondsPerPage > 0 && (
                                     <span> · {(60 / progress.secondsPerPage).toFixed(1)} pages/min</span>
@@ -1708,7 +1710,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                               {selectedDocs.has(doc.id) ? (
                                 <CheckSquare className="w-6 h-6 text-orange-500" />
                               ) : (
-                                <Square className="w-6 h-6 text-gray-500" />
+                                <Square className="w-6 h-6 text-gray-400" />
                               )}
                             </button>
                           )}
@@ -1798,7 +1800,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                     </button>
                                   </div>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1.5">
+                                <p className="text-xs text-gray-400 mt-1.5">
                                   {getAccessLevelDescription(doc.accessLevel)}
                                 </p>
                               </div>
@@ -1900,7 +1902,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                                   <span className="text-xs text-yellow-500 font-medium">May be paused</span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
                                 {percent > 0 && <span className="font-medium text-gray-400">{percent}%</span>}
                                 {eta > 0 && phase !== 'queued' && !isFailed && (
                                   <span>{formatETA(eta)}</span>
@@ -1945,7 +1947,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
 
                             {/* Explanation text */}
                             {explanation && (
-                              <p className="text-xs text-gray-500">{explanation}</p>
+                              <p className="text-xs text-gray-400">{explanation}</p>
                             )}
 
                             {/* Progress bar */}
@@ -1966,7 +1968,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             {/* Concurrent batch lanes */}
                             {progress?.concurrency && progress.concurrency > 1 && progress.activeBatches && progress.activeBatches.length > 0 && progress.totalBatches && (
                               <div className="space-y-1" aria-label={`${progress.concurrency} concurrent batch lanes`}>
-                                <div className="text-[10px] text-gray-500 font-medium">
+                                <div className="text-[10px] text-gray-400 font-medium">
                                   Batch lanes ({progress.concurrency}x parallel)
                                 </div>
                                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(progress.concurrency, 4)}, 1fr)` }}>
@@ -2005,7 +2007,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                             {/* Timing row + Force Resume */}
                             <div className="flex items-center justify-between">
                               {phase !== 'queued' && !isFailed && (
-                                <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                <div className="flex items-center gap-2 text-[10px] text-gray-400">
                                   {progress?.elapsedSeconds != null && progress.elapsedSeconds > 0 && (
                                     <span>Elapsed: {formatElapsed(progress.elapsedSeconds)}</span>
                                   )}
@@ -2063,11 +2065,14 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
       {renameModalOpen && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="document-library-rename-dialog-title"
         >
-          <div className="bg-dark-card border border-gray-700 rounded-lg shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+          <div
+            ref={renameModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="document-library-rename-dialog-title"
+            className="bg-dark-card border border-gray-700 rounded-lg shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200"
+          >
             <h3 id="document-library-rename-dialog-title" className="text-xl font-bold text-slate-50 mb-4">Rename Document</h3>
             <p className="text-sm text-gray-400 mb-4">
               Enter a new name for "{renameDocument?.name}"
@@ -2095,10 +2100,10 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 autoFocus
               />
               <div id="name-requirements" className="flex justify-between items-center mt-2 text-xs" role="status" aria-live="polite">
-                <span className={`${newDocumentName.length < 3 ? 'text-orange-500' : 'text-gray-500'}`}>
+                <span className={`${newDocumentName.length < 3 ? 'text-orange-500' : 'text-gray-400'}`}>
                   {newDocumentName.length < 3 && newDocumentName.length > 0 && 'Minimum 3 characters'}
                 </span>
-                <span className={`${newDocumentName.length > 180 ? 'text-orange-500' : 'text-gray-500'}`}>
+                <span className={`${newDocumentName.length > 180 ? 'text-orange-500' : 'text-gray-400'}`}>
                   {newDocumentName.length}/200
                 </span>
               </div>
@@ -2188,7 +2193,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                 <p>Are you sure you want to delete &quot;{pendingDeleteDoc?.name}&quot;? This action cannot be undone.</p>
 
                 {deletionImpactLoading && (
-                  <div className="flex items-center gap-2 mt-3 text-gray-500">
+                  <div className="flex items-center gap-2 mt-3 text-gray-400">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">Checking for extracted data...</span>
                   </div>

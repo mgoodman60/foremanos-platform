@@ -204,7 +204,7 @@ export default function BIMDataPanel({
   if (!modelId) {
     return (
       <div className="bg-dark-subtle border border-gray-700 rounded-xl p-6 text-center">
-        <Database className="w-10 h-10 text-gray-500 mx-auto mb-3" />
+        <Database className="w-10 h-10 text-gray-400 mx-auto mb-3" aria-hidden="true" />
         <p className="text-gray-400">Select a model to view BIM data</p>
       </div>
     );
@@ -216,7 +216,7 @@ export default function BIMDataPanel({
       <div className="p-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-cyan-500/20 rounded-lg">
-            <Database className="w-5 h-5 text-cyan-400" />
+            <Database className="w-5 h-5 text-cyan-400" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-white font-semibold">BIM Data Flow</h3>
@@ -228,14 +228,14 @@ export default function BIMDataPanel({
           disabled={extracting}
           className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg transition-all disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 ${extracting ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${extracting ? 'animate-spin' : ''}`} aria-hidden="true" />
           <span className="text-sm">{extracting ? 'Extracting...' : 'Re-extract'}</span>
         </button>
       </div>
 
       {loading ? (
         <div className="p-8 text-center">
-          <RefreshCw className="w-8 h-8 text-gray-500 animate-spin mx-auto" />
+          <RefreshCw className="w-8 h-8 text-gray-400 animate-spin mx-auto" aria-hidden="true" />
           <p className="text-gray-400 mt-2">Loading BIM data...</p>
         </div>
       ) : summary ? (
@@ -244,28 +244,28 @@ export default function BIMDataPanel({
           <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 text-gray-400 text-xs mb-1">
-                <Box className="w-3 h-3" />
+                <Box className="w-3 h-3" aria-hidden="true" />
                 Total Elements
               </div>
               <p className="text-xl font-bold text-white">{formatNumber(summary.totalElements)}</p>
             </div>
             <div className="p-3 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 text-gray-400 text-xs mb-1">
-                <Ruler className="w-3 h-3" />
+                <Ruler className="w-3 h-3" aria-hidden="true" />
                 Total Area
               </div>
               <p className="text-xl font-bold text-white">{formatNumber(summary.measurements.totalArea)} SF</p>
             </div>
             <div className="p-3 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 text-gray-400 text-xs mb-1">
-                <Box className="w-3 h-3" />
+                <Box className="w-3 h-3" aria-hidden="true" />
                 Total Volume
               </div>
               <p className="text-xl font-bold text-white">{formatNumber(summary.measurements.totalVolume)} CF</p>
             </div>
             <div className="p-3 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2 text-gray-400 text-xs mb-1">
-                <Clock className="w-3 h-3" />
+                <Clock className="w-3 h-3" aria-hidden="true" />
                 Last Sync
               </div>
               <p className="text-sm font-medium text-white">
@@ -288,24 +288,24 @@ export default function BIMDataPanel({
                     className="w-full p-3 flex items-center justify-between hover:bg-gray-800/50"
                   >
                     <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-blue-400" />
+                      <Building2 className="w-4 h-4 text-blue-400" aria-hidden="true" />
                       <span className="text-white">Structural</span>
-                      <span className="text-gray-500 text-sm">({summary.structural})</span>
+                      <span className="text-gray-400 text-sm">({summary.structural})</span>
                     </div>
                     {expandedCategories.includes('structural') ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     )}
                   </button>
                   {expandedCategories.includes('structural') && (
                     <div className="px-3 pb-3 text-sm text-gray-400">
                       <p className="flex items-center gap-2">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Auto-mapped to Material Takeoff (CSI Div 03-07)
                       </p>
                       <p className="flex items-center gap-2 mt-1">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Quantities: Concrete (CY), Steel (Tons), Area (SF)
                       </p>
                     </div>
@@ -321,28 +321,28 @@ export default function BIMDataPanel({
                     className="w-full p-3 flex items-center justify-between hover:bg-gray-800/50"
                   >
                     <div className="flex items-center gap-2">
-                      <Plug className="w-4 h-4 text-orange-400" />
+                      <Plug className="w-4 h-4 text-orange-400" aria-hidden="true" />
                       <span className="text-white">MEP Systems</span>
-                      <span className="text-gray-500 text-sm">({summary.mep})</span>
+                      <span className="text-gray-400 text-sm">({summary.mep})</span>
                     </div>
                     {expandedCategories.includes('mep') ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     )}
                   </button>
                   {expandedCategories.includes('mep') && (
                     <div className="px-3 pb-3 text-sm text-gray-400">
                       <p className="flex items-center gap-2">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Auto-creates MEP Equipment records
                       </p>
                       <p className="flex items-center gap-2 mt-1">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Tracks: HVAC, Electrical, Plumbing, Fire Protection
                       </p>
                       <p className="flex items-center gap-2 mt-1">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Schedules submittals, inspections, commissioning
                       </p>
                     </div>
@@ -358,24 +358,24 @@ export default function BIMDataPanel({
                     className="w-full p-3 flex items-center justify-between hover:bg-gray-800/50"
                   >
                     <div className="flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-purple-400" />
+                      <Layers className="w-4 h-4 text-purple-400" aria-hidden="true" />
                       <span className="text-white">Architectural</span>
-                      <span className="text-gray-500 text-sm">({summary.architectural})</span>
+                      <span className="text-gray-400 text-sm">({summary.architectural})</span>
                     </div>
                     {expandedCategories.includes('architectural') ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
                     )}
                   </button>
                   {expandedCategories.includes('architectural') && (
                     <div className="px-3 pb-3 text-sm text-gray-400">
                       <p className="flex items-center gap-2">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Door/Window schedules to Takeoff
                       </p>
                       <p className="flex items-center gap-2 mt-1">
-                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <ArrowRight className="w-3 h-3 text-green-400" aria-hidden="true" />
                         Finish schedules (CSI Div 08-12)
                       </p>
                     </div>
@@ -392,11 +392,11 @@ export default function BIMDataPanel({
               className="w-full p-3 flex items-center justify-between hover:bg-gray-800/30"
             >
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-400" />
+                <Zap className="w-4 h-4 text-yellow-400" aria-hidden="true" />
                 <span className="text-white font-medium">Automated Data Flows</span>
-                <span className="text-gray-500 text-sm">({dataFlows.length} active)</span>
+                <span className="text-gray-400 text-sm">({dataFlows.length} active)</span>
               </div>
-              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showFlows ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showFlows ? '' : '-rotate-90'}`} aria-hidden="true" />
             </button>
 
             {showFlows && (
@@ -409,10 +409,10 @@ export default function BIMDataPanel({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-cyan-400 font-medium">{flow.source}</span>
-                        <ArrowRight className="w-4 h-4 text-gray-500" />
+                        <ArrowRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
                         <span className="text-green-400 font-medium">{flow.destination}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-400 mt-1">
                         {flow.dataType} • {flow.count} items
                       </p>
                     </div>
@@ -422,11 +422,11 @@ export default function BIMDataPanel({
                       'bg-red-500/20'
                     }`}>
                       {flow.status === 'active' ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-400" />
+                        <CheckCircle2 className="w-4 h-4 text-green-400" aria-hidden="true" />
                       ) : flow.status === 'pending' ? (
-                        <Clock className="w-4 h-4 text-yellow-400" />
+                        <Clock className="w-4 h-4 text-yellow-400" aria-hidden="true" />
                       ) : (
-                        <AlertCircle className="w-4 h-4 text-red-400" />
+                        <AlertCircle className="w-4 h-4 text-red-400" aria-hidden="true" />
                       )}
                     </div>
                   </div>
@@ -438,13 +438,13 @@ export default function BIMDataPanel({
           {/* AI Chat Integration */}
           <div className="p-4 border-t border-gray-700 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
             <div className="flex items-start gap-3">
-              <MessageSquare className="w-5 h-5 text-purple-400 mt-0.5" />
+              <MessageSquare className="w-5 h-5 text-purple-400 mt-0.5" aria-hidden="true" />
               <div>
                 <h4 className="text-white font-medium">AI Chat Integration</h4>
                 <p className="text-sm text-gray-400 mt-1">
                   BIM data is indexed for natural language queries. Ask questions like:
                 </p>
-                <ul className="text-sm text-gray-500 mt-2 space-y-1">
+                <ul className="text-sm text-gray-400 mt-2 space-y-1">
                   <li>“How many HVAC units are in the model?”</li>
                   <li>“What's the total concrete volume?”</li>
                   <li>“List all doors on Level 2”</li>
@@ -455,7 +455,7 @@ export default function BIMDataPanel({
         </>
       ) : (
         <div className="p-8 text-center">
-          <Database className="w-10 h-10 text-gray-500 mx-auto mb-3" />
+          <Database className="w-10 h-10 text-gray-400 mx-auto mb-3" aria-hidden="true" />
           <p className="text-gray-400">No BIM data extracted yet</p>
           <button
             onClick={triggerExtraction}

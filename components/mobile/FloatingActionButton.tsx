@@ -114,7 +114,7 @@ export function FloatingActionButton({
                 onClick={action.onClick}
                 className={`w-12 h-12 rounded-full ${action.color} shadow-lg flex items-center justify-center transition-transform active:scale-95`}
               >
-                <action.icon className="w-5 h-5 text-white" />
+                <action.icon className="w-5 h-5 text-white" aria-hidden="true" />
               </button>
             </div>
           ))}

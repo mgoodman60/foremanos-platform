@@ -104,17 +104,17 @@ export function ScheduleFilters({
     <div className="flex flex-wrap items-center gap-3">
       {/* Search Input */}
       <div className="relative flex-1 min-w-[200px] max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
         <Input
           placeholder="Search tasks, IDs, descriptions..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="pl-9 bg-dark-surface border-gray-700 text-gray-100 placeholder:text-gray-500"
+          className="pl-9 bg-dark-surface border-gray-700 text-gray-100 placeholder:text-gray-400"
         />
         {searchInput && (
           <button
             onClick={() => setSearchInput('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
           >
             <X className="h-4 w-4" />
           </button>
@@ -131,14 +131,14 @@ export function ScheduleFilters({
               filters.statuses.length > 0 && "border-orange-500/50 bg-orange-500/10"
             )}
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4" aria-hidden="true" />
             Status
             {filters.statuses.length > 0 && (
               <Badge className="ml-1 bg-orange-500 text-white border-orange-400">
                 {filters.statuses.length}
               </Badge>
             )}
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-dark-card border-gray-700 w-48">
@@ -177,7 +177,7 @@ export function ScheduleFilters({
                   {filters.trades.length}
                 </Badge>
               )}
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-dark-card border-gray-700 w-56 max-h-64 overflow-y-auto">
@@ -214,7 +214,7 @@ export function ScheduleFilters({
                   {filters.assignees.length}
                 </Badge>
               )}
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-dark-card border-gray-700 w-56 max-h-64 overflow-y-auto">
@@ -245,7 +245,7 @@ export function ScheduleFilters({
             : 'bg-dark-hover border-gray-500 text-gray-200 hover:bg-gray-700 hover:border-gray-400'
         )}
       >
-        <Zap className={cn("h-4 w-4", filters.criticalPathOnly && "text-yellow-300")} />
+        <Zap className={cn("h-4 w-4", filters.criticalPathOnly && "text-yellow-300")} aria-hidden="true" />
         Critical Path
       </Button>
 
@@ -256,7 +256,7 @@ export function ScheduleFilters({
           onClick={clearFilters}
           className="text-gray-400 hover:text-gray-200"
         >
-          <X className="h-4 w-4 mr-1" />
+          <X className="h-4 w-4 mr-1" aria-hidden="true" />
           Clear ({activeFilterCount})
         </Button>
       )}

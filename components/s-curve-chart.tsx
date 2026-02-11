@@ -10,6 +10,7 @@ import { TrendingUp, Loader2, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { neutralColors, backgroundColors, borderColors, chartColors } from '@/lib/design-tokens';
 
 interface CurvePoint {
   date: string;
@@ -123,19 +124,19 @@ export default function SCurveChart() {
       <CardContent className="pt-4">
         <ResponsiveContainer width="100%" height={300}>
           <ComposedChart data={data.curve}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
             <XAxis
               dataKey="date"
-              stroke="#9CA3AF"
-              tick={{ fill: '#9CA3AF', fontSize: 11 }}
+              stroke={neutralColors.gray[400]}
+              tick={{ fill: neutralColors.gray[400], fontSize: 11 }}
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return `${date.getMonth() + 1}/${date.getDate()}`;
               }}
             />
             <YAxis
-              stroke="#9CA3AF"
-              tick={{ fill: '#9CA3AF', fontSize: 11 }}
+              stroke={neutralColors.gray[400]}
+              tick={{ fill: neutralColors.gray[400], fontSize: 11 }}
               tickFormatter={formatCurrency}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -147,7 +148,7 @@ export default function SCurveChart() {
               type="monotone"
               dataKey="plannedValue"
               name="Planned Value (PV)"
-              stroke="#3B82F6"
+              stroke={chartColors.neutral}
               strokeWidth={2}
               dot={false}
             />
@@ -157,7 +158,7 @@ export default function SCurveChart() {
                   type="monotone"
                   dataKey="earnedValue"
                   name="Earned Value (EV)"
-                  stroke="#10B981"
+                  stroke={chartColors.positive}
                   strokeWidth={2}
                   dot={false}
                 />
@@ -165,7 +166,7 @@ export default function SCurveChart() {
                   type="monotone"
                   dataKey="actualCost"
                   name="Actual Cost (AC)"
-                  stroke="#EF4444"
+                  stroke={chartColors.negative}
                   strokeWidth={2}
                   dot={false}
                 />

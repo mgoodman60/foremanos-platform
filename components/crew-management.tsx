@@ -260,7 +260,7 @@ export default function CrewManagement() {
           onClick={handleCreateCrew}
           className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus aria-hidden="true" className="w-4 h-4 mr-2" />
           Add Crew
         </Button>
       </div>
@@ -294,14 +294,14 @@ export default function CrewManagement() {
       {filteredCrews.length === 0 ? (
         <Card className="bg-dark-card border-gray-700">
           <CardContent className="py-12 text-center">
-            <Users className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+            <Users aria-hidden="true" className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <p className="text-gray-400">No crews found</p>
             <Button
               onClick={handleCreateCrew}
               variant="outline"
               className="mt-4"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus aria-hidden="true" className="w-4 h-4 mr-2" />
               Create First Crew
             </Button>
           </CardContent>
@@ -357,7 +357,7 @@ export default function CrewManagement() {
                 {/* Subcontractor */}
                 {crew.subcontractor && (
                   <div className="flex items-center text-sm text-gray-400">
-                    <Users className="w-4 h-4 mr-2" />
+                    <Users aria-hidden="true" className="w-4 h-4 mr-2" />
                     {crew.subcontractor.companyName}
                   </div>
                 )}
@@ -366,12 +366,12 @@ export default function CrewManagement() {
                 {crew.foremanName && (
                   <div className="space-y-1">
                     <div className="flex items-center text-sm text-gray-400">
-                      <Users className="w-4 h-4 mr-2" />
+                      <Users aria-hidden="true" className="w-4 h-4 mr-2" />
                       Foreman: {crew.foremanName}
                     </div>
                     {crew.foremanPhone && (
                       <div className="flex items-center text-sm text-gray-400 ml-6">
-                        <Phone className="w-3 h-3 mr-2" />
+                        <Phone aria-hidden="true" className="w-3 h-3 mr-2" />
                         {crew.foremanPhone}
                       </div>
                     )}
@@ -380,7 +380,7 @@ export default function CrewManagement() {
 
                 {/* Crew Size */}
                 <div className="flex items-center text-sm text-gray-400">
-                  <Users className="w-4 h-4 mr-2" />
+                  <Users aria-hidden="true" className="w-4 h-4 mr-2" />
                   Average Size: {crew.averageSize} workers
                 </div>
 
@@ -388,21 +388,21 @@ export default function CrewManagement() {
                 <div className="space-y-2 pt-2 border-t border-gray-700">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400 flex items-center">
-                      <TrendingUp className="w-4 h-4 mr-2" />
+                      <TrendingUp aria-hidden="true" className="w-4 h-4 mr-2" />
                       Productivity
                     </span>
                     {getScoreBadge(crew.productivityScore)}
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400 flex items-center">
-                      <Shield className="w-4 h-4 mr-2" />
+                      <Shield aria-hidden="true" className="w-4 h-4 mr-2" />
                       Safety
                     </span>
                     {getScoreBadge(crew.safetyScore)}
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400 flex items-center">
-                      <Award className="w-4 h-4 mr-2" />
+                      <Award aria-hidden="true" className="w-4 h-4 mr-2" />
                       Quality
                     </span>
                     {getScoreBadge(crew.qualityScore)}
@@ -410,7 +410,7 @@ export default function CrewManagement() {
                 </div>
 
                 {/* Statistics */}
-                <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-700">
+                <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-700">
                   <span>{crew._count?.assignments || 0} assignments</span>
                   <Badge variant={crew.isActive ? "default" : "outline"}>
                     {crew.isActive ? 'Active' : 'Inactive'}

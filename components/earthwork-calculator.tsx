@@ -216,7 +216,7 @@ export default function EarthworkCalculator({
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-900/30 rounded-lg">
-            <Mountain className="w-5 h-5 text-amber-500" />
+            <Mountain aria-hidden="true" className="w-5 h-5 text-amber-500" />
           </div>
           <div className="text-left">
             <h3 className="font-semibold text-slate-50">Earthwork Calculator</h3>
@@ -224,9 +224,9 @@ export default function EarthworkCalculator({
           </div>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
+          <ChevronUp className="w-5 h-5 text-gray-400" />
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
+          <ChevronDown className="w-5 h-5 text-gray-400" />
         )}
       </button>
       
@@ -247,7 +247,7 @@ export default function EarthworkCalculator({
                       : 'border-gray-600 hover:border-gray-500 text-gray-300'
                   }`}
                 >
-                  <Calculator className="w-5 h-5 mb-1" />
+                  <Calculator aria-hidden="true" className="w-5 h-5 mb-1" />
                   <div className="font-medium text-sm">Quick Estimate</div>
                   <div className="text-xs text-gray-400">From area & depths</div>
                 </button>
@@ -259,7 +259,7 @@ export default function EarthworkCalculator({
                       : 'border-gray-600 hover:border-gray-500 text-gray-300'
                   }`}
                 >
-                  <FileText className="w-5 h-5 mb-1" />
+                  <FileText aria-hidden="true" className="w-5 h-5 mb-1" />
                   <div className="font-medium text-sm">From Documents</div>
                   <div className="text-xs text-gray-400">AI extraction</div>
                 </button>
@@ -338,7 +338,7 @@ export default function EarthworkCalculator({
                 </label>
                 {documents.length === 0 ? (
                   <div className="text-center py-4 text-gray-400 text-sm bg-dark-surface rounded-lg">
-                    <Info className="w-5 h-5 mx-auto mb-2 text-gray-500" />
+                    <Info aria-hidden="true" className="w-5 h-5 mx-auto mb-2 text-gray-400" />
                     No grading/survey documents found.
                     Upload site survey or grading plans first.
                   </div>
@@ -393,12 +393,12 @@ export default function EarthworkCalculator({
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 aria-hidden="true" className="w-5 h-5 animate-spin" />
                   Calculating...
                 </>
               ) : (
                 <>
-                  <Calculator className="w-5 h-5" />
+                  <Calculator aria-hidden="true" className="w-5 h-5" />
                   Calculate Earthwork
                 </>
               )}
@@ -410,14 +410,14 @@ export default function EarthworkCalculator({
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-slate-50 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <CheckCircle aria-hidden="true" className="w-5 h-5 text-green-500" />
                   Calculation Results
                 </h4>
                 <button
                   onClick={downloadReport}
                   className="text-sm text-amber-500 hover:text-amber-400 flex items-center gap-1"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download aria-hidden="true" className="w-4 h-4" />
                   Download Report
                 </button>
               </div>
@@ -426,7 +426,7 @@ export default function EarthworkCalculator({
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-3 bg-red-900/30 rounded-lg border border-red-800">
                   <div className="flex items-center gap-1 text-red-400 text-xs font-medium mb-1">
-                    <TrendingDown className="w-3 h-3" />
+                    <TrendingDown aria-hidden="true" className="w-3 h-3" />
                     CUT
                   </div>
                   <div className="text-xl font-bold text-red-300">
@@ -436,7 +436,7 @@ export default function EarthworkCalculator({
                 </div>
                 <div className="p-3 bg-green-900/30 rounded-lg border border-green-800">
                   <div className="flex items-center gap-1 text-green-400 text-xs font-medium mb-1">
-                    <TrendingUp className="w-3 h-3" />
+                    <TrendingUp aria-hidden="true" className="w-3 h-3" />
                     FILL
                   </div>
                   <div className="text-xl font-bold text-green-300">
@@ -454,7 +454,7 @@ export default function EarthworkCalculator({
                   <div className={`flex items-center gap-1 text-xs font-medium mb-1 ${
                     result.netVolumeCY > 0 ? 'text-blue-400' : result.netVolumeCY < 0 ? 'text-orange-400' : 'text-gray-400'
                   }`}>
-                    <Minus className="w-3 h-3" />
+                    <Minus aria-hidden="true" className="w-3 h-3" />
                     NET
                   </div>
                   <div className={`text-xl font-bold ${
@@ -473,7 +473,7 @@ export default function EarthworkCalculator({
               {/* Balance Info */}
               <div className="p-3 bg-amber-900/30 rounded-lg border border-amber-700">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <AlertCircle aria-hidden="true" className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="font-medium text-amber-200">{result.balancePoint}</div>
                     <div className="text-sm text-amber-400 mt-1">

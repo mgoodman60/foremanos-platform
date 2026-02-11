@@ -109,13 +109,13 @@ export function RenderGallery({ projectSlug }: RenderGalleryProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
         <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-4">
-          <Paintbrush className="h-8 w-8 text-orange-400" />
+          <Paintbrush className="h-8 w-8 text-orange-400" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-semibold text-white mb-2">No renders yet</h2>
         <p className="text-sm text-gray-400 max-w-md mb-6">
           Create your first architectural rendering. AI will generate a visualization based on your project data and uploaded plans.
         </p>
-        <p className="text-xs text-gray-500 mb-6">
+        <p className="text-xs text-gray-400 mb-6">
           AI-generated conceptual visualization — for illustrative purposes only.
         </p>
         <Button
@@ -124,7 +124,7 @@ export function RenderGallery({ projectSlug }: RenderGalleryProps) {
             window.dispatchEvent(new CustomEvent('openRenderWizard'));
           }}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
           New Render
         </Button>
       </div>
@@ -145,7 +145,7 @@ export function RenderGallery({ projectSlug }: RenderGalleryProps) {
             window.dispatchEvent(new CustomEvent('openRenderWizard'));
           }}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
           New Render
         </Button>
       </div>
@@ -162,7 +162,7 @@ export function RenderGallery({ projectSlug }: RenderGalleryProps) {
 
       {renders.length === 0 && (
         <div className="text-center py-12 text-gray-400">
-          <Paintbrush className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <Paintbrush className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
           <p>No renders match your filters</p>
         </div>
       )}

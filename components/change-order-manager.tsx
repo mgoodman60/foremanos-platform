@@ -193,11 +193,11 @@ export default function ChangeOrderManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <FileEdit className="h-5 w-5 text-blue-400" />
+          <FileEdit aria-hidden="true" className="h-5 w-5 text-blue-400" />
           Change Orders
         </h3>
         <Button onClick={() => setShowAddModal(true)} size="sm" className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-1" /> New CO
+          <Plus aria-hidden="true" className="h-4 w-4 mr-1" /> New CO
         </Button>
       </div>
 
@@ -224,16 +224,16 @@ export default function ChangeOrderManager() {
                     <h4 className="text-white font-medium">{co.title}</h4>
                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
                       <span className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
+                        <DollarSign aria-hidden="true" className="h-4 w-4" />
                         {formatCurrency(co.proposedAmount)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar aria-hidden="true" className="h-4 w-4" />
                         {format(new Date(co.submittedDate), 'MMM d, yyyy')}
                       </span>
                       {co.scheduleImpactDays && (
                         <span className="flex items-center gap-1 text-orange-400">
-                          <Clock className="h-4 w-4" />
+                          <Clock aria-hidden="true" className="h-4 w-4" />
                           {co.scheduleImpactDays} days impact
                         </span>
                       )}

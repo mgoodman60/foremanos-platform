@@ -99,7 +99,7 @@ const WeatherIcon = ({ condition }: { condition: string | null }) => {
     case 'sunny': case 'clear': return <Sun className="w-5 h-5 text-yellow-400" />;
     case 'cloudy': case 'overcast': return <Cloud className="w-5 h-5 text-gray-400" />;
     case 'rainy': case 'rain': return <CloudRain className="w-5 h-5 text-blue-400" />;
-    default: return <Sun className="w-5 h-5 text-gray-500" />;
+    default: return <Sun className="w-5 h-5 text-gray-400" />;
   }
 };
 
@@ -459,11 +459,11 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="text-gray-500 text-xs block">Condition</span>
+                <span className="text-gray-400 text-xs block">Condition</span>
                 <span className="text-gray-200">{report.weatherCondition || '--'}</span>
               </div>
               <div>
-                <span className="text-gray-500 text-xs block">Temperature</span>
+                <span className="text-gray-400 text-xs block">Temperature</span>
                 <span className="text-gray-200">
                   {report.temperatureLow != null && report.temperatureHigh != null
                     ? `${report.temperatureLow}F - ${report.temperatureHigh}F`
@@ -473,20 +473,20 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                 </span>
               </div>
               <div>
-                <span className="text-gray-500 text-xs block">Humidity</span>
+                <span className="text-gray-400 text-xs block">Humidity</span>
                 <span className="text-gray-200">{report.humidity != null ? `${report.humidity}%` : '--'}</span>
               </div>
               <div>
-                <span className="text-gray-500 text-xs block">Wind</span>
+                <span className="text-gray-400 text-xs block">Wind</span>
                 <span className="text-gray-200">{report.windSpeed != null ? `${report.windSpeed} mph` : '--'}</span>
               </div>
               <div>
-                <span className="text-gray-500 text-xs block">Precipitation</span>
+                <span className="text-gray-400 text-xs block">Precipitation</span>
                 <span className="text-gray-200">{report.precipitation != null ? `${report.precipitation} in` : '--'}</span>
               </div>
               {report.weatherNotes && (
                 <div className="col-span-2 sm:col-span-3">
-                  <span className="text-gray-500 text-xs block">Notes</span>
+                  <span className="text-gray-400 text-xs block">Notes</span>
                   <span className="text-gray-300">{report.weatherNotes}</span>
                 </div>
               )}
@@ -555,7 +555,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-gray-500 text-xs border-b border-gray-700">
+                    <tr className="text-gray-400 text-xs border-b border-gray-700">
                       <th className="text-left pb-2 pr-4">Trade</th>
                       <th className="text-right pb-2 pr-4">Workers</th>
                       <th className="text-right pb-2 pr-4">Reg Hrs</th>
@@ -609,7 +609,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                     <div>
                       <span className="text-gray-200 text-sm">{entry.equipmentName}</span>
                       {entry.equipmentType && (
-                        <span className="text-gray-500 text-xs ml-2">({entry.equipmentType})</span>
+                        <span className="text-gray-400 text-xs ml-2">({entry.equipmentType})</span>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-sm">
@@ -646,7 +646,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                         style={{ width: `${Math.min(entry.percentComplete, 100)}%` }}
                       />
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                       {entry.location && <span>{entry.location}</span>}
                       {entry.unitsCompleted > 0 && (
                         <span>{entry.unitsCompleted} {entry.unitOfMeasure || 'units'}</span>
@@ -773,7 +773,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                     key={photoId}
                     className="aspect-square bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600"
                   >
-                    <ImageIcon className="w-6 h-6 text-gray-500" />
+                    <ImageIcon className="w-6 h-6 text-gray-400" />
                   </div>
                 ))}
               </div>
@@ -808,7 +808,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           >
             <div className="space-y-3">
               <div>
-                <span className="text-gray-500 text-xs block">Visitors</span>
+                <span className="text-gray-400 text-xs block">Visitors</span>
                 <span className="text-gray-300 text-sm">
                   {report.visitors
                     ? (typeof report.visitors === 'string' ? report.visitors : JSON.stringify(report.visitors))
@@ -816,7 +816,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                 </span>
               </div>
               <div>
-                <span className="text-gray-500 text-xs block">Materials Received</span>
+                <span className="text-gray-400 text-xs block">Materials Received</span>
                 <span className="text-gray-300 text-sm">
                   {report.materialsReceived
                     ? (typeof report.materialsReceived === 'string' ? report.materialsReceived : JSON.stringify(report.materialsReceived))
@@ -849,31 +849,31 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
             </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Report #</span>
+                <span className="text-gray-400">Report #</span>
                 <span className="text-gray-300">{report.reportNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Created</span>
+                <span className="text-gray-400">Created</span>
                 <span className="text-gray-300">{format(new Date(report.createdAt), 'MMM d, yyyy')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Last Updated</span>
+                <span className="text-gray-400">Last Updated</span>
                 <span className="text-gray-300">{format(new Date(report.updatedAt), 'MMM d, yyyy h:mm a')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Created By</span>
+                <span className="text-gray-400">Created By</span>
                 <span className="text-gray-300">{report.createdByUser.username}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Labor Entries</span>
+                <span className="text-gray-400">Labor Entries</span>
                 <span className="text-gray-300">{report.laborEntries.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Equipment</span>
+                <span className="text-gray-400">Equipment</span>
                 <span className="text-gray-300">{report.equipmentEntries.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Photos</span>
+                <span className="text-gray-400">Photos</span>
                 <span className="text-gray-300">{report.photoIds.length}</span>
               </div>
             </div>

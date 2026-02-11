@@ -45,7 +45,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     id: 'create-rfi',
     label: 'Create RFI',
-    icon: <FileText className="h-4 w-4" />,
+    icon: <FileText aria-hidden="true" className="h-4 w-4" />,
     description: 'Generate an RFI from this conversation',
     color: 'text-blue-400 hover:bg-blue-500/20',
     action: 'create-rfi'
@@ -53,7 +53,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     id: 'add-daily-report',
     label: 'Add to Daily Report',
-    icon: <ClipboardList className="h-4 w-4" />,
+    icon: <ClipboardList aria-hidden="true" className="h-4 w-4" />,
     description: 'Include this in today\'s daily report',
     color: 'text-green-400 hover:bg-green-500/20',
     action: 'add-daily-report'
@@ -61,7 +61,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     id: 'create-task',
     label: 'Create Task',
-    icon: <Calendar className="h-4 w-4" />,
+    icon: <Calendar aria-hidden="true" className="h-4 w-4" />,
     description: 'Add a new task to the schedule',
     color: 'text-purple-400 hover:bg-purple-500/20',
     action: 'create-task'
@@ -69,7 +69,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     id: 'flag-issue',
     label: 'Flag Issue',
-    icon: <AlertTriangle className="h-4 w-4" />,
+    icon: <AlertTriangle aria-hidden="true" className="h-4 w-4" />,
     description: 'Flag this as a potential issue',
     color: 'text-orange-400 hover:bg-orange-500/20',
     action: 'flag-issue'
@@ -77,7 +77,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     id: 'send-notification',
     label: 'Notify Team',
-    icon: <Send className="h-4 w-4" />,
+    icon: <Send aria-hidden="true" className="h-4 w-4" />,
     description: 'Send notification to team members',
     color: 'text-cyan-400 hover:bg-cyan-500/20',
     action: 'send-notification'
@@ -319,7 +319,7 @@ export function QuickActions({
                 {action.icon}
                 <div>
                   <div className="text-sm font-medium text-gray-200">{action.label}</div>
-                  <div className="text-xs text-gray-500">{action.description}</div>
+                  <div className="text-xs text-gray-400">{action.description}</div>
                 </div>
               </button>
             ))}
@@ -404,7 +404,7 @@ export function MessageQuickActions({
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 px-2 text-xs text-gray-500 hover:text-blue-400"
+        className="h-6 px-2 text-xs text-gray-400 hover:text-blue-400"
         onClick={() => handleQuickAction('rfi')}
         disabled={!!processing}
       >
@@ -413,7 +413,7 @@ export function MessageQuickActions({
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 px-2 text-xs text-gray-500 hover:text-green-400"
+        className="h-6 px-2 text-xs text-gray-400 hover:text-green-400"
         onClick={() => handleQuickAction('daily-report')}
         disabled={!!processing}
       >
@@ -422,7 +422,7 @@ export function MessageQuickActions({
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 px-2 text-xs text-gray-500 hover:text-orange-400"
+        className="h-6 px-2 text-xs text-gray-400 hover:text-orange-400"
         onClick={() => handleQuickAction('issue')}
         disabled={!!processing}
       >

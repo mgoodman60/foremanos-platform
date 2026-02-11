@@ -33,7 +33,7 @@ const ERROR_INFO: Record<UploadErrorType, {
   canRetry: boolean;
 }> = {
   network: {
-    icon: <WifiOff className="w-6 h-6 text-yellow-400" />,
+    icon: <WifiOff className="w-6 h-6 text-yellow-400" aria-hidden="true" />,
     title: 'Network Connection Lost',
     description: 'The upload was interrupted due to a network issue.',
     recoveryActions: [
@@ -45,7 +45,7 @@ const ERROR_INFO: Record<UploadErrorType, {
     canRetry: true,
   },
   file_size: {
-    icon: <FileX className="w-6 h-6 text-red-400" />,
+    icon: <FileX className="w-6 h-6 text-red-400" aria-hidden="true" />,
     title: 'File Too Large',
     description: 'The file exceeds the maximum allowed size.',
     recoveryActions: [
@@ -57,7 +57,7 @@ const ERROR_INFO: Record<UploadErrorType, {
     canRetry: false,
   },
   file_type: {
-    icon: <FileX className="w-6 h-6 text-orange-400" />,
+    icon: <FileX className="w-6 h-6 text-orange-400" aria-hidden="true" />,
     title: 'Unsupported File Type',
     description: 'This file format is not supported.',
     recoveryActions: [
@@ -68,7 +68,7 @@ const ERROR_INFO: Record<UploadErrorType, {
     canRetry: false,
   },
   server: {
-    icon: <Server className="w-6 h-6 text-red-400" />,
+    icon: <Server className="w-6 h-6 text-red-400" aria-hidden="true" />,
     title: 'Server Error',
     description: 'The server encountered an error processing your upload.',
     recoveryActions: [
@@ -80,7 +80,7 @@ const ERROR_INFO: Record<UploadErrorType, {
     canRetry: true,
   },
   unknown: {
-    icon: <AlertCircle className="w-6 h-6 text-gray-400" />,
+    icon: <AlertCircle className="w-6 h-6 text-gray-400" aria-hidden="true" />,
     title: 'Upload Failed',
     description: 'An unexpected error occurred during upload.',
     recoveryActions: [
@@ -173,7 +173,7 @@ export function UploadErrorDialog({
           {/* File info */}
           {error.fileName && (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-500">File:</span>
+              <span className="text-gray-400">File:</span>
               <span className="text-gray-300 truncate">{error.fileName}</span>
             </div>
           )}
@@ -207,7 +207,7 @@ export function UploadErrorDialog({
           {/* Recovery Actions */}
           <div>
             <h3 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-              <HelpCircle className="w-4 h-4" />
+              <HelpCircle className="w-4 h-4" aria-hidden="true" />
               What you can do:
             </h3>
             <ul className="space-y-2">
@@ -239,7 +239,7 @@ export function UploadErrorDialog({
               onClick={onRetry}
               className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" aria-hidden="true" />
               {canResume ? 'Resume Upload' : 'Try Again'}
             </button>
           )}

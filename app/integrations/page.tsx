@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function IntegrationsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+    <main id="main-content" className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       <LandingHeader />
       {/* Hero */}
       <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
@@ -52,7 +52,7 @@ export default function IntegrationsPage() {
               </div>
               <div className="bg-gray-900/50 rounded-lg p-6 border border-purple-500/50">
                 <h3 className="font-semibold mb-2">OneDrive</h3>
-                <p className="text-sm text-purple-400">Live now -- document sync</p>
+                <p className="text-sm text-purple-400">Live now {'\u2014'} document sync</p>
               </div>
               <div className="bg-gray-900/50 rounded-lg p-6 border border-gray-700">
                 <h3 className="font-semibold mb-2">Dropbox</h3>
@@ -67,7 +67,7 @@ export default function IntegrationsPage() {
             <div className="bg-purple-900/20 rounded-lg p-6 border border-purple-700/50 mb-8">
               <h3 className="text-lg font-semibold mb-3">Need a Specific Integration?</h3>
               <p className="text-gray-300">
-                Tell us what tools your team uses daily. We build integrations based on what our customers actually need -- not a feature list for a sales deck.
+                Tell us what tools your team uses daily. We build integrations based on what our customers actually need {'\u2014'} not a feature list for a sales deck.
               </p>
             </div>
 
@@ -82,6 +82,6 @@ export default function IntegrationsPage() {
         </div>
       </section>
       <Footer />
-    </div>
+    </main>
   );
 }

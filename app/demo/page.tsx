@@ -46,7 +46,7 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+    <main id="main-content" className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       <LandingHeader />
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
@@ -267,6 +267,6 @@ export default function DemoPage() {
         </div>
       </div>
       <Footer />
-    </div>
+    </main>
   );
 }

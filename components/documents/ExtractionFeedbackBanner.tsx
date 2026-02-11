@@ -41,7 +41,7 @@ export default function ExtractionFeedbackBanner({ documentName, documentId, pro
   return (
     <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
       <div className="flex items-start gap-3">
-        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+        <CheckCircle aria-hidden="true" className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-green-800">
             Processing complete for &ldquo;{documentName}&rdquo;
@@ -57,7 +57,7 @@ export default function ExtractionFeedbackBanner({ documentName, documentId, pro
           </div>
           {intelligence.lowConfidenceCount > 0 && (
             <div className="flex items-center gap-1 mt-2 text-sm text-amber-600">
-              <AlertTriangle className="h-3.5 w-3.5" />
+              <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5" />
               {intelligence.lowConfidenceCount} sheet{intelligence.lowConfidenceCount > 1 ? 's' : ''} had low confidence -- review recommended
             </div>
           )}
@@ -65,7 +65,7 @@ export default function ExtractionFeedbackBanner({ documentName, documentId, pro
             href={`/project/${projectSlug}/documents/${documentId}`}
             className="inline-flex items-center gap-1 mt-2 text-sm text-green-700 hover:text-green-900 font-medium"
           >
-            <Eye className="h-3.5 w-3.5" /> View Details
+            <Eye aria-hidden="true" className="h-3.5 w-3.5" /> View Details
           </Link>
         </div>
         <button

@@ -12,6 +12,7 @@ import { RenderPicker } from './RenderPicker';
 import { LogoUploader } from './LogoUploader';
 import { PresentationBoardPreview } from './PresentationBoardPreview';
 import { PresentationExportBar } from './PresentationExportBar';
+import { primaryColors, secondaryColors } from '@/lib/design-tokens';
 
 interface BoardData {
   title: string;
@@ -42,8 +43,8 @@ const DEFAULT_BOARD: BoardData = {
     month: 'long',
     year: 'numeric',
   }),
-  primaryColor: '#F97316',
-  accentColor: '#003B71',
+  primaryColor: primaryColors.orange[500],
+  accentColor: secondaryColors.blue.brand,
   renderIds: [],
   companyLogoUrl: null,
   clientLogoUrl: null,
@@ -93,8 +94,8 @@ export function PresentationBoardEditor({
           tagline: board.tagline || '',
           contactInfo: board.contactInfo || '',
           dateText: board.dateText || '',
-          primaryColor: board.primaryColor || '#F97316',
-          accentColor: board.accentColor || '#003B71',
+          primaryColor: board.primaryColor || primaryColors.orange[500],
+          accentColor: board.accentColor || secondaryColors.blue.brand,
           renderIds: board.renderIds || [],
           companyLogoUrl: board.companyLogoUrl || null,
           clientLogoUrl: board.clientLogoUrl || null,
@@ -214,7 +215,7 @@ export function PresentationBoardEditor({
             onClick={onBack}
             className="gap-2"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={16} aria-hidden="true" />
             <span className="hidden sm:inline">Back</span>
           </Button>
           <Input
@@ -240,9 +241,9 @@ export function PresentationBoardEditor({
             className="gap-2"
           >
             {saving ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" aria-hidden="true" />
             ) : (
-              <Save size={14} />
+              <Save size={14} aria-hidden="true" />
             )}
             Save
           </Button>

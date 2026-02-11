@@ -732,7 +732,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                       </div>
                     </td>
                     {[...week1Dates, ...week2Dates, ...week3Dates].map((date, i) => (
-                      <td key={`${group.id}-date-${i}`} className="border border-gray-600 print:border-gray-400 p-1 text-center text-gray-500 print:text-gray-400 text-[10px]">
+                      <td key={`${group.id}-date-${i}`} className="border border-gray-600 print:border-gray-400 p-1 text-center text-gray-400 print:text-gray-400 text-[10px]">
                         {format(date, 'M/d')}
                       </td>
                     ))}
@@ -823,7 +823,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                   {/* Empty row if no tasks and not collapsed */}
                   {!isCollapsed && group.tasks.length === 0 && (
                     <tr key={`${group.id}-empty`}>
-                      <td className="border border-gray-600 print:border-gray-400 p-2 text-gray-500 italic">
+                      <td className="border border-gray-600 print:border-gray-400 p-2 text-gray-400 italic">
                         No tasks scheduled
                       </td>
                       {[...Array(21)].map((_, i) => (
@@ -883,28 +883,28 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                     <p className="text-xl font-bold text-blue-400 print:text-blue-600">
                       ${totalBudgeted.toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-gray-500">{tasksWithCosts} tasks with budget</p>
+                    <p className="text-[10px] text-gray-400">{tasksWithCosts} tasks with budget</p>
                   </div>
                   <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Actual Cost</p>
                     <p className="text-xl font-bold text-green-400 print:text-green-600">
                       ${totalActual.toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-gray-500">Incurred to date</p>
+                    <p className="text-[10px] text-gray-400">Incurred to date</p>
                   </div>
                   <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Variance</p>
                     <p className={`text-xl font-bold ${variance >= 0 ? 'text-green-400 print:text-green-600' : 'text-red-400 print:text-red-600'}`}>
                       {variance >= 0 ? '+' : ''} ${variance.toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-gray-500">{variance >= 0 ? 'Under budget' : 'Over budget'}</p>
+                    <p className="text-[10px] text-gray-400">{variance >= 0 ? 'Under budget' : 'Over budget'}</p>
                   </div>
                   <div className="bg-dark-surface rounded p-3 print:bg-white print:border print:border-gray-200">
                     <p className="text-xs text-gray-400 print:text-gray-600">Cost % Complete</p>
                     <p className="text-xl font-bold text-yellow-400 print:text-yellow-600">
                       {totalBudgeted > 0 ? Math.round((totalActual / totalBudgeted) * 100) : 0}%
                     </p>
-                    <p className="text-[10px] text-gray-500">Of budgeted amount</p>
+                    <p className="text-[10px] text-gray-400">Of budgeted amount</p>
                   </div>
                 </>
               );
@@ -925,7 +925,7 @@ export default function ThreeWeekLookahead({ projectSlug, onTaskClick }: ThreeWe
                       <p className="text-xs text-gray-400 print:text-gray-600 truncate">{group.name}</p>
                       <div className="flex justify-between items-baseline">
                         <span className="text-sm font-medium text-white print:text-black">${groupActual.toLocaleString()}</span>
-                        <span className="text-[10px] text-gray-500">/ ${groupBudget.toLocaleString()}</span>
+                        <span className="text-[10px] text-gray-400">/ ${groupBudget.toLocaleString()}</span>
                       </div>
                     </div>
                   );

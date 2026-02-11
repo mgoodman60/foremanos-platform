@@ -158,7 +158,7 @@ export function KeyboardShortcutsHelp({ open, onOpenChange }: KeyboardShortcutsH
       <DialogContent className="bg-dark-card border-gray-700 text-gray-100 max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
-            <Keyboard className="h-5 w-5 text-orange-500" />
+            <Keyboard className="h-5 w-5 text-orange-500" aria-hidden="true" />
             Keyboard Shortcuts
           </DialogTitle>
         </DialogHeader>
@@ -173,7 +173,7 @@ export function KeyboardShortcutsHelp({ open, onOpenChange }: KeyboardShortcutsH
                       {key}
                     </kbd>
                     {i < shortcut.keys.length - 1 && (
-                      <span className="mx-1 text-gray-500 text-xs">+</span>
+                      <span className="mx-1 text-gray-400 text-xs">+</span>
                     )}
                   </span>
                 ))}
@@ -182,7 +182,7 @@ export function KeyboardShortcutsHelp({ open, onOpenChange }: KeyboardShortcutsH
           ))}
         </div>
         <div className="mt-4 pt-4 border-t border-gray-700">
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-gray-400 text-center">
             Press <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs">?</kbd> anytime to toggle this menu
           </p>
         </div>

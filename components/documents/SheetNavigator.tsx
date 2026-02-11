@@ -27,7 +27,7 @@ export default function SheetNavigator({ sheets, drawingTypes, selectedSheet, on
 
   return (
     <div className="py-2">
-      <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
         Sheets ({sheets.length})
       </div>
       {sortedDisciplines.map(discipline => {
@@ -55,7 +55,7 @@ export default function SheetNavigator({ sheets, drawingTypes, selectedSheet, on
                   }`}
                 >
                   <div className="font-medium truncate">{sheet.sheetNumber}</div>
-                  <div className="text-xs text-gray-500 truncate">
+                  <div className="text-xs text-gray-400 truncate">
                     {dt ? getDrawingTypeLabel(dt.type) : 'Unknown type'}
                   </div>
                 </button>

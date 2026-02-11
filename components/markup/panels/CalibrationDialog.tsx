@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { secondaryColors } from '@/lib/design-tokens';
 import {
   Dialog,
   DialogContent,
@@ -188,7 +189,7 @@ export function CalibrationDialog({
             )}
             {point1 && point2 && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                <line x1={point1.x} y1={point1.y} x2={point2.x} y2={point2.y} stroke="#2563EB" strokeWidth="2" />
+                <line x1={point1.x} y1={point1.y} x2={point2.x} y2={point2.y} stroke={secondaryColors.blue[600]} strokeWidth="2" />
               </svg>
             )}
           </div>

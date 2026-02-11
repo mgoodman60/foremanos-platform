@@ -84,7 +84,7 @@ lib/                  # 277 service modules (RAG, S3, Stripe, auth, offline-stor
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
 components/           # 337 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
 prisma/               # Database schema and migrations (112 models)
-__tests__/            # Vitest tests (225 test files: 182 lib + 32 API + 3 smoke)
+__tests__/            # Vitest tests (241 test files: 182 lib + 32 API + 3 smoke)
 e2e/                  # Playwright E2E tests (23 spec files)
 .claude/agents/       # 24 custom Claude Code agents
 .claude/skills/       # 14 project slash commands + 24 installed skills (see below)
@@ -393,7 +393,7 @@ Comprehensive codebase quality initiative addressing TypeScript errors, logging,
 **Sprint 4**: Added 20 test files for critical business logic (+632 tests)
 **Sprint 5**: Added 19 lib test files + 4 API route tests (+502 tests)
 
-**Key outcomes**: Zero TS errors, zero `console.log` in `lib/`, no file exceeds ~900 lines, 221→222 test files, 7572→8706 tests. All barrel re-exports preserve original import paths — zero consumer changes needed.
+**Key outcomes**: Zero TS errors, zero `console.log` in `lib/`, no file exceeds ~900 lines, 221→241 test files, 7572→9417 tests. All barrel re-exports preserve original import paths — zero consumer changes needed.
 
 ### Dashboard Polish Sprint (Feb 2026) — COMPLETE
 
@@ -429,13 +429,14 @@ Full dashboard refinement: branding, widget reorganization, intelligence scoring
 
 ## Testing
 
-- **Vitest**: 225 test files, 8845 tests total (8845 passing, 41 skipped)
+- **Vitest**: 241 test files (239 passed, 2 skipped), 9417 tests total (9343 passing, 74 skipped)
   - 182 lib tests (`__tests__/lib/`)
   - 32 API tests (`__tests__/api/`)
   - 3 smoke tests (`__tests__/smoke/`)
   - 1 hooks test (`__tests__/hooks/`)
   - 3 coverage gap tests
 - **Playwright**: 23 E2E spec files in `e2e/`
+- **TypeScript 5.8.3**: Strict mode enabled
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
 - **Comprehensive lib coverage**: All major lib modules have dedicated test files
 
@@ -853,11 +854,16 @@ npm run build
 
 ## Recent Changes & Known Blockers
 
-### Remaining NPM Vulnerabilities (8 — require breaking changes)
-- esbuild (Vitest 2.x) - 3 MODERATE: Vitest 4.x causes 358 test failures
-- eslint - 1 MODERATE: Requires ESLint 9 + flat config migration
-- Next.js DoS - 2 HIGH: Requires Next.js 15+ major version upgrade
-- tar - 3 HIGH: Canvas rebuild fails (no Node.js v25 prebuilt binaries)
+### Technical Debt Sprint (Feb 2026) — COMPLETE
+- Updated TypeScript 5.2.2 → 5.8.3
+- Removed `@tanstack/react-query` (zero imports found)
+- Updated Radix UI packages to latest minor versions
+- Fixed all `npm audit` issues that don't require breaking changes
+
+### Remaining NPM Vulnerabilities (6 — require breaking changes)
+- esbuild (Vitest 2.x) - 4 MODERATE: Dev-only, affects vite dev server not production
+- Next.js DoS - 1 HIGH (2 CVEs): Requires Next.js 15+ major version upgrade. Image Optimizer CVE doesn't apply (no remotePatterns configured). RSC deserialization mitigated by Vercel edge runtime.
+- webpack buildHttp SSRF - 1 LOW: Requires experiments.buildHttp (not used)
 
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. See `model-config.ts` for all constants. Key points:

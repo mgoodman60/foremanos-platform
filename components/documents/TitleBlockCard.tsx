@@ -31,14 +31,14 @@ export default function TitleBlockCard({ data }: Props) {
   );
 
   if (entries.length === 0) {
-    return <p className="text-sm text-gray-500 italic">No title block data extracted</p>;
+    return <p className="text-sm text-gray-400 italic">No title block data extracted</p>;
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 pt-2">
       {entries.map(([key, value]) => (
         <div key={key} className="flex flex-col py-1">
-          <span className="text-xs text-gray-500">{FIELD_LABELS[key] || key.replace(/([A-Z])/g, ' $1').trim()}</span>
+          <span className="text-xs text-gray-400">{FIELD_LABELS[key] || key.replace(/([A-Z])/g, ' $1').trim()}</span>
           <span className="text-sm text-gray-900 break-words">
             {typeof value === 'object' ? JSON.stringify(value) : String(value)}
           </span>

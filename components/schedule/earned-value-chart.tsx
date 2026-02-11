@@ -268,7 +268,7 @@ export function EarnedValueChart({
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <LineChart className="h-5 w-5 text-purple-400" />
+              <LineChart className="h-5 w-5 text-purple-400" aria-hidden="true" />
               <h3 className="text-sm font-semibold text-gray-200">Earned Value Analysis</h3>
               <Badge 
                 variant="outline" 
@@ -323,7 +323,7 @@ export function EarnedValueChart({
             {/* CPI */}
             <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
-                <DollarSign className="h-3 w-3" />
+                <DollarSign className="h-3 w-3" aria-hidden="true" />
                 CPI
               </div>
               <div className={cn(
@@ -333,7 +333,7 @@ export function EarnedValueChart({
               )}>
                 {metrics.cpi.toFixed(2)}
               </div>
-              <div className="text-[9px] text-gray-500">
+              <div className="text-[9px] text-gray-400">
                 {metrics.cpi >= 1 ? 'Under Budget' : 'Over Budget'}
               </div>
             </div>
@@ -341,7 +341,7 @@ export function EarnedValueChart({
             {/* SPI */}
             <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3 w-3" aria-hidden="true" />
                 SPI
               </div>
               <div className={cn(
@@ -351,7 +351,7 @@ export function EarnedValueChart({
               )}>
                 {metrics.spi.toFixed(2)}
               </div>
-              <div className="text-[9px] text-gray-500">
+              <div className="text-[9px] text-gray-400">
                 {metrics.spi >= 1 ? 'Ahead' : 'Behind'}
               </div>
             </div>
@@ -360,9 +360,9 @@ export function EarnedValueChart({
             <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 {metrics.cv >= 0 ? (
-                  <TrendingDown className="h-3 w-3 text-green-400" />
+                  <TrendingDown className="h-3 w-3 text-green-400" aria-hidden="true" />
                 ) : (
-                  <TrendingUp className="h-3 w-3 text-red-400" />
+                  <TrendingUp className="h-3 w-3 text-red-400" aria-hidden="true" />
                 )}
                 CV
               </div>
@@ -372,7 +372,7 @@ export function EarnedValueChart({
               )}>
                 {formatCurrency(Math.abs(metrics.cv))}
               </div>
-              <div className="text-[9px] text-gray-500">
+              <div className="text-[9px] text-gray-400">
                 {metrics.cv >= 0 ? 'Under' : 'Over'}
               </div>
             </div>
@@ -380,7 +380,7 @@ export function EarnedValueChart({
             {/* Schedule Variance */}
             <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
-                <Activity className="h-3 w-3" />
+                <Activity className="h-3 w-3" aria-hidden="true" />
                 SV
               </div>
               <div className={cn(
@@ -389,7 +389,7 @@ export function EarnedValueChart({
               )}>
                 {formatCurrency(Math.abs(metrics.sv))}
               </div>
-              <div className="text-[9px] text-gray-500">
+              <div className="text-[9px] text-gray-400">
                 {metrics.sv >= 0 ? 'Ahead' : 'Behind'}
               </div>
             </div>
@@ -397,7 +397,7 @@ export function EarnedValueChart({
             {/* EAC */}
             <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
-                <Target className="h-3 w-3" />
+                <Target className="h-3 w-3" aria-hidden="true" />
                 EAC
               </div>
               <div className={cn(
@@ -406,7 +406,7 @@ export function EarnedValueChart({
               )}>
                 {formatCurrency(metrics.eac)}
               </div>
-              <div className="text-[9px] text-gray-500">
+              <div className="text-[9px] text-gray-400">
                 Forecast Total
               </div>
             </div>
@@ -415,9 +415,9 @@ export function EarnedValueChart({
             <div className="bg-dark-card rounded-lg p-2">
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mb-0.5">
                 {metrics.vac >= 0 ? (
-                  <CheckCircle2 className="h-3 w-3 text-green-400" />
+                  <CheckCircle2 className="h-3 w-3 text-green-400" aria-hidden="true" />
                 ) : (
-                  <AlertTriangle className="h-3 w-3 text-red-400" />
+                  <AlertTriangle className="h-3 w-3 text-red-400" aria-hidden="true" />
                 )}
                 VAC
               </div>
@@ -427,7 +427,7 @@ export function EarnedValueChart({
               )}>
                 {metrics.vac >= 0 ? '+' : ''}{formatCurrency(metrics.vac)}
               </div>
-              <div className="text-[9px] text-gray-500">
+              <div className="text-[9px] text-gray-400">
                 {metrics.vac >= 0 ? 'Under Est.' : 'Over Est.'}
               </div>
             </div>
@@ -436,7 +436,7 @@ export function EarnedValueChart({
           {/* S-Curve Chart */}
           <div className="relative">
             {/* Y-axis labels */}
-            <div className="absolute left-0 top-0 bottom-6 w-12 flex flex-col justify-between text-[10px] text-gray-500 pr-1 text-right">
+            <div className="absolute left-0 top-0 bottom-6 w-12 flex flex-col justify-between text-[10px] text-gray-400 pr-1 text-right">
               <span>{formatCurrency(maxValue)}</span>
               <span>{formatCurrency(maxValue * 0.75)}</span>
               <span>{formatCurrency(maxValue * 0.5)}</span>
@@ -605,7 +605,7 @@ export function EarnedValueChart({
                 {weeklyData.filter((_, i) => i % Math.ceil(weeklyData.length / 8) === 0 || i === weeklyData.length - 1).map((week, idx) => (
                   <div 
                     key={idx}
-                    className="text-[10px] text-gray-500"
+                    className="text-[10px] text-gray-400"
                     style={{ flex: 1 }}
                   >
                     {format(week.weekStart, 'MMM d')}

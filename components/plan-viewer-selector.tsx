@@ -142,7 +142,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
             placeholder="Search plan documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-500"
+            className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-400"
           />
         </div>
 
@@ -177,7 +177,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
                   ? 'No plan documents match your search'
                   : 'No plan documents found'}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-400">
                 {searchQuery
                   ? 'Try adjusting your search'
                   : 'Upload PDF plans to view them here'}
@@ -213,7 +213,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
                   <p className="text-xs text-gray-400 mb-2 truncate">{doc.fileName}</p>
 
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="text-gray-500">
+                    <span className="text-gray-400">
                       Uploaded: {new Date(doc.createdAt).toLocaleDateString()}
                     </span>
 

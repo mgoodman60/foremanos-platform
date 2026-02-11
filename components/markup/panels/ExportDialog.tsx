@@ -147,7 +147,7 @@ export function ExportDialog({ slug, documentId, open, onOpenChange }: ExportDia
             Cancel
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
             {exporting ? 'Exporting...' : 'Export'}
           </Button>
         </DialogFooter>

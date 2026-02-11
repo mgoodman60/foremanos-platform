@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar, AlertTriangle, CheckCircle2, Clock, ChevronRight, ChevronDown, Flag, GripVertical, Layers, Eye, EyeOff, Link2, Activity, Zap, Timer, TrendingDown, PlayCircle, Beaker, Undo2, Move } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { neutralColors } from '@/lib/design-tokens';
 import { TradeFilter, TradeOption } from './trade-filter';
 import { DependencyLines, DependencyTypeSelector } from './dependency-lines';
 import { InlineTaskEditor } from './inline-task-editor';
@@ -65,28 +66,28 @@ const categoryStyles: Record<TaskCategory, { bg: string; border: string; text: s
     bg: 'bg-red-600',
     border: 'ring-2 ring-red-400 ring-offset-1 ring-offset-dark-card',
     text: 'text-red-400',
-    icon: <Zap className="h-3 w-3" />,
+    icon: <Zap className="h-3 w-3" aria-hidden="true" />,
     label: 'Critical Path'
   },
   'whats-next': {
     bg: 'bg-amber-500',
     border: 'ring-2 ring-amber-400/50 ring-offset-1 ring-offset-dark-card',
     text: 'text-amber-400',
-    icon: <PlayCircle className="h-3 w-3" />,
+    icon: <PlayCircle className="h-3 w-3" aria-hidden="true" />,
     label: "What's Next"
   },
   'at-risk': {
     bg: 'bg-orange-500',
     border: 'ring-1 ring-orange-400/50',
     text: 'text-orange-400',
-    icon: <Timer className="h-3 w-3" />,
+    icon: <Timer className="h-3 w-3" aria-hidden="true" />,
     label: 'At Risk'
   },
   'behind': {
     bg: 'bg-rose-600',
     border: 'ring-2 ring-rose-400/70 ring-offset-1 ring-offset-dark-card',
     text: 'text-rose-400',
-    icon: <TrendingDown className="h-3 w-3" />,
+    icon: <TrendingDown className="h-3 w-3" aria-hidden="true" />,
     label: 'Behind Schedule'
   },
   'on-track': {
@@ -100,7 +101,7 @@ const categoryStyles: Record<TaskCategory, { bg: string; border: string; text: s
     bg: 'bg-green-500',
     border: '',
     text: 'text-green-400',
-    icon: <CheckCircle2 className="h-3 w-3" />,
+    icon: <CheckCircle2 className="h-3 w-3" aria-hidden="true" />,
     label: 'Completed'
   }
 };
@@ -637,7 +638,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
           
           toast.success(`Simulated: ${daysMoved > 0 ? '+' : ''}${daysMoved} day${Math.abs(daysMoved) > 1 ? 's' : ''}`, {
             description: 'Changes are in What-If mode. Apply to save.',
-            icon: <Beaker className="h-4 w-4 text-purple-400" />
+            icon: <Beaker className="h-4 w-4 text-purple-400" aria-hidden="true" />
           });
         } else if (onTaskUpdate) {
           // Normal mode - actually update
@@ -680,9 +681,9 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle2 className="h-4 w-4" />;
-      case 'in_progress': return <Clock className="h-4 w-4" />;
-      case 'delayed': return <AlertTriangle className="h-4 w-4" />;
+      case 'completed': return <CheckCircle2 className="h-4 w-4" aria-hidden="true" />;
+      case 'in_progress': return <Clock className="h-4 w-4" aria-hidden="true" />;
+      case 'delayed': return <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
       default: return null;
     }
   };
@@ -755,7 +756,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-gray-400" />
+          <Calendar className="h-5 w-5 text-gray-400" aria-hidden="true" />
           <span className="text-sm text-gray-300">
             {format(startDate, 'MMM d, yyyy')} - {format(endDate, 'MMM d, yyyy')}
           </span>
@@ -774,7 +775,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
               "text-sm flex items-center gap-1.5 cursor-pointer",
               showBaseline ? "text-orange-400" : "text-gray-400"
             )}>
-              <Layers className="h-4 w-4" />
+              <Layers className="h-4 w-4" aria-hidden="true" />
               Baseline
             </Label>
           </div>
@@ -791,7 +792,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
               "text-sm flex items-center gap-1.5 cursor-pointer",
               showP6Columns ? "text-orange-400" : "text-gray-400"
             )}>
-              {showP6Columns ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              {showP6Columns ? <Eye className="h-4 w-4" aria-hidden="true" /> : <EyeOff className="h-4 w-4" aria-hidden="true" />}
               P6 View
             </Label>
           </div>
@@ -808,7 +809,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
               "text-sm flex items-center gap-1.5 cursor-pointer",
               showDependencyLines ? "text-blue-400" : "text-gray-400"
             )}>
-              <Link2 className="h-4 w-4" />
+              <Link2 className="h-4 w-4" aria-hidden="true" />
               Dependencies
             </Label>
             {/* Dependency Type Selector (only visible when enabled) */}
@@ -908,7 +909,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
             "text-sm flex items-center gap-1.5 cursor-pointer",
             snapToWeek ? "text-green-400" : "text-gray-400"
           )}>
-            <Move className="h-4 w-4" />
+            <Move className="h-4 w-4" aria-hidden="true" />
             Snap to Week
           </Label>
         </div>
@@ -921,7 +922,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
             onClick={undoLastDrag}
             className="gap-1.5 text-amber-400 hover:text-amber-300 hover:bg-amber-900/20"
           >
-            <Undo2 className="h-4 w-4" />
+            <Undo2 className="h-4 w-4" aria-hidden="true" />
             Undo
             <Badge variant="outline" className="border-amber-500/50 text-amber-400 ml-1 text-[10px]">
               {dragHistory.length}
@@ -1091,7 +1092,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
               )}
               {/* Marker legend */}
               <div className="flex items-center gap-1 ml-auto border-l border-gray-600 pl-4">
-                <span className="text-gray-500 mr-2">Markers:</span>
+                <span className="text-gray-400 mr-2">Markers:</span>
                 <div className="flex items-center gap-1.5">
                   <div className="w-0.5 h-4 bg-red-500 rounded" />
                   <span className="text-gray-400">Today</span>
@@ -1149,7 +1150,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                           </div>
                           {/* WBS Code */}
                           <div className="px-2 py-3 border-r border-gray-700 flex items-center justify-center">
-                            <span className="text-xs font-mono text-gray-500">{task.wbsCode || '-'}</span>
+                            <span className="text-xs font-mono text-gray-400">{task.wbsCode || '-'}</span>
                           </div>
                           {/* Task Name */}
                           <div className="px-2 py-3 border-r border-gray-700 flex items-center gap-1">
@@ -1369,7 +1370,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                                       className="absolute inset-y-0 left-0 bg-white/25 rounded-l"
                                       style={{ width: `${task.percentComplete}%` }}
                                     />
-                                    <GripVertical className="h-3 w-3 text-white/50 absolute left-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <GripVertical className="h-3 w-3 text-white/50 absolute left-0.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                                     <div className="flex items-center gap-1 w-full pl-3 relative z-10">
                                       {/* Category icon */}
                                       {styles.icon}
@@ -1391,7 +1392,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                                 {!isEditingProgress && isModifiedInWhatIf && (
                                   <div className="absolute -top-1 -right-1 flex items-center gap-0.5">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                                    <Beaker className="h-3 w-3 text-purple-300" />
+                                    <Beaker className="h-3 w-3 text-purple-300" aria-hidden="true" />
                                   </div>
                                 )}
                                 {/* Category indicator pulse (only if not modified in what-if) */}
@@ -1457,7 +1458,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
 
                     {/* Inline Task Editor (shown on double-click) */}
                     {editingTaskId === task.taskId && (
-                      <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center" onClick={() => setEditingTaskId(null)}>
+                      <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center" onClick={() => setEditingTaskId(null)} onKeyDown={(e) => e.key === 'Escape' && setEditingTaskId(null)} role="button" tabIndex={-1} aria-label="Close overlay">
                         <div ref={taskEditorTrapRef} role="dialog" aria-modal="true" aria-label="Edit Task" onClick={(e) => e.stopPropagation()}>
                           <InlineTaskEditor
                             task={task}
@@ -1524,7 +1525,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                               <div className="text-xs text-gray-400 mt-1">
                                 {format(milestoneDate, 'MMM d, yyyy')}
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">{milestone.type}</div>
+                              <div className="text-xs text-gray-400 mt-1">{milestone.type}</div>
                             </div>
                           </div>
                           
@@ -1555,7 +1556,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         {/* Critical Path */}
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded bg-red-600 ring-2 ring-red-400/50 flex items-center justify-center">
-            <Zap className="h-2.5 w-2.5 text-white" />
+            <Zap className="h-2.5 w-2.5 text-white" aria-hidden="true" />
           </div>
           <span className="text-gray-300 text-xs">Critical Path</span>
         </div>
@@ -1563,7 +1564,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         {/* What's Next */}
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded bg-amber-500 ring-2 ring-amber-400/50 flex items-center justify-center">
-            <PlayCircle className="h-2.5 w-2.5 text-white" />
+            <PlayCircle className="h-2.5 w-2.5 text-white" aria-hidden="true" />
           </div>
           <span className="text-gray-300 text-xs">What&apos;s Next (7d)</span>
         </div>
@@ -1571,7 +1572,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         {/* At Risk */}
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded bg-orange-500 flex items-center justify-center">
-            <Timer className="h-2.5 w-2.5 text-white" />
+            <Timer className="h-2.5 w-2.5 text-white" aria-hidden="true" />
           </div>
           <span className="text-gray-300 text-xs">At Risk (Low Float)</span>
         </div>
@@ -1579,7 +1580,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         {/* Behind Schedule */}
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded bg-rose-600 ring-2 ring-rose-400/50 flex items-center justify-center">
-            <TrendingDown className="h-2.5 w-2.5 text-white" />
+            <TrendingDown className="h-2.5 w-2.5 text-white" aria-hidden="true" />
           </div>
           <span className="text-gray-300 text-xs">Behind Schedule</span>
         </div>
@@ -1593,7 +1594,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
         {/* Completed */}
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded bg-green-500 flex items-center justify-center">
-            <CheckCircle2 className="h-2.5 w-2.5 text-white" />
+            <CheckCircle2 className="h-2.5 w-2.5 text-white" aria-hidden="true" />
           </div>
           <span className="text-gray-300 text-xs">Completed</span>
         </div>
@@ -1603,7 +1604,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
           <div className="flex items-center gap-3 border-l border-gray-600 pl-3 ml-1">
             <span className="text-gray-400 text-xs font-medium">Dependencies:</span>
             <div className="flex items-center gap-1.5">
-              <div className="w-6 h-0.5 bg-gray-500" style={{ borderBottom: '2px dashed #6B7280' }} />
+              <div className="w-6 h-0.5 bg-gray-500" style={{ borderBottom: `2px dashed ${neutralColors.gray[500]}` }} />
               <span className="text-gray-400 text-xs">Normal</span>
             </div>
             <div className="flex items-center gap-1.5">

@@ -44,7 +44,7 @@ export function MarkupSummaryBar({ slug, documentId, onExportClick }: MarkupSumm
   if (loading || !summary) {
     return (
       <div className="h-[32px] border-t bg-white px-4 flex items-center justify-between">
-        <div className="text-xs text-gray-500">Loading summary...</div>
+        <div className="text-xs text-gray-400">Loading summary...</div>
       </div>
     );
   }
@@ -57,9 +57,9 @@ export function MarkupSummaryBar({ slug, documentId, onExportClick }: MarkupSumm
     <div className="h-[32px] border-t bg-white px-4 flex items-center justify-between">
       <div className="flex items-center gap-6 text-xs">
         <div className="flex items-center gap-2">
-          <FileText className="h-3 w-3 text-gray-500" />
+          <FileText className="h-3 w-3 text-gray-400" aria-hidden="true" />
           <span className="font-medium">{summary.total}</span>
-          <span className="text-gray-500">markups</span>
+          <span className="text-gray-400">markups</span>
         </div>
 
         {topTypes.length > 0 && (
@@ -86,7 +86,7 @@ export function MarkupSummaryBar({ slug, documentId, onExportClick }: MarkupSumm
       </div>
 
       <Button size="sm" variant="outline" onClick={onExportClick} className="h-6 text-xs">
-        <Download className="h-3 w-3 mr-1" />
+        <Download className="h-3 w-3 mr-1" aria-hidden="true" />
         Export
       </Button>
     </div>

@@ -100,7 +100,7 @@ export default function ProcessingLogPanel({ log }: Props) {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium min-h-[44px] ${
                   completed
                     ? 'bg-green-50 text-green-700'
-                    : 'bg-gray-100 text-gray-500'
+                    : 'bg-gray-100 text-gray-400'
                 }`}
               >
                 {completed ? (

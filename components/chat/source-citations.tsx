@@ -62,13 +62,13 @@ export function SourceCitations({ citations, onDocumentClick }: SourceCitationsP
             className="flex items-start gap-2 p-2 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors group cursor-pointer"
             onClick={() => onDocumentClick?.(doc.documentId, doc.pages[0]?.pageNumber)}
           >
-            <FileText className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+            <FileText className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-300 truncate font-medium">
                   {doc.documentName}
                 </span>
-                <ExternalLink className="w-3 h-3 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               {doc.pages.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -81,7 +81,7 @@ export function SourceCitations({ citations, onDocumentClick }: SourceCitationsP
                     </span>
                   ))}
                   {doc.pages.length > 5 && (
-                    <span className="text-xs px-1.5 py-0.5 text-gray-500">
+                    <span className="text-xs px-1.5 py-0.5 text-gray-400">
                       +{doc.pages.length - 5} more
                     </span>
                   )}

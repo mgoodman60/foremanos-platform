@@ -380,9 +380,9 @@ export default function SubcontractorQuotes() {
       <div className="space-y-3">
         {quotes.length === 0 ? (
           <div className="bg-dark-card rounded-lg p-8 text-center border border-gray-700">
-            <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400">No quotes uploaded yet</p>
-            <p className="text-sm text-gray-500 mt-1">Upload a subcontractor quote to get started</p>
+            <p className="text-sm text-gray-400 mt-1">Upload a subcontractor quote to get started</p>
           </div>
         ) : (
           quotes.map((quote) => (
@@ -487,7 +487,7 @@ export default function SubcontractorQuotes() {
                           Expires: {format(new Date(quote.expirationDate), 'MMM d, yyyy')}
                         </p>
                       )}
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-gray-400 text-xs">
                         Uploaded: {format(new Date(quote.createdAt), 'MMM d, yyyy')}
                         {quote.Uploader && ` by ${quote.Uploader.username}`}
                       </p>

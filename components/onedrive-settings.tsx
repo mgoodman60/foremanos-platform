@@ -142,7 +142,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
     return (
       <Card className="p-6">
         <div className="flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           <span className="ml-2 text-sm text-muted-foreground">Loading OneDrive status...</span>
         </div>
       </Card>
@@ -169,7 +169,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Cloud className="h-5 w-5 text-blue-600" />
+                <Cloud className="h-5 w-5 text-blue-600" aria-hidden="true" />
                 OneDrive Integration
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
@@ -178,7 +178,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
             </div>
             {status?.connected && (
               <Badge variant="default" className="bg-green-600">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
+                <CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
                 Connected
               </Badge>
             )}
@@ -187,12 +187,12 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
           {/* Connection Status */}
           {!status?.connected ? (
             <Alert>
-              <CloudOff className="h-4 w-4" />
+              <CloudOff className="h-4 w-4" aria-hidden="true" />
               <AlertDescription className="ml-2">
                 <div className="space-y-2">
                   <p>OneDrive is not connected to this project.</p>
                   <Button onClick={handleConnect} className="mt-2">
-                    <Cloud className="h-4 w-4 mr-2" />
+                    <Cloud className="h-4 w-4 mr-2" aria-hidden="true" />
                     Connect OneDrive
                   </Button>
                 </div>
@@ -203,7 +203,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
               {/* Folder Path */}
               {status.folderPath ? (
                 <div className="flex items-start gap-3 p-4 border rounded-lg bg-muted/50">
-                  <FolderOpen className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <FolderOpen className="h-5 w-5 text-blue-600 mt-0.5" aria-hidden="true" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Syncing from</p>
                     <p className="text-sm text-muted-foreground">{status.folderPath}</p>
@@ -223,7 +223,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
                     <div className="space-y-2">
                       <p>OneDrive is connected, but no folder is selected.</p>
                       <Button onClick={() => setShowFolderBrowser(true)} variant="outline" size="sm">
-                        <FolderOpen className="h-4 w-4 mr-2" />
+                        <FolderOpen className="h-4 w-4 mr-2" aria-hidden="true" />
                         Select Folder
                       </Button>
                     </div>
@@ -254,7 +254,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
                   {/* Last Sync */}
                   {status.lastSyncAt && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-4 w-4" aria-hidden="true" />
                       Last synced: {new Date(status.lastSyncAt).toLocaleString()}
                     </div>
                   )}
@@ -268,12 +268,12 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
                     >
                       {syncing ? (
                         <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                           Syncing...
                         </>
                       ) : (
                         <>
-                          <RefreshCw className="h-4 w-4 mr-2" />
+                          <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
                           Sync Now
                         </>
                       )}
@@ -282,7 +282,7 @@ export default function OneDriveSettings({ projectSlug, isOwner }: OneDriveSetti
                       variant="outline"
                       onClick={() => setShowSyncHistory(true)}
                     >
-                      <History className="h-4 w-4 mr-2" />
+                      <History className="h-4 w-4 mr-2" aria-hidden="true" />
                       History
                     </Button>
                   </div>

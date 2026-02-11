@@ -74,12 +74,12 @@ export function TakeoffFilters({
 
       {/* Search */}
       <div className="relative flex-1 min-w-[200px]">
-        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" aria-hidden="true" />
         <Input
           placeholder="Search materials..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-8 bg-dark-card border-gray-600 pl-8 text-sm text-slate-50 placeholder:text-gray-500"
+          className="h-8 bg-dark-card border-gray-600 pl-8 text-sm text-slate-50 placeholder:text-gray-400"
         />
       </div>
 
@@ -119,7 +119,7 @@ export function TakeoffFilters({
             onClick={clearFilters}
             className="h-8 text-xs text-orange-500 hover:text-orange-400 hover:bg-dark-card"
           >
-            <X className="mr-1 h-3.5 w-3.5" />
+            <X className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
             Clear
           </Button>
         </WithTooltip>

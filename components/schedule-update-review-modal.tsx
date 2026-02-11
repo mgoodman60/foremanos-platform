@@ -243,7 +243,7 @@ export default function ScheduleUpdateReviewModal({
                           <h4 className="font-semibold text-slate-50">
                             {suggestion.taskName}
                           </h4>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-400">
                             Task ID: {suggestion.taskId}
                           </p>
                         </div>
@@ -259,13 +259,13 @@ export default function ScheduleUpdateReviewModal({
                     {/* Changes */}
                     <div className="grid grid-cols-2 gap-4 p-3 bg-dark-card rounded-lg">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Current Status</p>
+                        <p className="text-xs text-gray-400 mb-1">Current Status</p>
                         <p className="text-sm text-gray-300">
                           {suggestion.currentStatus} at {suggestion.currentPercentComplete}%
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Suggested Update</p>
+                        <p className="text-xs text-gray-400 mb-1">Suggested Update</p>
                         <p className="text-sm text-green-400 font-medium">
                           {suggestion.suggestedStatus} at {suggestion.suggestedPercentComplete}%
                         </p>
@@ -274,7 +274,7 @@ export default function ScheduleUpdateReviewModal({
 
                     {/* Reasoning */}
                     <div className="p-3 bg-dark-card rounded-lg">
-                      <p className="text-xs text-gray-500 mb-1">AI Reasoning</p>
+                      <p className="text-xs text-gray-400 mb-1">AI Reasoning</p>
                       <p className="text-sm text-gray-300">{suggestion.reasoning}</p>
                     </div>
                   </div>

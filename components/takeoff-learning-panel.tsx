@@ -525,7 +525,7 @@ export default function TakeoffLearningPanel({
                               <div className="flex items-center gap-2">
                                 <span className="text-gray-400">Change:</span>
                                 <span className="text-red-400 line-through">{correction.originalValue}</span>
-                                <span className="text-gray-500">→</span>
+                                <span className="text-gray-400">→</span>
                                 <span className="text-green-400">{correction.correctedValue}</span>
                               </div>
                               {correction.reason && (
@@ -534,7 +534,7 @@ export default function TakeoffLearningPanel({
                                   <span className="text-gray-300">{correction.reason}</span>
                                 </div>
                               )}
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-400">
                                 Submitted by {correction.submittedBy} on{' '}
                                 {new Date(correction.submittedAt).toLocaleDateString()}
                               </div>
@@ -580,7 +580,7 @@ export default function TakeoffLearningPanel({
                     <div className="text-center py-12">
                       <Lightbulb className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
                       <p className="text-gray-400">No suggestions available</p>
-                      <p className="text-sm text-gray-500 mt-1">Submit more corrections to train the learning system</p>
+                      <p className="text-sm text-gray-400 mt-1">Submit more corrections to train the learning system</p>
                     </div>
                   ) : (
                     <>
@@ -592,7 +592,7 @@ export default function TakeoffLearningPanel({
                           >
                             Select All
                           </button>
-                          <span className="text-gray-500">|</span>
+                          <span className="text-gray-400">|</span>
                           <span className="text-sm text-gray-400">
                             {selectedSuggestions.size} of {suggestions.length} selected
                           </span>
@@ -635,7 +635,7 @@ export default function TakeoffLearningPanel({
                                 <div className="text-sm mt-1">
                                   <span className="text-gray-400">{suggestion.fieldName}:</span>{' '}
                                   <span className="text-red-400">{suggestion.currentValue}</span>{' '}
-                                  <span className="text-gray-500">→</span>{' '}
+                                  <span className="text-gray-400">→</span>{' '}
                                   <span className="text-green-400">{suggestion.suggestedValue}</span>
                                 </div>
                                 <p className="text-sm text-gray-400 mt-1">{suggestion.reason}</p>
@@ -648,7 +648,7 @@ export default function TakeoffLearningPanel({
                               }`}>
                                 {(suggestion.confidence * 100).toFixed(0)}%
                               </span>
-                              <div className="text-xs text-gray-500">confidence</div>
+                              <div className="text-xs text-gray-400">confidence</div>
                             </div>
                           </div>
                         </div>
@@ -665,7 +665,7 @@ export default function TakeoffLearningPanel({
                     <div className="text-center py-12">
                       <Brain className="w-12 h-12 text-purple-400 mx-auto mb-3" />
                       <p className="text-gray-400">No learned patterns yet</p>
-                      <p className="text-sm text-gray-500 mt-1">Patterns are created when corrections are applied</p>
+                      <p className="text-sm text-gray-400 mt-1">Patterns are created when corrections are applied</p>
                     </div>
                   ) : (
                     patterns.map(pattern => (
@@ -712,11 +712,11 @@ export default function TakeoffLearningPanel({
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <div className="text-sm text-white">{(pattern.confidence * 100).toFixed(0)}%</div>
-                              <div className="text-xs text-gray-500">confidence</div>
+                              <div className="text-xs text-gray-400">confidence</div>
                             </div>
                             <div className="text-right">
                               <div className="text-sm text-white">{pattern.usageCount}</div>
-                              <div className="text-xs text-gray-500">uses</div>
+                              <div className="text-xs text-gray-400">uses</div>
                             </div>
                             <button
                               onClick={() => handleDeletePattern(pattern.id)}
@@ -776,7 +776,7 @@ export default function TakeoffLearningPanel({
                                 {fb.comment && (
                                   <p className="text-gray-300 mt-1">{fb.comment}</p>
                                 )}
-                                <div className="text-xs text-gray-500 mt-2">
+                                <div className="text-xs text-gray-400 mt-2">
                                   By {fb.submittedBy} • {new Date(fb.createdAt).toLocaleDateString()}
                                 </div>
                               </div>

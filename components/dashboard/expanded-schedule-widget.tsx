@@ -5,6 +5,7 @@ import { Calendar, Flag, CloudSun, Users, CheckCircle, AlertTriangle } from 'luc
 import { DashboardWidget } from './dashboard-widget';
 import { KeyDatesTimeline } from './key-dates-timeline';
 import { ScheduleCalendarWidget } from './schedule-calendar-widget';
+import { primaryColors } from '@/lib/design-tokens';
 
 interface ExpandedScheduleWidgetProps {
   projectSlug: string;
@@ -55,7 +56,7 @@ function MiniSparkline({ data }: { data: number[] }) {
       <polyline
         points={points.join(' ')}
         fill="none"
-        stroke="#f97316"
+        stroke={primaryColors.orange[500]}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -227,7 +228,7 @@ export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetPr
                 {/* Key Dates Timeline */}
                 {keyDates.length > 0 && (
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Key Dates</p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Key Dates</p>
                     <KeyDatesTimeline keyDates={keyDates} />
                   </div>
                 )}
@@ -235,7 +236,7 @@ export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetPr
                 {/* Sparkline */}
                 {velocityData.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500">7d velocity</span>
+                    <span className="text-[10px] text-gray-400">7d velocity</span>
                     <MiniSparkline data={velocityData} />
                   </div>
                 )}

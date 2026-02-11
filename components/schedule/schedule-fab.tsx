@@ -106,7 +106,7 @@ export function ScheduleFAB({
                   }}
                   className={`flex items-center gap-3 ${item.color} text-white px-4 py-2.5 rounded-full shadow-lg transition-all hover:shadow-xl group`}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-5 w-5" aria-hidden="true" />
                   <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
                 </button>
               </motion.div>

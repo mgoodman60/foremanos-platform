@@ -312,7 +312,7 @@ export default function PunchListDetailModal({
           ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
           : 'bg-gray-500/20 text-gray-400 border-gray-500/30'
       }`}>
-        {(isSafety || isCodeViolation) && <AlertTriangle className="w-3 h-3" />}
+        {(isSafety || isCodeViolation) && <AlertTriangle aria-hidden="true" className="w-3 h-3" />}
         {CATEGORY_LABELS[category]}
       </span>
     );
@@ -328,13 +328,13 @@ export default function PunchListDetailModal({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <ClipboardList className="w-5 h-5 text-orange-400" />
+              <ClipboardList aria-hidden="true" className="w-5 h-5 text-orange-400" />
               <DialogTitle className="text-white">Item #{item.itemNumber}</DialogTitle>
               <StatusBadge status={item.status} />
               <PriorityBadge priority={item.priority} />
               {isOverdue && (
                 <span className="flex items-center gap-1 text-xs text-red-400">
-                  <AlertTriangle className="w-3 h-3" />
+                  <AlertTriangle aria-hidden="true" className="w-3 h-3" />
                   Overdue
                 </span>
               )}
@@ -526,7 +526,7 @@ export default function PunchListDetailModal({
                   disabled={isSaving}
                   className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg text-white transition-colors disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save aria-hidden="true" className="w-4 h-4" />
                   {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -548,25 +548,25 @@ export default function PunchListDetailModal({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 {item.assignedToName && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <User className="w-4 h-4" />
+                    <User aria-hidden="true" className="w-4 h-4" />
                     <span>Assigned to: <span className="text-white">{item.assignedToName}</span></span>
                   </div>
                 )}
                 {item.trade && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <Wrench className="w-4 h-4" />
+                    <Wrench aria-hidden="true" className="w-4 h-4" />
                     <span>Trade: <span className="text-white">{TRADE_LABELS[item.trade]}</span></span>
                   </div>
                 )}
                 {item.dueDate && (
                   <div className={`flex items-center gap-2 ${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
-                    <Clock className="w-4 h-4" />
+                    <Clock aria-hidden="true" className="w-4 h-4" />
                     <span>Due: <span className={isOverdue ? 'text-red-400' : 'text-white'}>{format(new Date(item.dueDate), 'MMM d, yyyy')}</span></span>
                   </div>
                 )}
                 {(item.location || item.floor || item.room) && (
                   <div className="flex items-center gap-2 text-gray-400">
-                    <MapPin className="w-4 h-4" />
+                    <MapPin aria-hidden="true" className="w-4 h-4" />
                     <span>Location: <span className="text-white">
                       {[item.location, item.floor, item.room].filter(Boolean).join(' > ')}
                     </span></span>
@@ -578,7 +578,7 @@ export default function PunchListDetailModal({
               {item.notes && (
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="w-4 h-4 text-gray-400" />
+                    <FileText aria-hidden="true" className="w-4 h-4 text-gray-400" />
                     <h4 className="text-sm font-medium text-gray-300">Notes</h4>
                   </div>
                   <p className="text-gray-300 text-sm whitespace-pre-wrap">{item.notes}</p>
@@ -589,7 +589,7 @@ export default function PunchListDetailModal({
               {item.photoIds.length > 0 && (
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Camera className="w-4 h-4 text-gray-400" />
+                    <Camera aria-hidden="true" className="w-4 h-4 text-gray-400" />
                     <h4 className="text-sm font-medium text-gray-300">Photos ({item.photoIds.length})</h4>
                   </div>
                   <div className="text-sm text-gray-400">
@@ -602,9 +602,9 @@ export default function PunchListDetailModal({
               {item.completedAt && (
                 <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4 text-purple-400" />
+                    <CheckCircle aria-hidden="true" className="w-4 h-4 text-purple-400" />
                     <h4 className="text-sm font-medium text-purple-400">Completed</h4>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-400">
                       {format(new Date(item.completedAt), 'MMM d, yyyy')}
                     </span>
                   </div>
@@ -618,9 +618,9 @@ export default function PunchListDetailModal({
               {item.verifiedAt && (
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                   <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-green-400" />
+                    <Shield aria-hidden="true" className="w-4 h-4 text-green-400" />
                     <h4 className="text-sm font-medium text-green-400">Verified</h4>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-400">
                       {format(new Date(item.verifiedAt), 'MMM d, yyyy')}
                     </span>
                   </div>
@@ -650,7 +650,7 @@ export default function PunchListDetailModal({
                       disabled={isSaving}
                       className="flex items-center gap-2 px-4 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm text-white disabled:opacity-50"
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle aria-hidden="true" className="w-4 h-4" />
                       {isSaving ? 'Completing...' : 'Mark Complete'}
                     </button>
                   </div>
@@ -665,7 +665,7 @@ export default function PunchListDetailModal({
                     disabled={isSaving}
                     className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-white transition-colors disabled:opacity-50"
                   >
-                    <Clock className="w-4 h-4" />
+                    <Clock aria-hidden="true" className="w-4 h-4" />
                     Start Progress
                   </button>
                 )}
@@ -675,7 +675,7 @@ export default function PunchListDetailModal({
                     onClick={() => setShowCompleteForm(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle aria-hidden="true" className="w-4 h-4" />
                     Mark Complete
                   </button>
                 )}
@@ -687,7 +687,7 @@ export default function PunchListDetailModal({
                       disabled={isSaving}
                       className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors disabled:opacity-50"
                     >
-                      <XCircle className="w-4 h-4" />
+                      <XCircle aria-hidden="true" className="w-4 h-4" />
                       Reject
                     </button>
                     <button
@@ -695,7 +695,7 @@ export default function PunchListDetailModal({
                       disabled={isSaving}
                       className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white transition-colors disabled:opacity-50"
                     >
-                      <Shield className="w-4 h-4" />
+                      <Shield aria-hidden="true" className="w-4 h-4" />
                       Verify
                     </button>
                   </>

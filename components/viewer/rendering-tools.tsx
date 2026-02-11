@@ -233,14 +233,14 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Palette className="w-4 h-4 text-pink-400" />
+          <Palette className="w-4 h-4 text-pink-400" aria-hidden="true" />
           <span className="text-sm font-medium text-white">Rendering</span>
         </div>
         <button
           onClick={resetDefaults}
           className="text-xs text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
         >
-          <RefreshCw className="w-3 h-3" />
+          <RefreshCw className="w-3 h-3" aria-hidden="true" />
           Reset
         </button>
       </div>
@@ -271,7 +271,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
           <h4 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Environment</h4>
           {Object.entries(groupedEnvironments).map(([category, envs]) => (
             <div key={category} className="mb-3">
-              <p className="text-[10px] text-gray-500 mb-1.5">{category}</p>
+              <p className="text-[10px] text-gray-400 mb-1.5">{category}</p>
               <div className="grid grid-cols-2 gap-1.5">
                 {envs.map((env) => {
                   const Icon = env.icon;
@@ -286,7 +286,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
                           : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
                       }`}
                     >
-                      <Icon className="w-3.5 h-3.5" />
+                      <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                       <span className="truncate">{env.name}</span>
                     </button>
                   );
@@ -302,7 +302,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
           <div className="space-y-2">
             <label className="flex items-center justify-between p-2 bg-gray-700/30 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors">
               <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-gray-400" />
+                <Layers className="w-4 h-4 text-gray-400" aria-hidden="true" />
                 <span className="text-sm text-white">Ground Shadow</span>
               </div>
               <button
@@ -319,7 +319,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
 
             <label className="flex items-center justify-between p-2 bg-gray-700/30 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-gray-400" />
+                <Sparkles className="w-4 h-4 text-gray-400" aria-hidden="true" />
                 <span className="text-sm text-white">Ground Reflection</span>
               </div>
               <button
@@ -336,7 +336,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
 
             <label className="flex items-center justify-between p-2 bg-gray-700/30 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors">
               <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4 text-gray-400" />
+                <Sun className="w-4 h-4 text-gray-400" aria-hidden="true" />
                 <span className="text-sm text-white">Ambient Occlusion</span>
               </div>
               <button
@@ -353,7 +353,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
 
             <label className="flex items-center justify-between p-2 bg-gray-700/30 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors">
               <div className="flex items-center gap-2">
-                {ghosting ? <Eye className="w-4 h-4 text-gray-400" /> : <EyeOff className="w-4 h-4 text-gray-400" />}
+                {ghosting ? <Eye className="w-4 h-4 text-gray-400" aria-hidden="true" /> : <EyeOff className="w-4 h-4 text-gray-400" aria-hidden="true" />}
                 <span className="text-sm text-white">Ghosting</span>
               </div>
               <button
@@ -370,7 +370,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
 
             <label className="flex items-center justify-between p-2 bg-gray-700/30 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors">
               <div className="flex items-center gap-2">
-                <Maximize className="w-4 h-4 text-gray-400" />
+                <Maximize className="w-4 h-4 text-gray-400" aria-hidden="true" />
                 <span className="text-sm text-white">HDR Background</span>
               </div>
               <button
@@ -394,7 +394,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-yellow-400" />
+                  <Lightbulb className="w-4 h-4 text-yellow-400" aria-hidden="true" />
                   <span className="text-xs text-gray-300">Light Intensity</span>
                 </div>
                 <span className="text-xs text-gray-400">{lightIntensity.toFixed(1)}x</span>
@@ -413,7 +413,7 @@ export default function RenderingTools({ viewerRef }: RenderingToolsProps) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-blue-400" />
+                  <Sliders className="w-4 h-4 text-blue-400" aria-hidden="true" />
                   <span className="text-xs text-gray-300">Exposure</span>
                 </div>
                 <span className="text-xs text-gray-400">{exposureValue > 0 ? '+' : ''}{exposureValue.toFixed(1)}</span>

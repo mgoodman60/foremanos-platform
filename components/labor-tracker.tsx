@@ -173,7 +173,7 @@ export default function LaborTracker() {
           <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-400" />
+                <Clock aria-hidden="true" className="h-5 w-5 text-blue-400" />
                 <div>
                   <div className="text-2xl font-bold text-white">{summary.totalHours.toFixed(1)}</div>
                   <div className="text-sm text-gray-400">Total Hours</div>
@@ -184,7 +184,7 @@ export default function LaborTracker() {
           <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-green-400" />
+                <DollarSign aria-hidden="true" className="h-5 w-5 text-green-400" />
                 <div>
                   <div className="text-2xl font-bold text-white">{formatCurrency(summary.totalCost)}</div>
                   <div className="text-sm text-gray-400">Total Cost</div>
@@ -195,7 +195,7 @@ export default function LaborTracker() {
           <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-yellow-400" />
+                <TrendingUp aria-hidden="true" className="h-5 w-5 text-yellow-400" />
                 <div>
                   <div className="text-2xl font-bold text-white">${summary.avgHourlyRate.toFixed(2)}</div>
                   <div className="text-sm text-gray-400">Avg Rate</div>
@@ -206,7 +206,7 @@ export default function LaborTracker() {
           <Card className="bg-dark-card border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-400" />
+                <Users aria-hidden="true" className="h-5 w-5 text-purple-400" />
                 <div>
                   <div className="text-2xl font-bold text-white">{summary.totalEntries}</div>
                   <div className="text-sm text-gray-400">Entries</div>
@@ -222,7 +222,7 @@ export default function LaborTracker() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-white text-sm flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-blue-400" />
+              <Wrench aria-hidden="true" className="h-4 w-4 text-blue-400" />
               By Trade
             </CardTitle>
           </CardHeader>
@@ -245,7 +245,7 @@ export default function LaborTracker() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Users className="h-5 w-5 text-purple-400" />
+          <Users aria-hidden="true" className="h-5 w-5 text-purple-400" />
           Labor Tracking
         </h3>
         <div className="flex items-center gap-2">
@@ -260,7 +260,7 @@ export default function LaborTracker() {
             </SelectContent>
           </Select>
           <Button onClick={() => setShowAddModal(true)} size="sm" className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-1" /> Add Entry
+            <Plus aria-hidden="true" className="h-4 w-4 mr-1" /> Add Entry
           </Button>
         </div>
       </div>
@@ -289,11 +289,11 @@ export default function LaborTracker() {
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar aria-hidden="true" className="h-3 w-3" />
                         {format(new Date(entry.date), 'MMM d')}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock aria-hidden="true" className="h-3 w-3" />
                         {entry.hoursWorked}h {entry.overtimeHours > 0 && `+ ${entry.overtimeHours}h OT`}
                       </span>
                       <span>${entry.hourlyRate}/hr</span>
@@ -304,7 +304,7 @@ export default function LaborTracker() {
                       {formatCurrency(entry.totalCost)}
                     </div>
                     {entry.description && (
-                      <div className="text-xs text-gray-500 max-w-[150px] truncate">
+                      <div className="text-xs text-gray-400 max-w-[150px] truncate">
                         {entry.description}
                       </div>
                     )}

@@ -79,10 +79,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">{card.change}</p>
+                  <p className="text-xs text-gray-400 mt-2">{card.change}</p>
                 </div>
                 <div className={`p-3 rounded-lg ${card.color}`}>
-                  <Icon className="h-6 w-6" />
+                  <Icon aria-hidden="true" className="h-6 w-6" />
                 </div>
               </div>
               {/* Decorative element */}

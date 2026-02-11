@@ -192,7 +192,7 @@ export default function ForecastActualChart({
       <div className="px-4 py-3 border-b border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-blue-400" />
+            <TrendingUp aria-hidden="true" className="h-5 w-5 text-blue-400" />
             Forecast vs Actual
           </h3>
           <div className="flex items-center gap-2">
@@ -232,7 +232,7 @@ export default function ForecastActualChart({
           <div className="bg-gray-800/50 rounded-lg p-3">
             <div className="text-xs text-gray-400 mb-1 flex items-center gap-1">
               Variance
-              {metrics.isOverBudget && <AlertTriangle className="h-3 w-3 text-red-500" />}
+              {metrics.isOverBudget && <AlertTriangle aria-hidden="true" className="h-3 w-3 text-red-500" />}
             </div>
             <div className={cn(
               'text-lg font-semibold',
@@ -249,15 +249,15 @@ export default function ForecastActualChart({
       <div className="p-4">
         <ResponsiveContainer width="100%" height={height}>
           <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
             <XAxis 
               dataKey="month" 
-              stroke="#9CA3AF" 
+              stroke={neutralColors.gray[400]} 
               fontSize={12}
               tickLine={false}
             />
             <YAxis 
-              stroke="#9CA3AF" 
+              stroke={neutralColors.gray[400]} 
               fontSize={12}
               tickLine={false}
               tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}

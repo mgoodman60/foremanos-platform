@@ -23,7 +23,7 @@ export default function DocumentIntelligenceBadges({ intelligence, compact = fal
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 text-xs text-gray-500">
+      <div className="flex items-center gap-2 text-xs text-gray-400">
         <span>{intelligence.sheetCount} sheets</span>
         {intelligence.averageConfidence != null && (
           <span className="flex items-center gap-1">
@@ -59,7 +59,7 @@ export default function DocumentIntelligenceBadges({ intelligence, compact = fal
       })}
 
       {/* Sheet count */}
-      <span className="text-xs text-gray-500">{intelligence.sheetCount} sheets</span>
+      <span className="text-xs text-gray-400">{intelligence.sheetCount} sheets</span>
 
       {/* Top drawing types */}
       {intelligence.drawingTypes && Object.entries(intelligence.drawingTypes)

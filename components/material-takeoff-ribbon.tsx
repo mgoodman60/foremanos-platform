@@ -22,7 +22,7 @@ export function MaterialTakeoffRibbon({ projectSlug, projectId }: MaterialTakeof
           variant="outline"
           className="w-full flex items-center justify-center gap-2 border-gray-600 text-gray-300 hover:bg-dark-card hover:text-white py-2"
         >
-          <Calculator className="h-4 w-4" />
+          <Calculator className="h-4 w-4" aria-hidden="true" />
           <span>Material Takeoff</span>
         </Button>
       </div>

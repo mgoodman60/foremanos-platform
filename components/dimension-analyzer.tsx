@@ -116,11 +116,11 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
     switch (severity) {
       case 'critical':
       case 'high':
-        return <AlertTriangle className="h-4 w-4" />;
+        return <AlertTriangle aria-hidden="true" className="h-4 w-4" />;
       case 'medium':
-        return <AlertCircle className="h-4 w-4" />;
+        return <AlertCircle aria-hidden="true" className="h-4 w-4" />;
       default:
-        return <CheckCircle className="h-4 w-4" />;
+        return <CheckCircle aria-hidden="true" className="h-4 w-4" />;
     }
   };
 
@@ -168,7 +168,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
-            <Loader2 className="animate-spin text-orange-500 h-8 w-8" />
+            <Loader2 aria-hidden="true" className="animate-spin text-orange-500 h-8 w-8" />
           </div>
         </CardContent>
       </Card>
@@ -196,7 +196,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
                 <p className="text-sm text-gray-600">Total Dimensions</p>
                 <p className="text-2xl font-bold">{totalDimensions}</p>
               </div>
-              <Ruler className="h-8 w-8 text-blue-600" />
+              <Ruler aria-hidden="true" className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -208,7 +208,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
                 <p className="text-sm text-gray-600">Avg. Confidence</p>
                 <p className="text-2xl font-bold">{(avgConfidence * 100).toFixed(0)}%</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendingUp aria-hidden="true" className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -220,7 +220,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
                 <p className="text-sm text-gray-600">Critical Issues</p>
                 <p className="text-2xl font-bold text-red-600">{criticalConflicts}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle aria-hidden="true" className="h-8 w-8 text-red-600" />
             </div>
           </CardContent>
         </Card>
@@ -232,7 +232,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
                 <p className="text-sm text-gray-600">High Priority</p>
                 <p className="text-2xl font-bold text-orange-600">{highConflicts}</p>
               </div>
-              <AlertCircle className="h-8 w-8 text-orange-600" />
+              <AlertCircle aria-hidden="true" className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>
@@ -242,7 +242,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Ruler className="h-5 w-5" />
+            <Ruler aria-hidden="true" className="h-5 w-5" />
             Dimension Analysis
           </CardTitle>
         </CardHeader>
@@ -250,7 +250,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search aria-hidden="true" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search dimensions..."
                   value={searchQuery}
@@ -293,7 +293,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
         <Card className="border-orange-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-600">
-              <AlertTriangle className="h-5 w-5" />
+              <AlertTriangle aria-hidden="true" className="h-5 w-5" />
               Dimension Conflicts ({conflicts.length})
             </CardTitle>
             <CardDescription>
@@ -349,7 +349,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
         <CardContent>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {filteredDimensions.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No dimensions found</p>
+              <p className="text-center text-gray-400 py-8">No dimensions found</p>
             ) : (
               filteredDimensions.map((dim: Dimension, idx) => (
                 <div
@@ -371,7 +371,7 @@ export default function DimensionAnalyzer({ projectSlug }: Props) {
                           {dim.direction}
                         </Badge>
                       )}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         {(dim.confidence * 100).toFixed(0)}%
                       </span>
                     </div>

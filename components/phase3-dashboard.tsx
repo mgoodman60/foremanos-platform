@@ -423,7 +423,7 @@ export function Phase3Dashboard({
                     <div className="text-sm font-semibold text-purple-400">
                       {formatCurrency(category.totalCost)}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-400">
                       {category.percentage}%
                     </div>
                   </div>
@@ -499,7 +499,7 @@ export function Phase3Dashboard({
               <Activity className="h-4 w-4 text-blue-500" />
               Recent Activity
             </h3>
-            <span className="text-xs text-gray-500">Last 7 days</span>
+            <span className="text-xs text-gray-400">Last 7 days</span>
           </div>
           <div className="space-y-3">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-surface">

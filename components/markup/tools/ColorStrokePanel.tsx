@@ -97,7 +97,7 @@ export function ColorStrokePanel({
           className="w-full"
         />
         {isHighlighter && (
-          <p className="text-xs text-gray-500 mt-1">Effective width: {style.strokeWidth * 5}px</p>
+          <p className="text-xs text-gray-400 mt-1">Effective width: {style.strokeWidth * 5}px</p>
         )}
       </div>
 

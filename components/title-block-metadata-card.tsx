@@ -87,7 +87,7 @@ export default function TitleBlockMetadataCard({
               </Badge>
             </div>
             <p className="text-sm text-gray-300">{titleBlockData.sheetTitle}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {getDisciplineName(titleBlockData.discipline)}
             </p>
           </div>

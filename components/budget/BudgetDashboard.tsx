@@ -17,7 +17,7 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 import { format, subDays } from 'date-fns';
-import { chartColors, semanticColors } from '@/lib/design-tokens';
+import { chartColors, semanticColors, neutralColors, backgroundColors, borderColors, textColors } from '@/lib/design-tokens';
 
 // Types
 interface EVMMetrics {
@@ -119,15 +119,15 @@ function PerformanceGauge({
       <div className="mt-2">
         {value >= 1.0 ? (
           <Badge className="bg-green-600/20 text-green-400 border-green-600/30">
-            <CheckCircle2 className="h-3 w-3 mr-1" /> On Target
+            <CheckCircle2 aria-hidden="true" className="h-3 w-3 mr-1" /> On Target
           </Badge>
         ) : value >= 0.9 ? (
           <Badge className="bg-yellow-600/20 text-yellow-400 border-yellow-600/30">
-            <AlertTriangle className="h-3 w-3 mr-1" /> At Risk
+            <AlertTriangle aria-hidden="true" className="h-3 w-3 mr-1" /> At Risk
           </Badge>
         ) : (
           <Badge className="bg-red-600/20 text-red-400 border-red-600/30">
-            <TrendingDown className="h-3 w-3 mr-1" /> Over Budget
+            <TrendingDown aria-hidden="true" className="h-3 w-3 mr-1" /> Over Budget
           </Badge>
         )}
       </div>
@@ -159,19 +159,19 @@ function KPICard({
             <p className="text-sm text-gray-400">{title}</p>
             <p className={`text-2xl font-bold ${color}`}>{value}</p>
             {subValue && (
-              <p className="text-xs text-gray-500 mt-1">{subValue}</p>
+              <p className="text-xs text-gray-400 mt-1">{subValue}</p>
             )}
           </div>
           <div className={`p-2 rounded-lg ${color.replace('text', 'bg')}/20`}>
-            <Icon className={`h-5 w-5 ${color}`} />
+            <Icon aria-hidden="true" className={`h-5 w-5 ${color}`} />
           </div>
         </div>
         {trend && (
           <div className="mt-2 flex items-center text-xs">
             {trend === 'up' ? (
-              <ArrowUpRight className="h-3 w-3 text-green-400 mr-1" />
+              <ArrowUpRight aria-hidden="true" className="h-3 w-3 text-green-400 mr-1" />
             ) : trend === 'down' ? (
-              <ArrowDownRight className="h-3 w-3 text-red-400 mr-1" />
+              <ArrowDownRight aria-hidden="true" className="h-3 w-3 text-red-400 mr-1" />
             ) : null}
             <span className={trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-gray-400'}>
               {trend === 'up' ? '+' : trend === 'down' ? '-' : ''}vs last period
@@ -241,7 +241,7 @@ export default function BudgetDashboard() {
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="p-8 text-center">
-          <PieChartIcon className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+          <PieChartIcon aria-hidden="true" className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No Budget Data</h3>
           <p className="text-gray-400">Configure your project budget to see the dashboard.</p>
         </CardContent>
@@ -263,7 +263,7 @@ export default function BudgetDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <DollarSign className="h-6 w-6 text-green-400" />
+          <DollarSign aria-hidden="true" className="h-6 w-6 text-green-400" />
           Budget Performance Dashboard
         </h2>
         <div className="flex items-center gap-2">
@@ -370,28 +370,28 @@ export default function BudgetDashboard() {
         <Card className="bg-dark-card border-gray-700 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-white text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-400" />
+              <TrendingUp aria-hidden="true" className="h-5 w-5 text-blue-400" />
               Daily Cost Trend
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={dailyCosts}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
                 <XAxis 
                   dataKey="date" 
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                  stroke={neutralColors.gray[400]}
+                  tick={{ fill: neutralColors.gray[400], fontSize: 11 }}
                   tickFormatter={(value) => format(new Date(value), 'M/d')}
                 />
                 <YAxis 
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                  stroke={neutralColors.gray[400]}
+                  tick={{ fill: neutralColors.gray[400], fontSize: 11 }}
                   tickFormatter={(value) => formatCurrency(value)}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1F2328', border: '1px solid #374151', borderRadius: '8px' }}
-                  labelStyle={{ color: '#9CA3AF' }}
+                  contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}`, borderRadius: '8px' }}
+                  labelStyle={{ color: neutralColors.gray[400] }}
                   formatter={(value: number) => [formatCurrencyFull(value), '']}
                 />
                 <Legend />
@@ -408,7 +408,7 @@ export default function BudgetDashboard() {
         <Card className="bg-dark-card border-gray-700">
           <CardHeader>
             <CardTitle className="text-white text-lg flex items-center gap-2">
-              <PieChartIcon className="h-5 w-5 text-green-400" />
+              <PieChartIcon aria-hidden="true" className="h-5 w-5 text-green-400" />
               Cost by Trade
             </CardTitle>
           </CardHeader>
@@ -431,7 +431,7 @@ export default function BudgetDashboard() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2328', border: '1px solid #374151', borderRadius: '8px' }}
+                      contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}`, borderRadius: '8px' }}
                       formatter={(value: number) => formatCurrencyFull(value)}
                     />
                   </PieChart>
@@ -468,17 +468,17 @@ export default function BudgetDashboard() {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={costBreakdown.slice(0, 10)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis type="number" stroke="#9CA3AF" tickFormatter={formatCurrency} />
+              <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
+              <XAxis type="number" stroke={neutralColors.gray[400]} tickFormatter={formatCurrency} />
               <YAxis 
                 type="category" 
                 dataKey="category" 
-                stroke="#9CA3AF" 
-                tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                stroke={neutralColors.gray[400]} 
+                tick={{ fill: neutralColors.gray[400], fontSize: 11 }}
                 width={100}
               />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1F2328', border: '1px solid #374151', borderRadius: '8px' }}
+                contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}`, borderRadius: '8px' }}
                 formatter={(value: number) => formatCurrencyFull(value)}
               />
               <Legend />

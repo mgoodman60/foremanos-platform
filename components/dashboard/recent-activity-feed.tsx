@@ -109,7 +109,7 @@ export function RecentActivityFeed({ projectSlug }: RecentActivityFeedProps) {
       {!loading && activities.length === 0 && (
         <div className="text-center py-8">
           <FileText className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-          <p className="text-sm text-gray-500">No recent activity. Upload a document to get started.</p>
+          <p className="text-sm text-gray-400">No recent activity. Upload a document to get started.</p>
         </div>
       )}
 
@@ -154,7 +154,7 @@ export function RecentActivityFeed({ projectSlug }: RecentActivityFeedProps) {
                       )}
                       <p className="text-xs text-gray-400 truncate">{item.description}</p>
                     </div>
-                    <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                    <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
                       {getRelativeTime(item.timestamp)}
                     </span>
                   </div>
@@ -165,7 +165,7 @@ export function RecentActivityFeed({ projectSlug }: RecentActivityFeedProps) {
                     >
                       {getInitial(item.actor.name)}
                     </div>
-                    <span className="text-xs text-gray-500">{item.actor.name}</span>
+                    <span className="text-xs text-gray-400">{item.actor.name}</span>
                   </div>
                 </div>
               </li>

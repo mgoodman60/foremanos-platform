@@ -73,7 +73,7 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
           </span>
         )}
         {drawingType && <ConfidenceIndicator confidence={drawingType.confidence} />}
-        {sheet.scale && <span className="text-xs text-gray-500">Scale: {sheet.scale}</span>}
+        {sheet.scale && <span className="text-xs text-gray-400">Scale: {sheet.scale}</span>}
       </div>
 
       {/* Title Block */}
@@ -194,7 +194,7 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
           <div className="space-y-1 text-sm">
             {legends.flatMap((l: any) => (l.legendEntries as any[] || []).map((entry: any, i: number) => (
               <div key={`${l.sheetNumber}-${i}`} className="flex gap-2">
-                <span className="font-mono text-gray-500">{typeof entry === 'string' ? entry : entry.symbol}</span>
+                <span className="font-mono text-gray-400">{typeof entry === 'string' ? entry : entry.symbol}</span>
                 <span>{typeof entry === 'string' ? '' : entry.meaning}</span>
               </div>
             )))}
@@ -209,7 +209,7 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
             {rooms.map((r: any, i: number) => (
               <div key={i} className="p-2 bg-gray-50 rounded">
                 <div className="font-medium">{r.roomNumber || r.name}</div>
-                <div className="text-xs text-gray-500">{r.type}{r.area ? ` \u2022 ${r.area} SF` : ''}</div>
+                <div className="text-xs text-gray-400">{r.type}{r.area ? ` \u2022 ${r.area} SF` : ''}</div>
               </div>
             ))}
           </div>
@@ -222,12 +222,12 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {doors?.length > 0 && (
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 mb-2">DOORS ({doors.length})</h4>
+                <h4 className="text-xs font-semibold text-gray-400 mb-2">DOORS ({doors.length})</h4>
                 <div className="space-y-1 text-sm">
                   {doors.map((d: any, i: number) => (
                     <div key={i} className="flex justify-between">
                       <span className="font-mono">{d.doorNumber}</span>
-                      <span className="text-gray-500">{d.doorType}{d.width && d.height ? ` ${d.width}x${d.height}` : ''}</span>
+                      <span className="text-gray-400">{d.doorType}{d.width && d.height ? ` ${d.width}x${d.height}` : ''}</span>
                     </div>
                   ))}
                 </div>
@@ -235,12 +235,12 @@ export default function SheetDetailPanel({ sheet, drawingType, dimensions, callo
             )}
             {windows?.length > 0 && (
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 mb-2">WINDOWS ({windows.length})</h4>
+                <h4 className="text-xs font-semibold text-gray-400 mb-2">WINDOWS ({windows.length})</h4>
                 <div className="space-y-1 text-sm">
                   {windows.map((w: any, i: number) => (
                     <div key={i} className="flex justify-between">
                       <span className="font-mono">{w.windowNumber}</span>
-                      <span className="text-gray-500">{w.windowType}{w.width && w.height ? ` ${w.width}x${w.height}` : ''}</span>
+                      <span className="text-gray-400">{w.windowType}{w.width && w.height ? ` ${w.width}x${w.height}` : ''}</span>
                     </div>
                   ))}
                 </div>

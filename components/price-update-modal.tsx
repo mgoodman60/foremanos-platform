@@ -218,9 +218,9 @@ export function PriceUpdateModal({
 
   const getPriceChangeIcon = (original: number, suggested: number) => {
     const diff = suggested - original;
-    if (Math.abs(diff) < 0.01) return <Minus className="h-4 w-4 text-gray-400" />;
-    if (diff > 0) return <TrendingUp className="h-4 w-4 text-red-400" />;
-    return <TrendingDown className="h-4 w-4 text-green-400" />;
+    if (Math.abs(diff) < 0.01) return <Minus className="h-4 w-4 text-gray-400" aria-hidden="true" />;
+    if (diff > 0) return <TrendingUp className="h-4 w-4 text-red-400" aria-hidden="true" />;
+    return <TrendingDown className="h-4 w-4 text-green-400" aria-hidden="true" />;
   };
 
   const formatCurrency = (amount: number) => {
@@ -246,7 +246,7 @@ export function PriceUpdateModal({
       <DialogContent className="max-w-4xl max-h-[90vh] bg-dark-surface text-white border-gray-700">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-blue-400" />
+            <Globe className="h-5 w-5 text-blue-400" aria-hidden="true" />
             Update Prices from Web
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -260,7 +260,7 @@ export function PriceUpdateModal({
             {searching ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-3">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-400" aria-hidden="true" />
                   <span className="text-lg">Searching for current prices...</span>
                 </div>
                 <Progress value={searchProgress} className="h-2" />
@@ -270,7 +270,7 @@ export function PriceUpdateModal({
               </div>
             ) : (
               <div className="text-center space-y-4">
-                <Globe className="h-16 w-16 mx-auto text-blue-400 opacity-50" />
+                <Globe className="h-16 w-16 mx-auto text-blue-400 opacity-50" aria-hidden="true" />
                 <p className="text-gray-300">
                   Click search to find current market prices for all materials in your takeoff.
                   Prices will be adjusted for your project location.
@@ -280,7 +280,7 @@ export function PriceUpdateModal({
                   className="bg-blue-600 hover:bg-blue-700"
                   size="lg"
                 >
-                  <RefreshCw className="mr-2 h-5 w-5" />
+                  <RefreshCw className="mr-2 h-5 w-5" aria-hidden="true" />
                   Search Current Prices
                 </Button>
               </div>
@@ -292,7 +292,7 @@ export function PriceUpdateModal({
             {/* Location & Summary */}
             <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-green-400" />
+                <MapPin className="h-4 w-4 text-green-400" aria-hidden="true" />
                 <span className="text-sm">
                   {[session.projectLocation.city, session.projectLocation.state, session.projectLocation.zip]
                     .filter(Boolean).join(', ') || 'National Average'}
@@ -324,7 +324,7 @@ export function PriceUpdateModal({
                 </span>
               </div>
               <Button variant="outline" size="sm" onClick={handleExportReport}>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
                 Export Report
               </Button>
             </div>
@@ -425,7 +425,7 @@ export function PriceUpdateModal({
                 onClick={handleSearch}
                 disabled={searching}
               >
-                <RefreshCw className={`mr-2 h-4 w-4 ${searching ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`mr-2 h-4 w-4 ${searching ? 'animate-spin' : ''}`} aria-hidden="true" />
                 Re-Search
               </Button>
               <Button
@@ -434,9 +434,9 @@ export function PriceUpdateModal({
                 className="bg-green-600 hover:bg-green-700"
               >
                 {applying ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
                 )}
                 Apply {selectedItems.size} Updates
               </Button>

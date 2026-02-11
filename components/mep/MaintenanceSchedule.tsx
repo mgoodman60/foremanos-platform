@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Wrench, 
+import {
+  Plus,
+  Search,
+  Wrench,
   Calendar,
   AlertTriangle,
   CheckCircle,
@@ -14,6 +14,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface MaintenanceSchedule {
   id: string;
@@ -183,7 +184,7 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg 
             flex items-center gap-2 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4" aria-hidden="true" />
           New Schedule
         </button>
       </div>
@@ -191,7 +192,7 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <input
             type="text"
             value={search}
@@ -208,7 +209,7 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
               ? 'bg-red-600 text-white' 
               : 'bg-dark-surface border border-gray-700 text-gray-300 hover:bg-gray-700'}`}
         >
-          <AlertTriangle className="w-4 h-4" />
+          <AlertTriangle className="w-4 h-4" aria-hidden="true" />
           Overdue Only
         </button>
       </div>
@@ -258,18 +259,18 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
                       )}
                     </div>
                     {sch.taskDescription && (
-                      <p className="mt-2 text-sm text-gray-500">{sch.taskDescription}</p>
+                      <p className="mt-2 text-sm text-gray-400">{sch.taskDescription}</p>
                     )}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   {sch.isOverdue ? (
                     <span className="px-2 py-1 bg-red-600 text-white text-xs rounded flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> {Math.abs(sch.daysToDue)} days overdue
+                      <AlertTriangle className="w-3 h-3" aria-hidden="true" /> {Math.abs(sch.daysToDue)} days overdue
                     </span>
                   ) : sch.daysToDue <= 7 ? (
                     <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Due in {sch.daysToDue} days
+                      <Clock className="w-3 h-3" aria-hidden="true" /> Due in {sch.daysToDue} days
                     </span>
                   ) : (
                     <span className="px-2 py-1 bg-gray-600 text-gray-200 text-xs rounded">
@@ -281,7 +282,7 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
                 <div className="flex items-center gap-4 text-sm text-gray-400">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                    <Calendar className="w-3 h-3" aria-hidden="true" />
                     Next: {new Date(sch.nextDueDate).toLocaleDateString()}
                   </span>
                   {sch.lastCompletedDate && (
@@ -291,7 +292,7 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
                   )}
                   {sch.logs && sch.logs[0] && (
                     <span className="text-green-400 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="w-3 h-3" aria-hidden="true" />
                       {sch.logs[0].completedByName}
                     </span>
                   )}
@@ -301,7 +302,7 @@ export default function MaintenanceScheduleView({ projectSlug }: MaintenanceSche
                   className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded
                     flex items-center gap-1 transition-colors"
                 >
-                  <Check className="w-3 h-3" /> Complete
+                  <Check className="w-3 h-3" aria-hidden="true" /> Complete
                 </button>
               </div>
             </div>
@@ -348,6 +349,8 @@ function CompleteMaintenanceModal({
   });
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
 
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -358,11 +361,14 @@ function CompleteMaintenanceModal({
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="mep-maintenance-complete-dialog-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mep-maintenance-complete-dialog-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div>
             <h3 id="mep-maintenance-complete-dialog-title" className="text-lg font-medium text-white">Complete Maintenance</h3>
@@ -492,6 +498,8 @@ function AddScheduleModal({
     regulatoryCode: '',
   });
 
+  const addContainerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -500,11 +508,14 @@ function AddScheduleModal({
   return (
     <div
       className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="mep-maintenance-add-dialog-title"
     >
-      <div className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full">
+      <div
+        ref={addContainerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mep-maintenance-add-dialog-title"
+        className="bg-dark-surface border border-gray-700 rounded-lg max-w-lg w-full"
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 id="mep-maintenance-add-dialog-title" className="text-lg font-medium text-white">New Maintenance Schedule</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close dialog">

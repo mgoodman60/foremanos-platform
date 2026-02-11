@@ -356,7 +356,7 @@ export function TakeoffQADashboard({
                         <span className="text-sm font-medium text-gray-300">Accuracy Rate</span>
                       </div>
                       <div className="text-2xl font-bold text-emerald-400">{metrics.accuracyRate}%</div>
-                      <p className="text-xs text-gray-500 mt-1">Items verified as correct</p>
+                      <p className="text-xs text-gray-400 mt-1">Items verified as correct</p>
                     </div>
                     <div className="bg-dark-card rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
@@ -364,7 +364,7 @@ export function TakeoffQADashboard({
                         <span className="text-sm font-medium text-gray-300">Verification Rate</span>
                       </div>
                       <div className="text-2xl font-bold text-blue-400">{metrics.verificationRate}%</div>
-                      <p className="text-xs text-gray-500 mt-1">Items reviewed (approved + rejected)</p>
+                      <p className="text-xs text-gray-400 mt-1">Items reviewed (approved + rejected)</p>
                     </div>
                   </div>
                 </div>
@@ -433,11 +433,11 @@ export function TakeoffQADashboard({
                               <div className="px-4 pb-4 pt-2 border-t border-gray-700">
                                 <div className="space-y-3">
                                   <div>
-                                    <div className="text-xs text-gray-500 uppercase">Issue</div>
+                                    <div className="text-xs text-gray-400 uppercase">Issue</div>
                                     <div className="text-gray-300">{issue.description}</div>
                                   </div>
                                   <div>
-                                    <div className="text-xs text-gray-500 uppercase">Suggested Action</div>
+                                    <div className="text-xs text-gray-400 uppercase">Suggested Action</div>
                                     <div className="text-gray-300">{issue.suggestedAction}</div>
                                   </div>
                                   <div className="flex gap-2 pt-2">

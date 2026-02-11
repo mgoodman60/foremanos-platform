@@ -230,7 +230,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
           {/* Search */}
           <div className="mt-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search symbols by code or name..."
                 value={searchQuery}
@@ -348,7 +348,7 @@ export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrows
 
                           {symbol.alternativeCodes && symbol.alternativeCodes.length > 0 && (
                             <div className="flex gap-1 flex-wrap mt-2">
-                              <span className="text-xs text-gray-500">Also:</span>
+                              <span className="text-xs text-gray-400">Also:</span>
                               {symbol.alternativeCodes.map((code, cIdx) => (
                                 <Badge key={cIdx} variant="outline" className="border-gray-600 text-gray-400 text-xs">
                                   {code}

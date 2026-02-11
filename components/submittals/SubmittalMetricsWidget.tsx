@@ -65,7 +65,7 @@ export default function SubmittalMetricsWidget({
     return (
       <div className="bg-slate-900 border-2 border-slate-600 rounded-xl p-4">
         <div className="flex items-center justify-center py-6">
-          <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
+          <Loader2 className="w-5 h-5 text-blue-400 animate-spin" aria-hidden="true" />
         </div>
       </div>
     );
@@ -95,10 +95,10 @@ export default function SubmittalMetricsWidget({
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <FileCheck className="w-5 h-5 text-blue-400" />
+            <FileCheck className="w-5 h-5 text-blue-400" aria-hidden="true" />
             <span className="font-semibold text-white">Submittals</span>
           </div>
-          <ChevronRight className="w-4 h-4 text-slate-400" />
+          <ChevronRight className="w-4 h-4 text-slate-400" aria-hidden="true" />
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
@@ -124,7 +124,7 @@ export default function SubmittalMetricsWidget({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileCheck className="w-5 h-5 text-blue-400" />
+          <FileCheck className="w-5 h-5 text-blue-400" aria-hidden="true" />
           <h3 className="font-semibold text-white">Submittal Overview</h3>
         </div>
         <Link
@@ -132,7 +132,7 @@ export default function SubmittalMetricsWidget({
           className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
         >
           View All
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
 
@@ -140,28 +140,28 @@ export default function SubmittalMetricsWidget({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-slate-800 border-2 border-slate-500 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
-            <FileEdit className="w-4 h-4 text-slate-400" />
+            <FileEdit className="w-4 h-4 text-slate-400" aria-hidden="true" />
             <span className="text-xs text-slate-400">Total</span>
           </div>
           <p className="text-2xl font-bold text-white">{stats.total}</p>
         </div>
         <div className="bg-emerald-950 border-2 border-emerald-500 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <CheckCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
             <span className="text-xs text-emerald-300">Approved</span>
           </div>
           <p className="text-2xl font-bold text-emerald-400">{approvedCount}</p>
         </div>
         <div className="bg-amber-950 border-2 border-amber-500 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
-            <Clock className="w-4 h-4 text-amber-400" />
+            <Clock className="w-4 h-4 text-amber-400" aria-hidden="true" />
             <span className="text-xs text-amber-300">Pending</span>
           </div>
           <p className="text-2xl font-bold text-amber-400">{stats.pendingReview}</p>
         </div>
         <div className="bg-red-950 border-2 border-red-500 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
-            <XCircle className="w-4 h-4 text-red-400" />
+            <XCircle className="w-4 h-4 text-red-400" aria-hidden="true" />
             <span className="text-xs text-red-300">Rejected</span>
           </div>
           <p className="text-2xl font-bold text-red-400">{rejectedCount}</p>
@@ -197,13 +197,13 @@ export default function SubmittalMetricsWidget({
         <div className="flex items-center gap-4 text-sm">
           {stats.recentlyApproved > 0 && (
             <div className="flex items-center gap-1 text-emerald-400">
-              <TrendingUp className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" aria-hidden="true" />
               <span>{stats.recentlyApproved} approved</span>
             </div>
           )}
           {stats.recentlyRejected > 0 && (
             <div className="flex items-center gap-1 text-red-400">
-              <AlertTriangle className="w-4 h-4" />
+              <AlertTriangle className="w-4 h-4" aria-hidden="true" />
               <span>{stats.recentlyRejected} rejected</span>
             </div>
           )}

@@ -200,12 +200,12 @@ export function FloorPlanExport({
       >
         {exporting ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
             Exporting...
           </>
         ) : (
           <>
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-2" aria-hidden="true" />
             Export
           </>
         )}

@@ -10,7 +10,7 @@ interface Props {
 
 export default function CrossReferenceMap({ callouts, onNavigateSheet }: Props) {
   if (callouts.length === 0) {
-    return <p className="text-sm text-gray-500 italic">No cross references found</p>;
+    return <p className="text-sm text-gray-400 italic">No cross references found</p>;
   }
 
   return (
@@ -28,7 +28,7 @@ export default function CrossReferenceMap({ callouts, onNavigateSheet }: Props) 
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-[44px] ${
               targetSheet
                 ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer'
-                : 'bg-gray-100 text-gray-500 cursor-default'
+                : 'bg-gray-100 text-gray-400 cursor-default'
             }`}
             title={description ? `${label}: ${description}` : label}
             aria-label={targetSheet ? `Navigate to sheet ${targetSheet}` : label}

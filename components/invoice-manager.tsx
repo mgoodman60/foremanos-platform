@@ -204,11 +204,11 @@ export default function InvoiceManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <Receipt className="h-5 w-5 text-green-400" />
+          <Receipt aria-hidden="true" className="h-5 w-5 text-green-400" />
           Subcontractor Invoices
         </h3>
         <Button onClick={() => setShowAddModal(true)} size="sm" className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-1" /> Add Invoice
+          <Plus aria-hidden="true" className="h-4 w-4 mr-1" /> Add Invoice
         </Button>
       </div>
 
@@ -237,11 +237,11 @@ export default function InvoiceManager() {
                     </h4>
                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
                       <span className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
+                        <DollarSign aria-hidden="true" className="h-4 w-4" />
                         {formatCurrency(inv.amount)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar aria-hidden="true" className="h-4 w-4" />
                         {format(new Date(inv.invoiceDate), 'MMM d, yyyy')}
                       </span>
                       {inv.BudgetItem && (

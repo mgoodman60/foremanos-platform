@@ -147,7 +147,7 @@ export function SidebarNavigation() {
           <div key={section.label} className={sectionIdx > 0 ? 'mt-2' : ''}>
             {!sidebarCollapsed && (
               <div className="px-4 py-1.5">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                   {section.label}
                 </span>
               </div>
@@ -239,7 +239,7 @@ export function SidebarNavigation() {
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="
             hidden md:flex w-full items-center gap-3 px-3 py-2 rounded-lg text-sm
-            text-gray-500 hover:bg-gray-800 hover:text-gray-400
+            text-gray-400 hover:bg-gray-800 hover:text-gray-400
             transition-colors duration-150
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
             justify-center

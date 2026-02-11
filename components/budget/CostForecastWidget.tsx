@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 import { format, addDays, differenceInDays } from 'date-fns';
+import { neutralColors, backgroundColors, borderColors, chartColors, semanticColors } from '@/lib/design-tokens';
 
 interface ForecastData {
   // Core metrics
@@ -168,7 +169,7 @@ export default function CostForecastWidget({
             <p className={`text-xl font-bold ${overBudget ? 'text-red-400' : 'text-green-400'}`}>
               {formatCurrency(data.estimateAtCompletion)}
             </p>
-            <p className="text-xs text-gray-500">Budget: {formatCurrency(data.totalBudget)}</p>
+            <p className="text-xs text-gray-400">Budget: {formatCurrency(data.totalBudget)}</p>
           </div>
 
           {/* VAC - Variance at Completion */}
@@ -183,7 +184,7 @@ export default function CostForecastWidget({
             <p className={`text-xl font-bold ${data.varianceAtCompletion >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {data.varianceAtCompletion >= 0 ? '+' : ''}{formatCurrency(data.varianceAtCompletion)}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {data.varianceAtCompletion >= 0 ? 'Under budget' : 'Over budget'}
             </p>
           </div>
@@ -197,7 +198,7 @@ export default function CostForecastWidget({
             <p className="text-xl font-bold text-white">
               {formatCurrency(data.estimateToComplete)}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {((data.estimateToComplete / data.totalBudget) * 100).toFixed(1)}% of budget remaining
             </p>
           </div>
@@ -211,7 +212,7 @@ export default function CostForecastWidget({
             <p className={`text-2xl font-bold ${getCPIColor(data.costPerformanceIndex)}`}>
               {formatPercent(data.costPerformanceIndex)}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {data.costPerformanceIndex >= 1 ? 'Cost efficient' : 'Cost overrun'}
             </p>
           </div>
@@ -222,7 +223,7 @@ export default function CostForecastWidget({
             <p className={`text-2xl font-bold ${getCPIColor(data.schedulePerformanceIndex)}`}>
               {formatPercent(data.schedulePerformanceIndex)}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {data.schedulePerformanceIndex >= 1 ? 'Ahead of schedule' : 'Behind schedule'}
             </p>
           </div>
@@ -233,7 +234,7 @@ export default function CostForecastWidget({
             <p className={`text-2xl font-bold ${data.toCompletePerformanceIndex <= 1 ? 'text-green-400' : 'text-yellow-400'}`}>
               {formatPercent(data.toCompletePerformanceIndex)}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               {data.toCompletePerformanceIndex <= 1 ? 'Achievable' : 'Challenging'}
             </p>
           </div>
@@ -244,37 +245,37 @@ export default function CostForecastWidget({
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={data.projectionTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke={neutralColors.gray[700]} />
                 <XAxis 
                   dataKey="date" 
-                  tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                  tick={{ fill: neutralColors.gray[400], fontSize: 10 }}
                   tickFormatter={(val) => {
                     const d = new Date(val);
                     return `${d.getMonth()+1}/${d.getDate()}`;
                   }}
                 />
                 <YAxis 
-                  tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                  tick={{ fill: neutralColors.gray[400], fontSize: 10 }}
                   tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`}
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
-                  labelStyle={{ color: '#9CA3AF' }}
+                  contentStyle={{ backgroundColor: backgroundColors.dark.card, border: `1px solid ${borderColors.dark.subtle}` }}
+                  labelStyle={{ color: neutralColors.gray[400] }}
                   formatter={(value: number) => [formatCurrency(value), '']}
                 />
-                <ReferenceLine y={data.totalBudget} stroke="#EF4444" strokeDasharray="5 5" label="Budget" />
+                <ReferenceLine y={data.totalBudget} stroke={semanticColors.error[500]} strokeDasharray="5 5" label="Budget" />
                 <Area 
                   type="monotone" 
                   dataKey="planned" 
                   fill="rgba(59, 130, 246, 0.1)" 
-                  stroke="#3B82F6" 
+                  stroke={chartColors.neutral}
                   strokeDasharray="3 3"
                   name="Planned"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="actual" 
-                  stroke="#10B981" 
+                  stroke={chartColors.positive}
                   strokeWidth={2}
                   dot={false}
                   name="Actual"
@@ -282,7 +283,7 @@ export default function CostForecastWidget({
                 <Line 
                   type="monotone" 
                   dataKey="projected" 
-                  stroke="#F59E0B" 
+                  stroke={chartColors.warning}
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   dot={false}

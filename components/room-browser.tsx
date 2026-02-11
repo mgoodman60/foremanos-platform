@@ -40,6 +40,7 @@ import {
   FileDown,
 } from 'lucide-react';
 import RoomComparison from '@/components/room-comparison';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -1252,7 +1253,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                             {/* Room Type & Floor Selector */}
                             <div className="flex items-center gap-3 mb-2">
                               <div className="flex items-center gap-1.5">
-                                <Home className="h-3 w-3 text-gray-500" />
+                                <Home className="h-3 w-3 text-gray-400" />
                                 <span className="text-xs text-gray-400">{getRoomTypeLabel(room.type)}</span>
                               </div>
                               
@@ -1539,7 +1540,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                                           {tradeItems.map((item) => (
                                             <div key={item.id} className="flex items-center justify-between text-xs bg-dark-surface rounded px-2 py-1.5">
                                               <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                <span className="font-mono text-gray-500 flex-shrink-0">{item.tag}</span>
+                                                <span className="font-mono text-gray-400 flex-shrink-0">{item.tag}</span>
                                                 <span className="text-slate-50 truncate">{item.name}</span>
                                               </div>
                                               <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -1567,7 +1568,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
                             {/* No Finish Data Message */}
                             {(!room.FinishScheduleItem || room.FinishScheduleItem.length === 0) && (!room.mepEquipment || room.mepEquipment.length === 0) && (
                               <div className="text-center py-4">
-                                <Circle className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                                <Circle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                                 <p className="text-xs text-gray-400">No finish schedule or MEP data available for this room</p>
                               </div>
                             )}
@@ -1598,20 +1599,29 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
       {/* Room Comparison Modal */}
       {showComparison && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="room-comparison-title"
-        >
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-auto">
-            <RoomComparison
-              projectSlug={projectSlug}
-              onClose={() => setShowComparison(false)}
-            />
-          </div>
-        </div>
+        <RoomComparisonModalWrapper
+          projectSlug={projectSlug}
+          onClose={() => setShowComparison(false)}
+        />
       )}
+    </div>
+  );
+}
+
+function RoomComparisonModalWrapper({ projectSlug, onClose }: { projectSlug: string; onClose: () => void }) {
+  const containerRef = useFocusTrap({ isActive: true, onEscape: onClose });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="room-comparison-title"
+        className="w-full max-w-4xl max-h-[90vh] overflow-auto"
+      >
+        <RoomComparison projectSlug={projectSlug} onClose={onClose} />
+      </div>
     </div>
   );
 }

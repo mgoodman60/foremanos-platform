@@ -704,7 +704,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
       {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between border-b border-gray-700 p-4">
         <div className="flex items-center gap-2">
-          <Map className="h-5 w-5 text-blue-500" />
+          <Map className="h-5 w-5 text-blue-500" aria-hidden="true" />
           <h2 className="text-lg font-semibold">Plan Navigator</h2>
         </div>
         <div className="flex items-center gap-2">
@@ -787,7 +787,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               placeholder="Search by sheet number (A101), name, or discipline..."
               value={sheetSearch}
               onChange={(e) => setSheetSearch(e.target.value)}
-              className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-400"
             />
           </div>
           {/* Quick Stats */}
@@ -855,7 +855,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
               placeholder="Search references, documents, locations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 pl-10 text-slate-50 placeholder:text-gray-400"
             />
           </div>
 
@@ -928,7 +928,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                   <p className="text-sm text-gray-400">
                     {sheetSearch ? 'No sheets match your search' : 'No documents found'}
                   </p>
-                  <p className="mt-2 text-xs text-gray-500">Upload documents to see them organized here</p>
+                  <p className="mt-2 text-xs text-gray-400">Upload documents to see them organized here</p>
                 </div>
               </div>
             ) : (
@@ -974,7 +974,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                                 </div>
                               ) : (
                                 <div className="flex-shrink-0 w-16 px-2 py-1 bg-gray-500/20 border border-gray-500/30 rounded text-center">
-                                  <Hash className="h-4 w-4 text-gray-500 mx-auto" />
+                                  <Hash className="h-4 w-4 text-gray-400 mx-auto" />
                                 </div>
                               )}
                               
@@ -982,11 +982,11 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-slate-50 truncate">{doc.name}</p>
                                 <p className="text-xs text-gray-400 mt-0.5">{doc.summary}</p>
-                                <p className="text-[10px] text-gray-500 mt-0.5">{doc.category}</p>
+                                <p className="text-[10px] text-gray-400 mt-0.5">{doc.category}</p>
                               </div>
                               
                               {/* View Icon */}
-                              <Eye className="h-4 w-4 text-gray-500 group-hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              <Eye className="h-4 w-4 text-gray-400 group-hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </button>
                           ))}
                         </div>
@@ -1021,13 +1021,13 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                         onClick={() => handleJumpToDocument(doc.id, doc.name)}
                         className="flex w-full items-center gap-3 rounded-lg border border-gray-700 bg-dark-surface p-3 text-left hover:border-blue-500 hover:bg-dark-card transition-all group"
                       >
-                        <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                        <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-slate-50 truncate">{doc.name}</p>
                           <p className="text-xs text-gray-400 mt-0.5">{doc.summary}</p>
-                          <p className="text-[10px] text-gray-500 mt-0.5">{doc.category}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{doc.category}</p>
                         </div>
-                        <Eye className="h-4 w-4 text-gray-500 group-hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Eye className="h-4 w-4 text-gray-400 group-hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
                   </div>
@@ -1044,7 +1044,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                   ? 'No references match your filters'
                   : 'No cross-references found'}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-400">
                 {Object.keys(referencesByDoc).length === 0
                   ? 'Process documents to extract cross-references'
                   : 'Try adjusting your filters'}
@@ -1122,14 +1122,14 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                               {/* Reference Info */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-xs text-gray-500">{ref.location}</span>
+                                  <span className="text-xs text-gray-400">{ref.location}</span>
                                   {getReferenceTypeBadge(ref.referenceType)}
                                 </div>
                                 
                                 {/* Summary */}
                                 <p className="text-xs text-gray-400 mb-1">{summary}</p>
 
-                                <p className="text-xs text-gray-500 mb-2 italic">"{ref.context}"</p>
+                                <p className="text-xs text-gray-400 mb-2 italic">"{ref.context}"</p>
 
                                 {/* Target Document */}
                                 <button
@@ -1184,7 +1184,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                         <p className="text-xs text-gray-400 mt-1">{summary}</p>
                       </div>
                     </div>
-                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">#{idx + 1}</span>
+                    <span className="text-xs text-gray-400 flex-shrink-0 ml-2">#{idx + 1}</span>
                   </button>
                   
                   {/* Reference Body - Always show basic info */}
@@ -1206,8 +1206,8 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                         </button>
                       </WithTooltip>
 
-                      <ArrowRight className="hidden sm:block h-5 w-5 text-gray-500 flex-shrink-0" />
-                      <span className="sm:hidden text-xs text-gray-500 ml-2">↓ references</span>
+                      <ArrowRight className="hidden sm:block h-5 w-5 text-gray-400 flex-shrink-0" />
+                      <span className="sm:hidden text-xs text-gray-400 ml-2">↓ references</span>
 
                       {/* Target Document */}
                       <WithTooltip tooltip="View target document">
@@ -1249,7 +1249,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                                 />
                               ) : (
                                 <div 
-                                  className="h-32 flex flex-col items-center justify-center text-gray-500 bg-gray-800/50 rounded cursor-pointer hover:bg-gray-800 transition-colors"
+                                  className="h-32 flex flex-col items-center justify-center text-gray-400 bg-gray-800/50 rounded cursor-pointer hover:bg-gray-800 transition-colors"
                                   onClick={() => handleJumpToDocument(ref.sourceDocumentId, ref.sourceDoc?.name || 'Unknown')}
                                 >
                                   <FileText className="h-8 w-8 mb-2 opacity-50" />
@@ -1278,7 +1278,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                                 />
                               ) : (
                                 <div 
-                                  className="h-32 flex flex-col items-center justify-center text-gray-500 bg-gray-800/50 rounded cursor-pointer hover:bg-gray-800 transition-colors"
+                                  className="h-32 flex flex-col items-center justify-center text-gray-400 bg-gray-800/50 rounded cursor-pointer hover:bg-gray-800 transition-colors"
                                   onClick={() => handleJumpToDocument(ref.targetDocumentId, ref.targetDoc?.name || 'Unknown')}
                                 >
                                   <FileText className="h-8 w-8 mb-2 opacity-50" />

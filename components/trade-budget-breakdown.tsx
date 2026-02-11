@@ -211,9 +211,9 @@ export default function TradeBudgetBreakdown() {
     return (
       <Card className="bg-dark-card border-gray-700">
         <CardContent className="py-12 text-center">
-          <HardHat className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+          <HardHat className="w-12 h-12 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-400 mb-2">No trade breakdown available</p>
-          <p className="text-sm text-gray-500">Import a budget to see cost breakdown by trade</p>
+          <p className="text-sm text-gray-400">Import a budget to see cost breakdown by trade</p>
         </CardContent>
       </Card>
     );
@@ -307,7 +307,7 @@ export default function TradeBudgetBreakdown() {
                     </div>
                     <div>
                       <div className="text-sm font-medium text-white">{trade.tradeName}</div>
-                      <div className="text-xs text-gray-500">{trade.itemCount} items</div>
+                      <div className="text-xs text-gray-400">{trade.itemCount} items</div>
                     </div>
                   </div>
                   <div className="text-right">
@@ -335,7 +335,7 @@ export default function TradeBudgetBreakdown() {
                       style={{ width: `${Math.min(spentPercent, 100)}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-gray-400">
                     <span>Spent: {formatCompactCurrency(trade.actualCost)}</span>
                     <span>{spentPercent.toFixed(0)}%</span>
                   </div>
@@ -354,7 +354,7 @@ export default function TradeBudgetBreakdown() {
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-400">Unassigned to Trade</div>
-                    <div className="text-xs text-gray-500">{unassigned.itemCount} items</div>
+                    <div className="text-xs text-gray-400">{unassigned.itemCount} items</div>
                   </div>
                 </div>
                 <div className="text-sm font-semibold text-gray-400">
@@ -374,7 +374,7 @@ export default function TradeBudgetBreakdown() {
             </div>
           ))}
           {trades.length > 6 && (
-            <span className="text-xs text-gray-500">+{trades.length - 6} more</span>
+            <span className="text-xs text-gray-400">+{trades.length - 6} more</span>
           )}
         </div>
       </CardContent>

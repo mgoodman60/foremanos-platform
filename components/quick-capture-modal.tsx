@@ -276,7 +276,7 @@ export function QuickCaptureModal({
               type="text"
               {...register('location')}
               placeholder="e.g., 2nd Floor, Room 201"
-              className="bg-dark-card border-gray-600 text-slate-50 placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 text-slate-50 placeholder:text-gray-400"
               aria-invalid={!!errors.location}
               aria-describedby={errors.location ? 'location-error' : undefined}
             />
@@ -323,7 +323,7 @@ export function QuickCaptureModal({
               type="text"
               {...register('caption')}
               placeholder="Brief description..."
-              className="bg-dark-card border-gray-600 text-slate-50 placeholder:text-gray-500"
+              className="bg-dark-card border-gray-600 text-slate-50 placeholder:text-gray-400"
               aria-invalid={!!errors.caption}
               aria-describedby={errors.caption ? 'caption-error' : undefined}
             />

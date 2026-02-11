@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Loader2, CalendarPlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface CreateDailyReportDialogProps {
   open: boolean;
@@ -23,6 +24,8 @@ export default function CreateDailyReportDialog({
   );
   const [weatherCondition, setWeatherCondition] = useState('');
   const [workPerformed, setWorkPerformed] = useState('');
+
+  const containerRef = useFocusTrap({ isActive: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -79,16 +82,17 @@ export default function CreateDailyReportDialog({
 
       {/* Dialog */}
       <div
+        ref={containerRef}
         className="relative w-full max-w-md mx-4 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl"
         role="dialog"
         aria-modal="true"
-        aria-label="Create daily report"
+        aria-labelledby="create-daily-report-title"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
           <div className="flex items-center gap-2">
             <CalendarPlus className="w-5 h-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-white">
+            <h2 id="create-daily-report-title" className="text-lg font-semibold text-white">
               New Daily Report
             </h2>
           </div>
@@ -146,7 +150,7 @@ export default function CreateDailyReportDialog({
               className="block text-sm font-medium text-gray-300 mb-1.5"
             >
               Notes / Summary
-              <span className="text-gray-500 font-normal ml-1">(optional)</span>
+              <span className="text-gray-400 font-normal ml-1">(optional)</span>
             </label>
             <textarea
               id="work-performed"

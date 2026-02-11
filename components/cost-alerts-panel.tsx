@@ -27,12 +27,12 @@ interface CostAlert {
 }
 
 const ALERT_ICONS: Record<string, React.ReactNode> = {
-  CPI_LOW: <TrendingDown className="h-5 w-5" />,
-  SPI_LOW: <TrendingDown className="h-5 w-5" />,
-  BUDGET_EXCEEDED: <DollarSign className="h-5 w-5" />,
-  ITEM_OVER_BUDGET: <AlertCircle className="h-5 w-5" />,
-  CONTINGENCY_LOW: <AlertTriangle className="h-5 w-5" />,
-  FORECAST_OVERRUN: <TrendingDown className="h-5 w-5" />
+  CPI_LOW: <TrendingDown aria-hidden="true" className="h-5 w-5" />,
+  SPI_LOW: <TrendingDown aria-hidden="true" className="h-5 w-5" />,
+  BUDGET_EXCEEDED: <DollarSign aria-hidden="true" className="h-5 w-5" />,
+  ITEM_OVER_BUDGET: <AlertCircle aria-hidden="true" className="h-5 w-5" />,
+  CONTINGENCY_LOW: <AlertTriangle aria-hidden="true" className="h-5 w-5" />,
+  FORECAST_OVERRUN: <TrendingDown aria-hidden="true" className="h-5 w-5" />
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -111,7 +111,7 @@ export default function CostAlertsPanel() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">
-            <Bell className="h-5 w-5 text-yellow-400" />
+            <Bell aria-hidden="true" className="h-5 w-5 text-yellow-400" />
             Cost Alerts
             {unreadCount > 0 && (
               <Badge className="bg-red-500 text-white">{unreadCount}</Badge>
@@ -133,7 +133,7 @@ export default function CostAlertsPanel() {
       <CardContent className="pt-2">
         {alerts.length === 0 ? (
           <div className="text-center py-6 text-gray-400">
-            <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-400" />
+            <CheckCircle aria-hidden="true" className="h-8 w-8 mx-auto mb-2 text-green-400" />
             <p>No active cost alerts</p>
           </div>
         ) : (
@@ -161,7 +161,7 @@ export default function CostAlertsPanel() {
                         Current: {alert.currentValue.toFixed(2)} | Threshold: {alert.threshold.toFixed(2)}
                       </p>
                     )}
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       {formatDistanceToNow(new Date(alert.triggeredAt), { addSuffix: true })}
                     </p>
                   </div>

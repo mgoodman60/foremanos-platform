@@ -71,17 +71,17 @@ export default function ScheduleExtractionButton({
       <button
         onClick={handleExtract}
         disabled={extracting}
-        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-500
+        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-400
           text-white rounded-lg flex items-center gap-2 transition-colors font-medium border-2 border-indigo-400"
       >
         {extracting ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             Extracting Schedules...
           </>
         ) : (
           <>
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
             Extract Schedules
           </>
         )}
@@ -96,18 +96,18 @@ export default function ScheduleExtractionButton({
           >
             <div className="flex items-center gap-2">
               {hasErrors ? (
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <AlertTriangle className="w-4 h-4 text-amber-400" aria-hidden="true" />
               ) : (
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                <CheckCircle className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               )}
               <span className="text-white font-medium">
                 {totalExtracted} items extracted
               </span>
             </div>
             {showDetails ? (
-              <ChevronUp className="w-4 h-4 text-slate-400" />
+              <ChevronUp className="w-4 h-4 text-slate-400" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />
             )}
           </button>
 

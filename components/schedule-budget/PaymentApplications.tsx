@@ -329,7 +329,7 @@ export default function PaymentApplications() {
       {summary && summary.pendingPayment > 0 && (
         <Card className="p-4 bg-yellow-900/20 border-yellow-700">
           <div className="flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-yellow-400" />
+            <AlertCircle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
             <div>
               <span className="text-yellow-400 font-medium">
                 {formatCurrency(summary.pendingPayment)}
@@ -343,7 +343,7 @@ export default function PaymentApplications() {
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-4">
         <Button onClick={() => setShowGenerateModal(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Generate Pay App
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Generate Pay App
         </Button>
         
         {/* Upload Pay App Button */}
@@ -363,9 +363,9 @@ export default function PaymentApplications() {
             className="border-gray-600 hover:bg-gray-700"
           >
             {uploading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
             ) : (
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 mr-2" aria-hidden="true" />
             )}
             Upload Pay App
           </Button>
@@ -373,7 +373,7 @@ export default function PaymentApplications() {
         
         {/* Data source indicator */}
         <div className="ml-auto flex items-center gap-2 text-sm text-gray-400">
-          <Info className="h-4 w-4" />
+          <Info className="h-4 w-4" aria-hidden="true" />
           <span>Pay apps update actual project costs automatically</span>
         </div>
       </div>
@@ -382,7 +382,7 @@ export default function PaymentApplications() {
       {uploadResult && uploadResult.success && (
         <Card className="p-4 bg-green-900/20 border-green-700">
           <div className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5" />
+            <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5" aria-hidden="true" />
             <div className="flex-1">
               <div className="font-medium text-green-400">
                 Pay App #{uploadResult.paymentApplication.applicationNumber} Imported
@@ -418,7 +418,7 @@ export default function PaymentApplications() {
       <div className="space-y-3">
         {payApps.length === 0 ? (
           <Card className="p-8 bg-dark-card border-gray-700 text-center text-gray-400">
-            <FileUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <FileUp className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
             <p>No payment applications yet</p>
             <p className="text-sm mt-1">
               Upload an AIA G702/G703 form or generate a new pay app
@@ -430,10 +430,10 @@ export default function PaymentApplications() {
                 onClick={() => fileInputRef.current?.click()}
                 className="border-gray-600"
               >
-                <Upload className="h-4 w-4 mr-2" /> Upload Document
+                <Upload className="h-4 w-4 mr-2" aria-hidden="true" /> Upload Document
               </Button>
               <Button size="sm" onClick={() => setShowGenerateModal(true)}>
-                <Plus className="h-4 w-4 mr-2" /> Generate New
+                <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Generate New
               </Button>
             </div>
           </Card>
@@ -449,7 +449,7 @@ export default function PaymentApplications() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     <div className="bg-blue-600 p-3 rounded-lg">
-                      <FileText className="h-6 w-6 text-white" />
+                      <FileText className="h-6 w-6 text-white" aria-hidden="true" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -466,25 +466,25 @@ export default function PaymentApplications() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
                         <div>
-                          <div className="text-xs text-gray-500">This Period</div>
+                          <div className="text-xs text-gray-400">This Period</div>
                           <div className="text-sm font-medium text-white">
                             {formatCurrency(pa.currentPeriod)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500">Total Completed</div>
+                          <div className="text-xs text-gray-400">Total Completed</div>
                           <div className="text-sm font-medium text-white">
                             {formatCurrency(pa.totalCompleted)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500">Retainage</div>
+                          <div className="text-xs text-gray-400">Retainage</div>
                           <div className="text-sm font-medium text-yellow-400">
                             {formatCurrency(pa.retainage)} ({pa.retainagePercent}%)
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500">Net Due</div>
+                          <div className="text-xs text-gray-400">Net Due</div>
                           <div className="text-sm font-medium text-green-400">
                             {formatCurrency(pa.netDue)}
                           </div>
@@ -492,7 +492,7 @@ export default function PaymentApplications() {
                       </div>
 
                       <div className="mt-2">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <div className="flex justify-between text-xs text-gray-400 mb-1">
                           <span>Progress</span>
                           <span>{percentComplete.toFixed(1)}%</span>
                         </div>
@@ -503,7 +503,7 @@ export default function PaymentApplications() {
 
                   <div className="flex flex-col gap-2">
                     <Button size="sm" variant="ghost" onClick={() => viewDetails(pa)}>
-                      <Eye className="h-4 w-4 mr-1" /> View
+                      <Eye className="h-4 w-4 mr-1" aria-hidden="true" /> View
                     </Button>
                     {pa.status === 'DRAFT' && (
                       <Button
@@ -512,7 +512,7 @@ export default function PaymentApplications() {
                         className="text-blue-400"
                         onClick={() => handleStatusUpdate(pa.id, 'SUBMITTED')}
                       >
-                        <Send className="h-4 w-4 mr-1" /> Submit
+                        <Send className="h-4 w-4 mr-1" aria-hidden="true" /> Submit
                       </Button>
                     )}
                     {pa.status === 'SUBMITTED' && (
@@ -523,7 +523,7 @@ export default function PaymentApplications() {
                           className="text-green-400"
                           onClick={() => handleReview(pa.id, 'approve')}
                         >
-                          <Check className="h-4 w-4 mr-1" /> Approve
+                          <Check className="h-4 w-4 mr-1" aria-hidden="true" /> Approve
                         </Button>
                         <Button
                           size="sm"
@@ -531,7 +531,7 @@ export default function PaymentApplications() {
                           className="text-red-400"
                           onClick={() => handleReview(pa.id, 'reject', 'Needs revision')}
                         >
-                          <X className="h-4 w-4 mr-1" /> Reject
+                          <X className="h-4 w-4 mr-1" aria-hidden="true" /> Reject
                         </Button>
                       </>
                     )}
@@ -542,7 +542,7 @@ export default function PaymentApplications() {
                         className="text-green-400"
                         onClick={() => handleStatusUpdate(pa.id, 'PAID')}
                       >
-                        <DollarSign className="h-4 w-4 mr-1" /> Mark Paid
+                        <DollarSign className="h-4 w-4 mr-1" aria-hidden="true" /> Mark Paid
                       </Button>
                     )}
                   </div>
@@ -613,25 +613,25 @@ export default function PaymentApplications() {
               {/* Header Info */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <div className="text-xs text-gray-500">Scheduled Value</div>
+                  <div className="text-xs text-gray-400">Scheduled Value</div>
                   <div className="text-lg font-bold">
                     {formatCurrency(selectedPayApp.scheduledValue)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">This Application</div>
+                  <div className="text-xs text-gray-400">This Application</div>
                   <div className="text-lg font-bold text-blue-400">
                     {formatCurrency(selectedPayApp.currentPeriod)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Retainage</div>
+                  <div className="text-xs text-gray-400">Retainage</div>
                   <div className="text-lg font-bold text-yellow-400">
                     {formatCurrency(selectedPayApp.retainage)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Net Due</div>
+                  <div className="text-xs text-gray-400">Net Due</div>
                   <div className="text-lg font-bold text-green-400">
                     {formatCurrency(selectedPayApp.netDue)}
                   </div>
@@ -660,7 +660,7 @@ export default function PaymentApplications() {
                             <td className="py-2">
                               <div>{item.description}</div>
                               {item.costCode && (
-                                <div className="text-xs text-gray-500">{item.costCode}</div>
+                                <div className="text-xs text-gray-400">{item.costCode}</div>
                               )}
                             </td>
                             <td className="text-right py-2">

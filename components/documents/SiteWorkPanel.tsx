@@ -41,7 +41,7 @@ export default function SiteWorkPanel({ data }: Props) {
       {/* Footings */}
       {hasFootings && (
         <div>
-          <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Footings ({footings!.length})
           </h5>
           <div className="overflow-x-auto rounded-lg border">
@@ -74,7 +74,7 @@ export default function SiteWorkPanel({ data }: Props) {
       {/* Slab Details */}
       {hasSlabs && (
         <div>
-          <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Slab Details ({slabDetails.length})
           </h5>
           <div className="overflow-x-auto rounded-lg border">
@@ -105,7 +105,7 @@ export default function SiteWorkPanel({ data }: Props) {
       {/* Rebar Schedule */}
       {hasRebar && (
         <div>
-          <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Rebar Schedule ({rebarSchedule!.length})
           </h5>
           <div className="overflow-x-auto rounded-lg border">
@@ -136,31 +136,31 @@ export default function SiteWorkPanel({ data }: Props) {
       {/* Grading Data */}
       {hasGrading && (
         <div>
-          <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
             Grading
           </h5>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {gradingData.existingGrade && (
               <div className="border rounded-lg p-2 bg-white">
-                <div className="text-xs text-gray-500">Existing Grade</div>
+                <div className="text-xs text-gray-400">Existing Grade</div>
                 <div className="text-sm font-mono text-gray-900">{gradingData.existingGrade}</div>
               </div>
             )}
             {gradingData.proposedGrade && (
               <div className="border rounded-lg p-2 bg-white">
-                <div className="text-xs text-gray-500">Proposed Grade</div>
+                <div className="text-xs text-gray-400">Proposed Grade</div>
                 <div className="text-sm font-mono text-gray-900">{gradingData.proposedGrade}</div>
               </div>
             )}
             {gradingData.cutFill && (
               <div className="border rounded-lg p-2 bg-white">
-                <div className="text-xs text-gray-500">Cut/Fill</div>
+                <div className="text-xs text-gray-400">Cut/Fill</div>
                 <div className="text-sm font-mono text-gray-900">{gradingData.cutFill}</div>
               </div>
             )}
             {gradingData.slopes && (
               <div className="border rounded-lg p-2 bg-white">
-                <div className="text-xs text-gray-500">Slopes</div>
+                <div className="text-xs text-gray-400">Slopes</div>
                 <div className="text-sm font-mono text-gray-900">
                   {Array.isArray(gradingData.slopes) ? gradingData.slopes.join(', ') : gradingData.slopes}
                 </div>
@@ -180,7 +180,7 @@ export default function SiteWorkPanel({ data }: Props) {
           {/* Plant Schedule */}
           {landscape.plantSchedule?.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Plant Schedule ({landscape.plantSchedule.length})
               </h5>
               <div className="overflow-x-auto rounded-lg border">
@@ -211,7 +211,7 @@ export default function SiteWorkPanel({ data }: Props) {
           {/* Existing Trees */}
           {landscape.existingTrees?.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Existing Trees ({landscape.existingTrees.length})
               </h5>
               <div className="overflow-x-auto rounded-lg border">
@@ -250,7 +250,7 @@ export default function SiteWorkPanel({ data }: Props) {
           {/* Hardscape */}
           {landscape.hardscape?.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Hardscape ({landscape.hardscape.length})
               </h5>
               <div className="overflow-x-auto rounded-lg border">
@@ -279,7 +279,7 @@ export default function SiteWorkPanel({ data }: Props) {
           {/* Irrigation */}
           {landscape.irrigation?.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Irrigation ({landscape.irrigation.length})
               </h5>
               <div className="overflow-x-auto rounded-lg border">
@@ -308,7 +308,7 @@ export default function SiteWorkPanel({ data }: Props) {
           {/* Site Furniture */}
           {landscape.siteFurniture?.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Site Furniture ({landscape.siteFurniture.length})
               </h5>
               <div className="overflow-x-auto rounded-lg border">
@@ -337,7 +337,7 @@ export default function SiteWorkPanel({ data }: Props) {
           {/* Retaining Walls */}
           {landscape.retainingWalls?.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Retaining Walls ({landscape.retainingWalls.length})
               </h5>
               <div className="overflow-x-auto rounded-lg border">

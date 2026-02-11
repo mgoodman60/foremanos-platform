@@ -68,7 +68,7 @@ export function TakeoffSummary({
       {mepData && mepData.exists && (
         <div className="mt-4 p-3 bg-dark-surface rounded-lg border border-gray-700">
           <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-yellow-500" />
+            <Zap className="h-4 w-4 text-yellow-500" aria-hidden="true" />
             MEP Systems Summary
           </h4>
           <div className="grid grid-cols-3 gap-2 text-xs">

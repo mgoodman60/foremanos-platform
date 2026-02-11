@@ -136,7 +136,7 @@ export default function CrewPerformanceForm({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="date" className="text-gray-300 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+                <Calendar aria-hidden="true" className="w-4 h-4" />
                 Date *
               </Label>
               <Input
@@ -174,7 +174,7 @@ export default function CrewPerformanceForm({
           <fieldset className="border-0 p-0 m-0 min-w-0">
             <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
               <legend className="text-sm font-semibold text-slate-50 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-400" />
+                <TrendingUp aria-hidden="true" className="w-4 h-4 text-green-400" />
                 Productivity Metrics
               </legend>
 
@@ -238,7 +238,7 @@ export default function CrewPerformanceForm({
           <fieldset className="border-0 p-0 m-0 min-w-0">
             <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
               <legend className="text-sm font-semibold text-slate-50 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-blue-400" />
+                <Shield aria-hidden="true" className="w-4 h-4 text-blue-400" />
                 Safety & Quality
               </legend>
 
@@ -292,7 +292,7 @@ export default function CrewPerformanceForm({
           <fieldset className="border-0 p-0 m-0 min-w-0">
             <div className="space-y-4 p-4 bg-dark-surface rounded-lg">
               <legend className="text-sm font-semibold text-slate-50 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                <AlertTriangle aria-hidden="true" className="w-4 h-4 text-yellow-400" />
                 Weather Impact
               </legend>
 

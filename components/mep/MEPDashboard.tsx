@@ -170,7 +170,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
       {models.length > 0 && (
         <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
           <h3 className="text-lg font-medium text-white mb-3 flex items-center gap-2">
-            <Download className="w-5 h-5 text-blue-400" />
+            <Download className="w-5 h-5 text-blue-400" aria-hidden="true" />
             Import from BIM Models
           </h3>
           <p className="text-sm text-gray-400 mb-4">
@@ -186,9 +186,9 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
                   text-white text-sm rounded-lg flex items-center gap-2 transition-colors"
               >
                 {importing ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4" aria-hidden="true" />
                 )}
                 {model.fileName}
               </button>
@@ -212,7 +212,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
                   className={`flex items-center justify-between p-3 rounded-lg border ${colorClass}`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-5 h-5" aria-hidden="true" />
                     <span className="font-medium">{type.replace(/_/g, ' ')}</span>
                   </div>
                   <span className="text-lg font-semibold">{count}</span>
@@ -220,7 +220,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
               );
             })}
             {Object.keys(stats.systemsByType).length === 0 && (
-              <p className="text-gray-500 text-center py-4">No systems created yet</p>
+              <p className="text-gray-400 text-center py-4">No systems created yet</p>
             )}
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
               </div>
             ))}
             {Object.keys(stats.equipmentByStatus).length === 0 && (
-              <p className="text-gray-500 text-center py-4">No equipment added yet</p>
+              <p className="text-gray-400 text-center py-4">No equipment added yet</p>
             )}
           </div>
         </div>
@@ -256,13 +256,13 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
       {(stats.overdueMaintenance > 0 || stats.pendingSubmittals > 0) && (
         <div className="bg-dark-surface border border-gray-700 rounded-lg p-4">
           <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-yellow-500" />
+            <AlertTriangle className="w-5 h-5 text-yellow-500" aria-hidden="true" />
             Attention Required
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {stats.overdueMaintenance > 0 && (
               <div className="flex items-center gap-3 p-3 bg-red-900/30 border border-red-700 rounded-lg">
-                <Clock className="w-5 h-5 text-red-400" />
+                <Clock className="w-5 h-5 text-red-400" aria-hidden="true" />
                 <div>
                   <p className="text-red-300 font-medium">
                     {stats.overdueMaintenance} Overdue Maintenance
@@ -273,7 +273,7 @@ export default function MEPDashboard({ projectSlug }: MEPDashboardProps) {
             )}
             {stats.pendingSubmittals > 0 && (
               <div className="flex items-center gap-3 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
-                <FileCheck className="w-5 h-5 text-yellow-400" />
+                <FileCheck className="w-5 h-5 text-yellow-400" aria-hidden="true" />
                 <div>
                   <p className="text-yellow-300 font-medium">
                     {stats.pendingSubmittals} Pending Submittals
@@ -321,7 +321,7 @@ function StatCard({
   return (
     <div className={`p-4 rounded-lg border ${colorClasses[color]}`}>
       <div className="flex items-center justify-between mb-2">
-        <Icon className={`w-6 h-6 ${iconColors[color]}`} />
+        <Icon className={`w-6 h-6 ${iconColors[color]}`} aria-hidden="true" />
         {alert !== undefined && alert > 0 && (
           <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full">
             {alert} overdue

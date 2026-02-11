@@ -148,7 +148,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           disabled={isClassifying}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center gap-2"
         >
-          <Sparkles className="h-4 w-4" />
+          <Sparkles aria-hidden="true" className="h-4 w-4" />
           {isClassifying ? 'Classifying...' : 'Classify Drawings'}
         </button>
       </div>
@@ -159,7 +159,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           {/* Total Sheets */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <FileText className="h-5 w-5 text-blue-500" />
+              <FileText aria-hidden="true" className="h-5 w-5 text-blue-500" />
               <span className="text-2xl font-bold text-gray-100">
                 {stats.totalSheets}
               </span>
@@ -170,7 +170,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           {/* Drawing Types */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <Layers className="h-5 w-5 text-green-500" />
+              <Layers aria-hidden="true" className="h-5 w-5 text-green-500" />
               <span className="text-2xl font-bold text-gray-100">
                 {Object.keys(stats.byType).length}
               </span>
@@ -192,7 +192,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           {/* Composite Sheets */}
           <div className="bg-dark-card border border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <AlertTriangle aria-hidden="true" className="h-5 w-5 text-amber-500" />
               <span className="text-2xl font-bold text-gray-100">
                 {stats.compositeSheets}
               </span>
@@ -206,7 +206,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
       {stats && Object.keys(stats.byTypeFormatted).length > 0 && (
         <div className="bg-dark-card border border-gray-700 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-blue-500" />
+            <TrendingUp aria-hidden="true" className="h-5 w-5 text-blue-500" />
             Drawing Type Distribution
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -256,7 +256,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
         <div className="text-center py-12 bg-dark-card border border-gray-700 rounded-lg">
           <Grid3x3 className="h-12 w-12 text-gray-600 mx-auto mb-3" />
           <p className="text-gray-400 mb-2">No classified drawings found</p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-400 mb-4">
             Click "Classify Drawings" to analyze your sheets
           </p>
         </div>
@@ -286,7 +286,7 @@ function DrawingCard({ drawing }: { drawing: DrawingInfo }) {
           <h3 className="text-lg font-semibold text-gray-100">
             {drawing.sheetNumber}
           </h3>
-          <p className="text-xs text-gray-500 truncate">
+          <p className="text-xs text-gray-400 truncate">
             {drawing.documentName}
           </p>
         </div>

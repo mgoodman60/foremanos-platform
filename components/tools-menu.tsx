@@ -538,6 +538,7 @@ export function ToolsMenu({
   const renderToolItem = (tool: ToolItem) => (
     <button
       key={tool.id}
+      role="menuitem"
       onClick={() => handleToolClick(tool)}
       className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-dark-surface hover:text-white rounded transition-colors group focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-card"
     >
@@ -625,7 +626,7 @@ export function ToolsMenu({
         className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-lg transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-medium"
         title="Project Tools"
       >
-        <MoreVertical className="w-4 h-4" />
+        <MoreVertical className="w-4 h-4" aria-hidden="true" />
         <span className="hidden sm:inline">Tools</span>
         <ChevronDown className="w-3 h-3" />
       </button>
@@ -637,14 +638,18 @@ export function ToolsMenu({
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
+            onKeyDown={(e) => e.key === 'Escape' && setIsOpen(false)}
+            role="button"
+            tabIndex={-1}
+            aria-label="Close overlay"
           />
 
           {/* Menu */}
-          <div className="absolute right-0 top-full mt-2 w-72 bg-dark-card border border-gray-700 rounded-lg shadow-2xl z-50 max-h-[80vh] overflow-hidden flex flex-col">
+          <div className="absolute right-0 top-full mt-2 w-72 bg-dark-card border border-gray-700 rounded-lg shadow-2xl z-50 max-h-[80vh] overflow-hidden flex flex-col" role="menu" aria-label="Project tools">
             {/* Search */}
             <div className="p-3 border-b border-gray-700">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                 <input
                   type="text"
                   placeholder="Search tools..."
@@ -685,7 +690,7 @@ export function ToolsMenu({
 
               {/* No results */}
               {filteredTools.length === 0 && (
-                <div className="p-4 text-center text-sm text-gray-500">
+                <div className="p-4 text-center text-sm text-gray-400">
                   No tools found for &quot;{searchQuery}&quot;
                 </div>
               )}

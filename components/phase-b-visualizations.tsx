@@ -82,7 +82,7 @@ export function DimensionCard({ data }: { data: DimensionData }) {
           ))}
         </div>
         {data.dimensions.length > 5 && (
-          <div className="text-xs text-gray-500 mt-2 text-center">
+          <div className="text-xs text-gray-400 mt-2 text-center">
             +{data.dimensions.length - 5} more dimensions
           </div>
         )}
@@ -222,7 +222,7 @@ export function AnnotationCard({ data }: { data: AnnotationData }) {
           ))}
         </div>
         {data.annotations.length > 4 && (
-          <div className="text-xs text-gray-500 mt-2 text-center">
+          <div className="text-xs text-gray-400 mt-2 text-center">
             +{data.annotations.length - 4} more annotations
           </div>
         )}
@@ -293,26 +293,26 @@ export function DetailCalloutCard({ data }: { data: CalloutData }) {
                   </span>
                   {callout.sheetReference && (
                     <>
-                      <ArrowRight className="h-3 w-3 text-gray-500" />
+                      <ArrowRight className="h-3 w-3 text-gray-400" />
                       <Badge variant="outline" className="border-gray-600 text-gray-300 text-xs">
                         Sheet {callout.sheetReference}
                       </Badge>
                     </>
                   )}
                 </div>
-                <ExternalLink className="h-3 w-3 text-gray-500" />
+                <ExternalLink className="h-3 w-3 text-gray-400" />
               </div>
               {callout.description && (
                 <p className="text-xs text-gray-400 mt-1">{callout.description}</p>
               )}
               {callout.sheetNumber && (
-                <p className="text-xs text-gray-500 mt-1">From: Sheet {callout.sheetNumber}</p>
+                <p className="text-xs text-gray-400 mt-1">From: Sheet {callout.sheetNumber}</p>
               )}
             </div>
           ))}
         </div>
         {data.callouts.length > 5 && (
-          <div className="text-xs text-gray-500 mt-2 text-center">
+          <div className="text-xs text-gray-400 mt-2 text-center">
             +{data.callouts.length - 5} more references
           </div>
         )}
@@ -377,7 +377,7 @@ export function SymbolCard({ data }: { data: SymbolData }) {
           )}
           {data.alternativeCodes && data.alternativeCodes.length > 0 && (
             <div className="flex gap-1 flex-wrap mt-2">
-              <span className="text-xs text-gray-500">Also:</span>
+              <span className="text-xs text-gray-400">Also:</span>
               {data.alternativeCodes.map((code, idx) => (
                 <Badge key={idx} variant="outline" className="border-gray-600 text-gray-400 text-xs">
                   {code}

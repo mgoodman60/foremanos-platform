@@ -90,7 +90,7 @@ export default function ShortageAlerts({ projectSlug, onCreateRFI }: ShortageAle
     return (
       <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
         <div className="flex items-center gap-2 text-slate-400">
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
           Checking for shortages...
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function ShortageAlerts({ projectSlug, onCreateRFI }: ShortageAle
     return (
       <div className="bg-emerald-950 border border-emerald-700 rounded-xl p-4">
         <div className="flex items-center gap-2 text-emerald-400">
-          <BellOff className="w-5 h-5" />
+          <BellOff className="w-5 h-5" aria-hidden="true" />
           <span className="font-medium">No shortages detected</span>
         </div>
         <p className="text-sm text-emerald-300/70 mt-1 ml-7">
@@ -119,7 +119,7 @@ export default function ShortageAlerts({ projectSlug, onCreateRFI }: ShortageAle
         className="w-full px-4 py-3 flex items-center justify-between bg-red-950/50 hover:bg-red-950/70 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Bell className="w-5 h-5 text-red-400" />
+          <Bell className="w-5 h-5 text-red-400" aria-hidden="true" />
           <span className="font-semibold text-white">Shortage Alerts</span>
           <span className="px-2 py-0.5 bg-red-900 text-red-300 rounded-full text-sm font-medium">
             {visibleShortages.length}
@@ -136,7 +136,7 @@ export default function ShortageAlerts({ projectSlug, onCreateRFI }: ShortageAle
               {highCount} High
             </span>
           )}
-          {expanded ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
+          {expanded ? <ChevronDown className="w-5 h-5 text-slate-400" aria-hidden="true" /> : <ChevronRight className="w-5 h-5 text-slate-400" aria-hidden="true" />}
         </div>
       </button>
 
@@ -184,7 +184,7 @@ export default function ShortageAlerts({ projectSlug, onCreateRFI }: ShortageAle
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <Icon className={`w-5 h-5 ${config.text} flex-shrink-0 mt-0.5`} />
+                      <Icon className={`w-5 h-5 ${config.text} flex-shrink-0 mt-0.5`} aria-hidden="true" />
                       <div className="min-w-0">
                         <p className="text-white font-medium truncate">{shortage.productName}</p>
                         <p className="text-sm text-slate-400">
