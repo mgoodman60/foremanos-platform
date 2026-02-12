@@ -30,7 +30,7 @@ export const FALLBACK_MODEL = 'gpt-5.2';
 export const SIMPLE_MODEL = 'gpt-4o-mini';
 
 /** Extraction tasks (document processing, OCR, etc.) */
-export const EXTRACTION_MODEL = DEFAULT_MODEL;
+export const EXTRACTION_MODEL = VISION_MODEL;
 
 /**
  * Resolve legacy model aliases to current model IDs.

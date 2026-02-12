@@ -40,6 +40,7 @@ export async function findOrphanedDocuments(): Promise<OrphanedDocument[]> {
         createdAt: { lt: fiveMinutesAgo },
         deletedAt: null,
         cloud_storage_path: { not: null },
+        queueStatus: { notIn: ['failed'] },
       },
       select: {
         id: true,
@@ -123,6 +124,19 @@ export async function recoverOrphanedDocument(documentId: string): Promise<boole
 
     if (document.processed) {
       log.info('Document is already processed', { documentId });
+      return false;
+    }
+
+    // Check retry count BEFORE cleanup — don't retry documents that have failed too many times
+    const retryCount = await prisma.processingQueue.count({
+      where: { documentId },
+    });
+    if (retryCount >= 3) {
+      log.info('Document has exceeded max retries, marking as failed', { documentId, retryCount });
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { queueStatus: 'failed' },
+      });
       return false;
     }
 

@@ -67,10 +67,28 @@ export async function processDocument(
       classification = await classifyDocument(document.fileName, fileExtension);
     }
 
-    // Download file from S3
+    // Download file from S3 with 90s timeout
     const fileUrl = await getFileUrl(document.cloud_storage_path, document.isPublic);
-    const response = await fetch(fileUrl);
-    
+    const downloadController = new AbortController();
+    const downloadTimeout = setTimeout(() => downloadController.abort(), 90000); // 90s timeout
+
+    let response: Response;
+    try {
+      response = await fetch(fileUrl, { signal: downloadController.signal });
+    } catch (fetchErr: any) {
+      clearTimeout(downloadTimeout);
+      if (fetchErr.name === 'AbortError') {
+        logger.warn('DOCUMENT_PROCESSOR', `S3 download timeout after 90s for document ${documentId}, marking queued for retry`);
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { queueStatus: 'queued' },
+        });
+        return;
+      }
+      throw fetchErr;
+    }
+    clearTimeout(downloadTimeout);
+
     if (!response.ok) {
       throw new Error(`Failed to download file from S3: ${response.statusText}`);
     }

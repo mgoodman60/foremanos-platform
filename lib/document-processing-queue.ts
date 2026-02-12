@@ -500,7 +500,8 @@ export async function processQueuedDocument(
   documentId: string,
   maxDurationMs: number = 240000,
   maxConcurrency: number = 1,
-  staleBatchTimeoutMs: number = 5 * 60 * 1000
+  staleBatchTimeoutMs: number = 5 * 60 * 1000,
+  preloadedPdfBuffer?: Buffer
 ): Promise<void> {
   const startTime = Date.now();
   logger.info('PROCESS_QUEUE', `Starting concurrent processing for document ${documentId}`, { maxConcurrency, staleBatchTimeoutMs });
@@ -571,10 +572,13 @@ export async function processQueuedDocument(
   }, heartbeatIntervalMs);
 
   try {
-    // Download PDF ONCE upfront and share across all batches
-    logger.info('PROCESS_QUEUE', `Downloading PDF for ${documentId}`);
-    const pdfBuffer = await downloadDocumentPdf(documentId);
-    logger.info('PROCESS_QUEUE', `PDF downloaded (${(pdfBuffer.length / 1024 / 1024).toFixed(1)}MB)`, { documentId });
+    // Use preloaded buffer if provided, otherwise download PDF ONCE upfront and share across all batches
+    const pdfBuffer = preloadedPdfBuffer || await downloadDocumentPdf(documentId);
+    if (preloadedPdfBuffer) {
+      logger.info('PROCESS_QUEUE', `Using preloaded PDF buffer for ${documentId} (${(pdfBuffer.length / 1024 / 1024).toFixed(1)}MB)`);
+    } else {
+      logger.info('PROCESS_QUEUE', `Downloaded PDF for ${documentId} (${(pdfBuffer.length / 1024 / 1024).toFixed(1)}MB)`);
+    }
 
     // Check if download consumed most of the time budget
     const downloadDurationMs = Date.now() - startTime;

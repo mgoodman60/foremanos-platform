@@ -27,6 +27,7 @@ export async function GET(
         pagesProcessed: true,
         queueStatus: true,
         processorType: true,
+        createdAt: true,
         Project: {
           select: { ownerId: true }
         }
@@ -60,6 +61,24 @@ export async function GET(
         metadata: true,
       }
     });
+
+    // Return "initializing" status for newly created documents without queue entry
+    if (!queueEntry && !document.processed && document.queueStatus !== 'failed') {
+      const ageMs = Date.now() - new Date(document.createdAt).getTime();
+      if (ageMs < 5 * 60 * 1000) {
+        return NextResponse.json({
+          status: 'initializing',
+          currentPhase: 'initializing',
+          pagesProcessed: 0,
+          totalPages: 0,
+          percentComplete: 0,
+          estimatedTimeRemaining: null,
+          queuePosition: null,
+          secondsPerPage: 8,
+          elapsedSeconds: Math.round(ageMs / 1000),
+        });
+      }
+    }
 
     // Calculate progress
     const totalPages = queueEntry?.totalPages ?? 0;
