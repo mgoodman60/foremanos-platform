@@ -25,6 +25,7 @@ export interface BatchResult {
   pagesProcessed: number;
   error?: string;
   providerStats?: Record<string, ProviderStat>;
+  estimatedCost?: number; // NEW: estimated API cost
 }
 
 /**
@@ -249,10 +250,20 @@ export async function processDocumentBatch(
       )
     );
 
+    // Calculate estimated cost based on provider usage
+    let estimatedCost = 0;
+    if (pagesProcessed > 0 && Object.keys(providerStats).length > 0) {
+      for (const [provider, stats] of Object.entries(providerStats)) {
+        const costPerPage = provider.includes('claude') ? 0.01 : 0.003;
+        estimatedCost += stats.pagesProcessed * costPerPage;
+      }
+    }
+
     return {
       success: true,
       pagesProcessed,
       providerStats,
+      estimatedCost,
     };
 
   } catch (error: any) {

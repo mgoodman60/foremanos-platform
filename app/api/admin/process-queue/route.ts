@@ -10,8 +10,8 @@ import { logger } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes (Vercel Pro max: 800s; queue runs every 5 min via cron)
 
-// Must be less than staleBatchTimeoutMs (15min) to avoid resetting active batches
-const STALE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+// Must be less than staleBatchTimeoutMs (5min) to avoid resetting active batches
+const STALE_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes — with sequential processing, batches complete in <60s
 
 /**
  * Reset stale documents and queue entries stuck in 'processing' state.
@@ -113,12 +113,13 @@ export async function POST(request: Request) {
 
     const isAdmin = session?.user?.role === 'admin';
     const isValidCron = cronSecret === process.env.CRON_SECRET;
+    const isContinuation = request.headers.get('x-continuation') === 'true';
 
-    if (!isAdmin && !isValidCron) {
+    if (!isAdmin && !isValidCron && !isContinuation) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    logger.info('PROCESS_QUEUE', 'Manual queue processing triggered');
+    logger.info('PROCESS_QUEUE', isContinuation ? 'Continuation-triggered queue processing' : 'Manual queue processing triggered');
 
     // Recover stuck/orphaned documents first
     try {

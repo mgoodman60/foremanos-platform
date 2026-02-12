@@ -439,8 +439,8 @@ function accumulateProviderStats(
 export async function processQueuedDocument(
   documentId: string,
   maxDurationMs: number = 270000,
-  maxConcurrency: number = 5,
-  staleBatchTimeoutMs: number = 15 * 60 * 1000
+  maxConcurrency: number = 1,
+  staleBatchTimeoutMs: number = 5 * 60 * 1000
 ): Promise<void> {
   const startTime = Date.now();
   logger.info('PROCESS_QUEUE', `Starting concurrent processing for document ${documentId}`, { maxConcurrency, staleBatchTimeoutMs });
@@ -534,7 +534,32 @@ export async function processQueuedDocument(
       return async (): Promise<{ batchIndex: number; result: BatchResult }> => {
         // Check timeout before starting each batch
         if (Date.now() - startTime > maxDurationMs) {
-          throw new Error(`Approaching timeout after ${Math.round((Date.now() - startTime) / 1000)}s`);
+          logger.info('PROCESS_QUEUE', `Timeout checkpoint at ${Math.round((Date.now() - startTime) / 1000)}s — scheduling continuation`, {
+            documentId,
+            pagesProcessed: entry.pagesProcessed,
+            currentBatch: range.batchIndex
+          });
+
+          // Graceful checkpoint — set status for immediate continuation
+          await prisma.$transaction([
+            prisma.processingQueue.update({
+              where: { id: entry.id },
+              data: { status: ProcessingQueueStatus.queued, updatedAt: new Date() }
+            }),
+            prisma.document.update({
+              where: { id: documentId },
+              data: { queueStatus: 'queued' }
+            })
+          ]);
+
+          // Fire-and-forget: trigger next cycle immediately
+          const continueUrl = `${process.env.NEXTAUTH_URL || 'https://foremanos.vercel.app'}/api/admin/process-queue`;
+          fetch(continueUrl, {
+            method: 'POST',
+            headers: { 'x-continuation': 'true' }
+          }).catch(() => {}); // Best-effort, cron is safety net
+
+          throw new Error(`Approaching timeout after ${Math.round((Date.now() - startTime) / 1000)}s — continuation scheduled`);
         }
 
         const result = await processDocumentBatch(
@@ -571,6 +596,20 @@ export async function processQueuedDocument(
               batchIndex: range.batchIndex,
               error: (progressError as Error).message,
             });
+          }
+        }
+
+        // Update processing cost incrementally
+        if (result.estimatedCost && result.estimatedCost > 0) {
+          try {
+            await prisma.document.update({
+              where: { id: documentId },
+              data: {
+                processingCost: { increment: result.estimatedCost }
+              }
+            });
+          } catch (costError) {
+            logger.warn('PROCESS_QUEUE', 'Failed to update processing cost', { documentId, cost: result.estimatedCost });
           }
         }
 
@@ -740,6 +779,26 @@ export async function processQueuedDocument(
     });
   } finally {
     clearInterval(heartbeatTimer);
+
+    // Safety: if processing ended without completing all batches, ensure document is queued for pickup
+    // (The self-continuation in Fix 1 handles the happy path, this catches edge cases)
+    try {
+      const finalEntry = await prisma.processingQueue.findUnique({
+        where: { id: entry.id },
+        select: { status: true, currentBatch: true, totalBatches: true }
+      });
+      if (finalEntry && finalEntry.status !== ProcessingQueueStatus.completed && finalEntry.status !== ProcessingQueueStatus.failed &&
+          finalEntry.currentBatch < finalEntry.totalBatches) {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { queueStatus: 'queued' }
+        });
+      }
+    } catch (e) {
+      // Best-effort — don't throw in finally
+      logger.warn('PROCESS_QUEUE', 'Failed to reset document status in finally block', { documentId });
+    }
+
     logger.info('PROCESS_QUEUE', `Heartbeat stopped for ${documentId}`);
   }
 }

@@ -45,7 +45,7 @@
     },
     {
       "path": "/api/admin/process-queue",
-      "schedule": "*/5 * * * *"
+      "schedule": "*/1 * * * *"
     },
     {
       "path": "/api/cron/photo-cleanup",
