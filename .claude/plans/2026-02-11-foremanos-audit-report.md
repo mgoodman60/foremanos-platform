@@ -1,0 +1,174 @@
+# ForemanOS Codebase Audit Report
+
+**Date:** 2026-02-11
+
+## Executive Summary
+- TypeScript compilation succeeds with current `tsconfig.json`.
+- Stricter TypeScript (`--noUnusedLocals --noUnusedParameters`) reports **1,589** unused declarations, indicating widespread dead code or unfinished refactors.
+- ESLint reports **4,135** warnings, dominated by `@typescript-eslint/no-explicit-any` and `@typescript-eslint/no-unused-vars`.
+- Unit/integration/snapshot tests pass. Playwright E2E run **timed out** before completion.
+- `npm audit --production` reports **2 vulnerabilities** (Next.js high, webpack low).
+- OpenAPI spec covers **8** endpoints while the codebase exposes **427** API routes.
+- Database docs indicate pending schema/migration debt (nullable required fields; orphaned records; pending migration).
+
+## What I Ran
+- `npx tsc --noEmit --incremental false`
+- `npx tsc --noEmit --incremental false --noUnusedLocals --noUnusedParameters --pretty false`
+- `npm run lint`
+- `npx eslint app components lib hooks types scripts __tests__ e2e --ext .ts,.tsx --format json`
+- `npm test -- --run`
+- `npm run test:integration`
+- `npm run test:snapshot`
+- `npx playwright test` (timed out)
+- `npm audit --production`
+- Route/OpenAPI alignment scan
+
+## Top Findings by Severity
+
+### High
+1. **OpenAPI spec is drastically out of sync with code**
+   - `openapi.yaml` has **8** paths vs **427** `app/api/**/route.ts` files.
+   - Risk: client/server drift, outdated docs, onboarding friction, and broken integrations.
+   - Evidence: `openapi.yaml` and route scan.
+
+2. **Unauthenticated calendar export route**
+   - `app/api/projects/[slug]/calendar/[type]/route.ts` has no auth/permission checks.
+   - Risk: project schedule metadata potentially exposed to anyone with slug.
+   - If intended to be public, it should be explicit (signed URL/share token) and documented.
+
+3. **Dependency vulnerabilities**
+   - `npm audit --production` reports:
+     - Next.js DoS vulnerabilities (high)
+     - webpack SSRF buildHttp allowedUris bypass (low)
+   - Requires a dependency upgrade strategy. Current `npm audit` suggests major upgrades.
+
+4. **Schema integrity debt: required fields still nullable**
+   - `MIGRATION-GUIDE-ORPHANED-RECORDS.md` documents orphaned `Document.projectId` and nullable `User.email`.
+   - Risk: orphaned data, broken assumptions in code paths, and inconsistent application behavior.
+
+### Medium
+1. **TypeScript strict unused errors across code and tests**
+   - 1,589 unused declarations (`TS6133`, `TS6192`, `TS6196`).
+   - Indicates dead code, unused parameters, and incomplete refactors.
+   - Affects maintainability, readability, and future correctness.
+
+2. **Large lint surface (4,135 warnings)**
+   - Top rules:
+     - `@typescript-eslint/no-explicit-any`: 2,174
+     - `@typescript-eslint/no-unused-vars`: 1,366
+     - `react/no-unescaped-entities`: 318
+     - `react-hooks/exhaustive-deps`: 151
+   - Maintains technical debt and weakens type safety over time.
+
+3. **E2E coverage incomplete in this run**
+   - `npx playwright test` timed out before completion. E2E status currently unknown.
+   - Prior internal report (`ISSUES-LOG.md`) indicates E2E passed on 2026-01-31, but this run was inconclusive.
+
+4. **Package manager inconsistency**
+   - `.gitignore` says “use yarn.lock instead,” but there is no `yarn.lock`.
+   - `vercel.json` uses `npm install`, while `.yarnrc.yml` exists.
+   - `package-lock.json` exists but is ignored.
+   - Risk: non-deterministic installs and drift between environments.
+
+5. **Security headers allow unsafe scripts**
+   - `next.config.js` CSP includes `script-src 'unsafe-inline' 'unsafe-eval'`.
+   - Risk: XSS surface is wider than necessary. Should be tightened if possible.
+
+### Low
+1. **Repo hygiene artifacts**
+   - 56 `*.bak` files (likely stale scripts).
+   - Empty path-artifact dirs: `c?Usersmsgooforemanoscomponentslayout`, `c?Usersmsgooforemanoshooks`, `C?usersmsgooforemanoslibrag`, `c?Usersmsgooforemanosscripts`, `c?Usersmsgooforemanos__tests__apiprojectsrooms`.
+   - `nul` file exists (ignored by `.gitignore`).
+
+2. **Image optimization disabled**
+   - `next.config.js` has `images: { unoptimized: true }`.
+   - Lint flags raw `<img>` usage in several files.
+
+## Detailed Findings & Evidence
+
+### TypeScript & Lint
+- `npx tsc --noEmit` passes.
+- `npx tsc --noUnusedLocals --noUnusedParameters`:
+  - **Total:** 1,589 unused errors.
+  - Mostly in `__tests__` and `lib/`.
+- ESLint warnings: **4,135** total.
+
+### Tests
+- `npm test -- --run`: PASS.
+- `npm run test:integration`: PASS.
+- `npm run test:snapshot`: PASS.
+- `npx playwright test`: **Timed out** (needs rerun with confirmed dev server readiness or a higher timeout).
+
+### API / OpenAPI Alignment
+- Route count: **427** in `app/api/**/route.ts`.
+- OpenAPI spec count: **8** paths.
+- Missing in spec: **419** endpoints.
+
+### Data Layer & Migrations
+- `MIGRATION-GUIDE-ORPHANED-RECORDS.md`:
+  - `Document.projectId` still nullable with orphans.
+  - `User.email` intended to become required.
+- `DATABASE_HEALTH_REPORT.md`:
+  - Pending migration: `add_processing_queue`.
+  - Composite index gaps and N+1 risks documented.
+
+### Potential Wiring Gaps
+- `app/api/projects/[slug]/calendar/[type]/route.ts` has no auth checks.
+- `openapi.yaml` is not wired to actual route surface.
+- `.claude/plans/binary-tinkering-kahan.md` is untracked and appears to be a UX fix plan, not integrated into the app.
+
+## Recommendations (Prioritized)
+
+### 1. Security & Reliability
+- Decide whether `/api/projects/[slug]/calendar/[type]` must be private.
+  - If private: add auth + project membership check.
+  - If public: require signed token or share key.
+- Update Next.js/webpack to patched versions (evaluate within your compatibility range).
+- Tighten CSP to reduce `'unsafe-inline'` and `'unsafe-eval'` where feasible.
+
+### 2. API Spec Hygiene
+- Generate/maintain OpenAPI for all routes.
+- Adopt a CI check to prevent spec drift.
+
+### 3. Data Integrity
+- Follow the orphaned record migration plan to make `Document.projectId` and `User.email` required.
+- Deploy pending `add_processing_queue` migration if that table is already used in production logic.
+
+### 4. Type Safety & Lint Debt
+- Establish a “new code is strict” policy:
+  - New files must avoid `any` and unused declarations.
+  - Introduce targeted `zod` schemas for external payloads.
+- Add a CI lint budget or “lint debt burn down” task list.
+
+### 5. Package Manager Consistency
+- Pick one: npm or yarn.
+- Align `vercel.json` install command, lockfile, and `.gitignore` accordingly.
+
+### 6. Testing & E2E Stability
+- Rerun Playwright with a higher timeout or dedicated base URL.
+- Add a deterministic auth fixture for authenticated E2E flows.
+
+### 7. Repo Hygiene
+- Remove `.bak` files or move to an archive directory.
+- Delete empty artifact directories or add ignores to prevent re-creation.
+
+## Technical Debt Backlog (Condensed)
+- OpenAPI coverage gap.
+- Optional schema fields that should be required.
+- High count of `any` and unused vars.
+- Package manager mismatch and ignored lockfile.
+- Pending migration for processing queue.
+- CSP loosened with `unsafe-inline/unsafe-eval`.
+- E2E run instability.
+
+## Notable Context from Existing Reports
+- `DATABASE_HEALTH_REPORT.md` already documents missing indexes and N+1 risks; those are still valid actionable items.
+- `ISSUES-LOG.md` reports E2E was passing on 2026-01-31, but this run timed out.
+- `TEST_FAILURES.md` indicates only 3 skipped tests due to known TODOs.
+
+## Suggested Next Actions (If You Want Me To Implement)
+1. Lock package manager and update install/build pipeline.
+2. Fix `/api/projects/[slug]/calendar/[type]` auth (or add signed access).
+3. Begin OpenAPI generation strategy.
+4. Start lint/type debt cleanup with a scoped plan.
+5. Apply orphaned-record migration steps and make schema fields required.
