@@ -130,9 +130,9 @@ export async function GET(
     }
 
     // Concurrent processing metadata
-    const concurrency = (metadata.concurrency as number) ?? 3;
+    const concurrency = (metadata.concurrency as number) ?? 1;
     const failedBatchRanges = (metadata.failedBatchRanges as Array<{ startPage: number; endPage: number; error: string }>) ?? [];
-    const processingMode = (metadata.processingMode as string) ?? (totalPages > 5 ? 'concurrent' : 'sequential');
+    const processingMode = (metadata.processingMode as string) ?? ((concurrency > 1) ? 'concurrent' : 'sequential');
     const activeBatches = currentPhase === 'analyzing' || currentPhase === 'extracting'
       ? Math.min((queueEntry?.totalBatches ?? 0) - (queueEntry?.currentBatch ?? 0), concurrency)
       : 0;

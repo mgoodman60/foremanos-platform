@@ -257,16 +257,16 @@ describe('GET /api/documents/[id]/progress', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         lastError: null,
-        metadata: { batchSize: 5 }, // No concurrency fields
+        metadata: { batchSize: 1 }, // No concurrency fields
       });
 
       const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.concurrency).toBe(3); // Default
+      expect(data.concurrency).toBe(1); // Default
       expect(data.failedBatchRanges).toEqual([]); // Default empty
-      expect(data.processingMode).toBe('concurrent'); // totalPages > 5
+      expect(data.processingMode).toBe('sequential'); // concurrency=1
     });
 
     it('should return activeBatches=0 when not actively processing', async () => {

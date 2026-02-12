@@ -94,6 +94,7 @@
     "@types/pdfkit": "^0.17.4",
     "@types/plotly.js": "2.35.5",
     "@types/react-plotly.js": "2.6.3",
+    "@upstash/qstash": "^2.9.0",
     "@vercel/functions": "^3.4.1",
     "autoprefixer": "10.4.15",
     "bcryptjs": "2.4.3",

@@ -254,7 +254,7 @@ export async function processDocumentBatch(
     let estimatedCost = 0;
     if (pagesProcessed > 0 && Object.keys(providerStats).length > 0) {
       for (const [provider, stats] of Object.entries(providerStats)) {
-        const costPerPage = provider.includes('claude') ? 0.01 : 0.003;
+        const costPerPage = provider.includes('claude') ? 0.10 : 0.03;
         estimatedCost += stats.pagesProcessed * costPerPage;
       }
     }

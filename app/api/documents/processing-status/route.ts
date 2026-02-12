@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,10 +81,10 @@ export async function GET(req: NextRequest) {
           lastError: entry.lastError,
           retriesCount: entry.retriesCount,
           updatedAt: entry.updatedAt,
-          concurrency: meta?.concurrency || 3,
-          activeBatches: entry.status === 'processing' ? Math.min(entry.totalBatches - entry.currentBatch, meta?.concurrency || 3) : 0,
+          concurrency: meta?.concurrency || 1,
+          activeBatches: entry.status === 'processing' ? Math.min(entry.totalBatches - entry.currentBatch, meta?.concurrency || 1) : 0,
           failedBatchRanges: meta?.failedBatchRanges || [],
-          processingMode: meta?.concurrency > 1 || entry.totalBatches > 1 ? 'concurrent' : 'sequential',
+          processingMode: (meta?.concurrency || 1) > 1 ? 'concurrent' : 'sequential',
         }];
       })
     );
@@ -110,7 +111,7 @@ export async function GET(req: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('[API] Error fetching processing status:', error);
+    logger.error('PROCESSING_STATUS', 'Error fetching processing status', error);
     return NextResponse.json(
       { error: 'Failed to fetch processing status' },
       { status: 500 }

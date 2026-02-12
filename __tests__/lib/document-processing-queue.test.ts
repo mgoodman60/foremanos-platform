@@ -47,6 +47,9 @@ vi.mock('@/lib/s3', () => ({
 vi.mock('@/lib/intelligence-orchestrator', () => ({
   runIntelligenceExtraction: vi.fn().mockResolvedValue({ phasesRun: [] }),
 }));
+vi.mock('@/lib/qstash-client', () => ({
+  scheduleProcessingContinuation: vi.fn().mockResolvedValue(true),
+}));
 vi.mock('@/lib/room-extractor', () => ({
   extractRoomsFromDocuments: vi.fn().mockResolvedValue({ rooms: [] }),
   saveExtractedRooms: vi.fn().mockResolvedValue({ created: 0, updated: 0 }),
@@ -71,7 +74,7 @@ describe('Document Processing Queue', () => {
     it('should create a queue entry with correct batch calculations', async () => {
       mockPrisma.processingQueue.create.mockResolvedValue({ id: 'queue-1' });
 
-      await queueDocumentForProcessing('doc-1', 25, 5, 'vision-ai');
+      await queueDocumentForProcessing('doc-1', 25, 1, 'vision-ai');
 
       expect(mockPrisma.processingQueue.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -80,7 +83,7 @@ describe('Document Processing Queue', () => {
           totalPages: 25,
           pagesProcessed: 0,
           currentBatch: 0,
-          totalBatches: 5, // ceil(25/5)
+          totalBatches: 25, // ceil(25/1)
           retriesCount: 0,
         }),
       });
@@ -104,11 +107,11 @@ describe('Document Processing Queue', () => {
           documentId: 'doc-1',
           status: 'queued',
           currentBatch: 0,
-          totalBatches: 5,
+          totalBatches: 25,
           totalPages: 25,
           pagesProcessed: 0,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
@@ -129,11 +132,11 @@ describe('Document Processing Queue', () => {
           documentId: 'doc-1',
           status: 'queued',
           currentBatch: 0,
-          totalBatches: 5,
+          totalBatches: 25,
           totalPages: 25,
           pagesProcessed: 0,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
@@ -143,7 +146,7 @@ describe('Document Processing Queue', () => {
       // Batch processing succeeds
       mockProcessDocumentBatch.mockResolvedValue({
         success: true,
-        pagesProcessed: 5,
+        pagesProcessed: 1,
       });
 
       mockPrisma.processingQueue.update.mockResolvedValue({});
@@ -151,7 +154,7 @@ describe('Document Processing Queue', () => {
       const result = await processNextQueuedBatch();
 
       expect(result).toBe(true);
-      expect(mockProcessDocumentBatch).toHaveBeenCalledWith('doc-1', 1, 5, 'vision-ai');
+      expect(mockProcessDocumentBatch).toHaveBeenCalledWith('doc-1', 1, 1, 'vision-ai');
     });
 
     it('should skip entries where all batches are already done', async () => {
@@ -160,12 +163,12 @@ describe('Document Processing Queue', () => {
           id: 'queue-1',
           documentId: 'doc-1',
           status: 'queued',
-          currentBatch: 5, // equals totalBatches, meaning all done
-          totalBatches: 5,
+          currentBatch: 25, // equals totalBatches, meaning all done
+          totalBatches: 25,
           totalPages: 25,
           pagesProcessed: 25,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
@@ -181,12 +184,12 @@ describe('Document Processing Queue', () => {
           id: 'queue-1',
           documentId: 'doc-1',
           status: 'queued',
-          currentBatch: 1, // batch 1 of 5 - not the last batch
-          totalBatches: 5,
+          currentBatch: 1, // batch 1 of 25 - not the last batch
+          totalBatches: 25,
           totalPages: 25,
-          pagesProcessed: 5,
+          pagesProcessed: 1,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
@@ -196,7 +199,7 @@ describe('Document Processing Queue', () => {
       // Batch processing succeeds
       mockProcessDocumentBatch.mockResolvedValue({
         success: true,
-        pagesProcessed: 5,
+        pagesProcessed: 1,
       });
 
       mockPrisma.processingQueue.update.mockResolvedValue({});
@@ -210,7 +213,7 @@ describe('Document Processing Queue', () => {
           data: expect.objectContaining({
             status: 'queued',
             currentBatch: 2,
-            pagesProcessed: 10,
+            pagesProcessed: 2,
           }),
         })
       );
@@ -223,12 +226,12 @@ describe('Document Processing Queue', () => {
           id: 'queue-1',
           documentId: 'doc-1',
           status: 'queued',
-          currentBatch: 4, // batch 4 of 5 - the last batch
-          totalBatches: 5,
+          currentBatch: 24, // batch 24 of 25 - the last batch
+          totalBatches: 25,
           totalPages: 25,
-          pagesProcessed: 20,
+          pagesProcessed: 24,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
@@ -238,7 +241,7 @@ describe('Document Processing Queue', () => {
       // Batch processing succeeds
       mockProcessDocumentBatch.mockResolvedValue({
         success: true,
-        pagesProcessed: 5,
+        pagesProcessed: 1,
       });
 
       mockPrisma.processingQueue.update.mockResolvedValue({});
@@ -259,7 +262,7 @@ describe('Document Processing Queue', () => {
           where: { id: 'queue-1' },
           data: expect.objectContaining({
             status: 'completed',
-            currentBatch: 5,
+            currentBatch: 25,
             pagesProcessed: 25,
           }),
         })
@@ -273,12 +276,12 @@ describe('Document Processing Queue', () => {
           id: 'queue-1',
           documentId: 'doc-1',
           status: 'queued',
-          currentBatch: 4,
-          totalBatches: 5,
+          currentBatch: 24,
+          totalBatches: 25,
           totalPages: 25,
-          pagesProcessed: 20,
+          pagesProcessed: 24,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
@@ -288,7 +291,7 @@ describe('Document Processing Queue', () => {
       // Batch processing succeeds (final batch)
       mockProcessDocumentBatch.mockResolvedValue({
         success: true,
-        pagesProcessed: 5,
+        pagesProcessed: 1,
       });
 
       mockPrisma.processingQueue.update.mockResolvedValue({});
@@ -310,19 +313,19 @@ describe('Document Processing Queue', () => {
           id: 'queue-1',
           documentId: 'doc-1',
           status: 'queued',
-          currentBatch: 4,
-          totalBatches: 5,
+          currentBatch: 24,
+          totalBatches: 25,
           totalPages: 25,
-          pagesProcessed: 20,
+          pagesProcessed: 24,
           retriesCount: 0,
-          metadata: { batchSize: 5, processorType: 'vision-ai' },
+          metadata: { batchSize: 1, processorType: 'vision-ai' },
         },
       ]);
 
       mockPrisma.processingQueue.updateMany.mockResolvedValue({ count: 1 });
       mockProcessDocumentBatch.mockResolvedValue({
         success: true,
-        pagesProcessed: 5,
+        pagesProcessed: 1,
       });
       mockPrisma.processingQueue.update.mockResolvedValue({});
 

@@ -319,7 +319,7 @@ async function processWithVision(
       // Import queue functions dynamically to avoid circular dependencies
       const { queueDocumentForProcessing } = await import('./document-processing-queue');
 
-      await queueDocumentForProcessing(documentId, pages, 5, processorType); // 5 pages per batch with classification
+      await queueDocumentForProcessing(documentId, pages, 1, processorType); // 1 page per batch with classification
 
       // Mark as queued (not completed yet!)
       await prisma.document.update({
@@ -341,7 +341,7 @@ async function processWithVision(
         logger.warn('DOCUMENT_PROCESSOR', 'Immediate queue processing failed, cron will retry', { documentId, error: err?.message });
       }
 
-      logger.info('PROCESS', `Document ${documentId} queued and immediate processing triggered`, { pages, batches: Math.ceil(pages / 5) });
+      logger.info('PROCESS', `Document ${documentId} queued and immediate processing triggered`, { pages, batches: pages });
 
       // Return 0 - actual values will be updated as queue processes
       return { pages: 0, cost: 0 };

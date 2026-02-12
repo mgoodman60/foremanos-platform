@@ -9,6 +9,7 @@ import { triggerEnhancementAfterProcessing } from './project-data-enhancer';
 import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getFileUrl } from './s3';
+import { scheduleProcessingContinuation } from './qstash-client';
 
 export type ProcessingStatus = ProcessingQueueStatus;
 
@@ -32,7 +33,7 @@ export interface ProcessingQueueEntry {
 export async function queueDocumentForProcessing(
   documentId: string,
   totalPages: number,
-  batchSize: number = 5,
+  batchSize: number = 1,
   processorType?: string
 ): Promise<void> {
   const totalBatches = Math.ceil(totalPages / batchSize);
@@ -100,7 +101,7 @@ export async function processNextQueuedBatch(): Promise<boolean> {
     }
 
     const metadata = entry.metadata as any;
-    const batchSize = metadata?.batchSize || 5;
+    const batchSize = metadata?.batchSize || 1;
     const processorType = metadata?.processorType || 'vision-ai';
     const startPage = entry.currentBatch * batchSize + 1;
     const endPage = Math.min(startPage + batchSize - 1, entry.totalPages);
@@ -438,7 +439,7 @@ function accumulateProviderStats(
  */
 export async function processQueuedDocument(
   documentId: string,
-  maxDurationMs: number = 270000,
+  maxDurationMs: number = 240000,
   maxConcurrency: number = 1,
   staleBatchTimeoutMs: number = 5 * 60 * 1000
 ): Promise<void> {
@@ -488,7 +489,7 @@ export async function processQueuedDocument(
   });
 
   const metadata = entry.metadata as any;
-  const batchSize = metadata?.batchSize || 5;
+  const batchSize = metadata?.batchSize || 1;
   const processorType = metadata?.processorType || 'vision-ai';
 
   // Heartbeat: periodically update updatedAt so stale-batch recovery doesn't reset us
@@ -552,12 +553,8 @@ export async function processQueuedDocument(
             })
           ]);
 
-          // Fire-and-forget: trigger next cycle immediately
-          const continueUrl = `${process.env.NEXTAUTH_URL || 'https://foremanos.vercel.app'}/api/admin/process-queue`;
-          fetch(continueUrl, {
-            method: 'POST',
-            headers: { 'x-continuation': 'true' }
-          }).catch(() => {}); // Best-effort, cron is safety net
+          // QStash: guaranteed delivery with automatic retries (cron is safety net)
+          await scheduleProcessingContinuation(documentId);
 
           throw new Error(`Approaching timeout after ${Math.round((Date.now() - startTime) / 1000)}s — continuation scheduled`);
         }
@@ -780,8 +777,7 @@ export async function processQueuedDocument(
   } finally {
     clearInterval(heartbeatTimer);
 
-    // Safety: if processing ended without completing all batches, ensure document is queued for pickup
-    // (The self-continuation in Fix 1 handles the happy path, this catches edge cases)
+    // Safety net: if processing ended without completing all batches, schedule QStash continuation
     try {
       const finalEntry = await prisma.processingQueue.findUnique({
         where: { id: entry.id },
@@ -789,14 +785,17 @@ export async function processQueuedDocument(
       });
       if (finalEntry && finalEntry.status !== ProcessingQueueStatus.completed && finalEntry.status !== ProcessingQueueStatus.failed &&
           finalEntry.currentBatch < finalEntry.totalBatches) {
+        // Schedule continuation via QStash (guaranteed delivery)
+        await scheduleProcessingContinuation(documentId);
         await prisma.document.update({
           where: { id: documentId },
           data: { queueStatus: 'queued' }
         });
+        logger.info('PROCESS_QUEUE', 'Safety-net continuation scheduled via finally block', { documentId });
       }
     } catch (e) {
       // Best-effort — don't throw in finally
-      logger.warn('PROCESS_QUEUE', 'Failed to reset document status in finally block', { documentId });
+      logger.warn('PROCESS_QUEUE', 'Failed to schedule continuation in finally block', { documentId });
     }
 
     logger.info('PROCESS_QUEUE', `Heartbeat stopped for ${documentId}`);
@@ -828,7 +827,7 @@ async function processNextBatchForDocument(documentId: string): Promise<boolean>
     }
 
     const metadata = entry.metadata as any;
-    const batchSize = metadata?.batchSize || 5;
+    const batchSize = metadata?.batchSize || 1;
     const processorType = metadata?.processorType || 'vision-ai';
     const startPage = entry.currentBatch * batchSize + 1;
     const endPage = Math.min(startPage + batchSize - 1, entry.totalPages);
