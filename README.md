@@ -125,7 +125,22 @@ Key test suites cover: RAG scoring, rate limiting, authentication, Stripe integr
 
 ## 🚢 Deployment
 
-### Production Build
+### Vercel (Production)
+
+ForemanOS is deployed on Vercel. Production deploys automatically when you push to `main`:
+
+```bash
+git push origin main
+```
+
+Manual deploy (if needed):
+```bash
+npx vercel --prod
+```
+
+Production URL: https://foremanos.vercel.app
+
+### Local Production Build
 
 ```bash
 yarn build

@@ -1,8 +1,9 @@
 # ForemanOS Deployment Checklist & Technical Debt Report
 
-**Generated:** February 2, 2026
+**Generated:** February 3, 2026
 **Platform Status:** 98.3% Feature Complete
 **Test Coverage:** 6,886 tests (6,559 Vitest + 327 E2E)
+**Repository:** Single branch (`main`); push to main triggers Vercel deployment
 
 ---
 

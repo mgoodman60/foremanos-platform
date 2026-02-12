@@ -879,6 +879,12 @@ Centralized in `lib/model-config.ts`. See `model-config.ts` for all constants. K
 
 ## Infrastructure Status
 
+### Repository & Deployment
+
+- **Branch**: `main` (single branch; feature branches merged and cleaned up as of Feb 2026)
+- **Deploy**: Push to `main` triggers Vercel production deployment
+- **Manual deploy**: `npx vercel --prod`
+
 ### Production Environment (Vercel)
 
 **URL**: https://foremanos.vercel.app
