@@ -96,7 +96,8 @@ e2e/                  # Playwright E2E tests (23 spec files)
 |------|---------|
 | `lib/db.ts` | Prisma singleton with connection management |
 | `lib/auth-options.ts` | NextAuth configuration |
-| `lib/rag.ts` | Barrel re-export → `lib/rag/` (19 modules) |
+| `lib/rag.ts` | Barrel re-export → `lib/rag/` (5 modules: core-types, document-retrieval, context-generation, query-classifiers, phase-instructions) |
+| `lib/rag-enhancements.ts` | Barrel re-export → `lib/rag/` (14 modules: types, query-classification, measurement-extraction, takeoff-extraction, symbol-legend, mep-coordination, compliance-checking, scale-detection, abbreviations, spatial-analysis, system-topology, isometric-views, symbol-learning, export-utilities) |
 | `lib/s3.ts` | AWS S3 operations with timeout/retry |
 | `lib/rate-limiter.ts` | Distributed rate limiting (Redis with memory fallback) |
 | `lib/document-processor.ts` | Document processing pipeline |
@@ -106,14 +107,44 @@ e2e/                  # Playwright E2E tests (23 spec files)
 | `lib/model-config.ts` | Centralized LLM model constants (single source of truth) |
 | `lib/logger.ts` | Structured logging utility with context and metadata |
 | `lib/query-cache.ts` | Redis-backed query caching for LLM cost reduction |
-| `lib/intelligence-orchestrator.ts` | Phase A/B/C intelligence extraction orchestration |
-| `lib/intelligence-score-calculator.ts` | 5-dimension intelligence scoring engine |
-| `lib/vision-api-multi-provider.ts` | Multi-provider vision with fallback (Claude Opus → GPT-5.2 → Sonnet) |
+| `lib/password-validator.ts` | Password strength validation |
+| `lib/template-processor.ts` | PDF form filling with pdf-lib |
+| `lib/onedrive-service.ts` | OneDrive upload via Microsoft Graph API |
+| `lib/email-service.ts` | Welcome emails and notifications (Resend) |
 | `lib/access-control.ts` | Role-based document access control |
+| `lib/actual-cost-sync.ts` | Cost sync from pay apps, invoices, derived data |
+| `lib/budget-auto-sync.ts` | AI budget extraction and sync |
+| `lib/document-auto-sync.ts` | Document sync orchestration |
 | `lib/feature-sync-services.ts` | Room/door/MEP/scale/schedule sync |
+| `lib/analytics-service.ts` | Project KPIs, schedule/cost variance, metrics dashboard |
+| `lib/vision-api-multi-provider.ts` | Multi-provider vision with fallback (Claude Opus → GPT-5.2 → Sonnet) |
 | `lib/budget-sync-service.ts` | Budget synchronization and AI extraction |
+| `lib/workflow-service.ts` | Workflow orchestration and state transitions |
+| `lib/report-finalization.ts` | Barrel re-export → `lib/report-finalization/` (8 modules: types, validation, pdf-generation, document-library, onedrive-export, rag-indexing, schedule-processing, orchestrator) |
+| `lib/intelligence-orchestrator.ts` | Phase A/B/C intelligence extraction orchestration |
+| `lib/intelligence-score-calculator.ts` | 5-dimension intelligence scoring engine with checklist generation |
+| `lib/schedule-extractor-ai.ts` | AI-powered schedule/Gantt chart extraction |
 | `lib/daily-report-permissions.ts` | RBAC for daily reports (VIEWER, REPORTER, SUPERVISOR, ADMIN) |
+| `lib/weather-day-tracker.ts` | Weather day tracking with schedule push-out for outdoor tasks |
+| `lib/daily-report-onedrive-sync.ts` | Auto-upload to OneDrive on report approval (PDF + DOCX + Photos) |
+| `lib/photo-retention-service.ts` | 7-day tiered retention with OneDrive archival |
+| `lib/daily-report-indexer.ts` | RAG chunking/indexing for daily reports |
+| `lib/sms-daily-report-service.ts` | SMS-based daily log entry via Twilio |
+| `lib/crew-templates-smart-defaults.ts` | Reusable crew templates with smart defaults |
 | `lib/offline-store.ts` | IndexedDB wrapper (idb) for offline draft storage + sync queue |
+| `lib/daily-report-sync-service.ts` | Daily report cost/schedule sync with WeatherDay creation |
+| `lib/cross-reference-resolver.ts` | Resolve sheet-to-sheet references within a document |
+| `lib/drawing-schedule-parser.ts` | Parse drawing schedule tables → structured model records |
+| `lib/fixture-extractor.ts` | Extract plumbing/electrical/HVAC/fire fixtures → project records |
+| `lib/spatial-data-aggregator.ts` | Aggregate dimensional/spatial data across sheets |
+| `lib/sheet-index-builder.ts` | Build navigable sheet TOC per document |
+| `lib/revision-comparator.ts` | Detect changes between document revisions |
+| `lib/quantity-calculator.ts` | 2D/3D quantity calculation engine (areas, volumes, linear footage) |
+| `lib/quantity-calculation-orchestrator.ts` | Run calculations per room/zone, confidence scoring, CSI rollups |
+| `lib/calculated-takeoff-generator.ts` | Auto-generate MaterialTakeoff line items from calculated quantities |
+| `lib/mep-takeoff-generator.ts` | Barrel re-export → `lib/mep-takeoff/` (4 modules: types, pricing-database, extraction, triggers) |
+| `lib/sitework-takeoff-extractor.ts` | Barrel re-export → `lib/sitework/` (7 modules: patterns, unit-conversion, drawing-classification, extraction, quantity-derivation, geotech-integration, cad-integration) |
+| `lib/discipline-colors.ts` | Shared discipline → color/icon mapping |
 
 277 total service modules in `lib/` — see directory for full listing.
 
@@ -238,6 +269,27 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 - `GET /api/cron/processing-queue-cleanup` — Prune old ProcessingQueue entries
 
 **Document Detail Page** (`/project/[slug]/documents/[id]`): SheetNavigator sidebar, SheetDetailPanel (7 sub-panels), IntelligenceSummary, ProcessingLogPanel. 18 components in `components/documents/`.
+
+| Component | Purpose |
+|-----------|---------|
+| `DocumentDetailPage.tsx` | Main client component — fetches intelligence API, manages sheet selection |
+| `SheetNavigator.tsx` | Left sidebar listing sheets grouped by discipline |
+| `SheetDetailPanel.tsx` | Selected sheet's full intelligence display (7 sub-panels) |
+| `TitleBlockCard.tsx` | Parsed title block data (project, drawn by, date, revision) |
+| `CrossReferenceMap.tsx` | Clickable cross-reference chips for sheet navigation |
+| `DimensionTable.tsx` | Contextual dimensions with types (horizontal, vertical, height) |
+| `FixtureTable.tsx` | Plumbing/electrical fixture table with room/tag/count |
+| `MaterialsPanel.tsx` | Hatching-derived materials with confidence indicators |
+| `ScheduleTableView.tsx` | Door/window/finish/equipment schedule table renderer |
+| `SpatialDataPanel.tsx` | Spot elevations, levels, grid spacing, slopes |
+| `ConfidenceIndicator.tsx` | Reusable green/yellow/red confidence dot with tooltip |
+| `IntelligenceSummary.tsx` | Aggregate stats grid (sheets, confidence, disciplines, rooms, fixtures) |
+| `ProcessingLogPanel.tsx` | Processing metadata (phases, duration, cost, errors) |
+| `DocumentIntelligenceBadges.tsx` | Per-document intelligence badges in library list |
+| `ExtractionFeedbackBanner.tsx` | Post-processing completion summary banner |
+| `DocumentFilterBar.tsx` | Search + multi-select filter controls for document library |
+| `IntelligenceChecklist.tsx` | 9-item actionable checklist with progress bar and re-analyze button |
+| `markup-annotation.tsx` | Markup annotation overlay for document viewing |
 
 ## Testing
 
