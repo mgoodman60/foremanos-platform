@@ -41,6 +41,14 @@ export const processDocumentTask = task({
     triggerLogger.log(`Starting document processing`, { documentId, totalPages, processorType });
     logger.info('TRIGGER_PROCESS', `Task started for document ${documentId}`, { totalPages, processorType });
 
+    // 0. Verify document still exists (may have been deleted while queued)
+    const docCheck = await prisma.document.findUnique({ where: { id: documentId }, select: { id: true } });
+    if (!docCheck) {
+      triggerLogger.warn(`Document ${documentId} not found (deleted?), skipping`, { documentId });
+      logger.warn('TRIGGER_PROCESS', `Document not found, aborting`, { documentId });
+      return { documentId, pagesProcessed: 0, totalPages, status: 'cancelled' as const };
+    }
+
     try {
       // 1. Create ProcessingQueue entry if not exists
       const existingEntry = await prisma.processingQueue.findFirst({
@@ -261,7 +269,13 @@ export const processDocumentTask = task({
             },
           }),
         ]);
-      } catch (dbError) {
+      } catch (dbError: any) {
+        // P2025 = record not found (document was deleted mid-processing)
+        if (dbError?.code === 'P2025' || dbError?.code === 'P2003') {
+          logger.warn('TRIGGER_PROCESS', `Document deleted during processing, skipping DB update`, { documentId });
+          triggerLogger.warn(`Document deleted mid-processing, exiting cleanly`, { documentId });
+          return { documentId, pagesProcessed: 0, totalPages, status: 'cancelled' as const };
+        }
         logger.error('TRIGGER_PROCESS', `Failed to update database after error`, dbError as Error, { documentId });
       }
 
