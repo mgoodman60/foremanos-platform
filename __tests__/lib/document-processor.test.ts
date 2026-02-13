@@ -136,7 +136,6 @@ vi.mock('@/lib/schedule-extractor-ai', () => ({
 
 vi.mock('@/lib/document-processing-queue', () => ({
   queueDocumentForProcessing: vi.fn().mockResolvedValue(undefined),
-  processQueuedDocument: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Import functions after mocks
