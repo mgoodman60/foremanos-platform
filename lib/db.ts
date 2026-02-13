@@ -5,19 +5,30 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// CRITICAL FIX: Enhanced connection pooling configuration
-// Prevents "upstream connect error" and connection exhaustion
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
+// Lazy construction: skip PrismaClient when DATABASE_URL is missing
+// (happens during Trigger.dev Docker build indexing — env vars aren't available yet)
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
     },
-  },
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  // Connection pool configuration for high-traffic scenarios
-  // Reduces connection errors during concurrent requests
-  errorFormat: 'minimal',
-})
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    errorFormat: 'minimal',
+  })
+}
+
+export const prisma: PrismaClient = globalForPrisma.prisma ?? (
+  process.env.DATABASE_URL
+    ? createPrismaClient()
+    : new Proxy({} as PrismaClient, {
+        get(_, prop) {
+          if (prop === 'then') return undefined
+          throw new Error('DATABASE_URL not configured — cannot use database')
+        },
+      })
+)
 
 // In development, preserve single instance across hot reloads
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
@@ -94,8 +105,10 @@ async function ensureConnection(retryDelay = 1000) {
 // Note: Health check interval removed for serverless compatibility
 // Prisma handles reconnection automatically on each request
 
-// Initialize connection
-ensureConnection()
+// Initialize connection (skip when DATABASE_URL is missing, e.g. Trigger.dev indexing)
+if (process.env.DATABASE_URL) {
+  ensureConnection()
+}
 
 // Export connection utilities
 export const dbHealth = {
