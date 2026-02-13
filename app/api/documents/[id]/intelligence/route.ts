@@ -167,6 +167,10 @@ export async function GET(
         drawingTypes.length > 0
           ? drawingTypes.reduce((sum, dt) => sum + (dt.confidence || 0), 0) /
             drawingTypes.length
+          : chunks.some((c: any) => c.drawingTypeConfidence != null)
+          ? chunks.filter((c: any) => c.drawingTypeConfidence != null)
+              .reduce((sum: number, c: any) => sum + (c.drawingTypeConfidence || 0), 0) /
+            chunks.filter((c: any) => c.drawingTypeConfidence != null).length
           : null,
       lowConfidenceCount: drawingTypes.filter((dt) => (dt.confidence || 0) < 0.5)
         .length,

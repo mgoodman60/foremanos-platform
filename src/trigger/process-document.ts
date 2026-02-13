@@ -226,7 +226,8 @@ export const processDocumentTask = task({
           triggerLogger.log(`Running post-processing`, { documentId });
           logger.info('TRIGGER_PROCESS', `Starting post-processing`, { documentId });
 
-          await runDocumentPostProcessing(documentId, pagesProcessed);
+          // Pass skipProcessedCheck=true since we already set processed=true in step 6 transaction
+          await runDocumentPostProcessing(documentId, pagesProcessed, true);
 
           triggerLogger.log(`Post-processing completed`, { documentId });
           logger.info('TRIGGER_PROCESS', `Post-processing completed`, { documentId });

@@ -213,6 +213,9 @@ export async function processDocumentBatch(
             chunkIndex: pageNum - 1,
             content: chunkContent,
             metadata,
+            sheetNumber: metadata.sheetNumber || null,
+            titleBlockData: metadata.titleBlock || null,
+            discipline: metadata.discipline || null,
           },
         });
 
@@ -935,6 +938,7 @@ function extractMetadata(data: any): any {
   return {
     sheetNumber: data.sheetNumber || null,
     discipline: data.discipline || null,
+    titleBlock: data.titleBlock || null,
     hasScale: !!data.scale,
     hasDimensions: (data.dimensions?.length || 0) > 0,
     roomsCount: data.rooms?.length || 0,

@@ -376,12 +376,17 @@ export async function runIntelligenceExtraction(
         if (scaleData.primaryScale) {
           phaseAResult.scalesDetected++;
         }
-        
+
+        // Extract titleBlockData from metadata if present and not already set
+        const meta = chunk.metadata as Record<string, any> | null;
+        const titleBlockJson = meta?.titleBlock || null;
+
         // Update chunk with Phase A data
         await prisma.documentChunk.update({
           where: { id: chunk.id },
           data: {
             sheetNumber: sheetNumber || chunk.sheetNumber,
+            titleBlockData: titleBlockJson || chunk.titleBlockData || undefined,
             primaryScale: scaleData.primaryScale,
             scaleRatio: scaleData.scaleRatio,
             scaleType: scaleData.scaleType,

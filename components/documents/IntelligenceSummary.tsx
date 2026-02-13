@@ -17,7 +17,7 @@ interface Summary {
   totalSheets: number;
   disciplineBreakdown: DisciplineBreakdown[];
   drawingTypeBreakdown: DrawingTypeBreakdown[];
-  averageConfidence: number;
+  averageConfidence: number | null;
   lowConfidenceCount: number;
   fixtureCount: number;
   roomCount: number;
@@ -44,8 +44,8 @@ export default function IntelligenceSummary({ summary }: Props) {
     return null;
   }
 
-  const confidenceColor = getConfidenceColor(summary.averageConfidence);
-  const confidenceBg = getConfidenceBg(summary.averageConfidence);
+  const confidenceColor = summary.averageConfidence != null ? getConfidenceColor(summary.averageConfidence) : 'text-gray-600';
+  const confidenceBg = summary.averageConfidence != null ? getConfidenceBg(summary.averageConfidence) : 'bg-gray-50';
 
   return (
     <div className="bg-white border rounded-lg p-4">
@@ -64,7 +64,9 @@ export default function IntelligenceSummary({ summary }: Props) {
         <div className={`rounded-lg p-3 ${confidenceBg}`}>
           <div className="text-xs text-gray-600 mb-1">Avg Confidence</div>
           <div className={`text-xl font-bold ${confidenceColor}`}>
-            {Math.round(summary.averageConfidence * 100)}%
+            {summary.averageConfidence != null
+              ? `${Math.round(summary.averageConfidence * 100)}%`
+              : 'N/A'}
           </div>
         </div>
 
