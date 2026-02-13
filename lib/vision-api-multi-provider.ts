@@ -321,6 +321,31 @@ async function callClaudeSonnetVision(
   const timeout = setTimeout(() => controller.abort(), 45000); // 45s - reduced from 60s to limit stall time per page
 
   try {
+    // Detect content type - PDF or image
+    const isPdf = isPdfContent(imageBase64);
+    const contentArray: any[] = [];
+
+    if (isPdf) {
+      contentArray.push({
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: imageBase64,
+        },
+      });
+    } else {
+      contentArray.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: 'image/jpeg',
+          data: imageBase64,
+        },
+      });
+    }
+    contentArray.push({ type: 'text', text: prompt });
+
     const requestBody = JSON.stringify({
       model: DEFAULT_MODEL,
       max_tokens: 6000,
@@ -328,20 +353,7 @@ async function callClaudeSonnetVision(
       messages: [
         {
           role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: 'image/jpeg',
-                data: imageBase64,
-              },
-            },
-            {
-              type: 'text',
-              text: prompt,
-            },
-          ],
+          content: contentArray,
         },
       ],
     });
@@ -436,6 +448,17 @@ async function callGPT52Vision(
       provider: 'gpt-5.2',
       attempts: retryCount + 1,
       error: 'OpenAI API key not configured',
+    };
+  }
+
+  // GPT-5.2 cannot handle PDF native content — fail fast
+  if (isPdfContent(imageBase64)) {
+    return {
+      success: false,
+      content: '',
+      provider: 'gpt-5.2',
+      attempts: 0,
+      error: 'GPT-5.2 does not support PDF native content',
     };
   }
 
@@ -625,8 +648,12 @@ export async function analyzeWithLoadBalancing(
     callClaudeSonnetVision,
   ];
 
-  // Get primary provider using round-robin
-  const primaryIndex = getNextProviderIndex();
+  // Get primary provider using round-robin (PDFs always use Claude Opus)
+  const isPdf = isPdfContent(imageBase64);
+  const primaryIndex = isPdf ? 0 : getNextProviderIndex();
+  if (isPdf) {
+    logger.info('VISION_API', 'PDF native content — using Claude Opus as primary (skipping round-robin)');
+  }
   const primaryConfig = PROVIDERS[primaryIndex];
   const primaryFn = providerFunctions[primaryIndex];
 
@@ -671,18 +698,24 @@ export async function analyzeWithMultiProvider(
 ): Promise<VisionResponse> {
   logger.info('VISION_API', 'Multi-Provider Vision Analysis Started');
 
-  const providerFunctions = [
-    callClaudeOpusVision,
-    callGPT52Vision,
-    callClaudeSonnetVision,
-  ];
+  const isPdf = isPdfContent(imageBase64);
+  const providerFunctions = isPdf
+    ? [callClaudeOpusVision, callClaudeSonnetVision, callGPT52Vision]
+    : [callClaudeOpusVision, callGPT52Vision, callClaudeSonnetVision];
+  const providerConfigs = isPdf
+    ? [PROVIDERS[0], PROVIDERS[2], PROVIDERS[1]]
+    : [...PROVIDERS];
+
+  if (isPdf) {
+    logger.info('VISION_API', 'PDF content — reordered providers: Opus → Sonnet → GPT');
+  }
 
   let lastError = '';
   let totalAttempts = 0;
 
   for (let i = 0; i < providerFunctions.length; i++) {
     const providerFn = providerFunctions[i];
-    const config = PROVIDERS[i];
+    const config = providerConfigs[i];
 
     logger.info('VISION_API', `Trying provider ${i + 1}/${providerFunctions.length}`, { provider: config.displayName });
     
@@ -695,7 +728,7 @@ export async function analyzeWithMultiProvider(
         const quality = validateQuality(result.content);
         result.confidenceScore = quality.score;
 
-        logger.info('VISION_API', `${config.displayName} succeeded`, {
+        logger.info('VISION_API', `${providerConfigs[i].displayName} succeeded`, {
           confidence: quality.score,
           hasSheetNumber: quality.hasSheetNumber,
           hasContent: quality.hasContent,
@@ -703,10 +736,10 @@ export async function analyzeWithMultiProvider(
           hasStructuredData: quality.hasStructuredData,
         });
 
-        logger.info('VISION_API', `Using ${config.displayName} response - Analysis Complete`);
+        logger.info('VISION_API', `Using ${providerConfigs[i].displayName} response - Analysis Complete`);
         return result;
       } else {
-        logger.warn('VISION_API', `${config.displayName} failed`, { error: result.error });
+        logger.warn('VISION_API', `${providerConfigs[i].displayName} failed`, { error: result.error });
         lastError = result.error || 'Unknown error';
 
         // If Cloudflare block, immediately try next provider
@@ -715,7 +748,7 @@ export async function analyzeWithMultiProvider(
         }
       }
     } catch (error: any) {
-      logger.error('VISION_API', `${config.displayName} threw error`, error);
+      logger.error('VISION_API', `${providerConfigs[i].displayName} threw error`, error);
       lastError = error.message;
     }
 
@@ -758,7 +791,8 @@ export async function analyzeWithDirectPdf(
   pdfBase64OrBuffer: string | Buffer,
   prompt: string,
   startPage?: number,
-  endPage?: number
+  endPage?: number,
+  model?: string  // NEW: override model (default: DEFAULT_MODEL)
 ): Promise<VisionResponse> {
   logger.info('VISION_API', 'Direct PDF Analysis Started', { startPage: startPage || 1, endPage: endPage || 'all' });
 
@@ -805,7 +839,7 @@ export async function analyzeWithDirectPdf(
     const timeout = setTimeout(() => controller.abort(), 120000); // 120s - Sonnet is faster but dense PDFs need time
 
     try {
-      logger.info('DIRECT_PDF', `Attempt ${attempt + 1}/${maxRetries} using Claude Sonnet 4`);
+      logger.info('DIRECT_PDF', `Attempt ${attempt + 1}/${maxRetries} using ${model || DEFAULT_MODEL}`);
 
       // Enhanced page instruction
       let pageInstruction = '';
@@ -814,7 +848,7 @@ export async function analyzeWithDirectPdf(
       }
 
       const requestBody = JSON.stringify({
-        model: DEFAULT_MODEL,
+        model: model || DEFAULT_MODEL,
         max_tokens: 8000,
         temperature: 0.1,
         messages: [
@@ -838,7 +872,7 @@ export async function analyzeWithDirectPdf(
         ],
       });
       const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
-      logger.info('DIRECT_PDF', `Sending request`, { payloadSizeMB, model: DEFAULT_MODEL, attempt: attempt + 1 });
+      logger.info('DIRECT_PDF', `Sending request`, { payloadSizeMB, model: model || DEFAULT_MODEL, attempt: attempt + 1 });
 
       const fetchStart = Date.now();
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1062,11 +1096,11 @@ export async function analyzeWithSmartRouting(
 
       // Fallback to direct PDF if image processing fails
       logger.warn('SMART_ROUTING', 'Image processing failed, trying direct PDF');
-      return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
+      return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber, VISION_MODEL);
     } catch (rasterError: any) {
       // Canvas/native module not available (common in production/serverless)
       logger.warn('SMART_ROUTING', 'Rasterization unavailable, using direct PDF', { error: rasterError.message?.substring(0, 50) });
-      return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber);
+      return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber, VISION_MODEL);
     }
 
   } else {

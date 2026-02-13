@@ -357,6 +357,176 @@ describe('Vision API Multi-Provider', () => {
   // Note: API key validation tests that require module reloads are skipped
   // as vi.resetModules() doesn't preserve the fetch mock properly
 
+  describe('PDF content handling', () => {
+    const mockPdfBase64 = 'JVBERi0xLjQKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2Jq';
+    const mockImageBase64 = '/9j/4AAQSkZJRgABAQEASABIAAD...'; // JPEG header
+
+    it('should use Claude Opus for PDF content in load balancing', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nExtracted PDF content with structured data: key=value' }],
+        }),
+      });
+
+      const result = await analyzeWithLoadBalancing(mockPdfBase64, 'Extract content');
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-opus-4-6');
+      // Should call Claude Opus (index 0), not use round-robin for PDF
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.anthropic.com/v1/messages',
+        expect.any(Object)
+      );
+    });
+
+    it('should use round-robin for non-PDF content in load balancing', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nExtracted image content with structured data: key=value' }],
+        }),
+      });
+
+      const result = await analyzeWithLoadBalancing(mockImageBase64, 'Extract content');
+
+      expect(result.success).toBe(true);
+      // Round-robin could pick any provider (depends on counter state)
+      expect(['claude-opus-4-6', 'gpt-5.2', 'claude-sonnet-4-5']).toContain(result.provider);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should fail fast when GPT-5.2 receives PDF content', async () => {
+      // First provider (Claude Opus) fails
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'Internal Server Error',
+      });
+      // Claude Opus retries (maxRetries=3)
+      for (let i = 0; i < 3; i++) {
+        fetchMock.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Internal Server Error',
+        });
+      }
+
+      // GPT-5.2 should fail fast (no HTTP request)
+      // Third provider (Claude Sonnet) succeeds
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nExtracted via Sonnet with data: value' }],
+        }),
+      });
+
+      const result = await analyzeWithMultiProvider(mockPdfBase64, 'Extract content', 0);
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-sonnet-4-5');
+      // Should be: 4 calls for Claude Opus (initial + 3 retries) + 0 for GPT (fast fail) + 1 for Sonnet = 5
+      expect(fetchMock).toHaveBeenCalledTimes(5);
+    });
+
+    it('should reorder providers to Opus → Sonnet → GPT for PDF content', async () => {
+      // Claude Opus fails
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'Internal Server Error',
+      });
+      for (let i = 0; i < 3; i++) {
+        fetchMock.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Internal Server Error',
+        });
+      }
+
+      // Claude Sonnet (should be second, not GPT) succeeds
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nSonnet content with data: value' }],
+        }),
+      });
+
+      const result = await analyzeWithMultiProvider(mockPdfBase64, 'Extract content', 0);
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-sonnet-4-5');
+      // Should try Opus (4 calls) → Sonnet (1 call), never reaching GPT
+      expect(fetchMock).toHaveBeenCalledTimes(5);
+    });
+
+    it('should use document type for PDF content in Claude Sonnet', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nPDF document content' }],
+        }),
+      });
+
+      const result = await analyzeWithDirectPdf(mockPdfBase64, 'Extract content');
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-sonnet-4-5');
+
+      // Verify the request body has correct document type
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1]?.body as string);
+      expect(callBody.messages[0].content[0].type).toBe('document');
+      expect(callBody.messages[0].content[0].source.media_type).toBe('application/pdf');
+    });
+
+    it('should use image type for non-PDF content in Claude Opus', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nImage content' }],
+        }),
+      });
+
+      // Use analyzeWithMultiProvider with image content
+      const result = await analyzeWithMultiProvider(mockImageBase64, 'Extract content', 0);
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-opus-4-6');
+
+      // Verify the request body has correct image type
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1]?.body as string);
+      expect(callBody.messages[0].content[0].type).toBe('image');
+      expect(callBody.messages[0].content[0].source.media_type).toBe('image/jpeg');
+    });
+
+    it('should use document type for PDF content in Claude Opus', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nPDF via Opus' }],
+        }),
+      });
+
+      const result = await analyzeWithMultiProvider(mockPdfBase64, 'Extract content', 0);
+
+      expect(result.success).toBe(true);
+      expect(result.provider).toBe('claude-opus-4-6');
+
+      // Verify the request body has correct document type for PDF
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1]?.body as string);
+      expect(callBody.messages[0].content[0].type).toBe('document');
+      expect(callBody.messages[0].content[0].source.media_type).toBe('application/pdf');
+    });
+  });
+
   describe('analyzeWithDirectPdf', () => {
     it('should use Claude Sonnet for direct PDF processing', async () => {
       fetchMock.mockResolvedValueOnce({
@@ -376,6 +546,42 @@ describe('Vision API Multi-Provider', () => {
         'https://api.anthropic.com/v1/messages',
         expect.any(Object)
       );
+    });
+
+    it('should use DEFAULT_MODEL when no model parameter is provided', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nContent' }],
+        }),
+      });
+
+      const pdfBase64 = 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nPj4KZW5kb2Jq';
+      const result = await analyzeWithDirectPdf(pdfBase64, 'Extract content');
+
+      expect(result.success).toBe(true);
+      // Should use DEFAULT_MODEL (claude-sonnet-4-5-20250929) by default
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1]?.body as string);
+      expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
+    });
+
+    it('should use specified model when model parameter is provided', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          content: [{ text: 'Sheet A-101\nContent' }],
+        }),
+      });
+
+      const pdfBase64 = 'JVBERi0xLjQKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nPj4KZW5kb2Jq';
+      const result = await analyzeWithDirectPdf(pdfBase64, 'Extract content', undefined, undefined, 'claude-opus-4-6');
+
+      expect(result.success).toBe(true);
+      // Should use specified model (claude-opus-4-6)
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1]?.body as string);
+      expect(callBody.model).toBe('claude-opus-4-6');
     });
 
     // Note: Retry test skipped as internal retry logic with delays conflicts with mock timing

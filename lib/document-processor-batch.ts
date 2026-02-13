@@ -108,11 +108,14 @@ export async function processDocumentBatch(
 
         // Use smart routing based on document classification
         const startTime = Date.now();
+        // When page was extracted into a 1-page PDF, target page 1 of that PDF
+        // When extraction failed and we're using the full buffer, use original page number
+        const effectivePageForVision = (pageBuffer !== buffer) ? 1 : pageNum;
         const visionResult = await analyzeWithSmartRouting(
           pageBuffer,
           getVisionPrompt(document.fileName, pageNum),
           effectiveProcessorType,
-          pageNum,
+          effectivePageForVision,
           50 // Minimum quality score
         );
         const processingTime = Date.now() - startTime;

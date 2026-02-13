@@ -486,5 +486,53 @@ describe('document-processor-batch', () => {
       expect(content).toContain('ELECTRICAL DEVICES:');
       expect(content).toContain('HVAC:');
     });
+
+    it('should use page 1 for vision when page extraction succeeds', async () => {
+      // Mock successful page extraction (returns different buffer)
+      mockExtractPageAsPdf.mockResolvedValue({ base64: 'extracted-page-base64' });
+      mockAnalyzeWithSmartRouting.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'claude-opus-4-6',
+        confidenceScore: 0.9,
+        attempts: 1,
+      });
+
+      await processDocumentBatch('doc-123', 3, 3); // Process page 3
+
+      // analyzeWithSmartRouting should be called with page 1
+      // because the extracted page is a 1-page PDF
+      expect(mockAnalyzeWithSmartRouting).toHaveBeenCalledWith(
+        expect.any(Buffer),
+        expect.any(String),
+        'vision-ai',
+        1, // effectivePageForVision should be 1
+        50
+      );
+    });
+
+    it('should use original page number when page extraction fails', async () => {
+      // Mock failed page extraction (returns original buffer via fallback)
+      mockExtractPageAsPdf.mockRejectedValue(new Error('Extraction failed'));
+      mockAnalyzeWithSmartRouting.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'claude-opus-4-6',
+        confidenceScore: 0.9,
+        attempts: 1,
+      });
+
+      await processDocumentBatch('doc-123', 5, 5); // Process page 5
+
+      // analyzeWithSmartRouting should be called with original page 5
+      // because extraction failed and we're using full buffer
+      expect(mockAnalyzeWithSmartRouting).toHaveBeenCalledWith(
+        expect.any(Buffer),
+        expect.any(String),
+        'vision-ai',
+        5, // effectivePageForVision should be original page number
+        50
+      );
+    });
   });
 });

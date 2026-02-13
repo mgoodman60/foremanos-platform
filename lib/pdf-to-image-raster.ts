@@ -127,9 +127,10 @@ export async function rasterizePdfToImages(
 
     const results: RasterizedPage[] = [];
 
-    for (const pageNum of pagesToConvert) {
+    for (let pageNum of pagesToConvert) {
       if (pageNum < 1 || pageNum > totalPages) {
-        continue;
+        logger.warn('PDF_RASTER', `Page ${pageNum} out of range (1-${totalPages}), clamping to ${Math.min(Math.max(pageNum, 1), totalPages)}`);
+        pageNum = Math.min(Math.max(pageNum, 1), totalPages);
       }
 
       try {

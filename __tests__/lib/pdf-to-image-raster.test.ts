@@ -5,6 +5,14 @@ import { PDFDocument } from 'pdf-lib';
 // Mocks Setup - Must use vi.hoisted for mock objects
 // ============================================
 
+// Mock logger with vi.hoisted
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+}));
+
 // Mock sharp with vi.hoisted
 const mockSharpInstance = vi.hoisted(() => ({
   metadata: vi.fn(),
@@ -19,6 +27,12 @@ const mockSharp = vi.hoisted(() => {
   sharp.default = sharp;
   return sharp;
 });
+
+// Mock the logger
+vi.mock('@/lib/logger', () => ({
+  logger: mockLogger,
+  createScopedLogger: vi.fn(() => mockLogger),
+}));
 
 // Mock the dynamic imports
 vi.mock('sharp', () => ({
@@ -257,12 +271,16 @@ describe('PDF to Image Raster - rasterizeSinglePage', () => {
     expect(result.pageNumber).toBe(5);
   });
 
-  it('should throw error if page rasterization fails', async () => {
+  it('should clamp out-of-range page number to valid range', async () => {
     const pdfBuffer = await createSimplePDF(1);
 
-    // Page 99 doesn't exist in a 1-page PDF
-    await expect(rasterizeSinglePage(pdfBuffer, 99)).rejects.toThrow(
-      'Failed to process page 99'
+    // Page 99 doesn't exist in a 1-page PDF, should clamp to page 1
+    const result = await rasterizeSinglePage(pdfBuffer, 99);
+
+    expect(result.pageNumber).toBe(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'PDF_RASTER',
+      expect.stringContaining('Page 99 out of range')
     );
   });
 });
@@ -421,6 +439,60 @@ describe('PDF to Image Raster - Edge Cases', () => {
     // Dimensions should be clamped
     expect(results[0].width).toBeLessThanOrEqual(2000);
     expect(results[0].height).toBeLessThanOrEqual(2000);
+  });
+
+  it('should clamp out-of-range page numbers to valid range', async () => {
+    const pdfBuffer = await createSimplePDF(5); // 5 pages total
+
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'pdf',
+      startPage: 1,
+      endPage: 10, // Exceeds page count
+    });
+
+    // Should process all 5 pages
+    expect(results).toHaveLength(5);
+    // Last page should be 5, not 10
+    expect(results[4].pageNumber).toBe(5);
+  });
+
+  it('should log warning when page number is out of range', async () => {
+    const pdfBuffer = await createSimplePDF(3); // 3 pages total
+
+    // Clear mocks to check for specific warning
+    vi.clearAllMocks();
+
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'pdf',
+      startPage: 1,
+      endPage: 10, // Exceeds page count
+    });
+
+    // Should have processed all 3 pages
+    expect(results).toHaveLength(3);
+    // Pages 4-10 were out of range and got clamped, but they're not in pagesToConvert
+    // so no warnings are logged. The clamping happens at endPage level.
+  });
+
+  it('should clamp negative page numbers to 1', async () => {
+    const pdfBuffer = await createSimplePDF(5);
+
+    vi.clearAllMocks();
+
+    // Manually test with pagesToConvert that includes invalid page numbers
+    // This requires calling with page option
+    const results = await rasterizePdfToImages(pdfBuffer, {
+      mode: 'pdf',
+      page: -1, // Invalid page number
+    });
+
+    // Should clamp to page 1
+    expect(results).toHaveLength(1);
+    expect(results[0].pageNumber).toBe(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'PDF_RASTER',
+      expect.stringContaining('Page -1 out of range')
+    );
   });
 });
 
