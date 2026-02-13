@@ -17,6 +17,8 @@ const mockShouldResetQuota = vi.hoisted(() => vi.fn());
 const mockGetNextResetDate = vi.hoisted(() => vi.fn());
 const mockClassifyDocument = vi.hoisted(() => vi.fn());
 const mockProcessDocument = vi.hoisted(() => vi.fn());
+const mockGetDocumentMetadata = vi.hoisted(() => vi.fn());
+const mockTasksTrigger = vi.hoisted(() => vi.fn());
 const mockCalculateFileHash = vi.hoisted(() => vi.fn());
 const mockIsDuplicate = vi.hoisted(() => vi.fn());
 const mockScanFileBuffer = vi.hoisted(() => vi.fn());
@@ -51,6 +53,16 @@ vi.mock('@/lib/document-classifier', () => ({
 }));
 vi.mock('@/lib/document-processor', () => ({
   processDocument: mockProcessDocument,
+  getDocumentMetadata: mockGetDocumentMetadata,
+}));
+vi.mock('@trigger.dev/sdk/v3', () => ({
+  tasks: { trigger: mockTasksTrigger },
+  task: vi.fn(),
+  logger: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  configure: vi.fn(),
+}));
+vi.mock('@/src/trigger/process-document', () => ({
+  processDocumentTask: { id: 'process-document' },
 }));
 vi.mock('@/lib/duplicate-detector', () => ({
   calculateFileHash: mockCalculateFileHash,
@@ -177,6 +189,8 @@ describe('Confirm Upload Route', () => {
     mockGetNextResetDate.mockReturnValue(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
     mockClassifyDocument.mockResolvedValue({ processorType: 'pdf', category: 'plans' });
     mockProcessDocument.mockResolvedValue(undefined);
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
     mockCalculateFileHash.mockReturnValue('hash-abc-123');
     mockIsDuplicate.mockResolvedValue(false);
     mockScanFileBuffer.mockResolvedValue({ clean: true, engine: 'clamav' });
@@ -525,14 +539,18 @@ describe('Confirm Upload Route', () => {
       );
     });
 
-    it('should trigger processDocument fire-and-forget', async () => {
+    it('should trigger Trigger.dev task for document processing', async () => {
       const request = createConfirmRequest(validBody);
       const response = await POST(request);
 
       expect(response.status).toBe(201);
-      expect(mockProcessDocument).toHaveBeenCalledWith(
-        mockDocument.id,
-        expect.objectContaining({ processorType: 'pdf' })
+      expect(mockTasksTrigger).toHaveBeenCalledWith(
+        'process-document',
+        expect.objectContaining({
+          documentId: mockDocument.id,
+          totalPages: 5,
+          processorType: 'vision-ai',
+        })
       );
     });
 

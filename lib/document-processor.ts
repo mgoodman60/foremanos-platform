@@ -315,7 +315,7 @@ async function processWithVision(
     // For large documents (>10 pages), use queue system
     if (pages > 10) {
       logger.info('PROCESS', `Large document detected, using queue system`, { pages, classification: processorType });
-      
+
       // Import queue functions dynamically to avoid circular dependencies
       const { queueDocumentForProcessing } = await import('./document-processing-queue');
 
@@ -331,17 +331,10 @@ async function processWithVision(
         },
       });
 
-      // Start processing immediately (cron remains as safety net)
-      try {
-        const { processQueuedDocument } = await import('./document-processing-queue');
-        // Await processing — keeps function alive via waitUntil() chain
-        // processQueuedDocument has its own 270s internal timeout and saves progress incrementally
-        await processQueuedDocument(documentId);
-      } catch (err: any) {
-        logger.warn('DOCUMENT_PROCESSOR', 'Immediate queue processing failed, cron will retry', { documentId, error: err?.message });
-      }
-
-      logger.info('PROCESS', `Document ${documentId} queued and immediate processing triggered`, { pages, batches: pages });
+      // NOTE: Immediate processing has been removed. The document will be picked up by:
+      // 1. Trigger.dev task (for new uploads via confirm-upload route)
+      // 2. Legacy cron job (for old uploads via upload route - to be deprecated)
+      logger.info('PROCESS', `Document ${documentId} queued for processing`, { pages, batches: pages });
 
       // Return 0 - actual values will be updated as queue processes
       return { pages: 0, cost: 0 };
@@ -389,6 +382,48 @@ async function getPdfPageCountFromFile(filePath: string): Promise<number> {
     const stats = fs.statSync(filePath);
     return Math.max(1, Math.ceil(stats.size / (100 * 1024)));
   }
+}
+
+/**
+ * Get page count and processor type for a document buffer
+ * Used by upload routes to prepare task payload before triggering Trigger.dev
+ * @param buffer Document buffer
+ * @param fileName File name for classification
+ * @param fileExtension File extension
+ * @returns Page count and processor type
+ */
+export async function getDocumentMetadata(
+  buffer: Buffer,
+  fileName: string,
+  fileExtension: string
+): Promise<{ totalPages: number; processorType: ProcessorType }> {
+  logger.info('DOCUMENT_METADATA', 'Getting metadata', { fileName, fileExtension });
+
+  // Classify document to determine processor type
+  const classification = await classifyDocument(fileName, fileExtension, buffer);
+
+  // Get page count for PDFs
+  let totalPages = 1;
+  if (fileExtension === 'pdf') {
+    try {
+      const { getPdfPageCount } = await import('./pdf-to-image');
+      totalPages = await getPdfPageCount(buffer);
+      logger.info('DOCUMENT_METADATA', 'PDF page count retrieved', { totalPages });
+    } catch (error) {
+      logger.error('DOCUMENT_METADATA', 'Error getting PDF page count', error);
+      // Fallback: estimate from file size (rough estimate: 100KB per page)
+      totalPages = Math.max(1, Math.ceil(buffer.length / (100 * 1024)));
+      logger.warn('DOCUMENT_METADATA', 'Using estimated page count', { totalPages });
+    }
+  } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+    // For DOCX, estimate chunk count (will be updated during actual processing)
+    totalPages = Math.max(1, Math.ceil(buffer.length / (1000 * 100))); // ~100 chunks per MB
+  }
+
+  return {
+    totalPages,
+    processorType: classification.processorType,
+  };
 }
 
 /**

@@ -24,10 +24,23 @@ vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }));
 
-const mockProcessDocument = vi.hoisted(() => vi.fn());
+const mockTasksTrigger = vi.hoisted(() => vi.fn().mockResolvedValue({ id: 'test-run-id' }));
+const mockGetFileUrl = vi.hoisted(() => vi.fn());
+const mockGetDocumentMetadata = vi.hoisted(() => vi.fn());
+
+vi.mock('@trigger.dev/sdk/v3', () => ({
+  tasks: { trigger: mockTasksTrigger },
+  task: vi.fn(),
+  logger: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  configure: vi.fn(),
+}));
+
+vi.mock('@/lib/s3', () => ({
+  getFileUrl: mockGetFileUrl,
+}));
 
 vi.mock('@/lib/document-processor', () => ({
-  processDocument: mockProcessDocument,
+  getDocumentMetadata: mockGetDocumentMetadata,
 }));
 
 // Mock logger for createScopedLogger
@@ -358,20 +371,38 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
   it('should successfully recover an orphaned document', async () => {
     const mockDoc = {
       id: 'doc-1',
-      name: 'Floor Plan',
+      name: 'Floor Plan.pdf',
       cloud_storage_path: 'uploads/plan.pdf',
       processed: false,
     };
 
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findUnique.mockResolvedValue(mockDoc);
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+
+    mockGetDocumentMetadata.mockResolvedValue({
+      totalPages: 10,
+      processorType: 'vision-ai',
+    });
+
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(true);
-    expect(mockProcessDocument).toHaveBeenCalledWith('doc-1');
+    expect(mockTasksTrigger).toHaveBeenCalledWith('process-document', {
+      documentId: 'doc-1',
+      totalPages: 10,
+      processorType: 'vision-ai',
+    });
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
@@ -381,7 +412,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     const result = await recoverOrphanedDocument('nonexistent-doc');
 
     expect(result).toBe(false);
-    expect(mockProcessDocument).not.toHaveBeenCalled();
+    expect(mockTasksTrigger).not.toHaveBeenCalled();
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
@@ -396,7 +427,7 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(false);
-    expect(mockProcessDocument).not.toHaveBeenCalled();
+    expect(mockTasksTrigger).not.toHaveBeenCalled();
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
@@ -411,20 +442,29 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(false);
-    expect(mockProcessDocument).not.toHaveBeenCalled();
+    expect(mockTasksTrigger).not.toHaveBeenCalled();
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should delete existing chunks before recovery', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'doc-1',
-      name: 'Has Chunks',
+      name: 'Has Chunks.pdf',
       cloud_storage_path: 'uploads/test.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 3 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const result = await recoverOrphanedDocument('doc-1');
 
@@ -435,15 +475,24 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
   });
 
   it('should delete failed queue entries before recovery', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'doc-1',
-      name: 'Failed Queue',
+      name: 'Failed Queue.pdf',
       cloud_storage_path: 'uploads/test.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 2 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const result = await recoverOrphanedDocument('doc-1');
 
@@ -458,16 +507,25 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
     });
   });
 
-  it('should handle processDocument errors gracefully', async () => {
+  it('should handle Trigger.dev task errors gracefully', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'doc-1',
-      name: 'Error Doc',
+      name: 'Error Doc.pdf',
       cloud_storage_path: 'uploads/test.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockRejectedValue(new Error('Processing failed'));
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockRejectedValue(new Error('Trigger.dev unavailable'));
 
     const result = await recoverOrphanedDocument('doc-1');
 
@@ -493,35 +551,54 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
   });
 
   it('should log start and success messages', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'doc-1',
-      name: 'Test Doc',
+      name: 'Test Doc.pdf',
       cloud_storage_path: 'uploads/test.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     await recoverOrphanedDocument('doc-1');
 
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
-  it('should handle null document name gracefully', async () => {
+  it('should handle document name being used as fileName', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'doc-1',
-      name: null,
+      name: 'test-document.pdf', // name is used as fileName in getDocumentMetadata
       cloud_storage_path: 'uploads/test.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const result = await recoverOrphanedDocument('doc-1');
 
     expect(result).toBe(true);
+    expect(mockGetDocumentMetadata).toHaveBeenCalledWith(expect.any(Buffer), 'test-document.pdf', 'pdf');
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 });
@@ -543,9 +620,10 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
   });
 
   it('should recover all orphaned documents', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
     const mockOrphans = [
-      createMockDocument({ id: 'orphan-1', name: 'Plan A' }),
-      createMockDocument({ id: 'orphan-2', name: 'Plan B' }),
+      createMockDocument({ id: 'orphan-1', name: 'Plan A.pdf' }),
+      createMockDocument({ id: 'orphan-2', name: 'Plan B.pdf' }),
     ];
 
     mockPrisma.document.findMany.mockResolvedValue(mockOrphans);
@@ -553,14 +631,21 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     mockPrisma.document.findUnique.mockImplementation((args) => {
       return Promise.resolve({
         id: args.where.id,
-        name: `Document ${args.where.id}`,
+        name: `Document ${args.where.id}.pdf`,
         cloud_storage_path: 'uploads/test.pdf',
         processed: false,
       });
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const resultPromise = recoverAllOrphanedDocuments();
 
@@ -572,7 +657,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     const result = await resultPromise;
 
     expect(result).toBe(2);
-    expect(mockProcessDocument).toHaveBeenCalledTimes(2);
+    expect(mockTasksTrigger).toHaveBeenCalledTimes(2);
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
@@ -583,13 +668,14 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     const result = await recoverAllOrphanedDocuments();
 
     expect(result).toBe(0);
-    expect(mockProcessDocument).not.toHaveBeenCalled();
+    expect(mockTasksTrigger).not.toHaveBeenCalled();
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 
   it('should handle partial recovery failures', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
     const mockOrphans = [
-      createMockDocument({ id: 'success', name: 'Good Doc' }),
+      createMockDocument({ id: 'success', name: 'Good Doc.pdf' }),
       createMockDocument({ id: 'fail', name: 'Bad Doc' }),
     ];
 
@@ -598,7 +684,7 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     mockPrisma.document.findUnique
       .mockResolvedValueOnce({
         id: 'success',
-        name: 'Good Doc',
+        name: 'Good Doc.pdf',
         cloud_storage_path: 'uploads/good.pdf',
         processed: false,
       })
@@ -606,7 +692,14 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
 
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const resultPromise = recoverAllOrphanedDocuments();
 
@@ -622,9 +715,10 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
   });
 
   it('should add 1 second delay between recoveries', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
     const mockOrphans = [
-      createMockDocument({ id: 'orphan-1', name: 'Doc 1' }),
-      createMockDocument({ id: 'orphan-2', name: 'Doc 2' }),
+      createMockDocument({ id: 'orphan-1', name: 'Doc 1.pdf' }),
+      createMockDocument({ id: 'orphan-2', name: 'Doc 2.pdf' }),
     ];
 
     mockPrisma.document.findMany.mockResolvedValue(mockOrphans);
@@ -632,14 +726,21 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     mockPrisma.document.findUnique.mockImplementation((args) =>
       Promise.resolve({
         id: args.where.id,
-        name: `Doc ${args.where.id}`,
+        name: `Doc ${args.where.id}.pdf`,
         cloud_storage_path: 'uploads/test.pdf',
         processed: false,
       })
     );
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const resultPromise = recoverAllOrphanedDocuments();
 
@@ -652,16 +753,17 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     const result = await resultPromise;
 
     // Both documents should be recovered
-    expect(mockProcessDocument).toHaveBeenCalledTimes(2);
+    expect(mockTasksTrigger).toHaveBeenCalledTimes(2);
     expect(result).toBe(2);
   });
 
   it('should log found orphaned documents with details', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const mockOrphans = [
       createMockDocument({
         id: 'orphan-1',
-        name: 'Test Plan',
+        name: 'Test Plan.pdf',
         createdAt: tenMinutesAgo,
       }),
     ];
@@ -670,13 +772,20 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     mockPrisma.processingQueue.findMany.mockResolvedValue([]);
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'orphan-1',
-      name: 'Test Plan',
+      name: 'Test Plan.pdf',
       cloud_storage_path: 'uploads/test.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const resultPromise = recoverAllOrphanedDocuments();
     await vi.advanceTimersByTimeAsync(1000);
@@ -707,8 +816,9 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
   });
 
   it('should handle recovery of many documents', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
     const mockOrphans = Array.from({ length: 5 }, (_, i) =>
-      createMockDocument({ id: `orphan-${i}`, name: `Doc ${i}` })
+      createMockDocument({ id: `orphan-${i}`, name: `Doc ${i}.pdf` })
     );
 
     mockPrisma.document.findMany.mockResolvedValue(mockOrphans);
@@ -716,14 +826,21 @@ describe('Orphaned Document Recovery - recoverAllOrphanedDocuments()', () => {
     mockPrisma.document.findUnique.mockImplementation((args) =>
       Promise.resolve({
         id: args.where.id,
-        name: `Doc ${args.where.id}`,
+        name: `Doc ${args.where.id}.pdf`,
         cloud_storage_path: 'uploads/test.pdf',
         processed: false,
       })
     );
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined);
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
 
     const resultPromise = recoverAllOrphanedDocuments();
 
@@ -949,20 +1066,29 @@ describe('Orphaned Document Recovery - Edge Cases', () => {
     expect(result[0].createdAt).toEqual(veryOld);
   });
 
-  it('should handle recovery when processDocument completes immediately', async () => {
+  it('should handle recovery when Trigger.dev task completes immediately', async () => {
+    const mockBuffer = Buffer.from('fake-pdf-content');
+
     mockPrisma.document.findMany.mockResolvedValue([
-      createMockDocument({ id: 'fast-doc', name: 'Fast' }),
+      createMockDocument({ id: 'fast-doc', name: 'Fast.pdf' }),
     ]);
     mockPrisma.processingQueue.findMany.mockResolvedValue([]);
     mockPrisma.document.findUnique.mockResolvedValue({
       id: 'fast-doc',
-      name: 'Fast',
+      name: 'Fast.pdf',
       cloud_storage_path: 'uploads/fast.pdf',
       processed: false,
     });
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
-    mockProcessDocument.mockResolvedValue(undefined); // Completes immediately
+
+    mockGetFileUrl.mockResolvedValue('https://fake-url.com/doc.pdf');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => mockBuffer,
+    }) as any;
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 5, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' }); // Completes immediately
 
     const resultPromise = recoverAllOrphanedDocuments();
     await vi.advanceTimersByTimeAsync(1000);

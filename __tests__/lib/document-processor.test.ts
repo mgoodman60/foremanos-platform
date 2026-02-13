@@ -250,7 +250,7 @@ describe('Document Processor - PDF Processing', () => {
     );
   });
 
-  it('should queue large PDFs (>10 pages) for batch processing', async () => {
+  it('should queue large PDFs (>10 pages) for batch processing without inline processing', async () => {
     const pdfBuffer = await createSimplePDF(25);
     const mockDoc = createMockDocument({ fileName: 'specifications.pdf' });
 
@@ -274,8 +274,8 @@ describe('Document Processor - PDF Processing', () => {
 
     await processDocument('doc-1');
 
-    // Verify document was queued
-    expect(queueDocumentForProcessing).toHaveBeenCalledWith('doc-1', 25, 5, 'claude-haiku-ocr');
+    // Verify document was queued (batchSize 1, not 5 - changed to per-page processing)
+    expect(queueDocumentForProcessing).toHaveBeenCalledWith('doc-1', 25, 1, 'claude-haiku-ocr');
 
     // Verify document status was set to queued
     expect(mockPrisma.document.update).toHaveBeenCalledWith(
@@ -691,8 +691,8 @@ describe('Document Processor - Error Handling', () => {
     );
   });
 
-  // Large documents are queued for cron processing — processQueuedDocument is NOT called inline
-  it('should queue large documents without calling processQueuedDocument inline', async () => {
+  // Large documents are queued for Trigger.dev processing (no inline processing)
+  it('should queue large documents without inline processing (Trigger.dev migration)', async () => {
     const pdfBuffer = await createSimplePDF(25);
     const mockDoc = createMockDocument({ fileName: 'large-plan.pdf' });
 
@@ -711,15 +711,17 @@ describe('Document Processor - Error Handling', () => {
     mockGetPdfPageCount.mockResolvedValue(25);
     mockPrisma.document.update.mockResolvedValue(mockDoc);
 
-    const { queueDocumentForProcessing, processQueuedDocument } = await import('@/lib/document-processing-queue');
+    const { queueDocumentForProcessing } = await import('@/lib/document-processing-queue');
 
     await processDocument('doc-1');
 
-    // Verify document was queued
-    expect(queueDocumentForProcessing).toHaveBeenCalledWith('doc-1', 25, 5, 'vision-ai');
+    // Verify document was queued (batchSize 1 for per-page processing)
+    expect(queueDocumentForProcessing).toHaveBeenCalledWith('doc-1', 25, 1, 'vision-ai');
 
-    // Verify processQueuedDocument IS called immediately (fire-and-forget, cron as safety net)
-    expect(processQueuedDocument).toHaveBeenCalledWith('doc-1');
+    // NOTE: processQueuedDocument function was removed during Trigger.dev migration
+    // Processing is now triggered by:
+    // 1. Trigger.dev task (for new uploads via confirm-upload route)
+    // 2. Legacy cron job (for old uploads - to be deprecated)
 
     // Verify document status set to queued
     expect(mockPrisma.document.update).toHaveBeenCalledWith(

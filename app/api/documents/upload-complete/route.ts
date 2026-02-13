@@ -7,14 +7,14 @@ import { prisma } from '@/lib/db';
 import crypto from 'crypto';
 import { requireProjectPermission } from '@/lib/project-permissions';
 import { canProcessDocument, getProcessingLimits } from '@/lib/processing-limits';
-import { classifyDocument } from '@/lib/document-classifier';
+import { getDocumentMetadata } from '@/lib/document-processor';
 import { suggestDocumentCategory } from '@/lib/document-categorizer';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
-import { processDocument } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { DocumentCategory } from '@prisma/client';
-import { waitUntil } from '@vercel/functions';
+import { tasks } from '@trigger.dev/sdk/v3';
+import type { processDocumentTask } from '@/src/trigger/process-document';
 
 const VALID_CATEGORIES: readonly string[] = [
   'budget_cost', 'schedule', 'plans_drawings', 'specifications',
@@ -201,15 +201,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const estimatedPages = 50; // Assume 50 pages max for quota check
+    // Get page count and classification
+    const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'pdf';
+    logger.info('UPLOAD_COMPLETE', 'Getting document metadata', { fileName, fileExtension });
+    const { totalPages, processorType } = await getDocumentMetadata(completeBuffer, fileName, fileExtension);
+    logger.info('UPLOAD_COMPLETE', 'Document metadata retrieved', { totalPages, processorType });
+
     const canProcessResult = await canProcessDocument(
       user.id,
-      estimatedPages
+      totalPages
     );
-
-    // Classify document to determine processor type
-    const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'pdf';
-    const classification = await classifyDocument(fileName, fileExtension, completeBuffer);
 
     // Create document record
     const document = await prisma.document.create({
@@ -225,7 +226,7 @@ export async function POST(request: Request) {
         projectId,
         category: validatedCategory,
         processed: false,
-        processorType: classification.processorType,
+        processorType: processorType,
         tags: [],
         accessLevel: 'admin',
       },
@@ -244,29 +245,29 @@ export async function POST(request: Request) {
 
     // Trigger document processing if allowed
     if (canProcessResult.allowed) {
-      console.log(`[COMPLETE] Starting document processing for ${document.id}...`);
-      waitUntil(
-        processDocument(document.id, classification)
-          .then(() => {
-            console.log(`[COMPLETE] ✅ Processing completed for document ${document.id}`);
-          })
-          .catch(async (error) => {
-            console.error(`[COMPLETE ERROR] ❌ Processing failed for document ${document.id}:`, error);
-
-            // Mark document as failed
-            await prisma.document.update({
-              where: { id: document.id },
-              data: {
-                queueStatus: 'failed',
-                lastProcessingError: error.message || 'Processing initialization failed',
-              },
-            }).catch((updateError: any) => {
-              console.error('[COMPLETE ERROR] Failed to update document status:', updateError);
-            });
-          })
-      );
+      logger.info('UPLOAD_COMPLETE', 'Triggering Trigger.dev task', { documentId: document.id, totalPages, processorType });
+      try {
+        const handle = await tasks.trigger<typeof processDocumentTask>('process-document', {
+          documentId: document.id,
+          totalPages,
+          processorType,
+        });
+        logger.info('UPLOAD_COMPLETE', 'Trigger.dev task triggered', { documentId: document.id, runId: handle.id });
+      } catch (triggerError) {
+        logger.error('UPLOAD_COMPLETE', 'Failed to trigger Trigger.dev task', triggerError);
+        // Mark document as failed
+        await prisma.document.update({
+          where: { id: document.id },
+          data: {
+            queueStatus: 'failed',
+            lastProcessingError: 'Failed to start processing task',
+          },
+        }).catch((updateError: any) => {
+          logger.error('UPLOAD_COMPLETE', 'Failed to update document status', updateError);
+        });
+      }
     } else {
-      console.log(`[COMPLETE] Document ${document.id} not processed - quota exceeded`);
+      logger.info('UPLOAD_COMPLETE', 'Document not processed - quota exceeded', { documentId: document.id });
     }
 
     return NextResponse.json({

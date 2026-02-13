@@ -71,3 +71,5 @@ assets/tour/video_temp/
 # (package-lock.json is tracked in git)
 .vercel
 .env*.local
+
+.trigger

@@ -7,8 +7,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { downloadFile } from '@/lib/s3';
+import { getDocumentMetadata } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { tasks } from '@trigger.dev/sdk/v3';
+import type { processDocumentTask } from '@/src/trigger/process-document';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,
@@ -52,7 +58,7 @@ export async function POST(
     // 4. Find all processed documents in project
     const documents = await prisma.document.findMany({
       where: { projectId: project.id, processed: true },
-      select: { id: true, name: true, processedAt: true },
+      select: { id: true, name: true, fileName: true, cloud_storage_path: true, processedAt: true },
     });
 
     if (documents.length === 0) {
@@ -70,13 +76,43 @@ export async function POST(
 
     for (const doc of documents) {
       try {
+        // Get document metadata before resetting
+        let totalPages = 1;
+        let processorType: 'vision-ai' | 'claude-haiku-ocr' | 'basic-ocr' = 'vision-ai';
+
+        if (doc.cloud_storage_path) {
+          try {
+            const buffer = await downloadFile(doc.cloud_storage_path);
+            const fileExtension = doc.fileName.split('.').pop()?.toLowerCase() || 'pdf';
+            const metadata = await getDocumentMetadata(buffer, doc.fileName, fileExtension);
+            totalPages = metadata.totalPages;
+            processorType = metadata.processorType;
+            logger.info('RESCAN', 'Document metadata retrieved', { documentId: doc.id, totalPages, processorType });
+          } catch (metadataError) {
+            logger.warn('RESCAN', `Failed to get metadata for ${doc.id}, using defaults`, {
+              error: metadataError instanceof Error ? metadataError.message : String(metadataError),
+            });
+          }
+        }
+
+        // Reset document and trigger processing
         await prisma.$transaction([
           prisma.documentChunk.deleteMany({ where: { documentId: doc.id } }),
+          prisma.processingQueue.deleteMany({ where: { documentId: doc.id } }),
           prisma.document.update({
             where: { id: doc.id },
-            data: { processed: false, pagesProcessed: 0, queueStatus: 'queued' },
+            data: { processed: false, pagesProcessed: 0, queueStatus: 'queued', processorType },
           }),
         ]);
+
+        // Trigger via Trigger.dev
+        const handle = await tasks.trigger<typeof processDocumentTask>('process-document', {
+          documentId: doc.id,
+          totalPages,
+          processorType,
+        });
+        logger.info('RESCAN', 'Trigger.dev task triggered', { documentId: doc.id, runId: handle.id });
+
         queued++;
       } catch (err) {
         skipped++;
@@ -85,26 +121,6 @@ export async function POST(
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }
-
-    // 6. Trigger async processing via waitUntil if available
-    try {
-      const { waitUntil } = await import('@vercel/functions');
-      const { processDocument } = await import('@/lib/document-processor');
-
-      for (const doc of documents) {
-        waitUntil(
-          processDocument(doc.id).catch((err: Error) => {
-            logger.error('RESCAN', `Async processing failed for ${doc.id}`, err);
-          })
-        );
-      }
-    } catch {
-      // waitUntil not available (local dev) — documents are queued for pickup
-      logger.info('RESCAN', 'Documents queued but async processing unavailable (local dev)', {
-        projectId: project.id,
-        queued,
-      });
     }
 
     logger.info('RESCAN', 'Project rescan initiated', {

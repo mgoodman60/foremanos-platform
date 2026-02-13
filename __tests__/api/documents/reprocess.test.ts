@@ -20,17 +20,24 @@ const mockPrisma = vi.hoisted(() => ({
     deleteMany: vi.fn(),
   },
 }));
-const mockProcessDocument = vi.hoisted(() => vi.fn());
-const mockWaitUntil = vi.hoisted(() => vi.fn());
+const mockTasksTrigger = vi.hoisted(() => vi.fn().mockResolvedValue({ id: 'test-run-id' }));
+const mockDownloadFile = vi.hoisted(() => vi.fn());
+const mockGetDocumentMetadata = vi.hoisted(() => vi.fn());
 
 vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
 vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('@/lib/document-processor', () => ({
-  processDocument: mockProcessDocument,
+vi.mock('@trigger.dev/sdk/v3', () => ({
+  tasks: { trigger: mockTasksTrigger },
+  task: vi.fn(),
+  logger: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  configure: vi.fn(),
 }));
-vi.mock('@vercel/functions', () => ({
-  waitUntil: mockWaitUntil,
+vi.mock('@/lib/s3', () => ({
+  downloadFile: mockDownloadFile,
+}));
+vi.mock('@/lib/document-processor', () => ({
+  getDocumentMetadata: mockGetDocumentMetadata,
 }));
 vi.mock('@/lib/logger', () => ({
   logger: {
@@ -94,7 +101,10 @@ function createMockDocument(overrides = {}) {
 describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockWaitUntil.mockImplementation(() => {});
+    const mockBuffer = Buffer.from('fake-pdf-content');
+    mockDownloadFile.mockResolvedValue(mockBuffer);
+    mockGetDocumentMetadata.mockResolvedValue({ totalPages: 10, processorType: 'vision-ai' });
+    mockTasksTrigger.mockResolvedValue({ id: 'test-run-id' });
   });
 
   it('should return 401 when not authenticated', async () => {
@@ -168,7 +178,6 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 5 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 1 });
     mockPrisma.document.update.mockResolvedValue({});
-    mockProcessDocument.mockResolvedValue(undefined);
 
     const response = await POST(createRequest(), {
       params: { slug: 'test-project', id: 'doc-1' },
@@ -192,7 +201,6 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.document.update.mockResolvedValue({});
-    mockProcessDocument.mockResolvedValue(undefined);
 
     const response = await POST(createRequest(), {
       params: { slug: 'test-project', id: 'doc-1' },
@@ -203,8 +211,8 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     expect(data.success).toBe(true);
   });
 
-  // C2: Async processing via waitUntil
-  it('should use waitUntil for async processing instead of await', async () => {
+  // Trigger.dev async processing (replaces waitUntil)
+  it('should use Trigger.dev tasks.trigger for async processing', async () => {
     mockGetServerSession.mockResolvedValue(adminSession);
     mockPrisma.project.findUnique.mockResolvedValue(createMockProject());
     mockPrisma.document.findUnique.mockResolvedValue(
@@ -214,7 +222,6 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.document.update.mockResolvedValue({});
-    mockProcessDocument.mockResolvedValue(undefined);
 
     const response = await POST(createRequest(), {
       params: { slug: 'test-project', id: 'doc-1' },
@@ -222,11 +229,15 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
 
     expect(response.status).toBe(200);
 
-    // Verify waitUntil was called (async processing)
-    expect(mockWaitUntil).toHaveBeenCalledTimes(1);
+    // Verify Trigger.dev was called (async processing)
+    expect(mockTasksTrigger).toHaveBeenCalledWith('process-document', {
+      documentId: 'doc-1',
+      totalPages: 10,
+      processorType: 'vision-ai',
+    });
   });
 
-  // C2: Old ProcessingQueue entries are cleaned up before reprocessing
+  // Old ProcessingQueue entries are cleaned up before reprocessing
   it('should delete old ProcessingQueue entries before reprocessing', async () => {
     mockGetServerSession.mockResolvedValue(adminSession);
     mockPrisma.project.findUnique.mockResolvedValue(createMockProject());
@@ -237,7 +248,6 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 3 });
     mockPrisma.processingQueue.deleteMany.mockResolvedValue({ count: 1 });
     mockPrisma.document.update.mockResolvedValue({});
-    mockProcessDocument.mockResolvedValue(undefined);
 
     await POST(createRequest(), {
       params: { slug: 'test-project', id: 'doc-1' },

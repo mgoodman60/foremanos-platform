@@ -30,12 +30,6 @@
     },
     "app/api/documents/confirm-upload/route.ts": {
       "maxDuration": 300
-    },
-    "app/api/admin/process-queue/route.ts": {
-      "maxDuration": 300
-    },
-    "app/api/webhooks/qstash/route.ts": {
-      "maxDuration": 300
     }
   },
   "env": {
@@ -45,10 +39,6 @@
     {
       "path": "/api/admin/finalize-reports",
       "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/admin/process-queue",
-      "schedule": "*/1 * * * *"
     },
     {
       "path": "/api/cron/photo-cleanup",

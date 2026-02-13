@@ -5,8 +5,10 @@
 
 import { prisma } from './db';
 import { createScopedLogger } from './logger';
-import { processDocument } from './document-processor';
 import { ProcessingQueueStatus } from '@prisma/client';
+import { tasks } from '@trigger.dev/sdk/v3';
+import type { processDocumentTask } from '@/src/trigger/process-document';
+import { getDocumentMetadata } from './document-processor';
 
 const log = createScopedLogger('ORPHAN_RECOVERY');
 
@@ -137,11 +139,41 @@ export async function recoverOrphanedDocument(documentId: string): Promise<boole
       },
     });
 
-    // Start processing
-    await processDocument(documentId);
+    // Get document metadata to prepare Trigger.dev task
+    const { getFileUrl } = await import('./s3');
+    const fileUrl = await getFileUrl(document.cloud_storage_path!, false);
+    const response = await fetch(fileUrl);
 
-    log.info('Successfully initiated recovery', { documentName: document.name });
-    return true;
+    if (!response.ok) {
+      log.error('Failed to download file from S3', new Error(`HTTP ${response.status}`), { documentId });
+      return false;
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const fileName = document.name;
+    const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
+
+    const { totalPages, processorType } = await getDocumentMetadata(buffer, fileName, fileExtension);
+
+    // Trigger processing via Trigger.dev
+    try {
+      const handle = await tasks.trigger<typeof processDocumentTask>('process-document', {
+        documentId,
+        totalPages,
+        processorType,
+      });
+
+      log.info('Successfully initiated recovery via Trigger.dev', {
+        documentName: document.name,
+        runId: handle.id,
+        totalPages,
+        processorType
+      });
+      return true;
+    } catch (triggerError) {
+      log.error('Failed to trigger Trigger.dev task', triggerError as Error, { documentId });
+      return false;
+    }
   } catch (error) {
     log.error('Error recovering document', error as Error, { documentId });
     return false;

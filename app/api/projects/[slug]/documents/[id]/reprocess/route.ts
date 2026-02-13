@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { processDocument } from '@/lib/document-processor';
-import { waitUntil } from '@vercel/functions';
+import { downloadFile } from '@/lib/s3';
+import { getDocumentMetadata } from '@/lib/document-processor';
 import { logger } from '@/lib/logger';
+import { tasks } from '@trigger.dev/sdk/v3';
+import type { processDocumentTask } from '@/src/trigger/process-document';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * API endpoint to reprocess a document
@@ -84,6 +88,14 @@ export async function POST(
       where: { documentId: id },
     });
 
+    // Download file to get metadata
+    logger.info('REPROCESS', 'Downloading file for metadata extraction', { documentId: id });
+    const buffer = await downloadFile(document.cloud_storage_path!);
+    const fileExtension = document.fileName.split('.').pop()?.toLowerCase() || 'pdf';
+
+    const { totalPages, processorType } = await getDocumentMetadata(buffer, document.fileName, fileExtension);
+    logger.info('REPROCESS', 'Document metadata retrieved', { totalPages, processorType });
+
     // Reset document processing status
     await prisma.document.update({
       where: { id },
@@ -91,26 +103,30 @@ export async function POST(
         processed: false,
         pagesProcessed: 0,
         queueStatus: 'queued',
+        processorType,
       },
     });
 
-    // Trigger reprocessing asynchronously to avoid Vercel timeout for large docs
-    waitUntil(
-      processDocument(id)
-        .then(() => {
-          logger.info('REPROCESS', `Document ${id} reprocessing completed`);
-        })
-        .catch(async (error) => {
-          logger.error('REPROCESS', `Document ${id} reprocessing failed`, error);
-          await prisma.document.update({
-            where: { id },
-            data: {
-              queueStatus: 'failed',
-              lastProcessingError: error?.message || 'Reprocessing failed',
-            },
-          }).catch(() => {});
-        })
-    );
+    // Trigger reprocessing via Trigger.dev
+    logger.info('REPROCESS', 'Triggering Trigger.dev task', { documentId: id, totalPages, processorType });
+    try {
+      const handle = await tasks.trigger<typeof processDocumentTask>('process-document', {
+        documentId: id,
+        totalPages,
+        processorType,
+      });
+      logger.info('REPROCESS', 'Trigger.dev task triggered', { documentId: id, runId: handle.id });
+    } catch (triggerError) {
+      logger.error('REPROCESS', 'Failed to trigger Trigger.dev task', triggerError);
+      await prisma.document.update({
+        where: { id },
+        data: {
+          queueStatus: 'failed',
+          lastProcessingError: 'Failed to start reprocessing task',
+        },
+      }).catch(() => {});
+      throw triggerError;
+    }
 
     return NextResponse.json({
       success: true,

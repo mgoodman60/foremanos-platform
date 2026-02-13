@@ -9,7 +9,6 @@ import { triggerEnhancementAfterProcessing } from './project-data-enhancer';
 import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getFileUrl } from './s3';
-import { scheduleProcessingContinuation } from './qstash-client';
 
 export type ProcessingStatus = ProcessingQueueStatus;
 
@@ -231,35 +230,6 @@ export async function resumeFailedProcessing(documentId: string): Promise<void> 
 }
 
 /**
- * Run concurrency-limited parallel tasks
- * Executes up to maxConcurrency tasks simultaneously, queueing the rest
- */
-async function runWithConcurrency<T>(
-  tasks: (() => Promise<T>)[],
-  maxConcurrency: number
-): Promise<PromiseSettledResult<T>[]> {
-  const results: PromiseSettledResult<T>[] = new Array(tasks.length);
-  const executing: Set<Promise<void>> = new Set();
-  let index = 0;
-
-  for (const task of tasks) {
-    const i = index++;
-    const p = task().then(
-      (value) => { results[i] = { status: 'fulfilled', value }; },
-      (reason) => { results[i] = { status: 'rejected', reason }; }
-    ).finally(() => executing.delete(p));
-    executing.add(p);
-
-    if (executing.size >= maxConcurrency) {
-      await Promise.race(executing);
-    }
-  }
-
-  await Promise.all(executing);
-  return results;
-}
-
-/**
  * Reset stale batches that have been stuck in 'processing' status
  * This handles cases where a Vercel function timed out or the vision API hung
  */
@@ -295,7 +265,7 @@ async function resetStaleBatches(
  * Consolidated post-processing: intelligence extraction, room extraction, takeoffs
  * Called once after all batches complete for a document
  */
-async function runPostProcessing(documentId: string, totalPagesProcessed: number): Promise<void> {
+export async function runPostProcessing(documentId: string, totalPagesProcessed: number): Promise<void> {
   // Atomic compare-and-swap: claim processing rights and prevent duplicate extraction
   const claimed = await prisma.document.updateMany({
     where: { id: documentId, processed: false },
@@ -379,9 +349,31 @@ async function runPostProcessing(documentId: string, totalPagesProcessed: number
 }
 
 /**
+ * Run all post-processing steps including intelligence extraction, rooms, takeoffs, and project enhancement
+ * This is a wrapper that combines runPostProcessing + triggerEnhancementAfterProcessing
+ */
+export async function runDocumentPostProcessing(documentId: string, totalPagesProcessed: number): Promise<void> {
+  // 1. Run intelligence extraction, room extraction, and takeoffs
+  await runPostProcessing(documentId, totalPagesProcessed);
+
+  // 2. Trigger project-wide data enhancement
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    include: { Project: true },
+  });
+
+  if (document?.Project?.slug) {
+    logger.info('PROCESS_QUEUE', `Triggering project data enhancement for ${document.Project.slug}`);
+    triggerEnhancementAfterProcessing(document.Project.slug, document.name).catch(err => {
+      logger.error('PROCESS_QUEUE', 'Project enhancement failed', err, { documentId });
+    });
+  }
+}
+
+/**
  * Download PDF buffer for a document
  */
-async function downloadDocumentPdf(documentId: string): Promise<Buffer> {
+export async function downloadDocumentPdf(documentId: string): Promise<Buffer> {
   const document = await prisma.document.findUnique({
     where: { id: documentId },
     select: { cloud_storage_path: true, isPublic: true },
@@ -399,7 +391,7 @@ async function downloadDocumentPdf(documentId: string): Promise<Buffer> {
 /**
  * Accumulate provider stats from batch results into a single breakdown array
  */
-function accumulateProviderStats(
+export function accumulateProviderStats(
   batchResults: BatchResult[],
   existingBreakdown: any[] = []
 ): any[] {
@@ -431,375 +423,6 @@ function accumulateProviderStats(
   }
 
   return breakdown;
-}
-
-/**
- * Process all batches for a specific document using concurrent dispatch
- * Downloads the PDF once, then fires batches in parallel up to maxConcurrency
- */
-export async function processQueuedDocument(
-  documentId: string,
-  maxDurationMs: number = 240000,
-  maxConcurrency: number = 1,
-  staleBatchTimeoutMs: number = 5 * 60 * 1000
-): Promise<void> {
-  const startTime = Date.now();
-  logger.info('PROCESS_QUEUE', `Starting concurrent processing for document ${documentId}`, { maxConcurrency, staleBatchTimeoutMs });
-
-  // Task 12 fix: Reset any stale batches stuck in 'processing' from previous timeouts
-  await resetStaleBatches(documentId, staleBatchTimeoutMs);
-
-  // Find the queue entry for this document
-  const entry = await prisma.processingQueue.findFirst({
-    where: { documentId },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  if (!entry) {
-    logger.error('PROCESS_QUEUE', `No queue entry found for document ${documentId}`);
-    return;
-  }
-
-  // Check if already completed or failed
-  if (entry.status === ProcessingQueueStatus.completed || entry.status === ProcessingQueueStatus.failed) {
-    logger.info('PROCESS_QUEUE', `Document ${documentId} already in terminal state: ${entry.status}`);
-    return;
-  }
-
-  // Check if all batches are already done
-  if (entry.currentBatch >= entry.totalBatches) {
-    logger.info('PROCESS_QUEUE', `All batches already processed for ${documentId}`);
-    return;
-  }
-
-  // Atomic claim: set to processing to prevent concurrent processQueuedDocument calls
-  const claimed = await prisma.processingQueue.updateMany({
-    where: { id: entry.id, status: { not: ProcessingQueueStatus.processing } },
-    data: { status: ProcessingQueueStatus.processing, updatedAt: new Date() },
-  });
-  if (claimed.count === 0) {
-    logger.info('PROCESS_QUEUE', `Document ${documentId} already being processed by another worker`);
-    return;
-  }
-
-  // Mark document as processing
-  await prisma.document.update({
-    where: { id: documentId },
-    data: { queueStatus: 'processing' },
-  });
-
-  const metadata = entry.metadata as any;
-  const batchSize = metadata?.batchSize || 1;
-  const processorType = metadata?.processorType || 'vision-ai';
-
-  // Heartbeat: periodically update updatedAt so stale-batch recovery doesn't reset us
-  const heartbeatIntervalMs = 60 * 1000; // Every 60 seconds
-  const heartbeatTimer = setInterval(async () => {
-    try {
-      await prisma.processingQueue.update({
-        where: { id: entry.id },
-        data: { updatedAt: new Date() },
-      });
-      logger.info('PROCESS_QUEUE', `Heartbeat for ${documentId}`, { elapsed: Math.round((Date.now() - startTime) / 1000) });
-    } catch (heartbeatError) {
-      // Non-fatal: heartbeat failure shouldn't stop processing
-      logger.warn('PROCESS_QUEUE', 'Heartbeat update failed', {
-        documentId,
-        error: (heartbeatError as Error).message,
-        elapsed: Math.round((Date.now() - startTime) / 1000),
-      });
-    }
-  }, heartbeatIntervalMs);
-
-  try {
-    // Download PDF ONCE upfront and share across all batches
-    logger.info('PROCESS_QUEUE', `Downloading PDF for ${documentId}`);
-    const pdfBuffer = await downloadDocumentPdf(documentId);
-    logger.info('PROCESS_QUEUE', `PDF downloaded (${(pdfBuffer.length / 1024 / 1024).toFixed(1)}MB)`, { documentId });
-
-    // Calculate ALL remaining batch ranges upfront
-    const batchRanges: { batchIndex: number; startPage: number; endPage: number }[] = [];
-    for (let batch = entry.currentBatch; batch < entry.totalBatches; batch++) {
-      const startPage = batch * batchSize + 1;
-      const endPage = Math.min(startPage + batchSize - 1, entry.totalPages);
-      batchRanges.push({ batchIndex: batch, startPage, endPage });
-    }
-
-    logger.info('PROCESS_QUEUE', `Dispatching ${batchRanges.length} batches concurrently (max ${maxConcurrency})`, {
-      documentId,
-      batchRanges: batchRanges.map(b => `${b.startPage}-${b.endPage}`),
-    });
-
-    // Create task functions for each batch, with incremental progress updates
-    const batchTasks = batchRanges.map((range) => {
-      return async (): Promise<{ batchIndex: number; result: BatchResult }> => {
-        // Check timeout before starting each batch
-        if (Date.now() - startTime > maxDurationMs) {
-          logger.info('PROCESS_QUEUE', `Timeout checkpoint at ${Math.round((Date.now() - startTime) / 1000)}s — scheduling continuation`, {
-            documentId,
-            pagesProcessed: entry.pagesProcessed,
-            currentBatch: range.batchIndex
-          });
-
-          // Graceful checkpoint — set status for immediate continuation
-          await prisma.$transaction([
-            prisma.processingQueue.update({
-              where: { id: entry.id },
-              data: { status: ProcessingQueueStatus.queued, updatedAt: new Date() }
-            }),
-            prisma.document.update({
-              where: { id: documentId },
-              data: { queueStatus: 'queued' }
-            })
-          ]);
-
-          // QStash: guaranteed delivery with automatic retries (cron is safety net)
-          await scheduleProcessingContinuation(documentId);
-
-          throw new Error(`Approaching timeout after ${Math.round((Date.now() - startTime) / 1000)}s — continuation scheduled`);
-        }
-
-        const result = await processDocumentBatch(
-          documentId,
-          range.startPage,
-          range.endPage,
-          processorType,
-          pdfBuffer
-        );
-
-        // Incremental progress update: write pagesProcessed to DB as each batch completes
-        // This prevents the UI from showing "Scanning 0 pages" during long concurrent runs
-        if (result.success && result.pagesProcessed > 0) {
-          try {
-            await prisma.$executeRawUnsafe(
-              `UPDATE "ProcessingQueue" SET "pagesProcessed" = LEAST("pagesProcessed" + $1, "totalPages"), "currentBatch" = LEAST("currentBatch" + 1, "totalBatches"), "updatedAt" = NOW() WHERE id = $2`,
-              result.pagesProcessed,
-              entry.id
-            );
-            await prisma.$executeRawUnsafe(
-              `UPDATE "Document" SET "pagesProcessed" = LEAST("pagesProcessed" + $1, $2) WHERE id = $3`,
-              result.pagesProcessed,
-              entry.totalPages,
-              documentId
-            );
-            logger.info('PROCESS_QUEUE', `Batch ${range.batchIndex + 1} progress saved`, {
-              documentId,
-              batchPages: result.pagesProcessed,
-              pageRange: `${range.startPage}-${range.endPage}`,
-            });
-          } catch (progressError) {
-            logger.warn('PROCESS_QUEUE', 'Incremental progress update failed', {
-              documentId,
-              batchIndex: range.batchIndex,
-              error: (progressError as Error).message,
-            });
-          }
-        }
-
-        // Update processing cost incrementally
-        if (result.estimatedCost && result.estimatedCost > 0) {
-          try {
-            await prisma.document.update({
-              where: { id: documentId },
-              data: {
-                processingCost: { increment: result.estimatedCost }
-              }
-            });
-          } catch (costError) {
-            logger.warn('PROCESS_QUEUE', 'Failed to update processing cost', { documentId, cost: result.estimatedCost });
-          }
-        }
-
-        return { batchIndex: range.batchIndex, result };
-      };
-    });
-
-    // Run batches with concurrency limit
-    const settledResults = await runWithConcurrency(batchTasks, maxConcurrency);
-
-    // Aggregate results
-    let totalPagesProcessed = entry.pagesProcessed;
-    let highestCompletedBatch = entry.currentBatch;
-    const successfulResults: BatchResult[] = [];
-    const failedBatches: { batchIndex: number; error: string }[] = [];
-
-    for (const settled of settledResults) {
-      if (settled.status === 'fulfilled') {
-        const { batchIndex, result } = settled.value;
-        if (result.success) {
-          totalPagesProcessed += result.pagesProcessed;
-          successfulResults.push(result);
-          if (batchIndex + 1 > highestCompletedBatch) {
-            highestCompletedBatch = batchIndex + 1;
-          }
-        } else {
-          failedBatches.push({
-            batchIndex,
-            error: result.error || 'Unknown batch error',
-          });
-        }
-      } else {
-        // Promise was rejected (timeout or unexpected error)
-        const reason = settled.reason?.message || String(settled.reason);
-        failedBatches.push({
-          batchIndex: -1, // Unknown which batch failed
-          error: reason,
-        });
-      }
-    }
-
-    // Accumulate provider stats from all successful batches
-    const currentProviderBreakdown = metadata?.providerBreakdown || [];
-    const updatedProviderBreakdown = accumulateProviderStats(successfulResults, currentProviderBreakdown);
-
-    const isComplete = failedBatches.length === 0 && highestCompletedBatch >= entry.totalBatches;
-
-    logger.info('PROCESS_QUEUE', `Batch dispatch complete for ${documentId}`, {
-      succeeded: successfulResults.length,
-      failed: failedBatches.length,
-      totalPagesProcessed,
-      isComplete,
-    });
-
-    // Single atomic update with all accumulated results
-    await prisma.processingQueue.update({
-      where: { id: entry.id },
-      data: {
-        pagesProcessed: totalPagesProcessed,
-        currentBatch: highestCompletedBatch,
-        status: isComplete
-          ? ProcessingQueueStatus.completed
-          : failedBatches.length > 0 && successfulResults.length === 0
-            ? ProcessingQueueStatus.failed
-            : ProcessingQueueStatus.queued, // Partial success — queued for retry of failed ranges
-        lastError: failedBatches.length > 0
-          ? `${failedBatches.length} batch(es) failed: ${failedBatches.map(f => f.error).join('; ').slice(0, 500)}`
-          : null,
-        updatedAt: new Date(),
-        metadata: {
-          ...metadata,
-          concurrency: maxConcurrency,
-          processingMode: 'concurrent',
-          lastBatchAt: new Date().toISOString(),
-          providerBreakdown: updatedProviderBreakdown,
-          ...(failedBatches.length > 0 ? {
-            failedBatchRanges: failedBatches
-              .filter(f => f.batchIndex >= 0)
-              .map(f => {
-                const range = batchRanges.find(r => r.batchIndex === f.batchIndex);
-                return range ? { startPage: range.startPage, endPage: range.endPage, error: f.error } : null;
-              })
-              .filter(Boolean),
-          } : {}),
-        },
-      },
-    });
-
-    // Update document with progress
-    await prisma.document.update({
-      where: { id: documentId },
-      data: { pagesProcessed: totalPagesProcessed },
-    });
-
-    // Handle completion
-    if (isComplete) {
-      logger.info('PROCESS_QUEUE', `Document ${documentId} fully processed`, { totalPagesProcessed });
-      await prisma.document.update({
-        where: { id: documentId },
-        data: {
-          queueStatus: 'completed',
-          processedAt: new Date(),
-        },
-      });
-
-      // Run consolidated post-processing
-      try {
-        await runPostProcessing(documentId, totalPagesProcessed);
-      } catch (postError) {
-        logger.error('PROCESS_QUEUE', 'Post-processing failed', postError as Error, { documentId });
-      }
-
-      // Trigger project-wide data enhancement
-      const processedDoc = await prisma.document.findUnique({
-        where: { id: documentId },
-        include: { Project: true },
-      });
-      if (processedDoc?.Project?.slug) {
-        logger.info('PROCESS_QUEUE', `Triggering project data enhancement for ${processedDoc.Project.slug}`);
-        triggerEnhancementAfterProcessing(processedDoc.Project.slug, processedDoc.name).catch(err => {
-          logger.error('PROCESS_QUEUE', 'Project enhancement failed', err, { documentId });
-        });
-      }
-    } else if (failedBatches.length > 0 && successfulResults.length === 0) {
-      // All batches failed
-      logger.error('PROCESS_QUEUE', `Document ${documentId} processing failed — all batches failed`);
-      await prisma.document.update({
-        where: { id: documentId },
-        data: {
-          queueStatus: 'failed',
-          lastProcessingError: `All ${failedBatches.length} batches failed`,
-        },
-      });
-    } else if (failedBatches.length > 0) {
-      // Partial failure — some batches succeeded, some failed
-      logger.warn('PROCESS_QUEUE', `Document ${documentId} partial failure`, {
-        succeeded: successfulResults.length,
-        failed: failedBatches.length,
-        willRetry: true,
-      });
-      // Leave in 'queued' status for cron to retry the failed page ranges
-    } else {
-      // Timed out but no failures — some batches may not have started
-      logger.info('PROCESS_QUEUE', `Document ${documentId} processing paused (timeout), cron will resume`, {
-        pagesProcessed: totalPagesProcessed,
-        totalPages: entry.totalPages,
-      });
-    }
-  } catch (error: any) {
-    logger.error('PROCESS_QUEUE', `Fatal error processing document ${documentId}`, error);
-
-    await prisma.processingQueue.update({
-      where: { id: entry.id },
-      data: {
-        status: ProcessingQueueStatus.failed,
-        lastError: error.message,
-        updatedAt: new Date(),
-      },
-    });
-
-    await prisma.document.update({
-      where: { id: documentId },
-      data: {
-        queueStatus: 'failed',
-        lastProcessingError: error.message,
-      },
-    });
-  } finally {
-    clearInterval(heartbeatTimer);
-
-    // Safety net: if processing ended without completing all batches, schedule QStash continuation
-    try {
-      const finalEntry = await prisma.processingQueue.findUnique({
-        where: { id: entry.id },
-        select: { status: true, currentBatch: true, totalBatches: true }
-      });
-      if (finalEntry && finalEntry.status !== ProcessingQueueStatus.completed && finalEntry.status !== ProcessingQueueStatus.failed &&
-          finalEntry.currentBatch < finalEntry.totalBatches) {
-        // Schedule continuation via QStash (guaranteed delivery)
-        await scheduleProcessingContinuation(documentId);
-        await prisma.document.update({
-          where: { id: documentId },
-          data: { queueStatus: 'queued' }
-        });
-        logger.info('PROCESS_QUEUE', 'Safety-net continuation scheduled via finally block', { documentId });
-      }
-    } catch (e) {
-      // Best-effort — don't throw in finally
-      logger.warn('PROCESS_QUEUE', 'Failed to schedule continuation in finally block', { documentId });
-    }
-
-    logger.info('PROCESS_QUEUE', `Heartbeat stopped for ${documentId}`);
-  }
 }
 
 /**

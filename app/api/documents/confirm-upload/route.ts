@@ -5,10 +5,9 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { downloadFile, deleteFile } from '@/lib/s3';
 import { requireProjectPermission } from '@/lib/project-permissions';
-import { processDocument } from '@/lib/document-processor';
+import { getDocumentMetadata } from '@/lib/document-processor';
 import { calculateFileHash, isDuplicate } from '@/lib/duplicate-detector';
 import { sendDocumentUploadNotification } from '@/lib/email-service';
-import { classifyDocument } from '@/lib/document-classifier';
 import { canProcessDocument, getRemainingPages, shouldResetQuota, getNextResetDate } from '@/lib/processing-limits';
 import { withDatabaseRetry } from '@/lib/retry-util';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';
@@ -18,7 +17,8 @@ import { shouldBlockMacroFile } from '@/lib/macro-detector';
 import { logger } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { DocumentCategory } from '@prisma/client';
-import { waitUntil } from '@vercel/functions';
+import { tasks } from '@trigger.dev/sdk/v3';
+import type { processDocumentTask } from '@/src/trigger/process-document';
 
 const VALID_CATEGORIES: readonly string[] = [
   'budget_cost', 'schedule', 'plans_drawings', 'specifications',
@@ -325,12 +325,13 @@ export async function POST(request: Request) {
       };
     }
 
-    // Classify document to estimate pages
-    const classification = await classifyDocument(fileName, fileExtension);
-    const estimatedPages = Math.ceil(buffer.length / (100 * 1024)); // Rough estimate: 100KB per page
+    // Get page count and classification
+    logger.info('CONFIRM_UPLOAD', 'Getting document metadata', { fileName, fileExtension });
+    const { totalPages, processorType } = await getDocumentMetadata(buffer, fileName, fileExtension);
+    logger.info('CONFIRM_UPLOAD', 'Document metadata retrieved', { totalPages, processorType });
 
     // Check if user can process this document
-    const { allowed, reason } = await canProcessDocument(user.id, estimatedPages);
+    const { allowed, reason } = await canProcessDocument(user.id, totalPages);
 
     if (!allowed) {
       const remainingPages = await getRemainingPages(user.pagesProcessedThisMonth, user.subscriptionTier);
@@ -340,7 +341,7 @@ export async function POST(request: Request) {
           message: reason,
           remainingPages,
           tier: user.subscriptionTier,
-          classification: classification.processorType,
+          classification: processorType,
         },
         { status: 403 }
       );
@@ -363,7 +364,7 @@ export async function POST(request: Request) {
           oneDriveHash: fileHash,
           syncSource: 'manual_upload',
           processed: false,
-          processorType: classification.processorType,
+          processorType: processorType,
           pagesProcessed: 0,
           processingCost: 0,
           queueStatus: 'pending',
@@ -375,34 +376,31 @@ export async function POST(request: Request) {
       'Create document record'
     );
 
-    // 10. Trigger async processing (waitUntil keeps function alive after response)
-    logger.info('CONFIRM_UPLOAD', 'Triggering async document processing', { documentId: document.id });
-    waitUntil(
-      processDocument(document.id, classification)
-        .then(() => {
-          logger.info('CONFIRM_UPLOAD', `Processing completed for document ${document.id}`);
-        })
-        .catch(async (error) => {
-          logger.error('CONFIRM_UPLOAD', `Processing failed for document ${document.id}`, error);
-
-          try {
-            await withDatabaseRetry(
-              () => prisma.document.update({
-                where: { id: document.id },
-                data: {
-                  queueStatus: 'failed',
-                  processed: false,
-                  lastProcessingError: error?.message || String(error),
-                  processingRetries: 0,
-                },
-              }),
-              'Mark document as failed'
-            );
-          } catch (updateError) {
-            logger.error('CONFIRM_UPLOAD', 'Failed to update document status', updateError);
-          }
-        })
-    );
+    // 10. Trigger async processing via Trigger.dev
+    logger.info('CONFIRM_UPLOAD', 'Triggering Trigger.dev task', { documentId: document.id, totalPages, processorType });
+    try {
+      const handle = await tasks.trigger<typeof processDocumentTask>('process-document', {
+        documentId: document.id,
+        totalPages,
+        processorType,
+      });
+      logger.info('CONFIRM_UPLOAD', 'Trigger.dev task triggered', { documentId: document.id, runId: handle.id });
+    } catch (triggerError) {
+      logger.error('CONFIRM_UPLOAD', 'Failed to trigger Trigger.dev task', triggerError);
+      // Mark document as failed
+      await withDatabaseRetry(
+        () => prisma.document.update({
+          where: { id: document.id },
+          data: {
+            queueStatus: 'failed',
+            processed: false,
+            lastProcessingError: 'Failed to start processing task',
+          },
+        }),
+        'Mark document as failed after trigger error'
+      );
+      throw triggerError;
+    }
 
     // 11. Send notifications (async, don't wait)
     sendDocumentUploadNotification(
@@ -431,8 +429,8 @@ export async function POST(request: Request) {
         },
         message: 'Document uploaded successfully. Processing in background...',
         processingInfo: {
-          estimatedPages,
-          processorType: classification.processorType,
+          estimatedPages: totalPages,
+          processorType: processorType,
           remainingPages: updatedRemainingPages,
           tier: user.subscriptionTier,
         },
