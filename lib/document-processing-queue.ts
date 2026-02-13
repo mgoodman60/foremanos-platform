@@ -264,17 +264,28 @@ async function resetStaleBatches(
 /**
  * Consolidated post-processing: intelligence extraction, room extraction, takeoffs
  * Called once after all batches complete for a document
+ *
+ * @param skipProcessedCheck - When true, skip the CAS guard (for Trigger.dev path where processed flag is already set)
  */
-export async function runPostProcessing(documentId: string, totalPagesProcessed: number): Promise<void> {
+export async function runPostProcessing(documentId: string, totalPagesProcessed: number, skipProcessedCheck: boolean = false): Promise<void> {
   // Atomic compare-and-swap: claim processing rights and prevent duplicate extraction
-  const claimed = await prisma.document.updateMany({
-    where: { id: documentId, processed: false },
-    data: { processed: true, pagesProcessed: totalPagesProcessed },
-  });
+  // Skip this check when called from Trigger.dev (which already sets processed=true in its own transaction)
+  if (!skipProcessedCheck) {
+    const claimed = await prisma.document.updateMany({
+      where: { id: documentId, processed: false },
+      data: { processed: true, pagesProcessed: totalPagesProcessed },
+    });
 
-  if (claimed.count === 0) {
-    logger.info('PROCESS_QUEUE', `Already processed, skipping post-processing for ${documentId}`);
-    return;
+    if (claimed.count === 0) {
+      logger.info('PROCESS_QUEUE', `Already processed, skipping post-processing for ${documentId}`);
+      return;
+    }
+  } else {
+    // Trigger.dev path: just update pagesProcessed if needed
+    await prisma.document.update({
+      where: { id: documentId },
+      data: { pagesProcessed: totalPagesProcessed },
+    });
   }
 
   const document = await prisma.document.findUnique({
@@ -351,10 +362,12 @@ export async function runPostProcessing(documentId: string, totalPagesProcessed:
 /**
  * Run all post-processing steps including intelligence extraction, rooms, takeoffs, and project enhancement
  * This is a wrapper that combines runPostProcessing + triggerEnhancementAfterProcessing
+ *
+ * @param skipProcessedCheck - When true, skip the CAS guard (for Trigger.dev path where processed flag is already set)
  */
-export async function runDocumentPostProcessing(documentId: string, totalPagesProcessed: number): Promise<void> {
+export async function runDocumentPostProcessing(documentId: string, totalPagesProcessed: number, skipProcessedCheck: boolean = false): Promise<void> {
   // 1. Run intelligence extraction, room extraction, and takeoffs
-  await runPostProcessing(documentId, totalPagesProcessed);
+  await runPostProcessing(documentId, totalPagesProcessed, skipProcessedCheck);
 
   // 2. Trigger project-wide data enhancement
   const document = await prisma.document.findUnique({

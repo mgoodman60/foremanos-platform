@@ -802,13 +802,13 @@ export async function classifyDrawingsFromDocument(documentId: string): Promise<
         Project: true,
         DocumentChunk: {
           where: {
-            sheetNumber: { not: null as any },
-            titleBlockData: { not: null as any }
+            sheetNumber: { not: null as any }
           },
           select: {
             id: true,
             sheetNumber: true,
-            titleBlockData: true
+            titleBlockData: true,
+            metadata: true
           },
           distinct: ['sheetNumber']
         }
@@ -829,7 +829,8 @@ export async function classifyDrawingsFromDocument(documentId: string): Promise<
     let classifiedCount = 0;
 
     for (const chunk of document.DocumentChunk) {
-      const titleBlockData = chunk.titleBlockData as any;
+      // Use titleBlockData if available, fall back to metadata
+      const titleBlockData = (chunk.titleBlockData || (chunk.metadata as any)?.titleBlock) as any;
       const sheetNumber = chunk.sheetNumber || 'Unknown';
       const sheetTitle = titleBlockData?.sheetTitle || titleBlockData?.title || 'Untitled';
 
