@@ -28,7 +28,7 @@ interface ProcessDocumentPayload {
 
 export const processDocumentTask = task({
   id: "process-document",
-  maxDuration: 3600, // 1 hour max
+  maxDuration: 7200, // 2 hours max — enough for 100+ page documents at ~60s/page (Opus 600s timeout)
   retry: {
     maxAttempts: 2,
     factor: 2,

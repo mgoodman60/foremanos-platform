@@ -163,7 +163,7 @@ async function callClaudeOpusVision(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000); // 90s - reduced from 180s to limit stall time per page
+  const timeout = setTimeout(() => controller.abort(), 600000); // 600s - increased from 90s for dense construction PDFs
 
   try {
     // Detect content type - PDF or image
@@ -201,7 +201,7 @@ async function callClaudeOpusVision(
 
     const requestBody = JSON.stringify({
       model: VISION_MODEL,
-      max_tokens: 6000,
+      max_tokens: 8000,
       temperature: 0.1,
       messages: [
         {
@@ -267,9 +267,15 @@ async function callClaudeOpusVision(
   } catch (error: any) {
     clearTimeout(timeout);
 
-    // Don't retry on timeout — immediately fall through to next provider
+    // Retry Opus on timeout for PDFs (once), otherwise fall through
     if (error.name === 'AbortError') {
-      logger.info('VISION_API', `${config.displayName}: timeout after 90s, switching provider`);
+      const isPdf = isPdfContent(imageBase64);
+      if (isPdf && retryCount < 1) {
+        logger.warn('VISION_API', `${config.displayName}: timeout after 600s, retrying Opus (attempt ${retryCount + 2})`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return callClaudeOpusVision(imageBase64, prompt, retryCount + 1);
+      }
+      logger.info('VISION_API', `${config.displayName}: timeout after 600s`);
       return {
         success: false,
         content: '',
@@ -465,7 +471,7 @@ async function callGPT52Vision(
   try {
     // Add timeout for faster failover in dev environment
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
 
     const requestBody = JSON.stringify({
       model: FALLBACK_MODEL,
@@ -481,7 +487,7 @@ async function callGPT52Vision(
           ],
         },
       ],
-      max_tokens: 5000,
+      max_tokens: 8000,
       temperature: 0.1,
     });
     const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
@@ -523,6 +529,11 @@ async function callGPT52Vision(
 
     const elapsedMs = Date.now() - fetchStart;
     logger.info('VISION_API', `${config.displayName}: Response received`, { elapsedMs, status: response.status, contentLength: content.length });
+
+    logger.warn('VISION_API', 'GPT-5.2 FALLBACK USED — page processed by OpenAI, not Claude Opus', {
+      elapsedMs,
+      contentLength: content.length,
+    });
 
     return {
       success: true,
@@ -645,7 +656,6 @@ export async function analyzeWithLoadBalancing(
   const providerFunctions = [
     callClaudeOpusVision,
     callGPT52Vision,
-    callClaudeSonnetVision,
   ];
 
   // Get primary provider using round-robin (PDFs always use Claude Opus)
@@ -682,7 +692,18 @@ export async function analyzeWithLoadBalancing(
     logger.error('VISION_API', `${primaryConfig.displayName} error`, error);
   }
 
-  // Primary failed - fall back to sequential failover
+  // Primary failed - check if PDF (no fallback for PDFs)
+  if (isPdf) {
+    logger.warn('VISION_API', 'Opus failed for PDF content — no fallback available');
+    return {
+      success: false,
+      content: '',
+      provider: 'claude-opus-4-6',
+      attempts: 2,
+      error: 'Opus failed for PDF content after retries',
+      confidenceScore: 0,
+    };
+  }
   logger.info('VISION_API', 'Primary provider failed, falling back to sequential failover');
   return analyzeWithMultiProvider(imageBase64, prompt, minQualityScore);
 }
@@ -700,14 +721,14 @@ export async function analyzeWithMultiProvider(
 
   const isPdf = isPdfContent(imageBase64);
   const providerFunctions = isPdf
-    ? [callClaudeOpusVision, callClaudeSonnetVision, callGPT52Vision]
-    : [callClaudeOpusVision, callGPT52Vision, callClaudeSonnetVision];
+    ? [callClaudeOpusVision]                              // Opus only for PDFs — no fallback
+    : [callClaudeOpusVision, callGPT52Vision];             // GPT-5.2 fallback for images only, no Sonnet
   const providerConfigs = isPdf
-    ? [PROVIDERS[0], PROVIDERS[2], PROVIDERS[1]]
-    : [...PROVIDERS];
+    ? [PROVIDERS[0]]
+    : [PROVIDERS[0], PROVIDERS[1]];
 
   if (isPdf) {
-    logger.info('VISION_API', 'PDF content — reordered providers: Opus → Sonnet → GPT');
+    logger.info('VISION_API', 'PDF content — Opus only (no fallback)');
   }
 
   let lastError = '';
@@ -735,6 +756,10 @@ export async function analyzeWithMultiProvider(
           contentLength: quality.contentLength,
           hasStructuredData: quality.hasStructuredData,
         });
+
+        if (providerConfigs[i].name === 'gpt-5.2') {
+          logger.warn('VISION_API', 'GPT-5.2 FALLBACK USED in sequential failover', { provider: providerConfigs[i].displayName });
+        }
 
         logger.info('VISION_API', `Using ${providerConfigs[i].displayName} response - Analysis Complete`);
         return result;
@@ -792,7 +817,7 @@ export async function analyzeWithDirectPdf(
   prompt: string,
   startPage?: number,
   endPage?: number,
-  model?: string  // NEW: override model (default: DEFAULT_MODEL)
+  model?: string  // Override model (default: VISION_MODEL / claude-opus-4-6)
 ): Promise<VisionResponse> {
   logger.info('VISION_API', 'Direct PDF Analysis Started', { startPage: startPage || 1, endPage: endPage || 'all' });
 
@@ -804,7 +829,7 @@ export async function analyzeWithDirectPdf(
     return {
       success: false,
       content: '',
-      provider: 'claude-sonnet-4-5',
+      provider: ((model || VISION_MODEL) as VisionProvider),
       attempts: 1,
       error: 'Anthropic API key not configured for direct PDF processing',
     };
@@ -836,10 +861,10 @@ export async function analyzeWithDirectPdf(
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 120000); // 120s - Sonnet is faster but dense PDFs need time
+    const timeout = setTimeout(() => controller.abort(), 120000); // 120s - Opus for construction PDFs — 120s timeout
 
     try {
-      logger.info('DIRECT_PDF', `Attempt ${attempt + 1}/${maxRetries} using ${model || DEFAULT_MODEL}`);
+      logger.info('DIRECT_PDF', `Attempt ${attempt + 1}/${maxRetries} using ${model || VISION_MODEL}`);
 
       // Enhanced page instruction
       let pageInstruction = '';
@@ -848,7 +873,7 @@ export async function analyzeWithDirectPdf(
       }
 
       const requestBody = JSON.stringify({
-        model: model || DEFAULT_MODEL,
+        model: model || VISION_MODEL,
         max_tokens: 8000,
         temperature: 0.1,
         messages: [
@@ -872,7 +897,7 @@ export async function analyzeWithDirectPdf(
         ],
       });
       const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
-      logger.info('DIRECT_PDF', `Sending request`, { payloadSizeMB, model: model || DEFAULT_MODEL, attempt: attempt + 1 });
+      logger.info('DIRECT_PDF', `Sending request`, { payloadSizeMB, model: model || VISION_MODEL, attempt: attempt + 1 });
 
       const fetchStart = Date.now();
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -919,7 +944,7 @@ export async function analyzeWithDirectPdf(
       return {
         success: true,
         content,
-        provider: 'claude-sonnet-4-5',
+        provider: ((model || VISION_MODEL) as VisionProvider),
         attempts: attempt + 1,
         confidenceScore: quality.score,
       };
@@ -933,7 +958,7 @@ export async function analyzeWithDirectPdf(
         return {
           success: false,
           content: '',
-          provider: 'claude-sonnet-4-5',
+          provider: ((model || VISION_MODEL) as VisionProvider),
           attempts: attempt + 1,
           error: 'TIMEOUT',
           confidenceScore: 0,
@@ -966,7 +991,7 @@ export async function analyzeWithDirectPdf(
   return {
     success: false,
     content: '',
-    provider: 'claude-sonnet-4-5',
+    provider: ((model || VISION_MODEL) as VisionProvider),
     attempts: maxRetries,
     error: `Direct PDF processing failed: ${lastError}`,
     confidenceScore: 0,

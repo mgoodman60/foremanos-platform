@@ -5,7 +5,7 @@ export default defineConfig({
   project: "proj_gwelfqscrhdgtzzmqgxk",
   runtime: "node",
   logLevel: "log",
-  maxDuration: 3600, // 1 hour — enough for 50+ page documents at ~60s/page
+  maxDuration: 7200, // 2 hours — enough for 100+ page documents at ~60s/page (Opus 600s timeout)
   retries: {
     enabledInDev: true,
     default: {
