@@ -246,7 +246,7 @@ Snippet: The 2010 ADA Standards set minimum requirements for newly designed and 
 Source: ada.gov
         `.trim();
 
-        mockCallLLM.mockResolvedValue({ content, model: 'claude-sonnet-4-5-20250929' });
+        mockCallLLM.mockResolvedValue({ content, model: 'claude-opus-4-6' });
 
         const result = await performWebSearch('IBC building code requirements');
 
@@ -258,7 +258,7 @@ Source: ada.gov
             expect.objectContaining({ role: 'system' }),
             expect.objectContaining({ role: 'user' }),
           ]),
-          expect.objectContaining({ model: 'claude-sonnet-4-5-20250929', max_tokens: 1500 })
+          expect.objectContaining({ model: 'claude-opus-4-6', max_tokens: 1500 })
         );
       });
 
@@ -270,7 +270,7 @@ Here are some relevant sources:
 - https://www.test.org/regulations
 - https://codes.example.net/ibc
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('building code');
@@ -287,7 +287,7 @@ Title: Result ${i + 1}
 URL: https://example.com/result-${i + 1}
 Snippet: Content for result ${i + 1}
           `).join('\n'),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test query');
@@ -302,7 +302,7 @@ Title: Test Result
 URL: https://www.example.com/page
 Snippet: Test content
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -314,7 +314,7 @@ Snippet: Test content
       it('should handle URLs without www prefix', async () => {
         mockCallLLM.mockResolvedValue({
           content: 'URL: https://codes.iccsafe.org/content',
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -324,7 +324,7 @@ Snippet: Test content
       });
 
       it('should enhance query with construction context', async () => {
-        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
         await performWebSearch('code requirements');
 
@@ -335,7 +335,7 @@ Snippet: Test content
       });
 
       it('should add construction context for foundation queries', async () => {
-        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
         await performWebSearch('footing depth requirements');
 
@@ -346,7 +346,7 @@ Snippet: Test content
       });
 
       it('should not add duplicate construction context', async () => {
-        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
         await performWebSearch('construction building code requirements');
 
@@ -361,7 +361,7 @@ Snippet: Test content
 
     describe('API Configuration', () => {
       it('should send correct request parameters', async () => {
-        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
         await performWebSearch('test query');
 
@@ -371,7 +371,7 @@ Snippet: Test content
             expect.objectContaining({ role: 'user' }),
           ]),
           expect.objectContaining({
-            model: 'claude-sonnet-4-5-20250929',
+            model: 'claude-opus-4-6',
             max_tokens: 1500,
           })
         );
@@ -405,7 +405,7 @@ Snippet: Test content
       });
 
       it('should handle empty content response', async () => {
-        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+        mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
         const result = await performWebSearch('test query');
 
@@ -421,7 +421,7 @@ Title: Test Result
 URL: not-a-valid-url
 Snippet: Test content
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -442,7 +442,7 @@ Snippet: This has a URL
 Title: Invalid Result
 Snippet: This has no URL
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -461,7 +461,7 @@ URL: https://codes.example.com
 Snippet: Comprehensive building code information
 Source: codes.example.com
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -477,7 +477,7 @@ Title: Test
 URL: https://example.com
 Description: This is a description instead of snippet
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -493,7 +493,7 @@ Title: Test Result
 URL: https://example.com
 This is content that should become the snippet because it is long enough and has no http.
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -509,7 +509,7 @@ Some text with URLs embedded:
 https://example.com/page1
 https://example.org/page2
           `.trim(),
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         });
 
         const result = await performWebSearch('test');
@@ -705,7 +705,7 @@ URL: https://www.ada.gov/regs2010/2010ADAstandards
 Snippet: Section 404.2.3 requires minimum 32 inch clear opening width for doors.
 Source: ada.gov
         `.trim(),
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       const searchResults = await performWebSearch(query);
@@ -725,7 +725,7 @@ Source: ada.gov
     });
 
     it('should handle empty query gracefully', async () => {
-      mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+      mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
       const result = await performWebSearch('');
 
@@ -738,7 +738,7 @@ Source: ada.gov
     it('should handle very long queries', async () => {
       const longQuery = 'building code requirements '.repeat(50);
 
-      mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+      mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
       await performWebSearch(longQuery);
 
@@ -746,7 +746,7 @@ Source: ada.gov
     });
 
     it('should handle Unicode and emoji in queries', async () => {
-      mockCallLLM.mockResolvedValue({ content: '', model: 'claude-sonnet-4-5-20250929' });
+      mockCallLLM.mockResolvedValue({ content: '', model: 'claude-opus-4-6' });
 
       await performWebSearch('建築コード 🏗️ requirements');
 
@@ -758,7 +758,7 @@ Source: ada.gov
         content: `
 URL: https://example.com
         `.trim(),
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       const result = await performWebSearch('test');

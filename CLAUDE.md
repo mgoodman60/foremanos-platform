@@ -104,7 +104,7 @@ e2e/                  # Playwright E2E tests (23 spec files)
 | `lib/stripe.ts` | Lazy-loaded Stripe integration + tier enforcement |
 | `lib/design-tokens.ts` | Centralized color palette and spacing |
 | `lib/llm-providers.ts` | Multi-provider LLM abstraction |
-| `lib/model-config.ts` | Centralized LLM model constants (single source of truth) |
+| `lib/model-config.ts` | Centralized LLM model constants (single source of truth); includes `GEMINI_PRIMARY_MODEL` (gemini-3-pro-preview), `GEMINI_SECONDARY_MODEL` (gemini-2.5-pro) for three-pass pipeline |
 | `lib/logger.ts` | Structured logging utility with context and metadata |
 | `lib/query-cache.ts` | Redis-backed query caching for LLM cost reduction |
 | `lib/password-validator.ts` | Password strength validation |
@@ -117,7 +117,7 @@ e2e/                  # Playwright E2E tests (23 spec files)
 | `lib/document-auto-sync.ts` | Document sync orchestration |
 | `lib/feature-sync-services.ts` | Room/door/MEP/scale/schedule sync |
 | `lib/analytics-service.ts` | Project KPIs, schedule/cost variance, metrics dashboard |
-| `lib/vision-api-multi-provider.ts` | Multi-provider vision with fallback (Claude Opus → GPT-5.2 → Sonnet) |
+| `lib/vision-api-multi-provider.ts` | Multi-provider vision with three-pass pipeline (Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Opus interpretation) and fallback chain (GPT-5.2 → smart routing) |
 | `lib/budget-sync-service.ts` | Budget synchronization and AI extraction |
 | `lib/workflow-service.ts` | Workflow orchestration and state transitions |
 | `lib/report-finalization.ts` | Barrel re-export → `lib/report-finalization/` (8 modules: types, validation, pdf-generation, document-library, onedrive-export, rag-indexing, schedule-processing, orchestrator) |
@@ -227,6 +227,7 @@ Key model groups in `prisma/schema.prisma`:
 | OneDrive | No | Upload disabled |
 | Resend | No | Email disabled |
 | Twilio | No | SMS entry disabled |
+| Google Gemini | No | Falls back to Opus single-pass |
 
 ### Daily Report Feature Architecture
 
@@ -244,7 +245,7 @@ Downstream triggers on APPROVED: RAG indexing → budget/schedule sync → OneDr
 
 ### Document Intelligence Pipeline
 
-Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI (Claude Opus 4.6 / GPT-5.2):
+Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI. Batch processing uses a three-pass pipeline: Gemini Pro 3 for extraction, Gemini 2.5 Pro for validation, Claude Opus for interpretation (GPT-5.2 fallback). Falls back to smart routing if both Gemini models fail. Cost per page: ~$0.16 three-pass, $0.11 with GPT-5.2 fallback, $0.05 extraction-only.
 
 ```
 Upload → Vision Extraction (15 categories) → Phase A/B/C Intelligence
@@ -367,7 +368,7 @@ Defined in `lib/rate-limiter.ts`:
 - DAILY_REPORT: 30 submissions/hour (SMS and web)
 
 ### Subscription Tiers
-Six tiers (Free → Enterprise) with query limits and model access configured in Stripe price IDs. Tier enforcement via `getEffectiveModel()` in `lib/stripe.ts` automatically downgrades models based on subscription level. Model constants centralized in `lib/model-config.ts`.
+Six tiers (Free → Enterprise) with query limits configured in Stripe price IDs. Complexity-based model routing only — no tier downgrades. Model constants centralized in `lib/model-config.ts`.
 
 ### Design Tokens
 Use `lib/design-tokens.ts` for colors instead of hardcoded values:
@@ -420,6 +421,7 @@ Optional:
 - `RESEND_API_KEY` - Email service
 - `TWILIO_AUTH_TOKEN` - SMS daily report entry
 - `TWILIO_WEBHOOK_URL` - Twilio webhook endpoint (optional, defaults to `/api/webhooks/twilio`)
+- `GOOGLE_API_KEY` - Google Gemini API key (optional, falls back to Opus single-pass vision)
 
 **Note:** See `S3_SETUP_GUIDE.md` for comprehensive Cloudflare R2 (recommended) or AWS S3 bucket configuration. R2 offers zero egress fees and simpler setup without IAM policies or CORS configuration.
 
@@ -443,8 +445,7 @@ npm run build
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:
 - `resolveModelAlias()` maps deprecated models (gpt-4o, gpt-3.5-turbo, claude-3-5-sonnet) to current ones
-- Tier enforcement via `getEffectiveModel()` in `lib/stripe.ts`
-- Vision provider chain: Claude Opus 4.6 → GPT-5.2 → Claude Sonnet 4.5
+- Vision provider chain: Gemini Pro 3 (extraction) → Gemini 2.5 Pro (validation) → Claude Opus 4.6 (interpretation) → GPT-5.2 (interpretation fallback) → smart routing (full fallback)
 
 ### Known Test Limitations
 - `fillPdfForm` tests skipped (pdf-lib/Vitest compatibility issue)

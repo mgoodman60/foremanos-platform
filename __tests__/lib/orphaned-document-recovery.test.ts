@@ -17,6 +17,7 @@ const mockPrisma = vi.hoisted(() => ({
   processingQueue: {
     findMany: vi.fn(),
     deleteMany: vi.fn(),
+    count: vi.fn(),
   },
 }));
 
@@ -361,6 +362,9 @@ describe('Orphaned Document Recovery - findOrphanedDocuments()', () => {
 describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: retry count is 0 (no previous attempts)
+    mockPrisma.processingQueue.count.mockResolvedValue(0);
+    mockPrisma.document.update.mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -572,6 +576,27 @@ describe('Orphaned Document Recovery - recoverOrphanedDocument()', () => {
 
     await recoverOrphanedDocument('doc-1');
 
+    expect(mockScopedLogger.info).toHaveBeenCalled();
+  });
+
+  it('should return false if document has exceeded max retries (3+)', async () => {
+    mockPrisma.document.findUnique.mockResolvedValue({
+      id: 'doc-1',
+      name: 'Retried Doc.pdf',
+      cloud_storage_path: 'uploads/test.pdf',
+      processed: false,
+    });
+    mockPrisma.processingQueue.count.mockResolvedValue(3);
+
+    const result = await recoverOrphanedDocument('doc-1');
+
+    expect(result).toBe(false);
+    expect(mockTasksTrigger).not.toHaveBeenCalled();
+    // Should mark document as failed
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: 'doc-1' },
+      data: { queueStatus: 'failed' },
+    });
     expect(mockScopedLogger.info).toHaveBeenCalled();
   });
 

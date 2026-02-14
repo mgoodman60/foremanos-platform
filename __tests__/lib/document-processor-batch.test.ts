@@ -22,6 +22,8 @@ const mockLogger = vi.hoisted(() => ({
 
 const mockGetFileUrl = vi.hoisted(() => vi.fn());
 const mockAnalyzeWithSmartRouting = vi.hoisted(() => vi.fn());
+const mockCallGeminiVision = vi.hoisted(() => vi.fn());
+const mockCallGeminiPro3Vision = vi.hoisted(() => vi.fn());
 const mockGetProviderDisplayName = vi.hoisted(() => vi.fn());
 const mockPerformQualityCheck = vi.hoisted(() => vi.fn());
 const mockFormatQualityReport = vi.hoisted(() => vi.fn());
@@ -39,6 +41,8 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@/lib/s3', () => ({ getFileUrl: mockGetFileUrl }));
 vi.mock('@/lib/vision-api-multi-provider', () => ({
   analyzeWithSmartRouting: mockAnalyzeWithSmartRouting,
+  callGeminiVision: mockCallGeminiVision,
+  callGeminiPro3Vision: mockCallGeminiPro3Vision,
   getProviderDisplayName: mockGetProviderDisplayName,
 }));
 vi.mock('@/lib/vision-api-quality', () => ({
@@ -95,6 +99,9 @@ describe('document-processor-batch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // Set required env vars for two-tier pipeline
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
+
     // Default mock implementations
     mockPrisma.document.findUnique.mockResolvedValue(mockDocument);
     mockPrisma.documentChunk.deleteMany.mockResolvedValue({ count: 0 });
@@ -107,6 +114,23 @@ describe('document-processor-batch', () => {
     mockWriteFile.mockResolvedValue(undefined);
     mockUnlink.mockResolvedValue(undefined);
     mockExtractPageAsPdf.mockResolvedValue({ base64: 'mock-base64-page' });
+
+    // Default: Both Gemini models fail so three-pass pipeline falls back to analyzeWithSmartRouting
+    // This preserves existing test behavior that expects analyzeWithSmartRouting calls
+    mockCallGeminiPro3Vision.mockResolvedValue({
+      success: false,
+      content: '',
+      provider: 'gemini-3-pro-preview',
+      attempts: 1,
+      error: 'Google API key not configured',
+    });
+    mockCallGeminiVision.mockResolvedValue({
+      success: false,
+      content: '',
+      provider: 'gemini-2.5-pro',
+      attempts: 1,
+      error: 'Google API key not configured',
+    });
 
     // Mock fetch for PDF download
     global.fetch = vi.fn().mockResolvedValue({
@@ -532,6 +556,300 @@ describe('document-processor-batch', () => {
         'vision-ai',
         5, // effectivePageForVision should be original page number
         50
+      );
+    });
+  });
+
+  describe('Three-Pass Pipeline', () => {
+    it('should use three-pass pipeline when Gemini Pro 3, Gemini 2.5, and Opus all succeed', async () => {
+      const extractedData = { sheetNumber: 'A-101', sheetTitle: 'Floor Plan' };
+      const validatedData = { ...extractedData, discipline: 'Architectural' };
+      const enrichedData = {
+        ...validatedData,
+        _overallConfidence: 0.92,
+        _corrections: ['Standardized dimension format'],
+        _enrichments: ['Added discipline from sheet number'],
+        _validationIssues: [],
+      };
+
+      // Pass 1: Gemini Pro 3 succeeds
+      mockCallGeminiPro3Vision.mockResolvedValue({
+        success: true,
+        content: JSON.stringify(extractedData),
+        provider: 'gemini-3-pro-preview',
+        attempts: 1,
+        confidenceScore: 0.85,
+      });
+
+      // Pass 2: Gemini 2.5 Pro validation succeeds
+      mockCallGeminiVision.mockResolvedValue({
+        success: true,
+        content: JSON.stringify(validatedData),
+        provider: 'gemini-2.5-pro',
+        attempts: 1,
+      });
+
+      mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+      // Pass 3: Opus interpretation succeeds
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            content: [{ text: JSON.stringify(enrichedData) }],
+          }),
+        });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(result.pagesProcessed).toBe(1);
+      // Should NOT call analyzeWithSmartRouting when three-pass succeeds
+      expect(mockAnalyzeWithSmartRouting).not.toHaveBeenCalled();
+      // Should store three-pass metadata
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'three-pass',
+              interpretationProvider: 'claude-opus-4-6',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should fall back to extraction-only when Gemini Pro 3 succeeds but Opus fails', async () => {
+      // Pass 1: Gemini Pro 3 succeeds
+      mockCallGeminiPro3Vision.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'gemini-3-pro-preview',
+        attempts: 1,
+      });
+
+      // Pass 2: Gemini 2.5 Pro validation fails
+      mockCallGeminiVision.mockResolvedValue({
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        attempts: 1,
+        error: 'timeout',
+      });
+
+      mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+      // Pass 3: Opus fails, GPT-5.2 also fails
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Internal Server Error',
+        });
+
+      // GPT-5.2 fallback also needs to be mocked (no OPENAI_API_KEY or fails)
+      delete process.env.OPENAI_API_KEY;
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: expect.stringContaining('extraction-only'),
+            }),
+          }),
+        })
+      );
+
+      // Restore key
+      process.env.OPENAI_API_KEY = 'sk-test-key';
+    });
+
+    it('should fall back to smart routing when both Gemini models fail', async () => {
+      // Pass 1: Gemini Pro 3 fails
+      mockCallGeminiPro3Vision.mockResolvedValue({
+        success: false,
+        content: '',
+        provider: 'gemini-3-pro-preview',
+        attempts: 3,
+        error: 'TIMEOUT',
+      });
+
+      // Fallback Gemini 2.5 also fails
+      mockCallGeminiVision.mockResolvedValue({
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        attempts: 3,
+        error: 'TIMEOUT',
+      });
+
+      mockAnalyzeWithSmartRouting.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'claude-opus-4-6',
+        confidenceScore: 0.9,
+        attempts: 1,
+      });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(mockAnalyzeWithSmartRouting).toHaveBeenCalled();
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'fallback-single-pass',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should use three-pass cost model for Gemini pages', async () => {
+      const extractedData = { sheetNumber: 'A-101' };
+      const enrichedData = { ...extractedData, _overallConfidence: 0.9 };
+
+      // Pass 1: Gemini Pro 3 ($0.03)
+      mockCallGeminiPro3Vision.mockResolvedValue({
+        success: true,
+        content: JSON.stringify(extractedData),
+        provider: 'gemini-3-pro-preview',
+        attempts: 1,
+      });
+
+      // Pass 2: Gemini 2.5 Pro validation (separate cost tracked elsewhere)
+      mockCallGeminiVision.mockResolvedValue({
+        success: true,
+        content: JSON.stringify(extractedData),
+        provider: 'gemini-2.5-pro',
+        attempts: 1,
+      });
+
+      mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+      // Pass 3: Opus interpretation ($0.08)
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            content: [{ text: JSON.stringify(enrichedData) }],
+          }),
+        });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      // Gemini Pro 3 ($0.03) + Opus interpretation ($0.08) = $0.11
+      expect(result.estimatedCost).toBe(0.11);
+    });
+
+    it('should handle Gemini Pro 3 returning unparseable JSON by falling back', async () => {
+      // Pass 1: Gemini Pro 3 returns bad JSON
+      mockCallGeminiPro3Vision.mockResolvedValue({
+        success: true,
+        content: 'Here is some text that is not JSON at all',
+        provider: 'gemini-3-pro-preview',
+        attempts: 1,
+      });
+
+      // Gemini 2.5 fallback also fails to parse
+      mockCallGeminiVision.mockResolvedValue({
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        attempts: 1,
+        error: 'failed',
+      });
+
+      mockAnalyzeWithSmartRouting.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'claude-opus-4-6',
+        confidenceScore: 0.9,
+        attempts: 1,
+      });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      // Should fall back to smart routing
+      expect(mockAnalyzeWithSmartRouting).toHaveBeenCalled();
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'fallback-single-pass',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should strip markdown and prefix garbage from Gemini Pro 3 JSON', async () => {
+      const rawData = { sheetNumber: 'A-101', discipline: 'Architectural' };
+      const enrichedData = { ...rawData, _overallConfidence: 0.85 };
+
+      // Pass 1: Gemini Pro 3 returns JSON wrapped in markdown
+      mockCallGeminiPro3Vision.mockResolvedValue({
+        success: true,
+        content: `Here is the extraction:\n\`\`\`json\n${JSON.stringify(rawData)}\n\`\`\``,
+        provider: 'gemini-3-pro-preview',
+        attempts: 1,
+      });
+
+      // Pass 2: Gemini 2.5 Pro validation succeeds
+      mockCallGeminiVision.mockResolvedValue({
+        success: true,
+        content: JSON.stringify(rawData),
+        provider: 'gemini-2.5-pro',
+        attempts: 1,
+      });
+
+      mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+      // Pass 3: Opus interpretation
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            content: [{ text: JSON.stringify(enrichedData) }],
+          }),
+        });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'three-pass',
+            }),
+          }),
+        })
       );
     });
   });

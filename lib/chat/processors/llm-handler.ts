@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { streamLLM, type LLMMessage } from '@/lib/llm-providers';
 import { logger } from '@/lib/logger';
 import { VISION_MODEL } from '@/lib/model-config';
-import { getEffectiveModel, type SubscriptionTier } from '@/lib/stripe';
+
 import type { LLMHandlerOptions, LLMResponse, BuiltContext } from '@/types/chat';
 
 /**
@@ -76,12 +76,8 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
   // Images always use vision model (Claude Opus 4.6)
   const selectedModel = image ? VISION_MODEL : complexityAnalysis.model;
 
-  // Enforce tier-based model access
-  const tier = (options.subscriptionTier || 'free') as SubscriptionTier;
-  const effectiveModel = getEffectiveModel(tier, selectedModel, complexityAnalysis.complexity as 'simple' | 'medium' | 'complex');
-  if (effectiveModel !== selectedModel) {
-    logger.info('CHAT_API', `Model downgraded for ${tier} tier`, { requested: selectedModel, effective: effectiveModel });
-  }
+  // Complexity-based routing only — no tier downgrades
+  const effectiveModel = selectedModel;
 
   logger.info('LLM_HANDLER', 'Model selected', { model: effectiveModel, reason: complexityAnalysis.reason });
 

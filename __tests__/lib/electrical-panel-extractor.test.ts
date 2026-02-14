@@ -240,12 +240,12 @@ describe('extractElectricalPanels', () => {
     expect(aiCall.messages[0].content).toContain('\n\n');
   });
 
-  it('should use claude-sonnet-4-5-20250929 model with low temperature', async () => {
+  it('should use claude-opus-4-6 model with low temperature', async () => {
     const { extractElectricalPanels } = await import('@/lib/electrical-panel-extractor');
     await extractElectricalPanels('project-1');
 
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith({
-      model: 'claude-sonnet-4-5-20250929',
+      model: 'claude-opus-4-6',
       messages: expect.any(Array),
       temperature: 0.1,
     });

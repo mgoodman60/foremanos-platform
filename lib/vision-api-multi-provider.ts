@@ -18,10 +18,10 @@
 import fs from 'fs';
 import path from 'path';
 import { logger } from '@/lib/logger';
-import { VISION_MODEL, FALLBACK_MODEL, DEFAULT_MODEL } from '@/lib/model-config';
+import { VISION_MODEL, FALLBACK_MODEL, DEFAULT_MODEL, GEMINI_PRIMARY_MODEL, GEMINI_SECONDARY_MODEL } from '@/lib/model-config';
 
-// Provider types (Claude Opus primary, OpenAI + Claude fallbacks)
-export type VisionProvider = 'claude-opus-4-6' | 'gpt-5.2' | 'claude-sonnet-4-5';
+// Provider types (Claude Opus primary, OpenAI + Claude fallbacks, Gemini for two-tier extraction)
+export type VisionProvider = 'gemini-3-pro-preview' | 'gemini-2.5-pro' | 'claude-opus-4-6' | 'gpt-5.2' | 'claude-sonnet-4-5';
 
 interface ProviderConfig {
   name: VisionProvider;
@@ -70,17 +70,18 @@ const PROVIDERS: ProviderConfig[] = [
 ];
 
 // Load API secrets - checks environment variables first, then falls back to secrets file
-// Note: Gemini removed (Jan 2026) - OpenAI + Anthropic provide complete coverage
 function getApiSecrets() {
   // Priority 1: Environment variables (works in production)
   const envAnthropicKey = process.env.ANTHROPIC_API_KEY;
   const envOpenaiKey = process.env.OPENAI_API_KEY;
+  const envGoogleKey = process.env.GOOGLE_API_KEY;
 
-  if (envAnthropicKey || envOpenaiKey) {
+  if (envAnthropicKey || envOpenaiKey || envGoogleKey) {
     logger.info('API_SECRETS', 'Using environment variables');
     return {
       anthropic: envAnthropicKey || null,
       openai: envOpenaiKey || null,
+      google: envGoogleKey || null,
     };
   }
 
@@ -89,7 +90,7 @@ function getApiSecrets() {
     const secretsPath = '/home/ubuntu/.config/abacusai_auth_secrets.json';
     if (!fs.existsSync(secretsPath)) {
       logger.warn('API_SECRETS', 'No env vars and secrets file not found');
-      return {};
+      return { anthropic: null, openai: null, google: null };
     }
     logger.info('API_SECRETS', 'Using secrets file');
     const secretsData = JSON.parse(fs.readFileSync(secretsPath, 'utf-8'));
@@ -106,10 +107,11 @@ function getApiSecrets() {
     return {
       anthropic: anthropicActual,
       openai: openaiKey,
+      google: null,
     };
   } catch (error) {
     logger.error('API_SECRETS', 'Error loading API secrets', error);
-    return {};
+    return { anthropic: null, openai: null, google: null };
   }
 }
 
@@ -137,7 +139,7 @@ function isCloudflareBlock(response: any, text?: string): boolean {
 }
 
 // Detect if content is a PDF (base64 encoded)
-function isPdfContent(base64: string): boolean {
+export function isPdfContent(base64: string): boolean {
   // PDF magic number in base64: "JVBERi" which is %PDF-
   return base64.startsWith('JVBERi') || base64.substring(0, 20).includes('JVBERi');
 }
@@ -589,6 +591,292 @@ async function callGPT52Vision(
   }
 }
 
+// Call Gemini 3 Pro Preview (Google — primary extraction for three-pass pipeline)
+export async function callGeminiPro3Vision(
+  imageBase64: string,
+  prompt: string,
+  retryCount: number = 0
+): Promise<VisionResponse> {
+  const { GoogleGenAI, ThinkingLevel } = await import('@google/genai');
+  const apiKey = process.env.GOOGLE_API_KEY;
+
+  if (!apiKey) {
+    return {
+      success: false,
+      content: '',
+      provider: 'gemini-3-pro-preview',
+      attempts: retryCount + 1,
+      error: 'Google API key not configured',
+    };
+  }
+
+  const isPdf = isPdfContent(imageBase64);
+  const timeoutMs = isPdf ? 300000 : 90000; // 300s for PDFs, 90s for images
+  const maxRetries = 3;
+  const baseDelay = 1000;
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+
+    const mimeType = isPdf ? 'application/pdf' : 'image/jpeg';
+    const inlineData = {
+      inlineData: {
+        mimeType,
+        data: imageBase64,
+      },
+    };
+
+    const geminiCall = async () => {
+      const response = await ai.models.generateContent({
+        model: GEMINI_PRIMARY_MODEL,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              inlineData,
+              { text: prompt },
+            ],
+          },
+        ],
+        config: {
+          maxOutputTokens: 8192,
+          temperature: 0.1,
+          thinkingConfig: {
+            thinkingLevel: ThinkingLevel.LOW,
+          },
+        },
+      });
+      return response;
+    };
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Gemini Pro 3 vision timeout')), timeoutMs)
+    );
+
+    logger.info('GEMINI_PRO3_VISION', 'Sending request', {
+      model: GEMINI_PRIMARY_MODEL,
+      contentType: isPdf ? 'PDF' : 'image',
+      attempt: retryCount + 1,
+    });
+
+    const fetchStart = Date.now();
+    const result = await Promise.race([geminiCall(), timeoutPromise]);
+    const content = result.text || '';
+
+    if (!content) {
+      throw new Error('Empty response from Gemini Pro 3');
+    }
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('GEMINI_PRO3_VISION', 'Response received', {
+      elapsedMs,
+      contentLength: content.length,
+    });
+
+    return {
+      success: true,
+      content,
+      provider: 'gemini-3-pro-preview',
+      attempts: retryCount + 1,
+    };
+  } catch (error: any) {
+    const errorMsg = error.message || String(error);
+
+    // Check for timeout
+    if (errorMsg === 'Gemini Pro 3 vision timeout') {
+      logger.warn('GEMINI_PRO3_VISION', `Timeout after ${timeoutMs}ms`, { attempt: retryCount + 1 });
+      return {
+        success: false,
+        content: '',
+        provider: 'gemini-3-pro-preview',
+        attempts: retryCount + 1,
+        error: 'TIMEOUT',
+      };
+    }
+
+    // Check for rate limiting (429 / RESOURCE_EXHAUSTED)
+    const isRateLimited =
+      errorMsg.includes('429') ||
+      errorMsg.includes('RESOURCE_EXHAUSTED') ||
+      errorMsg.includes('quota');
+
+    // Check for safety filter
+    const isSafetyBlock = errorMsg.includes('SAFETY');
+
+    if (isSafetyBlock) {
+      logger.warn('GEMINI_PRO3_VISION', 'Content blocked by safety filter', { attempt: retryCount + 1 });
+      return {
+        success: false,
+        content: '',
+        provider: 'gemini-3-pro-preview',
+        attempts: retryCount + 1,
+        error: 'SAFETY_BLOCK',
+      };
+    }
+
+    // Retry on rate limits and transient errors
+    if (retryCount < maxRetries - 1) {
+      const delay = baseDelay * Math.pow(2, retryCount);
+      const reason = isRateLimited ? 'rate limited' : 'error';
+      logger.info('GEMINI_PRO3_VISION', `Retry ${retryCount + 1}/${maxRetries} (${reason}) after ${delay}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return callGeminiPro3Vision(imageBase64, prompt, retryCount + 1);
+    }
+
+    logger.error('GEMINI_PRO3_VISION', 'All retries exhausted', error);
+    return {
+      success: false,
+      content: '',
+      provider: 'gemini-3-pro-preview',
+      attempts: retryCount + 1,
+      error: errorMsg,
+    };
+  }
+}
+
+// Call Gemini 2.5 Pro (Google — secondary validation for three-pass pipeline)
+export async function callGeminiVision(
+  imageBase64: string,
+  prompt: string,
+  retryCount: number = 0
+): Promise<VisionResponse> {
+  const { GoogleGenAI } = await import('@google/genai');
+  const apiKey = process.env.GOOGLE_API_KEY;
+
+  if (!apiKey) {
+    return {
+      success: false,
+      content: '',
+      provider: 'gemini-2.5-pro',
+      attempts: retryCount + 1,
+      error: 'Google API key not configured',
+    };
+  }
+
+  const isPdf = isPdfContent(imageBase64);
+  const timeoutMs = isPdf ? 300000 : 90000; // 300s for PDFs, 90s for images
+  const maxRetries = 3;
+  const baseDelay = 1000;
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+
+    const mimeType = isPdf ? 'application/pdf' : 'image/jpeg';
+    const inlineData = {
+      inlineData: {
+        mimeType,
+        data: imageBase64,
+      },
+    };
+
+    const geminiCall = async () => {
+      const response = await ai.models.generateContent({
+        model: GEMINI_SECONDARY_MODEL,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              inlineData,
+              { text: prompt },
+            ],
+          },
+        ],
+        config: {
+          maxOutputTokens: 8192,
+          temperature: 0.1,
+          thinkingConfig: {
+            thinkingBudget: 0,
+          },
+        },
+      });
+      return response;
+    };
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Gemini vision timeout')), timeoutMs)
+    );
+
+    logger.info('GEMINI_VISION', 'Sending request', {
+      model: GEMINI_SECONDARY_MODEL,
+      contentType: isPdf ? 'PDF' : 'image',
+      attempt: retryCount + 1,
+    });
+
+    const fetchStart = Date.now();
+    const result = await Promise.race([geminiCall(), timeoutPromise]);
+    const content = result.text || '';
+
+    if (!content) {
+      throw new Error('Empty response from Gemini');
+    }
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('GEMINI_VISION', 'Response received', {
+      elapsedMs,
+      contentLength: content.length,
+    });
+
+    return {
+      success: true,
+      content,
+      provider: 'gemini-2.5-pro',
+      attempts: retryCount + 1,
+    };
+  } catch (error: any) {
+    const errorMsg = error.message || String(error);
+
+    // Check for timeout
+    if (errorMsg === 'Gemini vision timeout') {
+      logger.warn('GEMINI_VISION', `Timeout after ${timeoutMs}ms`, { attempt: retryCount + 1 });
+      return {
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        attempts: retryCount + 1,
+        error: 'TIMEOUT',
+      };
+    }
+
+    // Check for rate limiting (429 / RESOURCE_EXHAUSTED)
+    const isRateLimited =
+      errorMsg.includes('429') ||
+      errorMsg.includes('RESOURCE_EXHAUSTED') ||
+      errorMsg.includes('quota');
+
+    // Check for safety filter
+    const isSafetyBlock = errorMsg.includes('SAFETY');
+
+    if (isSafetyBlock) {
+      logger.warn('GEMINI_VISION', 'Content blocked by safety filter', { attempt: retryCount + 1 });
+      return {
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        attempts: retryCount + 1,
+        error: 'SAFETY_BLOCK',
+      };
+    }
+
+    // Retry on rate limits and transient errors
+    if (retryCount < maxRetries - 1) {
+      const delay = baseDelay * Math.pow(2, retryCount);
+      const reason = isRateLimited ? 'rate limited' : 'error';
+      logger.info('GEMINI_VISION', `Retry ${retryCount + 1}/${maxRetries} (${reason}) after ${delay}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return callGeminiVision(imageBase64, prompt, retryCount + 1);
+    }
+
+    logger.error('GEMINI_VISION', 'All retries exhausted', error);
+    return {
+      success: false,
+      content: '',
+      provider: 'gemini-2.5-pro',
+      attempts: retryCount + 1,
+      error: errorMsg,
+    };
+  }
+}
+
 // Quality validation
 function validateQuality(content: string): QualityMetrics {
   const metrics: QualityMetrics = {
@@ -800,6 +1088,8 @@ export async function analyzeWithMultiProvider(
 
 // Helper function to get provider display name
 export function getProviderDisplayName(provider: VisionProvider): string {
+  if (provider === 'gemini-3-pro-preview') return 'Gemini Pro 3 (Google)';
+  if (provider === 'gemini-2.5-pro') return 'Gemini 2.5 Pro (Google)';
   const config = PROVIDERS.find(p => p.name === provider);
   return config?.displayName || provider;
 }

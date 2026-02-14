@@ -1,13 +1,4 @@
 import Stripe from 'stripe';
-import {
-  DEFAULT_FREE_MODEL,
-  DEFAULT_MODEL,
-  PREMIUM_MODEL,
-  SIMPLE_MODEL,
-  VISION_MODEL,
-  FALLBACK_MODEL,
-  resolveModelAlias,
-} from '@/lib/model-config';
 import { logger } from '@/lib/logger';
 
 // Lazy initialization to avoid build-time API key requirement
@@ -47,39 +38,33 @@ export const STRIPE_PRICE_IDS = {
   enterprise_monthly: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || 'price_enterprise_monthly',
 } as const;
 
-// Subscription tier limits (Updated Feb 2026: Claude-primary)
+// Subscription tier limits (Updated Feb 2026: models removed — no tier downgrades)
 export const SUBSCRIPTION_LIMITS = {
   free: {
     projects: 1,
     queriesPerMonth: 50,
-    models: [DEFAULT_FREE_MODEL],
   },
   starter: {
     projects: 5,
     queriesPerMonth: 500,
-    models: [DEFAULT_FREE_MODEL, DEFAULT_MODEL],
   },
   pro: {
     projects: -1, // unlimited
     queriesPerMonth: 2000,
-    models: [DEFAULT_FREE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL, FALLBACK_MODEL],
   },
   team: {
     projects: -1,
     queriesPerMonth: 10000,
-    models: [DEFAULT_FREE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL, FALLBACK_MODEL],
     teamMembers: 10,
   },
   business: {
     projects: -1,
     queriesPerMonth: 25000,
-    models: [DEFAULT_FREE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL, FALLBACK_MODEL],
     teamMembers: 25,
   },
   enterprise: {
     projects: -1,
     queriesPerMonth: -1, // unlimited
-    models: [DEFAULT_FREE_MODEL, DEFAULT_MODEL, PREMIUM_MODEL, FALLBACK_MODEL],
     teamMembers: -1, // unlimited
   },
 } as const;
@@ -200,55 +185,3 @@ export async function reactivateSubscription(subscriptionId: string) {
   }
 }
 
-/**
- * Check if a model is allowed for the given subscription tier.
- * Resolves legacy aliases before checking.
- */
-export function isModelAllowed(tier: SubscriptionTier, model: string): boolean {
-  const resolved = resolveModelAlias(model);
-  const limits = SUBSCRIPTION_LIMITS[tier];
-  return (limits.models as readonly string[]).includes(resolved);
-}
-
-/**
- * Get the effective model for a user's tier.
- * If the requested model isn't allowed, downgrades to the best allowed alternative.
- *
- * @param tier - User's subscription tier
- * @param requestedModel - Model selected by complexity analyzer
- * @param complexity - Query complexity level
- * @returns The model to actually use for the API call
- */
-export function getEffectiveModel(
-  tier: SubscriptionTier,
-  requestedModel: string,
-  complexity: 'simple' | 'medium' | 'complex'
-): string {
-  const resolved = resolveModelAlias(requestedModel);
-
-  // If the resolved model is allowed, use it
-  if (isModelAllowed(tier, resolved)) {
-    return resolved;
-  }
-
-  // Downgrade logic based on tier
-  const allowedModels = SUBSCRIPTION_LIMITS[tier].models as readonly string[];
-
-  // For complex queries, try premium -> default -> simple
-  if (complexity === 'complex') {
-    if (allowedModels.includes(PREMIUM_MODEL)) return PREMIUM_MODEL;
-    if (allowedModels.includes(DEFAULT_MODEL)) return DEFAULT_MODEL;
-    if (allowedModels.includes(FALLBACK_MODEL)) return FALLBACK_MODEL;
-    return DEFAULT_FREE_MODEL;
-  }
-
-  // For medium queries, try default -> simple
-  if (complexity === 'medium') {
-    if (allowedModels.includes(DEFAULT_MODEL)) return DEFAULT_MODEL;
-    if (allowedModels.includes(FALLBACK_MODEL)) return FALLBACK_MODEL;
-    return DEFAULT_FREE_MODEL;
-  }
-
-  // For simple queries, use the cheapest allowed model
-  return DEFAULT_FREE_MODEL;
-}

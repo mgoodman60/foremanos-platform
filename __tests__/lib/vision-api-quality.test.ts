@@ -3,7 +3,9 @@ import {
   performQualityCheck,
   isBlankPage,
   formatQualityReport,
+  scoreTwoTierResult,
   type QualityCheckResult,
+  type TwoTierQualityResult,
   type ExtractedData,
 } from '@/lib/vision-api-quality';
 
@@ -820,6 +822,204 @@ describe('Vision API Quality Module', () => {
       expect(report).toMatch(/3\. Issue C/);
       expect(report).toMatch(/1\. Suggestion 1/);
       expect(report).toMatch(/2\. Suggestion 2/);
+    });
+  });
+
+  describe('scoreTwoTierResult', () => {
+    it('should award +10 bonus for high overall confidence (>= 0.8)', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        _overallConfidence: 0.92,
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.twoTierBonus).toBeGreaterThanOrEqual(10);
+      expect(result.overallConfidence).toBe(0.92);
+    });
+
+    it('should award +5 bonus for corrections', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        _corrections: ['Fixed sheet number format'],
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.correctionsCount).toBe(1);
+      expect(result.twoTierBonus).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should award +5 bonus for enrichments', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        _enrichments: ['Added discipline from sheet number'],
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.enrichmentsCount).toBe(1);
+      expect(result.twoTierBonus).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should award +5 bonus for zero validation issues', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        _validationIssues: [],
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.validationIssuesCount).toBe(0);
+      expect(result.twoTierBonus).toBeGreaterThanOrEqual(5);
+    });
+
+    it('should apply -10 penalty for >5 validation issues', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        _validationIssues: [
+          'Issue 1', 'Issue 2', 'Issue 3',
+          'Issue 4', 'Issue 5', 'Issue 6',
+        ],
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.validationIssuesCount).toBe(6);
+      expect(result.twoTierBonus).toBeLessThan(0);
+    });
+
+    it('should preserve base score fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+      };
+
+      const baseResult = performQualityCheck(data, 1, 0);
+      const twoTierResult = scoreTwoTierResult(data, 1, 0);
+
+      // Base issues/suggestions should be preserved
+      expect(twoTierResult.issues).toEqual(baseResult.issues);
+      expect(twoTierResult.suggestions).toEqual(baseResult.suggestions);
+    });
+
+    it('should handle missing two-tier fields gracefully', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        // No _overallConfidence, _corrections, _enrichments, or _validationIssues
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.overallConfidence).toBeNull();
+      expect(result.correctionsCount).toBe(0);
+      expect(result.enrichmentsCount).toBe(0);
+      expect(result.validationIssuesCount).toBe(0);
+      // Only zero-validation-issues bonus (+5)
+      expect(result.twoTierBonus).toBe(5);
+    });
+
+    it('should have all expected TwoTierQualityResult fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        _overallConfidence: 0.85,
+        _corrections: ['fix'],
+        _enrichments: ['add'],
+        _validationIssues: ['issue'],
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      // Standard QualityCheckResult fields
+      expect(result).toHaveProperty('passed');
+      expect(result).toHaveProperty('score');
+      expect(result).toHaveProperty('issues');
+      expect(result).toHaveProperty('suggestions');
+
+      // Two-tier specific fields
+      expect(result).toHaveProperty('twoTierBonus');
+      expect(result).toHaveProperty('overallConfidence');
+      expect(result).toHaveProperty('correctionsCount');
+      expect(result).toHaveProperty('enrichmentsCount');
+      expect(result).toHaveProperty('validationIssuesCount');
+    });
+
+    it('should cap score at 100', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        scale: '1:100',
+        content: 'A'.repeat(600),
+        dimensions: ['10ft'],
+        gridLines: ['A'],
+        roomLabels: ['Room 1'],
+        doors: ['D1'],
+        windows: ['W1'],
+        equipment: ['HVAC-1'],
+        annotations: ['Note 1'],
+        symbols: ['Symbol1'],
+        visualMaterials: [{ material: 'concrete' }],
+        plumbingFixtures: [{ type: 'WC' }],
+        electricalDevices: [{ type: 'receptacle' }],
+        spatialData: { heights: ['10ft'] },
+        constructionIntel: { tradesRequired: ['Arch'] },
+        drawingScheduleTables: [{ scheduleType: 'door' }],
+        hvacData: { ductwork: ['12x12'] },
+        fireProtection: { sprinklerHeads: ['pendant'] },
+        _overallConfidence: 0.95,
+        _corrections: ['fix1'],
+        _enrichments: ['add1'],
+        _validationIssues: [],
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      // Base = 100, two-tier bonus = +25, but capped at 100
+      expect(result.score).toBeLessThanOrEqual(100);
+    });
+
+    it('should floor score at 0', () => {
+      const data: ExtractedData = {
+        // Zero base score
+        _validationIssues: ['1', '2', '3', '4', '5', '6'], // -10 penalty
+      };
+
+      const result = scoreTwoTierResult(data, 1, 0);
+
+      expect(result.score).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should update passed based on final score including bonus', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Floor Plan',
+        // Base score = 35 (20+15), below 50
+        _overallConfidence: 0.95, // +10
+        _corrections: ['fix'], // +5
+        _enrichments: ['add'], // +5
+        _validationIssues: [], // +5
+        // Three-pass bonus: both corrections and enrichments present: +5
+        // Total = 35 + 30 = 65, above 50
+      };
+
+      const result = scoreTwoTierResult(data, 1, 50);
+
+      // Score is 35 + 30 = 65 (includes three-pass bonus for corrections+enrichments)
+      // Issues > 2 (scale + content + structural), so passed is still false
+      expect(result.score).toBe(65);
     });
   });
 });

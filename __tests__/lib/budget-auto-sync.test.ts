@@ -136,7 +136,7 @@ describe('Budget Auto-Sync - AI JSON Extraction', () => {
     expect(result).toEqual(budgetJSON);
     expect(mockOpenAICreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
         max_tokens: 4000,
         messages: expect.arrayContaining([
           expect.objectContaining({

@@ -25,6 +25,8 @@ import {
   analyzeWithDirectPdf,
   getProviderDisplayName,
   getProcessingType,
+  callGeminiVision,
+  isPdfContent,
 } from '@/lib/vision-api-multi-provider';
 
 describe('Vision API Multi-Provider', () => {
@@ -48,6 +50,25 @@ describe('Vision API Multi-Provider', () => {
 
     it('should return provider name if not found', () => {
       expect(getProviderDisplayName('unknown' as any)).toBe('unknown');
+    });
+
+    it('should return correct display name for gemini-2.5-pro', () => {
+      expect(getProviderDisplayName('gemini-2.5-pro')).toBe('Gemini 2.5 Pro (Google)');
+    });
+  });
+
+  describe('Gemini exports', () => {
+    it('should accept gemini-2.5-pro as VisionProvider type', () => {
+      const provider: import('@/lib/vision-api-multi-provider').VisionProvider = 'gemini-2.5-pro';
+      expect(provider).toBe('gemini-2.5-pro');
+    });
+
+    it('should export callGeminiVision as a function', () => {
+      expect(typeof callGeminiVision).toBe('function');
+    });
+
+    it('should export isPdfContent as a function', () => {
+      expect(typeof isPdfContent).toBe('function');
     });
   });
 

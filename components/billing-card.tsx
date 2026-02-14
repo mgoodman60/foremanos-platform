@@ -15,7 +15,6 @@ interface BillingCardProps {
     limits: {
       projects: number;
       queriesPerMonth: number;
-      models: string[];
     };
     usage: {
       queries: number;
@@ -172,10 +171,7 @@ export function BillingCard({ subscription }: BillingCardProps) {
                 {subscription.limits.projects === -1 ? 'Unlimited' : subscription.limits.projects}
               </span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">AI Models</span>
-              <span className="font-medium text-gray-300">{subscription.limits.models.length} models</span>
-            </div>
+
           </div>
         </div>
 

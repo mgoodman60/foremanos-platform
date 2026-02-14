@@ -44,8 +44,6 @@ import {
   reactivateSubscription,
   STRIPE_PRICE_IDS,
   SUBSCRIPTION_LIMITS,
-  isModelAllowed,
-  getEffectiveModel,
 } from '@/lib/stripe';
 
 const mockLogger = vi.hoisted(() => ({
@@ -380,14 +378,12 @@ describe('stripe module', () => {
       expect(SUBSCRIPTION_LIMITS.free).toEqual({
         projects: 1,
         queriesPerMonth: 50,
-        models: ['gpt-4o-mini'],
       });
     });
 
     it('should define starter tier limits', () => {
       expect(SUBSCRIPTION_LIMITS.starter.projects).toBe(5);
       expect(SUBSCRIPTION_LIMITS.starter.queriesPerMonth).toBe(500);
-      expect(SUBSCRIPTION_LIMITS.starter.models).toContain('claude-sonnet-4-5-20250929');
     });
 
     it('should define pro tier with unlimited projects', () => {
@@ -411,67 +407,5 @@ describe('stripe module', () => {
       expect(SUBSCRIPTION_LIMITS.enterprise.teamMembers).toBe(-1);
     });
 
-    it('should include claude-opus-4-6 in pro and higher tiers', () => {
-      expect(SUBSCRIPTION_LIMITS.pro.models).toContain('claude-opus-4-6');
-      expect(SUBSCRIPTION_LIMITS.team.models).toContain('claude-opus-4-6');
-      expect(SUBSCRIPTION_LIMITS.business.models).toContain('claude-opus-4-6');
-      expect(SUBSCRIPTION_LIMITS.enterprise.models).toContain('claude-opus-4-6');
-    });
-
-    it('should not include claude-opus-4-6 in free tier', () => {
-      expect(SUBSCRIPTION_LIMITS.free.models).not.toContain('claude-opus-4-6');
-    });
-  });
-
-  describe('isModelAllowed', () => {
-    it('should allow gpt-4o-mini for free tier', () => {
-      expect(isModelAllowed('free', 'gpt-4o-mini')).toBe(true);
-    });
-
-    it('should not allow claude-opus-4-6 for free tier', () => {
-      expect(isModelAllowed('free', 'claude-opus-4-6')).toBe(false);
-    });
-
-    it('should allow claude-sonnet-4-5-20250929 for starter tier', () => {
-      expect(isModelAllowed('starter', 'claude-sonnet-4-5-20250929')).toBe(true);
-    });
-
-    it('should allow claude-opus-4-6 for pro tier', () => {
-      expect(isModelAllowed('pro', 'claude-opus-4-6')).toBe(true);
-    });
-
-    it('should allow gpt-5.2 for enterprise tier', () => {
-      expect(isModelAllowed('enterprise', 'gpt-5.2')).toBe(true);
-    });
-
-    it('should resolve legacy model aliases', () => {
-      expect(isModelAllowed('starter', 'claude-3-5-sonnet-20241022')).toBe(true);
-    });
-  });
-
-  describe('getEffectiveModel', () => {
-    it('should return requested model if allowed', () => {
-      expect(getEffectiveModel('pro', 'claude-opus-4-6', 'complex')).toBe('claude-opus-4-6');
-    });
-
-    it('should downgrade to premium model for complex queries when requested model not allowed', () => {
-      expect(getEffectiveModel('pro', 'some-unavailable-model', 'complex')).toBe('claude-opus-4-6');
-    });
-
-    it('should downgrade to simple model for free tier complex queries', () => {
-      expect(getEffectiveModel('free', 'claude-opus-4-6', 'complex')).toBe('gpt-4o-mini');
-    });
-
-    it('should downgrade to default model for medium queries', () => {
-      expect(getEffectiveModel('starter', 'claude-opus-4-6', 'medium')).toBe('claude-sonnet-4-5-20250929');
-    });
-
-    it('should use simple model for simple queries on free tier', () => {
-      expect(getEffectiveModel('free', 'gpt-4o-mini', 'simple')).toBe('gpt-4o-mini');
-    });
-
-    it('should resolve model aliases before checking', () => {
-      expect(getEffectiveModel('starter', 'claude-3-5-sonnet-20241022', 'medium')).toBe('claude-sonnet-4-5-20250929');
-    });
   });
 });

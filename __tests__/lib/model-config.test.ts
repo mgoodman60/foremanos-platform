@@ -7,9 +7,13 @@ import {
   FALLBACK_MODEL,
   SIMPLE_MODEL,
   EXTRACTION_MODEL,
+  GEMINI_PRIMARY_MODEL,
+  GEMINI_SECONDARY_MODEL,
+  GEMINI_EXTRACTION_MODEL,
   resolveModelAlias,
   isClaudeModel,
   isOpenAIModel,
+  isGeminiModel,
 } from '@/lib/model-config';
 
 describe('Model Config', () => {
@@ -38,8 +42,8 @@ describe('Model Config', () => {
       expect(SIMPLE_MODEL).toBe('gpt-4o-mini');
     });
 
-    it('should define EXTRACTION_MODEL same as DEFAULT_MODEL', () => {
-      expect(EXTRACTION_MODEL).toBe(DEFAULT_MODEL);
+    it('should define EXTRACTION_MODEL same as VISION_MODEL', () => {
+      expect(EXTRACTION_MODEL).toBe(VISION_MODEL);
     });
   });
 
@@ -72,6 +76,32 @@ describe('Model Config', () => {
     it('should return false for non-Claude models', () => {
       expect(isClaudeModel('gpt-4o-mini')).toBe(false);
       expect(isClaudeModel('gpt-5.2')).toBe(false);
+    });
+  });
+
+  describe('Gemini Constants', () => {
+    it('should define GEMINI_PRIMARY_MODEL as gemini-3-pro-preview', () => {
+      expect(GEMINI_PRIMARY_MODEL).toBe('gemini-3-pro-preview');
+    });
+
+    it('should define GEMINI_SECONDARY_MODEL as gemini-2.5-pro', () => {
+      expect(GEMINI_SECONDARY_MODEL).toBe('gemini-2.5-pro');
+    });
+
+    it('should define GEMINI_EXTRACTION_MODEL same as GEMINI_PRIMARY_MODEL', () => {
+      expect(GEMINI_EXTRACTION_MODEL).toBe(GEMINI_PRIMARY_MODEL);
+    });
+  });
+
+  describe('isGeminiModel', () => {
+    it('should return true for Gemini models', () => {
+      expect(isGeminiModel('gemini-3-pro-preview')).toBe(true);
+      expect(isGeminiModel('gemini-2.5-pro')).toBe(true);
+    });
+
+    it('should return false for non-Gemini models', () => {
+      expect(isGeminiModel('claude-opus-4-6')).toBe(false);
+      expect(isGeminiModel('gpt-5.2')).toBe(false);
     });
   });
 

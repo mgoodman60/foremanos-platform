@@ -17,6 +17,11 @@ export interface ExtractedData {
   sheetTitle?: string;
   scale?: string;
   content?: string;
+  _overallConfidence?: number;
+  _corrections?: string[];
+  _enrichments?: string[];
+  _validationIssues?: string[];
+  _confidence?: Record<string, number>;
   [key: string]: any;
 }
 
@@ -174,3 +179,76 @@ export function formatQualityReport(result: QualityCheckResult, pageNumber: numb
   report += `=================================\n`;
   return report;
 }
+
+export interface TwoTierQualityResult extends QualityCheckResult {
+  twoTierBonus: number;
+  overallConfidence: number | null;
+  correctionsCount: number;
+  enrichmentsCount: number;
+  validationIssuesCount: number;
+}
+
+/**
+ * Score a multi-pass extraction result (Gemini extraction + optional validation + Opus/GPT interpretation)
+ * Builds on base performQualityCheck with multi-pass bonuses/penalties
+ */
+export function scoreMultiPassResult(
+  data: ExtractedData,
+  pageNumber: number,
+  minScore: number = 50
+): TwoTierQualityResult {
+  const baseResult = performQualityCheck(data, pageNumber, minScore);
+
+  let twoTierBonus = 0;
+  const overallConfidence = data._overallConfidence ?? null;
+  const correctionsCount = data._corrections?.length ?? 0;
+  const enrichmentsCount = data._enrichments?.length ?? 0;
+  const validationIssuesCount = data._validationIssues?.length ?? 0;
+
+  // Bonus: high overall confidence from interpretation pass
+  if (typeof overallConfidence === 'number' && overallConfidence >= 0.8) {
+    twoTierBonus += 10;
+  }
+
+  // Bonus: corrections were made (interpretation pass added value)
+  if (correctionsCount > 0) {
+    twoTierBonus += 5;
+  }
+
+  // Bonus: enrichments were added
+  if (enrichmentsCount > 0) {
+    twoTierBonus += 5;
+  }
+
+  // Bonus: zero validation issues (clean extraction)
+  if (validationIssuesCount === 0) {
+    twoTierBonus += 5;
+  }
+
+  // Penalty: too many validation issues
+  if (validationIssuesCount > 5) {
+    twoTierBonus -= 10;
+  }
+
+  // Bonus: three-pass data (both corrections and enrichments present from validation pass)
+  if (data._corrections && data._corrections.length > 0 &&
+      data._enrichments && data._enrichments.length > 0) {
+    twoTierBonus += 5;
+  }
+
+  const finalScore = Math.max(0, Math.min(100, baseResult.score + twoTierBonus));
+
+  return {
+    ...baseResult,
+    score: finalScore,
+    passed: finalScore >= minScore && baseResult.issues.length <= 2,
+    twoTierBonus,
+    overallConfidence,
+    correctionsCount,
+    enrichmentsCount,
+    validationIssuesCount,
+  };
+}
+
+/** Backward compatibility alias */
+export const scoreTwoTierResult = scoreMultiPassResult;

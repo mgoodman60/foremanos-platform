@@ -402,7 +402,7 @@ describe('Earthwork Extractor', () => {
           datum: 'NAVD88',
           units: 'feet',
         }),
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       const documentContent = 'Test document content';
@@ -411,7 +411,7 @@ describe('Earthwork Extractor', () => {
       expect(mocks.callLLM).toHaveBeenCalledWith(
         [{ role: 'user', content: expect.stringContaining('Extract elevation data') }],
         expect.objectContaining({
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
           temperature: 0.1,
           response_format: { type: 'json_object' },
         })
@@ -434,7 +434,7 @@ describe('Earthwork Extractor', () => {
           datum: 'NAVD88',
           units: 'feet',
         }),
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       const result = await extractElevationsWithAI('Test', 'survey', 'api-key');
@@ -456,7 +456,7 @@ describe('Earthwork Extractor', () => {
     it('should handle empty AI response', async () => {
       mocks.callLLM.mockResolvedValueOnce({
         content: JSON.stringify({}),
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       const result = await extractElevationsWithAI('Test', 'survey', 'api-key');
@@ -471,7 +471,7 @@ describe('Earthwork Extractor', () => {
 
       mocks.callLLM.mockResolvedValueOnce({
         content: JSON.stringify({}),
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       await extractElevationsWithAI(longContent, 'survey', 'api-key');
@@ -507,7 +507,7 @@ describe('Earthwork Extractor', () => {
     it('should fall back to pattern matching on JSON parse error', async () => {
       mocks.callLLM.mockResolvedValueOnce({
         content: 'invalid json',
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-opus-4-6',
       });
 
       const documentContent = 'N 100 E 200 ELEV 950';

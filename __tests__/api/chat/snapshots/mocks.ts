@@ -151,7 +151,7 @@ vi.mock('@/lib/query-cache', () => ({
   analyzeQueryComplexity: vi.fn().mockReturnValue({
     complexity: 'simple',
     reason: 'mocked',
-    model: 'gpt-4',
+    model: 'gpt-4o-mini',
   }),
 }));
 

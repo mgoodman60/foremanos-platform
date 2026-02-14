@@ -85,7 +85,7 @@ describe('Abacus LLM', () => {
         );
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
+        expect(callBody.model).toBe('claude-opus-4-6');
         expect(callBody.temperature).toBe(0.3);
         expect(callBody.max_tokens).toBe(4000);
       });
@@ -646,7 +646,7 @@ describe('Abacus LLM', () => {
       it('should call API with vision format', async () => {
         const mockResponse = {
           content: [{ text: 'I see a construction site' }],
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
           usage: {
             input_tokens: 100,
             output_tokens: 50,
@@ -664,7 +664,7 @@ describe('Abacus LLM', () => {
         const result = await callAbacusLLMWithVision(textPrompt, imageBase64);
 
         expect(result.content).toBe('I see a construction site');
-        expect(result.model).toBe('claude-sonnet-4-5-20250929');
+        expect(result.model).toBe('claude-opus-4-6');
         expect(result.usage?.total_tokens).toBe(150);
 
         // Routed to Anthropic since default model is Claude
@@ -674,7 +674,7 @@ describe('Abacus LLM', () => {
         );
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
+        expect(callBody.model).toBe('claude-opus-4-6');
         // Image should be converted to Claude native format
         const imageBlock = callBody.messages[0].content.find((b: any) => b.type === 'image');
         expect(imageBlock).toBeDefined();
@@ -869,10 +869,10 @@ describe('Abacus LLM', () => {
         expect(textBlock.text).toBe(prompt);
       });
 
-      it('should default to EXTRACTION_MODEL (Claude) when no model specified', async () => {
+      it('should default to EXTRACTION_MODEL (Claude Opus) when no model specified', async () => {
         const mockResponse = {
           content: [{ text: 'Response' }],
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -883,13 +883,13 @@ describe('Abacus LLM', () => {
         await callAbacusLLMWithVision('Analyze', 'imagedata', {});
 
         const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
-        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
+        expect(callBody.model).toBe('claude-opus-4-6');
       });
 
       it('should preserve existing options when merging', async () => {
         const mockResponse = {
           content: [{ text: 'Response' }],
-          model: 'claude-sonnet-4-5-20250929',
+          model: 'claude-opus-4-6',
         };
 
         fetchMock.mockResolvedValueOnce({
@@ -910,7 +910,7 @@ describe('Abacus LLM', () => {
         expect(callBody.temperature).toBe(0.5);
         // JSON instruction added to system for Claude
         expect(callBody.system).toContain('You must respond with valid JSON only');
-        expect(callBody.model).toBe('claude-sonnet-4-5-20250929');
+        expect(callBody.model).toBe('claude-opus-4-6');
       });
     });
   });

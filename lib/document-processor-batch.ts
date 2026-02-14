@@ -5,7 +5,7 @@
 
 import { prisma } from './db';
 import { getFileUrl } from './s3';
-import { analyzeWithMultiProvider, analyzeWithLoadBalancing, analyzeDocumentSmart, analyzeWithDirectPdf, analyzeWithSmartRouting, getProviderDisplayName, type VisionProvider } from './vision-api-multi-provider';
+import { analyzeWithMultiProvider, analyzeWithLoadBalancing, analyzeDocumentSmart, analyzeWithDirectPdf, analyzeWithSmartRouting, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
 import { performQualityCheck, formatQualityReport, isBlankPage, type ExtractedData } from './vision-api-quality';
 import { writeFile, unlink, readFile } from 'fs/promises';
 import { join } from 'path';
@@ -13,6 +13,26 @@ import { tmpdir } from 'os';
 import * as fs from 'fs';
 import { convertSinglePage } from './pdf-to-image';
 import { logger } from '@/lib/logger';
+import { PREMIUM_MODEL, GEMINI_PRIMARY_MODEL, GEMINI_SECONDARY_MODEL } from '@/lib/model-config';
+
+// Cost per page by provider (estimated USD)
+const COST_PER_PAGE: Record<string, number> = {
+  'gemini-3-pro-preview': 0.03,
+  'gemini-2.5-pro': 0.05,
+  'claude-opus-4-6': 0.10,
+  'gpt-5.2': 0.03,
+  'claude-sonnet-4-5': 0.05,
+};
+const INTERPRETATION_COST_OPUS = 0.08;
+const INTERPRETATION_COST_GPT = 0.03;
+
+function getCostPerPage(provider: VisionProvider, interpProvider: VisionProvider | null): number {
+  const extractionCost = COST_PER_PAGE[provider] ?? 0.05;
+  const interpCost = interpProvider === 'claude-opus-4-6' ? INTERPRETATION_COST_OPUS
+    : interpProvider === 'gpt-5.2' ? INTERPRETATION_COST_GPT
+    : 0;
+  return extractionCost + interpCost;
+}
 
 interface ProviderStat {
   pagesProcessed: number;
@@ -26,6 +46,410 @@ export interface BatchResult {
   error?: string;
   providerStats?: Record<string, ProviderStat>;
   estimatedCost?: number; // NEW: estimated API cost
+}
+
+/**
+ * Call Opus for text-only interpretation of raw extraction JSON.
+ * Validates, corrects, enriches, and adds confidence scores.
+ */
+async function callOpusInterpretation(
+  extractedJson: string,
+  pageNumber: number
+): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY not configured for interpretation');
+  }
+
+  const prompt = `You are a construction document intelligence expert. You've been given raw extraction data from a construction drawing page. Your job is to VALIDATE, CORRECT, ENRICH, and add CONFIDENCE scores.
+
+INPUT: Raw JSON extraction from Page ${pageNumber}
+${extractedJson}
+
+TASKS:
+1. VALIDATE - Check internal consistency:
+   - Sheet number format matches discipline (M-101 = Mechanical, A-101 = Architectural, etc.)
+   - Room numbers referenced in fixtures/equipment exist in rooms array
+   - Dimensions are physically reasonable for construction
+   - CSI codes are correctly formatted (XX XX XX pattern)
+
+2. CORRECT - Fix common extraction errors:
+   - OCR errors in sheet numbers (0 vs O, 1 vs I/l)
+   - Standardize dimension formats (mix of feet/inches notation)
+   - Fix misspelled trade/discipline names
+   - Normalize room names/numbers
+
+3. ENRICH - Add derived intelligence:
+   - Infer discipline from sheet number if not already set
+   - Calculate approximate room areas from bounds if dimensions available
+   - Identify potential coordination conflicts between trades
+   - Map fixtures to CSI divisions where possible
+
+4. CONFIDENCE - Score each populated category (0.0-1.0):
+   - Add _confidence object with per-category scores
+   - Add _overallConfidence (0.0-1.0) as weighted average
+   - Add _corrections array listing what was changed
+   - Add _enrichments array listing what was added
+   - Add _validationIssues array listing problems found
+
+Respond with the complete JSON (original data + your additions). Preserve ALL original fields.`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000); // 60s — text-only is fast
+
+  try {
+    logger.info('OPUS_INTERPRETATION', `Starting interpretation for page ${pageNumber}`);
+
+    const requestBody = JSON.stringify({
+      model: PREMIUM_MODEL,
+      max_tokens: 8000,
+      temperature: 0.1,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+
+    const fetchStart = Date.now();
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: requestBody,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    const responseText = await response.text();
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+    }
+
+    const data = JSON.parse(responseText);
+    const content = data.content?.[0]?.text || '';
+
+    if (!content) {
+      throw new Error('Empty response from Opus interpretation');
+    }
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('OPUS_INTERPRETATION', `Interpretation complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
+
+    return content;
+  } catch (error: any) {
+    clearTimeout(timeout);
+
+    if (error.name === 'AbortError') {
+      logger.warn('OPUS_INTERPRETATION', `Timeout after 60s for page ${pageNumber}`);
+      throw new Error('Opus interpretation timed out');
+    }
+
+    logger.error('OPUS_INTERPRETATION', `Failed for page ${pageNumber}`, error);
+    throw error;
+  }
+}
+
+/**
+ * Call GPT-5.2 for text-only interpretation of raw extraction JSON.
+ * Fallback when Opus interpretation fails.
+ */
+async function callGPT52Interpretation(
+  extractedJson: string,
+  pageNumber: number
+): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY not configured for interpretation');
+  }
+
+  const prompt = `You are a construction document intelligence expert. You've been given raw extraction data from a construction drawing page. Your job is to VALIDATE, CORRECT, ENRICH, and add CONFIDENCE scores.
+
+INPUT: Raw JSON extraction from Page ${pageNumber}
+${extractedJson}
+
+TASKS:
+1. VALIDATE - Check internal consistency:
+   - Sheet number format matches discipline (M-101 = Mechanical, A-101 = Architectural, etc.)
+   - Room numbers referenced in fixtures/equipment exist in rooms array
+   - Dimensions are physically reasonable for construction
+   - CSI codes are correctly formatted (XX XX XX pattern)
+
+2. CORRECT - Fix common extraction errors:
+   - OCR errors in sheet numbers (0 vs O, 1 vs I/l)
+   - Standardize dimension formats (mix of feet/inches notation)
+   - Fix misspelled trade/discipline names
+   - Normalize room names/numbers
+
+3. ENRICH - Add derived intelligence:
+   - Infer discipline from sheet number if not already set
+   - Calculate approximate room areas from bounds if dimensions available
+   - Identify potential coordination conflicts between trades
+   - Map fixtures to CSI divisions where possible
+
+4. CONFIDENCE - Score each populated category (0.0-1.0):
+   - Add _confidence object with per-category scores
+   - Add _overallConfidence (0.0-1.0) as weighted average
+   - Add _corrections array listing what was changed
+   - Add _enrichments array listing what was added
+   - Add _validationIssues array listing problems found
+
+Respond with the complete JSON (original data + your additions). Preserve ALL original fields.`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000); // 60s
+
+  try {
+    logger.info('GPT52_INTERPRETATION', `Starting interpretation for page ${pageNumber}`);
+
+    const requestBody = JSON.stringify({
+      model: 'gpt-5.2',
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 8000,
+      temperature: 0.1,
+    });
+
+    const fetchStart = Date.now();
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: requestBody,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    const responseText = await response.text();
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+    }
+
+    const data = JSON.parse(responseText);
+    const content = data.choices?.[0]?.message?.content || '';
+
+    if (!content) {
+      throw new Error('Empty response from GPT-5.2 interpretation');
+    }
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('GPT52_INTERPRETATION', `Interpretation complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
+
+    return content;
+  } catch (error: any) {
+    clearTimeout(timeout);
+
+    if (error.name === 'AbortError') {
+      logger.warn('GPT52_INTERPRETATION', `Timeout after 60s for page ${pageNumber}`);
+      throw new Error('GPT-5.2 interpretation timed out');
+    }
+
+    logger.error('GPT52_INTERPRETATION', `Failed for page ${pageNumber}`, error);
+    throw error;
+  }
+}
+
+/**
+ * Three-pass vision pipeline: Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Opus interpretation
+ *
+ * Pass 1: Gemini 3 Pro Preview for fast, cheap visual extraction
+ * Pass 2: Gemini 2.5 Pro validates and fills gaps (sees both the image AND Pass 1's JSON)
+ * Pass 3: Claude Opus for text-only validation, correction, and enrichment
+ * Fallback: GPT-5.2 for interpretation if Opus fails; analyzeWithSmartRouting if both Gemini models fail
+ */
+async function analyzeWithThreePassPipeline(
+  pdfBuffer: Buffer,
+  prompt: string,
+  processorType: string,
+  pageNumber?: number,
+  minQualityScore: number = 50
+): Promise<{ success: boolean; content: string; provider: VisionProvider; attempts: number; error?: string; confidenceScore?: number; interpretationProvider?: VisionProvider; pass2Provider?: VisionProvider; processingTier?: string }> {
+  logger.info('THREE_PASS_PIPELINE', `Starting three-pass pipeline`, { pageNumber, processorType });
+
+  const base64 = pdfBuffer.toString('base64');
+
+  // Helper: strip JSON from LLM response (markdown wrappers, text before first {, etc.)
+  function stripToJson(raw: string): string {
+    let content = raw;
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      content = jsonMatch[1].trim();
+    }
+    const firstBrace = content.indexOf('{');
+    if (firstBrace > 0) {
+      content = content.substring(firstBrace);
+    }
+    const lastBrace = content.lastIndexOf('}');
+    if (lastBrace >= 0 && lastBrace < content.length - 1) {
+      content = content.substring(0, lastBrace + 1);
+    }
+    return content;
+  }
+
+  // Helper: interpret JSON with Opus, falling back to GPT-5.2
+  async function interpretWithFallback(
+    jsonContent: string,
+    page: number,
+    tierPrefix: string
+  ): Promise<{ content: string; interpretationProvider: VisionProvider; processingTier: string }> {
+    // Try Opus first
+    try {
+      const enrichedContent = await callOpusInterpretation(jsonContent, page);
+      const enrichedJson = stripToJson(enrichedContent);
+      JSON.parse(enrichedJson); // Validate
+      return {
+        content: enrichedJson,
+        interpretationProvider: 'claude-opus-4-6' as VisionProvider,
+        processingTier: tierPrefix,
+      };
+    } catch (opusError: any) {
+      logger.warn('THREE_PASS_PIPELINE', `Opus interpretation failed, trying GPT-5.2`, { error: opusError.message, pageNumber });
+    }
+
+    // GPT-5.2 fallback
+    try {
+      const gptContent = await callGPT52Interpretation(jsonContent, page);
+      const gptJson = stripToJson(gptContent);
+      JSON.parse(gptJson); // Validate
+      return {
+        content: gptJson,
+        interpretationProvider: 'gpt-5.2' as VisionProvider,
+        processingTier: `${tierPrefix}-gpt-fallback`,
+      };
+    } catch (gptError: any) {
+      logger.warn('THREE_PASS_PIPELINE', `GPT-5.2 interpretation also failed, returning raw`, { error: gptError.message, pageNumber });
+    }
+
+    // Both failed — return raw JSON
+    return {
+      content: jsonContent,
+      interpretationProvider: null as unknown as VisionProvider,
+      processingTier: tierPrefix.replace(/three-pass|two-pass/, 'extraction-only'),
+    };
+  }
+
+  // PASS 1: Gemini Pro 3 extraction
+  const pass1Result = await callGeminiPro3Vision(base64, prompt);
+
+  if (!pass1Result.success || !pass1Result.content) {
+    // Pass 1 failed — try Gemini 2.5 Pro as primary extraction fallback
+    logger.warn('THREE_PASS_PIPELINE', `Gemini Pro 3 failed, trying Gemini 2.5 Pro as primary`, { error: pass1Result.error, pageNumber });
+
+    const fallbackGeminiResult = await callGeminiVision(base64, prompt);
+
+    if (fallbackGeminiResult.success && fallbackGeminiResult.content) {
+      // Parse Gemini 2.5 Pro's JSON
+      let fallbackJson: string;
+      try {
+        fallbackJson = stripToJson(fallbackGeminiResult.content);
+        JSON.parse(fallbackJson);
+      } catch (parseError: any) {
+        logger.warn('THREE_PASS_PIPELINE', `Gemini 2.5 Pro JSON parse failed, falling back to smart routing`, { error: parseError.message, pageNumber });
+        const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
+        return { ...smartResult, processingTier: 'fallback-single-pass' };
+      }
+
+      // Pass 3 with Gemini 2.5 Pro's JSON
+      const interpResult = await interpretWithFallback(fallbackJson, pageNumber || 1, 'fallback-two-pass');
+
+      return {
+        success: true,
+        content: interpResult.content,
+        provider: fallbackGeminiResult.provider,
+        attempts: pass1Result.attempts + fallbackGeminiResult.attempts,
+        confidenceScore: fallbackGeminiResult.confidenceScore,
+        interpretationProvider: interpResult.interpretationProvider,
+        processingTier: interpResult.processingTier,
+      };
+    }
+
+    // Both Gemini models failed — fall back to smart routing
+    logger.warn('THREE_PASS_PIPELINE', `Both Gemini models failed, falling back to smart routing`, { pageNumber });
+    const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
+    return { ...smartResult, processingTier: 'fallback-single-pass' };
+  }
+
+  // Parse Pass 1 JSON
+  let pass1Json: string;
+  try {
+    pass1Json = stripToJson(pass1Result.content);
+    JSON.parse(pass1Json);
+    logger.info('THREE_PASS_PIPELINE', `Pass 1 complete (Gemini Pro 3)`, { pageNumber, contentLength: pass1Json.length });
+  } catch (parseError: any) {
+    logger.warn('THREE_PASS_PIPELINE', `Pass 1 JSON parse failed, falling back to smart routing`, { error: parseError.message, pageNumber });
+    const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
+    return { ...smartResult, processingTier: 'fallback-single-pass' };
+  }
+
+  // 500ms delay for rate limit mitigation between Gemini calls
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // PASS 2: Gemini 2.5 Pro validation (sends BOTH the image AND Pass 1's JSON)
+  let pass2Json: string | null = null;
+  let pass2Provider: VisionProvider | undefined;
+
+  const validationPrompt = `You are validating a construction drawing extraction.
+
+A previous AI pass extracted the following data from this drawing:
+${pass1Json}
+
+Your job:
+1. REVIEW each field against what you see in the actual drawing
+2. CORRECT any extraction errors (wrong sheet numbers, missing data, misread text)
+3. FILL GAPS — extract any data categories the first pass missed entirely
+4. PRESERVE all correctly extracted data unchanged
+
+Return the complete validated JSON with all original fields plus any additions/corrections.`;
+
+  try {
+    const pass2Result = await callGeminiVision(base64, validationPrompt);
+
+    if (pass2Result.success && pass2Result.content) {
+      const parsed = stripToJson(pass2Result.content);
+      JSON.parse(parsed); // Validate
+      pass2Json = parsed;
+      pass2Provider = 'gemini-2.5-pro' as VisionProvider;
+      logger.info('THREE_PASS_PIPELINE', `Pass 2 complete (Gemini 2.5 Pro validation)`, { pageNumber, contentLength: pass2Json.length });
+    } else {
+      logger.warn('THREE_PASS_PIPELINE', `Pass 2 failed, skipping validation`, { error: pass2Result.error, pageNumber });
+    }
+  } catch (pass2Error: any) {
+    logger.warn('THREE_PASS_PIPELINE', `Pass 2 error, skipping validation`, { error: pass2Error.message, pageNumber });
+  }
+
+  // Determine which JSON goes to Pass 3
+  const jsonForPass3 = pass2Json || pass1Json;
+  const tierPrefix = pass2Json ? 'three-pass' : 'two-pass-skip-validation';
+
+  // PASS 3: Opus/GPT interpretation
+  const interpResult = await interpretWithFallback(jsonForPass3, pageNumber || 1, tierPrefix);
+
+  logger.info('THREE_PASS_PIPELINE', `Pipeline complete`, { pageNumber, processingTier: interpResult.processingTier, pass2: !!pass2Json });
+
+  return {
+    success: true,
+    content: interpResult.content,
+    provider: pass1Result.provider,
+    attempts: pass1Result.attempts,
+    confidenceScore: pass1Result.confidenceScore,
+    interpretationProvider: interpResult.interpretationProvider,
+    pass2Provider,
+    processingTier: interpResult.processingTier,
+  };
 }
 
 /**
@@ -44,6 +468,7 @@ export async function processDocumentBatch(
   preloadedPdfBuffer?: Buffer
 ): Promise<BatchResult> {
   let pagesProcessed = 0;
+  let estimatedCost = 0;
   const tempFiles: string[] = [];
   const providerStats: Record<string, ProviderStat> = {};
 
@@ -106,12 +531,12 @@ export async function processDocumentBatch(
           logger.warn('BATCH_PROCESSOR', `Page extraction failed for page ${pageNum}, using full PDF`, { error: extractErr.message });
         }
 
-        // Use smart routing based on document classification
+        // Use three-pass pipeline: Gemini Pro 3 → Gemini 2.5 Pro validation → Opus interpretation → fallback
         const startTime = Date.now();
         // When page was extracted into a 1-page PDF, target page 1 of that PDF
         // When extraction failed and we're using the full buffer, use original page number
         const effectivePageForVision = (pageBuffer !== buffer) ? 1 : pageNum;
-        const visionResult = await analyzeWithSmartRouting(
+        const visionResult = await analyzeWithThreePassPipeline(
           pageBuffer,
           getVisionPrompt(document.fileName, pageNum),
           effectiveProcessorType,
@@ -135,23 +560,40 @@ export async function processDocumentBatch(
           }
           providerStats[providerName].pagesProcessed++;
           providerStats[providerName].totalTime += processingTime;
-          providerStats[providerName].avgTimePerPage = 
+          providerStats[providerName].avgTimePerPage =
             providerStats[providerName].totalTime / providerStats[providerName].pagesProcessed / 1000; // Convert to seconds
+
+          // Track cost inline using multi-pass cost model
+          const pageCost = getCostPerPage(visionResult.provider, (visionResult as any).interpretationProvider ?? null);
+          estimatedCost += pageCost;
 
           // Parse vision response
           try {
-            // Strip markdown code blocks if present (Claude sometimes wraps JSON in ```json ... ```)
+            // Strip markdown code blocks if present (Claude/Gemini sometimes wraps JSON in ```json ... ```)
             let contentToParse = visionResult.content;
             if (typeof contentToParse === 'string') {
               // Check for markdown code block wrappers: ```json ... ``` or ``` ... ```
               const jsonMatch = contentToParse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
               if (jsonMatch) {
-                contentToParse = jsonMatch[1].trim(); // Extract just the JSON content
-                logger.info('BATCH_PROCESSOR', `Stripped markdown wrapper from Claude response`, { pageNum });
+                contentToParse = jsonMatch[1].trim();
+                logger.info('BATCH_PROCESSOR', `Stripped markdown wrapper from response`, { pageNum });
               }
             }
-            
-            const parsedData = typeof contentToParse === 'string' 
+
+            // Strip text before first { and after last } (Gemini sometimes prepends/appends text)
+            if (typeof contentToParse === 'string') {
+              const firstBrace = contentToParse.indexOf('{');
+              if (firstBrace > 0) {
+                logger.warn('BATCH_PROCESSOR', `Stripped ${firstBrace} chars before JSON`, { pageNum });
+                contentToParse = contentToParse.substring(firstBrace);
+              }
+              const lastBrace = contentToParse.lastIndexOf('}');
+              if (lastBrace >= 0 && lastBrace < contentToParse.length - 1) {
+                contentToParse = contentToParse.substring(0, lastBrace + 1);
+              }
+            }
+
+            const parsedData = typeof contentToParse === 'string'
               ? JSON.parse(contentToParse)
               : contentToParse;
             
@@ -174,6 +616,9 @@ export async function processDocumentBatch(
               qualityScore: qualityCheck.score,
               qualityPassed: qualityCheck.passed,
               attempts: visionResult.attempts,
+              interpretationProvider: (visionResult as any).interpretationProvider || null,
+              pass2Provider: (visionResult as any).pass2Provider || null,
+              processingTier: (visionResult as any).processingTier || 'single-pass',
               ...extractMetadata(parsedData),
             };
 
@@ -255,15 +700,6 @@ export async function processDocumentBatch(
           .map(([name, stats]) => [name, `${stats.pagesProcessed} pages @ ${stats.avgTimePerPage.toFixed(1)}s/page`])
       )
     );
-
-    // Calculate estimated cost based on provider usage
-    let estimatedCost = 0;
-    if (pagesProcessed > 0 && Object.keys(providerStats).length > 0) {
-      for (const [provider, stats] of Object.entries(providerStats)) {
-        const costPerPage = provider.includes('claude') ? 0.10 : 0.03;
-        estimatedCost += stats.pagesProcessed * costPerPage;
-      }
-    }
 
     return {
       success: true,
