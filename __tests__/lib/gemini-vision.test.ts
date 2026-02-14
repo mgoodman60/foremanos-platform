@@ -211,7 +211,7 @@ describe('callGeminiVision', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should disable thinking with thinkingBudget: 0', async () => {
+  it('should set minimal thinking with thinkingBudget: 1024', async () => {
     mockGenerateContent.mockResolvedValue({
       text: '{"data": "test"}',
     });
@@ -221,7 +221,7 @@ describe('callGeminiVision', () => {
     expect(mockGenerateContent).toHaveBeenCalledWith(
       expect.objectContaining({
         config: expect.objectContaining({
-          thinkingConfig: { thinkingBudget: 0 },
+          thinkingConfig: { thinkingBudget: 1024 },
         }),
       })
     );

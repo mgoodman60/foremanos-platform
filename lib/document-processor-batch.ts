@@ -216,7 +216,7 @@ Respond with the complete JSON (original data + your additions). Preserve ALL or
           content: prompt,
         },
       ],
-      max_tokens: 8000,
+      max_completion_tokens: 8000,
       temperature: 0.1,
     });
 

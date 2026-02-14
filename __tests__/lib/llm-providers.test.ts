@@ -86,6 +86,59 @@ describe('LLM Providers', () => {
       const messages: LLMMessage[] = [{ role: 'user', content: 'Hello' }];
       await expect(callOpenAI(messages)).rejects.toThrow('OpenAI API request failed (429)');
     });
+
+    it('should send max_completion_tokens for gpt-5.2 model', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'GPT-5.2 response' } }],
+          model: 'gpt-5.2',
+          usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+        }),
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Hello' }];
+      await callOpenAI(messages, { model: 'gpt-5.2', max_tokens: 4000 });
+
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(callBody.max_completion_tokens).toBe(4000);
+      expect(callBody.max_tokens).toBeUndefined();
+    });
+
+    it('should send max_tokens for gpt-4o-mini model', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'Mini response' } }],
+          model: 'gpt-4o-mini',
+          usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+        }),
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Hello' }];
+      await callOpenAI(messages, { model: 'gpt-4o-mini', max_tokens: 4000 });
+
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(callBody.max_tokens).toBe(4000);
+      expect(callBody.max_completion_tokens).toBeUndefined();
+    });
+
+    it('should send max_completion_tokens for o3 models', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'O3 response' } }],
+          model: 'o3-mini',
+        }),
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Think' }];
+      await callOpenAI(messages, { model: 'o3-mini', max_tokens: 8000 });
+
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(callBody.max_completion_tokens).toBe(8000);
+      expect(callBody.max_tokens).toBeUndefined();
+    });
   });
 
   describe('callAnthropic', () => {
@@ -563,6 +616,38 @@ describe('LLM Providers', () => {
       const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
       expect(callBody.stream).toBe(true);
       expect(callBody.model).toBe('claude-opus-4-6');
+    });
+
+    it('should send max_completion_tokens for gpt-5.2 in stream mode', async () => {
+      const mockStream = new ReadableStream();
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        body: mockStream,
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Hello' }];
+      await streamLLM(messages, { model: 'gpt-5.2', max_tokens: 4000 });
+
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(callBody.max_completion_tokens).toBe(4000);
+      expect(callBody.max_tokens).toBeUndefined();
+      expect(callBody.stream).toBe(true);
+    });
+
+    it('should send max_tokens for gpt-4o-mini in stream mode', async () => {
+      const mockStream = new ReadableStream();
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        body: mockStream,
+      });
+
+      const messages: LLMMessage[] = [{ role: 'user', content: 'Hello' }];
+      await streamLLM(messages, { model: 'gpt-4o-mini', max_tokens: 4000 });
+
+      const callBody = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(callBody.max_tokens).toBe(4000);
+      expect(callBody.max_completion_tokens).toBeUndefined();
+      expect(callBody.stream).toBe(true);
     });
   });
 });

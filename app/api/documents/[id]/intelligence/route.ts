@@ -195,6 +195,18 @@ export async function GET(
       cost: docWithProcessing.processingCost || null,
     };
 
+    // Aggregate vision pipeline tier data from chunk metadata
+    const tierBreakdown: Record<string, number> = {};
+    for (const chunk of chunks) {
+      const meta = chunk.metadata as any;
+      const tier = meta?.processingTier || 'unknown';
+      tierBreakdown[tier] = (tierBreakdown[tier] || 0) + 1;
+    }
+    const visionPipeline = {
+      tierBreakdown,
+      totalPages: chunks.length,
+    };
+
     // Return aggregated intelligence data
     return NextResponse.json({
       document: {
@@ -218,6 +230,7 @@ export async function GET(
       materialTakeoffs,
       summary,
       processingLog,
+      visionPipeline,
     });
   } catch (error) {
     console.error('Error fetching document intelligence:', error);

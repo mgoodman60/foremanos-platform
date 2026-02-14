@@ -158,7 +158,7 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
           )}
 
           {data.summary && <IntelligenceSummary summary={data.summary} />}
-          {data.processingLog && <ProcessingLogPanel log={data.processingLog} />}
+          {data.processingLog && <ProcessingLogPanel log={data.processingLog} visionPipeline={data.visionPipeline} />}
         </main>
       </div>
     </div>

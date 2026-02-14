@@ -489,7 +489,7 @@ async function callGPT52Vision(
           ],
         },
       ],
-      max_tokens: 8000,
+      max_completion_tokens: 8000,
       temperature: 0.1,
     });
     const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
@@ -785,7 +785,7 @@ export async function callGeminiVision(
           maxOutputTokens: 8192,
           temperature: 0.1,
           thinkingConfig: {
-            thinkingBudget: 0,
+            thinkingBudget: 1024,
           },
         },
       });

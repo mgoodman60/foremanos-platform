@@ -62,11 +62,15 @@ export async function callOpenAI(
     stream = false,
   } = options;
 
+  const tokenKey = model.startsWith('gpt-5') || model.startsWith('o3') || model.startsWith('o4')
+    ? 'max_completion_tokens'
+    : 'max_tokens';
+
   const requestBody: Record<string, unknown> = {
     model,
     messages,
     temperature,
-    max_tokens,
+    [tokenKey]: max_tokens,
     stream,
   };
 
@@ -310,7 +314,9 @@ async function streamOpenAI(
       model,
       messages,
       temperature,
-      max_tokens,
+      ...(model.startsWith('gpt-5') || model.startsWith('o3') || model.startsWith('o4')
+        ? { max_completion_tokens: max_tokens }
+        : { max_tokens }),
       stream: true,
     }),
   });

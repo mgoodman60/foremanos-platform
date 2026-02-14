@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Layers } from 'lucide-react';
 
 interface ProcessingLog {
   phasesCompleted: string[];
@@ -12,8 +12,14 @@ interface ProcessingLog {
   cost?: number;
 }
 
+interface VisionPipeline {
+  tierBreakdown: Record<string, number>;
+  totalPages: number;
+}
+
 interface Props {
   log: ProcessingLog;
+  visionPipeline?: VisionPipeline;
 }
 
 function formatDuration(ms: number): string {
@@ -38,7 +44,35 @@ function formatDate(dateString: string): string {
   }
 }
 
-export default function ProcessingLogPanel({ log }: Props) {
+const TIER_COLORS: Record<string, string> = {
+  'three-pass': 'bg-green-100 text-green-700',
+  'three-pass-gpt-fallback': 'bg-yellow-100 text-yellow-700',
+  'extraction-only-skip-validation': 'bg-blue-100 text-blue-700',
+  'extraction-only': 'bg-blue-100 text-blue-700',
+  'unknown': 'bg-gray-100 text-gray-500',
+};
+
+function getPassStatus(tierBreakdown: Record<string, number>) {
+  const threePassPages = (tierBreakdown['three-pass'] || 0) + (tierBreakdown['three-pass-gpt-fallback'] || 0);
+  const totalPages = Object.values(tierBreakdown).reduce((a, b) => a + b, 0);
+  const extractionOnlyPages = (tierBreakdown['extraction-only-skip-validation'] || 0) + (tierBreakdown['extraction-only'] || 0);
+  return {
+    pass1: totalPages > 0,
+    pass2: threePassPages > 0,
+    pass3: threePassPages > 0,
+    threePassPages,
+    extractionOnlyPages,
+  };
+}
+
+function formatTierLabel(tier: string): string {
+  return tier
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+export default function ProcessingLogPanel({ log, visionPipeline }: Props) {
   if (!log) {
     return null;
   }
@@ -85,6 +119,57 @@ export default function ProcessingLogPanel({ log }: Props) {
           </div>
         )}
       </div>
+
+      {/* Vision Pipeline */}
+      {visionPipeline && visionPipeline.totalPages > 0 && (() => {
+        const status = getPassStatus(visionPipeline.tierBreakdown);
+        const passes = [
+          { label: 'Pass 1', provider: 'Gemini Pro 3', detail: 'Extraction', active: status.pass1 },
+          { label: 'Pass 2', provider: 'Gemini 2.5 Pro', detail: 'Validation', active: status.pass2 },
+          { label: 'Pass 3', provider: 'Claude Opus / GPT-5.2', detail: 'Interpretation', active: status.pass3 },
+        ];
+        return (
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+              <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+              Vision Pipeline
+            </h4>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {passes.map((pass) => (
+                <div
+                  key={pass.label}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                    pass.active
+                      ? 'bg-green-50 text-green-700'
+                      : 'bg-gray-100 text-gray-400'
+                  }`}
+                >
+                  {pass.active ? (
+                    <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                  )}
+                  <span>{pass.label}:</span>
+                  <span className="font-normal">{pass.provider}</span>
+                  <span className="text-[10px] opacity-70">({pass.detail})</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(visionPipeline.tierBreakdown).map(([tier, count]) => (
+                <span
+                  key={tier}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                    TIER_COLORS[tier] || TIER_COLORS['unknown']
+                  }`}
+                >
+                  {formatTierLabel(tier)}: {count} {count === 1 ? 'page' : 'pages'}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Phase Completion Status */}
       <div className="mb-4">
