@@ -25,6 +25,26 @@ export interface ExtractedData {
   [key: string]: any;
 }
 
+/** Structural fields checked for page complexity and quality scoring */
+export const STRUCTURAL_FIELDS = [
+  'dimensions',
+  'gridLines',
+  'rooms',
+  'doors',
+  'windows',
+  'equipment',
+  'symbolData',
+  'siteAndConcrete',
+  'visualMaterials',
+  'plumbingFixtures',
+  'electricalDevices',
+  'spatialData',
+  'constructionIntel',
+  'drawingScheduleTables',
+  'hvacData',
+  'fireProtection',
+] as const;
+
 /**
  * Perform comprehensive quality check on extracted construction document data
  */
@@ -79,24 +99,7 @@ export function performQualityCheck(
   }
 
   // Structural elements check (40 points)
-  const structuralFields = [
-    'dimensions',
-    'gridLines',
-    'roomLabels',
-    'doors',
-    'windows',
-    'equipment',
-    'annotations',
-    'symbols',
-    'visualMaterials',
-    'plumbingFixtures',
-    'electricalDevices',
-    'spatialData',
-    'constructionIntel',
-    'drawingScheduleTables',
-    'hvacData',
-    'fireProtection',
-  ];
+  const structuralFields = STRUCTURAL_FIELDS;
 
   let structuralFieldsFound = 0;
   structuralFields.forEach(field => {
@@ -153,6 +156,28 @@ export function isBlankPage(data: ExtractedData): boolean {
     (!data.content || data.content.length < 50);
 
   return criticalFieldsMissing;
+}
+
+export type PageComplexity = 'blank' | 'simple' | 'complex';
+
+/**
+ * Assess page complexity to determine which pipeline passes to run.
+ * - blank: No meaningful content → skip Pass 2 and Pass 3
+ * - simple: Title block only, <3 structural fields → skip Pass 2 and Pass 3
+ * - complex: 3+ structural fields → run full three-pass pipeline
+ */
+export function assessPageComplexity(data: ExtractedData): PageComplexity {
+  if (isBlankPage(data)) return 'blank';
+
+  let found = 0;
+  for (const field of STRUCTURAL_FIELDS) {
+    const value = data[field];
+    if (value && (Array.isArray(value) ? value.length > 0 : value !== 'N/A')) {
+      found++;
+    }
+  }
+
+  return found < 3 ? 'simple' : 'complex';
 }
 
 /**

@@ -6,6 +6,9 @@
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { getFileUrl } from '@/lib/s3';
+import OpenAI from 'openai';
+
+const openai = new OpenAI();
 
 interface ExtractedLineItem {
   description: string;
@@ -123,12 +126,6 @@ export async function analyzeQuotePDF(
     if (!pdfBase64) {
       return null;
     }
-
-    // Use OpenAI-compatible API with vision for PDF analysis
-    const OpenAI = (await import('openai')).default;
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     const response = await openai.chat.completions.create({
       model: 'gpt-5.2',

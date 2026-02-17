@@ -78,14 +78,15 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 ```
 app/api/              # 406 API routes organized by feature domain
 lib/                  # 277 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
-  lib/rag/            # 19 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
+  lib/rag/            # 25 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
   lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
   lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
 components/           # 337 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
 prisma/               # Database schema and migrations (112 models)
-__tests__/            # Vitest tests (241 test files: 182 lib + 32 API + 3 smoke)
+__tests__/            # Vitest tests (245+ test files)
 e2e/                  # Playwright E2E tests (23 spec files)
+src/trigger/          # Trigger.dev v3 long-running tasks (document processing)
 .claude/agents/       # 24 custom Claude Code agents
 .claude/skills/       # 14 project slash commands + 24 installed skills (see below)
 ```
@@ -145,6 +146,7 @@ e2e/                  # Playwright E2E tests (23 spec files)
 | `lib/mep-takeoff-generator.ts` | Barrel re-export → `lib/mep-takeoff/` (4 modules: types, pricing-database, extraction, triggers) |
 | `lib/sitework-takeoff-extractor.ts` | Barrel re-export → `lib/sitework/` (7 modules: patterns, unit-conversion, drawing-classification, extraction, quantity-derivation, geotech-integration, cad-integration) |
 | `lib/discipline-colors.ts` | Shared discipline → color/icon mapping |
+| `lib/api-error.ts` | Standardized API error response helper (`apiError()`, `apiSuccess()`) |
 
 277 total service modules in `lib/` — see directory for full listing.
 
@@ -161,6 +163,15 @@ All API routes follow this middleware pattern:
 ```
 Auth Check → Rate Limit → Validation → Business Logic → Response
 ```
+
+Error responses use `apiError()` from `lib/api-error.ts`:
+```typescript
+import { apiError } from '@/lib/api-error';
+return apiError('Not found', 404, 'NOT_FOUND');
+// Returns: { error: 'Not found', code: 'NOT_FOUND' }
+```
+
+API routes with POST/PUT use Zod schemas for input validation (`z.object`, `z.coerce` for query params).
 
 Main chat endpoint (`app/api/chat/route.ts`) includes:
 - Maintenance mode detection
@@ -294,7 +305,7 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 
 ## Testing
 
-241 test files (182 lib + 32 API + 3 smoke + 1 hooks + 3 coverage gap), 9417 tests total (9343 passing, 74 skipped). 23 Playwright E2E spec files in `e2e/`.
+245+ test files, 9500+ tests total. 23 Playwright E2E spec files in `e2e/`.
 
 - **TypeScript 5.8.3**: Strict mode enabled
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
@@ -422,6 +433,10 @@ Optional:
 - `TWILIO_AUTH_TOKEN` - SMS daily report entry
 - `TWILIO_WEBHOOK_URL` - Twilio webhook endpoint (optional, defaults to `/api/webhooks/twilio`)
 - `GOOGLE_API_KEY` - Google Gemini API key (optional, falls back to Opus single-pass vision)
+- `OPENWEATHERMAP_API_KEY` - Weather features (`lib/weather-service.ts`)
+- `VIRUSTOTAL_API_KEY` - Virus scanning (`lib/virus-scanner.ts`)
+- `BFL_API_KEY` - 3D render provider (`lib/render-provider.ts`)
+- `CRON_SECRET` - Cron job authentication (`app/api/cron/`)
 
 **Note:** See `S3_SETUP_GUIDE.md` for comprehensive Cloudflare R2 (recommended) or AWS S3 bucket configuration. R2 offers zero egress fees and simpler setup without IAM policies or CORS configuration.
 

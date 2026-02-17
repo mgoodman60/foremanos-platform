@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { createScopedLogger } from '@/lib/logger';
 import { cleanupExpiredPhotos, getExpirationWarnings } from '@/lib/photo-retention-service';
+import { getCached, setCached } from '@/lib/redis';
 
 const log = createScopedLogger('PHOTO_CLEANUP_CRON');
 
@@ -16,33 +17,47 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const projects = await prisma.project.findMany({
-      where: { status: 'active' },
-      select: { id: true, name: true, photoRetentionDays: true },
-    });
-
-    const results = [];
-    for (const project of projects) {
-      const cleanup = await cleanupExpiredPhotos(project.id);
-      const warnings = await getExpirationWarnings(project.id);
-
-      results.push({
-        projectId: project.id,
-        projectName: project.name,
-        deleted: cleanup.deleted,
-        skipped: cleanup.skipped,
-        warnings: warnings.length,
-        errors: cleanup.errors,
-      });
+    // Idempotency lock: prevent concurrent execution (10-minute TTL auto-expires if job crashes)
+    const lockKey = 'cron:photo-cleanup:lock';
+    const existingLock = await getCached<string>(lockKey);
+    if (existingLock) {
+      log.info('Cron job already running, skipping');
+      return NextResponse.json({ status: 'skipped', reason: 'already_running' });
     }
+    await setCached(lockKey, Date.now().toString(), 600);
 
-    log.info('Photo cleanup cron completed', { projectCount: projects.length });
+    try {
+      const projects = await prisma.project.findMany({
+        where: { status: 'active' },
+        select: { id: true, name: true, photoRetentionDays: true },
+      });
 
-    return NextResponse.json({
-      success: true,
-      projectsProcessed: projects.length,
-      results,
-    });
+      const results = [];
+      for (const project of projects) {
+        const cleanup = await cleanupExpiredPhotos(project.id);
+        const warnings = await getExpirationWarnings(project.id);
+
+        results.push({
+          projectId: project.id,
+          projectName: project.name,
+          deleted: cleanup.deleted,
+          skipped: cleanup.skipped,
+          warnings: warnings.length,
+          errors: cleanup.errors,
+        });
+      }
+
+      log.info('Photo cleanup cron completed', { projectCount: projects.length });
+
+      return NextResponse.json({
+        success: true,
+        projectsProcessed: projects.length,
+        results,
+      });
+    } finally {
+      // Release lock (best-effort, 1s TTL so it expires almost immediately)
+      setCached(lockKey, '', 1).catch(() => {});
+    }
   } catch (error) {
     log.error('Photo cleanup cron failed', error as Error);
     return NextResponse.json({ error: 'Cron job failed' }, { status: 500 });

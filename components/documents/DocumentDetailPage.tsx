@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import SheetNavigator from './SheetNavigator';
 import SheetDetailPanel from './SheetDetailPanel';
 import IntelligenceSummary from './IntelligenceSummary';
@@ -75,6 +76,7 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
   const selectedSheetData = data.sheets?.find((s: any) => s.sheetNumber === selectedSheet);
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b px-4 py-3 sm:px-6">
@@ -162,5 +164,6 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
         </main>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

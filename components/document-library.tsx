@@ -1479,7 +1479,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center max-w-md px-4">
                 <div className="w-24 h-24 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-orange-500/30">
-                  <FileText className="w-12 h-12 text-orange-400" />
+                  <FileText className="w-12 h-12 text-orange-400" aria-hidden="true" />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-50 mb-3">
                   {userRole === 'guest' ? 'No Documents Available' : 'No Documents Yet'}
@@ -1495,7 +1495,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
                       onClick={() => fileInputRef.current?.click()}
                       className="mb-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-dark-base"
                     >
-                      <Upload className="w-5 h-5 inline mr-2" />
+                      <Upload className="w-5 h-5 inline mr-2" aria-hidden="true" />
                       Upload Your First Document
                     </button>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-gray-400">

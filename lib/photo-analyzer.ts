@@ -254,7 +254,8 @@ export async function processUploadedPhoto(
 
   // Generate public URL for the photo
   const imageUrl = `/api/files/view?path=${photo.cloud_storage_path}`;
-  const fullImageUrl = `${process.env.NEXTAUTH_URL}${imageUrl}`;
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://foremanos.vercel.app';
+  const fullImageUrl = `${baseUrl}${imageUrl}`;
 
   // Analyze the photo
   const analysis = await analyzePhoto(

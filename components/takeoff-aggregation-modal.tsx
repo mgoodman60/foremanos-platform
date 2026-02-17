@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface TakeoffSummary {
   id: string;
@@ -87,6 +88,7 @@ export function TakeoffAggregationModal({
   projectSlug,
   onAggregationCreated
 }: TakeoffAggregationModalProps) {
+  const containerRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [takeoffs, setTakeoffs] = useState<TakeoffSummary[]>([]);
@@ -264,7 +266,7 @@ export function TakeoffAggregationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="w-full max-w-4xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
+      <div ref={containerRef} role="dialog" aria-modal="true" className="w-full max-w-4xl bg-dark-surface rounded-lg shadow-xl border border-gray-700 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">

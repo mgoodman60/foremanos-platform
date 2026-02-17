@@ -5,6 +5,9 @@
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import OpenAI from 'openai';
+
+const openai = new OpenAI();
 
 interface ExtractedLabor {
   tradeName: string;
@@ -53,12 +56,6 @@ export async function extractLaborFromReport(
     const tradeContext = projectTrades.length > 0
       ? `Known trades on this project: ${projectTrades.map((t: { companyName: string; tradeType: string | null }) => t.tradeType || t.companyName).join(', ')}`
       : 'No known trades yet';
-
-    // Use AI to extract labor data - dynamic import to avoid module issues
-    const OpenAI = (await import('openai')).default;
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     const response = await openai.chat.completions.create({
       model: 'gpt-5.2',

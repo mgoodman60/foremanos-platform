@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface DashboardGreetingProps {
   projectSlug: string;
@@ -30,9 +30,12 @@ export function DashboardGreeting({ projectSlug, projectId, userName }: Dashboar
     unprocessedDocs: 0,
   });
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setError(false);
+    try {
       const results = await Promise.allSettled([
         fetch(`/api/projects/${projectSlug}/health`).then((r) => r.ok ? r.json() : null),
         fetch(`/api/projects/${projectSlug}/schedule-metrics`, { cache: 'no-store' }).then((r) => r.ok ? r.json() : null),
@@ -53,10 +56,15 @@ export function DashboardGreeting({ projectSlug, projectId, userName }: Dashboar
         unprocessedDocs: 0,
       });
       setLoaded(true);
-    };
+    } catch {
+      setError(true);
+      setLoaded(true);
+    }
+  }, [projectSlug]);
 
+  useEffect(() => {
     fetchData();
-  }, [projectSlug, projectId]);
+  }, [fetchData, projectId]);
 
   const greeting = getTimeOfDayGreeting();
   const attentionItems = data.overdueCount + data.pendingSubmittals + data.unprocessedDocs;
@@ -69,9 +77,34 @@ export function DashboardGreeting({ projectSlug, projectId, userName }: Dashboar
     ? `${attentionItems} item${attentionItems !== 1 ? 's' : ''} need${attentionItems === 1 ? 's' : ''} attention today.`
     : 'Everything looks good today.';
 
+  if (!loaded) {
+    return (
+      <div className="animate-pulse space-y-2">
+        <div className="h-7 bg-gray-700 rounded w-2/5" />
+        <div className="h-5 bg-gray-700/60 rounded w-3/5" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center gap-3">
+        <p className="text-gray-400 text-sm">Failed to load project data.</p>
+        {retryCount < 3 && (
+          <button
+            onClick={() => { setRetryCount(c => c + 1); setLoaded(false); fetchData(); }}
+            className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 transition-colors"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`transition-all duration-500 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
+      className="transition-all duration-500 opacity-100 translate-y-0"
     >
       <h1 className="text-xl text-slate-50 font-medium">
         {greeting}{userName ? `, ${userName}` : ''}.{' '}

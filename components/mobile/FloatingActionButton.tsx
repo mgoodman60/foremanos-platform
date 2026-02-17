@@ -129,11 +129,12 @@ export function FloatingActionButton({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all transform active:scale-95 ${isOpen ? 'bg-gray-700 rotate-45' : 'bg-orange-500'}`}
+        aria-label={isOpen ? 'Close quick actions' : 'Open quick actions'}
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="w-6 h-6 text-white" aria-hidden="true" />
         ) : (
-          <Camera className="w-6 h-6 text-white" />
+          <Camera className="w-6 h-6 text-white" aria-hidden="true" />
         )}
       </button>
 

@@ -6,6 +6,9 @@
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import OpenAI from 'openai';
+
+const openai = new OpenAI();
 
 interface ExtractedMaterial {
   materialName: string;
@@ -56,12 +59,6 @@ export async function extractMaterialsFromReport(
 
     // Get existing material deliveries from conversation metadata
     const existingDeliveries = (conversation?.materialDeliveries as any[]) || [];
-
-    // Use AI to extract additional material data
-    const OpenAI = (await import('openai')).default;
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     const response = await openai.chat.completions.create({
       model: 'gpt-5.2',

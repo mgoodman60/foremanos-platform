@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { calculateProjectHealth, saveHealthSnapshot, getHealthHistory } from '@/lib/project-health-service';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export async function GET(
   request: NextRequest,
@@ -13,6 +14,14 @@ export async function GET(
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimit = await checkRateLimit(`api:${session.user.id}`, RATE_LIMITS.API);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Too many requests', retryAfter: rateLimit.retryAfter },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter || 60) } }
+      );
     }
 
     const project = await prisma.project.findUnique({
@@ -56,6 +65,14 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitPost = await checkRateLimit(`api:${session.user.id}`, RATE_LIMITS.API);
+    if (!rateLimitPost.success) {
+      return NextResponse.json(
+        { error: 'Too many requests', retryAfter: rateLimitPost.retryAfter },
+        { status: 429, headers: { 'Retry-After': String(rateLimitPost.retryAfter || 60) } }
+      );
     }
 
     const project = await prisma.project.findUnique({

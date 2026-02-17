@@ -28,6 +28,7 @@ const mockGetProviderDisplayName = vi.hoisted(() => vi.fn());
 const mockPerformQualityCheck = vi.hoisted(() => vi.fn());
 const mockFormatQualityReport = vi.hoisted(() => vi.fn());
 const mockIsBlankPage = vi.hoisted(() => vi.fn());
+const mockAssessPageComplexity = vi.hoisted(() => vi.fn());
 const mockWriteFile = vi.hoisted(() => vi.fn());
 const mockUnlink = vi.hoisted(() => vi.fn());
 
@@ -48,6 +49,7 @@ vi.mock('@/lib/vision-api-quality', () => ({
   performQualityCheck: mockPerformQualityCheck,
   formatQualityReport: mockFormatQualityReport,
   isBlankPage: mockIsBlankPage,
+  assessPageComplexity: mockAssessPageComplexity,
 }));
 vi.mock('fs/promises', () => ({
   default: {
@@ -115,6 +117,7 @@ describe('Opus Interpretation (via three-pass pipeline)', () => {
     mockPerformQualityCheck.mockReturnValue({ score: 85, passed: true, issues: [] });
     mockFormatQualityReport.mockReturnValue('Quality: 85%');
     mockIsBlankPage.mockReturnValue(false);
+    mockAssessPageComplexity.mockReturnValue('complex');
     mockWriteFile.mockResolvedValue(undefined);
     mockUnlink.mockResolvedValue(undefined);
     mockExtractPageAsPdf.mockResolvedValue({ base64: 'mock-base64-page' });

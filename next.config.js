@@ -31,6 +31,8 @@ const nextConfig = {
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
       // CSP: 'unsafe-inline' required by Next.js framework inline scripts (no nonce support without custom server)
       {
         key: 'Content-Security-Policy',

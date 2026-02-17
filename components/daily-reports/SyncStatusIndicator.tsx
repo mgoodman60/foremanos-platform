@@ -54,7 +54,7 @@ export default function SyncStatusIndicator({
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color} ${className}`}>
-      <Icon className={`h-3 w-3 ${status === 'syncing' ? 'animate-spin' : ''}`} />
+      <Icon className={`h-3 w-3 ${status === 'syncing' ? 'animate-spin' : ''}`} aria-hidden="true" />
       {config.label}
       {pendingCount > 0 && status !== 'online' && (
         <span className="ml-0.5">({pendingCount})</span>

@@ -7,6 +7,13 @@ import { initializeRegulatoryDocumentsForProject } from '@/lib/regulatory-docume
 import { namespacePIN } from '@/lib/guest-pin-utils';
 import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
+import { z } from 'zod';
+
+const createProjectSchema = z.object({
+  name: z.string().min(1, 'Project name is required').max(100, 'Project name too long'),
+  guestUsername: z.string().min(1, 'Guest username is required').max(50, 'Guest username too long'),
+  guestPassword: z.string().max(100, 'Guest password too long').optional().nullable(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -39,14 +46,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const { name, guestUsername, guestPassword } = await request.json();
-
-    if (!name || !guestUsername) {
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
       return NextResponse.json(
-        { error: 'Project name and guest username are required' },
+        { error: 'Invalid request body. Expected JSON.' },
         { status: 400 }
       );
     }
+
+    const parsed = createProjectSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
+        { status: 400 }
+      );
+    }
+
+    const { name, guestUsername, guestPassword } = parsed.data;
 
     // Generate unique slug
     let slug = generateSlug(name);

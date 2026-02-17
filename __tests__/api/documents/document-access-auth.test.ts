@@ -4,6 +4,19 @@ import {
   getServerSessionMock,
 } from '../../mocks/shared-mocks';
 
+// Mock modules that cause OpenAI SDK instantiation at import time
+vi.mock('@/lib/document-auto-sync', () => ({
+  handleDocumentDeletion: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('@/lib/docx-converter', () => ({
+  convertDocxToPdf: vi.fn(),
+  isConversionSupported: vi.fn().mockReturnValue(false),
+}));
+vi.mock('@/lib/aws-config', () => ({
+  createS3Client: vi.fn(),
+  getBucketConfig: vi.fn().mockReturnValue({ bucket: 'test', prefix: '' }),
+}));
+
 import { GET } from '@/app/api/documents/[id]/route';
 
 describe('Document Access Auth', () => {

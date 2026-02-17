@@ -4,6 +4,7 @@ import Script from 'next/script';
 import './globals.css';
 import { SessionProvider } from '@/components/session-provider';
 import { AnnouncerProvider } from '@/components/ui/announcer';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { ProgressBarProvider } from '@/components/ui/progress-bar';
 import { Toaster } from 'sonner';
 
@@ -104,7 +105,9 @@ export default function RootLayout({
         <SessionProvider>
           <ProgressBarProvider>
             <AnnouncerProvider>
-              {children}
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
               <Toaster
                 position="top-right"
                 richColors

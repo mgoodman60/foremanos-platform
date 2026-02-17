@@ -129,7 +129,7 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
                 <div className="flex items-end gap-3 mb-4">
                   <span className={`text-4xl font-bold tabular-nums ${scoreColor}`}>{health.overallScore}</span>
                   <div className={`flex items-center gap-1 pb-1 ${trendColor}`}>
-                    <TrendIcon className="w-4 h-4" />
+                    <TrendIcon className="w-4 h-4" aria-hidden="true" />
                     <span className="text-xs">
                       {health.changeFromPrevious >= 0 ? '+' : ''}
                       {health.changeFromPrevious.toFixed(1)}

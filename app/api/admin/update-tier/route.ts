@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createScopedLogger } from '@/lib/logger';
+import { apiError } from '@/lib/api-error';
+
+const log = createScopedLogger('ADMIN_UPDATE_TIER');
 
 export const dynamic = 'force-dynamic';
 
@@ -10,33 +14,24 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
     }
 
     // Only admins can update user tiers
     if (session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Only admins can update subscription tiers' },
-        { status: 403 }
-      );
+      return apiError('Only admins can update subscription tiers', 403, 'FORBIDDEN');
     }
 
     const { userId, tier } = await request.json();
 
     if (!userId || !tier) {
-      return NextResponse.json(
-        { error: 'User ID and tier are required' },
-        { status: 400 }
-      );
+      return apiError('User ID and tier are required', 400, 'VALIDATION_ERROR');
     }
 
     // Validate tier
     const validTiers = ['free', 'starter', 'pro', 'team', 'business', 'enterprise'];
     if (!validTiers.includes(tier)) {
-      return NextResponse.json(
-        { error: 'Invalid subscription tier' },
-        { status: 400 }
-      );
+      return apiError('Invalid subscription tier', 400, 'VALIDATION_ERROR');
     }
 
     // Check if user exists
@@ -51,7 +46,7 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return apiError('User not found', 404, 'NOT_FOUND');
     }
 
     // Update user's subscription tier
@@ -80,7 +75,7 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log(`[ADMIN] User ${userId} (${user.email}) tier updated from ${user.subscriptionTier} to ${tier} by ${session.user?.email}`);
+    log.info(`User tier updated`, { userId, email: user.email, oldTier: user.subscriptionTier, newTier: tier, updatedBy: session.user?.email });
 
     return NextResponse.json(
       {
@@ -96,13 +91,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('[ADMIN ERROR] Failed to update subscription tier:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to update subscription tier',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
-      { status: 500 }
-    );
+    log.error('Failed to update subscription tier', error);
+    return apiError('Failed to update subscription tier', 500, 'INTERNAL_ERROR');
   }
 }

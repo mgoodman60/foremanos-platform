@@ -31,7 +31,7 @@ interface DailyReportData {
 function TodayChip({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
     <div className="flex items-center gap-2 bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2">
-      <Icon className="w-3.5 h-3.5 text-gray-400" />
+      <Icon className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" />
       <span className="text-xs text-gray-300">{label}</span>
     </div>
   );
@@ -219,7 +219,7 @@ export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetPr
                   </div>
                   {criticalBadge && (
                     <div className={`flex items-center gap-1 mt-1 ${criticalBadge.color}`}>
-                      <criticalBadge.Icon className="w-3 h-3" />
+                      <criticalBadge.Icon className="w-3 h-3" aria-hidden="true" />
                       <span className="text-xs">{criticalBadge.label}</span>
                     </div>
                   )}

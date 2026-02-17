@@ -6,7 +6,7 @@
 import { prisma } from './db';
 import { getFileUrl } from './s3';
 import { analyzeWithMultiProvider, analyzeWithLoadBalancing, analyzeDocumentSmart, analyzeWithDirectPdf, analyzeWithSmartRouting, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
-import { performQualityCheck, formatQualityReport, isBlankPage, type ExtractedData } from './vision-api-quality';
+import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity, type ExtractedData } from './vision-api-quality';
 import { writeFile, unlink, readFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -95,7 +95,7 @@ TASKS:
 Respond with the complete JSON (original data + your additions). Preserve ALL original fields.`;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60s — text-only is fast
+  const timeout = setTimeout(() => controller.abort(), 120000); // 120s — large JSON prompts can be slow
 
   try {
     logger.info('OPUS_INTERPRETATION', `Starting interpretation for page ${pageNumber}`);
@@ -147,7 +147,7 @@ Respond with the complete JSON (original data + your additions). Preserve ALL or
     clearTimeout(timeout);
 
     if (error.name === 'AbortError') {
-      logger.warn('OPUS_INTERPRETATION', `Timeout after 60s for page ${pageNumber}`);
+      logger.warn('OPUS_INTERPRETATION', `Timeout after 120s for page ${pageNumber}`);
       throw new Error('Opus interpretation timed out');
     }
 
@@ -203,7 +203,7 @@ TASKS:
 Respond with the complete JSON (original data + your additions). Preserve ALL original fields.`;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60s
+  const timeout = setTimeout(() => controller.abort(), 120000); // 120s
 
   try {
     logger.info('GPT52_INTERPRETATION', `Starting interpretation for page ${pageNumber}`);
@@ -254,7 +254,7 @@ Respond with the complete JSON (original data + your additions). Preserve ALL or
     clearTimeout(timeout);
 
     if (error.name === 'AbortError') {
-      logger.warn('GPT52_INTERPRETATION', `Timeout after 60s for page ${pageNumber}`);
+      logger.warn('GPT52_INTERPRETATION', `Timeout after 120s for page ${pageNumber}`);
       throw new Error('GPT-5.2 interpretation timed out');
     }
 
@@ -393,6 +393,22 @@ async function analyzeWithThreePassPipeline(
     logger.warn('THREE_PASS_PIPELINE', `Pass 1 JSON parse failed, falling back to smart routing`, { error: parseError.message, pageNumber });
     const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
     return { ...smartResult, processingTier: 'fallback-single-pass' };
+  }
+
+  // Assess page complexity to skip Pass 2/3 for blank/simple pages
+  const complexity = assessPageComplexity(JSON.parse(pass1Json));
+  logger.info('THREE_PASS_PIPELINE', `Page complexity: ${complexity}`, { pageNumber });
+
+  if (complexity === 'blank' || complexity === 'simple') {
+    logger.info('THREE_PASS_PIPELINE', `Skipping Pass 2/3 for ${complexity} page`, { pageNumber });
+    return {
+      success: true,
+      content: pass1Json,
+      provider: pass1Result.provider,
+      attempts: pass1Result.attempts,
+      confidenceScore: pass1Result.confidenceScore,
+      processingTier: `extraction-only-${complexity}`,
+    };
   }
 
   // 500ms delay for rate limit mitigation between Gemini calls
@@ -564,7 +580,7 @@ export async function processDocumentBatch(
             providerStats[providerName].totalTime / providerStats[providerName].pagesProcessed / 1000; // Convert to seconds
 
           // Track cost inline using multi-pass cost model
-          const pageCost = getCostPerPage(visionResult.provider, (visionResult as any).interpretationProvider ?? null);
+          const pageCost = getCostPerPage(visionResult.provider, visionResult.interpretationProvider ?? null);
           estimatedCost += pageCost;
 
           // Parse vision response
@@ -616,9 +632,9 @@ export async function processDocumentBatch(
               qualityScore: qualityCheck.score,
               qualityPassed: qualityCheck.passed,
               attempts: visionResult.attempts,
-              interpretationProvider: (visionResult as any).interpretationProvider || null,
-              pass2Provider: (visionResult as any).pass2Provider || null,
-              processingTier: (visionResult as any).processingTier || 'single-pass',
+              interpretationProvider: visionResult.interpretationProvider || null,
+              pass2Provider: visionResult.pass2Provider || null,
+              processingTier: visionResult.processingTier || 'single-pass',
               ...extractMetadata(parsedData),
             };
 

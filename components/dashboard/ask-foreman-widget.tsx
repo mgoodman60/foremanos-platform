@@ -77,7 +77,7 @@ export function AskForemanWidget({ projectSlug, projectId }: AskForemanWidgetPro
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-orange-500/20 flex items-center justify-center">
-            <HardHat className="w-5 h-5 text-orange-400" />
+            <HardHat className="w-5 h-5 text-orange-400" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-50">Ask the Foreman</h3>
@@ -95,7 +95,7 @@ export function AskForemanWidget({ projectSlug, projectId }: AskForemanWidgetPro
                 onClick={() => setAiDrawerOpen(true)}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors truncate"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                <MessageSquare className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" aria-hidden="true" />
                 <span className="truncate">{conv.title}</span>
               </button>
             ))}
@@ -130,7 +130,7 @@ export function AskForemanWidget({ projectSlug, projectId }: AskForemanWidgetPro
             className="px-3 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
             aria-label="Send message"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4" aria-hidden="true" />
           </button>
         </form>
       </div>

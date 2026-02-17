@@ -5,6 +5,10 @@ import {
   recoverAllOrphanedDocuments,
   getOrphanedDocumentStats,
 } from '@/lib/orphaned-document-recovery';
+import { createScopedLogger } from '@/lib/logger';
+import { apiError } from '@/lib/api-error';
+
+const log = createScopedLogger('ADMIN_RECOVERY');
 
 export const dynamic = 'force-dynamic';
 
@@ -18,15 +22,12 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
     }
 
     // Check if user is admin
     if (session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
+      return apiError('Admin access required', 403, 'FORBIDDEN');
     }
 
     // Run recovery
@@ -38,11 +39,8 @@ export async function POST(request: Request) {
       message: `Recovery complete: ${recoveredCount} document(s) recovered`,
     });
   } catch (error: any) {
-    console.error('[ADMIN RECOVERY] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to recover orphaned documents' },
-      { status: 500 }
-    );
+    log.error('Recovery failed', error);
+    return apiError('Failed to recover orphaned documents', 500, 'INTERNAL_ERROR');
   }
 }
 
@@ -56,15 +54,12 @@ export async function GET(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return apiError('Unauthorized', 401, 'UNAUTHORIZED');
     }
 
     // Check if user is admin
     if (session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
+      return apiError('Admin access required', 403, 'FORBIDDEN');
     }
 
     // Get stats
@@ -75,10 +70,7 @@ export async function GET(request: Request) {
       ...stats,
     });
   } catch (error: any) {
-    console.error('[ADMIN RECOVERY STATS] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to get orphaned document stats' },
-      { status: 500 }
-    );
+    log.error('Failed to get orphaned document stats', error);
+    return apiError('Failed to get orphaned document stats', 500, 'INTERNAL_ERROR');
   }
 }

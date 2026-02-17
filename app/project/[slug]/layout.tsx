@@ -12,6 +12,7 @@ import { useProjectModals } from '@/hooks/use-project-modals';
 import { DocumentCategoryModal } from '@/components/document-category-modal';
 import { SkeletonProjectWorkspace } from '@/components/ui/skeleton-card';
 import { X } from 'lucide-react';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { KeyboardShortcutsProvider } from '@/components/shared/keyboard-shortcuts-modal';
 import { MobileBottomNav } from '@/components/mobile/MobileBottomNav';
 
@@ -107,7 +108,9 @@ function ProjectLayoutInner({ children }: { children: React.ReactNode }) {
             role="main"
             className="flex-1 overflow-y-auto pb-16 md:pb-0"
           >
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </main>
 
           <AIAssistantDrawer />

@@ -28,6 +28,7 @@ const mockGetProviderDisplayName = vi.hoisted(() => vi.fn());
 const mockPerformQualityCheck = vi.hoisted(() => vi.fn());
 const mockFormatQualityReport = vi.hoisted(() => vi.fn());
 const mockIsBlankPage = vi.hoisted(() => vi.fn());
+const mockAssessPageComplexity = vi.hoisted(() => vi.fn());
 const mockWriteFile = vi.hoisted(() => vi.fn());
 const mockUnlink = vi.hoisted(() => vi.fn());
 const mockConvertSinglePage = vi.hoisted(() => vi.fn());
@@ -49,6 +50,7 @@ vi.mock('@/lib/vision-api-quality', () => ({
   performQualityCheck: mockPerformQualityCheck,
   formatQualityReport: mockFormatQualityReport,
   isBlankPage: mockIsBlankPage,
+  assessPageComplexity: mockAssessPageComplexity,
 }));
 vi.mock('fs/promises', () => ({
   default: {
@@ -111,6 +113,7 @@ describe('document-processor-batch', () => {
     mockPerformQualityCheck.mockReturnValue({ score: 85, passed: true, issues: [] });
     mockFormatQualityReport.mockReturnValue('Quality: 85%');
     mockIsBlankPage.mockReturnValue(false);
+    mockAssessPageComplexity.mockReturnValue('complex'); // Default: run full pipeline
     mockWriteFile.mockResolvedValue(undefined);
     mockUnlink.mockResolvedValue(undefined);
     mockExtractPageAsPdf.mockResolvedValue({ base64: 'mock-base64-page' });
@@ -851,6 +854,161 @@ describe('document-processor-batch', () => {
           }),
         })
       );
+    });
+
+    describe('Smart Pass Skipping', () => {
+      it('should skip Pass 2 and Pass 3 for blank pages', async () => {
+        // Pass 1: Gemini Pro 3 succeeds with minimal data
+        mockCallGeminiPro3Vision.mockResolvedValue({
+          success: true,
+          content: JSON.stringify({ sheetNumber: '', content: '' }),
+          provider: 'gemini-3-pro-preview',
+          attempts: 1,
+          confidenceScore: 0.3,
+        });
+
+        // Complexity: blank
+        mockAssessPageComplexity.mockReturnValue('blank');
+        mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+        const result = await processDocumentBatch('doc-123', 1, 1);
+
+        expect(result.success).toBe(true);
+        // Should NOT call Gemini 2.5 Pro (Pass 2)
+        expect(mockCallGeminiVision).not.toHaveBeenCalled();
+        // Should NOT call smart routing fallback
+        expect(mockAnalyzeWithSmartRouting).not.toHaveBeenCalled();
+        // Should store extraction-only-blank tier
+        expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              metadata: expect.objectContaining({
+                processingTier: 'extraction-only-blank',
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should skip Pass 2 and Pass 3 for simple pages (cover sheets)', async () => {
+        // Pass 1: Gemini Pro 3 succeeds with cover sheet data
+        mockCallGeminiPro3Vision.mockResolvedValue({
+          success: true,
+          content: JSON.stringify({
+            sheetNumber: 'G-001',
+            sheetTitle: 'COVER SHEET',
+            content: 'Project directory and general information',
+          }),
+          provider: 'gemini-3-pro-preview',
+          attempts: 1,
+          confidenceScore: 0.7,
+        });
+
+        // Complexity: simple
+        mockAssessPageComplexity.mockReturnValue('simple');
+        mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+        const result = await processDocumentBatch('doc-123', 1, 1);
+
+        expect(result.success).toBe(true);
+        // Should NOT call Gemini 2.5 Pro (Pass 2)
+        expect(mockCallGeminiVision).not.toHaveBeenCalled();
+        // Should NOT call smart routing fallback
+        expect(mockAnalyzeWithSmartRouting).not.toHaveBeenCalled();
+        // Should store extraction-only-simple tier
+        expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              metadata: expect.objectContaining({
+                processingTier: 'extraction-only-simple',
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should run full three-pass pipeline for complex pages', async () => {
+        const extractedData = {
+          sheetNumber: 'A-101',
+          sheetTitle: 'Floor Plan',
+          dimensions: ['15\'-6"'],
+          rooms: [{ number: '101', name: 'LOBBY' }],
+          doors: ['D1'],
+        };
+        const enrichedData = { ...extractedData, _overallConfidence: 0.92 };
+
+        // Pass 1: Gemini Pro 3 succeeds
+        mockCallGeminiPro3Vision.mockResolvedValue({
+          success: true,
+          content: JSON.stringify(extractedData),
+          provider: 'gemini-3-pro-preview',
+          attempts: 1,
+          confidenceScore: 0.85,
+        });
+
+        // Complexity: complex — should continue to Pass 2/3
+        mockAssessPageComplexity.mockReturnValue('complex');
+
+        // Pass 2: Gemini 2.5 Pro validation succeeds
+        mockCallGeminiVision.mockResolvedValue({
+          success: true,
+          content: JSON.stringify(extractedData),
+          provider: 'gemini-2.5-pro',
+          attempts: 1,
+        });
+
+        mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+        // Pass 3: Opus interpretation succeeds
+        (global.fetch as any)
+          .mockResolvedValueOnce({
+            ok: true,
+            arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            text: async () => JSON.stringify({
+              content: [{ text: JSON.stringify(enrichedData) }],
+            }),
+          });
+
+        const result = await processDocumentBatch('doc-123', 1, 1);
+
+        expect(result.success).toBe(true);
+        // SHOULD call Gemini 2.5 Pro (Pass 2) for complex pages
+        expect(mockCallGeminiVision).toHaveBeenCalled();
+        // Should store three-pass tier
+        expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              metadata: expect.objectContaining({
+                processingTier: 'three-pass',
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should only use Gemini Pro 3 cost for skipped pages', async () => {
+        // Pass 1: Gemini Pro 3 succeeds
+        mockCallGeminiPro3Vision.mockResolvedValue({
+          success: true,
+          content: JSON.stringify({ sheetNumber: 'G-001', sheetTitle: 'COVER SHEET' }),
+          provider: 'gemini-3-pro-preview',
+          attempts: 1,
+          confidenceScore: 0.6,
+        });
+
+        mockAssessPageComplexity.mockReturnValue('simple');
+        mockGetProviderDisplayName.mockReturnValue('Gemini 3 Pro Preview (Google)');
+
+        const result = await processDocumentBatch('doc-123', 1, 1);
+
+        expect(result.success).toBe(true);
+        // Cost should be only Gemini Pro 3 ($0.03) with no interpretation cost
+        expect(result.estimatedCost).toBe(0.03);
+      });
     });
   });
 });

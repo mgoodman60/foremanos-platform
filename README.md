@@ -1,162 +1,75 @@
-# ForemanOS - Construction Project Management Platform
+# ForemanOS
 
-A comprehensive AI-powered construction project management platform built with Next.js, featuring document intelligence, schedule management, budget tracking, and field operations.
+AI-powered construction project management platform. Extracts intelligence from construction documents (plans, specs, schedules) using multi-provider vision AI, and provides a comprehensive project management interface with budgets, schedules, field operations, and real-time analytics.
 
-## 🚀 Features
+## Tech Stack
 
-- **AI-Powered Chat**: RAG-based document Q&A with source citations
-- **Document Intelligence**: Automatic extraction from plans, specs, schedules
-- **Schedule Management**: Gantt charts, 3-week lookahead, critical path analysis
-- **Budget Tracking**: Cost codes, change orders, EVM dashboard, S-curve analysis
-- **MEP Submittals**: Workflow management with quantity verification
-- **Daily Reports**: Field operations logging with photo capture
-- **CAD/BIM Integration**: Autodesk Forge viewer for DWG/RVT files
-- **Weather Integration**: Impact forecasting and alerts
+- **Framework**: Next.js 14.2 (App Router)
+- **Database**: PostgreSQL 14+ via Prisma 6.7 (112 models)
+- **Language**: TypeScript 5.8
+- **Auth**: NextAuth.js (JWT-based)
+- **Storage**: Cloudflare R2 (S3-compatible)
+- **Background Jobs**: Trigger.dev v3
+- **AI**: Claude Opus/Sonnet, GPT-5.2, Gemini Pro 3 / 2.5 Pro
+- **UI**: Tailwind CSS 3.3 + Radix UI + Shadcn components
 
-## 📋 Prerequisites
+## Prerequisites
 
-- Node.js 18+ 
+- Node.js 20+
 - PostgreSQL 14+
-- Yarn package manager
-- AWS account (for S3 file storage)
-- API keys for AI services (Anthropic/OpenAI)
+- npm
 
-## 🛠️ Installation
-
-### 1. Clone the Repository
+## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/foremanos.git
-cd foremanos
+git clone <repo-url> && cd foremanos
+npm install
+cp .env.example .env.local   # Configure environment variables
+npx prisma generate
+npx prisma db push            # Sync schema to database
+npm run dev                   # http://localhost:3000
 ```
 
-### 2. Install Dependencies
+## Key Directories
+
+```
+app/api/              # 406 API routes
+lib/                  # 277 service modules
+components/           # 337 React components
+prisma/               # Database schema (112 models)
+src/trigger/          # Trigger.dev background tasks
+__tests__/            # Vitest tests (245+ files, 9400+ tests)
+e2e/                  # Playwright E2E tests (23 specs)
+```
+
+## Testing
 
 ```bash
-yarn install
+npm test -- --run                                  # Run all tests
+npm test -- __tests__/lib/<module>.test.ts --run    # Single test file
+npx playwright test                                # E2E tests
 ```
 
-### 3. Configure Environment
+## Deployment
 
-```bash
-cp .env.example .env
-# Edit .env with your credentials
-```
+- Push to `main` triggers Vercel auto-deploy
+- Trigger.dev: `npx trigger.dev@latest deploy --env prod --skip-update-check`
 
-### 4. Set Up Database
+## Environment Variables
 
-```bash
-# Create PostgreSQL database
-createdb foremanos
+**Required:**
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_SECRET` - 32-char random string
+- `NEXTAUTH_URL` - Base URL (http://localhost:3000 for dev)
 
-# Run migrations
-yarn prisma migrate deploy
+**Optional:**
+- `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GOOGLE_API_KEY` - AI providers
+- `S3_ENDPOINT`, `AWS_REGION`, `AWS_BUCKET_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` - Storage (R2/S3)
+- `REDIS_URL` - Caching (falls back to in-memory)
+- `STRIPE_SECRET_KEY` - Payments
+- `CRON_SECRET` - Cron job authentication
+- `RESEND_API_KEY` - Email notifications
+- `TWILIO_AUTH_TOKEN` - SMS daily report entry
+- `ONEDRIVE_CLIENT_ID`, `ONEDRIVE_CLIENT_SECRET`, `ONEDRIVE_TENANT_ID` - OneDrive integration
 
-# Generate Prisma client
-yarn prisma generate
-
-# (Optional) Seed initial data
-yarn prisma db seed
-```
-
-### 5. Run Development Server
-
-```bash
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
-
-## 🏗️ Project Structure
-
-```
-├── app/                    # Next.js App Router
-│   ├── api/               # 388 API routes
-│   ├── dashboard/         # User dashboard
-│   ├── project/[slug]/    # Project pages
-│   └── admin/             # Admin panel
-├── components/            # React components
-│   ├── ui/               # Shadcn/Radix primitives
-│   ├── chat/             # Chat interface
-│   ├── budget/           # Budget management
-│   ├── schedule/         # Schedule components
-│   └── submittals/       # Submittal workflow
-├── lib/                   # Utilities & services
-│   ├── db.ts             # Prisma client
-│   ├── auth-options.ts   # NextAuth config
-│   ├── s3.ts             # AWS S3 operations
-│   └── rag.ts            # RAG system
-├── prisma/
-│   └── schema.prisma     # 112 database models
-└── public/               # Static assets
-```
-
-## 🔑 Required Services
-
-| Service | Purpose | Required |
-|---------|---------|----------|
-| PostgreSQL | Database | ✅ Yes |
-| AWS S3 | File storage | ✅ Yes |
-| Anthropic/OpenAI | AI/LLM | ✅ Yes |
-| Stripe | Payments | Optional |
-| Autodesk | CAD viewing | Optional |
-| Redis | Rate limiting | Optional |
-
-## 📝 Scripts
-
-```bash
-yarn dev          # Start development server
-yarn build        # Build for production
-yarn start        # Start production server
-yarn lint         # Run ESLint
-yarn prisma studio # Open Prisma database GUI
-```
-
-## 🧪 Testing
-
-```bash
-npm test              # Run all tests (903 tests)
-npm test -- --run     # Run once without watch mode
-npm run test:watch    # Watch mode
-npx playwright test   # Run E2E tests
-```
-
-Key test suites cover: RAG scoring, rate limiting, authentication, Stripe integration, S3 operations, access control, password validation, webhooks, Redis caching, and document processing.
-
-## 🚢 Deployment
-
-### Vercel (Production)
-
-ForemanOS is deployed on Vercel. Production deploys automatically when you push to `main`:
-
-```bash
-git push origin main
-```
-
-Manual deploy (if needed):
-```bash
-npx vercel --prod
-```
-
-Production URL: https://foremanos.vercel.app
-
-### Local Production Build
-
-```bash
-yarn build
-yarn start
-```
-
-### Environment Variables for Production
-
-- Set `NEXTAUTH_URL` to your production domain
-- Use live Stripe keys instead of test keys
-- Configure proper AWS credentials
-
-## 📄 License
-
-Proprietary - All rights reserved
-
-## 🤝 Support
-
-Contact: ForemanOS@outlook.com
+See `CLAUDE.md` for comprehensive architecture documentation, `S3_SETUP_GUIDE.md` for storage setup.

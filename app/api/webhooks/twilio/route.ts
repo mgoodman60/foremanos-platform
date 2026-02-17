@@ -3,9 +3,10 @@
  * Receives inbound SMS/MMS messages and parses them into daily report fields
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createScopedLogger } from '@/lib/logger';
 import { parseSMSToReportFields, lookupUserByPhone } from '@/lib/sms-daily-report-service';
+import { getCached, setCached } from '@/lib/redis';
 
 const log = createScopedLogger('TWILIO_WEBHOOK');
 
@@ -27,6 +28,13 @@ function escapeXml(str: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require TWILIO_AUTH_TOKEN — never process unsigned webhooks
+    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+    if (!twilioAuthToken) {
+      log.error('TWILIO_AUTH_TOKEN not configured');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
+    }
+
     // Parse Twilio form-encoded body
     const formData = await request.formData();
     const from = formData.get('From') as string;
@@ -38,29 +46,49 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate Twilio request signature (HMAC-SHA1)
-    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-    if (twilioAuthToken) {
-      const signature = request.headers.get('X-Twilio-Signature');
-      if (!signature) {
-        log.warn('Missing Twilio signature header');
-        return new Response('Forbidden', { status: 403 });
+    const signature = request.headers.get('X-Twilio-Signature');
+    if (!signature) {
+      log.warn('Missing Twilio signature header');
+      return new Response('Forbidden', { status: 403 });
+    }
+
+    const { createHmac } = await import('crypto');
+    const webhookUrl = process.env.TWILIO_WEBHOOK_URL || `${process.env.NEXTAUTH_URL}/api/webhooks/twilio`;
+    // Build parameter string: sort params alphabetically, concatenate key+value
+    const params: Record<string, string> = {};
+    formData.forEach((value, key) => { params[key] = value.toString(); });
+    const paramString = Object.keys(params).sort().map(k => k + params[k]).join('');
+    const expectedSignature = createHmac('sha1', twilioAuthToken)
+      .update(webhookUrl + paramString)
+      .digest('base64');
+    if (signature !== expectedSignature) {
+      log.warn('Invalid Twilio signature', { from });
+      return new Response('Forbidden', { status: 403 });
+    }
+
+    // Replay protection: reject requests older than 5 minutes
+    const twilioTimestamp = request.headers.get('X-Twilio-Timestamp');
+    if (twilioTimestamp) {
+      const requestTime = new Date(twilioTimestamp).getTime();
+      const now = Date.now();
+      const fiveMinutesMs = 5 * 60 * 1000;
+      if (!isNaN(requestTime) && Math.abs(now - requestTime) > fiveMinutesMs) {
+        log.warn('Twilio request outside timestamp window', { twilioTimestamp, from });
+        return new Response('Request expired', { status: 403 });
       }
-      // Validate signature using HMAC-SHA1 per Twilio spec
-      const { createHmac } = await import('crypto');
-      const webhookUrl = process.env.TWILIO_WEBHOOK_URL || `${process.env.NEXTAUTH_URL}/api/webhooks/twilio`;
-      // Build parameter string: sort params alphabetically, concatenate key+value
-      const params: Record<string, string> = {};
-      formData.forEach((value, key) => { params[key] = value.toString(); });
-      const paramString = Object.keys(params).sort().map(k => k + params[k]).join('');
-      const expectedSignature = createHmac('sha1', twilioAuthToken)
-        .update(webhookUrl + paramString)
-        .digest('base64');
-      if (signature !== expectedSignature) {
-        log.warn('Invalid Twilio signature', { from });
-        return new Response('Forbidden', { status: 403 });
+    }
+
+    // Deduplicate by MessageSid (Twilio may retry delivery)
+    const messageSid = formData.get('MessageSid') as string || formData.get('SmsSid') as string;
+    if (messageSid) {
+      const dedupeKey = `twilio:processed:${messageSid}`;
+      const alreadyProcessed = await getCached<string>(dedupeKey);
+      if (alreadyProcessed) {
+        log.info('Duplicate webhook ignored', { messageSid });
+        return NextResponse.json({ status: 'duplicate' });
       }
-    } else {
-      log.warn('TWILIO_AUTH_TOKEN not configured — webhook signature validation disabled');
+      // Mark as processed with 24h TTL
+      await setCached(dedupeKey, 'true', 86400);
     }
 
     // Look up user by phone number

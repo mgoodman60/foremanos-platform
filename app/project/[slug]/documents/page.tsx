@@ -49,7 +49,7 @@ export default function DocumentsPage() {
     return (
       <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500 mx-auto mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-orange-500 mx-auto mb-4" aria-hidden="true" />
           <p className="text-gray-400">Loading documents...</p>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function DocumentsPage() {
     return (
       <div className="min-h-screen bg-dark-surface flex items-center justify-center">
         <div className="text-center">
-          <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+          <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" aria-hidden="true" />
           <p className="text-gray-400">Project not found or not authorized.</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ export default function DocumentsPage() {
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-3">
-            <FileText className="h-6 w-6 text-orange-500" />
+            <FileText className="h-6 w-6 text-orange-500" aria-hidden="true" />
             Documents
           </h1>
           <p className="text-gray-400 mt-1">

@@ -33,25 +33,25 @@ export function QuickActionsBar({ projectSlug, onUpload }: QuickActionsBarProps)
   return (
     <div className="flex flex-wrap gap-3">
       <button className={`${pillBase} ${defaultPill}`} onClick={onUpload}>
-        <Upload className="w-4 h-4" />
+        <Upload className="w-4 h-4" aria-hidden="true" />
         Upload Doc
       </button>
       <button
         className={`${pillBase} ${defaultPill}`}
         onClick={() => router.push(`/project/${projectSlug}/field-ops/daily-reports?new=true`)}
       >
-        <ClipboardPlus className="w-4 h-4" />
+        <ClipboardPlus className="w-4 h-4" aria-hidden="true" />
         New Daily Report
       </button>
       <button
         className={`${pillBase} ${defaultPill}`}
         onClick={() => router.push(`/project/${projectSlug}/schedule-budget`)}
       >
-        <Calendar className="w-4 h-4" />
+        <Calendar className="w-4 h-4" aria-hidden="true" />
         Open Schedule
       </button>
       <button className={`${pillBase} ${foremanPill}`} onClick={handleAskForeman}>
-        <MessageSquare className="w-4 h-4" />
+        <MessageSquare className="w-4 h-4" aria-hidden="true" />
         Ask the Foreman
       </button>
     </div>

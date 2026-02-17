@@ -16,8 +16,43 @@ import {
   runDocumentPostProcessing
 } from "@/lib/document-processing-queue";
 import { prisma } from "@/lib/db";
-import { ProcessingQueueStatus } from "@prisma/client";
+import { Prisma, ProcessingQueueStatus } from "@prisma/client";
 import { logger } from "@/lib/logger";
+
+const MAX_PAGE_RETRIES = 3;
+const MAX_DURATION_SECONDS = 7200;
+
+/** Strip potential API keys and sensitive data from error messages */
+function sanitizeError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  return message
+    .replace(/sk-[a-zA-Z0-9]{20,}/g, '[REDACTED_KEY]')
+    .replace(/key-[a-zA-Z0-9]{20,}/g, '[REDACTED_KEY]')
+    .replace(/Bearer\s+[a-zA-Z0-9._-]+/g, 'Bearer [REDACTED]')
+    .replace(/https?:\/\/[^:]+:[^@]+@/g, 'https://[REDACTED]@')
+    .substring(0, 500);
+}
+
+/** Classify Prisma errors for appropriate handling */
+function classifyPrismaError(error: unknown): { isRetryable: boolean; code?: string } {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    // P2025 = record not found, P2003 = foreign key constraint
+    if (error.code === 'P2025' || error.code === 'P2003') {
+      return { isRetryable: false, code: error.code };
+    }
+    // P2002 = unique constraint violation (e.g., duplicate insert race)
+    if (error.code === 'P2002') {
+      return { isRetryable: false, code: error.code };
+    }
+    // Connection/timeout errors are retryable
+    if (error.code === 'P2024' || error.code === 'P1001' || error.code === 'P1002') {
+      return { isRetryable: true, code: error.code };
+    }
+    return { isRetryable: false, code: error.code };
+  }
+  // Unknown errors are retryable by default
+  return { isRetryable: true };
+}
 
 interface ProcessDocumentPayload {
   documentId: string;
@@ -37,6 +72,7 @@ export const processDocumentTask = task({
   },
   run: async (payload: ProcessDocumentPayload) => {
     const { documentId, totalPages, processorType = 'vision-ai', batchSize = 1 } = payload;
+    const taskStartTime = Date.now();
 
     triggerLogger.log(`Starting document processing`, { documentId, totalPages, processorType });
     logger.info('TRIGGER_PROCESS', `Task started for document ${documentId}`, { totalPages, processorType });
@@ -100,71 +136,110 @@ export const processDocumentTask = task({
       const errors: { page: number; error: string }[] = [];
 
       for (let page = 1; page <= totalPages; page++) {
-        try {
-          triggerLogger.log(`Processing page ${page}/${totalPages}`, { documentId });
+        // Timeout warning: log when elapsed time exceeds 80% of maxDuration
+        const elapsedSeconds = (Date.now() - taskStartTime) / 1000;
+        const timeoutThreshold = MAX_DURATION_SECONDS * 0.8;
+        if (elapsedSeconds > timeoutThreshold) {
+          const remainingSeconds = Math.round(MAX_DURATION_SECONDS - elapsedSeconds);
+          logger.warn('TRIGGER_PROCESS', `Approaching timeout: ${remainingSeconds}s remaining`, {
+            documentId, page, totalPages, elapsedSeconds: Math.round(elapsedSeconds),
+          });
+          triggerLogger.warn(`Timeout warning: ${remainingSeconds}s remaining at page ${page}/${totalPages}`, { documentId });
+        }
 
-          const result = await processDocumentBatch(
-            documentId,
-            page,
-            page,
-            processorType,
-            pdfBuffer
-          );
+        // Per-page retry loop (max 3 attempts with exponential backoff)
+        for (let attempt = 1; attempt <= MAX_PAGE_RETRIES; attempt++) {
+          try {
+            triggerLogger.log(`Processing page ${page}/${totalPages}${attempt > 1 ? ` (attempt ${attempt})` : ''}`, { documentId });
 
-          if (result.success) {
-            pagesProcessed += result.pagesProcessed;
-            providerBreakdown = accumulateProviderStats([result], providerBreakdown);
+            const result = await processDocumentBatch(
+              documentId,
+              page,
+              page,
+              processorType,
+              pdfBuffer
+            );
 
-            // Update progress in DB after each page
-            await prisma.$transaction([
-              prisma.document.update({
-                where: { id: documentId },
-                data: { pagesProcessed },
-              }),
-              prisma.processingQueue.update({
-                where: { id: queueEntry.id },
-                data: {
-                  pagesProcessed,
-                  currentBatch: page,
-                  updatedAt: new Date(),
-                  metadata: {
-                    ...metadata,
-                    providerBreakdown,
-                    lastBatchAt: new Date().toISOString(),
+            if (result.success) {
+              pagesProcessed += result.pagesProcessed;
+              providerBreakdown = accumulateProviderStats([result], providerBreakdown);
+
+              // Update progress in DB after each page
+              await prisma.$transaction([
+                prisma.document.update({
+                  where: { id: documentId },
+                  data: { pagesProcessed },
+                }),
+                prisma.processingQueue.update({
+                  where: { id: queueEntry.id },
+                  data: {
+                    pagesProcessed,
+                    currentBatch: page,
+                    updatedAt: new Date(),
+                    metadata: {
+                      ...metadata,
+                      providerBreakdown,
+                      lastBatchAt: new Date().toISOString(),
+                    },
                   },
-                },
-              }),
-            ]);
+                }),
+              ]);
 
-            // Update cost incrementally
-            if (result.estimatedCost && result.estimatedCost > 0) {
-              await prisma.document.update({
-                where: { id: documentId },
-                data: { processingCost: { increment: result.estimatedCost } },
+              // Update cost incrementally
+              if (result.estimatedCost && result.estimatedCost > 0) {
+                await prisma.document.update({
+                  where: { id: documentId },
+                  data: { processingCost: { increment: result.estimatedCost } },
+                });
+              }
+
+              triggerLogger.log(`Page ${page} completed`, {
+                documentId,
+                pagesProcessed,
+                cost: result.estimatedCost,
               });
+              break; // Success — exit retry loop
+            } else {
+              // Non-exception failure (e.g., vision API returned error result)
+              const errorMsg = sanitizeError(result.error || 'Unknown error');
+              if (attempt < MAX_PAGE_RETRIES) {
+                const backoffMs = Math.pow(2, attempt) * 1000; // 2s, 4s
+                logger.warn('TRIGGER_PROCESS', `Page ${page} failed (attempt ${attempt}), retrying in ${backoffMs}ms`, {
+                  documentId, error: errorMsg,
+                });
+                await new Promise(resolve => setTimeout(resolve, backoffMs));
+              } else {
+                errors.push({ page, error: errorMsg });
+                logger.warn('TRIGGER_PROCESS', `Page ${page} failed after ${MAX_PAGE_RETRIES} attempts`, {
+                  documentId, error: errorMsg,
+                });
+                triggerLogger.warn(`Page ${page} failed: ${errorMsg}`, { documentId });
+              }
+            }
+          } catch (pageError: unknown) {
+            const errorMsg = sanitizeError(pageError);
+
+            // Check if this is a non-retryable Prisma error (e.g., record deleted)
+            const classification = classifyPrismaError(pageError);
+            if (!classification.isRetryable) {
+              errors.push({ page, error: errorMsg });
+              logger.error('TRIGGER_PROCESS', `Page ${page} non-retryable error (${classification.code})`, pageError as Error, { documentId });
+              triggerLogger.error(`Page ${page} non-retryable error: ${errorMsg}`, { documentId });
+              break; // Exit retry loop — no point retrying
             }
 
-            triggerLogger.log(`Page ${page} completed`, {
-              documentId,
-              pagesProcessed,
-              cost: result.estimatedCost,
-            });
-          } else {
-            // Log error but continue to next page
-            const errorMsg = result.error || 'Unknown error';
-            errors.push({ page, error: errorMsg });
-            logger.warn('TRIGGER_PROCESS', `Page ${page} failed, continuing`, {
-              documentId,
-              error: errorMsg,
-            });
-            triggerLogger.warn(`Page ${page} failed: ${errorMsg}`, { documentId });
+            if (attempt < MAX_PAGE_RETRIES) {
+              const backoffMs = Math.pow(2, attempt) * 1000;
+              logger.warn('TRIGGER_PROCESS', `Page ${page} error (attempt ${attempt}), retrying in ${backoffMs}ms`, {
+                documentId, error: errorMsg,
+              });
+              await new Promise(resolve => setTimeout(resolve, backoffMs));
+            } else {
+              errors.push({ page, error: errorMsg });
+              logger.error('TRIGGER_PROCESS', `Page ${page} failed after ${MAX_PAGE_RETRIES} attempts`, pageError as Error, { documentId });
+              triggerLogger.error(`Page ${page} error: ${errorMsg}`, { documentId });
+            }
           }
-        } catch (pageError: any) {
-          // Log error and continue to next page
-          const errorMsg = pageError.message || String(pageError);
-          errors.push({ page, error: errorMsg });
-          logger.error('TRIGGER_PROCESS', `Page ${page} processing error`, pageError, { documentId });
-          triggerLogger.error(`Page ${page} error: ${errorMsg}`, { documentId });
         }
       }
 
@@ -231,10 +306,10 @@ export const processDocumentTask = task({
 
           triggerLogger.log(`Post-processing completed`, { documentId });
           logger.info('TRIGGER_PROCESS', `Post-processing completed`, { documentId });
-        } catch (postError: any) {
+        } catch (postError: unknown) {
           // Log but don't fail the task — vision extraction succeeded
-          logger.error('TRIGGER_PROCESS', `Post-processing failed`, postError, { documentId });
-          triggerLogger.error(`Post-processing failed: ${postError.message}`, { documentId });
+          logger.error('TRIGGER_PROCESS', `Post-processing failed`, postError as Error, { documentId });
+          triggerLogger.error(`Post-processing failed: ${sanitizeError(postError)}`, { documentId });
         }
       }
 
@@ -247,10 +322,11 @@ export const processDocumentTask = task({
         errors: errors.length > 0 ? errors : undefined,
       };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Fatal error — mark document and queue as failed
-      logger.error('TRIGGER_PROCESS', `Fatal error processing document`, error, { documentId });
-      triggerLogger.error(`Fatal error: ${error.message}`, { documentId });
+      const sanitizedMsg = sanitizeError(error);
+      logger.error('TRIGGER_PROCESS', `Fatal error processing document`, error as Error, { documentId });
+      triggerLogger.error(`Fatal error: ${sanitizedMsg}`, { documentId });
 
       try {
         await prisma.$transaction([
@@ -258,7 +334,7 @@ export const processDocumentTask = task({
             where: { documentId },
             data: {
               status: ProcessingQueueStatus.failed,
-              lastError: error.message || String(error),
+              lastError: sanitizedMsg,
               updatedAt: new Date(),
             },
           }),
@@ -266,13 +342,14 @@ export const processDocumentTask = task({
             where: { id: documentId },
             data: {
               queueStatus: 'failed',
-              lastProcessingError: error.message || String(error),
+              lastProcessingError: sanitizedMsg,
             },
           }),
         ]);
-      } catch (dbError: any) {
-        // P2025 = record not found (document was deleted mid-processing)
-        if (dbError?.code === 'P2025' || dbError?.code === 'P2003') {
+      } catch (dbError: unknown) {
+        const dbClassification = classifyPrismaError(dbError);
+        // P2025 = record not found, P2003 = foreign key (document was deleted mid-processing)
+        if (dbClassification.code === 'P2025' || dbClassification.code === 'P2003') {
           logger.warn('TRIGGER_PROCESS', `Document deleted during processing, skipping DB update`, { documentId });
           triggerLogger.warn(`Document deleted mid-processing, exiting cleanly`, { documentId });
           return { documentId, pagesProcessed: 0, totalPages, status: 'cancelled' as const };

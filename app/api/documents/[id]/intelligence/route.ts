@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { checkRateLimit, createRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limiter';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,12 +23,11 @@ export async function GET(
     }
 
     // Rate limiting
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-    const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.API);
+    const rateLimitResult = await checkRateLimit(`api:${session.user.id}`, RATE_LIMITS.API);
     if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: 'Too many requests' },
-        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+        { error: 'Too many requests', retryAfter: rateLimitResult.retryAfter },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) } }
       );
     }
 
@@ -84,34 +83,53 @@ export async function GET(
       prisma.documentChunk.findMany({
         where: { documentId },
         orderBy: { pageNumber: 'asc' },
+        take: 500,
       }),
       prisma.drawingType.findMany({
         where: { documentId },
+        orderBy: { extractedAt: 'desc' },
+        take: 500,
       }),
       prisma.dimensionAnnotation.findMany({
         where: { documentId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.detailCallout.findMany({
         where: { documentId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.sheetLegend.findMany({
         where: { documentId },
+        orderBy: { extractedAt: 'desc' },
+        take: 500,
       }),
       prisma.enhancedAnnotation.findMany({
         where: { documentId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.room.findMany({
         where: { sourceDocumentId: documentId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.doorScheduleItem.findMany({
         where: { sourceDocumentId: documentId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.windowScheduleItem.findMany({
         where: { sourceDocumentId: documentId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.materialTakeoff.findMany({
         where: { documentId },
         include: { TakeoffLineItem: true },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
     ]);
 

@@ -19,6 +19,7 @@ import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from
 import { DocumentCategory } from '@prisma/client';
 import { tasks } from '@trigger.dev/sdk/v3';
 import type { processDocumentTask } from '@/src/trigger/process-document';
+import { z } from 'zod';
 
 const VALID_CATEGORIES: readonly string[] = [
   'budget_cost', 'schedule', 'plans_drawings', 'specifications',
@@ -28,13 +29,13 @@ const VALID_CATEGORIES: readonly string[] = [
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for security scanning
 
-interface ConfirmUploadBody {
-  cloudStoragePath: string;
-  fileName: string;
-  fileSize: number;
-  projectId: string;
-  category: string;
-}
+const confirmUploadSchema = z.object({
+  cloudStoragePath: z.string().min(1, 'Cloud storage path is required'),
+  fileName: z.string().min(1, 'File name is required').max(500, 'File name too long'),
+  fileSize: z.number().int().positive('File size must be positive'),
+  projectId: z.string().min(1, 'Project ID is required'),
+  category: z.string().optional().default('other'),
+});
 
 /**
  * Validate that a cloud storage path is safe (no path traversal or absolute paths).
@@ -77,9 +78,9 @@ export async function POST(request: Request) {
     }
 
     // 2. Validate request body
-    let body: ConfirmUploadBody;
+    let rawBody: unknown;
     try {
-      body = await request.json();
+      rawBody = await request.json();
     } catch {
       return NextResponse.json(
         { error: 'Invalid request body. Expected JSON.' },
@@ -87,22 +88,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const { cloudStoragePath, fileName, fileSize, projectId, category } = body;
+    const parsed = confirmUploadSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid input' },
+        { status: 400 }
+      );
+    }
+
+    const { cloudStoragePath, fileName, fileSize, projectId, category } = parsed.data;
 
     // Validate category against Prisma enum
     const validatedCategory: DocumentCategory = VALID_CATEGORIES.includes(category)
       ? (category as DocumentCategory)
       : DocumentCategory.other;
 
-    if (!category || !VALID_CATEGORIES.includes(category)) {
+    if (!VALID_CATEGORIES.includes(category)) {
       logger.warn('CONFIRM_UPLOAD', 'Category defaulted to other', { provided: category, fileName });
-    }
-
-    if (!cloudStoragePath || !fileName || !fileSize || !projectId) {
-      return NextResponse.json(
-        { error: 'Missing required fields: cloudStoragePath, fileName, fileSize, projectId' },
-        { status: 400 }
-      );
     }
 
     if (!isValidCloudStoragePath(cloudStoragePath)) {

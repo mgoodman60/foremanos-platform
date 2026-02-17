@@ -7,6 +7,19 @@ import { logger } from '@/lib/logger';
 import type { StreamResponseOptions, LLMResponse, ConversationResult, BuiltContext } from '@/types/chat';
 
 /**
+ * Sanitize error before sending to client stream.
+ * Strips API keys, bearer tokens, and other sensitive data.
+ */
+function sanitizeStreamError(error: unknown): string {
+  const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+  return message
+    .replace(/sk-[a-zA-Z0-9]{20,}/g, '[REDACTED]')
+    .replace(/key-[a-zA-Z0-9]{20,}/g, '[REDACTED]')
+    .replace(/Bearer\s+[^\s]+/g, 'Bearer [REDACTED]')
+    .substring(0, 200);
+}
+
+/**
  * Stream LLM response to client with metadata injection
  * Extracted from app/api/chat/route.ts lines 1250-1407
  */
@@ -154,7 +167,8 @@ export function streamResponse(options: StreamResponseOptions): Response {
           hasMessage: !!message,
           responseLength: fullResponse.length,
         });
-        controller.error(error);
+        const safeMessage = sanitizeStreamError(error);
+        controller.error(new Error(safeMessage));
       } finally {
         controller.close();
       }

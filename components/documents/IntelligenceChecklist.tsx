@@ -133,7 +133,7 @@ export function IntelligenceChecklist({
         disabled={reprocessing}
         className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
       >
-        <RotateCw className={`h-4 w-4 ${reprocessing ? 'animate-spin' : ''}`} />
+        <RotateCw className={`h-4 w-4 ${reprocessing ? 'animate-spin' : ''}`} aria-hidden="true" />
         {reprocessing ? 'Queuing...' : 'Re-analyze Documents'}
       </button>
 

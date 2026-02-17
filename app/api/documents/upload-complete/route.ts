@@ -39,7 +39,7 @@ function calculateFileHash(buffer: Buffer): string {
 
 export async function POST(request: Request) {
   const startTime = Date.now();
-  console.log('[COMPLETE] Starting chunk assembly...');
+  logger.info('UPLOAD_COMPLETE', 'Starting chunk assembly');
 
   try {
     const session = await getServerSession(authOptions);
@@ -119,9 +119,9 @@ export async function POST(request: Request) {
     const s3Client = createS3Client();
     const { bucketName, folderPrefix } = getBucketConfig();
 
-    console.log(`[COMPLETE] Retrieving ${totalChunks} chunks...`);
+    logger.info('UPLOAD_COMPLETE', `Retrieving ${totalChunks} chunks`, { uploadId });
     const chunkBuffers: Buffer[] = [];
-    
+
     for (let i = 0; i < totalChunks; i++) {
       const chunkKey = `${folderPrefix}chunks/${uploadId}/${i}`;
       try {
@@ -129,21 +129,20 @@ export async function POST(request: Request) {
           Bucket: bucketName,
           Key: chunkKey,
         }));
-        
+
         const chunkData = await response.Body?.transformToByteArray();
         if (chunkData) {
           chunkBuffers.push(Buffer.from(chunkData));
         }
       } catch (error) {
-        console.error(`[COMPLETE ERROR] Failed to retrieve chunk ${i}:`, error);
+        logger.error('UPLOAD_COMPLETE', `Failed to retrieve chunk ${i}`, error as Error, { uploadId });
         throw new Error(`Failed to retrieve chunk ${i}`);
       }
     }
 
     // Combine all chunks
-    console.log('[COMPLETE] Combining chunks...');
     const completeBuffer = Buffer.concat(chunkBuffers);
-    console.log(`[COMPLETE] File assembled: ${(completeBuffer.length / 1024 / 1024).toFixed(2)}MB`);
+    logger.info('UPLOAD_COMPLETE', `File assembled: ${(completeBuffer.length / 1024 / 1024).toFixed(2)}MB`);
 
     // Verify file size matches
     if (completeBuffer.length !== fileSize) {
@@ -152,7 +151,7 @@ export async function POST(request: Request) {
 
     // Calculate file hash for duplicate detection
     const fileHash = calculateFileHash(completeBuffer);
-    
+
     // Check for duplicates using oneDriveHash field
     const existingDoc = await prisma.document.findFirst({
       where: {
@@ -164,27 +163,12 @@ export async function POST(request: Request) {
     if (existingDoc) {
       // Clean up chunks
       await cleanupChunks(s3Client, bucketName, folderPrefix, uploadId, totalChunks);
-      
+
       return NextResponse.json(
         { error: 'This document has already been uploaded to this project' },
         { status: 409 }
       );
     }
-
-    // Upload complete file to S3
-    const s3Key = `${folderPrefix}uploads/${Date.now()}-${fileName}`;
-    
-    console.log('[COMPLETE] Uploading complete file to S3...');
-    const fileExt = fileName.split('.').pop()?.toLowerCase() || 'pdf';
-    await s3Client.send(new PutObjectCommand({
-      Bucket: bucketName,
-      Key: s3Key,
-      Body: completeBuffer,
-      ContentType: fileExt === 'pdf' ? 'application/pdf' : 'application/octet-stream',
-    }));
-
-    // Clean up temporary chunks
-    await cleanupChunks(s3Client, bucketName, folderPrefix, uploadId, totalChunks);
 
     // Check processing quota
     const user = await prisma.user.findUnique({
@@ -212,7 +196,11 @@ export async function POST(request: Request) {
       totalPages
     );
 
-    // Create document record
+    // Transaction-safe: Create DB record first, then upload to S3
+    // If S3 fails, we clean up the DB record
+    const s3Key = `${folderPrefix}uploads/${Date.now()}-${fileName}`;
+    const fileExt = fileName.split('.').pop()?.toLowerCase() || 'pdf';
+
     const document = await prisma.document.create({
       data: {
         name: fileName,
@@ -232,16 +220,33 @@ export async function POST(request: Request) {
       },
     });
 
+    // Upload complete file to S3 — if this fails, roll back the DB record
+    try {
+      logger.info('UPLOAD_COMPLETE', 'Uploading assembled file to S3', { s3Key });
+      await s3Client.send(new PutObjectCommand({
+        Bucket: bucketName,
+        Key: s3Key,
+        Body: completeBuffer,
+        ContentType: fileExt === 'pdf' ? 'application/pdf' : 'application/octet-stream',
+      }));
+    } catch (s3UploadError) {
+      logger.error('UPLOAD_COMPLETE', 'S3 upload failed, rolling back document record', s3UploadError as Error, { documentId: document.id });
+      await prisma.document.delete({ where: { id: document.id } }).catch((deleteError: any) => {
+        logger.error('UPLOAD_COMPLETE', 'Failed to roll back document record', deleteError, { documentId: document.id });
+      });
+      throw s3UploadError;
+    }
+
+    // Clean up temporary chunks (best-effort, don't block on failure)
+    await cleanupChunks(s3Client, bucketName, folderPrefix, uploadId, totalChunks);
+
     const uploadTime = Date.now() - startTime;
-    console.log(`[COMPLETE] Upload completed in ${uploadTime}ms`);
+    logger.info('UPLOAD_COMPLETE', `Upload completed in ${uploadTime}ms`, { documentId: document.id });
 
     // Track onboarding progress - document uploaded
-    try {
-      await markDocumentUploaded(session.user.id, projectId);
-    } catch (error) {
-      // Silently fail - don't block upload
-      console.error('Failed to track onboarding progress:', error);
-    }
+    markDocumentUploaded(session.user.id, projectId).catch((error) => {
+      logger.error('UPLOAD_COMPLETE', 'Failed to track onboarding progress', error as Error);
+    });
 
     // Trigger document processing if allowed
     if (canProcessResult.allowed) {
@@ -313,7 +318,7 @@ async function cleanupChunks(
   uploadId: string,
   totalChunks: number
 ) {
-  console.log(`[CLEANUP] Removing ${totalChunks} temporary chunks...`);
+  logger.info('UPLOAD_COMPLETE', `Removing ${totalChunks} temporary chunks`, { uploadId });
   for (let i = 0; i < totalChunks; i++) {
     const chunkKey = `${folderPrefix}chunks/${uploadId}/${i}`;
     try {
@@ -322,8 +327,8 @@ async function cleanupChunks(
         Key: chunkKey,
       }));
     } catch (error) {
-      console.error(`[CLEANUP] Failed to delete chunk ${i}:`, error);
+      logger.error('UPLOAD_COMPLETE', `Failed to delete chunk ${i}`, error as Error, { uploadId });
     }
   }
-  console.log('[CLEANUP] Cleanup complete');
+  logger.info('UPLOAD_COMPLETE', 'Chunk cleanup complete', { uploadId });
 }

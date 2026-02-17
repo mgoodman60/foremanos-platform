@@ -37,6 +37,9 @@ interface VisionResponse {
   attempts: number;
   error?: string;
   confidenceScore?: number;
+  interpretationProvider?: VisionProvider;
+  pass2Provider?: VisionProvider;
+  processingTier?: string;
 }
 
 interface QualityMetrics {

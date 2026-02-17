@@ -6,6 +6,8 @@ import { getRoomProgressSummary } from '@/lib/location-detector';
 import { getPrimaryDoorTypeForRoom } from '@/lib/door-schedule-extractor';
 import { isExteriorEquipment, isExteriorLocation } from '@/lib/exterior-equipment-classifier';
 import { logger } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { z } from 'zod';
 
 // Helper to format floor number into a readable label
 function formatFloorLabel(floorNumber: number | null | undefined): string {
@@ -38,11 +40,27 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimit = await checkRateLimit(`api:${session.user?.id || 'anonymous'}`, RATE_LIMITS.API);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Too many requests', retryAfter: rateLimit.retryAfter },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter || 60) } }
+      );
+    }
+
     const { slug } = params;
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const status = searchParams.get('status');
-    const floor = searchParams.get('floor');
+    const floorParam = searchParams.get('floor');
+    let floor: string | null = floorParam;
+    if (floorParam) {
+      const floorParsed = z.coerce.number().int().safeParse(floorParam);
+      if (!floorParsed.success) {
+        return NextResponse.json({ error: 'Invalid floor parameter' }, { status: 400 });
+      }
+      floor = floorParam;
+    }
 
     // Get project
     const project = await prisma.project.findUnique({
@@ -104,7 +122,8 @@ export async function GET(
       orderBy: [
         { floorNumber: 'asc' },
         { roomNumber: 'asc' }
-      ]
+      ],
+      take: 500,
     });
 
     // Fetch MEP equipment from takeoff line items
@@ -119,7 +138,9 @@ export async function GET(
               category: { in: MEP_CATEGORIES }
             }
           }
-        }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
       prisma.mEPEquipment.findMany({
         where: { projectId: project.id },
@@ -129,6 +150,8 @@ export async function GET(
           level: true, room: true, gridLocation: true, status: true,
           estimatedCost: true, notes: true,
         },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
       }),
     ]);
 
@@ -501,6 +524,14 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitPost = await checkRateLimit(`api:${session.user?.id || 'anonymous'}`, RATE_LIMITS.API);
+    if (!rateLimitPost.success) {
+      return NextResponse.json(
+        { error: 'Too many requests', retryAfter: rateLimitPost.retryAfter },
+        { status: 429, headers: { 'Retry-After': String(rateLimitPost.retryAfter || 60) } }
+      );
     }
 
     const { slug } = params;

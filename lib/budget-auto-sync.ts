@@ -8,6 +8,8 @@ import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 
+const openai = new OpenAI();
+
 interface ExtractedBudgetItem {
   phaseCode: number;
   phaseName: string;
@@ -55,10 +57,6 @@ ${content.substring(0, 15000)}
 Return ONLY the JSON array, no explanation.`;
 
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     const response = await openai.chat.completions.create({
       model: EXTRACTION_MODEL,
       messages: [{ role: 'user', content: prompt }],

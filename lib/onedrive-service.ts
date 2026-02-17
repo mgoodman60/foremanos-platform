@@ -52,7 +52,7 @@ export class OneDriveService {
   private static readonly CLIENT_ID = process.env.ONEDRIVE_CLIENT_ID || '';
   private static readonly CLIENT_SECRET = process.env.ONEDRIVE_CLIENT_SECRET || '';
   private static readonly TENANT_ID = process.env.ONEDRIVE_TENANT_ID || 'common';
-  private static readonly REDIRECT_URI = process.env.NEXTAUTH_URL + '/api/projects/onedrive/callback';
+  private static readonly REDIRECT_URI = (process.env.NEXTAUTH_URL || 'https://foremanos.vercel.app') + '/api/projects/onedrive/callback';
 
   constructor(config: OneDriveConfig) {
     this.projectId = config.projectId;

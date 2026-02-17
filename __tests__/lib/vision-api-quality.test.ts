@@ -2,8 +2,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   performQualityCheck,
   isBlankPage,
+  assessPageComplexity,
   formatQualityReport,
   scoreTwoTierResult,
+  STRUCTURAL_FIELDS,
   type QualityCheckResult,
   type TwoTierQualityResult,
   type ExtractedData,
@@ -24,12 +26,12 @@ describe('Vision API Quality Module', () => {
           content: 'A'.repeat(600), // >500 chars
           dimensions: ['10ft', '20ft'],
           gridLines: ['A', 'B', 'C'],
-          roomLabels: ['Kitchen', 'Living Room'],
+          rooms: [{ number: '101', name: 'Kitchen' }, { number: '102', name: 'Living Room' }],
           doors: ['D1', 'D2'],
           windows: ['W1', 'W2'],
           equipment: ['HVAC-1'],
-          annotations: ['Note 1'],
-          symbols: ['Symbol1'],
+          symbolData: { sectionCuts: [{ number: '1', referenceSheet: 'A3.01' }] },
+          siteAndConcrete: { footings: [{ size: '24x24' }] },
           visualMaterials: [{ material: 'concrete' }],
           plumbingFixtures: [{ type: 'WC' }],
           electricalDevices: [{ type: 'receptacle' }],
@@ -243,12 +245,12 @@ describe('Vision API Quality Module', () => {
         const data: ExtractedData = {
           dimensions: ['10ft'],
           gridLines: ['A'],
-          roomLabels: ['Room 1'],
+          rooms: [{ number: '101', name: 'Room 1' }],
           doors: ['D1'],
           windows: ['W1'],
           equipment: ['HVAC-1'],
-          annotations: ['Note 1'],
-          symbols: ['Symbol1'],
+          symbolData: { sectionCuts: [{ number: '1', referenceSheet: 'A3.01' }] },
+          siteAndConcrete: { footings: [{ size: '24x24' }] },
           visualMaterials: [{ material: 'concrete' }],
           plumbingFixtures: [{ type: 'WC' }],
           electricalDevices: [{ type: 'receptacle' }],
@@ -269,7 +271,7 @@ describe('Vision API Quality Module', () => {
         const data: ExtractedData = {
           dimensions: ['10ft'],
           gridLines: ['A'],
-          roomLabels: ['Room 1'],
+          rooms: [{ number: '101', name: 'Room 1' }],
           doors: ['D1'],
           // 4 out of 16 fields = 10 points
         };
@@ -330,7 +332,7 @@ describe('Vision API Quality Module', () => {
         const data: ExtractedData = {
           dimensions: [],
           gridLines: [],
-          roomLabels: [],
+          rooms: [],
         };
 
         const result = performQualityCheck(data, 1, 0);
@@ -447,12 +449,12 @@ describe('Vision API Quality Module', () => {
         const data: ExtractedData = {
           dimensions: ['10ft'],
           gridLines: ['A'],
-          roomLabels: ['Room 1'],
+          rooms: [{ number: '101', name: 'Room 1' }],
           doors: ['D1'],
           windows: ['W1'],
           equipment: ['HVAC-1'],
-          annotations: ['Note 1'],
-          symbols: ['Symbol1'],
+          symbolData: { sectionCuts: [{ number: '1', referenceSheet: 'A3.01' }] },
+          siteAndConcrete: { footings: [{ size: '24x24' }] },
           extraField1: ['Extra'],
           extraField2: ['Extra'],
         };
@@ -648,6 +650,124 @@ describe('Vision API Quality Module', () => {
         expect(isBlankPage({ sheetNumber: 'N/A' })).toBe(true);
         expect(isBlankPage({ sheetNumber: 'A-101' })).toBe(false);
       });
+    });
+  });
+
+  describe('STRUCTURAL_FIELDS', () => {
+    it('should contain exactly 16 structural field names', () => {
+      expect(STRUCTURAL_FIELDS).toHaveLength(16);
+    });
+
+    it('should include all expected field names', () => {
+      expect(STRUCTURAL_FIELDS).toContain('dimensions');
+      expect(STRUCTURAL_FIELDS).toContain('fireProtection');
+      expect(STRUCTURAL_FIELDS).toContain('hvacData');
+    });
+  });
+
+  describe('assessPageComplexity', () => {
+    it('should return "blank" for empty data (blank page)', () => {
+      const data: ExtractedData = {};
+      expect(assessPageComplexity(data)).toBe('blank');
+    });
+
+    it('should return "blank" when content indicates blank page', () => {
+      const data: ExtractedData = { content: 'This is a blank page' };
+      expect(assessPageComplexity(data)).toBe('blank');
+    });
+
+    it('should return "simple" for cover sheet with title block only (0 structural fields)', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'G-001',
+        sheetTitle: 'COVER SHEET',
+        scale: 'N/A',
+        content: 'Project Name: Example Building. General contractor info and project directory.',
+      };
+      expect(assessPageComplexity(data)).toBe('simple');
+    });
+
+    it('should return "simple" for page with 1-2 structural fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'G-002',
+        sheetTitle: 'GENERAL NOTES',
+        content: 'A'.repeat(200),
+        dimensions: ['10ft'],
+        gridLines: ['A'],
+        // Only 2 structural fields
+      };
+      expect(assessPageComplexity(data)).toBe('simple');
+    });
+
+    it('should return "complex" for page with exactly 3 structural fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'FIRST FLOOR PLAN',
+        scale: '1/4"=1\'-0"',
+        content: 'A'.repeat(500),
+        dimensions: ['15\'-6"'],
+        rooms: [{ number: '101', name: 'LOBBY' }],
+        doors: ['D1', 'D2'],
+        // Exactly 3 structural fields
+      };
+      expect(assessPageComplexity(data)).toBe('complex');
+    });
+
+    it('should return "complex" for floor plan with many structural fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'First Floor Plan',
+        scale: '1/4"=1\'-0"',
+        content: 'A'.repeat(600),
+        dimensions: ['10ft', '20ft'],
+        gridLines: ['A', 'B', 'C'],
+        rooms: [{ number: '101', name: 'Kitchen' }],
+        doors: ['D1', 'D2'],
+        windows: ['W1'],
+        equipment: ['HVAC-1'],
+        plumbingFixtures: [{ type: 'WC' }],
+        electricalDevices: [{ type: 'receptacle' }],
+      };
+      expect(assessPageComplexity(data)).toBe('complex');
+    });
+
+    it('should ignore empty arrays when counting structural fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Notes',
+        content: 'A'.repeat(100),
+        dimensions: [],
+        gridLines: [],
+        rooms: [],
+        doors: ['D1'],
+        // Only 1 non-empty structural field
+      };
+      expect(assessPageComplexity(data)).toBe('simple');
+    });
+
+    it('should ignore N/A values when counting structural fields', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'A-101',
+        sheetTitle: 'Notes',
+        content: 'A'.repeat(100),
+        dimensions: 'N/A',
+        gridLines: 'N/A',
+        rooms: [{ number: '101', name: 'Room' }],
+        // Only 1 valid structural field (rooms)
+      };
+      expect(assessPageComplexity(data)).toBe('simple');
+    });
+
+    it('should count non-array truthy structural fields (objects)', () => {
+      const data: ExtractedData = {
+        sheetNumber: 'M-101',
+        sheetTitle: 'Mechanical Plan',
+        content: 'A'.repeat(200),
+        symbolData: { sectionCuts: [{ number: '1', referenceSheet: 'A3.01' }] },
+        constructionIntel: { tradesRequired: ['Mechanical'] },
+        hvacData: { ductwork: ['12x12'] },
+        // 3 object-type structural fields
+      };
+      expect(assessPageComplexity(data)).toBe('complex');
     });
   });
 
@@ -965,12 +1085,12 @@ describe('Vision API Quality Module', () => {
         content: 'A'.repeat(600),
         dimensions: ['10ft'],
         gridLines: ['A'],
-        roomLabels: ['Room 1'],
+        rooms: [{ number: '101', name: 'Room 1' }],
         doors: ['D1'],
         windows: ['W1'],
         equipment: ['HVAC-1'],
-        annotations: ['Note 1'],
-        symbols: ['Symbol1'],
+        symbolData: { sectionCuts: [{ number: '1', referenceSheet: 'A3.01' }] },
+        siteAndConcrete: { footings: [{ size: '24x24' }] },
         visualMaterials: [{ material: 'concrete' }],
         plumbingFixtures: [{ type: 'WC' }],
         electricalDevices: [{ type: 'receptacle' }],

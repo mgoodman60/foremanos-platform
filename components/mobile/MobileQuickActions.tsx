@@ -64,16 +64,18 @@ export function MobileQuickActions({ actions, className = '' }: MobileQuickActio
         <button
           onClick={() => scroll('left')}
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-dark-surface/90 rounded-full shadow-lg flex items-center justify-center text-gray-300 hover:text-white hidden sm:flex"
+          aria-label="Scroll left"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
         </button>
       )}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-dark-surface/90 rounded-full shadow-lg flex items-center justify-center text-gray-300 hover:text-white hidden sm:flex"
+          aria-label="Scroll right"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </button>
       )}
 

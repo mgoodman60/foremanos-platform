@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import InlineEditSection from './InlineEditSection';
 import ReportTimeline from './ReportTimeline';
 import OneDriveSyncBadge from './OneDriveSyncBadge';
@@ -107,6 +108,8 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
   const router = useRouter();
   const [report, setReport] = useState<DailyReportFull | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Edit state for each section
@@ -125,8 +128,13 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
   const [editNotes, setEditNotes] = useState({ visitors: '', materialsReceived: '' });
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const rejectDialogRef = useFocusTrap({
+    isActive: showRejectDialog,
+    onEscape: () => { setShowRejectDialog(false); setRejectReason(''); },
+  });
 
   const fetchReport = useCallback(async () => {
+    setFetchError(false);
     try {
       const res = await fetch(`/api/projects/${projectSlug}/daily-reports/${reportId}`);
       if (!res.ok) {
@@ -140,7 +148,8 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
       const data = await res.json();
       setReport(data.report);
       syncEditState(data.report);
-    } catch (error) {
+    } catch {
+      setFetchError(true);
       toast.error('Failed to load report');
     } finally {
       setLoading(false);
@@ -228,8 +237,41 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <RefreshCw className="w-8 h-8 text-gray-400 animate-spin" />
+      <div className="min-h-screen bg-gray-900 p-6">
+        <div className="animate-pulse">
+          {/* Back link skeleton */}
+          <div className="h-4 bg-gray-700 rounded w-40 mb-6" />
+          {/* Header skeleton */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-8 bg-gray-700 rounded w-48" />
+            <div className="h-6 bg-gray-700 rounded-full w-24" />
+          </div>
+          <div className="h-4 bg-gray-700/60 rounded w-64 mb-8" />
+          {/* Content sections skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
+                  <div className="h-5 bg-gray-700 rounded w-32 mb-4" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-700/60 rounded w-full" />
+                    <div className="h-4 bg-gray-700/60 rounded w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-6">
+              <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
+                <div className="h-5 bg-gray-700 rounded w-24 mb-4" />
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-4 bg-gray-700/60 rounded w-full" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -238,11 +280,19 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">Report not found</p>
+          <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" aria-hidden="true" />
+          <p className="text-gray-400">{fetchError ? 'Failed to load report' : 'Report not found'}</p>
+          {fetchError && retryCount < 3 && (
+            <button
+              onClick={() => { setRetryCount(c => c + 1); setLoading(true); fetchReport(); }}
+              className="mt-3 px-4 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 transition-colors"
+            >
+              Retry
+            </button>
+          )}
           <Link
             href={`/project/${projectSlug}/field-ops/daily-reports`}
-            className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block"
+            className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block block"
           >
             Back to reports
           </Link>
@@ -259,7 +309,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           href={`/project/${projectSlug}/field-ops/daily-reports`}
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           Back to Daily Reports
         </Link>
       </div>
@@ -286,7 +336,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           </div>
           <div className="flex items-center gap-3 mt-2 text-sm text-gray-400">
             <span className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-4 h-4" aria-hidden="true" />
               {format(new Date(report.reportDate), 'EEEE, MMMM d, yyyy')}
             </span>
             <span>by {report.createdByUser.username}</span>
@@ -301,7 +351,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
               disabled={actionLoading !== null}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
             >
-              {actionLoading === 'SUBMITTED' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {actionLoading === 'SUBMITTED' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Send className="w-4 h-4" aria-hidden="true" />}
               Submit
             </button>
           )}
@@ -312,7 +362,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                 disabled={actionLoading !== null}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
               >
-                {actionLoading === 'APPROVED' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                {actionLoading === 'APPROVED' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <CheckCircle className="w-4 h-4" aria-hidden="true" />}
                 Approve
               </button>
               <button
@@ -320,7 +370,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                 disabled={actionLoading !== null}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
               >
-                <XCircle className="w-4 h-4" />
+                <XCircle className="w-4 h-4" aria-hidden="true" />
                 Reject
               </button>
             </>
@@ -331,7 +381,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
               disabled={actionLoading !== null}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
             >
-              {actionLoading === 'DRAFT' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit2 className="w-4 h-4" />}
+              {actionLoading === 'DRAFT' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Edit2 className="w-4 h-4" aria-hidden="true" />}
               Return to Draft
             </button>
           )}
@@ -342,7 +392,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
       {report.status === 'REJECTED' && (report.rejectionReason || report.rejectionNotes) && (
         <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
-            <XCircle className="w-4 h-4 text-red-400" />
+            <XCircle className="w-4 h-4 text-red-400" aria-hidden="true" />
             <span className="text-red-400 font-medium text-sm">Rejected</span>
           </div>
           {report.rejectionReason && (
@@ -357,7 +407,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
       {/* Reject Dialog */}
       {showRejectDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4">
+          <div ref={rejectDialogRef} role="dialog" aria-modal="true" className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-white font-semibold mb-4">Reject Report</h3>
             <label className="block text-sm text-gray-400 mb-1">
               Reason <span className="text-red-400">*</span>
@@ -381,7 +431,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                 disabled={actionLoading !== null}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
               >
-                {actionLoading === 'REJECTED' ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                {actionLoading === 'REJECTED' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <XCircle className="w-4 h-4" aria-hidden="true" />}
                 Reject
               </button>
             </div>
@@ -496,7 +546,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Work Performed */}
           <InlineEditSection
             title="Work Performed"
-            icon={<HardHat className="w-5 h-5" />}
+            icon={<HardHat className="w-5 h-5" aria-hidden="true" />}
             canEdit={!!canEdit}
             onSave={async () => {
               await patchReport({ workPerformed: editWork.workPerformed || null });
@@ -521,7 +571,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Work Planned */}
           <InlineEditSection
             title="Work Planned"
-            icon={<FileText className="w-5 h-5" />}
+            icon={<FileText className="w-5 h-5" aria-hidden="true" />}
             canEdit={!!canEdit}
             onSave={async () => {
               await patchReport({ workPlanned: editWork.workPlanned || null });
@@ -546,7 +596,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Labor */}
           <InlineEditSection
             title="Labor"
-            icon={<Users className="w-5 h-5" />}
+            icon={<Users className="w-5 h-5" aria-hidden="true" />}
             canEdit={false}
           >
             {report.laborEntries.length === 0 ? (
@@ -597,7 +647,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Equipment */}
           <InlineEditSection
             title="Equipment"
-            icon={<Truck className="w-5 h-5" />}
+            icon={<Truck className="w-5 h-5" aria-hidden="true" />}
             canEdit={false}
           >
             {report.equipmentEntries.length === 0 ? (
@@ -627,7 +677,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Progress */}
           <InlineEditSection
             title="Progress"
-            icon={<MapPin className="w-5 h-5" />}
+            icon={<MapPin className="w-5 h-5" aria-hidden="true" />}
             canEdit={false}
           >
             {report.progressEntries.length === 0 ? (
@@ -662,7 +712,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Delays */}
           <InlineEditSection
             title="Delays"
-            icon={<AlertTriangle className="w-5 h-5" />}
+            icon={<AlertTriangle className="w-5 h-5" aria-hidden="true" />}
             canEdit={!!canEdit}
             onSave={async () => {
               await patchReport({
@@ -698,7 +748,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
               <div className="space-y-2">
                 {report.delayHours != null && report.delayHours > 0 && (
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-yellow-400" />
+                    <Clock className="w-4 h-4 text-yellow-400" aria-hidden="true" />
                     <span className="text-yellow-300 text-sm font-medium">{report.delayHours} hours</span>
                     {report.delayReason && (
                       <span className="text-gray-400 text-sm">- {report.delayReason}</span>
@@ -715,7 +765,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Safety */}
           <InlineEditSection
             title="Safety"
-            icon={<Wrench className="w-5 h-5" />}
+            icon={<Wrench className="w-5 h-5" aria-hidden="true" />}
             canEdit={!!canEdit}
             onSave={async () => {
               await patchReport({
@@ -742,12 +792,12 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
               <div className="flex items-center gap-2">
                 {report.safetyIncidents > 0 ? (
                   <>
-                    <AlertTriangle className="w-4 h-4 text-red-400" />
+                    <AlertTriangle className="w-4 h-4 text-red-400" aria-hidden="true" />
                     <span className="text-red-300 text-sm font-medium">{report.safetyIncidents} incident(s)</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <CheckCircle className="w-4 h-4 text-green-400" aria-hidden="true" />
                     <span className="text-green-300 text-sm">No incidents</span>
                   </>
                 )}
@@ -761,7 +811,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Photos */}
           <InlineEditSection
             title="Photos"
-            icon={<ImageIcon className="w-5 h-5" />}
+            icon={<ImageIcon className="w-5 h-5" aria-hidden="true" />}
             canEdit={false}
           >
             {report.photoIds.length === 0 ? (
@@ -773,7 +823,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
                     key={photoId}
                     className="aspect-square bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600"
                   >
-                    <ImageIcon className="w-6 h-6 text-gray-400" />
+                    <ImageIcon className="w-6 h-6 text-gray-400" aria-hidden="true" />
                   </div>
                 ))}
               </div>
@@ -783,7 +833,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Notes */}
           <InlineEditSection
             title="Notes"
-            icon={<MessageSquare className="w-5 h-5" />}
+            icon={<MessageSquare className="w-5 h-5" aria-hidden="true" />}
             canEdit={!!canEdit}
             onSave={async () => {
               await patchReport({
@@ -844,7 +894,7 @@ export default function DailyReportDetail({ projectSlug, reportId }: DailyReport
           {/* Report Metadata */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
             <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-gray-400" />
+              <FileText className="w-4 h-4 text-gray-400" aria-hidden="true" />
               Details
             </h3>
             <div className="space-y-3 text-sm">

@@ -46,12 +46,12 @@ export default function BudgetPage() {
             <div className="flex items-center gap-4">
               <Link href={`/project/${slug}`}>
                 <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                  <ChevronLeft className="h-4 w-4 mr-1" /> Back to Project
+                  <ChevronLeft className="h-4 w-4 mr-1" aria-hidden="true" /> Back to Project
                 </Button>
               </Link>
               <div>
                 <h1 className="text-xl font-bold flex items-center gap-2">
-                  <DollarSign className="h-6 w-6 text-green-400" />
+                  <DollarSign className="h-6 w-6 text-green-400" aria-hidden="true" />
                   Budget & Cost Management
                 </h1>
                 <p className="text-sm text-gray-400">Track costs, change orders, and financial performance</p>
@@ -75,43 +75,43 @@ export default function BudgetPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-dark-card border border-gray-700 mb-6 flex-wrap">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600">
-              <BarChart3 className="h-4 w-4 mr-2" />
+              <BarChart3 className="h-4 w-4 mr-2" aria-hidden="true" />
               Dashboard
             </TabsTrigger>
             <TabsTrigger value="job-cost" className="data-[state=active]:bg-blue-600">
-              <DollarSign className="h-4 w-4 mr-2" />
+              <DollarSign className="h-4 w-4 mr-2" aria-hidden="true" />
               Job Cost
             </TabsTrigger>
             <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600">
-              <TrendingUp className="h-4 w-4 mr-2" />
+              <TrendingUp className="h-4 w-4 mr-2" aria-hidden="true" />
               Overview
             </TabsTrigger>
             <TabsTrigger value="review" className="data-[state=active]:bg-blue-600">
-              <ClipboardCheck className="h-4 w-4 mr-2" />
+              <ClipboardCheck className="h-4 w-4 mr-2" aria-hidden="true" />
               Review
             </TabsTrigger>
             <TabsTrigger value="change-orders" className="data-[state=active]:bg-blue-600">
-              <FileEdit className="h-4 w-4 mr-2" />
+              <FileEdit className="h-4 w-4 mr-2" aria-hidden="true" />
               Change Orders
             </TabsTrigger>
             <TabsTrigger value="invoices" className="data-[state=active]:bg-blue-600">
-              <Receipt className="h-4 w-4 mr-2" />
+              <Receipt className="h-4 w-4 mr-2" aria-hidden="true" />
               Invoices
             </TabsTrigger>
             <TabsTrigger value="labor" className="data-[state=active]:bg-blue-600">
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 mr-2" aria-hidden="true" />
               Labor
             </TabsTrigger>
             <TabsTrigger value="quotes" className="data-[state=active]:bg-blue-600">
-              <FileUp className="h-4 w-4 mr-2" />
+              <FileUp className="h-4 w-4 mr-2" aria-hidden="true" />
               Quotes
             </TabsTrigger>
             <TabsTrigger value="takeoffs" className="data-[state=active]:bg-blue-600">
-              <Layers className="h-4 w-4 mr-2" />
+              <Layers className="h-4 w-4 mr-2" aria-hidden="true" />
               Takeoffs
             </TabsTrigger>
             <TabsTrigger value="reports" className="data-[state=active]:bg-blue-600">
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
               Reports
             </TabsTrigger>
           </TabsList>
