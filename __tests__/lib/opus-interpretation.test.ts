@@ -81,9 +81,21 @@ vi.mock('@/lib/pdf-to-image-serverless', async () => ({
 const fetchMock = vi.fn();
 global.fetch = fetchMock;
 
+// Mock discipline pipeline modules (not used in three-pass-legacy mode, but must be importable)
+vi.mock('@/lib/discipline-classifier', () => ({
+  classifyPage: vi.fn().mockResolvedValue({ discipline: 'General', drawingType: 'unknown', sheetNumber: '', confidence: 0 }),
+}));
+vi.mock('@/lib/symbol-context-loader', () => ({
+  loadSymbolContext: vi.fn().mockReturnValue(''),
+}));
+vi.mock('@/lib/discipline-prompts', () => ({
+  getDisciplinePrompt: vi.fn().mockReturnValue('mock discipline prompt'),
+}));
+
 // Set env
 process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
 process.env.GOOGLE_API_KEY = 'test-google-key';
+process.env.PIPELINE_MODE = 'three-pass-legacy';
 
 // Import after mocks
 import { processDocumentBatch } from '@/lib/document-processor-batch';

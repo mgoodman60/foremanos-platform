@@ -63,7 +63,7 @@ interface ProcessDocumentPayload {
 
 export const processDocumentTask = task({
   id: "process-document",
-  maxDuration: 7200, // 2 hours max — enough for 100+ page documents at ~60s/page (Opus 600s timeout)
+  maxDuration: 7200, // 2 hours max — enough for 100+ page documents at ~22s/page with discipline pipeline, 4-page parallel batches
   retry: {
     maxAttempts: 2,
     factor: 2,
@@ -129,118 +129,142 @@ export const processDocumentTask = task({
       triggerLogger.log(`PDF downloaded: ${fileSizeMB}MB`, { documentId });
       logger.info('TRIGGER_PROCESS', `PDF downloaded`, { documentId, sizeMB: fileSizeMB });
 
-      // 4. Process each page sequentially with progress tracking
+      // 4. Process pages in parallel batches with progress tracking
       let pagesProcessed = 0;
       let providerBreakdown: any[] = [];
       const metadata = queueEntry.metadata as any;
       const errors: { page: number; error: string }[] = [];
 
-      for (let page = 1; page <= totalPages; page++) {
-        // Timeout warning: log when elapsed time exceeds 80% of maxDuration
+      const PARALLEL_PAGES = parseInt(process.env.PARALLEL_PAGES || '4', 10);
+
+      for (let batchStart = 1; batchStart <= totalPages; batchStart += PARALLEL_PAGES) {
+        const batchEnd = Math.min(batchStart + PARALLEL_PAGES - 1, totalPages);
+        const pageNumbers = Array.from(
+          { length: batchEnd - batchStart + 1 },
+          (_, i) => batchStart + i
+        );
+
+        // Timeout warning at batch boundaries
         const elapsedSeconds = (Date.now() - taskStartTime) / 1000;
         const timeoutThreshold = MAX_DURATION_SECONDS * 0.8;
         if (elapsedSeconds > timeoutThreshold) {
           const remainingSeconds = Math.round(MAX_DURATION_SECONDS - elapsedSeconds);
           logger.warn('TRIGGER_PROCESS', `Approaching timeout: ${remainingSeconds}s remaining`, {
-            documentId, page, totalPages, elapsedSeconds: Math.round(elapsedSeconds),
+            documentId, batchStart, totalPages, elapsedSeconds: Math.round(elapsedSeconds),
           });
-          triggerLogger.warn(`Timeout warning: ${remainingSeconds}s remaining at page ${page}/${totalPages}`, { documentId });
+          triggerLogger.warn(`Timeout warning: ${remainingSeconds}s remaining at batch ${batchStart}-${batchEnd}/${totalPages}`, { documentId });
         }
 
-        // Per-page retry loop (max 3 attempts with exponential backoff)
-        for (let attempt = 1; attempt <= MAX_PAGE_RETRIES; attempt++) {
-          try {
-            triggerLogger.log(`Processing page ${page}/${totalPages}${attempt > 1 ? ` (attempt ${attempt})` : ''}`, { documentId });
+        triggerLogger.log(`Processing batch pages ${batchStart}-${batchEnd} (${pageNumbers.length} pages in parallel)`, { documentId });
 
-            const result = await processDocumentBatch(
+        // Process pages in parallel with per-page retry logic
+        const results = await Promise.allSettled(
+          pageNumbers.map(async (page) => {
+            for (let attempt = 1; attempt <= MAX_PAGE_RETRIES; attempt++) {
+              try {
+                triggerLogger.log(`Processing page ${page}/${totalPages}${attempt > 1 ? ` (attempt ${attempt})` : ''}`, { documentId });
+
+                const result = await processDocumentBatch(
+                  documentId,
+                  page,
+                  page,
+                  processorType,
+                  pdfBuffer
+                );
+
+                if (result.success) {
+                  return { page, result };
+                }
+
+                const errorMsg = sanitizeError(result.error || 'Unknown error');
+                if (attempt < MAX_PAGE_RETRIES) {
+                  const backoffMs = Math.pow(2, attempt) * 1000;
+                  logger.warn('TRIGGER_PROCESS', `Page ${page} failed (attempt ${attempt}), retrying in ${backoffMs}ms`, {
+                    documentId, error: errorMsg,
+                  });
+                  await new Promise(resolve => setTimeout(resolve, backoffMs));
+                } else {
+                  throw new Error(errorMsg);
+                }
+              } catch (pageError: unknown) {
+                const errorMsg = sanitizeError(pageError);
+                const classification = classifyPrismaError(pageError);
+
+                if (!classification.isRetryable) {
+                  throw pageError;
+                }
+
+                if (attempt < MAX_PAGE_RETRIES) {
+                  const backoffMs = Math.pow(2, attempt) * 1000;
+                  logger.warn('TRIGGER_PROCESS', `Page ${page} error (attempt ${attempt}), retrying in ${backoffMs}ms`, {
+                    documentId, error: errorMsg,
+                  });
+                  await new Promise(resolve => setTimeout(resolve, backoffMs));
+                } else {
+                  throw pageError;
+                }
+              }
+            }
+            throw new Error(`Page ${page} failed after ${MAX_PAGE_RETRIES} attempts`);
+          })
+        );
+
+        // Collect batch results
+        let batchCost = 0;
+        for (const [i, result] of results.entries()) {
+          if (result.status === 'fulfilled') {
+            pagesProcessed += result.value.result.pagesProcessed;
+            providerBreakdown = accumulateProviderStats([result.value.result], providerBreakdown);
+            batchCost += result.value.result.estimatedCost || 0;
+
+            triggerLogger.log(`Page ${result.value.page} completed`, {
               documentId,
-              page,
-              page,
-              processorType,
-              pdfBuffer
-            );
-
-            if (result.success) {
-              pagesProcessed += result.pagesProcessed;
-              providerBreakdown = accumulateProviderStats([result], providerBreakdown);
-
-              // Update progress in DB after each page
-              await prisma.$transaction([
-                prisma.document.update({
-                  where: { id: documentId },
-                  data: { pagesProcessed },
-                }),
-                prisma.processingQueue.update({
-                  where: { id: queueEntry.id },
-                  data: {
-                    pagesProcessed,
-                    currentBatch: page,
-                    updatedAt: new Date(),
-                    metadata: {
-                      ...metadata,
-                      providerBreakdown,
-                      lastBatchAt: new Date().toISOString(),
-                    },
-                  },
-                }),
-              ]);
-
-              // Update cost incrementally
-              if (result.estimatedCost && result.estimatedCost > 0) {
-                await prisma.document.update({
-                  where: { id: documentId },
-                  data: { processingCost: { increment: result.estimatedCost } },
-                });
-              }
-
-              triggerLogger.log(`Page ${page} completed`, {
-                documentId,
-                pagesProcessed,
-                cost: result.estimatedCost,
-              });
-              break; // Success — exit retry loop
-            } else {
-              // Non-exception failure (e.g., vision API returned error result)
-              const errorMsg = sanitizeError(result.error || 'Unknown error');
-              if (attempt < MAX_PAGE_RETRIES) {
-                const backoffMs = Math.pow(2, attempt) * 1000; // 2s, 4s
-                logger.warn('TRIGGER_PROCESS', `Page ${page} failed (attempt ${attempt}), retrying in ${backoffMs}ms`, {
-                  documentId, error: errorMsg,
-                });
-                await new Promise(resolve => setTimeout(resolve, backoffMs));
-              } else {
-                errors.push({ page, error: errorMsg });
-                logger.warn('TRIGGER_PROCESS', `Page ${page} failed after ${MAX_PAGE_RETRIES} attempts`, {
-                  documentId, error: errorMsg,
-                });
-                triggerLogger.warn(`Page ${page} failed: ${errorMsg}`, { documentId });
-              }
-            }
-          } catch (pageError: unknown) {
-            const errorMsg = sanitizeError(pageError);
-
-            // Check if this is a non-retryable Prisma error (e.g., record deleted)
-            const classification = classifyPrismaError(pageError);
-            if (!classification.isRetryable) {
-              errors.push({ page, error: errorMsg });
-              logger.error('TRIGGER_PROCESS', `Page ${page} non-retryable error (${classification.code})`, pageError as Error, { documentId });
-              triggerLogger.error(`Page ${page} non-retryable error: ${errorMsg}`, { documentId });
-              break; // Exit retry loop — no point retrying
-            }
-
-            if (attempt < MAX_PAGE_RETRIES) {
-              const backoffMs = Math.pow(2, attempt) * 1000;
-              logger.warn('TRIGGER_PROCESS', `Page ${page} error (attempt ${attempt}), retrying in ${backoffMs}ms`, {
-                documentId, error: errorMsg,
-              });
-              await new Promise(resolve => setTimeout(resolve, backoffMs));
-            } else {
-              errors.push({ page, error: errorMsg });
-              logger.error('TRIGGER_PROCESS', `Page ${page} failed after ${MAX_PAGE_RETRIES} attempts`, pageError as Error, { documentId });
-              triggerLogger.error(`Page ${page} error: ${errorMsg}`, { documentId });
-            }
+              cost: result.value.result.estimatedCost,
+            });
+          } else {
+            const errorMsg = sanitizeError(result.reason);
+            errors.push({ page: pageNumbers[i], error: errorMsg });
+            logger.warn('TRIGGER_PROCESS', `Page ${pageNumbers[i]} failed after all retries`, {
+              documentId, error: errorMsg,
+            });
+            triggerLogger.warn(`Page ${pageNumbers[i]} failed: ${errorMsg}`, { documentId });
           }
         }
+
+        // Single DB progress update per batch (reduces writes by ~4x)
+        await prisma.$transaction([
+          prisma.document.update({
+            where: { id: documentId },
+            data: { pagesProcessed },
+          }),
+          prisma.processingQueue.update({
+            where: { id: queueEntry.id },
+            data: {
+              pagesProcessed,
+              currentBatch: batchEnd,
+              updatedAt: new Date(),
+              metadata: {
+                ...metadata,
+                providerBreakdown,
+                lastBatchAt: new Date().toISOString(),
+              },
+            },
+          }),
+        ]);
+
+        // Accumulate cost for batch
+        if (batchCost > 0) {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: { processingCost: { increment: batchCost } },
+          });
+        }
+
+        triggerLogger.log(`Batch ${batchStart}-${batchEnd} completed`, {
+          documentId,
+          pagesProcessed,
+          batchErrors: results.filter(r => r.status === 'rejected').length,
+        });
       }
 
       // 5. Determine final status

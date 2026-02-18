@@ -14,6 +14,9 @@ import * as fs from 'fs';
 import { convertSinglePage } from './pdf-to-image';
 import { logger } from '@/lib/logger';
 import { PREMIUM_MODEL, GEMINI_PRIMARY_MODEL, GEMINI_SECONDARY_MODEL } from '@/lib/model-config';
+import { classifyPage } from './discipline-classifier';
+import { loadSymbolContext } from './symbol-context-loader';
+import { getDisciplinePrompt } from './discipline-prompts';
 
 // Cost per page by provider (estimated USD)
 const COST_PER_PAGE: Record<string, number> = {
@@ -22,9 +25,15 @@ const COST_PER_PAGE: Record<string, number> = {
   'claude-opus-4-6': 0.10,
   'gpt-5.2': 0.03,
   'claude-sonnet-4-5': 0.05,
+  'haiku-classification': 0.0002,
 };
 const INTERPRETATION_COST_OPUS = 0.08;
 const INTERPRETATION_COST_GPT = 0.03;
+
+type PipelineMode = 'discipline-single-pass' | 'three-pass-legacy';
+function getPipelineMode(): PipelineMode {
+  return (process.env.PIPELINE_MODE as PipelineMode) || 'discipline-single-pass';
+}
 
 function getCostPerPage(provider: VisionProvider, interpProvider: VisionProvider | null): number {
   const extractionCost = COST_PER_PAGE[provider] ?? 0.05;
@@ -46,6 +55,26 @@ export interface BatchResult {
   error?: string;
   providerStats?: Record<string, ProviderStat>;
   estimatedCost?: number; // NEW: estimated API cost
+}
+
+/**
+ * Strip JSON from LLM response (markdown wrappers, text before first {, etc.)
+ */
+function stripToJson(raw: string): string {
+  let content = raw;
+  const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    content = jsonMatch[1].trim();
+  }
+  const firstBrace = content.indexOf('{');
+  if (firstBrace > 0) {
+    content = content.substring(firstBrace);
+  }
+  const lastBrace = content.lastIndexOf('}');
+  if (lastBrace >= 0 && lastBrace < content.length - 1) {
+    content = content.substring(0, lastBrace + 1);
+  }
+  return content;
 }
 
 /**
@@ -264,6 +293,137 @@ Respond with the complete JSON (original data + your additions). Preserve ALL or
 }
 
 /**
+ * Call Opus for vision analysis — sends an IMAGE + prompt (unlike callOpusInterpretation which is text-only).
+ * Used by the discipline-aware single-pass pipeline.
+ */
+async function callOpusVision(
+  base64Image: string,
+  prompt: string,
+  pageNumber: number
+): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 120000);
+
+  try {
+    logger.info('OPUS_VISION', `Starting vision call for page ${pageNumber}`);
+    const fetchStart = Date.now();
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: PREMIUM_MODEL,
+        max_tokens: 8000,
+        temperature: 0.1,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64Image },
+            },
+            { type: 'text', text: prompt },
+          ],
+        }],
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+    const responseText = await response.text();
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+
+    const data = JSON.parse(responseText);
+    const content = data.content?.[0]?.text || '';
+    if (!content) throw new Error('Empty response from Opus vision');
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('OPUS_VISION', `Vision call complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
+    return content;
+  } catch (error: any) {
+    clearTimeout(timeout);
+    if (error.name === 'AbortError') {
+      logger.warn('OPUS_VISION', `Timeout after 120s for page ${pageNumber}`);
+      throw new Error('Opus vision call timed out');
+    }
+    logger.error('OPUS_VISION', `Failed for page ${pageNumber}`, error);
+    throw error;
+  }
+}
+
+/**
+ * Call GPT-5.2 for vision analysis — sends an IMAGE + prompt.
+ * Fallback when Opus vision fails in the discipline pipeline.
+ */
+async function callGPT52Vision(
+  base64Image: string,
+  prompt: string,
+  pageNumber: number
+): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY not configured');
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 120000);
+
+  try {
+    logger.info('GPT52_VISION', `Starting vision call for page ${pageNumber}`);
+    const fetchStart = Date.now();
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-5.2',
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: `data:application/pdf;base64,${base64Image}` },
+            },
+            { type: 'text', text: prompt },
+          ],
+        }],
+        max_completion_tokens: 8000,
+        temperature: 0.1,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+    const responseText = await response.text();
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+
+    const data = JSON.parse(responseText);
+    const content = data.choices?.[0]?.message?.content || '';
+    if (!content) throw new Error('Empty response from GPT-5.2 vision');
+
+    const elapsedMs = Date.now() - fetchStart;
+    logger.info('GPT52_VISION', `Vision call complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
+    return content;
+  } catch (error: any) {
+    clearTimeout(timeout);
+    if (error.name === 'AbortError') {
+      logger.warn('GPT52_VISION', `Timeout after 120s for page ${pageNumber}`);
+      throw new Error('GPT-5.2 vision call timed out');
+    }
+    logger.error('GPT52_VISION', `Failed for page ${pageNumber}`, error);
+    throw error;
+  }
+}
+
+/**
  * Three-pass vision pipeline: Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Opus interpretation
  *
  * Pass 1: Gemini 3 Pro Preview for fast, cheap visual extraction
@@ -281,24 +441,6 @@ async function analyzeWithThreePassPipeline(
   logger.info('THREE_PASS_PIPELINE', `Starting three-pass pipeline`, { pageNumber, processorType });
 
   const base64 = pdfBuffer.toString('base64');
-
-  // Helper: strip JSON from LLM response (markdown wrappers, text before first {, etc.)
-  function stripToJson(raw: string): string {
-    let content = raw;
-    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      content = jsonMatch[1].trim();
-    }
-    const firstBrace = content.indexOf('{');
-    if (firstBrace > 0) {
-      content = content.substring(firstBrace);
-    }
-    const lastBrace = content.lastIndexOf('}');
-    if (lastBrace >= 0 && lastBrace < content.length - 1) {
-      content = content.substring(0, lastBrace + 1);
-    }
-    return content;
-  }
 
   // Helper: interpret JSON with Opus, falling back to GPT-5.2
   async function interpretWithFallback(
@@ -469,6 +611,99 @@ Return the complete validated JSON with all original fields plus any additions/c
 }
 
 /**
+ * Discipline-aware single-pass pipeline: Haiku classify → Opus vision (with discipline prompt)
+ *
+ * 1. Classify page discipline with Haiku (fast, cheap)
+ * 2. Load symbol context and build discipline-specific prompt
+ * 3. Single Opus vision call with tailored prompt
+ * 4. Fallback: GPT-5.2 vision → analyzeWithSmartRouting
+ */
+async function analyzeWithDisciplinePipeline(
+  pdfBuffer: Buffer,
+  fileName: string,
+  pageNumber: number,
+  processorType: string,
+  minQualityScore: number = 50
+): Promise<{ success: boolean; content: string; provider: VisionProvider; attempts: number; error?: string; confidenceScore?: number; interpretationProvider?: VisionProvider; pass2Provider?: VisionProvider; processingTier?: string }> {
+  logger.info('DISCIPLINE_PIPELINE', `Starting discipline-aware pipeline`, { pageNumber, fileName });
+
+  const base64 = pdfBuffer.toString('base64');
+  let attempts = 0;
+
+  // Step 1: Classify page discipline with Haiku
+  let prompt: string;
+  let processingTier: string;
+
+  try {
+    const classification = await classifyPage(base64);
+    logger.info('DISCIPLINE_PIPELINE', `Classification result`, { pageNumber, discipline: classification.discipline, confidence: classification.confidence, drawingType: classification.drawingType });
+
+    if (classification.confidence >= 0.6 && classification.discipline !== 'General') {
+      // High-confidence discipline — use tailored prompt
+      const symbolHints = await loadSymbolContext(classification.discipline);
+      prompt = getDisciplinePrompt(
+        classification.discipline,
+        classification.drawingType || 'unknown',
+        fileName,
+        pageNumber,
+        symbolHints
+      );
+      processingTier = 'discipline-single-pass';
+    } else {
+      // Low confidence or General — use generic prompt
+      prompt = getVisionPrompt(fileName, pageNumber);
+      processingTier = 'generic-single-pass';
+    }
+  } catch (classifyError: any) {
+    logger.warn('DISCIPLINE_PIPELINE', `Classification failed, using generic prompt`, { error: classifyError.message, pageNumber });
+    prompt = getVisionPrompt(fileName, pageNumber);
+    processingTier = 'generic-single-pass';
+  }
+
+  // Step 2: Opus vision call
+  try {
+    attempts++;
+    const rawContent = await callOpusVision(base64, prompt, pageNumber);
+    const jsonContent = stripToJson(rawContent);
+    JSON.parse(jsonContent); // Validate
+
+    logger.info('DISCIPLINE_PIPELINE', `Opus vision succeeded`, { pageNumber, processingTier, contentLength: jsonContent.length });
+    return {
+      success: true,
+      content: jsonContent,
+      provider: 'claude-opus-4-6' as VisionProvider,
+      attempts,
+      processingTier,
+    };
+  } catch (opusError: any) {
+    logger.warn('DISCIPLINE_PIPELINE', `Opus vision failed, trying GPT-5.2`, { error: opusError.message, pageNumber });
+  }
+
+  // Step 3: GPT-5.2 fallback
+  try {
+    attempts++;
+    const rawContent = await callGPT52Vision(base64, prompt, pageNumber);
+    const jsonContent = stripToJson(rawContent);
+    JSON.parse(jsonContent); // Validate
+
+    logger.info('DISCIPLINE_PIPELINE', `GPT-5.2 vision fallback succeeded`, { pageNumber, processingTier: `${processingTier}-gpt-fallback`, contentLength: jsonContent.length });
+    return {
+      success: true,
+      content: jsonContent,
+      provider: 'gpt-5.2' as VisionProvider,
+      attempts,
+      processingTier: `${processingTier}-gpt-fallback`,
+    };
+  } catch (gptError: any) {
+    logger.warn('DISCIPLINE_PIPELINE', `GPT-5.2 vision also failed, falling back to smart routing`, { error: gptError.message, pageNumber });
+  }
+
+  // Step 4: Full fallback to smart routing
+  const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
+  return { ...smartResult, processingTier: 'fallback-single-pass' };
+}
+
+/**
  * Process a batch of pages from a document
  * @param documentId Document ID
  * @param startPage Starting page (1-indexed)
@@ -547,18 +782,26 @@ export async function processDocumentBatch(
           logger.warn('BATCH_PROCESSOR', `Page extraction failed for page ${pageNum}, using full PDF`, { error: extractErr.message });
         }
 
-        // Use three-pass pipeline: Gemini Pro 3 → Gemini 2.5 Pro validation → Opus interpretation → fallback
+        // Use discipline-aware pipeline (default) or three-pass legacy pipeline based on PIPELINE_MODE
         const startTime = Date.now();
         // When page was extracted into a 1-page PDF, target page 1 of that PDF
         // When extraction failed and we're using the full buffer, use original page number
         const effectivePageForVision = (pageBuffer !== buffer) ? 1 : pageNum;
-        const visionResult = await analyzeWithThreePassPipeline(
-          pageBuffer,
-          getVisionPrompt(document.fileName, pageNum),
-          effectiveProcessorType,
-          effectivePageForVision,
-          50 // Minimum quality score
-        );
+        const visionResult = getPipelineMode() === 'discipline-single-pass'
+          ? await analyzeWithDisciplinePipeline(
+              pageBuffer,
+              document.fileName,
+              effectivePageForVision,
+              effectiveProcessorType,
+              50
+            )
+          : await analyzeWithThreePassPipeline(
+              pageBuffer,
+              getVisionPrompt(document.fileName, pageNum),
+              effectiveProcessorType,
+              effectivePageForVision,
+              50
+            );
         const processingTime = Date.now() - startTime;
 
         let chunkContent = '';

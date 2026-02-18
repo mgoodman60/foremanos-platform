@@ -32,6 +32,9 @@ const mockAssessPageComplexity = vi.hoisted(() => vi.fn());
 const mockWriteFile = vi.hoisted(() => vi.fn());
 const mockUnlink = vi.hoisted(() => vi.fn());
 const mockConvertSinglePage = vi.hoisted(() => vi.fn());
+const mockClassifyPage = vi.hoisted(() => vi.fn());
+const mockLoadSymbolContext = vi.hoisted(() => vi.fn());
+const mockGetDisciplinePrompt = vi.hoisted(() => vi.fn());
 
 // Mock all dependencies
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
@@ -71,6 +74,9 @@ vi.mock('fs', () => ({
 vi.mock('@/lib/pdf-to-image', () => ({
   convertSinglePage: mockConvertSinglePage,
 }));
+vi.mock('@/lib/discipline-classifier', () => ({ classifyPage: mockClassifyPage }));
+vi.mock('@/lib/symbol-context-loader', () => ({ loadSymbolContext: mockLoadSymbolContext }));
+vi.mock('@/lib/discipline-prompts', () => ({ getDisciplinePrompt: mockGetDisciplinePrompt }));
 
 // Mock pdf-to-image-serverless dynamically
 const mockExtractPageAsPdf = vi.fn();
@@ -101,8 +107,10 @@ describe('document-processor-batch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Set required env vars for two-tier pipeline
+    // Set required env vars
     process.env.ANTHROPIC_API_KEY = 'sk-ant-test-key';
+    // Default to legacy pipeline for existing tests
+    process.env.PIPELINE_MODE = 'three-pass-legacy';
 
     // Default mock implementations
     mockPrisma.document.findUnique.mockResolvedValue(mockDocument);
@@ -117,6 +125,11 @@ describe('document-processor-batch', () => {
     mockWriteFile.mockResolvedValue(undefined);
     mockUnlink.mockResolvedValue(undefined);
     mockExtractPageAsPdf.mockResolvedValue({ base64: 'mock-base64-page' });
+
+    // Default mock implementations for discipline pipeline modules
+    mockClassifyPage.mockResolvedValue({ discipline: 'Architectural', confidence: 0.85, drawingType: 'floor_plan' });
+    mockLoadSymbolContext.mockResolvedValue([]);
+    mockGetDisciplinePrompt.mockReturnValue('Mock discipline prompt for testing');
 
     // Default: Both Gemini models fail so three-pass pipeline falls back to analyzeWithSmartRouting
     // This preserves existing test behavior that expects analyzeWithSmartRouting calls
@@ -1009,6 +1022,187 @@ describe('document-processor-batch', () => {
         // Cost should be only Gemini Pro 3 ($0.03) with no interpretation cost
         expect(result.estimatedCost).toBe(0.03);
       });
+    });
+  });
+
+  describe('Discipline-Aware Pipeline', () => {
+    beforeEach(() => {
+      process.env.PIPELINE_MODE = 'discipline-single-pass';
+      process.env.OPENAI_API_KEY = 'sk-test-key';
+    });
+
+    it('should use discipline pipeline when PIPELINE_MODE is discipline-single-pass', async () => {
+      const extractedData = { sheetNumber: 'M-101', discipline: 'Mechanical', sheetTitle: 'HVAC Plan' };
+
+      // Opus vision succeeds
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            content: [{ text: JSON.stringify(extractedData) }],
+          }),
+        });
+
+      mockGetProviderDisplayName.mockReturnValue('Claude Opus 4.6');
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(result.pagesProcessed).toBe(1);
+      expect(mockClassifyPage).toHaveBeenCalled();
+      // Should NOT call three-pass Gemini functions
+      expect(mockCallGeminiPro3Vision).not.toHaveBeenCalled();
+      expect(mockCallGeminiVision).not.toHaveBeenCalled();
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'discipline-single-pass',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should use three-pass pipeline when PIPELINE_MODE is three-pass-legacy', async () => {
+      process.env.PIPELINE_MODE = 'three-pass-legacy';
+
+      // Default: Both Gemini models fail → smart routing fallback
+      mockAnalyzeWithSmartRouting.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'claude-opus-4-6',
+        confidenceScore: 0.9,
+        attempts: 1,
+      });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      // Should NOT call discipline classifier
+      expect(mockClassifyPage).not.toHaveBeenCalled();
+      // Should use legacy path (Gemini calls then fallback)
+      expect(mockCallGeminiPro3Vision).toHaveBeenCalled();
+    });
+
+    it('should use generic prompt when classification confidence is low', async () => {
+      mockClassifyPage.mockResolvedValue({ discipline: 'General', confidence: 0.3, drawingType: null });
+
+      const extractedData = { sheetNumber: 'X-001' };
+
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            content: [{ text: JSON.stringify(extractedData) }],
+          }),
+        });
+
+      mockGetProviderDisplayName.mockReturnValue('Claude Opus 4.6');
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      // Should NOT use discipline prompt when confidence < 0.6
+      expect(mockGetDisciplinePrompt).not.toHaveBeenCalled();
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'generic-single-pass',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should fall back to GPT-5.2 when Opus vision fails', async () => {
+      const extractedData = { sheetNumber: 'A-101' };
+
+      // First fetch: PDF download. Second fetch: Opus fails. Third fetch: GPT-5.2 succeeds.
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Internal Server Error',
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({
+            choices: [{ message: { content: JSON.stringify(extractedData) } }],
+          }),
+        });
+
+      mockGetProviderDisplayName.mockReturnValue('GPT-5.2');
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'discipline-single-pass-gpt-fallback',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should fall back to smart routing when both Opus and GPT-5.2 fail', async () => {
+      // All fetch calls fail
+      (global.fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'Opus Error',
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          text: async () => 'GPT Error',
+        });
+
+      mockAnalyzeWithSmartRouting.mockResolvedValue({
+        success: true,
+        content: JSON.stringify({ sheetNumber: 'A-101' }),
+        provider: 'claude-opus-4-6',
+        confidenceScore: 0.9,
+        attempts: 1,
+      });
+
+      const result = await processDocumentBatch('doc-123', 1, 1);
+
+      expect(result.success).toBe(true);
+      expect(mockAnalyzeWithSmartRouting).toHaveBeenCalled();
+      expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              processingTier: 'fallback-single-pass',
+            }),
+          }),
+        })
+      );
     });
   });
 });
