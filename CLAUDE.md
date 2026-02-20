@@ -105,15 +105,15 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 ### Core Directories
 
 ```
-app/api/              # 406 API routes organized by feature domain
-lib/                  # 277 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
+app/api/              # 428 API routes organized by feature domain
+lib/                  # 295 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
   lib/rag/            # 25 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
   lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
   lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
-components/           # 337 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
+components/           # 398 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
 prisma/               # Database schema and migrations (112 models)
-__tests__/            # Vitest tests (245+ test files)
+__tests__/            # Vitest tests (248 test files)
 e2e/                  # Playwright E2E tests (23 spec files)
 src/trigger/          # Trigger.dev v3 long-running tasks (document processing)
 .claude/agents/       # 24 custom Claude Code agents
@@ -177,7 +177,7 @@ src/trigger/          # Trigger.dev v3 long-running tasks (document processing)
 | `lib/discipline-colors.ts` | Shared discipline → color/icon mapping |
 | `lib/api-error.ts` | Standardized API error response helper (`apiError()`, `apiSuccess()`) |
 
-277 total service modules in `lib/` — see directory for full listing.
+295 total service modules in `lib/` — see directory for full listing.
 
 ### Type Helper Files
 
@@ -334,7 +334,7 @@ Document Detail Page (UI) + Library Badges + Search/Filter
 
 ## Testing
 
-245+ test files, 9500+ tests total. 23 Playwright E2E spec files in `e2e/`.
+248 test files, 9533 tests total. 23 Playwright E2E spec files in `e2e/`.
 
 - **TypeScript 5.8.3**: Strict mode enabled
 - **Node.js v25 compatibility**: Uses `pool: 'forks'` in vitest.config.ts
@@ -416,6 +416,9 @@ Use `lib/design-tokens.ts` for colors instead of hardcoded values:
 import { colors } from '@/lib/design-tokens';
 // Use colors.primary.DEFAULT instead of '#3B82F6'
 ```
+
+### Unused Variable Convention
+Unused variables and parameters are prefixed with `_` (e.g., `_session`, `_metadata`). The `.eslintrc.json` is configured with `varsIgnorePattern: "^_"` and `argsIgnorePattern: "^_"` to suppress warnings for this pattern. When destructuring typed interfaces, use `{ propName: _propName }` (not `{ _propName }`) to preserve the interface property name.
 
 ### Structured Logging
 Use `lib/logger.ts` instead of `console.log/error/warn` for production observability:

@@ -33,12 +33,12 @@ npm run dev                   # http://localhost:3000
 ## Key Directories
 
 ```
-app/api/              # 406 API routes
-lib/                  # 277 service modules
-components/           # 337 React components
+app/api/              # 428 API routes
+lib/                  # 295 service modules
+components/           # 398 React components
 prisma/               # Database schema (112 models)
 src/trigger/          # Trigger.dev background tasks
-__tests__/            # Vitest tests (245+ files, 9400+ tests)
+__tests__/            # Vitest tests (248 files, 9533 tests)
 e2e/                  # Playwright E2E tests (23 specs)
 ```
 
