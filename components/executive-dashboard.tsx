@@ -8,8 +8,6 @@
 
 import { useState, useEffect } from 'react';
 import {
-  TrendingUp,
-  TrendingDown,
   Calendar,
   DollarSign,
   FileCheck,
@@ -18,13 +16,11 @@ import {
   Users,
   Clock,
   CheckCircle,
-  XCircle,
   BarChart3,
   Activity,
   Loader2,
   RefreshCw,
   ChevronRight,
-  Building,
   HardHat,
   FileText,
   Wrench,

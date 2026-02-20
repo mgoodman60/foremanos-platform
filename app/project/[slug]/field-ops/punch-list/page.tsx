@@ -38,7 +38,7 @@ interface PunchListItem {
 }
 
 export default function PunchListPage({ params }: { params: { slug: string } }) {
-  const [showForm, setShowForm] = useState(false);
+  const [_showForm, setShowForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PunchListItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);

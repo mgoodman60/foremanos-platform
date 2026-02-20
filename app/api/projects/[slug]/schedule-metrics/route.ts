@@ -225,7 +225,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     const averageCrewSize = crewSizeSamples > 0 ? Math.round(totalCrewSize / crewSizeSamples) : 0;
 
     // Calculate key dates from schedule data - show all major milestones
-    let keyDates: { label: string; date: string; daysUntil: number; isPast: boolean; type: 'start' | 'end' | 'milestone' }[] = [];
+    const keyDates: { label: string; date: string; daysUntil: number; isPast: boolean; type: 'start' | 'end' | 'milestone' }[] = [];
     
     if (allTasks.length > 0) {
       // Find earliest start date (Project Start)

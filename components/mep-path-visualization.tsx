@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowRight, AlertCircle, Route, Zap, CheckCircle2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -70,7 +70,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
     return 'text-red-400';
   };
 
-  const getRouteIcon = (route: string) => {
+  const getRouteIcon = (_route: string) => {
     return <Route className="h-3 w-3" aria-hidden="true" />;
   };
 

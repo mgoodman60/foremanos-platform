@@ -17,17 +17,14 @@ import {
   TrendingUp,
   ClipboardCheck,
   Loader2,
-  ChevronRight,
   Check,
   Printer,
-  Mail,
   Clock,
   Eye,
-  Wrench,
   HardHat,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, subDays, subWeeks } from 'date-fns';
+import { format, subWeeks } from 'date-fns';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 interface ReportTemplate {

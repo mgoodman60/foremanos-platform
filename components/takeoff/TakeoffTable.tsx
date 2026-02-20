@@ -34,7 +34,7 @@ interface TakeoffTableProps {
  * Supports both category and CSI division views
  */
 export function TakeoffTable({
-  items,
+  items: _items,
   selectedItems,
   onSelectItem,
   onEditItem,
@@ -43,7 +43,7 @@ export function TakeoffTable({
   onToggleCategory,
   categories = [],
   csiGroups = [],
-  hasBudgetDoc = false,
+  hasBudgetDoc: _hasBudgetDoc = false,
 }: TakeoffTableProps) {
   const renderItem = (item: TakeoffLineItem) => (
     <div

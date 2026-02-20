@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  FileSpreadsheet, Download, Upload, Plus, Edit2, Trash2,
-  ChevronDown, ChevronUp, Filter, Search, RefreshCw
+  FileSpreadsheet, Download, Upload, Plus,
+  ChevronDown, ChevronUp, Search, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,7 +60,7 @@ export default function JobCostReport() {
   const params = useParams();
   const slug = params?.slug as string;
   
-  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [_budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [phaseGroups, setPhaseGroups] = useState<PhaseGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set());

@@ -7,7 +7,6 @@ import {
   FileCheck, 
   Wrench, 
   AlertTriangle,
-  CheckCircle,
   Clock,
   Zap,
   Droplets,

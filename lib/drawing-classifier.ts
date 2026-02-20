@@ -5,7 +5,6 @@
 
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
-import path from 'path';
 import { convertSinglePage } from './pdf-to-image';
 import { getFileUrl } from './s3';
 import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
@@ -447,7 +446,7 @@ export async function classifyProjectDrawings(
   projectSlug: string,
   options: { forceReprocess?: boolean; useVision?: boolean } = {}
 ): Promise<DrawingTypeResult[]> {
-  const { forceReprocess = false, useVision = false } = options;
+  const { forceReprocess: _forceReprocess = false, useVision = false } = options;
   
   try {
     // Get project
@@ -509,8 +508,8 @@ export async function classifyProjectDrawings(
             const buffer = Buffer.from(await response.arrayBuffer());
             
             // Convert first page to image
-            const { base64: imageBase64 } = await convertSinglePage(buffer, 1, 2048);
-            
+            const { base64: _imageBase64 } = await convertSinglePage(buffer, 1, 2048);
+
             // Use pattern-based classification (vision classification requires file path)
             // For now, fall back to pattern-based until we update classifyDrawingWithVision
             classification = classifyDrawingWithPatterns(sheetNumber, sheetTitle);

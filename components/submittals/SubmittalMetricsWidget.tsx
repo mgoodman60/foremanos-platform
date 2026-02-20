@@ -80,11 +80,11 @@ export default function SubmittalMetricsWidget({
   }
 
   const approvedCount = stats.byStatus['approved'] || 0;
-  const submittedCount = stats.byStatus['submitted'] || 0;
-  const reviewedCount = stats.byStatus['reviewed'] || 0;
+  const _submittedCount = stats.byStatus['submitted'] || 0;
+  const _reviewedCount = stats.byStatus['reviewed'] || 0;
   const rejectedCount = stats.byStatus['rejected'] || 0;
-  const revisionCount = stats.byStatus['revision_requested'] || 0;
-  const draftCount = stats.byStatus['draft'] || 0;
+  const _revisionCount = stats.byStatus['revision_requested'] || 0;
+  const _draftCount = stats.byStatus['draft'] || 0;
 
   if (compact) {
     // Compact version for sidebar or small spaces

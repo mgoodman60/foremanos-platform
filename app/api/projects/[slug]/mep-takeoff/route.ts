@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { extractMEPTakeoffs, MEP_PRICING } from '@/lib/mep-takeoff-generator';
+import { extractMEPTakeoffs } from '@/lib/mep-takeoff-generator';
 import { prisma } from '@/lib/db';
 
 export async function POST(

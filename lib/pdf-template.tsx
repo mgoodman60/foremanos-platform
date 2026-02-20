@@ -24,7 +24,6 @@ import {
   StyleSheet,
   Font,
 } from '@react-pdf/renderer';
-import { format } from 'date-fns';
 
 // Register fonts
 Font.register({
@@ -462,7 +461,7 @@ const PhotosSection: React.FC<{ photos?: Photo[] }> = ({ photos }) => {
             Progress Photos {photoPages.length > 1 ? `(Page ${pageIndex + 1} of ${photoPages.length})` : ''}
           </Text>
           <View style={styles.photoGrid}>
-            {pagePhotos.map((photo, index) => (
+            {pagePhotos.map((photo, _index) => (
               <View key={photo.id} style={styles.photoContainer}>
                 <Image src={photo.url} style={styles.photo} />
                 <View style={styles.photoCaption}>

@@ -6,7 +6,7 @@
 import { prisma } from '@/lib/db';
 import { createScopedLogger } from '@/lib/logger';
 
-const log = createScopedLogger('SMS_DAILY_REPORT');
+const _log = createScopedLogger('SMS_DAILY_REPORT');
 
 export interface DailyReportFields {
   workPerformed: string;

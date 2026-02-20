@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { format, differenceInDays, addDays, startOfWeek, endOfWeek, startOfDay } from 'date-fns';
+import { format, differenceInDays, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import { neutralColors } from '@/lib/design-tokens';
 import { TradeFilter, TradeOption } from './trade-filter';
 import { DependencyLines, DependencyTypeSelector } from './dependency-lines';
 import { InlineTaskEditor } from './inline-task-editor';
-import { WhatIfScenarios, TaskChange, WhatIfScenario, useWhatIfScenarios } from './what-if-scenarios';
+import { WhatIfScenarios, TaskChange, WhatIfScenario } from './what-if-scenarios';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 
 // Task categorization for color coding
@@ -163,13 +163,13 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
   const [showDependencyLines, setShowDependencyLines] = useState(true); // Default ON now
   const [dependencyType, setDependencyType] = useState<'FS' | 'SS' | 'FF' | 'SF'>('FS');
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
-  const [taskPositions, setTaskPositions] = useState<Map<string, { left: number; width: number; top: number; height: number }>>(new Map());
+  const [_taskPositions, _setTaskPositions] = useState<Map<string, { left: number; width: number; top: number; height: number }>>(new Map());
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const taskEditorTrapRef = useFocusTrap({ isActive: !!editingTaskId, onEscape: () => setEditingTaskId(null) });
   const [progressEditingTaskId, setProgressEditingTaskId] = useState<string | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const taskRowsRef = useRef<HTMLDivElement>(null);
+  const _chartContainerRef = useRef<HTMLDivElement>(null);
+  const _taskRowsRef = useRef<HTMLDivElement>(null);
   
   // What-If Mode State
   const [isWhatIfMode, setIsWhatIfMode] = useState(false);
@@ -257,7 +257,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
   }, [activeTasks, selectedTrades]);
   
   // Check if any tasks have baseline or actual dates
-  const hasBaselineData = tasks.some(t => t.baselineStartDate || t.baselineEndDate);
+  const _hasBaselineData = tasks.some(t => t.baselineStartDate || t.baselineEndDate);
   const hasActualData = tasks.some(t => t.actualStartDate || t.actualEndDate);
 
   // Format assignee as "Trade - Subcontractor" (P6 style)
@@ -282,7 +282,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
   };
 
   // Get just the trade portion for compact displays
-  const getTradeLabel = (task: GanttTask) => {
+  const _getTradeLabel = (task: GanttTask) => {
     if (!task.subcontractor?.tradeType) return null;
     return task.subcontractor.tradeType
       .split('_')
@@ -306,7 +306,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
   };
 
   // Calculate date range
-  const { startDate, endDate, totalDays } = useMemo(() => {
+  const { startDate, endDate, totalDays: _totalDays } = useMemo(() => {
     if (tasks.length === 0) {
       const now = new Date();
       return {
@@ -670,7 +670,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
     setDragDaysDelta(0);
   };
 
-  const getStatusColor = (status: string) => {
+  const _getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-500';
       case 'in_progress': return 'bg-blue-500';
@@ -679,7 +679,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const _getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle2 className="h-4 w-4" aria-hidden="true" />;
       case 'in_progress': return <Clock className="h-4 w-4" aria-hidden="true" />;
@@ -1126,7 +1126,7 @@ export function GanttChart({ tasks, milestones = [], onTaskClick, onTaskUpdate, 
                   : 'No tasks match the current filters.'}
               </div>
             ) : (
-              filteredTasks.map((task, index) => {
+              filteredTasks.map((task, _index) => {
                 const isExpanded = expandedTasks.has(task.id);
                 const hasRelations = task.predecessors.length > 0 || task.successors.length > 0;
                 const barPosition = calculateBarPosition(task);

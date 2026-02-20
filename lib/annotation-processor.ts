@@ -156,7 +156,7 @@ const CATEGORY_KEYWORDS: Record<AnnotationCategory, string[]> = {
  */
 export function extractAnnotationsFromText(
   text: string,
-  sheetNumber: string
+  __sheetNumber: string
 ): Annotation[] {
   const annotations: Annotation[] = [];
   
@@ -203,7 +203,7 @@ export function extractAnnotationsFromText(
  */
 export async function extractAnnotationsWithVision(
   base64Data: string,
-  sheetNumber: string
+  __sheetNumber: string
 ): Promise<Annotation[]> {
   const prompt = `Analyze this construction drawing and extract ALL text annotations, notes, and requirements.
 

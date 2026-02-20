@@ -11,7 +11,7 @@ interface MaterialTakeoffRibbonProps {
   projectId: string;
 }
 
-export function MaterialTakeoffRibbon({ projectSlug, projectId }: MaterialTakeoffRibbonProps) {
+export function MaterialTakeoffRibbon({ projectSlug, projectId: _projectId }: MaterialTakeoffRibbonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

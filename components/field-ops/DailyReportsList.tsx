@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   FileText, Plus, Calendar, Sun, Cloud, CloudRain, CloudSnow, Wind,
-  Users, Clock, AlertTriangle, Check, X, ChevronRight, RefreshCw,
+  Users, Clock, AlertTriangle, ChevronRight, RefreshCw,
   CheckCircle, XCircle, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';

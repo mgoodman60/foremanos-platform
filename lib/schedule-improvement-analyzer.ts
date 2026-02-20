@@ -312,7 +312,7 @@ function analyzeDurations(tasks: any[], budgetItems: any[]): ScheduleImprovement
   let idCounter = 1;
 
   // Check for unusually short or long durations
-  const avgDuration = tasks.reduce((sum, t) => sum + (t.duration || 0), 0) / tasks.length;
+  const _avgDuration = tasks.reduce((sum, t) => sum + (t.duration || 0), 0) / tasks.length;
 
   tasks.forEach(task => {
     // Very short critical tasks
@@ -348,7 +348,7 @@ function analyzeDurations(tasks: any[], budgetItems: any[]): ScheduleImprovement
   if (budgetItems.length > 0) {
     const totalBudget = budgetItems.reduce((sum, b) => sum + (b.budgetedAmount || 0), 0);
     const totalDuration = tasks.reduce((sum, t) => sum + (t.duration || 0), 0);
-    const avgCostPerDay = totalBudget / totalDuration;
+    const _avgCostPerDay = totalBudget / totalDuration;
 
     // Find budget items without corresponding schedule activities
     const scheduleTrades = new Set(tasks.map(t => (t.assignedTo || '').toLowerCase()));
@@ -432,7 +432,7 @@ function analyzeDependencies(tasks: any[]): ScheduleImprovementRecommendation[] 
   }
 
   // Check for circular dependencies (simplified check)
-  const visited = new Set<string>();
+  const _visited = new Set<string>();
   const checkCircular = (taskId: string, path: string[]): boolean => {
     if (path.includes(taskId)) return true;
     const task = tasks.find(t => t.taskId === taskId);

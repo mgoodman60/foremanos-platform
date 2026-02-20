@@ -14,7 +14,6 @@ import {
   searchSymbols,
   findSymbolByCode,
   getLibraryStats,
-  matchSymbol,
   Trade
 } from '@/lib/symbol-libraries';
 import { SymbolCategory } from '@/lib/legend-extractor';

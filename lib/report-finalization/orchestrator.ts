@@ -132,7 +132,7 @@ export async function finalizeReport(
 
     // 11. Extract labor data from report (with budget item linking)
     log.info('Extracting labor data', { conversationId });
-    let laborCost = 0;
+    let _laborCost = 0;
     try {
       if (conversation.Project?.id) {
         const { processLaborFromDailyReport } = await import('../labor-extraction-service');
@@ -141,7 +141,7 @@ export async function finalizeReport(
           conversation.Project.id,
           conversation.createdAt
         );
-        laborCost = laborResult.totalLaborCost;
+        _laborCost = laborResult.totalLaborCost;
         if (laborResult.entriesSaved > 0) {
           log.info('Saved labor entries', {
             entriesSaved: laborResult.entriesSaved,
@@ -157,7 +157,7 @@ export async function finalizeReport(
 
     // 12. Extract material data from report (with budget item linking)
     log.info('Extracting material data', { conversationId });
-    let materialCost = 0;
+    let _materialCost = 0;
     try {
       if (conversation.Project?.id) {
         const { processMaterialsFromDailyReport } = await import('../material-extraction-service');
@@ -166,7 +166,7 @@ export async function finalizeReport(
           conversation.Project.id,
           conversation.createdAt
         );
-        materialCost = materialResult.totalMaterialCost;
+        _materialCost = materialResult.totalMaterialCost;
         if (materialResult.entriesSaved > 0) {
           log.info('Saved material entries', {
             entriesSaved: materialResult.entriesSaved,

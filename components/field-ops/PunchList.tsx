@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ClipboardList, Plus, MapPin, User, Calendar, Camera,
-  ChevronRight, RefreshCw, Check, X, AlertTriangle,
-  Filter
+  ChevronRight, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';

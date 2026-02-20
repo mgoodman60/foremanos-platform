@@ -1,4 +1,4 @@
-import type { MarkupGeometry, MarkupShapeType } from './markup-types';
+import type { MarkupGeometry } from './markup-types';
 
 /**
  * Convert PDF user space coordinates (bottom-left origin, 72 units/inch)
@@ -104,7 +104,8 @@ export function distanceToLine(
  */
 export function getBoundingBox(
   geometry: MarkupGeometry,
-  _shapeType: MarkupShapeType
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _shapeType: unknown
 ): { x: number; y: number; width: number; height: number } {
   if (
     geometry.x != null &&

@@ -11,10 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { format, differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 import {
-  Activity, Target, GitBranch, AlertTriangle, CheckCircle,
-  Clock, Calendar, RefreshCw, Link, TrendingUp, TrendingDown,
+  Activity, Target, GitBranch, AlertTriangle, CheckCircle, Calendar, RefreshCw, Link, TrendingUp,
   ArrowRight, Save
 } from 'lucide-react';
 

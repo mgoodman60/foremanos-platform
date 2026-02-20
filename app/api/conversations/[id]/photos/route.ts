@@ -18,8 +18,6 @@ import {
   generatePhotoFileName,
   getFileExtension,
   isValidImageType,
-  getImageDimensions,
-  extractBasicExif,
   createPhotoMetadata,
   formatAutoCaption,
   validatePhotoCount,

@@ -39,7 +39,7 @@ const COMMON_TRADES = [
 
 export function QuickCaptureModal({
   conversationId,
-  projectSlug,
+  projectSlug: _projectSlug,
   onClose,
   onPhotoUploaded,
   suggestedLocation,

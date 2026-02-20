@@ -8,7 +8,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import type { EnhancedChunk, SystemNode, SystemConnection, SystemTopology } from './types';
+import type { SystemNode, SystemConnection, SystemTopology } from './types';
 
 /**
  * Reconstruct system topology from MEP documents

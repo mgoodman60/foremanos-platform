@@ -555,11 +555,11 @@ export async function getPricingSummary(projectId: string): Promise<{
   const laborRates = await getAllProjectLaborRates(projectId);
 
   let budgetDerived = 0;
-  let highConfidenceRates = 0;
+  let _highConfidenceRates = 0;
   
   laborRates.forEach((rate) => {
     if (rate.source === 'budget_item') budgetDerived++;
-    if (rate.confidence === 'high') highConfidenceRates++;
+    if (rate.confidence === 'high') _highConfidenceRates++;
   });
 
   return {

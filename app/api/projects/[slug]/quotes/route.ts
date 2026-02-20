@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { generatePresignedUploadUrl } from '@/lib/s3';
 import { analyzeQuotePDF, linkOrCreateSubcontractor } from '@/lib/quote-analysis-service';
 
 export const dynamic = 'force-dynamic';

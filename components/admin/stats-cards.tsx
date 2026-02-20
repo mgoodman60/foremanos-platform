@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users, FolderOpen, FileText, UserCheck, TrendingUp } from 'lucide-react';
+import { Users, FolderOpen, FileText, UserCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface StatsCardsProps {

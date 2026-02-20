@@ -5,7 +5,6 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  Map,
   Upload,
   Loader2,
   Edit3,
@@ -103,7 +102,7 @@ export function FloorPlanRoomView({
   projectSlug,
   rooms,
   allRooms,
-  selectedRoom,
+  selectedRoom: _selectedRoom,
   onRoomSelect,
   onRoomsChange,
   overlayContent,
@@ -118,7 +117,7 @@ export function FloorPlanRoomView({
 
   const {
     zoom,
-    pan,
+    pan: _pan,
     isDragging,
     containerRef,
     handleZoomIn,
@@ -438,6 +437,7 @@ export function FloorPlanRoomView({
         >
           <div style={getTransformStyle()}>
             {/* Floor plan image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentFloorPlan.imageUrl}
               alt={currentFloorPlan.name}

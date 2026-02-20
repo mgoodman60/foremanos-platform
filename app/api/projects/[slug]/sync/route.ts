@@ -64,7 +64,7 @@ export async function POST(
     }
 
     const body = await request.json().catch(() => ({}));
-    const { documentId, feature } = body;
+    const { documentId, feature: _feature } = body;
 
     let result;
 

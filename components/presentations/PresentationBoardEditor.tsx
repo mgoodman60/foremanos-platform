@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 import { TemplateSelector } from './TemplateSelector';
 import { RenderPicker } from './RenderPicker';
 import { LogoUploader } from './LogoUploader';
@@ -497,6 +496,7 @@ function SitePhotoUploader({
       />
       {url ? (
         <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={url}
             alt="Site photo"

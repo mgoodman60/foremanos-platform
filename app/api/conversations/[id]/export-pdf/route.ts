@@ -174,7 +174,7 @@ function generatePdfHtml(data: {
     weatherSnapshots,
     photos,
     scheduleUpdates,
-    quantityCalculations,
+    quantityCalculations: _quantityCalculations,
     logoUrl,
   } = data;
 

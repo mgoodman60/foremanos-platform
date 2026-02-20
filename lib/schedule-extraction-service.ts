@@ -99,7 +99,7 @@ export async function extractAllSchedules(projectSlug: string): Promise<FullExtr
 async function extractDoorSchedule(projectId: string): Promise<ExtractionResult> {
   const errors: string[] = [];
   let itemsExtracted = 0;
-  let itemsUpdated = 0;
+  const itemsUpdated = 0;
 
   try {
     const project = await prisma.project.findUnique({
@@ -143,7 +143,7 @@ async function extractDoorSchedule(projectId: string): Promise<ExtractionResult>
 async function extractWindowSchedule(projectId: string): Promise<ExtractionResult> {
   const errors: string[] = [];
   let itemsExtracted = 0;
-  let itemsUpdated = 0;
+  const itemsUpdated = 0;
 
   try {
     const project = await prisma.project.findUnique({
@@ -185,7 +185,7 @@ async function extractWindowSchedule(projectId: string): Promise<ExtractionResul
 async function extractMEPSchedule(projectId: string): Promise<ExtractionResult> {
   const errors: string[] = [];
   let itemsExtracted = 0;
-  let itemsUpdated = 0;
+  const itemsUpdated = 0;
 
   try {
     const project = await prisma.project.findUnique({

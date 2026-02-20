@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Users, Package, Check, X, AlertTriangle, Clock,
-  RefreshCw, ChevronDown, ChevronUp, Loader2,
-  DollarSign, Building2, Calendar, Filter, Edit2
+  Users, Package, Check, X, Clock,
+  RefreshCw, Loader2, Building2, Calendar, Edit2
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';

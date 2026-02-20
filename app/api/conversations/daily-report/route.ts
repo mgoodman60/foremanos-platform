@@ -242,7 +242,7 @@ function generateScheduleQuestion(
  */
 async function handleLocationDetection(
   project: any,
-  conversation: any | null
+  _conversation: any | null
 ): Promise<{
   availableLocations: AvailableLocations;
   locationSummaryText: string;

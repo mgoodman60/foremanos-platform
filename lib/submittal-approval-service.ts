@@ -166,7 +166,7 @@ export async function getApprovalStats(projectSlug: string): Promise<{
 
 export async function getSubmittalsAwaitingAction(
   projectSlug: string,
-  userId: string
+  _userId: string
 ): Promise<Array<{
   id: string;
   submittalNumber: string;

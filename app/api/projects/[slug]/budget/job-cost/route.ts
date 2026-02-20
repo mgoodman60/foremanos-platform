@@ -40,8 +40,8 @@ export async function GET(
     const items = budget?.BudgetItem || [];
 
     // Calculate project summary
-    const totalBudget = items.reduce((sum, item) => sum + (item.budgetedAmount || 0), 0);
-    const totalActual = items.reduce((sum, item) => sum + (item.actualCost || 0), 0);
+    const _totalBudget = items.reduce((sum, item) => sum + (item.budgetedAmount || 0), 0);
+    const _totalActual = items.reduce((sum, item) => sum + (item.actualCost || 0), 0);
     const totalBilled = items.reduce((sum, item) => sum + (item.billedToDate || 0), 0);
     const totalContract = items.reduce((sum, item) => sum + (item.contractAmount || 0), 0);
 

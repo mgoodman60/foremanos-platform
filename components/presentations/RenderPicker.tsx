@@ -92,6 +92,7 @@ export function RenderPicker({
             aria-pressed={isSelected}
           >
             {imgSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imgSrc}
                 alt={render.title || 'Render'}

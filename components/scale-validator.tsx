@@ -64,7 +64,7 @@ export default function ScaleValidator({ projectSlug }: ScaleValidatorProps) {
   const [loading, setLoading] = useState(true);
   const [extracting, setExtracting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSheet, setSelectedSheet] = useState<string | null>(null);
+  const [_selectedSheet, setSelectedSheet] = useState<string | null>(null);
   
   // Converter state
   const [measurement, setMeasurement] = useState('1');

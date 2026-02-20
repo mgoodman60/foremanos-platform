@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { InteractivePlanViewer } from './interactive-plan-viewer';
 import { toast } from 'sonner';
 
@@ -35,7 +34,7 @@ interface PlanViewerSelectorProps {
 }
 
 export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');

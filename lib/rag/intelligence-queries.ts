@@ -417,7 +417,7 @@ export function formatScaleType(type: string): string {
 export async function retrievePhaseBContext(
   query: string,
   projectSlug: string,
-  chunks: DocumentChunk[]
+  _chunks: DocumentChunk[]
 ): Promise<string> {
   try {
     const lower = query.toLowerCase();

@@ -12,7 +12,6 @@ import { Badge } from './ui/badge';
 import {
   FileText,
   Calendar,
-  Hash,
   Ruler,
   User,
   Building2,

@@ -250,6 +250,7 @@ export function MobilePhotoCapture({
           {capturedImage && (
             <div className="space-y-4">
               <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={capturedImage}
                   alt="Captured"

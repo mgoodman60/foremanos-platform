@@ -11,9 +11,8 @@ import { GanttChart } from '@/components/schedule/gantt-chart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, FileText, Plus, Trash2, Edit, CheckCircle2, AlertTriangle, Clock, BarChart3, CalendarDays, ListTodo, Activity, History, Bookmark, MoreVertical, RefreshCw, Brain } from 'lucide-react';
+import { Calendar, FileText, Plus, AlertTriangle, Clock, BarChart3, CalendarDays, ListTodo, Activity, History, Bookmark, RefreshCw, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
@@ -115,7 +114,7 @@ interface ScheduleDocument {
 export default function SchedulesPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
   const slug = params.slug as string;
 
   const [schedules, setSchedules] = useState<Schedule[]>([]);

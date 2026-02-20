@@ -103,6 +103,7 @@ export function RenderGalleryCard({ render, onClick }: RenderGalleryCardProps) {
       {/* Thumbnail area */}
       <div className="relative aspect-video overflow-hidden">
         {render.thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={render.thumbnailUrl}
             alt={getAutoTitle(render)}

@@ -26,7 +26,6 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
-  Eye,
   FileText,
   Calculator,
   Scale,

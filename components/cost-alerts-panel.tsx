@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  AlertTriangle, Bell, BellOff, TrendingDown, DollarSign,
+  AlertTriangle, Bell, TrendingDown, DollarSign,
   AlertCircle, CheckCircle, X, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

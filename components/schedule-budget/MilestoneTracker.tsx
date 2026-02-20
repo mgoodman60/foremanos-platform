@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import {
   Flag, Calendar, Plus, Check, AlertTriangle,
-  Clock, Target, ChevronRight, DollarSign, Edit, Trash2
+  Clock, DollarSign, Edit, Trash2
 } from 'lucide-react';
 
 interface Milestone {

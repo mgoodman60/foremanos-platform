@@ -24,14 +24,10 @@ import {
   Loader2,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
   CheckCircle,
   Grid,
   List,
-  Download,
-  Trash2,
   Eye,
-  Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -78,7 +74,7 @@ export default function PhotoDocumentationHub({ projectSlug }: PhotoDocumentatio
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const [showLinkModal, setShowLinkModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [_showUploadModal, setShowUploadModal] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<Photo | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -256,7 +252,7 @@ export default function PhotoDocumentationHub({ projectSlug }: PhotoDocumentatio
     });
   };
 
-  const selectAll = () => {
+  const _selectAll = () => {
     setSelectedPhotos(new Set(filteredPhotos.map(p => p.id)));
   };
 

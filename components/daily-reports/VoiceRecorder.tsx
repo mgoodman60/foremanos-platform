@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Square, Loader2, Volume2 } from 'lucide-react';
+import { Mic, Square, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface VoiceRecorderProps {

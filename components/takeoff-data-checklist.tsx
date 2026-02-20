@@ -79,7 +79,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
         ? await mepRes.value.json() : { exists: false };
       const budget = budgetRes.status === 'fulfilled' && budgetRes.value.ok
         ? await budgetRes.value.json() : { items: [] };
-      const equipment = equipmentRes.status === 'fulfilled' && equipmentRes.value.ok
+      const _equipment = equipmentRes.status === 'fulfilled' && equipmentRes.value.ok
         ? await equipmentRes.value.json() : { equipment: [] };
 
       // Categorize documents
@@ -92,7 +92,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
       const specDocs = documents.filter((d: any) => 
         ['spec', 'specification', 'technical'].some(k => d.name?.toLowerCase().includes(k))
       );
-      const scheduleDocs = documents.filter((d: any) => 
+      const _scheduleDocs = documents.filter((d: any) => 
         ['schedule', 'timeline', 'phase'].some(k => d.name?.toLowerCase().includes(k))
       );
 
@@ -120,7 +120,7 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
       );
 
       // MEP from dedicated extraction
-      const mepExtracted = mep.exists ? (
+      const _mepExtracted = mep.exists ? (
         (mep.electrical?.itemCount || 0) + 
         (mep.plumbing?.itemCount || 0) + 
         (mep.hvac?.itemCount || 0)

@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, 
-  DollarSign, Calendar, Users, FileText, Activity, Briefcase,
+import { AlertTriangle, CheckCircle, Clock, 
+  DollarSign, Calendar, FileText, Activity, Briefcase,
   ArrowUp, ArrowDown, Minus, RefreshCw, Loader2
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
@@ -60,7 +59,7 @@ interface ExecutiveDashboardProps {
   projectSlug: string;
 }
 
-export default function ExecutiveDashboard({ projectId, projectSlug }: ExecutiveDashboardProps) {
+export default function ExecutiveDashboard({ projectId: _projectId, projectSlug }: ExecutiveDashboardProps) {
   const [kpis, setKpis] = useState<any>(null);
   const [trends, setTrends] = useState<any[]>([]);
   const [costBreakdown, setCostBreakdown] = useState<any[]>([]);

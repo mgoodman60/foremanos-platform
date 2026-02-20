@@ -25,7 +25,7 @@ export function ProgressBar() {
   useEffect(() => {
     let progressInterval: NodeJS.Timeout | null = null;
 
-    const handleStart = () => {
+    const _handleStart = () => {
       setIsLoading(true);
       setProgress(0);
 
@@ -42,7 +42,7 @@ export function ProgressBar() {
       }, 200);
     };
 
-    const handleComplete = () => {
+    const _handleComplete = () => {
       if (progressInterval) {
         clearInterval(progressInterval);
       }

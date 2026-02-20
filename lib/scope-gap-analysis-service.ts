@@ -46,7 +46,7 @@ interface DocumentChunkResult {
   content: string;
 }
 
-interface BudgetItemResult {
+interface _BudgetItemResult {
   description: string;
   budgetedAmount: unknown;
   costCode: string | null;

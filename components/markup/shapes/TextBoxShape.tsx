@@ -21,8 +21,8 @@ export function TextBoxShape({
   scale,
 }: TextBoxShapeProps) {
   const { geometry, style, content } = markup;
-  const [isEditing, setIsEditing] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [_isEditing, setIsEditing] = useState(false);
+  const _textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   if (
     geometry.x == null ||

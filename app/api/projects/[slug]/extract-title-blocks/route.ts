@@ -4,8 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   extractTitleBlock,
-  storeTitleBlockData,
-  TitleBlockData
+  storeTitleBlockData
 } from '@/lib/title-block-extractor';
 import { getFileUrl } from '@/lib/s3';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';

@@ -12,7 +12,6 @@ import {
   AlertTriangle,
   ArrowRightCircle,
   Combine,
-  FileStack,
   ShieldCheck,
   HardHat,
   Brain,
@@ -21,7 +20,6 @@ import {
   Globe,
   Package
 } from 'lucide-react';
-import EarthworkCalculator from './earthwork-calculator';
 import TakeoffDataChecklist from './takeoff-data-checklist';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,7 +41,6 @@ import { useTakeoffData } from '@/hooks/useTakeoffData';
 import { useTakeoffFilters } from '@/hooks/useTakeoffFilters';
 import { useTakeoffSelection } from '@/hooks/useTakeoffSelection';
 import { getCategorySummaries, getTotalQuantityByUnit, getTotalCost } from '@/lib/takeoff-calculations';
-import { getConfidenceColor } from '@/lib/takeoff-formatters';
 import { TakeoffFilters } from './takeoff/TakeoffFilters';
 import { TakeoffSummary } from './takeoff/TakeoffSummary';
 import { TakeoffActions } from './takeoff/TakeoffActions';
@@ -56,7 +53,7 @@ interface MaterialTakeoffManagerProps {
 }
 
 export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoffManagerProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   
   // Use new hooks for data, filters, and selection
   const {
@@ -64,8 +61,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     selectedTakeoff,
     loading,
     fetchTakeoffs,
-    selectTakeoff,
-    refreshTakeoffs,
+    selectTakeoff: _selectTakeoff,
+    refreshTakeoffs: _refreshTakeoffs,
     setTakeoffs,
     setSelectedTakeoff,
   } = useTakeoffData(projectSlug);
@@ -88,8 +85,8 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     toggleItemSelection,
     selectAllItems,
     clearSelection,
-    isSelected,
-    selectedCount,
+    isSelected: _isSelected,
+    selectedCount: _selectedCount,
   } = useTakeoffSelection();
 
   // Local state for UI
@@ -113,7 +110,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   const [calculating, setCalculating] = useState(false);
   const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
   const [mepData, setMepData] = useState<MEPData | null>(null);
-  const [extractingMEP, setExtractingMEP] = useState(false);
+  const [_extractingMEP, setExtractingMEP] = useState(false);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [hasBudgetDoc, setHasBudgetDoc] = useState(false);
 
@@ -154,7 +151,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
     }
   };
 
-  const triggerMEPExtraction = async (type?: string) => {
+  const triggerMEPExtraction = async (_type?: string) => {
     try {
       setExtractingMEP(true);
       toast.loading('Extracting MEP data from documents...', { id: 'mep-extract' });
@@ -735,7 +732,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   };
   
   // Handle delete item
-  const handleDeleteItem = async (itemId: string) => {
+  const _handleDeleteItem = async (itemId: string) => {
     if (!selectedTakeoff) return;
     
     if (!confirm('Are you sure you want to delete this item?')) return;
@@ -927,7 +924,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       });
       
       if (!budgetRes.ok) throw new Error('Failed to import budget');
-      const budgetData = await budgetRes.json();
+      const _budgetData = await budgetRes.json();
       
       // Sync budget prices to takeoff items
       const syncRes = await fetch('/api/takeoff/sync-budget', {

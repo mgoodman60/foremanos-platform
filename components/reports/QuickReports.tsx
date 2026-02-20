@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { 
-  FileText, Download, Clock, Briefcase, DollarSign, 
-  Calendar, Wrench, Users, TrendingUp, AlertCircle
+  FileText, Download, Clock, Briefcase, DollarSign, Wrench, Users, TrendingUp, AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -58,7 +57,7 @@ interface QuickReportsProps {
   projectSlug: string;
 }
 
-export default function QuickReports({ projectId, projectSlug }: QuickReportsProps) {
+export default function QuickReports({ projectId: _projectId, projectSlug }: QuickReportsProps) {
   const [generating, setGenerating] = useState<string | null>(null);
   const [recentReports, setRecentReports] = useState<any[]>([]);
 

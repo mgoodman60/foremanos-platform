@@ -171,7 +171,7 @@ export async function GET(
     // Track unique items per trade for tag generation
     const tagCounters: Record<string, number> = { E: 0, H: 0, P: 0, FA: 0 };
     
-    const equipmentFromTakeoff = Array.from(itemGroups.entries()).map(([key, group]) => {
+    const equipmentFromTakeoff = Array.from(itemGroups.entries()).map(([, group]) => {
       const { items, trade, displayName, category } = group;
       const prefix = trade === 'electrical' ? 'E' : trade === 'hvac' ? 'H' : trade === 'plumbing' ? 'P' : 'FA';
       tagCounters[prefix]++;

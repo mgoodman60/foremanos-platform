@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import { format, differenceInDays, eachWeekOfInterval, startOfWeek, endOfWeek, isBefore, isAfter } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
@@ -22,7 +21,6 @@ import {
   CheckCircle2,
   Activity,
   Clock,
-  BarChart2,
   LineChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -80,7 +78,7 @@ export function EarnedValueChart({
   const [showPV, setShowPV] = useState(true);
   const [showEV, setShowEV] = useState(true);
   const [showAC, setShowAC] = useState(true);
-  const [showForecasts, setShowForecasts] = useState(true);
+  const [showForecasts, _setShowForecasts] = useState(true);
 
   // Calculate weekly earned value data
   const weeklyData = useMemo((): WeeklyEVData[] => {
@@ -133,7 +131,7 @@ export function EarnedValueChart({
             
             // Distribute EV across the task duration
             const taskDuration = Math.max(1, differenceInDays(taskEnd, taskStart) + 1);
-            const weekProgress = task.percentComplete / 100;
+            const _weekProgress = task.percentComplete / 100;
             const effectiveEndForTask = new Date(Math.min(weekEnd.getTime(), taskEnd.getTime()));
             
             if (taskStart <= effectiveEndForTask) {

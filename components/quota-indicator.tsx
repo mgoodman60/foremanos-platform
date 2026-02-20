@@ -105,7 +105,7 @@ export function QuotaIndicator() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              You've reached your monthly limit. Upgrade your plan to process more documents.
+              You&apos;ve reached your monthly limit. Upgrade your plan to process more documents.
             </AlertDescription>
           </Alert>
         )}
@@ -114,7 +114,7 @@ export function QuotaIndicator() {
           <Alert className="border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-950">
             <Info className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
             <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-              You're approaching your monthly limit. Consider upgrading to avoid interruptions.
+              You&apos;re approaching your monthly limit. Consider upgrading to avoid interruptions.
             </AlertDescription>
           </Alert>
         )}

@@ -16,7 +16,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { parseScaleString } from './scale-detector';
-import { classifyDrawingWithPatterns, type DrawingClassification } from './drawing-classifier';
+import { classifyDrawingWithPatterns } from './drawing-classifier';
 import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
 import { logger } from '@/lib/logger';
 
@@ -392,7 +392,7 @@ export async function storeTitleBlockData(
 ): Promise<void> {
   try {
     // Extract scale information if available
-    let scaleData = null;
+    const scaleData = null;
     let primaryScale = null;
     let scaleRatio = null;
     let scaleType: string | null = null;

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl, deleteFile } from '@/lib/s3';
 
 // GET - Retrieve current logo info
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -136,7 +136,7 @@ export async function PUT(req: NextRequest) {
 }
 
 // DELETE - Remove company logo
-export async function DELETE(req: NextRequest) {
+export async function DELETE(_req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

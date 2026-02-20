@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   Clock,
   CloudRain,
-  TrendingUp,
   TrendingDown,
   Target,
   Calendar,
@@ -18,13 +17,11 @@ import {
   Activity,
   Users,
   Package,
-  Truck,
   CheckCircle2,
-  XCircle,
   ChevronRight,
   BarChart3
 } from 'lucide-react';
-import { format, differenceInDays, addDays, parseISO, isAfter, isBefore } from 'date-fns';
+import { format, differenceInDays, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export interface DelayEvent {
@@ -89,7 +86,7 @@ const getDelayTypeColor = (type: string) => {
 export function DelayImpactAnalyzer({
   projectSlug,
   tasks = [],
-  projectStartDate,
+  projectStartDate: _projectStartDate,
   projectEndDate,
   baselineEndDate
 }: DelayImpactAnalyzerProps) {

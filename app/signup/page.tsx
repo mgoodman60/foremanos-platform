@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle2, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff, Check, CreditCard, Mail } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Loader2, Eye, EyeOff, Check, CreditCard, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { loadStripe } from '@stripe/stripe-js';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const _stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 type SubscriptionTier = 'free' | 'starter' | 'pro' | 'team' | 'business' | 'enterprise';
 
@@ -231,9 +231,10 @@ export default function SignupPage() {
       >
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img 
-            src="/foremanos-new-logo.png" 
-            alt="ForemanOS Logo" 
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/foremanos-new-logo.png"
+            alt="ForemanOS Logo"
             className="h-20 w-auto object-contain"
           />
         </div>

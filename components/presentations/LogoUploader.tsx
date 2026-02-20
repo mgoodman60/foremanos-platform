@@ -101,6 +101,7 @@ export function LogoUploader({
       {logoUrl ? (
         <div className="flex items-center gap-2">
           <div className="w-12 h-12 rounded border border-border overflow-hidden bg-white flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
               alt={label}

@@ -57,7 +57,7 @@ export async function POST(
     }
 
     // Verify model exists and update markups
-    const model = await prisma.autodeskModel.update({
+    await prisma.autodeskModel.update({
       where: { id: modelId },
       data: {
         markups: {

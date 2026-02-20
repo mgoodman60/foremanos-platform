@@ -126,7 +126,7 @@ export async function POST(
 
     // Calculate next due date based on frequency
     const start = new Date(startDate || new Date());
-    let nextDueDate = new Date(start);
+    const nextDueDate = new Date(start);
     
     switch (frequency) {
       case 'DAILY': nextDueDate.setDate(nextDueDate.getDate() + 1); break;

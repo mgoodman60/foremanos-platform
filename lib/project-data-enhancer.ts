@@ -18,7 +18,7 @@ import { prisma } from './db';
 import { autoGenerateTakeoffs } from './auto-takeoff-generator';
 
 // Budget phase mapping (CSI Division structure)
-const WALKER_PHASES = {
+const _WALKER_PHASES = {
   100: 'GENERAL REQUIREMENTS',
   200: 'SITEWORK',
   300: 'CONCRETE',

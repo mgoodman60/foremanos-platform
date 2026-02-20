@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-type TradeType = string;
+// type TradeType = string; // Unused type removed
 
 // PUT /api/projects/[slug]/subcontractors/[id] - Update a subcontractor
 export async function PUT(

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { UserCheck, UserX, Edit, Trash2, Search, Filter, UserPlus, Copy, Crown } from 'lucide-react';
+import { UserCheck, UserX, Trash2, Search, UserPlus, Copy, Crown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +42,7 @@ interface UserManagementProps {
 }
 
 export function UserManagement({ users: initialUsers, onRefresh }: UserManagementProps) {
-  const [users, setUsers] = useState(initialUsers);
+  const [users] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [actionUserId, setActionUserId] = useState<string | null>(null);

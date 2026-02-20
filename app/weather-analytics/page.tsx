@@ -54,12 +54,12 @@ interface Project {
 }
 
 export default function WeatherAnalyticsPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [snapshots, setSnapshots] = useState<WeatherSnapshot[]>([]);
+  const [_snapshots, setSnapshots] = useState<WeatherSnapshot[]>([]);
   const [impacts, setImpacts] = useState<WeatherImpact[]>([]);
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');

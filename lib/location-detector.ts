@@ -21,7 +21,7 @@ interface RoomData {
  */
 export async function extractRoomsFromDocument(
   documentId: string,
-  projectId: string
+  _projectId: string
 ): Promise<RoomData[]> {
   try {
     logger.info('LOCATION_DETECTOR', 'Extracting rooms from document', { documentId });
@@ -171,7 +171,7 @@ function detectRoomType(roomNumber: string, context: string): string {
 export async function createRoomsFromExtraction(
   projectId: string,
   rooms: RoomData[],
-  userId: string
+  _userId: string
 ): Promise<number> {
   let created = 0;
 
@@ -282,7 +282,7 @@ export interface AvailableLocations {
 /**
  * STUB: Parse location data from text response
  */
-export function parseLocationResponse(text: string, availableLocations: AvailableLocations): LocationData | null {
+export function parseLocationResponse(_text: string, _availableLocations: AvailableLocations): LocationData | null {
   logger.info('LOCATION_DETECTOR', 'parseLocationResponse - stub implementation');
   return null;
 }
@@ -290,7 +290,7 @@ export function parseLocationResponse(text: string, availableLocations: Availabl
 /**
  * STUB: Structure location data
  */
-export function structureLocationData(locationType: string, locationIdentifier: string, activity: string): LocationData {
+export function structureLocationData(_locationType: string, _locationIdentifier: string, _activity: string): LocationData {
   logger.info('LOCATION_DETECTOR', 'structureLocationData - stub implementation');
   return {};
 }
@@ -298,7 +298,7 @@ export function structureLocationData(locationType: string, locationIdentifier: 
 /**
  * STUB: Validate location data
  */
-export function validateLocation(locationIdentifier: string, locationType: string): boolean {
+export function validateLocation(_locationIdentifier: string, _locationType: string): boolean {
   logger.info('LOCATION_DETECTOR', 'validateLocation - stub implementation');
   return true;
 }
@@ -306,7 +306,7 @@ export function validateLocation(locationIdentifier: string, locationType: strin
 /**
  * STUB: Find available locations in project
  */
-export async function findAvailableLocations(projectId: string): Promise<AvailableLocations> {
+export async function findAvailableLocations(_projectId: string): Promise<AvailableLocations> {
   logger.info('LOCATION_DETECTOR', 'findAvailableLocations - stub implementation');
   return {
     rooms: [],

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
@@ -182,6 +182,7 @@ export default function AdminDashboard() {
                 Back to Dashboard
               </Link>
               <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/foremanos-new-logo.png"
                   alt="ForemanOS"

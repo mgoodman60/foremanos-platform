@@ -183,7 +183,7 @@ export function RoomPlacementEditor({
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    let newPlacement = { ...placement };
+    const newPlacement = { ...placement };
 
     switch (resizeHandle) {
       case 'tl':
@@ -421,6 +421,7 @@ export function RoomPlacementEditor({
         >
           <div style={getTransformStyle()}>
             {/* Floor plan image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl}
               alt="Floor Plan"

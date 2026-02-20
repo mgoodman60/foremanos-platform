@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   LineChart,
   Line,
@@ -17,10 +16,10 @@ import {
   ComposedChart,
   ReferenceLine
 } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar, DollarSign, Target, AlertTriangle } from 'lucide-react';
+import { TrendingUp, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/budget-phases';
-import { format, addMonths, startOfMonth, differenceInMonths } from 'date-fns';
+import { format, addMonths, differenceInMonths } from 'date-fns';
 import { semanticColors, neutralColors, chartColors } from '@/lib/design-tokens';
 
 interface ForecastDataPoint {
@@ -49,7 +48,7 @@ export default function ForecastActualChart({
   const [data, setData] = useState<ForecastDataPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCumulative, setShowCumulative] = useState(initialShowCumulative);
-  const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
+  const [_viewMode, _setViewMode] = useState<'chart' | 'table'>('chart');
 
   useEffect(() => {
     fetchForecastData();
@@ -85,7 +84,7 @@ export default function ForecastActualChart({
     for (let i = 0; i < totalMonths; i++) {
       const date = addMonths(projectStart, i);
       const isPast = date <= now;
-      const isFuture = date > now;
+      const _isFuture = date > now;
       
       // S-curve style spending
       const progress = i / totalMonths;

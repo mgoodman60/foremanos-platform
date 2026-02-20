@@ -14,8 +14,6 @@
 
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
-import path from 'path';
-import fs from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -179,7 +177,7 @@ export async function linkRegulatoryDocumentToProject(
 
     // Copy chunks to project-specific regulatory document
     // Note: This creates new chunk records that reference the project's regulatory doc
-    const chunkPromises = regDoc.DocumentChunk.map((chunk: any, index: number) =>
+    const chunkPromises = regDoc.DocumentChunk.map((chunk: any, _index: number) =>
       prisma.documentChunk.create({
         data: {
           content: chunk.content,
@@ -363,7 +361,7 @@ export async function getRegulatoryDocumentStats(projectId: string) {
 /**
  * Get applicable regulatory codes for a location
  */
-export function getApplicableRegulatoryCodes(location: {
+export function getApplicableRegulatoryCodes(_location: {
   state?: string;
   city?: string;
   country?: string;
@@ -393,7 +391,7 @@ export function getFreeRegulatoryCodes(location: {
 /**
  * Calculate regulatory processing cost
  */
-export function calculateRegulatoryProcessingCost(codes: any[]) {
+export function calculateRegulatoryProcessingCost(_codes: any[]) {
   // Since we're using caching, the cost is $0 for already-cached documents
   return {
     estimatedCost: 0,

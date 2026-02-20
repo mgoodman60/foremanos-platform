@@ -36,7 +36,7 @@ export function PhotoGallery({
 }: PhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoMetadata | null>(null);
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   
   // Filtering state
   const [filterTrade, setFilterTrade] = useState<string>('all');

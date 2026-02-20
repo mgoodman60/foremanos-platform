@@ -3,13 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  Upload,
   FileText,
   DollarSign,
   CheckCircle2,
   AlertTriangle,
   Loader2,
-  X,
   FileSpreadsheet,
 } from 'lucide-react';
 import {

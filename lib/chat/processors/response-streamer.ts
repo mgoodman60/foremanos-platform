@@ -4,7 +4,7 @@ import { getQuickFollowUps as generateQuickFollowUps } from '@/lib/follow-up-gen
 import { validateBeforeResponse, EnhancedChunk } from '@/lib/rag-enhancements';
 import { cacheResponse, analyzeQueryComplexity } from '@/lib/query-cache';
 import { logger } from '@/lib/logger';
-import type { StreamResponseOptions, LLMResponse, ConversationResult, BuiltContext } from '@/types/chat';
+import type { StreamResponseOptions } from '@/types/chat';
 
 /**
  * Sanitize error before sending to client stream.
@@ -46,7 +46,7 @@ export function streamResponse(options: StreamResponseOptions): Response {
           if (done) break;
 
           partialRead += decoder.decode(value, { stream: true });
-          let lines = partialRead.split('\n');
+          const lines = partialRead.split('\n');
           partialRead = lines.pop() || '';
 
           for (const line of lines) {

@@ -7,7 +7,6 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
-  Filter,
   Home,
   Ruler,
   Circle,
@@ -17,7 +16,6 @@ import {
   AlertCircle,
   MapPin,
   Layers,
-  ArrowUpDown,
   ArrowUp,
   ArrowDown,
   Calculator,
@@ -27,16 +25,11 @@ import {
   RefreshCw,
   Bug,
   Paintbrush,
-  MoreVertical,
   Zap,
   Thermometer,
   Droplets,
   Flame,
-  Map,
-  Maximize2,
-  Minimize2,
   ArrowLeftRight,
-  Camera,
   FileDown,
 } from 'lucide-react';
 import RoomComparison from '@/components/room-comparison';
@@ -51,10 +44,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { Separator } from '@/components/ui/separator';
-import { QuickActionMenu, type ActionItem } from '@/components/ui/header-action-menu';
+import { QuickActionMenu } from '@/components/ui/header-action-menu';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 import { TakeoffSummaryModal } from '@/components/takeoff-summary-modal';
@@ -124,7 +116,7 @@ interface RoomBrowserProps {
 }
 
 export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const [rooms, setRooms] = useState<Room[]>([]);
   const [summary, setSummary] = useState<RoomSummary | null>(null);
   const [loading, setLoading] = useState(true);

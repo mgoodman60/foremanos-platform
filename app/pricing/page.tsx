@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Check, X, ArrowRight, Building2, Users, Sparkles } from 'lucide-react';
+import { Check, X, ArrowRight, Users, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { LandingHeader } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const _stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const pricingTiers = [
   {

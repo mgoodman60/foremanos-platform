@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import {
   Calendar,
   Users,
@@ -87,7 +86,7 @@ export default function DailyReportTemplate({
   onSubmit,
   projectSlug
 }: DailyReportTemplateProps) {
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [loadingCarryover, setLoadingCarryover] = useState(false);
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [currentWeather, setCurrentWeather] = useState<string>('');

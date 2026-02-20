@@ -103,7 +103,7 @@ export function applyTolerance(
   const excessAbsolute = tradeTolerance?.excessAbsolute ?? tolerance.excessAbsolute;
 
   const variance = submitted - required;
-  const variancePercent = (variance / required) * 100;
+  const _variancePercent = (variance / required) * 100;
 
   // Check for shortage
   if (submitted < required) {

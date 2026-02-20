@@ -18,7 +18,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import { chartColors, backgroundColors, neutralColors, textColors, borderColors } from '@/lib/design-tokens';
+import { chartColors, backgroundColors, neutralColors, textColors } from '@/lib/design-tokens';
 
 interface DataVisualizationProps {
   type: 'bar' | 'line' | 'pie' | 'area' | 'table';
@@ -41,7 +41,7 @@ export function DataVisualization({ type, data, config = {} }: DataVisualization
     yKeys = ['value'],
     colors = DEFAULT_COLORS,
     title,
-    width,
+    width: _width,
     height = 400,
   } = config;
 

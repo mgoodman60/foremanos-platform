@@ -58,7 +58,7 @@ export function calculateAggregateVolume(areaSF: number, thicknessInches: number
 }
 
 export function calculatePipeBedding(
-  pipeLengthLF: number, pipeDiameterInches: number, trenchWidthFT: number = 2, trenchDepthFT: number = 4
+  pipeLengthLF: number, pipeDiameterInches: number, trenchWidthFT: number = 2, _trenchDepthFT: number = 4
 ): DerivedQuantity {
   const beddingDepthFT = (pipeDiameterInches / 2 + 6) / 12;
   const beddingVolumeCF = pipeLengthLF * trenchWidthFT * beddingDepthFT;

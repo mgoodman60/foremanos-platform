@@ -30,9 +30,10 @@ export function MainApp({ session }: MainAppProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
-              <img 
-                src="/foremanos-new-logo.png" 
-                alt="ForemanOS Logo" 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/foremanos-new-logo.png"
+                alt="ForemanOS Logo"
                 className="h-12 w-auto object-contain"
               />
             </div>

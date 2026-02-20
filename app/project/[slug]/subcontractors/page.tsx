@@ -65,7 +65,7 @@ const TRADE_TYPES = [
 export default function SubcontractorsPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const projectSlug = params.slug as string;
 
   const [subcontractors, setSubcontractors] = useState<Subcontractor[]>([]);

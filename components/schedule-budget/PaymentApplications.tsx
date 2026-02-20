@@ -12,8 +12,8 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import {
-  FileText, Plus, DollarSign, Check, X, Clock,
-  Send, Eye, Download, AlertCircle, ChevronRight,
+  FileText, Plus, DollarSign, Check, X,
+  Send, Eye, AlertCircle,
   Upload, FileUp, Loader2, Info, CheckCircle2
 } from 'lucide-react';
 
@@ -77,7 +77,7 @@ export default function PaymentApplications() {
   });
 
   // File upload state
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [_showUploadModal, _setShowUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{
     success: boolean;

@@ -298,7 +298,7 @@ export async function generateDailyReportDOCX(data: DailyReportData): Promise<Bl
 /**
  * Generate DOCX XML content
  */
-function generateDocxContent(textContent: string, data: DailyReportData): Uint8Array {
+function generateDocxContent(textContent: string, __data: DailyReportData): Uint8Array {
   // Create document.xml content
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 

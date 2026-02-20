@@ -174,7 +174,7 @@ export async function extractMEPEquipmentWithAI(
       if (tradeFilter && trade !== tradeFilter) continue;
 
       // Check if content has relevant keywords
-      const hasRelevantContent = config.keywords.some(kw => 
+      const _hasRelevantContent = config.keywords.some(kw =>
         content.toLowerCase().includes(kw)
       );
 

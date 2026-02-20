@@ -187,7 +187,7 @@ const ERROR_INFO_MAP: Record<ErrorCategory, ErrorInfo> = {
  */
 export function categorizeError(
   error: Error | string | Response | number,
-  _context?: string // Reserved for future context-aware categorization
+  __context?: string // Reserved for future context-aware categorization
 ): ErrorCategory {
   // HTTP status code
   if (typeof error === 'number') {

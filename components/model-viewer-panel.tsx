@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Upload, Trash2, RefreshCw, Box, FileType, Clock, CheckCircle, XCircle, AlertCircle, ChevronRight, X, Database, Zap, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, Info, Layers, Ruler, Scissors, Pencil, Palette, Sparkles } from 'lucide-react';
+import { Upload, Trash2, RefreshCw, Box, FileType, Clock, CheckCircle, XCircle, AlertCircle, X, Database, Zap, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, Info, Layers, Ruler, Scissors, Pencil, Palette, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { ForgeViewerEnhanced, ViewerToolbar, ModelElementTree, ElementPropertiesPanel, MeasurementTools, SectionTools, MarkupTools, BIMDataPanel, RenderingTools, LayerControlPanel, AIRenderPanel } from './viewer';
 import type { ViewerHandle } from './viewer';

@@ -2,10 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Keyboard } from 'lucide-react';
 
-interface ShortcutAction {
+interface _ShortcutAction {
   key: string;
   description: string;
   action: () => void;

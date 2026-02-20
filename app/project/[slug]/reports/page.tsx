@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { 
-  BarChart2, FileText, Settings, ArrowLeft, 
-  PieChart, TrendingUp, Layout
+  BarChart2, FileText, Settings, ArrowLeft, Layout
 } from 'lucide-react';
 import Link from 'next/link';
 import ExecutiveDashboard from '@/components/executive-dashboard';
@@ -15,7 +14,7 @@ type TabType = 'dashboard' | 'quick-reports' | 'builder';
 
 export default function ReportsPage() {
   const params = useParams();
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const slug = params?.slug as string;
   
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');

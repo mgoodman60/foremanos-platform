@@ -6,7 +6,6 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import * as fs from 'fs';
 import { classifyDocument, ProcessorType, DocumentClassification } from './document-classifier';
-import { calculateProcessingCost, canProcessDocument } from './processing-limits';
 import { extractTitleBlock, storeTitleBlockData } from './title-block-extractor';
 import { markDocumentProcessed } from './onboarding-tracker';
 // Scale detection now handled by dedicated scale-detector module
@@ -639,8 +638,7 @@ export async function extractScalesFromDocument(documentId: string): Promise<voi
     const tempPdfPath = join(tmpdir(), `doc_${documentId}_${Date.now()}.pdf`);
 
     // Download file
-    const response = await fetch(fileUrl);
-    const pdfBuffer = Buffer.from(await response.arrayBuffer());
+    await fetch(fileUrl);
 
     try {
       // Convert first page to image for vision-based scale detection using pure JS
@@ -653,9 +651,7 @@ export async function extractScalesFromDocument(documentId: string): Promise<voi
       //   textScales.push(...scales);
       // }
 
-      // Get title block data if available
-      const titleBlockChunk = document.DocumentChunk.find((c: any) => c.titleBlockData);
-      const titleBlockData = titleBlockChunk?.titleBlockData as any;
+      // Title block data available via document.DocumentChunk but scale detection moved to dedicated endpoint
 
       // // Use vision for more accurate scale detection
       // let visionScales: any[] = [];

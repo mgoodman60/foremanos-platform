@@ -6,8 +6,8 @@ import { prisma } from '@/lib/db';
 import { getProjectWeather, autoPopulateDailyReportWeather, fetchCurrentWeather, calculateWorkImpact } from '@/lib/weather-service';
 
 // Fallback coordinates - Louisville, KY (only used if project has no location set)
-const FALLBACK_LAT = 38.2085;
-const FALLBACK_LON = -85.7585;
+const _FALLBACK_LAT = 38.2085;
+const _FALLBACK_LON = -85.7585;
 
 export async function GET(
   request: Request,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Info, Copy, ChevronRight, ChevronDown, Tag, Ruler, Hash, FileText, Loader2, X } from 'lucide-react';
+import { Info, Copy, ChevronRight, ChevronDown, Tag, Ruler, Hash, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 

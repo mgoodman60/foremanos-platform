@@ -152,7 +152,7 @@ export async function POST(
       const currentLocations = (conversation.workLocations as unknown as LocationData[]) || [];
       currentLocations.push(locationData);
 
-      const updated = await prisma.conversation.update({
+      await prisma.conversation.update({
         where: { id },
         data: {
           workLocations: currentLocations as any,
@@ -167,7 +167,7 @@ export async function POST(
       });
     } else if (action === 'set_suggestions' && body.suggestions) {
       // Store location suggestions
-      const updated = await prisma.conversation.update({
+      await prisma.conversation.update({
         where: { id },
         data: {
           locationSuggestions: body.suggestions as any,
@@ -180,7 +180,7 @@ export async function POST(
       });
     } else if (action === 'mark_asked') {
       // Mark that user was asked about locations
-      const updated = await prisma.conversation.update({
+      await prisma.conversation.update({
         where: { id },
         data: {
           locationAskedUser: true,

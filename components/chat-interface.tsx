@@ -75,10 +75,10 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
   const [isDragging, setIsDragging] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState<Record<string, number>>({});
-  const [showRoomBrowser, setShowRoomBrowser] = useState(false);
-  const [showMaterialTakeoff, setShowMaterialTakeoff] = useState(false);
-  const [showMEPEquipment, setShowMEPEquipment] = useState(false);
-  const [showPlanViewer, setShowPlanViewer] = useState(false);
+  const [_showRoomBrowser, setShowRoomBrowser] = useState(false);
+  const [_showMaterialTakeoff, setShowMaterialTakeoff] = useState(false);
+  const [_showMEPEquipment, setShowMEPEquipment] = useState(false);
+  const [_showPlanViewer, setShowPlanViewer] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -759,7 +759,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         if (!reader) throw new Error('No response stream available');
 
         const decoder = new TextDecoder();
-        let assistantMessage: Message = {
+        const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content: '',
@@ -774,7 +774,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           if (done) break;
 
           partialRead += decoder.decode(value, { stream: true });
-          let lines = partialRead.split('\n');
+          const lines = partialRead.split('\n');
           partialRead = lines.pop() || '';
 
           for (const line of lines) {
@@ -924,7 +924,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
         chatText += `Access Level: ${hasFullAccess ? 'Full Access (Admin/Client)' : 'Guest Access'}\n`;
         chatText += `\n${'='.repeat(60)}\n\n`;
 
-        messages.forEach((msg, index) => {
+        messages.forEach((msg, _index) => {
           const timestamp = msg.timestamp.toLocaleString();
           const role = msg.role === 'user' ? 'YOU' : 'AI ASSISTANT';
           
@@ -1315,7 +1315,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
           </div>
         )}
 
-        {messages.map((message, index) => {
+        {messages.map((message, _index) => {
           // Extract messageId from the message id (format: "messageId-role")
           const messageId = message.id.includes('-') ? message.id.split('-')[0] : message.id;
           const isHighlighted = searchHighlight?.messageId === messageId;
@@ -1584,7 +1584,7 @@ export function ChatInterface({ userRole: propUserRole, projectSlug, projectId, 
               messageContent={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
               projectSlug={projectSlug}
               conversationId={activeConversationId || undefined}
-              onActionComplete={(action, result) => {
+              onActionComplete={(action, _result) => {
                 toast.success(`${action} completed`);
               }}
             />

@@ -26,7 +26,7 @@ export async function syncDailyReportToOneDrive(
   reportId: string
 ): Promise<OneDriveSyncResult> {
   const errors: string[] = [];
-  let pdfUploaded = false;
+  const pdfUploaded = false;
   let docxUploaded = false;
   let photosUploaded = 0;
   let exportPath = '';

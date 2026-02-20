@@ -45,7 +45,7 @@ export default function SpecSectionLinker({
   projectSlug,
   submittalId,
   currentSpecSection,
-  tradeCategory,
+  tradeCategory: _tradeCategory,
   onSpecSectionChange,
   compact = false,
 }: SpecSectionLinkerProps) {
@@ -138,7 +138,7 @@ export default function SpecSectionLinker({
     if (!searchTerm) return Object.entries(CSI_DIVISIONS);
     
     const term = searchTerm.toLowerCase();
-    return Object.entries(CSI_DIVISIONS).filter(([num, div]) => {
+    return Object.entries(CSI_DIVISIONS).filter(([_num, div]) => {
       if (div.title.toLowerCase().includes(term)) return true;
       return Object.entries(div.sections).some(
         ([sec, title]) =>

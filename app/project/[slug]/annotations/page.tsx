@@ -3,11 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
-import { 
-  Plus, X, MessageSquare, AlertCircle, CheckCircle, 
-  Clock, Flag, User, Tag, ArrowLeft, Loader2, Search,
-  Filter, Download, ChevronDown, Pin
+import { X, AlertCircle, Flag, ArrowLeft, Loader2, Pin
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -49,7 +45,7 @@ interface Document {
 export default function AnnotationsPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);

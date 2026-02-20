@@ -43,6 +43,35 @@ Delegate all coding work to specialized agents or agent teams.
 - Require plan approval for risky or schema-changing work
 - Start research/review teammates before implementation teammates
 
+### Agent Execution Guardrails
+
+**max_turns limits (MANDATORY on every Task call):**
+- Explore agents: `max_turns: 8`
+- Plan agents: `max_turns: 10`
+- Single-purpose agents (fixer, tester, coder, etc.): `max_turns: 20`
+- General-purpose agents: `max_turns: 25`
+- NEVER spawn an agent without `max_turns`
+
+**Background agents:**
+- NEVER use `run_in_background: true` unless the user explicitly requests it
+- Foreground agents can be interrupted with Ctrl+C; background agents cannot
+- If you must use background, set `max_turns: 15` as hard cap
+
+**Error handling:**
+- If an agent errors or gets stuck, report to user — do NOT retry automatically
+- If an agent hits its max_turns limit, report what it accomplished and ask before continuing
+- NEVER spawn a replacement agent for one that failed without user approval
+
+**Phased execution:**
+- After each agent (or batch of parallel agents) completes, report results before spawning more
+- Do NOT chain agent → agent → agent without user checkpoints
+- For teams: complete one phase, verify, then start next phase
+
+**When user says stop:**
+- Immediately stop spawning new agents
+- Do NOT start "cleanup" or "verification" agents
+- Report current state and wait for instructions
+
 ## Build & Development Commands
 
 ```bash

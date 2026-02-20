@@ -75,7 +75,6 @@ export async function GET(
       if (t.status === 'completed') return true;
       if (t.status === 'delayed') return false;
       // In progress tasks - check if they're behind schedule
-      const endDate = new Date(t.endDate);
       const progress = t.percentComplete || 0;
       const daysPassed = Math.max(0, (now.getTime() - new Date(t.startDate).getTime()) / (1000 * 60 * 60 * 24));
       const totalDays = Math.max(1, t.duration || 1);

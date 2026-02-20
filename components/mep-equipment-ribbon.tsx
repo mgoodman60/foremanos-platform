@@ -11,7 +11,7 @@ interface MEPEquipmentRibbonProps {
   projectId: string;
 }
 
-export function MEPEquipmentRibbon({ projectSlug, projectId }: MEPEquipmentRibbonProps) {
+export function MEPEquipmentRibbon({ projectSlug, projectId: _projectId }: MEPEquipmentRibbonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

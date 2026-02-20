@@ -19,7 +19,6 @@ import {
   FileText,
   Info,
   Download,
-  Filter,
   Sparkles,
   Loader2,
   MapPinned
@@ -35,7 +34,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -113,7 +111,7 @@ const tradeConfig = {
 };
 
 export function MEPEquipmentBrowser({ projectSlug, onClose }: MEPEquipmentBrowserProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const [equipment, setEquipment] = useState<MEPEquipment[]>([]);
   const [conflicts, setConflicts] = useState<MEPConflict[]>([]);
   const [stats, setStats] = useState<MEPStats | null>(null);

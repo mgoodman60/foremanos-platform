@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Eye, EyeOff, Maximize2, Minimize2, RotateCcw, ZoomIn, ZoomOut,
-  Layers, Scissors, Ruler, Move3d, Target, Grid3x3, Sun, Moon,
-  Focus, Home, Camera, Crosshair, Box, Cuboid, ChevronDown
+  Eye, Maximize2, Minimize2,
+  Layers, Scissors, Ruler, Grid3x3, Sun, Moon, Home, Camera, Box, Cuboid, ChevronDown
 } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 
@@ -28,7 +27,7 @@ export default function ViewerToolbar({
   isFullscreen,
   onToggleFullscreen,
 }: ViewerToolbarProps) {
-  const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [_activeTool, setActiveTool] = useState<string | null>(null);
   const [sectionActive, setSectionActive] = useState(false);
   const [measureActive, setMeasureActive] = useState(false);
   const [showViewMenu, setShowViewMenu] = useState(false);

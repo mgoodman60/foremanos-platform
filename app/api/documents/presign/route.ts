@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { fileName, fileSize, contentType, projectId, category } = body;
+    const { fileName, fileSize, contentType, projectId, category: _category } = body;
 
     if (!fileName || typeof fileName !== 'string') {
       return NextResponse.json({ error: 'fileName is required' }, { status: 400 });

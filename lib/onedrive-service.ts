@@ -2,12 +2,12 @@
 // Uses Microsoft Graph API with per-project OAuth tokens
 
 import { prisma } from './db';
-import { uploadFile, deleteFile } from './s3';
+import { uploadFile } from './s3';
 import crypto from 'crypto';
 import { processUnprocessedDocuments } from './document-processor';
 import { suggestDocumentCategory } from './document-categorizer';
 import { createScopedLogger } from './logger';
-import type { OneDriveItem, OneDriveListResponse } from './types/report-data';
+import type { OneDriveItem } from './types/report-data';
 
 const log = createScopedLogger('ONEDRIVE');
 

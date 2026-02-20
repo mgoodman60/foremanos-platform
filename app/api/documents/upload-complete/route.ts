@@ -6,7 +6,7 @@ import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sd
 import { prisma } from '@/lib/db';
 import crypto from 'crypto';
 import { requireProjectPermission } from '@/lib/project-permissions';
-import { canProcessDocument, getProcessingLimits } from '@/lib/processing-limits';
+import { canProcessDocument } from '@/lib/processing-limits';
 import { getDocumentMetadata } from '@/lib/document-processor';
 import { suggestDocumentCategory } from '@/lib/document-categorizer';
 import { markDocumentUploaded } from '@/lib/onboarding-tracker';

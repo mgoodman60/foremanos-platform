@@ -452,7 +452,7 @@ export function accumulateProviderStats(
 /**
  * Process next batch for a specific document (used by cron for single-batch resume)
  */
-async function processNextBatchForDocument(documentId: string): Promise<boolean> {
+async function __processNextBatchForDocument(documentId: string): Promise<boolean> {
   const entry = await prisma.processingQueue.findFirst({
     where: { documentId },
     orderBy: { createdAt: 'desc' },

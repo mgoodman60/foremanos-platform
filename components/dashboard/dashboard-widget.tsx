@@ -1,7 +1,7 @@
 'use client';
 
 import { type LucideIcon } from 'lucide-react';
-import { TrendingUp, TrendingDown, Minus, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Link from 'next/link';
 
 interface PrimaryMetric {

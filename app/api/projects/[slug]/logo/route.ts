@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { generatePresignedUploadUrl, deleteFile, getFileUrl } from '@/lib/s3';
+import { generatePresignedUploadUrl, deleteFile } from '@/lib/s3';
 
 export const dynamic = 'force-dynamic';
 

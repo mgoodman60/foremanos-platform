@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  ChevronLeft, Calendar, DollarSign, Flag, Package,
+  ChevronLeft, DollarSign, Flag, Package,
   TrendingUp, Activity, FileText
 } from 'lucide-react';
 

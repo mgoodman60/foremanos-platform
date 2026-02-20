@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Loader2, Maximize2, Minimize2, RotateCcw, ZoomIn, ZoomOut, Box, Layers, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Maximize2, Minimize2, RotateCcw, Box, Layers, Eye } from 'lucide-react';
 
 // Use global Autodesk types - avoiding duplicate declaration
-type AutodeskViewer = any;
-type AutodeskDocument = any;
-type AutodeskBubbleNode = any;
+type _AutodeskViewer = any;
+type _AutodeskDocument = any;
+type _AutodeskBubbleNode = any;
 
 interface ForgeViewerProps {
   urn: string;
@@ -21,7 +21,7 @@ export default function ForgeViewer({ urn, onViewerReady, onError, className = '
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [_accessToken, setAccessToken] = useState<string | null>(null);
 
   // Fetch access token
   const fetchToken = useCallback(async () => {

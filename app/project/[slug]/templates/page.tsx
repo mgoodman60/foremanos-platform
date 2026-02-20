@@ -14,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { Upload, FileText, Download, Trash2, Plus, X, ChevronLeft } from 'lucide-react';
-import { generatePresignedUploadUrl } from '@/lib/s3';
 
 interface Template {
   id: string;
@@ -41,8 +40,8 @@ interface Template {
 
 export default function TemplatesPage() {
   const params = useParams();
-  const router = useRouter();
-  const { data: session } = useSession();
+  const _router = useRouter();
+  const { data: _session } = useSession();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadDialog, setShowUploadDialog] = useState(false);

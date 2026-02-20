@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { FileText, BarChart3, TrendingUp, Plus, ChevronLeft, ClipboardCheck } from 'lucide-react';
+import { FileText, BarChart3, TrendingUp, ChevronLeft, ClipboardCheck } from 'lucide-react';
 import DailyReportsList from '@/components/field-ops/DailyReportsList';
 import ProjectHealthWidget from '@/components/field-ops/ProjectHealthWidget';
 import ProgressDetectionPanel from '@/components/daily-reports/ProgressDetectionPanel';

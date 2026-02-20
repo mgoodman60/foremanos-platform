@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
  * Manually trigger orphaned document recovery
  * Admin only
  */
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
  * Get orphaned document statistics
  * Admin only
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 

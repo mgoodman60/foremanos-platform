@@ -11,7 +11,6 @@ import {
   X,
   ChevronDown,
   ChevronRight,
-  Package,
   AlertOctagon,
   Clock,
 } from 'lucide-react';
@@ -84,7 +83,7 @@ export default function ShortageAlerts({ projectSlug, onCreateRFI }: ShortageAle
 
   const criticalCount = shortages.filter(s => s.severity === 'CRITICAL' && !dismissed.has(s.lineItemId)).length;
   const highCount = shortages.filter(s => s.severity === 'HIGH' && !dismissed.has(s.lineItemId)).length;
-  const mediumCount = shortages.filter(s => s.severity === 'MEDIUM' && !dismissed.has(s.lineItemId)).length;
+  const _mediumCount = shortages.filter(s => s.severity === 'MEDIUM' && !dismissed.has(s.lineItemId)).length;
 
   if (loading) {
     return (

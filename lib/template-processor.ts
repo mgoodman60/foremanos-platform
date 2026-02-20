@@ -19,7 +19,7 @@ import type {
   ScheduleUpdateEntry,
 } from './types/report-data';
 
-interface TemplateVariable {
+interface _TemplateVariable {
   key: string;
   value: string | number | boolean | null;
   type?: 'text' | 'number' | 'date' | 'boolean';

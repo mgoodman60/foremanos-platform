@@ -23,9 +23,7 @@ import {
   MapPin,
   RefreshCw,
   CheckCircle2,
-  AlertCircle,
   Download,
-  DollarSign,
   Loader2
 } from 'lucide-react';
 

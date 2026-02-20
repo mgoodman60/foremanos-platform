@@ -39,7 +39,7 @@ export async function GET(
     const projectPrices = await getProjectUnitPrices(project.id, region);
 
     // Optionally include default prices
-    let defaultPrices: any[] = [];
+    const defaultPrices: any[] = [];
     if (includeDefaults) {
       const multiplier = REGIONAL_MULTIPLIERS[region] || 1.0;
       
@@ -144,7 +144,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params: _params }: { params: { slug: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);

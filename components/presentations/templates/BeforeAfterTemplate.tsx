@@ -92,6 +92,7 @@ const BeforeAfterTemplate = React.forwardRef<HTMLDivElement, PresentationTemplat
             }}
           >
             {sitePhotoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={sitePhotoUrl}
                 alt="Existing site"
@@ -158,6 +159,7 @@ const BeforeAfterTemplate = React.forwardRef<HTMLDivElement, PresentationTemplat
             }}
           >
             {renderImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={renderImage.url}
                 alt={renderImage.title || 'Proposed render'}
@@ -227,6 +229,7 @@ const BeforeAfterTemplate = React.forwardRef<HTMLDivElement, PresentationTemplat
             }}
           >
             {companyLogoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={companyLogoUrl}
                 alt="Company logo"
@@ -267,6 +270,7 @@ const BeforeAfterTemplate = React.forwardRef<HTMLDivElement, PresentationTemplat
             }}
           >
             {clientLogoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={clientLogoUrl}
                 alt="Client logo"

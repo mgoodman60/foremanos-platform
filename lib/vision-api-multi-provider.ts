@@ -16,9 +16,8 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import { logger } from '@/lib/logger';
-import { VISION_MODEL, FALLBACK_MODEL, DEFAULT_MODEL, GEMINI_PRIMARY_MODEL, GEMINI_SECONDARY_MODEL } from '@/lib/model-config';
+import { VISION_MODEL, FALLBACK_MODEL, GEMINI_PRIMARY_MODEL, GEMINI_SECONDARY_MODEL } from '@/lib/model-config';
 
 // Provider types (Claude Opus primary, OpenAI + Claude fallbacks, Gemini for two-tier extraction)
 export type VisionProvider = 'gemini-3-pro-preview' | 'gemini-2.5-pro' | 'claude-opus-4-6' | 'gpt-5.2' | 'claude-sonnet-4-5';
@@ -309,7 +308,7 @@ async function callClaudeOpusVision(
 }
 
 // Call Claude Sonnet 4.5 (secondary fallback)
-async function callClaudeSonnetVision(
+async function _callClaudeSonnetVision(
   imageBase64: string,
   prompt: string,
   retryCount: number = 0
@@ -358,7 +357,7 @@ async function callClaudeSonnetVision(
     contentArray.push({ type: 'text', text: prompt });
 
     const requestBody = JSON.stringify({
-      model: DEFAULT_MODEL,
+      model: VISION_MODEL,
       max_tokens: 6000,
       temperature: 0.1,
       messages: [
@@ -369,7 +368,7 @@ async function callClaudeSonnetVision(
       ],
     });
     const payloadSizeMB = (requestBody.length / (1024 * 1024)).toFixed(2);
-    logger.info('VISION_API', `${config.displayName}: Sending request`, { payloadSizeMB, model: DEFAULT_MODEL });
+    logger.info('VISION_API', `${config.displayName}: Sending request`, { payloadSizeMB, model: VISION_MODEL });
 
     const fetchStart = Date.now();
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -430,7 +429,7 @@ async function callClaudeSonnetVision(
       const delay = config.baseDelay * Math.pow(2, retryCount);
       logger.info('VISION_API', `${config.displayName}: Retry ${retryCount + 1}/${config.maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      return callClaudeSonnetVision(imageBase64, prompt, retryCount + 1);
+      return _callClaudeSonnetVision(imageBase64, prompt, retryCount + 1);
     }
 
     return {
@@ -1006,7 +1005,7 @@ export async function analyzeWithLoadBalancing(
 export async function analyzeWithMultiProvider(
   imageBase64: string,
   prompt: string,
-  minQualityScore: number = 50
+  _minQualityScore: number = 50
 ): Promise<VisionResponse> {
   logger.info('VISION_API', 'Multi-Provider Vision Analysis Started');
 

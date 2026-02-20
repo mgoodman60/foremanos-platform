@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import {
-  TrendingUp, TrendingDown, DollarSign, RefreshCw,
+import { DollarSign, RefreshCw,
   AlertTriangle, CheckCircle, Target, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import {
@@ -103,7 +102,7 @@ export default function CashFlowChart() {
     return `$${value.toFixed(0)}`;
   };
 
-  const getHealthColor = (status: string) => {
+  const _getHealthColor = (status: string) => {
     switch (status) {
       case 'ON_BUDGET':
       case 'ON_SCHEDULE':

@@ -33,7 +33,7 @@ interface DashboardData {
 export default function IntelligenceDashboard() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

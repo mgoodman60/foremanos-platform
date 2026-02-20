@@ -36,6 +36,7 @@ const PresentationCoverTemplate = React.forwardRef<HTMLDivElement, PresentationT
         {/* Background: render image or solid accent color */}
         {heroImage ? (
           <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={heroImage.url}
               alt={heroImage.title || 'Cover render'}
@@ -92,6 +93,7 @@ const PresentationCoverTemplate = React.forwardRef<HTMLDivElement, PresentationT
         >
           {/* Company logo */}
           {companyLogoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={companyLogoUrl}
               alt="Company logo"
@@ -192,6 +194,7 @@ const PresentationCoverTemplate = React.forwardRef<HTMLDivElement, PresentationT
               }}
             >
               {partnerLogo1Url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={partnerLogo1Url}
                   alt="Partner 1"
@@ -204,6 +207,7 @@ const PresentationCoverTemplate = React.forwardRef<HTMLDivElement, PresentationT
                 />
               )}
               {partnerLogo2Url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={partnerLogo2Url}
                   alt="Partner 2"

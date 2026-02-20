@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Cloud, CloudOff, FolderOpen, RefreshCw, History, CheckCircle2, XCircle, Clock, Loader2 } from 'lucide-react';
+import { Cloud, CloudOff, FolderOpen, RefreshCw, History, CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import OneDriveFolderBrowser from './onedrive-folder-browser';
 import OneDriveSyncHistory from './onedrive-sync-history';

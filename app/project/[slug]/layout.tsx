@@ -255,7 +255,7 @@ function ProjectLayoutInner({ children }: { children: React.ReactNode }) {
         >
           <LazyThreeWeekLookahead
             projectSlug={slug}
-            onTaskClick={(taskId: string) => {
+            onTaskClick={(_taskId: string) => {
               // Navigate to task or show details
             }}
           />
@@ -336,6 +336,7 @@ function LogoUploadModal({ modals }: { modals: ReturnType<typeof useProjectModal
           ) : (
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-lg flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={modals.logoPreview}
                   alt="Logo preview"

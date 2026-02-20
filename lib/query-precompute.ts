@@ -98,7 +98,7 @@ export async function precomputeCommonQueries(
   const stats = { success: 0, failed: 0, skipped: 0, total: 0 };
   
   // Get all queries to process
-  let queriesToProcess: string[] = [];
+  const queriesToProcess: string[] = [];
   if (categories && categories.length > 0) {
     // Only process selected categories
     categories.forEach(cat => {
@@ -144,7 +144,7 @@ export async function precomputeCommonQueries(
       const adminCorrections = await retrieveRelevantCorrections(query, projectSlug, 3);
       
       // Generate context
-      const documentContext = generateContextWithCorrections(chunks, adminCorrections);
+      const _documentContext = generateContextWithCorrections(chunks, adminCorrections);
       
       // Simulate API call (we'd need to actually call the API to get real responses)
       // For now, we'll mark it as a simulation

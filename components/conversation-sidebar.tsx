@@ -71,10 +71,10 @@ export function ConversationSidebar({
   const [loadingDailyReport, setLoadingDailyReport] = useState(false);
   const [showPhotoLibrary, setShowPhotoLibrary] = useState(false);
   const [showPhotoTimeline, setShowPhotoTimeline] = useState(false);
-  const [showRoomBrowser, setShowRoomBrowser] = useState(false);
-  const [showMaterialTakeoff, setShowMaterialTakeoff] = useState(false);
-  const [showMEPEquipment, setShowMEPEquipment] = useState(false);
-  const [showPlanViewer, setShowPlanViewer] = useState(false);
+  const [_showRoomBrowser, setShowRoomBrowser] = useState(false);
+  const [_showMaterialTakeoff, setShowMaterialTakeoff] = useState(false);
+  const [_showMEPEquipment, setShowMEPEquipment] = useState(false);
+  const [_showPlanViewer, setShowPlanViewer] = useState(false);
   const [showQuickCapture, setShowQuickCapture] = useState(false);
   const [dashboardExpanded, setDashboardExpanded] = useState(true);
   const [historyExpanded, setHistoryExpanded] = useState(true);

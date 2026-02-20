@@ -8,11 +8,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { extractGridSystem, findSheetsAtLocation } from '@/lib/spatial-correlation';
 import { extractMEPElements, detectAllClashes } from '@/lib/mep-path-tracer';
 import { getCustomSymbols } from '@/lib/adaptive-symbol-learning';
 import { getAnnotationStats } from '@/lib/visual-annotations';
-import { detectIsometricViews } from '@/lib/isometric-interpreter';
 import {
   calculateIntelligenceScore,
   getProjectIntelligenceMetrics,

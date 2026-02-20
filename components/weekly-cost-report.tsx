@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  FileText, RefreshCw, Download, Calendar, TrendingUp,
-  TrendingDown, DollarSign, Loader2, ChevronRight
+  FileText, RefreshCw, Calendar, Loader2, ChevronRight
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -70,7 +68,7 @@ export default function WeeklyCostReport() {
         method: 'POST'
       });
       if (res.ok) {
-        const report = await res.json();
+        const _report = await res.json();
         toast.success('Weekly report generated');
         fetchReports();
       } else if (res.status === 409) {

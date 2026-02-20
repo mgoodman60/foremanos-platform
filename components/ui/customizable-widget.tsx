@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { GripVertical, X, Maximize2, Minimize2, Settings } from 'lucide-react';
+import { GripVertical, X, Maximize2, Minimize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface WidgetConfig {
@@ -60,14 +60,14 @@ export function CustomizableWidget({
     setDragStart({ x: e.clientX - localPos.x, y: e.clientY - localPos.y });
   };
 
-  const handleDrag = (e: React.MouseEvent) => {
+  const _handleDrag = (e: React.MouseEvent) => {
     if (!isDragging) return;
     const newX = Math.max(0, e.clientX - dragStart.x);
     const newY = Math.max(0, e.clientY - dragStart.y);
     setLocalPos({ x: newX, y: newY });
   };
 
-  const handleDragEnd = () => {
+  const _handleDragEnd = () => {
     if (isDragging && onMove) {
       onMove(config.id, localPos.x, localPos.y);
     }
@@ -82,7 +82,7 @@ export function CustomizableWidget({
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handleResize = (e: React.MouseEvent) => {
+  const _handleResize = (e: React.MouseEvent) => {
     if (!isResizing) return;
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
@@ -92,7 +92,7 @@ export function CustomizableWidget({
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handleResizeEnd = () => {
+  const _handleResizeEnd = () => {
     if (isResizing && onResize) {
       onResize(config.id, localSize.width, localSize.height);
     }

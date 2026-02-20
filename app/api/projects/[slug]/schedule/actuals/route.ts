@@ -62,7 +62,6 @@ export async function GET(
     // Calculate schedule health
     let behindSchedule = 0;
     let aheadOfSchedule = 0;
-    const today = new Date();
 
     for (const task of tasks) {
       if (task.actualStartDate && task.baselineStartDate) {

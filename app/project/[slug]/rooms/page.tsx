@@ -7,7 +7,6 @@ import {
   Building2,
   ArrowLeft,
   Search,
-  Filter,
   Download,
   RefreshCw,
   CheckCircle2,
@@ -23,7 +22,6 @@ import {
   List,
   FileText,
   Flame,
-  LayoutGrid,
   PaintBucket,
   Layers,
   ArrowUpFromDot,
@@ -102,8 +100,8 @@ interface RoomFilters {
 
 export default function RoomsPage() {
   const params = useParams();
-  const router = useRouter();
-  const { data: session } = useSession() || {};
+  const _router = useRouter();
+  const { data: _session } = useSession() || {};
   const slug = params?.slug as string;
 
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -283,7 +281,7 @@ export default function RoomsPage() {
     completed: 'bg-green-500/10 border-green-500/30',
   };
 
-  function getHeatmapColor(status: string): string {
+  function _getHeatmapColor(status: string): string {
     return heatmapColors[status] || 'bg-amber-500/10 border-amber-500/30';
   }
 

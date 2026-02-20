@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import { format, addDays, differenceInDays, startOfWeek, endOfWeek, eachWeekOfInterval } from 'date-fns';
+import { format, differenceInDays, endOfWeek, eachWeekOfInterval } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
@@ -23,13 +22,10 @@ import {
 import {
   BarChart3,
   Users,
-  Truck,
   HardHat,
   AlertTriangle,
   TrendingUp,
-  TrendingDown,
-  Calendar,
-  Layers
+  TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { semanticColors, neutralColors, chartColors, secondaryColors } from '@/lib/design-tokens';
@@ -128,12 +124,12 @@ export function ResourceHistogram({
   taskResources,
   startDate,
   endDate,
-  viewMode = 'week'
+  viewMode: _viewMode = 'week'
 }: ResourceHistogramProps) {
   const [showPlanned, setShowPlanned] = useState(true);
   const [showActual, setShowActual] = useState(true);
   const [selectedTrade, setSelectedTrade] = useState<string>('all');
-  const [showEquipment, setShowEquipment] = useState(false);
+  const [_showEquipment, _setShowEquipment] = useState(false);
 
   // Get unique trades from data
   const uniqueTrades = useMemo(() => {

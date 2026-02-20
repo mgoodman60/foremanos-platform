@@ -169,7 +169,7 @@ async function extractTasksFromChunks(chunks: any[]): Promise<ParsedTask[]> {
 /**
  * Parse schedule content to extract task information
  */
-function parseScheduleContent(content: string, metadata: any): ParsedTask[] {
+function parseScheduleContent(content: string, _metadata: any): ParsedTask[] {
   const tasks: ParsedTask[] = [];
   const lines = content.split('\n');
 
@@ -231,8 +231,8 @@ function parseDate(dateStr: string): Date {
   // Format: MM/DD/YYYY or MM/DD/YY
   const parts = cleaned.split('/');
   if (parts.length === 3) {
-    let month = parseInt(parts[0]) - 1; // 0-indexed
-    let day = parseInt(parts[1]);
+    const month = parseInt(parts[0]) - 1; // 0-indexed
+    const day = parseInt(parts[1]);
     let year = parseInt(parts[2]);
 
     // Handle 2-digit years
@@ -514,7 +514,7 @@ export async function parseScheduleActivities(
 function parseActivityLine(
   line: string,
   targetDate: Date,
-  targetDateStr: string
+  _targetDateStr: string
 ): ScheduledActivity | null {
   // Skip empty lines or headers
   if (!line.trim() || line.length < 10) {

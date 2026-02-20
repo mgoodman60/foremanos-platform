@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { ArrowRight, FileText, Brain, Clock, DollarSign, Shield, Zap, Target, Users, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LandingHeader } from '@/components/landing/header';
@@ -75,7 +75,7 @@ export default function AboutPage() {
                   <Clock className="h-6 w-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
                     <p className="font-semibold text-gray-900">2-3 Hours Lost Every Day</p>
-                    <p>Your PM is flipping through 200-page drawing sets to find one dimension, one spec note, one detail callout. That's $150+ in billable time burned daily on manual searching.</p>
+                    <p>Your PM is flipping through 200-page drawing sets to find one dimension, one spec note, one detail callout. That&apos;s $150+ in billable time burned daily on manual searching.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -165,9 +165,9 @@ export default function AboutPage() {
               <div className="bg-red-50 border border-red-200 rounded-xl p-6">
                 <h3 className="text-lg font-bold text-red-900 mb-3">❌ Before Regulatory Caching</h3>
                 <div className="space-y-2 text-sm text-red-800">
-                  <p><strong>User:</strong> "What's the ADA parking requirement?"</p>
+                  <p><strong>User:</strong> &quot;What&apos;s the ADA parking requirement?&quot;</p>
                   <p className="bg-white border border-red-200 rounded p-3 mt-2">
-                    <strong>Bot:</strong> "I see 15 parking spaces on Sheet C-001."
+                    <strong>Bot:</strong> &quot;I see 15 parking spaces on Sheet C-001.&quot;
                   </p>
                   <ul className="mt-3 space-y-1 text-xs">
                     <li>• No code citation</li>
@@ -181,9 +181,9 @@ export default function AboutPage() {
               <div className="bg-green-50 border border-green-200 rounded-xl p-6">
                 <h3 className="text-lg font-bold text-green-900 mb-3">✓ With Compliance Checking</h3>
                 <div className="space-y-2 text-sm text-green-800">
-                  <p><strong>User:</strong> "What's the ADA parking requirement?"</p>
+                  <p><strong>User:</strong> &quot;What&apos;s the ADA parking requirement?&quot;</p>
                   <p className="bg-white border border-green-200 rounded p-3 mt-2">
-                    <strong>Bot:</strong> "Per <strong>ADA 2010 Section 208.2</strong>: 1 accessible space per 25 spaces. Your plans show 15 spaces, requiring 1 accessible space. <strong className="text-green-700">✓ Compliant</strong> (1 shown on Sheet C-001)."
+                    <strong>Bot:</strong> &quot;Per <strong>ADA 2010 Section 208.2</strong>: 1 accessible space per 25 spaces. Your plans show 15 spaces, requiring 1 accessible space. <strong className="text-green-700">✓ Compliant</strong> (1 shown on Sheet C-001).&quot;
                   </p>
                   <ul className="mt-3 space-y-1 text-xs">
                     <li>• Cites exact ADA section</li>
@@ -246,7 +246,7 @@ export default function AboutPage() {
               Measurable ROI from Day One
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              ForemanOS pays for itself within the first week. Here's how teams measure the impact.
+              ForemanOS pays for itself within the first week. Here&apos;s how teams measure the impact.
             </p>
           </motion.div>
 
@@ -308,7 +308,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Trust Every Answer</h3>
               <p className="text-gray-600 mb-4">
-                Every response cites the exact sheet, page, and section it came from. Your team verifies answers against the source, not against someone's memory.
+                Every response cites the exact sheet, page, and section it came from. Your team verifies answers against the source, not against someone&apos;s memory.
               </p>
               <div className="bg-purple-50 rounded-lg p-4">
                 <p className="text-sm font-semibold text-purple-700 mb-1">Accuracy Rate</p>

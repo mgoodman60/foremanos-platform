@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
   Users, Plus, Edit2, Trash2, Phone, TrendingUp,
-  Shield, Award, Calendar, Clock, CheckCircle2,
-  AlertCircle, X, ClipboardCheck
+  Shield, Award, ClipboardCheck
 } from 'lucide-react';
 import CrewPerformanceForm from './crew-performance-form';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  TrendingUp, TrendingDown, DollarSign, Calendar,
+  TrendingUp, DollarSign, Calendar,
   AlertTriangle, CheckCircle2, BarChart3, Activity,
   ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 
 interface EVMMetrics {
   plannedValue: number;
@@ -47,7 +46,7 @@ export default function EVMDashboard() {
 
   const [data, setData] = useState<EVMData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [days, setDays] = useState(30);
+  const [days, _setDays] = useState(30);
 
   useEffect(() => {
     if (slug) {

@@ -12,7 +12,6 @@ import { prisma } from '@/lib/db';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import {
-  analyzePhoto,
   generatePhotoFileName,
   getFileExtension,
   isValidImageType,
@@ -105,7 +104,6 @@ export async function POST(
 
     // Validate total photo count
     const currentCount = conversation.photoCount;
-    const newTotal = currentCount + files.length;
     const countValidation = validatePhotoCount(currentCount, files.length);
     if (!countValidation.valid) {
       return NextResponse.json(
@@ -127,10 +125,6 @@ export async function POST(
     const reportDate = conversation.dailyReportDate || new Date();
     const s3Client = createS3Client();
     const { bucketName, folderPrefix } = getBucketConfig();
-
-    const projectContext = conversation.Project
-      ? `${conversation.Project.name} - Construction project`
-      : undefined;
 
     // Process each file
     for (const file of files) {

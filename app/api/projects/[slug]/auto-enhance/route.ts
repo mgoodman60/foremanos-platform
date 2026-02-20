@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { runAutoMEPExtraction, extractDoorScheduleFromChunks, countDoorsByType } from '@/lib/auto-mep-extractor';
+import { runAutoMEPExtraction, countDoorsByType } from '@/lib/auto-mep-extractor';
 
 export async function POST(req: Request, { params }: { params: { slug: string } }) {
   try {

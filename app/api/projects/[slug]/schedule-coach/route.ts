@@ -246,10 +246,9 @@ function identifyMilestoneBreakdowns(tasks: any[]) {
   return breakdowns.slice(0, 5);
 }
 
-function generatePhaseProposedTasks(phase: string, existingTasks: any[]): ProposedTask[] {
+function generatePhaseProposedTasks(phase: string, _existingTasks: any[]): ProposedTask[] {
   // Generate suggested tasks based on phase type
   const proposals: ProposedTask[] = [];
-  const trades = new Set(existingTasks.map(t => t.assignedTo).filter(Boolean));
 
   if (phase.toLowerCase().includes('found') || phase === '03') {
     proposals.push(
@@ -275,19 +274,14 @@ function generatePhaseProposedTasks(phase: string, existingTasks: any[]): Propos
   return proposals;
 }
 
-function generateProposedTasks(recommendation: any): ProposedTask[] {
-  if (recommendation.category === 'trade_breakdown') {
-    return [
-      { name: 'Subtask 1', trade: 'General', duration: 2, predecessors: [], description: 'First breakdown activity' },
-      { name: 'Subtask 2', trade: 'General', duration: 2, predecessors: [], description: 'Second breakdown activity' }
-    ];
-  }
+function generateProposedTasks(_recommendation: any): ProposedTask[] {
+  // Deprecated - keeping for compatibility
   return [];
 }
 
 async function generateScheduleFromDocuments(projectId: string, projectName: string) {
   // Get project documents
-  const documents = await prisma.document.findMany({
+  const _documents = await prisma.document.findMany({
     where: { projectId, deletedAt: null },
     select: { id: true, name: true, category: true }
   });
@@ -462,7 +456,7 @@ function findSuccessorChain(tasks: any[], taskId: string): any[] {
   return successors;
 }
 
-function generateMitigationOptions(task: any, delayDays: number, allTasks: any[]): string[] {
+function generateMitigationOptions(task: any, delayDays: number, _allTasks: any[]): string[] {
   const options: string[] = [];
 
   if (delayDays <= 3) {

@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { 
-  FileText, Download, Settings, Plus, X, Check, Clock, 
-  BarChart2, PieChart, Table, Activity, Calendar, DollarSign,
+  FileText, Download, X, Check, Clock, Table, Activity, Calendar, DollarSign,
   Users, Wrench, FileStack, TrendingUp
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -31,7 +30,7 @@ interface ReportBuilderProps {
   projectSlug: string;
 }
 
-export default function ReportBuilder({ projectId, projectSlug }: ReportBuilderProps) {
+export default function ReportBuilder({ projectId: _projectId, projectSlug }: ReportBuilderProps) {
   const [reportTitle, setReportTitle] = useState('');
   const [selectedSections, setSelectedSections] = useState<string[]>(['kpis', 'schedule', 'budget']);
   const [reportFormat, setReportFormat] = useState<'JSON' | 'CSV'>('JSON');

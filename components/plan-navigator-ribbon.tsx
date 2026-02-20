@@ -11,7 +11,7 @@ interface PlanNavigatorRibbonProps {
   projectId: string;
 }
 
-export function PlanNavigatorRibbon({ projectSlug, projectId }: PlanNavigatorRibbonProps) {
+export function PlanNavigatorRibbon({ projectSlug, projectId: _projectId }: PlanNavigatorRibbonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

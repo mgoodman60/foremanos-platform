@@ -12,13 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { ScrollArea } from './ui/scroll-area';
 import {
   FileText,
   Search,
-  Download,
-  Filter,
   Calendar,
   Hash,
   Building2,
@@ -26,7 +24,6 @@ import {
   Loader2,
   RefreshCw
 } from 'lucide-react';
-import { getDisciplineName } from '@/lib/title-block-extractor';
 
 interface SheetIndexEntry {
   sheetNumber: string;
@@ -61,7 +58,7 @@ interface SheetIndexStats {
 
 export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetIndexBrowserProps) {
   const [sheets, setSheets] = useState<SheetIndexEntry[]>([]);
-  const [byDiscipline, setByDiscipline] = useState<Record<string, SheetIndexEntry[]>>({});
+  const [_byDiscipline, setByDiscipline] = useState<Record<string, SheetIndexEntry[]>>({});
   const [stats, setStats] = useState<SheetIndexStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');

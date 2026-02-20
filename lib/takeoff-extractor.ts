@@ -17,12 +17,7 @@ import { callAbacusLLM } from './abacus-llm';
 
 const log = createScopedLogger('TAKEOFF_EXTRACTOR');
 import {
-  extractSiteworkTakeoff,
-  classifyDrawingType,
-  extractGeotechData,
-  normalizeUnit as normalizeSiteworkUnit,
-  type SiteworkExtractionResult,
-  type DrawingType
+  extractSiteworkTakeoff
 } from './sitework-takeoff-extractor';
 
 interface TakeoffItem {
@@ -56,7 +51,7 @@ interface MaterialTakeoffExtractionResult {
 }
 
 // Standard units for construction takeoffs
-const VALID_UNITS = ['SF', 'LF', 'CY', 'CF', 'EA', 'TON', 'LBS', 'GAL', 'SY', 'MBF', 'SQFT', 'LN FT'];
+const _VALID_UNITS = ['SF', 'LF', 'CY', 'CF', 'EA', 'TON', 'LBS', 'GAL', 'SY', 'MBF', 'SQFT', 'LN FT'];
 
 // Unit normalization map
 const UNIT_NORMALIZE: Record<string, string> = {
@@ -134,12 +129,12 @@ export async function extractQuantitiesFromDocument(
 
     // Process chunks and extract quantities using enhanced vision prompts
     const allExtractedItems: QuantityExtractionResult[] = [];
-    let totalCost = 0;
-    let totalProcessingCost = 0;
+    const totalCost = 0;
+    const totalProcessingCost = 0;
 
     for (const chunk of existingChunks) {
       const pageNum = chunk.pageNumber || 0;
-      const metadata = chunk.metadata as any;
+      const _metadata = chunk.metadata as any;
 
       log.info('Processing page', { pageNum });
 
@@ -207,7 +202,7 @@ export async function extractQuantitiesFromDocument(
  */
 async function extractQuantitiesFromChunk(
   chunk: any,
-  documentName: string
+  _documentName: string
 ): Promise<QuantityExtractionResult> {
   const metadata = chunk.metadata as any;
   const items = [];
@@ -267,7 +262,7 @@ async function extractQuantitiesFromChunk(
 /**
  * Detect material category from content and metadata
  */
-function detectCategory(content: string, metadata: any): string {
+function detectCategory(content: string, _metadata: any): string {
   const lowerContent = content.toLowerCase();
   
   // Check for specific material keywords - order matters for specificity
@@ -357,7 +352,7 @@ function detectCategory(content: string, metadata: any): string {
 /**
  * Parse dimension string to takeoff item
  */
-function parseDimensionToTakeoffItem(dimension: string, metadata: any, pageNumber: number): any | null {
+function parseDimensionToTakeoffItem(dimension: string, metadata: any, _pageNumber: number): any | null {
   // Example dimension: "100' x 50'" or "4\" thick" or "12'" diameter"
   const dimMatch = dimension.match(/([\d.]+)['"\s]*([x×])?\s*([\d.]+)?['"\s]*(.*)?/i);
   
@@ -402,7 +397,7 @@ function parseDimensionToTakeoffItem(dimension: string, metadata: any, pageNumbe
 /**
  * Parse note to takeoff item
  */
-function parseNoteToTakeoffItem(note: string, metadata: any, pageNumber: number): any | null {
+function parseNoteToTakeoffItem(note: string, metadata: any, _pageNumber: number): any | null {
   // Look for quantity patterns like "100 EA", "500 LF", "25 CY"
   const qtyMatch = note.match(/([\d,]+\.?\d*)\s*(EA|LF|SF|CY|TON|LBS|SY|CF)/i);
   
@@ -425,7 +420,7 @@ function parseNoteToTakeoffItem(note: string, metadata: any, pageNumber: number)
 /**
  * Parse callout to takeoff item
  */
-function parseCalloutToTakeoffItem(callout: string, metadata: any, pageNumber: number, type: string): any | null {
+function parseCalloutToTakeoffItem(callout: string, metadata: any, _pageNumber: number, _type: string): any | null {
   // Example callouts: "#4 @ 12\" O.C.", "2x6 @ 16\" O.C.", "3/4\" PVC"
   
   // Detect rebar callouts
@@ -639,7 +634,7 @@ Return ONLY the JSON array, no other text.`;
 /**
  * Parse AI response into TakeoffItem array
  */
-function parseAITakeoffResponse(response: string, documentId: string): TakeoffItem[] {
+function parseAITakeoffResponse(response: string, _documentId: string): TakeoffItem[] {
   try {
     // Extract JSON from response
     const jsonMatch = response.match(/\[[\s\S]*\]/);

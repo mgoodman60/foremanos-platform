@@ -11,7 +11,7 @@ interface PlanViewerRibbonProps {
   projectId: string;
 }
 
-export function PlanViewerRibbon({ projectSlug, projectId }: PlanViewerRibbonProps) {
+export function PlanViewerRibbon({ projectSlug, projectId: _projectId }: PlanViewerRibbonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

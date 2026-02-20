@@ -479,7 +479,7 @@ function consolidateDetections(detections: ProgressDetection[]): ProgressDetecti
  */
 export async function applyProgressUpdates(
   updates: Array<{ taskId: string; newProgress: number }>,
-  userId: string
+  _userId: string
 ): Promise<{ updated: number; errors: string[] }> {
   let updated = 0;
   const errors: string[] = [];

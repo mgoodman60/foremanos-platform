@@ -44,7 +44,7 @@ export function DocumentCategoryModal({
     handleSubmit,
     setValue,
     watch,
-    reset,
+    reset: _reset,
   } = useForm<DocumentCategoryFormData>({
     resolver: zodResolver(documentCategorySchema),
     defaultValues: {

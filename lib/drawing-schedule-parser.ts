@@ -358,7 +358,7 @@ async function parseEquipmentSchedule(
   _table: any,
   _projectId: string,
   documentId: string,
-  _sheetNumber: string | null
+  __sheetNumber: string | null
 ): Promise<number> {
   logger.info('SCHEDULE_PARSER', `Found equipment schedule with ${_table.rows?.length || 0} rows`, {
     documentId,

@@ -19,7 +19,7 @@ export async function POST(
 
     const { slug } = params;
     const body = await request.json();
-    const { type, ids, reason } = body;
+    const { type, ids, reason: _reason } = body;
 
     if (!type || !ids || !Array.isArray(ids)) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

@@ -77,7 +77,7 @@ export async function calculateProjectHealth(projectId: string): Promise<HealthS
     punchItems,
     dailyReports,
     documents,
-    scheduleUpdates,
+    _scheduleUpdates,
     previousSnapshot,
   ] = await Promise.all([
     prisma.project.findUnique({ where: { id: projectId } }),
@@ -113,7 +113,7 @@ export async function calculateProjectHealth(projectId: string): Promise<HealthS
   let tasksOnTrack = 0;
   let overdueTasks = 0;
   let upcomingMilestones = 0;
-  let scheduleVariance = 0;
+  const scheduleVariance = 0;
 
   if (scheduleActivities.length > 0) {
     scheduleScore = 100;

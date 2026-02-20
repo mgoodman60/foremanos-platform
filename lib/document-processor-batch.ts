@@ -5,15 +5,14 @@
 
 import { prisma } from './db';
 import { getFileUrl } from './s3';
-import { analyzeWithMultiProvider, analyzeWithLoadBalancing, analyzeDocumentSmart, analyzeWithDirectPdf, analyzeWithSmartRouting, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
-import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity, type ExtractedData } from './vision-api-quality';
-import { writeFile, unlink, readFile } from 'fs/promises';
+import { analyzeWithSmartRouting, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
+import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity } from './vision-api-quality';
+import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import * as fs from 'fs';
-import { convertSinglePage } from './pdf-to-image';
 import { logger } from '@/lib/logger';
-import { PREMIUM_MODEL, GEMINI_PRIMARY_MODEL, GEMINI_SECONDARY_MODEL } from '@/lib/model-config';
+import { PREMIUM_MODEL } from '@/lib/model-config';
 import { classifyPage } from './discipline-classifier';
 import { loadSymbolContext } from './symbol-context-loader';
 import { getDisciplinePrompt } from './discipline-prompts';

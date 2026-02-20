@@ -15,7 +15,7 @@ import type { AdvancedConflict } from './types';
  */
 export async function detectAdvancedConflicts(
   projectSlug: string,
-  focusArea?: { from: string; to: string }
+  _focusArea?: { from: string; to: string }
 ): Promise<AdvancedConflict[]> {
   const conflicts: AdvancedConflict[] = [];
 

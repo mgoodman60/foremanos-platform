@@ -34,7 +34,7 @@ interface RFI {
 }
 
 export default function RFIsPage({ params }: { params: { slug: string } }) {
-  const [showForm, setShowForm] = useState(false);
+  const [_showForm, setShowForm] = useState(false);
   const [selectedRFI, setSelectedRFI] = useState<RFI | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);

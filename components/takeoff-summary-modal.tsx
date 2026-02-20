@@ -34,7 +34,7 @@ export function TakeoffSummaryModal({
   lineItemCount,
   roomCount,
   takeoffId,
-  projectSlug,
+  projectSlug: _projectSlug,
 }: TakeoffSummaryModalProps) {
   const [copied, setCopied] = useState(false);
 

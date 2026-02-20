@@ -10,13 +10,8 @@ import {
   Layers,
   TrendingUp,
   FileText,
-  CheckCircle2,
-  AlertCircle,
-  DollarSign,
-  Users,
   Activity,
   ArrowUpRight,
-  Search,
   BarChart3,
   PieChart,
   Sparkles,
@@ -105,7 +100,7 @@ export function Phase3Dashboard({
   onOpenMEP,
   onOpenPlans,
 }: Phase3DashboardProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
 

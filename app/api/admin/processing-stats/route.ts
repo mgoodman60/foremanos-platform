@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Get processing analytics for admin dashboard
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 

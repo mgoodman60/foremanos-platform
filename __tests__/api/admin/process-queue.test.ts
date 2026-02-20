@@ -64,8 +64,7 @@ describe('GET /api/admin/process-queue', () => {
   it('should return 401 when not authenticated', async () => {
     mockGetServerSession.mockResolvedValue(null);
 
-    const request = new Request('http://localhost/api/admin/process-queue', { method: 'GET' });
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(401);
     const data = await response.json();
@@ -75,8 +74,7 @@ describe('GET /api/admin/process-queue', () => {
   it('should return 401 for non-admin session', async () => {
     mockGetServerSession.mockResolvedValue(clientSession);
 
-    const request = new Request('http://localhost/api/admin/process-queue', { method: 'GET' });
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(401);
   });
@@ -114,8 +112,7 @@ describe('GET /api/admin/process-queue', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/admin/process-queue', { method: 'GET' });
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -155,8 +152,7 @@ describe('GET /api/admin/process-queue', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/admin/process-queue', { method: 'GET' });
-    const response = await GET(request);
+    const response = await GET();
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -173,8 +169,7 @@ describe('GET /api/admin/process-queue', () => {
     mockPrisma.processingQueue.findMany.mockResolvedValue([]);
     mockPrisma.document.findMany.mockResolvedValue([]);
 
-    const request = new Request('http://localhost/api/admin/process-queue', { method: 'GET' });
-    await GET(request);
+    await GET();
 
     expect(mockPrisma.processingQueue.findMany).toHaveBeenCalledWith(
       expect.objectContaining({

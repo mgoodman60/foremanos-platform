@@ -222,8 +222,6 @@ export const TAKEOFF_TO_BUDGET_MAP: Record<string, number[]> = {
  * Parse budget text extracted from Walker Company format PDF
  */
 export function parseWalkerBudgetText(text: string): ParsedBudget {
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  
   // Extract header info
   const jobMatch = text.match(/Job:\s*(\d+)/i);
   const projectMatch = text.match(/One Senior Care[^\n]*/i);

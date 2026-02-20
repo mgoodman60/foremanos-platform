@@ -252,7 +252,7 @@ export function formatDimension(
  */
 export function extractDimensionsFromText(
   text: string,
-  sheetNumber: string
+  __sheetNumber: string
 ): Dimension[] {
   const dimensions: Dimension[] = [];
   const seen = new Set<string>();

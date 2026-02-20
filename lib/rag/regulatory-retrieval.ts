@@ -17,7 +17,6 @@ import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import type {
   AdminCorrection,
-  ChunkMetadata,
   DocumentChunk,
   RegulatoryChunk,
   ScoredCorrection,

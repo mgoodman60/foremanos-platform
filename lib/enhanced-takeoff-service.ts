@@ -141,7 +141,7 @@ export async function extractTakeoffsWithVision(
   }
 
   // Get all project documents for cross-validation
-  const projectDocuments = crossValidate ? await prisma.document.findMany({
+  const _projectDocuments = crossValidate ? await prisma.document.findMany({
     where: { projectId },
     include: {
       DocumentChunk: {
@@ -341,7 +341,7 @@ function buildVisionExtractionPrompt(
   sheetType: string,
   scaleInfo: ScaleInfo,
   textContent: string,
-  metadata: Record<string, unknown> | null
+  _metadata: Record<string, unknown> | null
 ): string {
   return `You are an expert construction estimator performing a comprehensive quantity takeoff from this ${sheetType} drawing.
 
@@ -468,7 +468,7 @@ async function extractFromText(
   textContent: string,
   metadata: Record<string, unknown> | null,
   scaleInfo: ScaleInfo,
-  pageNumber: number
+  _pageNumber: number
 ): Promise<VisionExtractionResult> {
   const items: RawTakeoffItem[] = [];
   const warnings: string[] = [];
@@ -925,7 +925,7 @@ async function fetchImageAsBase64(cloudStoragePath: string): Promise<string | nu
   }
 }
 
-function parseVisionResponse(response: string, sheetNumber: string, pageNumber: number): VisionExtractionResult {
+function parseVisionResponse(response: string, sheetNumber: string, _pageNumber: number): VisionExtractionResult {
   try {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -950,7 +950,7 @@ function parseVisionResponse(response: string, sheetNumber: string, pageNumber: 
   }
 }
 
-function parseDimension(dim: string, metadata: Record<string, unknown> | null, scaleInfo: ScaleInfo): RawTakeoffItem | null {
+function parseDimension(dim: string, metadata: Record<string, unknown> | null, _scaleInfo: ScaleInfo): RawTakeoffItem | null {
   const match = dim.match(/([\d.]+)['"]?\s*[x×]\s*([\d.]+)['"]?/i);
   if (!match) return null;
   

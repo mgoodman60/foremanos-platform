@@ -41,7 +41,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const body = await request.json();
-    const { format, includeComments, includeMeasurements, includeMetadata } = body;
+    const { format, includeComments, includeMeasurements, includeMetadata: _includeMetadata } = body;
 
     const markups = await prisma.markup.findMany({
       where: {

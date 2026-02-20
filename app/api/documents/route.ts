@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
 
     // Optional intelligence enrichment
     const includeIntelligence = searchParams.get('include') === 'intelligence';
-    let intelligenceMap: Record<string, {
+    const intelligenceMap: Record<string, {
       sheetCount: number;
       disciplines: string[];
       drawingTypes: Record<string, number>;

@@ -12,7 +12,6 @@ import {
   X,
   Check,
   Minus,
-  ChevronDown,
   Loader2,
 } from 'lucide-react';
 

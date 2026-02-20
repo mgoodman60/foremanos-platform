@@ -15,7 +15,6 @@ import {
   AlertTriangle,
   Layers,
   TrendingUp,
-  Filter,
   RefreshCw,
   Sparkles,
 } from 'lucide-react';

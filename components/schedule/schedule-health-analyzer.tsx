@@ -11,17 +11,13 @@ import {
   AlertTriangle,
   AlertCircle,
   Info,
-  CheckCircle2,
   RefreshCw,
-  Wrench,
   TrendingUp,
   TrendingDown,
   Minus,
-  Target,
   BarChart3,
   Lightbulb,
   Zap,
-  Clock,
   ArrowRight,
 } from 'lucide-react';
 

@@ -24,7 +24,7 @@ const QUICK_PROMPTS = [
   'What needs attention?',
 ];
 
-export function AskForemanWidget({ projectSlug, projectId }: AskForemanWidgetProps) {
+export function AskForemanWidget({ projectSlug: _projectSlug, projectId }: AskForemanWidgetProps) {
   const { setAiDrawerOpen } = useProject();
   const [input, setInput] = useState('');
   const [recentConversations, setRecentConversations] = useState<ConversationPreview[]>([]);

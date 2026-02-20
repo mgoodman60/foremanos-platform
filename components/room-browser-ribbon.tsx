@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Building2, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent } from './ui/dialog';
 import { RoomBrowser } from './room-browser';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -13,8 +13,8 @@ interface RoomBrowserRibbonProps {
   projectId: string;
 }
 
-export function RoomBrowserRibbon({ projectSlug, projectId }: RoomBrowserRibbonProps) {
-  const { data: session } = useSession() || {};
+export function RoomBrowserRibbon({ projectSlug, projectId: _projectId }: RoomBrowserRibbonProps) {
+  const { data: _session } = useSession() || {};
   const [isOpen, setIsOpen] = useState(false);
 
   return (

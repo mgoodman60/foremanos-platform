@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Popover,
   PopoverContent,
@@ -24,10 +23,8 @@ import {
   ClipboardList,
   Calendar,
   AlertTriangle,
-  MessageSquarePlus,
   CheckCircle2,
-  Send,
-  X
+  Send
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -376,8 +373,8 @@ export function QuickActions({
 
 // Inline quick action buttons for message responses
 export function MessageQuickActions({
-  content,
-  projectSlug,
+  content: _content,
+  projectSlug: _projectSlug,
   className
 }: {
   content: string;

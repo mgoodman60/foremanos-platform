@@ -22,7 +22,7 @@ export function TakeoffSummary({
   categoryCount,
   quantityTotals,
   mepData,
-  costSummary,
+  costSummary: _costSummary,
 }: TakeoffSummaryProps) {
   if (!takeoff) return null;
 

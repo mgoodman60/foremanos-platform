@@ -8,7 +8,6 @@
  * - Logs security events
  */
 
-import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import FormData from 'form-data';
 
@@ -202,7 +201,7 @@ export async function getScanResult(scanId: string): Promise<VirusScanResult> {
     // Check if any engine detected malware
     const malicious = stats.malicious || 0;
     const suspicious = stats.suspicious || 0;
-    const totalEngines = Object.values(stats).reduce((sum: number, val) => sum + (val as number), 0);
+    const _totalEngines = Object.values(stats).reduce((sum: number, val) => sum + (val as number), 0);
 
     const clean = malicious === 0 && suspicious === 0;
 

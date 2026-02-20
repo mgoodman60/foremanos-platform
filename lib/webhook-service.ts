@@ -1,6 +1,5 @@
 // Webhook Service - Outbound notifications to external systems
 import { prisma } from './db';
-import { format } from 'date-fns';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';

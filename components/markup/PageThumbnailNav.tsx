@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { useMarkupState } from '@/hooks/markup/useMarkupState';
 
 interface PageThumbnailNavProps {
   documentId: string;
@@ -73,6 +72,7 @@ export function PageThumbnailNav({ documentId, totalPages, currentPage, onPageCh
             onClick={() => onPageChange(pageNumber)}
           >
             {isLoaded ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={`/api/documents/${documentId}/page-image?pageNumber=${pageNumber}&zoom=0.2`}
                 alt={`Page ${pageNumber}`}

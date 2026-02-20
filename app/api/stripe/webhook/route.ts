@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
-import { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
+import { SubscriptionTier } from '@prisma/client';
 import {
   mapStripeStatusToPrisma,
   extractSubscriptionDates,

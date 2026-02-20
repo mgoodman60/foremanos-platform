@@ -10,8 +10,7 @@ import {
   CheckCircle,
   Clock,
   X,
-  Check,
-  ChevronDown
+  Check
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFocusTrap } from '@/hooks/use-focus-trap';

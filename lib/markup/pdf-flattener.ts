@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts, PDFPage, pushGraphicsState, popGraphicsState, setDashPattern, moveTo, lineTo, closePath, stroke, fill } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFPage, pushGraphicsState, popGraphicsState, setDashPattern, moveTo, lineTo, closePath, fill } from 'pdf-lib';
 import type { MarkupRecord } from './markup-types';
 import { logger } from '@/lib/logger';
 
@@ -29,7 +29,8 @@ function applyDashPattern(page: PDFPage, lineStyle: string, strokeWidth: number)
   }
 }
 
-function drawArrowhead(page: PDFPage, x: number, y: number, angle: number, size: number, color: { r: number; g: number; b: number }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function drawArrowhead(page: PDFPage, x: number, y: number, angle: number, size: number, _color: { r: number; g: number; b: number }) {
   const a1 = angle + Math.PI * 0.85;
   const a2 = angle - Math.PI * 0.85;
   const x1 = x + size * Math.cos(a1);

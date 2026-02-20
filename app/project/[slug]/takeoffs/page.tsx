@@ -12,8 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Ruler, FileText, Plus, Eye, CheckCircle2, Clock, AlertCircle, Download, Edit2, Trash2, Check, X, ChevronLeft, Sparkles, RefreshCw, Zap, Target, AlertTriangle } from 'lucide-react';
-import { TakeoffConfidencePanel, TakeoffConfidenceSummary } from '@/components/takeoff-confidence-panel';
+import { Ruler, Plus, Eye, CheckCircle2, Clock, AlertCircle, Download, Edit2, Trash2, Check, X, ChevronLeft, Sparkles, RefreshCw, Zap, Target, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -251,7 +250,7 @@ export default function TakeoffsPage() {
     }
   };
 
-  const handleVerifyLineItem = async (itemId: string, verified: boolean, adjustedQuantity?: number) => {
+  const _handleVerifyLineItem = async (itemId: string, verified: boolean, adjustedQuantity?: number) => {
     if (!selectedTakeoff) return;
     
     try {

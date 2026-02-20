@@ -7,7 +7,7 @@
 
 import { prisma } from './db';
 import { logger } from './logger';
-import { TAKEOFF_CATEGORIES, getLaborHoursPerUnit } from './takeoff-categories';
+import { getLaborHoursPerUnit } from './takeoff-categories';
 
 // Types
 export interface LaborRequirement {
@@ -176,7 +176,7 @@ async function getProjectCrewSize(projectId: string, tradeType: string): Promise
 /**
  * Get crew size with project-specific override
  */
-async function getCrewSize(projectId: string | null, tradeType: string): Promise<number> {
+async function _getCrewSize(projectId: string | null, tradeType: string): Promise<number> {
   // Try project-specific first
   if (projectId) {
     const projectSize = await getProjectCrewSize(projectId, tradeType);
@@ -518,7 +518,7 @@ export async function suggestScheduleAdjustments(
   laborDelta: number;
 }>> {
   const links = await findMatchingScheduleTasks(takeoffId, projectId);
-  const requirements = await calculateLaborRequirements(takeoffId);
+  const _requirements = await calculateLaborRequirements(takeoffId);
   const suggestions: Array<{
     taskId: string;
     taskName: string;

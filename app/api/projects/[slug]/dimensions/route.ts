@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { getProjectDimensions, getSheetDimensions, searchDimensions, getDimensionStats } from '@/lib/dimension-intelligence';
+import { getSheetDimensions, searchDimensions, getDimensionStats } from '@/lib/dimension-intelligence';
 
 export async function GET(
   request: NextRequest,

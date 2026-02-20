@@ -8,7 +8,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Camera, Upload, FileText, RefreshCcw, Check, Clock, AlertTriangle } from 'lucide-react';
+import { Camera, Upload, FileText, RefreshCcw, Check, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PhotoGallery } from './photo-gallery';
 import { BulkUploadModal } from './bulk-upload-modal';

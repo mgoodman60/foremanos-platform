@@ -24,7 +24,7 @@ export function MarkupViewer({
   const [scale, setScale] = useState(1);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageHeight, setPageHeight] = useState(792); // Default letter size
+  const [pageHeight, _setPageHeight] = useState(792); // Default letter size
   const [markups, setMarkups] = useState<MarkupRecord[]>([]);
   const [selectedMarkupId, setSelectedMarkupId] = useState<string | null>(null);
   const [currentStyle, setCurrentStyle] = useState<MarkupStyle>({

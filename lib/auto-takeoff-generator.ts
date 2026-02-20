@@ -12,8 +12,7 @@ import { prisma } from './db';
 import { createScopedLogger } from './logger';
 import { extractMEPTakeoffs } from './mep-takeoff-generator';
 import { extractFinishSchedules } from './finish-schedule-extractor';
-import { extractSiteworkFromProjectModels } from './sitework-takeoff-extractor';
-import { getProjectSpecificPrice, getConcreteSpecs, getSiteworkSpecs } from './project-specific-pricing';
+import { getProjectSpecificPrice } from './project-specific-pricing';
 
 const log = createScopedLogger('AUTO_TAKEOFF');
 
@@ -215,8 +214,6 @@ export async function autoGenerateTakeoffs(
   // Step 3: Generate takeoff items for each room with finishes
   let itemsCreated = 0;
   let roomsProcessed = 0;
-  let totalCost = 0;
-  
   for (const room of project.Room) {
     if (!room.area || room.area <= 0) {
       continue;
@@ -267,7 +264,6 @@ export async function autoGenerateTakeoffs(
       const pricing = await getUnitPrice(finish.material, project.id);
       const unitCost = pricing.price;
       const itemTotalCost = quantity * unitCost;
-      totalCost += itemTotalCost;
       
       // Check if this item already exists
       const existingItem = await prisma.takeoffLineItem.findFirst({
@@ -325,10 +321,6 @@ export async function autoGenerateTakeoffs(
   });
   
   const calculatedTotalCost = allItems.reduce((sum, item) => sum + (item.totalCost || 0), 0);
-  const avgConfidence = allItems.length > 0
-    ? allItems.reduce((sum, item) => sum + (item.confidence || 0), 0) / allItems.length
-    : 0;
-  
   await prisma.materialTakeoff.update({
     where: { id: takeoff.id },
     data: {

@@ -20,7 +20,7 @@ export interface FixtureExtractionResult {
  */
 export async function extractFixtures(
   documentId: string,
-  projectId: string
+  _projectId: string
 ): Promise<FixtureExtractionResult> {
   logger.info('FIXTURE_EXTRACTOR', 'Starting fixture extraction', { documentId });
 

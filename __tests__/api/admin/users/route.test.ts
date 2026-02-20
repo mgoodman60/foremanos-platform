@@ -88,8 +88,7 @@ describe('GET /api/admin/users', () => {
   it('should return 401 if not authenticated', async () => {
     mockGetServerSession.mockResolvedValue(null);
 
-    const request = createRequest('GET', '/api/admin/users');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -101,8 +100,7 @@ describe('GET /api/admin/users', () => {
       user: { id: 'user-123', role: 'client' },
     });
 
-    const request = createRequest('GET', '/api/admin/users');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(403);
@@ -116,8 +114,7 @@ describe('GET /api/admin/users', () => {
 
     mockPrisma.user.findMany.mockResolvedValue(mockUsers);
 
-    const request = createRequest('GET', '/api/admin/users');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -139,8 +136,7 @@ describe('GET /api/admin/users', () => {
 
     mockPrisma.user.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/users');
-    await GET(request);
+    await GET();
 
     expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
       select: expect.any(Object),
@@ -155,8 +151,7 @@ describe('GET /api/admin/users', () => {
 
     mockPrisma.user.findMany.mockResolvedValue(mockUsers);
 
-    const request = createRequest('GET', '/api/admin/users');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -173,8 +168,7 @@ describe('GET /api/admin/users', () => {
 
     mockPrisma.user.findMany.mockRejectedValue(new Error('Database error'));
 
-    const request = createRequest('GET', '/api/admin/users');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);

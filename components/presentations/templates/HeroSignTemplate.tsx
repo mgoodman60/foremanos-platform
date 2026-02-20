@@ -12,7 +12,7 @@ const HeroSignTemplate = React.forwardRef<HTMLDivElement, PresentationTemplatePr
       tagline,
       contactInfo,
       dateText,
-      primaryColor,
+      primaryColor: _primaryColor,
       accentColor,
       renderImages,
       companyLogoUrl,
@@ -35,6 +35,7 @@ const HeroSignTemplate = React.forwardRef<HTMLDivElement, PresentationTemplatePr
       >
         {/* Background render image */}
         {heroImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={heroImage.url}
             alt={heroImage.title || 'Hero render'}
@@ -96,6 +97,7 @@ const HeroSignTemplate = React.forwardRef<HTMLDivElement, PresentationTemplatePr
               justifyContent: 'center',
             }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={companyLogoUrl}
               alt="Company logo"
@@ -123,6 +125,7 @@ const HeroSignTemplate = React.forwardRef<HTMLDivElement, PresentationTemplatePr
               justifyContent: 'center',
             }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={clientLogoUrl}
               alt="Client logo"

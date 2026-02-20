@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, Search, Users, Shield, Cloud, Zap, BarChart, Lock, Brain, Ruler, Grid3x3, Network, Lightbulb, Pin, Eye } from 'lucide-react';
+import { FileText, Search, Users, Shield, Cloud, Zap, BarChart, Ruler, Grid3x3, Network, Lightbulb, Pin, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Features() {

@@ -64,7 +64,7 @@ function loadSymbolsLibrary(): Record<
     const parsed = JSON.parse(raw);
 
     // Remove metadata key
-    const { metadata, ...divisions } = parsed;
+    const { metadata: _metadata, ...divisions } = parsed;
     cachedSymbols = divisions;
     logger.info('SYMBOL_CONTEXT', 'Symbols library loaded', {
       divisions: Object.keys(divisions).length,

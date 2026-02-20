@@ -9,7 +9,6 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   initializePhotoUpload,
-  finalizePhotoUpload,
   getProjectPhotos,
   PhotoMetadata,
 } from '@/lib/photo-documentation';

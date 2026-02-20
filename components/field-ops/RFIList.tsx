@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   MessageSquare, Plus, Calendar, User, AlertCircle,
-  ChevronRight, RefreshCw, Clock, FileText, DollarSign, CalendarClock
+  ChevronRight, RefreshCw, Clock, DollarSign, CalendarClock
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';

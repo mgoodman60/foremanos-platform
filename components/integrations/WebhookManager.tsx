@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Webhook, Plus, Trash2, Check, X, AlertCircle, Play, Settings } from 'lucide-react';
+import { Webhook, Plus, Trash2, Check, X, Play, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface WebhookConfig {

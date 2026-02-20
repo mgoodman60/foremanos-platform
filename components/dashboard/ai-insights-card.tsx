@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Lightbulb,
   TrendingDown,
@@ -173,7 +173,7 @@ export function AIInsightsCard({ projectSlug, projectId }: AIInsightsCardProps) 
     computeInsights();
   }, [computeInsights]);
 
-  const handleAskAI = (prompt?: string) => {
+  const handleAskAI = (_prompt?: string) => {
     setAiDrawerOpen(true);
     // The drawer opens with focus on input; the user can paste the prompt
   };

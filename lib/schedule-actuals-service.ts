@@ -7,7 +7,7 @@
 import { prisma } from './db';
 import { logger } from '@/lib/logger';
 
-interface TaskWorkEntry {
+interface _TaskWorkEntry {
   taskId: string;
   taskName: string;
   workDate: Date;
@@ -104,7 +104,7 @@ export async function setBaselineForSchedule(
   scheduleId: string
 ): Promise<{ tasksUpdated: number }> {
   try {
-    const result = await prisma.scheduleTask.updateMany({
+    const _result = await prisma.scheduleTask.updateMany({
       where: { scheduleId },
       data: {
         // Copy current planned dates to baseline

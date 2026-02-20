@@ -332,7 +332,7 @@ export function getNextSteps(
 export async function getNextStepsForWorkflow(
   workflowId: string,
   currentResponses: Record<string, any>,
-  scheduleContextData?: any
+  _scheduleContextData?: any
 ) {
   try {
     // Get workflow with all steps

@@ -13,7 +13,6 @@
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
 import { logger } from './logger';
-import type { MEPElement } from './mep-path-tracer';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -787,7 +786,7 @@ function generateSVGVisualization(
     connections: string[];
     label?: string;
   }>,
-  model: Spatial3DModel
+  _model: Spatial3DModel
 ): {
   svgData: string;
   dimensions: { width: number; height: number };

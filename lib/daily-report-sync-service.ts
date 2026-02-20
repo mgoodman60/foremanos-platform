@@ -12,25 +12,6 @@ import { prisma } from './db';
 import { getProjectLaborRate } from './project-specific-pricing';
 import { logger } from '@/lib/logger';
 
-// Trade to budget phase mapping
-const TRADE_TO_PHASE_CODE: Record<string, number> = {
-  'GENERAL': 100,
-  'SITEWORK': 200,
-  'CONCRETE': 300,
-  'MASONRY': 400,
-  'METALS': 500,
-  'WOOD_PLASTICS': 600,
-  'THERMAL_MOISTURE': 700,
-  'DOORS_WINDOWS': 800,
-  'FINISHES': 900,
-  'SPECIALTIES': 1000,
-  'EQUIPMENT': 1100,
-  'FURNISHINGS': 1200,
-  'CONVEYING': 1400,
-  'MECHANICAL': 1500,
-  'ELECTRICAL': 1600,
-};
-
 // Standard hourly rates by trade (fallback if not specified)
 const DEFAULT_HOURLY_RATES: Record<string, number> = {
   'General Labor': 35,
@@ -182,7 +163,7 @@ async function matchTradeToBudgetItem(
 async function matchEquipmentToBudgetItem(
   projectId: string,
   equipmentName: string,
-  equipmentType?: string
+  __equipmentType?: string
 ): Promise<string | null> {
   const budget = await prisma.projectBudget.findFirst({
     where: { projectId },
@@ -218,12 +199,9 @@ export async function syncLaborToBudget(
   for (const entry of laborEntries) {
     // Determine hourly rates - use project-specific pricing when available
     let hourlyRate = entry.hourlyRate;
-    let rateSource = 'provided';
-    
     if (!hourlyRate) {
       const projectRate = await getHourlyRateForTrade(projectId, entry.tradeName);
       hourlyRate = projectRate.rate;
-      rateSource = projectRate.source;
     }
     
     const overtimeRate = entry.overtimeRate || (hourlyRate * 1.5);

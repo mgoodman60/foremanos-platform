@@ -24,7 +24,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const execAsync = promisify(exec);
+const _execAsync = promisify(exec);
 
 interface ExtractionRequest {
   documentIds?: string[];       // Specific documents to process
@@ -240,7 +240,7 @@ async function convertPdfPageToImage(
 ): Promise<string | null> {
   try {
     const tempDir = os.tmpdir();
-    const outputPath = path.join(
+    const _outputPath = path.join(
       tempDir,
       `pdf-page-${Date.now()}-${pageNumber}.png`
     );

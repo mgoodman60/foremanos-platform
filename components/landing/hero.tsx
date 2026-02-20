@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { FileText, Search, Users, Shield, Cloud, Zap, MessageSquare, Send, CheckCircle } from 'lucide-react';
+import { FileText, Shield, MessageSquare, Send, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Hero() {

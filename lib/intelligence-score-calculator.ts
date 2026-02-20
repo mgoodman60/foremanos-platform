@@ -420,7 +420,7 @@ function buildChecklist(
   });
 
   // 9. Door/window schedules
-  const hasSchedules = metrics.doorScheduleItems > 0 || metrics.windowScheduleItems > 0;
+  const _hasSchedules = metrics.doorScheduleItems > 0 || metrics.windowScheduleItems > 0;
   items.push({
     id: 'extract-schedules',
     category: 'enrichment',

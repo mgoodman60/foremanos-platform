@@ -17,7 +17,7 @@ export async function GET(
     const { slug } = params;
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action') || 'list';
-    const type = searchParams.get('type');
+    const _type = searchParams.get('type');
     const priority = searchParams.get('priority');
     const category = searchParams.get('category');
 

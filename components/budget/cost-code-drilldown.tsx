@@ -12,7 +12,6 @@ import {
   TrendingDown,
   Minus,
   Search,
-  Filter,
   Download
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -49,7 +48,7 @@ export default function CostCodeDrilldown({
   const [loading, setLoading] = useState(true);
   const [expandedCodes, setExpandedCodes] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'code' | 'variance' | 'budget'>('code');
+  const [_sortBy, _setSortBy] = useState<'code' | 'variance' | 'budget'>('code');
 
   useEffect(() => {
     fetchCostCodes();

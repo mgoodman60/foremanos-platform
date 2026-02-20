@@ -87,7 +87,7 @@ export async function generateFollowUpSuggestions({
   userQuery,
   aiResponse,
   documentContext,
-  projectType = 'construction'
+  projectType: _projectType = 'construction'
 }: GenerateFollowUpParams): Promise<string[]> {
   try {
     // Quick path: Use templates if response is short or simple

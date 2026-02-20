@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Box, Settings, Info } from 'lucide-react';
+import { ArrowLeft, Box, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import ModelViewerPanel from '@/components/model-viewer-panel';
 

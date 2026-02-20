@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { subDays, startOfDay, endOfDay, format } from 'date-fns';
+import { subDays, format } from 'date-fns';
 
 export async function GET(
   request: NextRequest,
@@ -36,7 +36,7 @@ export async function GET(
     }
 
     // Fetch all data in parallel to minimize database round trips
-    const [budget, schedule, snapshots, laborByDate, materialsByDate, invoicesByDate] = await Promise.all([
+    const [budget, schedule, _snapshots, laborByDate, materialsByDate, invoicesByDate] = await Promise.all([
       prisma.projectBudget.findUnique({
         where: { projectId: project.id },
         include: {
@@ -105,7 +105,7 @@ export async function GET(
     // Get schedule tasks for percent complete
     const tasks = schedule?.ScheduleTask || [];
 
-    const totalTaskWeight = tasks.reduce((sum, t) => sum + 1, 0);
+    const totalTaskWeight = tasks.reduce((sum, _t) => sum + 1, 0);
     const completedWeight = tasks.reduce((sum, t) => sum + ((t.percentComplete || 0) / 100), 0);
     const percentComplete = totalTaskWeight > 0 ? (completedWeight / totalTaskWeight) * 100 : 0;
 

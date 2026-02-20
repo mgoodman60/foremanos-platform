@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   Database, ArrowRight, RefreshCw, CheckCircle2, AlertCircle,
-  Layers, Ruler, Wrench, DollarSign, MessageSquare, Clock,
-  TrendingUp, Box, FileText, Zap, ChevronDown, ChevronRight,
+  Layers, Ruler, Wrench, MessageSquare, Clock, Box, Zap, ChevronDown, ChevronRight,
   Building2, Plug, Flame, Droplets, Lightbulb
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -44,7 +43,7 @@ interface BIMDataPanelProps {
 export default function BIMDataPanel({
   projectSlug,
   modelId,
-  modelUrn,
+  modelUrn: _modelUrn,
   onRefresh,
 }: BIMDataPanelProps) {
   const [summary, setSummary] = useState<BIMSummary | null>(null);
@@ -187,7 +186,7 @@ export default function BIMDataPanel({
     return n.toFixed(0);
   };
 
-  const getCategoryIcon = (category: string) => {
+  const _getCategoryIcon = (category: string) => {
     const icons: Record<string, React.ReactNode> = {
       structural: <Building2 className="w-4 h-4" />,
       mep: <Plug className="w-4 h-4" />,

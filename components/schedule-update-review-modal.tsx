@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertTriangle, CheckCircle2, TrendingUp, Clock,
-  Check, X
+  Check
 } from 'lucide-react';
 import { toast } from 'sonner';
 

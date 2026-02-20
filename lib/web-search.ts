@@ -42,7 +42,7 @@ export interface WebSearchResponse {
  * - Document measurements
  * - Project schedules/budgets
  */
-export function shouldUseWebSearch(query: string, documentChunksFound: number): boolean {
+export function shouldUseWebSearch(query: string, _documentChunksFound: number): boolean {
   const lowerQuery = query.toLowerCase();
   
   // AGGRESSIVE WEB SEARCH FOR ALL CODE/REGULATION QUESTIONS

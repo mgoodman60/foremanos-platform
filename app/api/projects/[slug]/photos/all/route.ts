@@ -69,7 +69,7 @@ export async function GET(
     });
 
     // Fetch RFIs - note: RFI model doesn't have photoIds, we skip this for now
-    const rfis: { id: string; rfiNumber: number; title: string }[] = [];
+    const _rfis: { id: string; rfiNumber: number; title: string }[] = [];
 
     // Build photo-to-links mapping
     const photoLinks: Record<string, { type: string; id: string; label: string; date?: string }[]> = {};

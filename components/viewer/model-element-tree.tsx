@@ -33,7 +33,7 @@ export default function ModelElementTree({
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
-  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [_filterCategory, _setFilterCategory] = useState<string | null>(null);
 
   // Build tree from model
   useEffect(() => {

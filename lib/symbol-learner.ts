@@ -4,7 +4,6 @@
  * Learns from document analysis to identify and categorize symbols
  */
 
-import { PrismaClient } from '@prisma/client';
 import { prisma } from './db';
 
 // Types

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { format, parse, addDays, differenceInDays } from 'date-fns';
+import { format, parse, addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Calendar, X, Check, Pencil, Clock, Percent, CalendarDays } from 'lucide-react';
+import { X, Check, Pencil, Clock, Percent, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -214,7 +214,7 @@ interface QuickProgressSliderProps {
 
 export function QuickProgressSlider({ taskId, currentProgress, onProgressChange }: QuickProgressSliderProps) {
   const [progress, setProgress] = useState(currentProgress);
-  const [isDragging, setIsDragging] = useState(false);
+  const [_isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleChange = async (newProgress: number) => {

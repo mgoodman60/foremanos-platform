@@ -7,7 +7,6 @@
 
 import { prisma } from './db';
 import { createScopedLogger } from './logger';
-import { getCSIDivisionByNumber, type CSIDivision } from './csi-divisions';
 import { callAbacusLLM } from './abacus-llm';
 import { generateAbbreviationContext } from './construction-abbreviations';
 import { EXTRACTION_MODEL } from '@/lib/model-config';

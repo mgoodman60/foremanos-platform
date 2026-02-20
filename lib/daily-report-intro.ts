@@ -1,6 +1,5 @@
 import {
   fetchWeatherForecast,
-  DailyWeatherData,
   forecastsToDailyWeather
 } from './weather-service';
 import { formatWeatherForIntro } from './weather-automation';

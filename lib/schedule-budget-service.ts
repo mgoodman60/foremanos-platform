@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import { addDays, differenceInDays, startOfMonth, endOfMonth, format, isAfter, isBefore } from 'date-fns';
+import { addDays, differenceInDays, format, isAfter, isBefore } from 'date-fns';
 
 // Types
 interface TaskNode {
@@ -494,7 +494,7 @@ export async function generateScheduleForecast(projectId: string, scheduleId?: s
   };
 }
 
-function calculatePlannedProgress(tasks: any[], asOfDate: Date, projectStart: Date): number {
+function calculatePlannedProgress(tasks: any[], asOfDate: Date, _projectStart: Date): number {
   let plannedWork = 0;
   let totalWork = 0;
 
@@ -679,7 +679,7 @@ export async function linkTasksToBudget(projectId: string): Promise<{ linked: nu
 }
 
 export async function calculateScheduleDrivenCosts(projectId: string) {
-  const now = new Date();
+  const _now = new Date();
   
   // Get linked budget items
   const budget = await prisma.projectBudget.findFirst({

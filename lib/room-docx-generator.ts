@@ -2,7 +2,6 @@
 // Client-side DOCX generation for editable room data sheets
 // Matches the PDF formatting but in an editable Word format
 
-import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 
 // Helper function to clean item names (remove underscores and clean up formatting)
@@ -60,7 +59,7 @@ export interface RoomSheetData {
 }
 
 // Generate DOCX template as base64
-function generateDocxTemplate(): string {
+function _generateDocxTemplate(): string {
   // This creates a minimal valid DOCX file structure
   // The template uses docxtemplater tags like {variable}
   const templateXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -167,7 +166,7 @@ export async function generateRoomSheetDOCX(data: RoomSheetData): Promise<Blob> 
     }
   }
   
-  const fullContent = sections.join('\n');
+  const _fullContent = sections.join('\n');
   
   // Create minimal DOCX structure using PizZip
   const zip = new PizZip();

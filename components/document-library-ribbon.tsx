@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, ChevronDown, ChevronRight, Download, Eye, File, FileImage, Lock, Globe, Shield } from 'lucide-react';
+import { FileText, ChevronDown, ChevronRight, Download, Eye, FileImage, Lock, Globe, Shield } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
@@ -26,7 +26,7 @@ interface Document {
 
 export function DocumentLibraryRibbon({ projectId, userRole }: DocumentLibraryRibbonProps) {
   const { data: session } = useSession() || {};
-  const effectiveRole = userRole || session?.user?.role || 'guest';
+  const _effectiveRole = userRole || session?.user?.role || 'guest';
   
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);

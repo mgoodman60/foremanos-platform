@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, EyeOff, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, ExternalLink, CheckCircle2, Circle, RefreshCw } from 'lucide-react';
+import { FileText, X, Download, Loader2, Trash2, FileImage, File, Pencil, Eye, Lock, Globe, Upload, Shield, CheckSquare, Square, Filter, Box, CheckCircle2, Circle, RefreshCw } from 'lucide-react';
 import { primaryColors, semanticColors } from '@/lib/design-tokens';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -111,7 +110,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
   const [projectSlug, setProjectSlug] = useState<string>('');
   const [preSelectedCategory, setPreSelectedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cadFileInputRef = useRef<HTMLInputElement>(null);
+  const _cadFileInputRef = useRef<HTMLInputElement>(null);
   const [showViewModelConfirm, setShowViewModelConfirm] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -671,7 +670,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     return <Circle className="w-4 h-4 text-gray-600" />;
   };
 
-  const getStageDetail = (stage: ProcessingStage, progress: DocumentProgress | undefined, category: string): string | null => {
+  const getStageDetail = (stage: ProcessingStage, progress: DocumentProgress | undefined, _category: string): string | null => {
     if (!progress) return null;
     switch (stage) {
       case 'scanning':
@@ -697,7 +696,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     }
   };
 
-  const isStalled = (progress: DocumentProgress | undefined, lastPollTime: number | undefined): boolean => {
+  const isStalled = (progress: DocumentProgress | undefined, _lastPollTime: number | undefined): boolean => {
     if (!progress || !progress.lastActivityAt) return false;
     const lastActivity = new Date(progress.lastActivityAt).getTime();
     const now = Date.now();
@@ -1076,7 +1075,7 @@ export function DocumentLibrary({ userRole, projectId, onDocumentsChange }: Docu
     }
   };
 
-  const getDocumentColor = (fileType: string) => {
+  const _getDocumentColor = (fileType: string) => {
     const type = fileType.toLowerCase();
     switch (type) {
       case 'pdf':

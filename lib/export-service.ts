@@ -96,7 +96,7 @@ export async function exportDailyReports(
 // Export Budget Data
 export async function exportBudget(
   projectId: string,
-  _options: ExportOptions
+  __options: ExportOptions
 ): Promise<{ content: string; filename: string; mimeType: string }> {
   const budget = await prisma.projectBudget.findFirst({
     where: { projectId },
@@ -179,7 +179,7 @@ export async function exportBudget(
 // Export Schedule Data
 export async function exportSchedule(
   projectId: string,
-  _options: ExportOptions
+  __options: ExportOptions
 ): Promise<{ content: string; filename: string; mimeType: string }> {
   const schedule = await prisma.schedule.findFirst({
     where: { projectId },
@@ -241,7 +241,7 @@ export async function exportSchedule(
 // Export MEP Equipment
 export async function exportMEPEquipment(
   projectId: string,
-  _options: ExportOptions
+  __options: ExportOptions
 ): Promise<{ content: string; filename: string; mimeType: string }> {
   const equipment = await prisma.mEPEquipment.findMany({
     where: { projectId },
@@ -295,7 +295,7 @@ export async function exportMEPEquipment(
 // Export Change Orders
 export async function exportChangeOrders(
   projectId: string,
-  _options: ExportOptions
+  __options: ExportOptions
 ): Promise<{ content: string; filename: string; mimeType: string }> {
   const changeOrders = await prisma.changeOrder.findMany({
     where: { projectId },

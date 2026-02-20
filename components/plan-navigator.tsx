@@ -9,7 +9,6 @@ import {
   Search,
   X,
   ExternalLink,
-  Grid3x3,
   Link2,
   ChevronDown,
   ChevronRight,
@@ -19,7 +18,6 @@ import {
   Download,
   RefreshCw,
   FolderOpen,
-  DollarSign,
   Building,
   Zap,
   Droplet,
@@ -43,7 +41,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WithTooltip } from '@/components/ui/icon-button';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
 interface DocumentNode {
@@ -97,7 +94,7 @@ const DISCIPLINE_CONFIG: Record<string, { icon: any; color: string; patterns: st
 };
 
 export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const [references, setReferences] = useState<DocumentReference[]>([]);
   const [referencesByDoc, setReferencesByDoc] = useState<Record<string, DocumentReference[]>>({});
   const [nodes, setNodes] = useState<DocumentNode[]>([]);
@@ -196,7 +193,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
     const sourceName = ref.sourceDoc?.name || '';
     const targetName = ref.targetDoc?.name || '';
     const contextLower = context.toLowerCase();
-    const locationLower = location.toLowerCase();
+    const _locationLower = location.toLowerCase();
     
     // Extract specific identifiers from context/location
     const detailMatch = context.match(/(?:detail|dtl|det)\s*[-#]?\s*(\d+[A-Za-z]?)/i);
@@ -1241,8 +1238,9 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                                   <Loader2 className="animate-spin text-orange-500 h-6 w-6" />
                                 </div>
                               ) : sheetPreviews[ref.sourceDocumentId] ? (
-                                <img 
-                                  src={sheetPreviews[ref.sourceDocumentId]} 
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={sheetPreviews[ref.sourceDocumentId]}
                                   alt={`Preview of ${ref.sourceDoc?.name}`}
                                   className="w-full h-32 object-contain bg-white/5 rounded cursor-pointer hover:opacity-80 transition-opacity"
                                   onClick={() => handleJumpToDocument(ref.sourceDocumentId, ref.sourceDoc?.name || 'Unknown')}
@@ -1270,8 +1268,9 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
                                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-500 border-r-transparent" />
                                 </div>
                               ) : sheetPreviews[ref.targetDocumentId] ? (
-                                <img 
-                                  src={sheetPreviews[ref.targetDocumentId]} 
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={sheetPreviews[ref.targetDocumentId]}
                                   alt={`Preview of ${ref.targetDoc?.name}`}
                                   className="w-full h-32 object-contain bg-white/5 rounded cursor-pointer hover:opacity-80 transition-opacity"
                                   onClick={() => handleJumpToDocument(ref.targetDocumentId, ref.targetDoc?.name || 'Unknown')}

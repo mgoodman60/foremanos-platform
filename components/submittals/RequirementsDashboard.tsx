@@ -4,9 +4,6 @@ import { useState, useEffect } from 'react';
 import {
   RefreshCw,
   Package,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
   ChevronDown,
   ChevronRight,
   Loader2,
@@ -245,7 +242,7 @@ export default function RequirementsDashboard({ projectSlug }: RequirementsDashb
             };
             const CategoryIcon = config.icon;
             const isExpanded = expandedCategories.has(category);
-            const totals = getCategoryTotals(items);
+            const _totals = getCategoryTotals(items);
 
             return (
               <div

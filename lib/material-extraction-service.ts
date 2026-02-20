@@ -33,7 +33,7 @@ interface MaterialExtractionResult {
  */
 export async function extractMaterialsFromReport(
   conversationId: string,
-  projectId: string
+  _projectId: string
 ): Promise<MaterialExtractionResult | null> {
   try {
     // Get conversation messages

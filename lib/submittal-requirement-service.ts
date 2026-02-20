@@ -5,13 +5,11 @@
 
 import { prisma } from './db';
 import { logger } from './logger';
-import { extractPlumbingFixtures, getPlumbingRequirements } from './plumbing-fixture-extractor';
-import { extractElectricalSchedule, getElectricalRequirements } from './electrical-panel-extractor';
-import { extractEquipmentSchedule, getEquipmentRequirements } from './equipment-schedule-extractor';
+import { getPlumbingRequirements } from './plumbing-fixture-extractor';
+import { getElectricalRequirements } from './electrical-panel-extractor';
+import { getEquipmentRequirements } from './equipment-schedule-extractor';
 
 // Import existing extractors
-import { getDoorScheduleContext } from './door-schedule-extractor';
-import { getWindowScheduleContext } from './window-schedule-extractor';
 
 export interface RequirementItem {
   productName: string;
@@ -275,7 +273,7 @@ async function extractFinishRequirements(projectId: string): Promise<Requirement
   }
 
   // Create requirement items
-  for (const [key, data] of Object.entries(byFinish)) {
+  for (const [_key, data] of Object.entries(byFinish)) {
     const categoryLabel = data.category?.replace(/_/g, ' ') || 'Finish';
     const finishType = data.items[0]?.finishType || data.items[0]?.material || 'Standard';
     

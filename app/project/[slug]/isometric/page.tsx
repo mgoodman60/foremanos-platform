@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import DOMPurify from 'isomorphic-dompurify';
@@ -22,7 +22,6 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle2,
-  Maximize2,
   TrendingUp,
   Zap,
   Droplets,
@@ -88,9 +87,9 @@ interface SheetOption {
 export default function IsometricViewPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
   const [loadingSheets, setLoadingSheets] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [sheets, setSheets] = useState<SheetOption[]>([]);

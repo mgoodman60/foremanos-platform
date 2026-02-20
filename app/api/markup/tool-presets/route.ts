@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

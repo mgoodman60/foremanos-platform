@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Layers, Eye, EyeOff, ChevronDown, ChevronRight, Search, Palette, Sliders, RotateCcw, Filter, Check, Square, CheckSquare } from 'lucide-react';
+import { Layers, Eye, EyeOff, ChevronDown, ChevronRight, Search, Sliders, RotateCcw, Filter, Square, CheckSquare } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 import { semanticColors, chartColors, primaryColors, neutralColors } from '@/lib/design-tokens';
 
@@ -63,7 +63,7 @@ export default function LayerControlPanel({
   modelId,
   projectSlug,
   layerCategories,
-  totalLayers,
+  totalLayers: _totalLayers,
   className = '',
 }: LayerControlPanelProps) {
   const [layers, setLayers] = useState<LayerInfo[]>([]);
@@ -71,7 +71,7 @@ export default function LayerControlPanel({
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Contours', 'Grading', 'Erosion']));
   const [globalOpacity, setGlobalOpacity] = useState(100);
-  const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
+  const [_showColorPicker, _setShowColorPicker] = useState<string | null>(null);
   const [selectedLayers, setSelectedLayers] = useState<Set<string>>(new Set());
 
   // Fetch layers from model
@@ -383,7 +383,7 @@ export default function LayerControlPanel({
             const someVisible = categoryLayers.some(l => l.visible);
             const isExpanded = expandedCategories.has(category);
             const categoryColor = CATEGORY_COLORS[category] || CATEGORY_COLORS['Other'];
-            const totalElements = categoryLayers.reduce((sum, l) => sum + l.elementCount, 0);
+            const _totalElements = categoryLayers.reduce((sum, l) => sum + l.elementCount, 0);
 
             return (
               <div key={category} className="rounded border border-gray-700 overflow-hidden">

@@ -54,7 +54,7 @@ function Section({ title, count, children, defaultOpen = false }: { title: strin
   );
 }
 
-export default function SheetDetailPanel({ sheet, drawingType, dimensions, callouts, legends, annotations, rooms, doors, windows, onNavigateSheet }: Props) {
+export default function SheetDetailPanel({ sheet, drawingType, dimensions, callouts, legends, annotations: _annotations, rooms, doors, windows, onNavigateSheet }: Props) {
   const disciplineColor = getDisciplineColor(sheet.discipline || 'General');
 
   return (

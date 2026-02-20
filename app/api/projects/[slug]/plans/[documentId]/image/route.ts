@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { downloadFile, getFileUrl } from '@/lib/s3';
-import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
 
 export const dynamic = 'force-dynamic';
 

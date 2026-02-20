@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer, Area, ComposedChart
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  Legend, ResponsiveContainer, ComposedChart
 } from 'recharts';
 import { TrendingUp, Loader2, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { neutralColors, backgroundColors, borderColors, chartColors } from '@/lib/design-tokens';
+import { neutralColors, chartColors } from '@/lib/design-tokens';
 
 interface CurvePoint {
   date: string;

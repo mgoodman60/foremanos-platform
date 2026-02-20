@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
  * Get queue statistics
  * Returns current processing queue state
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 

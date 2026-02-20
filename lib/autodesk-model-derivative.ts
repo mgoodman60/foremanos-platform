@@ -112,7 +112,7 @@ export async function startTranslation(
     throw new Error(`Failed to start translation: ${errorText}`);
   }
 
-  const result = await response.json();
+  await response.json();
   logger.info('MODEL_DERIVATIVE', 'Translation started', { urn });
 
   return {

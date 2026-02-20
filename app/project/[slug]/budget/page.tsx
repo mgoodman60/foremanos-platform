@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  DollarSign, FileEdit, Receipt, Users, TrendingUp,
-  Shield, Bell, FileText, ChevronLeft, FileUp, Layers,
+  DollarSign, FileEdit, Receipt, Users, TrendingUp, FileText, ChevronLeft, FileUp, Layers,
   BarChart3, ClipboardCheck
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

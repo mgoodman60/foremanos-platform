@@ -156,6 +156,7 @@ export function RenderDetailView({
             }}
           >
             {render.imageUrl || render.thumbnailUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={render.imageUrl || render.thumbnailUrl || ''}
                 alt={render.title || 'Architectural render'}

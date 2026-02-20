@@ -5,7 +5,6 @@ import { prisma } from '@/lib/db';
 import {
   extractTakeoffsWithVision,
   saveEnhancedTakeoff,
-  type EnhancedTakeoffItem,
 } from '@/lib/enhanced-takeoff-service';
 
 interface RouteContext {

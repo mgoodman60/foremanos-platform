@@ -17,7 +17,7 @@ interface Phase3DashboardRibbonProps {
 
 export function Phase3DashboardRibbon({
   projectSlug,
-  projectId,
+  projectId: _projectId,
   onOpenRoom,
   onOpenMaterials,
   onOpenMEP,

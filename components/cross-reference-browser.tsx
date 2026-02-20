@@ -17,8 +17,6 @@ import {
   AlertCircle,
   CheckCircle,
   Search,
-  Filter,
-  TrendingUp,
   FileText,
   GitBranch,
   BarChart3,
@@ -131,7 +129,7 @@ export default function CrossReferenceBrowser({
   });
 
   // Get incoming/outgoing references for selected sheet
-  const getSheetReferences = (sheetNumber: string) => {
+  const _getSheetReferences = (sheetNumber: string) => {
     const incoming = edges.filter((e) => e.toSheet === sheetNumber);
     const outgoing = edges.filter((e) => e.fromSheet === sheetNumber);
     return { incoming, outgoing };
@@ -442,7 +440,7 @@ function ListView({
 // Graph View Component (Simplified text-based)
 function GraphView({
   nodes,
-  edges,
+  edges: _edges,
   onSheetClick,
 }: {
   nodes: GraphNode[];

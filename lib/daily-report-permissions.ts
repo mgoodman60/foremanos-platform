@@ -121,7 +121,7 @@ export function canDeleteReport(role: DailyReportRole): boolean {
 }
 
 /** Can view reports */
-export function canViewReport(role: DailyReportRole): boolean {
+export function canViewReport(__role: DailyReportRole): boolean {
   return true; // All roles can view
 }
 

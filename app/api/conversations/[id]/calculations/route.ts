@@ -22,7 +22,7 @@ import { prisma } from '@/lib/db';
 // - Extract from document: POST /api/documents/[id]/extract-quantities
 // - View takeoffs: GET /api/projects/[slug]/takeoffs
 
-type QuantityCalculation = any; // Placeholder for old type
+// type QuantityCalculation = any; // Deprecated - removed unused type
 
 export async function GET(
   request: NextRequest,
@@ -73,8 +73,8 @@ export async function GET(
 }
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params: _params }: { params: { id: string } }
 ) {
   // This endpoint has been deprecated
   // Use the new Material Takeoff system instead

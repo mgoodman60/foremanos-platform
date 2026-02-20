@@ -335,7 +335,7 @@ export async function DELETE(
     });
 
     // Deep cleanup: delete extracted/derived data sourced from this document
-    let cleanupCounts = { rooms: 0, doors: 0, windows: 0, finishes: 0, floorPlans: 0, hardware: 0 };
+    const cleanupCounts = { rooms: 0, doors: 0, windows: 0, finishes: 0, floorPlans: 0, hardware: 0 };
     if (cleanup) {
       try {
         const [roomResult, doorResult, windowResult, finishResult, hardwareResult] = await prisma.$transaction([

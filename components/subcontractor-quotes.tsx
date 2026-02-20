@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   FileText, Upload, Check, X, AlertCircle, Clock, RefreshCw,
-  DollarSign, Building2, Phone, Mail, Calendar, ChevronDown,
-  ChevronUp, Download, Trash2, BarChart3, Import, Eye, FileSearch
+  DollarSign, Building2, Phone, Mail, ChevronDown,
+  ChevronUp, Download, Trash2, Import, Eye, FileSearch
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';

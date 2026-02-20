@@ -169,7 +169,7 @@ export async function processScheduleUpdatesAfterFinalization(
         }
 
         // Create audit record
-        const scheduleUpdate = await prisma.scheduleUpdate.create({
+        const _scheduleUpdate = await prisma.scheduleUpdate.create({
           data: {
             projectId: project.id,
             scheduleId: activeSchedule.id,

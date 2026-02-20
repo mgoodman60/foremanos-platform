@@ -112,7 +112,7 @@ function extractGradingData(content: string, metadata: any): SiteworkExtractionR
   return results;
 }
 
-function extractUtilityData(content: string, metadata: any): SiteworkExtractionResult[] {
+function extractUtilityData(content: string, _metadata: any): SiteworkExtractionResult[] {
   const results: SiteworkExtractionResult[] = [];
 
   const pipePattern = /(\d+)["']?\s*(PVC|RCP|HDPE|DIP|CIP|VCP|PE|PP|ABS)\s*(?:SDR\d+|C900|C905)?\s*(?:@\s*([\d.]+)%)?/gi;
@@ -178,7 +178,7 @@ function extractUtilityData(content: string, metadata: any): SiteworkExtractionR
   return results;
 }
 
-function extractLandscapeData(content: string, metadata: any): SiteworkExtractionResult[] {
+function extractLandscapeData(content: string, _metadata: any): SiteworkExtractionResult[] {
   const results: SiteworkExtractionResult[] = [];
 
   const treePattern = /(\d+)\s*(?:each|ea|\/)?\s*(?:[A-Za-z]+\s+[A-Za-z]+)\s*(\d+)["']?\s*(?:CAL|caliper|B&B)/gi;
@@ -260,7 +260,7 @@ function extractLandscapeData(content: string, metadata: any): SiteworkExtractio
   return results;
 }
 
-function extractPavingData(content: string, metadata: any): SiteworkExtractionResult[] {
+function extractPavingData(content: string, _metadata: any): SiteworkExtractionResult[] {
   const results: SiteworkExtractionResult[] = [];
 
   const asphaltPattern = /(\d+)["']?\s*(?:thick)?\s*(?:asphalt|HMA|AC).*?([\d,]+\.?\d*)\s*(SF|SY)/gi;
@@ -336,7 +336,7 @@ function extractPavingData(content: string, metadata: any): SiteworkExtractionRe
   return results;
 }
 
-function extractErosionControlData(content: string, metadata: any): SiteworkExtractionResult[] {
+function extractErosionControlData(content: string, _metadata: any): SiteworkExtractionResult[] {
   const results: SiteworkExtractionResult[] = [];
 
   const siltPattern = /silt\s*fence\s*[:\-]?\s*([\d,]+\.?\d*)\s*(LF|lf)/gi;
@@ -374,7 +374,7 @@ function extractErosionControlData(content: string, metadata: any): SiteworkExtr
   return results;
 }
 
-function extractStormwaterData(content: string, metadata: any): SiteworkExtractionResult[] {
+function extractStormwaterData(content: string, _metadata: any): SiteworkExtractionResult[] {
   const results: SiteworkExtractionResult[] = [];
 
   const detentionPattern = /(?:detention|retention)\s*(?:pond|basin)?\s*(?:volume)?\s*[:\-]?\s*([\d,]+\.?\d*)\s*(CF|CY|AC-FT)/gi;
@@ -412,7 +412,7 @@ function extractStormwaterData(content: string, metadata: any): SiteworkExtracti
   return results;
 }
 
-function extractGeneralSiteworkData(content: string, metadata: any): SiteworkExtractionResult[] {
+function extractGeneralSiteworkData(content: string, _metadata: any): SiteworkExtractionResult[] {
   const results: SiteworkExtractionResult[] = [];
 
   for (const pattern of ALL_SITEWORK_PATTERNS) {

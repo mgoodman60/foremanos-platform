@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { cloudStoragePath, fileName, fileSize, projectId, category } = parsed.data;
+    const { cloudStoragePath, fileName, fileSize: _fileSize, projectId, category } = parsed.data;
 
     // Validate category against Prisma enum
     const validatedCategory: DocumentCategory = VALID_CATEGORIES.includes(category)

@@ -16,7 +16,7 @@ interface SyncStatusIndicatorProps {
 export default function SyncStatusIndicator({
   status: propStatus,
   pendingCount = 0,
-  lastSyncedAt,
+  lastSyncedAt: _lastSyncedAt,
   className = '',
 }: SyncStatusIndicatorProps) {
   const [status, setStatus] = useState<SyncStatus>(propStatus || 'online');

@@ -12,12 +12,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   AreaChart, Area, BarChart, Bar
 } from 'recharts';
 import { toast } from 'sonner';
-import { format, subDays } from 'date-fns';
-import { chartColors, semanticColors, neutralColors, backgroundColors, borderColors, textColors } from '@/lib/design-tokens';
+import { format } from 'date-fns';
+import { chartColors, semanticColors, neutralColors, backgroundColors, borderColors } from '@/lib/design-tokens';
 
 // Types
 interface EVMMetrics {
@@ -83,7 +83,7 @@ function PerformanceGauge({
 
   const colors = getColor(value);
   const angle = Math.min(Math.max((value - 0.5) * 180, 0), 180); // Map 0.5-1.5 to 0-180 degrees
-  const percentage = Math.min(Math.max((value - 0.5) * 100, 0), 100);
+  const _percentage = Math.min(Math.max((value - 0.5) * 100, 0), 100);
 
   return (
     <div className="flex flex-col items-center">

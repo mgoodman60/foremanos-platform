@@ -48,7 +48,7 @@ export function DisciplineOverlayPanel({
   const [layers, setLayers] = useState<Map<string, DisciplineLayerState>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [baseScaleRatio, setBaseScaleRatio] = useState<number>(48.0);
+  const [_baseScaleRatio, setBaseScaleRatio] = useState<number>(48.0);
 
   // Fetch available discipline sheets
   const fetchDisciplineSheets = useCallback(async () => {
@@ -249,7 +249,7 @@ export function DisciplineOverlayPanel({
         sortedLayers.map(([discipline, layer]) => {
           if (!layer.visible || !layer.imageUrl) return null;
 
-          const colors = getDisciplineColor(discipline);
+          const _colors = getDisciplineColor(discipline);
           const hasScaleMismatch = Math.abs(layer.sheet.scaleFactor - 1.0) > 0.01;
 
           const imageStyle: React.CSSProperties = {
@@ -272,6 +272,7 @@ export function DisciplineOverlayPanel({
           }
 
           return (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               key={discipline}
               src={layer.imageUrl}

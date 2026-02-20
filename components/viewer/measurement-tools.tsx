@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Ruler, Move, Circle, Square, Trash2, Save, X, RotateCcw, ChevronDown } from 'lucide-react';
+import { Ruler, Circle, Square, Trash2, Save, X, RotateCcw, ChevronDown } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 
 interface MeasurementResult {
@@ -27,9 +27,9 @@ export default function MeasurementTools({
 }: MeasurementToolsProps) {
   const [activeTool, setActiveTool] = useState<'distance' | 'angle' | 'area' | null>(null);
   const [measurements, setMeasurements] = useState<MeasurementResult[]>([]);
-  const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
+  const [_isExtensionLoaded, setIsExtensionLoaded] = useState(false);
   const [showResults, setShowResults] = useState(true);
-  const [calibrationMode, setCalibrationMode] = useState(false);
+  const [_calibrationMode, _setCalibrationMode] = useState(false);
   const [calibrationFactor, setCalibrationFactor] = useState(1);
   const [measureExtension, setMeasureExtension] = useState<any>(null);
 

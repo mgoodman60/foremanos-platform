@@ -126,7 +126,7 @@ export const authOptions: NextAuthOptions = {
     error: '/login', // Redirect errors back to login page
   },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user: __user }) {
       // Always allow sign in - we handle approval checks in authorize()
       return true;
     },
@@ -165,7 +165,7 @@ export const authOptions: NextAuthOptions = {
         return `${baseUrl}/dashboard`;
       }
     },
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger: __trigger }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;

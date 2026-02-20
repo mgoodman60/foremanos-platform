@@ -314,17 +314,17 @@ export async function queueDocumentForProcessing(
 // LEGACY COMPATIBILITY - Stub functions for old quota system
 // ============================================================================
 
-export async function canProcessDocument(userId: string, pageCount: number): Promise<{ allowed: boolean; reason?: string }> {
+export async function canProcessDocument(_userId: string, _pageCount: number): Promise<{ allowed: boolean; reason?: string }> {
   log.info('canProcessDocument - stub for legacy compatibility');
   return { allowed: true };
 }
 
-export async function getRemainingPages(pagesUsed: number, tier?: string): Promise<number> {
+export async function getRemainingPages(pagesUsed: number, _tier?: string): Promise<number> {
   log.info('getRemainingPages - stub for legacy compatibility');
   return Math.max(0, 1000 - pagesUsed);
 }
 
-export async function shouldResetQuota(user: any): Promise<boolean> {
+export async function shouldResetQuota(_user: any): Promise<boolean> {
   log.info('shouldResetQuota - stub for legacy compatibility');
   return false;
 }
@@ -344,7 +344,7 @@ export function calculateProcessingCost(pages: number, processorType: string): n
 }
 
 // Legacy function for user-based limits (old quota system)
-export function getProcessingLimits(tier: string): { monthlyPageLimit: number; pagesPerMonth: number } {
+export function getProcessingLimits(_tier: string): { monthlyPageLimit: number; pagesPerMonth: number } {
   log.info('getProcessingLimits(tier) - stub for legacy user quota');
   return { monthlyPageLimit: 1000, pagesPerMonth: 1000 };
 }
@@ -363,7 +363,7 @@ export async function getQueuedDocuments(
 }>> {
   // Get project limits
   const stats = await getUsageStats(projectId);
-  const limits = await getProjectProcessingLimits(projectId);
+  const _limits = await getProjectProcessingLimits(projectId);
 
   // Calculate how many pages we can process today
   const availablePages = maxPages || stats.dailyRemaining;

@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Schedule automatic status checks to trigger extraction
     // First check after 30 seconds, then 60 seconds, then 2 minutes
-    scheduleStatusChecks(model.id, projectSlug);
+    scheduleStatusChecks(model.id);
 
     return NextResponse.json({
       success: true,
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
 /**
  * Schedule automatic status checks to trigger extraction when ready
  */
-async function scheduleStatusChecks(modelId: string, _projectSlug: string) {
+async function scheduleStatusChecks(modelId: string) {
   // Import dynamically to avoid circular dependencies
   const { getTranslationStatus } = await import('@/lib/autodesk-model-derivative');
   const { extractBIMData } = await import('@/lib/bim-metadata-extractor');

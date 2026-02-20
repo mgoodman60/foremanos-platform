@@ -5,8 +5,6 @@ import {
   findSymbolByCode,
   searchSymbols,
   getSymbolsByTrade,
-  getSymbolsByCategory,
-  matchSymbol,
   getLibraryStats,
   ALL_STANDARD_SYMBOLS,
   Trade
@@ -16,7 +14,7 @@ import {
  * GET /api/projects/[slug]/symbols
  * Symbol library lookup and search
  */
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, { params: _params }: { params: { slug: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

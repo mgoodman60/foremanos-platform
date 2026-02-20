@@ -274,6 +274,7 @@ export default function DocumentPreviewModal({ document: doc, isOpen, onClose }:
 
               {isImage && (
                 <div className="w-full h-full overflow-auto p-4 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={blobUrl}
                     alt={doc.name}

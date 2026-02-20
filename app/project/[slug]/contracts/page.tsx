@@ -124,7 +124,7 @@ export default function ContractsPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const projectSlug = params.slug as string;
   const preselectedSubId = searchParams.get('subcontractorId');
 

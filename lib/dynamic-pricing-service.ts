@@ -46,7 +46,7 @@ export interface PriceUpdateSession {
 }
 
 // Material categories that benefit from web pricing search
-const SEARCHABLE_CATEGORIES = [
+const _SEARCHABLE_CATEGORIES = [
   'concrete', 'rebar', 'steel', 'lumber', 'drywall', 'roofing',
   'flooring', 'hvac', 'plumbing', 'electrical', 'doors', 'windows',
   'insulation', 'paint', 'tile', 'masonry', 'siding'
@@ -55,7 +55,7 @@ const SEARCHABLE_CATEGORIES = [
 /**
  * Get regional multiplier based on project location
  */
-export function getLocationMultiplier(city?: string, state?: string, zip?: string): number {
+export function getLocationMultiplier(city?: string, state?: string, _zip?: string): number {
   const location = `${city || ''}-${state || ''}`.toLowerCase().replace(/\s+/g, '-');
   
   // Check for exact city-state match
@@ -353,7 +353,7 @@ export async function applyPriceUpdates(
  * Get price history for an item
  */
 export async function getItemPriceHistory(
-  itemId: string
+  _itemId: string
 ): Promise<Array<{ date: Date; price: number; source: string }>> {
   // This would require a price history table - for now return empty
   // In a full implementation, you'd track price changes over time

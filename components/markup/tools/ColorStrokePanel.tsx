@@ -252,7 +252,7 @@ export function ColorStrokePanel({
             <label className="block text-sm font-medium text-gray-700 mb-2">Arrow Start</label>
             <select
               value={style.dashPattern?.[0] ?? 'none'}
-              onChange={(e) => {
+              onChange={(_e) => {
                 // Store arrowhead style in geometry, not style
                 // This is a simplified implementation
               }}
@@ -270,7 +270,7 @@ export function ColorStrokePanel({
             <label className="block text-sm font-medium text-gray-700 mb-2">Arrow End</label>
             <select
               value={style.dashPattern?.[1] ?? 'none'}
-              onChange={(e) => {
+              onChange={(_e) => {
                 // Store arrowhead style in geometry, not style
                 // This is a simplified implementation
               }}

@@ -8,10 +8,9 @@
 
 import { prisma } from './db';
 import { logger } from './logger';
-import { callAbacusLLM, LLMResponse } from './abacus-llm';
-import { getFileUrl } from './s3';
-import { CSI_DIVISIONS, getCSIDivision, generateWBSCode } from './schedule-improvement-analyzer';
-import { extractDetailedScheduleFromPlans, matchTasksToSubcontractors, importExtractedTasks } from './schedule-document-extractor';
+import { callAbacusLLM } from './abacus-llm';
+import { CSI_DIVISIONS, generateWBSCode } from './schedule-improvement-analyzer';
+import { extractDetailedScheduleFromPlans, matchTasksToSubcontractors } from './schedule-document-extractor';
 
 interface GeneratedTask {
   taskId: string;
@@ -595,7 +594,7 @@ function inferPhaseFromWBS(wbsCode?: string): string | undefined {
 /**
  * Generate tasks based on scope analysis
  */
-function generateTasksFromScope(
+function _generateTasksFromScope(
   scope: {
     projectType: string;
     buildingSize: string;
@@ -603,7 +602,7 @@ function generateTasksFromScope(
     keyFeatures: string[];
     complexity: 'simple' | 'medium' | 'complex';
   },
-  startDate: Date
+  _startDate: Date
 ): GeneratedTask[] {
   const tasks: GeneratedTask[] = [];
   let taskCounter = 1;
@@ -731,7 +730,7 @@ function getDaysFromStart(task: GeneratedTask, allTasks: GeneratedTask[]): numbe
 /**
  * Determine if task is on critical path
  */
-function isOnCriticalPath(task: GeneratedTask, allTasks: GeneratedTask[]): boolean {
+function isOnCriticalPath(task: GeneratedTask, _allTasks: GeneratedTask[]): boolean {
   // Simplified critical path detection
   // Tasks in phases 2-5 are typically critical
   const criticalPhases = ['Site Work', 'Foundation', 'Structural', 'Rough-In MEP'];

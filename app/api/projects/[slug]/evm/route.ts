@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { startOfDay, subDays, format, differenceInDays } from 'date-fns';
+import { startOfDay, subDays, differenceInDays } from 'date-fns';
 
 /**
  * Calculate Earned Value Management (EVM) metrics
@@ -56,7 +56,7 @@ async function calculateEVM(projectId: string, date: Date) {
   let plannedValue = 0;
   let earnedValue = 0;
   let actualCost = budgetItemActualCost; // Start with actual costs from budget items
-  let totalPlannedPercent = 0;
+  let _totalPlannedPercent = 0;
   let totalEarnedPercent = 0;
 
   if (tasksHaveBudgets) {
@@ -66,13 +66,13 @@ async function calculateEVM(projectId: string, date: Date) {
       
       if (task.endDate <= date) {
         plannedValue += taskBudget;
-        totalPlannedPercent += 100;
+        _totalPlannedPercent += 100;
       } else if (task.startDate <= date && task.endDate > date) {
         const duration = task.duration || 1;
         const daysElapsed = Math.floor((date.getTime() - task.startDate.getTime()) / (1000 * 60 * 60 * 24));
         const plannedPercent = Math.min((daysElapsed / duration) * 100, 100);
         plannedValue += (taskBudget * plannedPercent) / 100;
-        totalPlannedPercent += plannedPercent;
+        _totalPlannedPercent += plannedPercent;
       }
 
       earnedValue += (taskBudget * task.percentComplete) / 100;
@@ -82,9 +82,8 @@ async function calculateEVM(projectId: string, date: Date) {
   } else if (tasks.length > 0) {
     // Distribute budget proportionally across schedule based on duration
     // Find project date range
-    const projectStart = tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, tasks[0].startDate);
-    const projectEnd = tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, tasks[0].endDate);
-    const totalProjectDays = Math.max(differenceInDays(projectEnd, projectStart), 1);
+    const _projectStart = tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, tasks[0].startDate);
+    const _projectEnd = tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, tasks[0].endDate);
     
     // Calculate total task-days (weighted by duration)
     const totalTaskDays = tasks.reduce((sum, t) => sum + (t.duration || 1), 0);
@@ -97,13 +96,12 @@ async function calculateEVM(projectId: string, date: Date) {
       // Calculate planned value based on schedule
       if (task.endDate <= date) {
         plannedValue += taskBudget;
-        totalPlannedPercent += 100;
+        _totalPlannedPercent += 100;
       } else if (task.startDate <= date && task.endDate > date) {
         const duration = task.duration || 1;
         const daysElapsed = Math.max(0, differenceInDays(date, task.startDate));
         const plannedPercent = Math.min((daysElapsed / duration) * 100, 100);
         plannedValue += (taskBudget * plannedPercent) / 100;
-        totalPlannedPercent += plannedPercent;
       }
 
       // Calculate earned value based on task completion

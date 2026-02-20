@@ -12,7 +12,7 @@ import { classifyQueryIntent } from './query-classification';
 /**
  * Extract measurement information with hierarchy: explicit > scaled > unavailable
  */
-export function extractMeasurement(chunk: EnhancedChunk, query: string): MeasurementInfo | null {
+export function extractMeasurement(chunk: EnhancedChunk, _query: string): MeasurementInfo | null {
   const content = chunk.content;
 
   // Priority 1: Explicit written dimensions

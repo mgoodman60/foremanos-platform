@@ -18,7 +18,6 @@ import {
   Search,
   Navigation,
   ArrowRight,
-  ArrowLeft,
   Loader2,
   RefreshCw,
   ExternalLink,

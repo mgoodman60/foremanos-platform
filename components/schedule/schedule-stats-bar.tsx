@@ -9,7 +9,6 @@ import {
   Flag,
   CheckCircle2,
   Target,
-  TrendingUp,
   Zap
 } from 'lucide-react';
 

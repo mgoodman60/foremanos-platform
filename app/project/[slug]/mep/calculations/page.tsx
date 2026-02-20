@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calculator, Zap, Cpu, Droplets, Plus, X, Check, Pencil, Trash2 } from 'lucide-react';
+import { Calculator, Zap, Cpu, Droplets, Plus, X, Check, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CALC_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string; unit: string }> = {
@@ -44,7 +44,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
   const [summary, setSummary] = useState<any>({ total: 0, byType: {}, approved: 0, pending: 0, draft: 0 });
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedType, setSelectedType] = useState<string>('');
+  const [_selectedType, _setSelectedType] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     calcType: '',

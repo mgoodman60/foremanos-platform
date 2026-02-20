@@ -16,7 +16,6 @@ import {
   detectAdvancedConflicts,
   learnProjectSymbols,
   applyLearnedSymbols,
-  EnhancedChunk,
 } from '@/lib/rag-enhancements';
 import {
   enrichWithPhaseAMetadata,
@@ -294,7 +293,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   const enhancedContext = generateEnhancedContext(enrichedChunks, message || '');
 
   // Generate Phase 3-enhanced context with corrections
-  const documentContext = await generateContextWithPhase3(chunks, adminCorrections, message || '', projectSlug);
+  const _documentContext = await generateContextWithPhase3(chunks, adminCorrections, message || '', projectSlug);
 
   // Combine contexts
   const combinedContext = `${enhancedContext}${dailyReportContext}\n\n=== ADMIN CORRECTIONS (Priority Teaching) ===\n${
@@ -328,7 +327,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   }
 
   // Get accessible documents for context
-  const accessibleDocs = getAccessibleDocuments(userRole as "admin" | "client" | "guest");
+  const _accessibleDocs = getAccessibleDocuments(userRole as "admin" | "client" | "guest");
 
   // Build document filter based on user role
   let docFilter: { accessLevel?: { in: string[] } | string };

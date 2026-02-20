@@ -164,7 +164,7 @@ export async function POST(
 }
 
 // Build category mapping from budget items
-function buildCategoryBudgetMapping(budgetItems: any[]): Record<string, string[]> {
+function buildCategoryBudgetMapping(_budgetItems: any[]): Record<string, string[]> {
   const mapping: Record<string, string[]> = {
     // CSI Division mappings
     'electrical': ['Electrical', 'electrical', 'lighting', 'power'],

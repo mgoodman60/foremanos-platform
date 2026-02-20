@@ -17,9 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Book,
   CheckCircle2,
-  XCircle,
   Loader2,
-  DollarSign,
   Info,
   Plus,
 } from 'lucide-react';

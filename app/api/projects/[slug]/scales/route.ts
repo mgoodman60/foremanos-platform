@@ -18,7 +18,6 @@ import {
   getScaleStatistics,
   convertDrawingToRealWorld,
   getSheetScaleData,
-  type SheetScaleData,
 } from '@/lib/scale-detector';
 
 export async function GET(req: Request, { params }: { params: { slug: string } }) {

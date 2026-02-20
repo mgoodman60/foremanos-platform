@@ -79,7 +79,7 @@ function TextDiff({ label, current, previous }: {
   );
 }
 
-function ReportColumn({ report, label }: { report: DailyReport | null; label: string }) {
+function ReportColumn({ report, label: _label }: { report: DailyReport | null; label: string }) {
   if (!report) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-800/50 p-4 flex flex-col items-center justify-center min-h-[300px]">

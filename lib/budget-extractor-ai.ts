@@ -9,8 +9,6 @@ import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
 import { getFileUrl } from './s3';
 import { logger } from '@/lib/logger';
-import fs from 'fs';
-import path from 'path';
 
 const TRADE_TYPES = [
   'general_contractor',
@@ -278,8 +276,8 @@ Respond with ONLY valid JSON:
  */
 export async function extractBudgetWithAI(
   documentId: string,
-  projectId: string,
-  userId: string
+  __projectId: string,
+  __userId: string
 ): Promise<BudgetExtractionResult> {
   logger.info('BUDGET_EXTRACTOR', 'Starting budget extraction');
 
@@ -351,7 +349,7 @@ export async function extractBudgetWithAI(
 export async function importBudgetToProject(
   projectId: string,
   extraction: BudgetExtractionResult,
-  userId: string
+  __userId: string
 ): Promise<{ budgetId: string; itemsCreated: number }> {
   logger.info('BUDGET_EXTRACTOR', 'Importing budget to project');
 

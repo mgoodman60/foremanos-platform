@@ -13,7 +13,6 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
-  X,
   Building2,
   Home,
   Ruler,
@@ -339,7 +338,7 @@ export function FloorPlanViewer({
   );
 
   // Group rooms by type for auto-generated grid layout
-  const roomsByType = useMemo(() => {
+  const _roomsByType = useMemo(() => {
     const grouped: Record<string, Room[]> = {};
     floorRooms.forEach(room => {
       const type = room.type || 'other';
@@ -403,7 +402,7 @@ export function FloorPlanViewer({
       
       if (!response.ok) throw new Error('Failed to update room');
       
-      const data = await response.json();
+      const _data = await response.json();
       toast.success('Room updated successfully');
       setEditingRoom(false);
       onRoomUpdate?.(selectedRoom.id, editedRoom);
@@ -513,7 +512,7 @@ export function FloorPlanViewer({
   const hasPlanDocuments = planDocuments.length > 0 && currentPlanDoc;
   const showPlanDocument = !imageUrl && hasPlanDocuments;
   const showDwg = !imageUrl && !hasPlanDocuments && hasDwg;
-  const showAutoGrid = !imageUrl && !hasPlanDocuments && !hasDwg;
+  const _showAutoGrid = !imageUrl && !hasPlanDocuments && !hasDwg;
 
   return (
     <div className={`relative bg-dark-active border border-gray-700 rounded-lg overflow-hidden ${className}`}>
@@ -823,7 +822,7 @@ export function FloorPlanViewer({
                         className="grid gap-2"
                         style={{ gridTemplateColumns: `repeat(${Math.min(gridLayout.cols, 5)}, minmax(90px, 1fr))` }}
                       >
-                        {floorRooms.slice(0, expanded ? 15 : 6).map((room, idx) => (
+                        {floorRooms.slice(0, expanded ? 15 : 6).map((room, _idx) => (
                           <div
                             key={room.id}
                             className={`
@@ -927,6 +926,7 @@ export function FloorPlanViewer({
                 }}
               >
                 {/* Floor Plan Image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
                   alt={currentFloorPlan?.name || 'Floor Plan'}

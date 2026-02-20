@@ -80,8 +80,7 @@ describe('GET /api/admin/analytics', () => {
   it('should return 401 if not authenticated', async () => {
     mockGetServerSession.mockResolvedValue(null);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -93,8 +92,7 @@ describe('GET /api/admin/analytics', () => {
       user: { id: 'user-123', role: 'client' },
     });
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(403);
@@ -118,8 +116,7 @@ describe('GET /api/admin/analytics', () => {
       { id: 'conv-2', projectId: 'proj-2' },
     ]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -153,8 +150,7 @@ describe('GET /api/admin/analytics', () => {
     mockPrisma.chatMessage.groupBy.mockResolvedValue([]);
     mockPrisma.conversation.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -181,8 +177,7 @@ describe('GET /api/admin/analytics', () => {
       { id: 'conv-3', projectId: 'proj-2' }, // different project
     ]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -198,8 +193,7 @@ describe('GET /api/admin/analytics', () => {
     mockPrisma.chatMessage.groupBy.mockResolvedValue([]);
     mockPrisma.conversation.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -215,8 +209,7 @@ describe('GET /api/admin/analytics', () => {
     mockPrisma.chatMessage.groupBy.mockResolvedValue([]);
     mockPrisma.conversation.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    await GET(request);
+    await GET();
 
     expect(mockPrisma.project.findMany).toHaveBeenCalledWith({
       select: expect.any(Object),
@@ -233,8 +226,7 @@ describe('GET /api/admin/analytics', () => {
     mockPrisma.chatMessage.groupBy.mockResolvedValue([]);
     mockPrisma.conversation.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -253,8 +245,7 @@ describe('GET /api/admin/analytics', () => {
     mockPrisma.chatMessage.groupBy.mockResolvedValue([]);
     mockPrisma.conversation.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -278,8 +269,7 @@ describe('GET /api/admin/analytics', () => {
     // Conversation doesn't exist
     mockPrisma.conversation.findMany.mockResolvedValue([]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -294,8 +284,7 @@ describe('GET /api/admin/analytics', () => {
 
     mockPrisma.project.findMany.mockRejectedValue(new Error('Database error'));
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -320,8 +309,7 @@ describe('GET /api/admin/analytics', () => {
       { id: 'conv-2', projectId: 'proj-1' },
     ]);
 
-    const request = createRequest('GET', '/api/admin/analytics');
-    await GET(request);
+    await GET();
 
     expect(mockPrisma.conversation.findMany).toHaveBeenCalledWith({
       where: { id: { in: ['conv-1', 'conv-2'] } },

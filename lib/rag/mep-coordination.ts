@@ -15,7 +15,7 @@ import type {
  */
 export async function detectMEPConflicts(
   chunks: EnhancedChunk[],
-  projectSlug: string
+  _projectSlug: string
 ): Promise<CoordinationConflict[]> {
   const conflicts: CoordinationConflict[] = [];
 
@@ -189,7 +189,7 @@ function calculatePanelLoads(chunks: EnhancedChunk[]): Array<{
   return panels;
 }
 
-function extractAccessRequirements(chunks: EnhancedChunk[]): Array<{
+function extractAccessRequirements(_chunks: EnhancedChunk[]): Array<{
   equipment: string;
   system: string;
   location: string;

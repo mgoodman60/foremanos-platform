@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { 
   Calendar, 
@@ -28,16 +27,9 @@ import {
   Target,
   CalendarCheck,
   DollarSign,
-  PieChart,
   ArrowUpRight,
   ArrowDownRight,
   Calculator,
-  Wallet,
-  BarChart3,
-  Shield,
-  CheckSquare,
-  AlertCircle,
-  Info,
   Minus
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -423,7 +415,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
     }
   };
 
-  const getProgressColor = (progress: number) => {
+  const _getProgressColor = (progress: number) => {
     if (progress >= 80) return 'bg-green-500';
     if (progress >= 50) return 'bg-blue-500';
     if (progress >= 25) return 'bg-yellow-500';
@@ -446,7 +438,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
     return 'text-red-500';
   };
 
-  const getCPIStatus = (cpi: number) => {
+  const _getCPIStatus = (cpi: number) => {
     if (cpi >= 1.0) return 'Under Budget';
     if (cpi >= 0.9) return 'Near Budget';
     return 'Over Budget';

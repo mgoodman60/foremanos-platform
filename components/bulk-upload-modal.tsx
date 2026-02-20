@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { getErrorMessage } from '@/lib/fetch-with-retry';
 
 interface BulkUploadModalProps {
   conversationId: string;
@@ -346,6 +345,7 @@ export function BulkUploadModal({
                     role="listitem"
                   >
                     {file.preview && (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={file.preview}
                         alt={file.name}

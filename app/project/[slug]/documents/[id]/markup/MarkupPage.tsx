@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, lazy } from 'react';
+import { useState, lazy } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';

@@ -58,7 +58,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
     },
   });
 
-  const newPassword = watch('guestPassword');
+  const _newPassword = watch('guestPassword');
 
   useEffect(() => {
     fetchGuestData();

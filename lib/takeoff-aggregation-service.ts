@@ -320,7 +320,7 @@ export async function aggregateTakeoffs(
       // Smart merge or sum all - find matching items
       let foundMatch = false;
       
-      for (const [key, existing] of aggregatedMap.entries()) {
+      for (const [_key, existing] of aggregatedMap.entries()) {
         const shouldMerge = mergeStrategy === 'sum_all' 
           ? (existing.itemName === item.itemName && existing.category === item.category && existing.unit === item.unit)
           : canMergeItems(existing, item);

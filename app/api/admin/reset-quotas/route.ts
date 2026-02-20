@@ -92,7 +92,7 @@ export async function POST(request: Request) {
 /**
  * Get quota reset status and next reset date
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 

@@ -7,6 +7,7 @@ const FONT_FAMILY = "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif";
 
 function RenderImage({ url, title }: { url: string; title?: string }) {
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={url}
       alt={title || 'Render'}
@@ -198,6 +199,7 @@ const PortfolioSheetTemplate = React.forwardRef<HTMLDivElement, PresentationTemp
             }}
           >
             {companyLogoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={companyLogoUrl}
                 alt="Company logo"
@@ -238,6 +240,7 @@ const PortfolioSheetTemplate = React.forwardRef<HTMLDivElement, PresentationTemp
             }}
           >
             {clientLogoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={clientLogoUrl}
                 alt="Client logo"
@@ -329,6 +332,7 @@ const PortfolioSheetTemplate = React.forwardRef<HTMLDivElement, PresentationTemp
               }}
             >
               {partnerLogo1Url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={partnerLogo1Url}
                   alt="Partner 1"
@@ -340,6 +344,7 @@ const PortfolioSheetTemplate = React.forwardRef<HTMLDivElement, PresentationTemp
                 />
               )}
               {partnerLogo2Url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={partnerLogo2Url}
                   alt="Partner 2"

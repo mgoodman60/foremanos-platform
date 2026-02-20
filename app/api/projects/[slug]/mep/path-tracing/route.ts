@@ -8,8 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
+  _request: NextRequest,
+  { params: _params }: { params: { slug: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);

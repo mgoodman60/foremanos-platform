@@ -8,10 +8,8 @@ import {
   CloudSnow,
   Wind,
   Droplets,
-  Thermometer,
   AlertTriangle,
   Settings,
-  TrendingUp,
   Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -309,7 +307,7 @@ export default function WeatherWidget({
             </h4>
           </div>
           <div className="grid grid-cols-5 gap-3">
-            {weekForecast.map((snapshot, index) => {
+            {weekForecast.map((snapshot, _index) => {
               const DayIcon = getWeatherIcon(snapshot.conditions);
               return (
                 <div

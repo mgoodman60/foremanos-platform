@@ -16,7 +16,6 @@ import {
 import {
   ALL_CONSTRUCTION_ABBREVIATIONS,
   expandAbbreviation,
-  isKnownAbbreviation,
   searchAbbreviations,
   type ConstructionAbbreviation
 } from './construction-abbreviations';

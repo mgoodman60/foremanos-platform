@@ -84,7 +84,7 @@ export interface LegendExtractionResult {
  */
 export async function detectLegendRegion(
   base64Data: string,
-  sheetNumber: string
+  _sheetNumber: string
 ): Promise<{ found: boolean; boundingBox?: any; confidence: number }> {
   try {
     const prompt = generateLegendDetectionPrompt();

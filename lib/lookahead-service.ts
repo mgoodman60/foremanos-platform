@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import { addDays, addWeeks, startOfWeek, endOfWeek, isWithinInterval, format, differenceInDays } from 'date-fns';
+import { addDays, addWeeks, startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
 
 interface LookaheadTask {
   id: string;

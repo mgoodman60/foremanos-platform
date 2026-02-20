@@ -181,7 +181,7 @@ export async function rasterizePdfToImages(
           const sharp = await getSharp();
 
           // Create white image at calculated dimensions
-          let sharpInstance = sharp({
+          const sharpInstance = sharp({
             create: {
               width: pixelWidth,
               height: pixelHeight,

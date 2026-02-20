@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Camera, TrendingUp, Check, X, RefreshCw, AlertCircle,
+  Camera, TrendingUp, Check, RefreshCw,
   ChevronDown, ChevronUp, Sparkles, Eye, CheckCircle2
 } from 'lucide-react';
 import { toast } from 'sonner';

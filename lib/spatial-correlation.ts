@@ -110,7 +110,7 @@ function letterToNumber(letter: string): number {
 /**
  * Convert number to letter coordinate (1=A, 2=B, ..., 26=Z, 27=AA, etc.)
  */
-function numberToLetter(num: number): string {
+function _numberToLetter(num: number): string {
   let result = '';
   while (num > 0) {
     const remainder = (num - 1) % 26;

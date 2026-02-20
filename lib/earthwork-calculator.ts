@@ -6,7 +6,7 @@
  * - Prismoidal Method (for highest accuracy)
  */
 
-import { findPriceByDivision, REGIONAL_MULTIPLIERS } from './construction-pricing-database';
+import { REGIONAL_MULTIPLIERS } from './construction-pricing-database';
 
 export interface ElevationPoint {
   x: number;  // Easting or X coordinate

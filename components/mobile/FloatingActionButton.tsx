@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Camera, X, Upload, MessageSquare, FileText, Mic, Image as ImageIcon } from 'lucide-react';
+import { Camera, X, Upload, Mic } from 'lucide-react';
 
 interface FloatingActionButtonProps {
   onCapture: () => void;

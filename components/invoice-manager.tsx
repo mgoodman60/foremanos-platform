@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
-  Receipt, Plus, Check, X, Clock, DollarSign,
-  Building2, Calendar, Loader2, ChevronDown, ChevronUp
+  Receipt, Plus, Check, DollarSign, Calendar, Loader2, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -18,13 +17,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
+
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 

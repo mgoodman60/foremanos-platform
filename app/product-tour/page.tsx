@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Play, MessageSquare, FolderOpen, Scan, Cloud, Shield, Users, FileCheck, Smartphone, Brain, Ruler, Grid3x3, Network, Lightbulb, Pin, Eye, BarChart } from 'lucide-react';
+import { ArrowRight, Play, MessageSquare, FolderOpen, Cloud, Shield, Users, FileCheck, Smartphone, Brain, Ruler, Grid3x3, Network, Lightbulb, Pin, Eye, BarChart } from 'lucide-react';
 import { LandingHeader } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 

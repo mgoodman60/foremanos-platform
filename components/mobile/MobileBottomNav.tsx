@@ -331,7 +331,7 @@ export function MobileBottomNav({
                         longPressTimer.current = null;
                       }
                     }}
-                    onClick={(e) => {
+                    onClick={(_e) => {
                       // Desktop click fallback (touch events won't fire on desktop)
                       if (!('ontouchstart' in window)) {
                         onShowCamera();

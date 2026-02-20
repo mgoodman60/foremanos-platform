@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { Prisma } from '@prisma/client';
 import { getFileUrl } from '@/lib/s3';
-import { extractDimensionsWithVision, validateDimensionChains } from '@/lib/dimension-intelligence';
+import { extractDimensionsWithVision } from '@/lib/dimension-intelligence';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
 
 export async function POST(
@@ -41,7 +40,7 @@ export async function POST(
 
     let totalDimensions = 0;
     let processedSheets = 0;
-    let errors: string[] = [];
+    const errors: string[] = [];
 
     for (const document of documents) {
       try {

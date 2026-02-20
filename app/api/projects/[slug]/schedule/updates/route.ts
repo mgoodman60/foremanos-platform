@@ -5,12 +5,12 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-interface ScheduleUpdateHistoryRequest {
-  scheduleId?: string;
-  status?: 'pending' | 'approved' | 'rejected' | 'auto_applied';
-  limit?: number;
-  offset?: number;
-}
+// interface ScheduleUpdateHistoryRequest {
+//   scheduleId?: string;
+//   status?: 'pending' | 'approved' | 'rejected' | 'auto_applied';
+//   limit?: number;
+//   offset?: number;
+// }
 
 export async function GET(
   request: NextRequest,

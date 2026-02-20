@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Plus, FolderOpen, FileText, Users, Shield, Search, Key, Copy, Share2, Check, Pencil, UserPlus, Eye, Edit, Crown } from 'lucide-react';
+import { Plus, FolderOpen, FileText, Users, Shield, Copy, Share2, Check, Pencil, UserPlus, Eye, Edit, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { NotificationCenter } from '@/components/admin/notification-center';
 import { GuestCredentialModal } from '@/components/guest-credential-modal';
@@ -11,7 +11,7 @@ import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { BillingCard } from '@/components/billing-card';
 import { QuotaIndicator } from '@/components/quota-indicator';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
-import { SkeletonDashboard, SkeletonCardGrid } from '@/components/ui/skeleton-card';
+import { SkeletonDashboard } from '@/components/ui/skeleton-card';
 
 interface Project {
   id: string;
@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [ownedProjects, setOwnedProjects] = useState<Project[]>([]);
   const [sharedProjects, setSharedProjects] = useState<Project[]>([]);
-  const [stats, setStats] = useState<DashboardStats>({ totalProjects: 0, totalDocuments: 0 });
+  const [_stats, setStats] = useState<DashboardStats>({ totalProjects: 0, totalDocuments: 0 });
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showGuestLoginModal, setShowGuestLoginModal] = useState(false);
@@ -615,9 +615,10 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img 
-                src="/foremanos-new-logo.png" 
-                alt="ForemanOS" 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/foremanos-new-logo.png"
+                alt="ForemanOS"
                 className="h-10 w-auto object-contain"
               />
             </div>

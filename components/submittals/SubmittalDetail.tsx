@@ -16,10 +16,7 @@ import {
   ChevronRight,
   Loader2,
   X,
-  Edit2,
-  Trash2,
   History,
-  FileEdit,
   Download,
   Search,
   Filter,
@@ -693,7 +690,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
 function AddLineItemModal({
   onClose,
   onSubmit,
-  projectSlug,
+  projectSlug: _projectSlug,
 }: {
   onClose: () => void;
   onSubmit: (data: any) => void;

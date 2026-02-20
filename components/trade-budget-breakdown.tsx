@@ -16,14 +16,12 @@ import {
   AlertTriangle,
   TrendingUp,
   TrendingDown,
-  ChevronRight,
   RefreshCw,
   HardHat,
   Wand2,
   RefreshCcw,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -267,7 +265,7 @@ export default function TradeBudgetBreakdown() {
       <CardContent className="space-y-4">
         {/* Summary bar */}
         <div className="flex h-3 rounded-full overflow-hidden bg-gray-600">
-          {trades.map((trade, index) => {
+          {trades.map((trade, _index) => {
             const width = totalBudgeted > 0 ? (trade.budgetedAmount / totalBudgeted) * 100 : 0;
             return (
               <div

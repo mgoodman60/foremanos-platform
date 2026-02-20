@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getCacheStats, getTopCachedQueries, clearCache } from '@/lib/query-cache';
@@ -8,7 +8,7 @@ import { getCacheStats, getTopCachedQueries, clearCache } from '@/lib/query-cach
  * Returns cache statistics for monitoring cost savings
  * Only accessible to admins
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
  * Clears the cache
  * Only accessible to admins
  */
-export async function DELETE(req: NextRequest) {
+export async function DELETE() {
   try {
     const session = await getServerSession(authOptions);
     

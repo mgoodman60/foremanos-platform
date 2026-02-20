@@ -12,7 +12,6 @@ import {
   Ruler, 
   FileText, 
   CheckCircle2, 
-  AlertCircle, 
   Calculator,
   Layers,
   TrendingUp,

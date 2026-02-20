@@ -13,15 +13,10 @@ import {
   Home,
   Zap,
   Package,
-  Move,
   RotateCcw,
-  Download,
-  Eye,
-  EyeOff,
   Loader2,
   ChevronDown,
   ChevronRight,
-  DollarSign,
   Box,
   CheckCircle,
   AlertCircle
@@ -37,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
 import { chartColors, semanticColors } from '@/lib/design-tokens';
 
 interface Room {
@@ -99,7 +93,7 @@ export function InteractivePlanViewer({
   totalPages = 1,
   onClose
 }: InteractivePlanViewerProps) {
-  const { data: session } = useSession() || {};
+  const { data: _session } = useSession() || {};
   const [currentPage, setCurrentPage] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -786,6 +780,7 @@ export function InteractivePlanViewer({
                 </div>
               ) : !imageError ? (
                 <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={imageRef}
                     src={imageUrl}

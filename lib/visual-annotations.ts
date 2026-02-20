@@ -12,7 +12,6 @@
 
 import { prisma } from './db';
 import type { GridCoordinate } from './spatial-correlation';
-import { parseGridCoordinate } from './spatial-correlation';
 import { logger } from '@/lib/logger';
 
 // ============================================================================

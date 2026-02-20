@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ChevronLeft, Calendar, Sun, Cloud, CloudRain, Users, Clock,
-  AlertTriangle, Wrench, CheckCircle, XCircle, Send, Edit2,
-  Save, X, FileText, MapPin, Truck, HardHat, RefreshCw, Loader2,
+  AlertTriangle, Wrench, CheckCircle, XCircle, Send, Edit2, FileText, MapPin, Truck, HardHat, Loader2,
   ImageIcon, MessageSquare,
 } from 'lucide-react';
 import { toast } from 'sonner';

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { processUploadedBudgetDocument, compareTakeoffsToBudget, extractBudgetFromContent, syncBudgetToProject } from '@/lib/budget-auto-sync';
+import { processUploadedBudgetDocument, compareTakeoffsToBudget } from '@/lib/budget-auto-sync';
 
 // POST /api/projects/[slug]/budget/auto-sync - Manually trigger budget sync from documents
 export async function POST(
@@ -47,8 +47,6 @@ export async function POST(
     }
 
     let totalItems = 0;
-    let totalCreated = 0;
-    let totalUpdated = 0;
 
     for (const doc of budgetDocs) {
       const result = await processUploadedBudgetDocument(doc.id, project.id);

@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { 
-  Plus, FileText, DollarSign, Calendar, Clock, CheckCircle2, 
-  XCircle, AlertTriangle, ChevronRight, ChevronDown, Search,
-  Filter, RefreshCw, Edit2, Trash2, Send, Eye, Download,
+  Plus, FileText, DollarSign, Clock, CheckCircle2, 
+  XCircle, ChevronRight, ChevronDown, Search,
+  Filter, RefreshCw, Trash2, Send, Eye,
   TrendingUp, TrendingDown
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -97,7 +96,7 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export default function ChangeOrderManager({ projectSlug, budgetId }: ChangeOrderManagerProps) {
+export default function ChangeOrderManager({ projectSlug, budgetId: _budgetId }: ChangeOrderManagerProps) {
   const [changeOrders, setChangeOrders] = useState<ChangeOrder[]>([]);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [summary, setSummary] = useState<ChangeOrderSummary | null>(null);
@@ -105,8 +104,8 @@ export default function ChangeOrderManager({ projectSlug, budgetId }: ChangeOrde
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedCO, setSelectedCO] = useState<ChangeOrder | null>(null);
+  const [_showDetailModal, _setShowDetailModal] = useState(false);
+  const [_selectedCO, _setSelectedCO] = useState<ChangeOrder | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Form state

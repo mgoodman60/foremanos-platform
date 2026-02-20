@@ -35,7 +35,7 @@ interface VisionAPIResponse {
 export async function callVisionAPIWithRetry(
   imageBase64: string,
   prompt: string,
-  options: VisionAPIOptions = {}
+  _options: VisionAPIOptions = {}
 ): Promise<VisionAPIResponse> {
   try {
     const result = await analyzeWithMultiProvider(imageBase64, prompt);

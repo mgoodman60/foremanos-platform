@@ -21,7 +21,6 @@ import {
   ArrowRight,
   Loader2,
   RefreshCw,
-  TrendingUp,
   Link
 } from 'lucide-react';
 

@@ -365,7 +365,7 @@ export function searchStandardSymbols(
   const lowerQuery = query.toLowerCase();
   const { standard, category, limit = 20 } = options;
 
-  let results = ALL_STANDARD_SYMBOLS.filter(symbol => {
+  const results = ALL_STANDARD_SYMBOLS.filter(symbol => {
     // Filter by standard if specified
     if (standard && symbol.standard !== standard) {
       return false;
@@ -423,7 +423,7 @@ export function getSymbolsByCategory(category: string): StandardSymbol[] {
  */
 export function matchToStandardSymbol(
   extractedText: string,
-  confidence: number = 0.7
+  _confidence: number = 0.7
 ): StandardSymbol | null {
   const lower = extractedText.toLowerCase();
   

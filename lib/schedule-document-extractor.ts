@@ -10,9 +10,6 @@
 import { prisma } from './db';
 import { logger } from './logger';
 import { callAbacusLLM } from './abacus-llm';
-import { getFileUrl } from './s3';
-import * as fs from 'fs';
-import * as path from 'path';
 
 interface ExtractedTask {
   taskId?: string;

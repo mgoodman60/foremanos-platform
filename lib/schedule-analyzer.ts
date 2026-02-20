@@ -222,7 +222,7 @@ function keywordBasedAnalysis(
 /**
  * Extract numerical progress percentages from text
  */
-function extractProgressPercentage(text: string): number | null {
+function _extractProgressPercentage(text: string): number | null {
   const percentMatch = text.match(/(\d+)%|(\d+)\s*percent/i);
   if (percentMatch) {
     const value = parseInt(percentMatch[1] || percentMatch[2]);

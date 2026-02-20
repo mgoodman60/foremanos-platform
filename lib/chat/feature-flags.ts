@@ -20,7 +20,7 @@ export const CHAT_FEATURE_FLAGS = {
  * @deprecated No longer used - legacy route was removed.
  * Kept for backwards compatibility with tests.
  */
-export function shouldUseNewRoute(_userId?: string | null): boolean {
+export function shouldUseNewRoute(__userId?: string | null): boolean {
   return true;
 }
 

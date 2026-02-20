@@ -9,7 +9,7 @@ import { WeatherWidget, ExportPanel, CalendarSubscription, WebhookManager } from
 export default function IntegrationsPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const [project, setProject] = useState<{ name: string; slug: string } | null>(null);
   const [activeTab, setActiveTab] = useState('weather');
 

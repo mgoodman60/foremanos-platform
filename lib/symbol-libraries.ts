@@ -1055,7 +1055,7 @@ export function matchSymbol(
   category?: SymbolCategory
 ): { match: StandardSymbol | null; confidence: number } {
   // Try exact code match first
-  let match = findSymbolByCode(code);
+  const match = findSymbolByCode(code);
   if (match) {
     return { match, confidence: 0.95 };
   }

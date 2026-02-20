@@ -11,13 +11,9 @@ import {
   Trash2,
   RefreshCw,
   Check,
-  ChevronDown,
-  ChevronRight,
-  AlertCircle,
   Sparkles,
   Merge,
   FileText,
-  Filter,
   Search
 } from 'lucide-react';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
@@ -285,7 +281,7 @@ export default function TakeoffAggregation() {
     }
   };
 
-  const toggleCategory = (category: string) => {
+  const _toggleCategory = (category: string) => {
     const newExpanded = new Set(expandedCategories);
     if (newExpanded.has(category)) {
       newExpanded.delete(category);

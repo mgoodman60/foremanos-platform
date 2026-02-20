@@ -8,9 +8,9 @@
 import { prisma } from './db';
 import { callAbacusLLM } from './abacus-llm';
 import { logger } from '@/lib/logger';
-import { generateAbbreviationContext, expandAbbreviationsInText } from './construction-abbreviations';
+import { generateAbbreviationContext } from './construction-abbreviations';
 import { getFileUrl } from './s3';
-import { withLock, isLocked } from './extraction-lock-service';
+import { withLock } from './extraction-lock-service';
 import { ScheduleTaskStatus } from '@prisma/client';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 
@@ -575,7 +575,7 @@ function parseFlexibleDate(dateStr: string): string {
     // Format: MM/DD/YYYY or MM/DD/YY
     const slashMatch = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
     if (slashMatch) {
-      let [, month, day, year] = slashMatch;
+      const [, month, day, year] = slashMatch;
       let yearNum = parseInt(year);
       if (yearNum < 100) {
         yearNum += yearNum < 50 ? 2000 : 1900;

@@ -5,7 +5,7 @@
  */
 
 import { callAbacusLLM } from './abacus-llm';
-import { type DrawingScale, type SheetScaleData, extractScalesWithPatterns } from './scale-detector';
+import { type DrawingScale } from './scale-detector';
 import { logger } from './logger';
 
 export interface ScaleData {

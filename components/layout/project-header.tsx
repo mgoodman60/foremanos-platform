@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import {
@@ -10,7 +10,6 @@ import {
   Settings,
   User,
   Menu,
-  Search,
   Cloud,
   Image as ImageIcon,
   FileText,
@@ -57,6 +56,7 @@ export function ProjectHeader() {
           </button>
 
           {/* Logo */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/foremanos-new-logo.png"
             alt="ForemanOS"

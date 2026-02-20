@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layer, Line, Rect, Circle, Text } from 'react-konva';
+import { Layer, Line, Rect, Circle } from 'react-konva';
 import { useMarkupState } from '@/hooks/markup/useMarkupState';
 import { getDashPattern } from '@/lib/markup/geometry-utils';
 

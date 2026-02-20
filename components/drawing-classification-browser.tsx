@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Filter, FileText, BarChart3, Loader2, RefreshCw, Layers } from 'lucide-react';
+import { Search, FileText, Loader2, RefreshCw, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DrawingClassification {
@@ -111,8 +111,8 @@ export function DrawingClassificationBrowser({ projectSlug }: DrawingClassificat
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
-  const [minConfidence, setMinConfidence] = useState(0);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [minConfidence, _setMinConfidence] = useState(0);
+  const [_viewMode, _setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     fetchDrawingTypes();

@@ -6,7 +6,7 @@
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
-import { FeatureType, DataSourceType, DATA_SOURCE_PRIORITY, recordDataSource } from './document-intelligence-router';
+import { DataSourceType, DATA_SOURCE_PRIORITY, recordDataSource } from './document-intelligence-router';
 import { resolveModelAlias } from '@/lib/model-config';
 
 let openaiInstance: OpenAI | null = null;

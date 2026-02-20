@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { X, Download, Search, Filter, Calendar, MapPin, Briefcase, CheckSquare, Square, Package, Tag, MessageSquare, Trash2 } from 'lucide-react';
+import { X, Download, Search, Calendar, MapPin, Briefcase, CheckSquare, Square, Package, Tag, MessageSquare, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -31,7 +31,7 @@ interface PhotoLibraryProps {
   startInUploadMode?: boolean;
 }
 
-export function PhotoLibrary({ projectSlug, onClose, startInUploadMode = false }: PhotoLibraryProps) {
+export function PhotoLibrary({ projectSlug, onClose, startInUploadMode: _startInUploadMode = false }: PhotoLibraryProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');

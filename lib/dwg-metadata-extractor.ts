@@ -411,7 +411,7 @@ function extractTextAnnotations(properties: any[]): DWGTextAnnotation[] {
     // Check for text entities by entity type
     let textContent = '';
     let textType: DWGTextAnnotation['type'] = 'text';
-    let layerName = generalProps.Layer || generalProps['Layer '] || '';
+    const layerName = generalProps.Layer || generalProps['Layer '] || '';
     
     // Look for text content in nested properties
     for (const category of Object.values(props)) {

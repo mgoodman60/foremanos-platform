@@ -67,8 +67,6 @@ export async function POST(
     // Store DWG data in Autodesk model record
     // (We store searchable content in extractedMetadata rather than DocumentChunk
     // since DWG models don't have a corresponding Document record)
-    const projectId = model.project.id;
-    
     // Store search chunks in metadata for RAG queries
     const searchableData = {
       ...dwgData,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,25 +12,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   CheckCircle2,
   Circle,
-  Clock,
   AlertTriangle,
   Play,
   Pause,
   Search,
   Filter,
   RefreshCw,
-  ChevronRight,
   Calendar,
-  User,
   MapPin,
   MoreVertical,
   Flag,
-  MessageSquare,
-  Camera,
   Wrench,
   Zap
 } from 'lucide-react';
-import { format, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns';
+import { format, isToday, isPast, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -74,8 +69,8 @@ const STATUS_CONFIG = {
 const QUICK_PROGRESS = [0, 25, 50, 75, 100];
 
 export function MobileFieldView({
-  projectSlug,
-  scheduleId,
+  projectSlug: _projectSlug,
+  scheduleId: _scheduleId,
   tasks,
   onTaskUpdate,
   onRefresh

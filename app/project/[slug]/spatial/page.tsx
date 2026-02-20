@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   MapPin,
@@ -50,13 +49,13 @@ interface GridSystem {
 export default function SpatialCorrelationPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   
   const [loading, setLoading] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
   const [selectedDisciplines, setSelectedDisciplines] = useState<string[]>([]);
   const [matches, setMatches] = useState<SpatialMatch[]>([]);
-  const [gridSystems, setGridSystems] = useState<GridSystem[]>([]);
+  const [_gridSystems, _setGridSystems] = useState<GridSystem[]>([]);
   const [includeRelated, setIncludeRelated] = useState(true);
   
   const slug = params?.slug as string;

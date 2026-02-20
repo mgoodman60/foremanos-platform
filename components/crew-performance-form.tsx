@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Calendar, Clock, TrendingUp, Shield, AlertTriangle } from 'lucide-react';
+import { Calendar, TrendingUp, Shield, AlertTriangle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

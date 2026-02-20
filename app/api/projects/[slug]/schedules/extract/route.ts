@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { extractAllSchedules, FullExtractionResult } from '@/lib/schedule-extraction-service';
+import { extractAllSchedules } from '@/lib/schedule-extraction-service';
 
 // POST: Trigger schedule extraction for a project
 export async function POST(
@@ -28,8 +28,8 @@ export async function POST(
 
 // GET: Get extraction status/summary
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
+  _req: NextRequest,
+  { params: _params }: { params: { slug: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);

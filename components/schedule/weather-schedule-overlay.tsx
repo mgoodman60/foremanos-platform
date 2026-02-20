@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -15,15 +14,13 @@ import {
   Wind,
   Thermometer,
   AlertTriangle,
-  Calendar,
   RefreshCw,
   MapPin,
   CloudLightning,
   CloudFog,
-  Droplets,
-  CalendarDays
+  Droplets
 } from 'lucide-react';
-import { format, addDays, isWeekend, differenceInDays } from 'date-fns';
+import { format, isWeekend } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export interface WeatherDay {
@@ -96,8 +93,8 @@ const getDayBgColor = (day: WeatherDay) => {
 export function WeatherScheduleOverlay({
   projectSlug,
   tasks = [],
-  startDate,
-  endDate
+  startDate: _startDate,
+  endDate: _endDate
 }: WeatherScheduleOverlayProps) {
   const [forecast, setForecast] = useState<WeatherDay[]>([]);
   const [loading, setLoading] = useState(true);

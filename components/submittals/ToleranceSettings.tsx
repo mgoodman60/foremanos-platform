@@ -10,8 +10,6 @@ import {
   RefreshCw,
   Percent,
   Hash,
-  ToggleLeft,
-  ToggleRight,
   Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';

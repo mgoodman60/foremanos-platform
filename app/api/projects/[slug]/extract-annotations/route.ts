@@ -41,7 +41,7 @@ export async function POST(
     let totalAnnotations = 0;
     let processedSheets = 0;
     let criticalCount = 0;
-    let errors: string[] = [];
+    const errors: string[] = [];
 
     for (const document of documents) {
       try {

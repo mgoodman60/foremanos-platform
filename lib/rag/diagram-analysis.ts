@@ -16,7 +16,7 @@ import type {
  */
 export async function analyzeDiagram(
   chunk: EnhancedChunk,
-  diagramType?: string
+  _diagramType?: string
 ): Promise<DiagramAnalysis | null> {
   const content = chunk.content.toLowerCase();
 

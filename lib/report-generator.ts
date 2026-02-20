@@ -14,7 +14,7 @@ import {
   getDocumentAnalytics,
   getResourceUtilization
 } from './analytics-service';
-import { format, subDays, subWeeks, subMonths } from 'date-fns';
+import { format, subWeeks, subMonths } from 'date-fns';
 
 // =============================================
 // REPORT TYPES & CONFIGURATIONS

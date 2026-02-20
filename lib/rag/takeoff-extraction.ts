@@ -20,7 +20,7 @@ import type {
 export function extractTakeoffItems(
   chunks: EnhancedChunk[],
   scope: string,
-  query: string
+  _query: string
 ): TakeoffItem[] {
   const items: TakeoffItem[] = [];
 
@@ -228,12 +228,12 @@ function extractFromSchedule(chunk: EnhancedChunk, scope: string): TakeoffItem[]
  */
 function extractFromPlan(chunk: EnhancedChunk, scope: string, existingItems: TakeoffItem[]): TakeoffItem[] {
   const items: TakeoffItem[] = [];
-  const content = chunk.content;
-  const docName = chunk.metadata?.documentName || 'Unknown';
-  const pageNum = chunk.pageNumber || 'N/A';
+  const _content = chunk.content;
+  const _docName = chunk.metadata?.documentName || 'Unknown';
+  const _pageNum = chunk.pageNumber || 'N/A';
 
   // Only count items that are explicitly tagged but not already in schedules
-  const existingTags = new Set(existingItems.map(i => i.itemTagOrId));
+  const _existingTags = new Set(existingItems.map(i => i.itemTagOrId));
 
   // This function intentionally does NOT measure ductwork, piping, or conduit
   // unless routing is clearly dimensioned and scaled - which requires explicit user request
@@ -244,9 +244,9 @@ function extractFromPlan(chunk: EnhancedChunk, scope: string, existingItems: Tak
 /**
  * Calculate confidence score for a takeoff item
  */
-function calculateItemConfidence(
+function _calculateItemConfidence(
   item: TakeoffItem,
-  chunks: EnhancedChunk[]
+  _chunks: EnhancedChunk[]
 ): { confidence: 'high' | 'medium' | 'low'; basis: string } {
   // High confidence: Schedule-based or explicitly dimensioned
   if (item.method === 'counted' && item.sourceRefs.some(r => /schedule/i.test(r))) {

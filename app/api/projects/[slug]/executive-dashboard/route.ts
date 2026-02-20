@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { startOfWeek, endOfWeek, subDays, format, differenceInDays } from 'date-fns';
+import { startOfWeek, format, differenceInDays } from 'date-fns';
 
 export async function GET(
   request: NextRequest,

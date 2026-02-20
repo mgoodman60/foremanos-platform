@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { ThumbsDown, ThumbsUp, Brain, Trash2, Save, X, Plus } from 'lucide-react';
+import { ThumbsDown, ThumbsUp, Brain, Save, X, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

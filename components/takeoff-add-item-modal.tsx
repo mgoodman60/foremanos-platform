@@ -29,7 +29,6 @@ import {
   DollarSign,
   Ruler
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { TAKEOFF_CATEGORIES } from '@/lib/takeoff-categories';
 import { takeoffAddItemSchema, type TakeoffAddItemFormData, TAKEOFF_UNITS } from '@/lib/schemas';
 import { FormError } from '@/components/ui/form-error';

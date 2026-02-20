@@ -21,7 +21,7 @@ export function SelectionLayer({
   dragCurrentX = 0,
   dragCurrentY = 0,
 }: SelectionLayerProps) {
-  const { selectedIds, shapesById, activeTool } = useMarkupState();
+  const { selectedIds, shapesById: _shapesById, activeTool } = useMarkupState();
   const transformerRef = useRef<Konva.Transformer>(null);
   const selectionRectRef = useRef<Konva.Rect>(null);
 

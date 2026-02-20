@@ -20,7 +20,6 @@ import { logger } from '@/lib/logger';
 import type {
   AdminCorrection,
   ChunkMetadata,
-  CriticalPath,
   DocumentChunk,
   Phase3ContextData,
 } from './core-types';

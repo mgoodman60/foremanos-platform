@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { BUDGET_PHASES } from '@/lib/budget-phases';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 import { callLLM } from '@/lib/llm-providers';
 
 // Helper to parse Walker Company PDF text
-function parseWalkerCompanyPDF(text: string): Array<{
+function _parseWalkerCompanyPDF(text: string): Array<{
   phaseCode: number;
   phaseName: string;
   categoryNumber: number;

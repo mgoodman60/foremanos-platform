@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import type { Prisma, ProcurementStatus } from '@prisma/client';
+import type { ProcurementStatus } from '@prisma/client';
 import { addMonths, addWeeks, startOfMonth, endOfMonth, startOfWeek, endOfWeek, format, differenceInMonths, differenceInWeeks, isBefore, isAfter, eachMonthOfInterval, eachWeekOfInterval } from 'date-fns';
 
 // =============================================
@@ -436,10 +436,6 @@ export async function generateCashFlowForecast(
     let plannedInflow = 0;
     let actualInflow = 0;
     
-    // Assume billing one period after work
-    const billingPeriod = periodType === 'MONTHLY' 
-      ? addMonths(periodDate, 1) 
-      : addWeeks(periodDate, 1);
     plannedInflow = plannedOutflow * 1.1; // Assume 10% markup
 
     if (isPast) {

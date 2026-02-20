@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Scissors, Box, Eye, EyeOff, RotateCcw, X, Plus, ChevronDown } from 'lucide-react';
+import { Scissors, Box, Eye, EyeOff, RotateCcw, X, ChevronDown } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';
 
 interface SectionPlane {
@@ -25,7 +25,7 @@ export default function SectionTools({
   const [sections, setSections] = useState<SectionPlane[]>([]);
   const [showPanel, setShowPanel] = useState(true);
   const [sectionExtension, setSectionExtension] = useState<any>(null);
-  const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
+  const [_isExtensionLoaded, setIsExtensionLoaded] = useState(false);
 
   // Load section extension
   useEffect(() => {

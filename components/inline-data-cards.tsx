@@ -6,14 +6,9 @@ import {
   Package, 
   Zap, 
   ExternalLink,
-  MapPin,
-  DollarSign,
-  Ruler,
-  CheckCircle2,
-  Clock
+  MapPin
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 interface RoomCardProps {
@@ -22,8 +17,8 @@ interface RoomCardProps {
 }
 
 export function RoomCard({ roomId, onView }: RoomCardProps) {
-  const [roomData, setRoomData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [_roomData, _setRoomData] = useState<any>(null);
+  const [_loading, _setLoading] = useState(true);
 
   // In a real implementation, fetch room data
   // For now, we'll show a placeholder

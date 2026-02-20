@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Sparkles, Image as ImageIcon, Loader2, Download, RefreshCw, Settings2, Palette, TreePine, Building2, Car, Sun, Moon, CloudRain, Trash2 } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Loader2, Download, RefreshCw, Settings2, Palette, TreePine, Building2, Car, Sun, Moon, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { useFocusTrap } from '@/hooks/use-focus-trap';

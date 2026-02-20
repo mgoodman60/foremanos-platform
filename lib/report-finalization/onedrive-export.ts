@@ -57,7 +57,7 @@ export async function exportToOneDrive(
     const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
     // Upload to OneDrive
-    const uploadResult = await oneDriveService.uploadFile(
+    const _uploadResult = await oneDriveService.uploadFile(
       pdfBuffer,
       fileName,
       folderPath

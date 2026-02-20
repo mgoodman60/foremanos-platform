@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 // POST /api/feedback - Submit feedback for a message
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const _session = await getServerSession(authOptions);
     const { messageId, rating, comment } = await request.json();
 
     if (!messageId || !rating) {

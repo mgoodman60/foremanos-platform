@@ -64,7 +64,6 @@ export async function GET(
     // Calculate summary stats if requested
     let stats = null;
     if (includeStats) {
-      const now = new Date();
       
       const totalOriginalValue = contracts.reduce((sum, c) => sum + c.originalValue, 0);
       const totalCurrentValue = contracts.reduce((sum, c) => sum + c.currentValue, 0);

@@ -224,7 +224,7 @@ export async function importBIMToTakeoff(
   const lineItemsToCreate: any[] = [];
 
   for (const [key, data] of aggregatedItems) {
-    const [name, category, subcategory, unit, material] = key.split('|');
+    const [name, category, subcategory, __unit, material] = key.split('|');
     const csiKey = `${category}:${subcategory}`;
     const csiMapping = CSI_MAPPINGS[csiKey] || CSI_MAPPINGS['other:unknown'];
 

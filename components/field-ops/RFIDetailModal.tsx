@@ -12,19 +12,16 @@ import {
 } from '@/components/ui/dialog';
 import {
   MessageSquare,
-  Calendar,
   User,
   Clock,
   FileText,
   Send,
   Edit2,
   Save,
-  X,
   DollarSign,
   CalendarClock,
   AlertCircle,
   CheckCircle,
-  Trash2,
 } from 'lucide-react';
 
 interface RFI {

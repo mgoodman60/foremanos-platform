@@ -497,11 +497,11 @@ function calculateRelevanceScore(
   ];
 
   let totalMeasurementScore = 0;
-  let measurementCount = 0;
+  let _measurementCount = 0;
   for (const { pattern, weight } of measurementPatterns) {
     const matches = content.match(pattern);
     if (matches) {
-      measurementCount += matches.length;
+      _measurementCount += matches.length;
       totalMeasurementScore += matches.length * weight;
     }
   }

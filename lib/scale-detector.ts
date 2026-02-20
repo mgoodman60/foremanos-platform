@@ -13,7 +13,6 @@
  * PDF input is automatically detected and handled by vision APIs.
  */
 
-import { PrismaClient } from '@prisma/client';
 import { prisma } from './db';
 import { analyzeWithMultiProvider } from '@/lib/vision-api-multi-provider';
 import { logger } from '@/lib/logger';
@@ -95,7 +94,7 @@ const ENGINEERING_SCALES: Record<string, number> = {
  * Common metric scales
  * Format: "1:100" → 100 (100 units per 1 unit on drawing)
  */
-const METRIC_SCALES: Record<string, number> = {
+const _METRIC_SCALES: Record<string, number> = {
   '1:1': 1,
   '1:5': 5,
   '1:10': 10,
@@ -113,7 +112,7 @@ const METRIC_SCALES: Record<string, number> = {
  */
 export async function detectScalesWithVision(
   imageBase64: string,
-  sheetNumber?: string
+  _sheetNumber?: string
 ): Promise<{
   success: boolean;
   scales: DrawingScale[];
@@ -528,7 +527,7 @@ export async function getScaleStatistics(
   let confidenceCount = 0;
   let sheetsWithScales = 0;
 
-  for (const [sheetNumber, scaleData] of sheetMap.entries()) {
+  for (const [_sheetNumber, scaleData] of sheetMap.entries()) {
     if (scaleData) {
       const scale = scaleData as unknown as SheetScaleData;
       sheetsWithScales++;

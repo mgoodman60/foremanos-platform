@@ -218,7 +218,7 @@ export async function checkCompliance(
   };
 }
 
-async function checkEgressCompliance(chunks: EnhancedChunk[], codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
+async function checkEgressCompliance(chunks: EnhancedChunk[], _codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
   const issues: ComplianceIssue[] = [];
 
   // Check door widths
@@ -262,7 +262,7 @@ async function checkEgressCompliance(chunks: EnhancedChunk[], codeLibrary: CodeL
   return issues;
 }
 
-async function checkAccessibilityCompliance(chunks: EnhancedChunk[], codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
+async function checkAccessibilityCompliance(chunks: EnhancedChunk[], _codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
   const issues: ComplianceIssue[] = [];
 
   // Check restroom accessibility
@@ -305,7 +305,7 @@ async function checkAccessibilityCompliance(chunks: EnhancedChunk[], codeLibrary
   return issues;
 }
 
-async function checkElectricalCompliance(chunks: EnhancedChunk[], codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
+async function checkElectricalCompliance(chunks: EnhancedChunk[], _codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
   const issues: ComplianceIssue[] = [];
 
   // Check GFCI requirements
@@ -347,7 +347,7 @@ async function checkElectricalCompliance(chunks: EnhancedChunk[], codeLibrary: C
   return issues;
 }
 
-async function checkPlumbingCompliance(chunks: EnhancedChunk[], codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
+async function checkPlumbingCompliance(chunks: EnhancedChunk[], _codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
   const issues: ComplianceIssue[] = [];
 
   // Check fixture unit calculations
@@ -375,7 +375,7 @@ async function checkPlumbingCompliance(chunks: EnhancedChunk[], codeLibrary: Cod
   return issues;
 }
 
-async function checkMechanicalCompliance(chunks: EnhancedChunk[], codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
+async function checkMechanicalCompliance(chunks: EnhancedChunk[], _codeLibrary: CodeLibrary): Promise<ComplianceIssue[]> {
   const issues: ComplianceIssue[] = [];
 
   // Check ventilation rates

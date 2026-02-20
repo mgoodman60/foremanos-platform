@@ -13,8 +13,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
 } from 'recharts';
 import {
   BarChart3,
@@ -22,7 +20,7 @@ import {
   TrendingUp,
   Package,
 } from 'lucide-react';
-import { semanticColors, neutralColors, chartColors, textColors } from '@/lib/design-tokens';
+import { semanticColors, neutralColors, chartColors } from '@/lib/design-tokens';
 
 interface LineItem {
   id: string;

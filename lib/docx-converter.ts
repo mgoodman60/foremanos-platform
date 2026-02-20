@@ -1,6 +1,5 @@
 import mammoth from 'mammoth';
 import PDFDocument from 'pdfkit';
-import { Readable } from 'stream';
 import { logger } from './logger';
 
 export async function convertDocxToPdf(docxBuffer: Buffer): Promise<Buffer> {

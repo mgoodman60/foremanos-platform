@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { QuickActionMenu, type ActionItem } from '@/components/ui/header-action-menu';
+import { QuickActionMenu } from '@/components/ui/header-action-menu';
 import {
-  Calendar,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -16,18 +15,10 @@ import {
   Download,
   Upload,
   Plus,
-  Edit2,
-  Trash2,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
   CloudRain,
-  Video,
   Printer,
   FileSpreadsheet,
   RefreshCw,
-  X,
-  MoreHorizontal,
   DollarSign
 } from 'lucide-react';
 import {
@@ -35,10 +26,8 @@ import {
   addWeeks,
   startOfWeek,
   addDays,
-  isSameDay,
   parseISO,
-  isWithinInterval,
-  eachDayOfInterval
+  isWithinInterval
 } from 'date-fns';
 import { toast } from 'sonner';
 import {

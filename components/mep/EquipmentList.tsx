@@ -4,15 +4,9 @@ import { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
-  Filter,
-  ChevronDown,
   HardDrive,
   MapPin,
-  Calendar,
   DollarSign,
-  ExternalLink,
-  Edit,
-  Trash2,
   X,
   Cpu
 } from 'lucide-react';

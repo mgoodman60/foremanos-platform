@@ -31,7 +31,7 @@ export interface ExtractedElevations {
 export async function extractElevationsFromDocument(
   documentContent: string,
   documentType: 'survey' | 'grading' | 'geotech' | 'plans',
-  projectContext?: string
+  _projectContext?: string
 ): Promise<ExtractedElevations> {
   const existing: ExtractedElevations['existing'] = [];
   const proposed: ExtractedElevations['proposed'] = [];

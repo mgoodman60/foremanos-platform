@@ -7,7 +7,7 @@
  */
 
 import { EXTRACTION_MODEL } from '@/lib/model-config';
-import { callLLM, type LLMResponse as ProviderLLMResponse } from '@/lib/llm-providers';
+import { callLLM } from '@/lib/llm-providers';
 
 export interface LLMMessageContent {
   type: string;
@@ -57,35 +57,6 @@ export async function callAbacusLLM(
   options: LLMOptions = {}
 ): Promise<LLMResponse> {
   return callOpenAILLM(messages, options);
-}
-
-/**
- * Convert messages with document content to OpenAI-compatible format
- */
-function convertMessagesForOpenAI(messages: LLMMessage[]): LLMMessage[] {
-  return messages.map(msg => {
-    if (typeof msg.content === 'string') {
-      return msg;
-    }
-
-    // Convert array content to OpenAI format
-    const convertedContent: LLMMessageContent[] = msg.content.map(item => {
-      // Handle document type (Claude format) - convert to base64 data URL
-      if (item.type === 'document' && item.source) {
-        const mediaType = item.source.media_type || 'application/pdf';
-        const base64Data = item.source.data;
-        // OpenAI can process PDFs as images with vision models
-        return {
-          type: 'image_url',
-          image_url: { url: `data:${mediaType};base64,${base64Data}` }
-        };
-      }
-      // Pass through other types unchanged
-      return item;
-    });
-
-    return { ...msg, content: convertedContent };
-  });
 }
 
 /**

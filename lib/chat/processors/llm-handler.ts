@@ -4,7 +4,7 @@ import { streamLLM, type LLMMessage } from '@/lib/llm-providers';
 import { logger } from '@/lib/logger';
 import { VISION_MODEL } from '@/lib/model-config';
 
-import type { LLMHandlerOptions, LLMResponse, BuiltContext } from '@/types/chat';
+import type { LLMHandlerOptions, LLMResponse } from '@/types/chat';
 
 /**
  * Message content types for LLM API
@@ -82,7 +82,7 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
   logger.info('LLM_HANDLER', 'Model selected', { model: effectiveModel, reason: complexityAnalysis.reason });
 
   // Determine if web search should be enabled
-  const useWebSearch = !!image || (context.webSearchResults && context.webSearchResults.length > 0);
+  const _useWebSearch = !!image || (context.webSearchResults && context.webSearchResults.length > 0);
 
   // Build user message with optional image
   let userMessage: ChatMessage;
@@ -152,10 +152,10 @@ export async function handleLLMRequest(options: LLMHandlerOptions): Promise<LLMR
 export function createCachedLLMResponse(
   cachedResponse: string,
   conversationId: string | null,
-  userId: string | null,
-  userRole: string,
-  message: string,
-  documentIds: string[]
+  _userId: string | null,
+  _userRole: string,
+  _message: string,
+  _documentIds: string[]
 ): LLMResponse {
   // For cached responses, we create a simple stream that returns the cached content
   const encoder = new TextEncoder();

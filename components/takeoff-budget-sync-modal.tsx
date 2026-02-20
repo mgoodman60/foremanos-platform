@@ -6,14 +6,12 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertCircle,
-  DollarSign,
   Plus,
   RefreshCw,
   TrendingUp,
   TrendingDown,
   Minus,
   Layers,
-  FileText,
   PieChart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,7 +77,7 @@ export function TakeoffBudgetSyncModal({
   onClose,
   takeoffId,
   takeoffName,
-  projectSlug,
+  projectSlug: _projectSlug,
   onSyncComplete,
 }: TakeoffBudgetSyncModalProps) {
   const containerRef = useFocusTrap({ isActive: isOpen, onEscape: onClose });

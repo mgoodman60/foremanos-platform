@@ -15,11 +15,10 @@
 
 import { prisma } from './db';
 import { logger } from './logger';
-import { TAKEOFF_CATEGORIES, TakeoffCategory, SubCategory } from './takeoff-categories';
+import { TAKEOFF_CATEGORIES } from './takeoff-categories';
 import { 
   CSI_DIVISION_PRICING, 
   REGIONAL_MULTIPLIERS as CSI_REGIONAL_MULTIPLIERS,
-  UnitPriceEntry,
   findPriceByCategory
 } from './construction-pricing-database';
 
@@ -493,7 +492,7 @@ export async function getUnitPrice(
     
     // Try fuzzy matching against CSI database
     const normalizedCategory = category.toLowerCase();
-    for (const [bimCategory, mapping] of Object.entries(BIM_TO_CSI_MAPPING)) {
+    for (const [bimCategory] of Object.entries(BIM_TO_CSI_MAPPING)) {
       if (
         bimCategory.toLowerCase() === normalizedCategory ||
         bimCategory.toLowerCase().includes(normalizedCategory) ||

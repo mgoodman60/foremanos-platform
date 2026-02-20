@@ -16,8 +16,6 @@ export async function GET(
     }
 
     const modelId = params.id;
-    const { searchParams } = new URL(request.url);
-    const projectSlug = searchParams.get('projectSlug');
 
     // Fetch the model from database
     const model = await prisma.autodeskModel.findUnique({

@@ -5,7 +5,7 @@
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { startOfDay, subDays } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 export interface EVMMetrics {
   plannedValue: number;

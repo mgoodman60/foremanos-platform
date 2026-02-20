@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   DollarSign, Save, Trash2, Plus, Calculator, MapPin,
-  ChevronDown, ChevronRight, AlertCircle, Check, X, Loader2
+  ChevronDown, ChevronRight, AlertCircle, X, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TAKEOFF_CATEGORIES } from '@/lib/takeoff-categories';
@@ -33,7 +33,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
   const [region, setRegion] = useState('default');
   const [regions, setRegions] = useState<string[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [editingPrice, setEditingPrice] = useState<string | null>(null);
+  const [_editingPrice, setEditingPrice] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   
   // New price form state

@@ -659,7 +659,7 @@ export async function deletePattern(patternId: string): Promise<{ success: boole
 }
 
 // Reject a correction
-export async function rejectCorrection(correctionId: string, userId: string): Promise<{ success: boolean; error?: string }> {
+export async function rejectCorrection(correctionId: string, _userId: string): Promise<{ success: boolean; error?: string }> {
   try {
     await prisma.takeoffCorrection.delete({
       where: { id: correctionId },
@@ -760,7 +760,7 @@ function matchesPatternKey(itemName: string, patternKey: string): boolean {
 // Bulk apply suggestions
 export async function bulkApplySuggestions(
   suggestions: Array<{ lineItemId: string; fieldName: string; value: string }>,
-  userId: string
+  _userId: string
 ): Promise<{ success: boolean; appliedCount: number; error?: string }> {
   try {
     let appliedCount = 0;

@@ -20,7 +20,7 @@ export function LoginForm({ onClose }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const _router = useRouter();
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const announcer = useAnnounceOptional();
 
@@ -146,9 +146,10 @@ export function LoginForm({ onClose }: LoginFormProps) {
         <div className="absolute top-16 -right-[1rem] w-8 h-8 bg-red-800 transform rotate-45 shadow-xl" style={{ clipPath: 'polygon(0 0, 0 100%, 100% 0)' }}></div>
       </div>
       <div className="flex flex-col items-center justify-center mb-10">
-        <img 
-          src="/foremanos-new-logo.png" 
-          alt="ForemanOS - Construction Project Intelligence" 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/foremanos-new-logo.png"
+          alt="ForemanOS - Construction Project Intelligence"
           className="h-20 w-auto object-contain mb-6"
         />
         <div className="text-center mb-6">

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const { projectId, documentId } = await request.json();
+    const { projectId } = await request.json();
     
     if (!projectId) {
       return NextResponse.json({ error: 'Project ID required' }, { status: 400 });

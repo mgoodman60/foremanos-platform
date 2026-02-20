@@ -11,7 +11,6 @@ import {
   Camera,
   CheckCircle,
   Clock,
-  AlertTriangle,
   XCircle,
   TrendingUp,
   TrendingDown,
@@ -116,7 +115,7 @@ function BudgetSparkline({ percentSpent }: { percentSpent: number }) {
 }
 
 export function ProjectOverview({ projectSlug, projectId }: ProjectOverviewProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const { session } = useProject();
   const { triggerUpload, fileInputRef, handleFileUpload, showCategoryModal, pendingFile, handleCategoryConfirm, handleCategoryCancel } = useDocumentUpload();
 

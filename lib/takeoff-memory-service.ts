@@ -173,7 +173,7 @@ function getCategoryInfo(categoryId: string): { category?: TakeoffCategory; subC
 /**
  * Get waste factor and labor hours for a category
  */
-function getWasteAndLabor(categoryId: string, unit: string): { wasteFactor: number; laborHoursPerUnit: number } {
+function getWasteAndLabor(categoryId: string, _unit: string): { wasteFactor: number; laborHoursPerUnit: number } {
   const { category, subCategory } = getCategoryInfo(categoryId);
   
   if (subCategory) {

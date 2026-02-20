@@ -38,7 +38,7 @@ export function RequirementAutoImport({
   projectSlug,
   submittalId,
   onImportComplete,
-  onClose,
+  onClose: _onClose,
   onImported,
 }: RequirementAutoImportProps) {
   const [loading, setLoading] = useState(false);

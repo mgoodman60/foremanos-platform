@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Pencil, Type, Circle, Square, ArrowRight, Trash2, Save, Download,
-  Undo, Redo, Palette, ChevronDown, MessageSquare, AlertTriangle,
+  Pencil, Type, Circle, Square, ArrowRight, Trash2, Save, Download, Palette, ChevronDown, MessageSquare, AlertTriangle,
   CheckCircle2, Pin
 } from 'lucide-react';
 import type { ViewerHandle } from './forge-viewer-enhanced';

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { differenceInDays, isAfter, isBefore, addDays, parseISO, format } from 'date-fns';
+import { differenceInDays, isAfter, isBefore, addDays } from 'date-fns';
 import { logger } from '@/lib/logger';
 
 // Industry benchmarks for construction projects
@@ -96,7 +96,7 @@ export async function analyzeScheduleHealth(projectSlug: string): Promise<Schedu
   const metrics: HealthMetric[] = [];
 
   // 1. Calculate on-time performance
-  const completedTasks = tasks.filter(t => t.status === 'completed');
+  const _completedTasks = tasks.filter(t => t.status === 'completed');
   const delayedTasks = tasks.filter(t => t.status === 'delayed');
   const overdueTasks = tasks.filter(t => {
     const endDate = new Date(t.endDate);
@@ -167,7 +167,7 @@ export async function analyzeScheduleHealth(projectSlug: string): Promise<Schedu
   });
 
   // 5. Milestone adherence
-  const upcomingMilestones = milestones.filter(m => {
+  const _upcomingMilestones = milestones.filter(m => {
     const targetDate = new Date(m.plannedDate);
     return isAfter(targetDate, now) && isBefore(targetDate, addDays(now, 30));
   });

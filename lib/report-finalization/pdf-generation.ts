@@ -16,7 +16,7 @@ import type {
   QuantityCalculation,
 } from '../types/report-data';
 
-const log = createScopedLogger('PDF_GENERATION');
+const _log = createScopedLogger('PDF_GENERATION');
 
 /**
  * Generate PDF for finalized report

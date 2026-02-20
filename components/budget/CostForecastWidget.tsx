@@ -8,13 +8,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, ReferenceLine, Area, ComposedChart
 } from 'recharts';
 import { toast } from 'sonner';
-import { format, addDays, differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 import { neutralColors, backgroundColors, borderColors, chartColors, semanticColors } from '@/lib/design-tokens';
 
 interface ForecastData {

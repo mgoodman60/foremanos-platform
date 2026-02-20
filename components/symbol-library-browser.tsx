@@ -16,7 +16,6 @@ import { ScrollArea } from './ui/scroll-area';
 import {
   Zap,
   Search,
-  Filter,
   Loader2,
   BookOpen,
   Tag,
@@ -38,7 +37,7 @@ interface SymbolLibraryBrowserProps {
   projectSlug?: string;
 }
 
-export default function SymbolLibraryBrowser({ projectSlug }: SymbolLibraryBrowserProps) {
+export default function SymbolLibraryBrowser({ projectSlug: _projectSlug }: SymbolLibraryBrowserProps) {
   const [symbols, setSymbols] = useState<SymbolEntry[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);

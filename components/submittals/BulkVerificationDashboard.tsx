@@ -9,12 +9,8 @@ import {
   RefreshCw,
   Loader2,
   BarChart3,
-  ListChecks,
-  Package,
   ArrowRight,
   ClipboardList,
-  TrendingUp,
-  TrendingDown,
   AlertOctagon,
   Download,
 } from 'lucide-react';

@@ -118,7 +118,7 @@ export function RecentActivityFeed({ projectSlug }: RecentActivityFeedProps) {
         <ol role="feed" aria-label="Recent activity" className="relative">
           {displayedItems.map((item, index) => {
             const config = TYPE_CONFIG[item.type] || TYPE_CONFIG.document_upload;
-            const IconComponent = config.icon;
+            const _IconComponent = config.icon;
             const isLast = index === displayedItems.length - 1;
 
             return (

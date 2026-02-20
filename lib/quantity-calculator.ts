@@ -1,4 +1,3 @@
-import { logger } from '@/lib/logger';
 
 export interface DimensionInput {
   value: string; // "15'-6\"", "4.72m", "24'"

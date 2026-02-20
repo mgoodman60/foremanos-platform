@@ -374,7 +374,7 @@ export function isValidImageType(mimeType: string): boolean {
 /**
  * Get image dimensions (placeholder - actual implementation would need image processing library)
  */
-export async function getImageDimensions(buffer: Buffer): Promise<{ width: number; height: number } | null> {
+export async function getImageDimensions(_buffer: Buffer): Promise<{ width: number; height: number } | null> {
   try {
     // This is a placeholder. In production, you'd use sharp or another image library
     return null;
@@ -387,7 +387,7 @@ export async function getImageDimensions(buffer: Buffer): Promise<{ width: numbe
 /**
  * Extract basic EXIF data from image (placeholder)
  */
-export async function extractBasicExif(buffer: Buffer): Promise<{ capturedAt?: Date; location?: string } | null> {
+export async function extractBasicExif(_buffer: Buffer): Promise<{ capturedAt?: Date; location?: string } | null> {
   try {
     // This is a placeholder. In production, you'd use exif-parser or similar
     return null;
@@ -425,7 +425,7 @@ export function createPhotoMetadata(
   }
   
   // Legacy signature (id, originalName, generatedName, cloudPath, analysis, userId, dimensions, exif)
-  const generatedFileName = generatedFileNameOrSize;
+  const _generatedFileName = generatedFileNameOrSize;
   const cloudPath = cloudPathOrMimeType;
   const analysis = analysisOrAdditionalData;
   

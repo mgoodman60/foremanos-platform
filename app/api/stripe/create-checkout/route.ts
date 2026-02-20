@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { createCheckoutSession, STRIPE_PRICE_IDS } from '@/lib/stripe';
+import { createCheckoutSession } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { priceId, tier } = await request.json();
+    const { priceId, tier: _tier } = await request.json();
 
     if (!priceId) {
       return NextResponse.json(

@@ -4,8 +4,6 @@
  */
 
 import OpenAI from 'openai';
-import { readFileSync } from 'fs';
-import path from 'path';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 import { logger } from '@/lib/logger';
 
@@ -119,7 +117,7 @@ Respond ONLY with valid JSON in this exact format:
 }`;
 
   try {
-    let messages: any[] = [
+    const messages: any[] = [
       { role: 'system', content: systemPrompt }
     ];
 

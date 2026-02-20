@@ -55,7 +55,7 @@ export async function POST(
 
     // Calculate next due date
     const now = new Date();
-    let nextDueDate = new Date(now);
+    const nextDueDate = new Date(now);
     
     switch (schedule.frequency) {
       case 'DAILY': nextDueDate.setDate(nextDueDate.getDate() + 1); break;

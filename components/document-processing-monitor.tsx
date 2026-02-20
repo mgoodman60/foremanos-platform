@@ -165,7 +165,7 @@ export default function DocumentProcessingMonitor({
     return `~${minutes}m remaining`;
   };
 
-  const getPhaseLabel = (phase: string, progress: DocumentProgress | undefined): string => {
+  const _getPhaseLabel = (phase: string, progress: DocumentProgress | undefined): string => {
     if (!progress) return '';
     const concurrencyLabel = progress.concurrency && progress.concurrency > 1 ? ` (${progress.concurrency} parallel)` : '';
     switch (phase) {

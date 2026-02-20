@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useCallback, useMemo } from 'react';
-import { format, differenceInDays, addDays } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -27,17 +25,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
+
 import {
   Beaker,
-  Play,
-  Pause,
   RotateCcw,
   Save,
   Trash2,
@@ -45,7 +36,6 @@ import {
   CalendarDays,
   TrendingUp,
   TrendingDown,
-  AlertTriangle,
   CheckCircle2,
   GitBranch,
   History,
@@ -112,7 +102,7 @@ interface WhatIfScenariosProps {
 
 export function WhatIfScenarios({
   tasks,
-  originalTasks,
+  originalTasks: _originalTasks,
   isActive,
   onToggle,
   pendingChanges,
@@ -123,7 +113,7 @@ export function WhatIfScenarios({
   onLoadScenario,
   onDeleteScenario,
 }: WhatIfScenariosProps) {
-  const [isSaving, setIsSaving] = useState(false);
+  const [_isSaving, _setIsSaving] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
