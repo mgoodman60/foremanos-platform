@@ -7,6 +7,7 @@ import { X, Key, Copy, RefreshCw, Trash2, Clock, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { guestCredentialsSchema, type GuestCredentialsFormData } from '@/lib/schemas';
 import { FormError } from '@/components/ui/form-error';
 
@@ -59,6 +60,7 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
   });
 
   const _newPassword = watch('guestPassword');
+  const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
 
   useEffect(() => {
     fetchGuestData();
@@ -141,11 +143,12 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
     }
   };
 
-  const handleRevokeAccess = async () => {
-    if (!confirm('Are you sure you want to revoke guest access? This will prevent the guest user from accessing this project.')) {
-      return;
-    }
+  const handleRevokeAccess = () => {
+    setShowRevokeConfirm(true);
+  };
 
+  const doRevokeAccess = async () => {
+    setShowRevokeConfirm(false);
     setUpdating(true);
     try {
       const res = await fetch(`/api/projects/${projectSlug}/guest`, {
@@ -377,6 +380,15 @@ export function GuestCredentialModal({ projectSlug, projectName, onClose }: Gues
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showRevokeConfirm}
+        onConfirm={doRevokeAccess}
+        onCancel={() => setShowRevokeConfirm(false)}
+        title="Revoke Guest Access"
+        description="Are you sure you want to revoke guest access? This will prevent the guest user from accessing this project."
+        variant="destructive"
+      />
     </div>
   );
 }

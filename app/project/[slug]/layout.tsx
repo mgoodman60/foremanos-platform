@@ -9,6 +9,7 @@ import { AIAssistantDrawer } from '@/components/layout/ai-assistant-drawer';
 import { useDocumentUpload } from '@/hooks/use-document-upload';
 import { useScheduleUpdates } from '@/hooks/use-schedule-updates';
 import { useProjectModals } from '@/hooks/use-project-modals';
+import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { DocumentCategoryModal } from '@/components/document-category-modal';
 import { SkeletonProjectWorkspace } from '@/components/ui/skeleton-card';
 import { X } from 'lucide-react';
@@ -302,13 +303,20 @@ function ModalWrapper({
   maxWidth?: string;
   children: React.ReactNode;
 }) {
+  const titleId = `modal-${title.toLowerCase().replace(/\s+/g, '-')}`;
+  const containerRef = useFocusTrap({
+    isActive: true,
+    onEscape: onClose,
+  });
+
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+    <div ref={containerRef} className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className={`bg-dark-card rounded-lg shadow-xl w-full ${maxWidth} max-h-[90vh] overflow-hidden flex flex-col border border-gray-700`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-slate-50">{title}</h2>
+          <h2 id={titleId} className="text-xl font-bold text-slate-50">{title}</h2>
           <button
             onClick={onClose}
+            aria-label={`Close ${title}`}
             className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
@@ -324,13 +332,19 @@ function ModalWrapper({
 
 // Logo upload modal (uses modals hook state)
 function LogoUploadModal({ modals }: { modals: ReturnType<typeof useProjectModals> }) {
+  const containerRef = useFocusTrap({
+    isActive: true,
+    onEscape: modals.closeLogoUpload,
+  });
+
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+    <div ref={containerRef} className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="logo-upload-title">
       <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-md border border-gray-700">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-slate-50">Upload Company Logo</h2>
+          <h2 id="logo-upload-title" className="text-xl font-bold text-slate-50">Upload Company Logo</h2>
           <button
             onClick={modals.closeLogoUpload}
+            aria-label="Close logo upload"
             className="p-2 hover:bg-dark-surface text-gray-400 hover:text-white rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />

@@ -33,6 +33,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { WithTooltip } from '@/components/ui/icon-button';
 import { toast } from 'sonner';
 import { CSI_DIVISIONS, type CSIDivision } from '@/lib/csi-divisions';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { QuickActionMenu, type ActionItem } from '@/components/ui/header-action-menu';
 
 // Import new infrastructure
@@ -111,6 +112,7 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
   const [mepData, setMepData] = useState<MEPData | null>(null);
   const [_extractingMEP, setExtractingMEP] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [hasBudgetDoc, setHasBudgetDoc] = useState(false);
 
@@ -732,11 +734,16 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
   };
   
   // Handle delete item
-  const _handleDeleteItem = async (itemId: string) => {
+  const _handleDeleteItem = (itemId: string) => {
     if (!selectedTakeoff) return;
-    
-    if (!confirm('Are you sure you want to delete this item?')) return;
-    
+    setDeleteItemId(itemId);
+  };
+
+  const _doDeleteItem = async () => {
+    const itemId = deleteItemId;
+    setDeleteItemId(null);
+    if (!selectedTakeoff || !itemId) return;
+
     try {
       const response = await fetch(`/api/takeoff/${selectedTakeoff.id}/line-items/${itemId}`, {
         method: 'DELETE',
@@ -1565,6 +1572,15 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteItemId !== null}
+        onConfirm={_doDeleteItem}
+        onCancel={() => setDeleteItemId(null)}
+        title="Delete Item"
+        description="Are you sure you want to delete this item?"
+        variant="destructive"
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { getFileUrl } from '@/lib/s3';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Photo {
   id: string;
@@ -46,6 +47,7 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode: _startIn
   const [bulkLocation, setBulkLocation] = useState('');
   const [bulkCaption, setBulkCaption] = useState('');
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Fetch all photos for the project
   useEffect(() => {
@@ -285,10 +287,11 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode: _startIn
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete ${selectedPhotos.size} photos? This action cannot be undone.`)) {
-      return;
-    }
+    setShowDeleteConfirm(true);
+  };
 
+  const doBulkDelete = async () => {
+    setShowDeleteConfirm(false);
     try {
       setBulkProcessing(true);
       const photoIds = Array.from(selectedPhotos);
@@ -596,6 +599,15 @@ export function PhotoLibrary({ projectSlug, onClose, startInUploadMode: _startIn
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onConfirm={doBulkDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        title="Delete Photos"
+        description={`Are you sure you want to delete ${selectedPhotos.size} photos? This action cannot be undone.`}
+        variant="destructive"
+      />
     </div>
   );
 }

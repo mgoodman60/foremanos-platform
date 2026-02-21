@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { createScopedLogger } from '@/lib/logger';
 import { semanticColors, neutralColors } from '@/lib/design-tokens';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const log = createScopedLogger('SMS_CONFIG_PANEL');
 
@@ -37,6 +38,7 @@ export default function SMSConfigPanel({ projectSlug }: SMSConfigPanelProps) {
   const [newUserId, setNewUserId] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [formError, setFormError] = useState('');
+  const [deleteMapId, setDeleteMapId] = useState<string | null>(null);
 
   const baseUrl = `/api/projects/${projectSlug}/daily-reports/sms-config`;
 
@@ -124,8 +126,14 @@ export default function SMSConfigPanel({ projectSlug }: SMSConfigPanelProps) {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Remove this phone mapping?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteMapId(id);
+  };
+
+  const doDelete = async () => {
+    const id = deleteMapId;
+    setDeleteMapId(null);
+    if (!id) return;
 
     setDeletingId(id);
     try {
@@ -305,6 +313,15 @@ export default function SMSConfigPanel({ projectSlug }: SMSConfigPanelProps) {
           Add Mapping
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={deleteMapId !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteMapId(null)}
+        title="Remove Phone Mapping"
+        description="Remove this phone mapping?"
+        variant="destructive"
+      />
     </div>
   );
 }

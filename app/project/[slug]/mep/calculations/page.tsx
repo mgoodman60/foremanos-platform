@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Calculator, Zap, Cpu, Droplets, Plus, X, Check, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const CALC_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string; unit: string }> = {
   ELECTRICAL_DEMAND: { label: 'Electrical Demand', icon: Zap, color: 'bg-yellow-900/50 border-yellow-700', unit: 'kW' },
@@ -45,6 +46,7 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [_selectedType, _setSelectedType] = useState<string>('');
+  const [deleteCalcId, setDeleteCalcId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     calcType: '',
@@ -110,8 +112,14 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
     }
   };
 
-  const handleDeleteCalculation = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this calculation?')) return;
+  const handleDeleteCalculation = (id: string) => {
+    setDeleteCalcId(id);
+  };
+
+  const doDeleteCalculation = async () => {
+    const id = deleteCalcId;
+    setDeleteCalcId(null);
+    if (!id) return;
 
     try {
       const res = await fetch(`/api/projects/${params.slug}/mep/load-calculations/${id}`, {
@@ -402,6 +410,15 @@ export default function CalculationsPage({ params }: { params: { slug: string } 
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteCalcId !== null}
+        onConfirm={doDeleteCalculation}
+        onCancel={() => setDeleteCalcId(null)}
+        title="Delete Calculation"
+        description="Are you sure you want to delete this calculation?"
+        variant="destructive"
+      />
     </div>
   );
 }

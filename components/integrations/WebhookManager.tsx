@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Webhook, Plus, Trash2, Check, X, Play, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface WebhookConfig {
   id: string;
@@ -44,6 +45,7 @@ export default function WebhookManager({ projectSlug }: WebhookManagerProps) {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
+  const [deleteWebhookId, setDeleteWebhookId] = useState<string | null>(null);
   const [newWebhook, setNewWebhook] = useState({
     url: '',
     events: [] as string[],
@@ -92,8 +94,14 @@ export default function WebhookManager({ projectSlug }: WebhookManagerProps) {
     }
   };
 
-  const handleDelete = async (webhookId: string) => {
-    if (!confirm('Delete this webhook?')) return;
+  const handleDelete = (webhookId: string) => {
+    setDeleteWebhookId(webhookId);
+  };
+
+  const doDelete = async () => {
+    const webhookId = deleteWebhookId;
+    setDeleteWebhookId(null);
+    if (!webhookId) return;
 
     try {
       const res = await fetch(`/api/projects/${projectSlug}/webhooks?webhookId=${webhookId}`, {
@@ -321,6 +329,15 @@ export default function WebhookManager({ projectSlug }: WebhookManagerProps) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteWebhookId !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteWebhookId(null)}
+        title="Delete Webhook"
+        description="Delete this webhook?"
+        variant="destructive"
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import type { MarkupLayerRecord } from '@/lib/markup/markup-types';
 import { logger } from '@/lib/logger';
 import { secondaryColors } from '@/lib/design-tokens';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface LayerPanelProps {
   slug: string;
@@ -18,6 +19,7 @@ interface LayerPanelProps {
 export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps) {
   const [layers, setLayers] = useState<MarkupLayerRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLayerId, setDeleteLayerId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
 
@@ -103,8 +105,14 @@ export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps)
     }
   };
 
-  const handleDelete = async (layerId: string) => {
-    if (!confirm('Delete this layer? Markups on this layer will be moved to the default layer.')) return;
+  const handleDelete = (layerId: string) => {
+    setDeleteLayerId(layerId);
+  };
+
+  const doDeleteLayer = async () => {
+    const layerId = deleteLayerId;
+    setDeleteLayerId(null);
+    if (!layerId) return;
     try {
       const res = await fetch(`/api/projects/${slug}/documents/${documentId}/layers/${layerId}`, {
         method: 'DELETE',
@@ -211,6 +219,15 @@ export function LayerPanel({ slug, documentId, onLayerChange }: LayerPanelProps)
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={deleteLayerId !== null}
+        onConfirm={doDeleteLayer}
+        onCancel={() => setDeleteLayerId(null)}
+        title="Delete Layer"
+        description="Delete this layer? Markups on this layer will be moved to the default layer."
+        variant="destructive"
+      />
     </div>
   );
 }

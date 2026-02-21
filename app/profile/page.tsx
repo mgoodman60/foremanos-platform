@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getFileUrl } from '@/lib/s3';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession() || {};
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -147,10 +149,11 @@ export default function ProfilePage() {
   };
 
   const handleRemoveLogo = async () => {
-    if (!confirm('Are you sure you want to remove your company logo?')) {
-      return;
-    }
+    setShowRemoveConfirm(true);
+  };
 
+  const doRemoveLogo = async () => {
+    setShowRemoveConfirm(false);
     try {
       setUploading(true);
       const res = await fetch('/api/user/logo', { method: 'DELETE' });
@@ -310,6 +313,15 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={showRemoveConfirm}
+        onConfirm={doRemoveLogo}
+        onCancel={() => setShowRemoveConfirm(false)}
+        title="Remove Company Logo"
+        description="Are you sure you want to remove your company logo?"
+        variant="destructive"
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { PhotoMetadata } from '@/lib/photo-analyzer';
 import { createScopedLogger } from '@/lib/logger';
 import { toast } from 'sonner';
 import { PhotoAnnotationModal } from './photo-annotation-modal';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const log = createScopedLogger('PHOTO_GALLERY');
 
@@ -54,6 +55,7 @@ export function PhotoGallery({
   // Analyze state
   const [analyzingPhotoId, setAnalyzingPhotoId] = useState<string | null>(null);
   const [localCaptions, setLocalCaptions] = useState<Record<string, string>>({});
+  const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null);
 
   // Fetch signed URLs for all photos
   useEffect(() => {
@@ -211,10 +213,14 @@ export function PhotoGallery({
     }
   };
 
-  const handleDelete = async (photoId: string) => {
-    if (!confirm('Are you sure you want to delete this photo?')) {
-      return;
-    }
+  const handleDelete = (photoId: string) => {
+    setDeletePhotoId(photoId);
+  };
+
+  const doDeletePhoto = async () => {
+    const photoId = deletePhotoId;
+    setDeletePhotoId(null);
+    if (!photoId) return;
 
     try {
       const response = await fetch(
@@ -593,6 +599,15 @@ export function PhotoGallery({
           onSave={handleAnnotationSave}
         />
       )}
+
+      <ConfirmDialog
+        open={deletePhotoId !== null}
+        onConfirm={doDeletePhoto}
+        onCancel={() => setDeletePhotoId(null)}
+        title="Delete Photo"
+        description="Are you sure you want to delete this photo?"
+        variant="destructive"
+      />
     </>
   );
 }

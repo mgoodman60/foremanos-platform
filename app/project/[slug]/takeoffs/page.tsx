@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Ruler, Plus, Eye, CheckCircle2, Clock, AlertCircle, Download, Edit2, Trash2, Check, X, ChevronLeft, Sparkles, RefreshCw, Zap, Target, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface MaterialTakeoff {
   id: string;
@@ -106,6 +107,7 @@ export default function TakeoffsPage() {
   const [enhancedStats, setEnhancedStats] = useState<EnhancedStats | null>(null);
   const [documents, setDocuments] = useState<{ id: string; name: string }[]>([]);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string>('');
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; onConfirm: () => void }>({ open: false, title: '', description: '', onConfirm: () => {} });
   
   // Create takeoff form
   const [newTakeoff, setNewTakeoff] = useState({
@@ -299,22 +301,26 @@ export default function TakeoffsPage() {
     }
   };
 
-  const handleDeleteTakeoff = async (takeoffId: string) => {
-    if (!confirm('Are you sure you want to delete this takeoff?')) return;
-
-    try {
-      const res = await fetch(`/api/takeoff/${takeoffId}`, {
-        method: 'DELETE'
-      });
-
-      if (!res.ok) throw new Error('Failed to delete takeoff');
-      
-      toast.success('Takeoff deleted successfully');
-      loadTakeoffs();
-    } catch (error: unknown) {
-      console.error('Error deleting takeoff:', error);
-      toast.error('Failed to delete takeoff');
-    }
+  const handleDeleteTakeoff = (takeoffId: string) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Takeoff',
+      description: 'Are you sure you want to delete this takeoff?',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        try {
+          const res = await fetch(`/api/takeoff/${takeoffId}`, {
+            method: 'DELETE'
+          });
+          if (!res.ok) throw new Error('Failed to delete takeoff');
+          toast.success('Takeoff deleted successfully');
+          loadTakeoffs();
+        } catch (error: unknown) {
+          console.error('Error deleting takeoff:', error);
+          toast.error('Failed to delete takeoff');
+        }
+      },
+    });
   };
 
   const handleApproveTakeoff = async (takeoffId: string) => {
@@ -398,23 +404,28 @@ export default function TakeoffsPage() {
     }
   };
 
-  const handleDeleteLineItem = async (itemId: string) => {
+  const handleDeleteLineItem = (itemId: string) => {
     if (!selectedTakeoff) return;
-    if (!confirm('Are you sure you want to delete this line item?')) return;
-
-    try {
-      const res = await fetch(`/api/takeoff/${selectedTakeoff.id}/line-items/${itemId}`, {
-        method: 'DELETE'
-      });
-
-      if (!res.ok) throw new Error('Failed to delete line item');
-      
-      toast.success('Line item deleted successfully');
-      loadLineItems(selectedTakeoff.id);
-    } catch (error: unknown) {
-      console.error('Error deleting line item:', error);
-      toast.error('Failed to delete line item');
-    }
+    const takeoffId = selectedTakeoff.id;
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Line Item',
+      description: 'Are you sure you want to delete this line item?',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        try {
+          const res = await fetch(`/api/takeoff/${takeoffId}/line-items/${itemId}`, {
+            method: 'DELETE'
+          });
+          if (!res.ok) throw new Error('Failed to delete line item');
+          toast.success('Line item deleted successfully');
+          loadLineItems(takeoffId);
+        } catch (error: unknown) {
+          console.error('Error deleting line item:', error);
+          toast.error('Failed to delete line item');
+        }
+      },
+    });
   };
 
   const handleExportCSV = async (takeoffId: string) => {
@@ -1173,6 +1184,15 @@ export default function TakeoffsPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <ConfirmDialog
+          open={confirmDialog.open}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          variant="destructive"
+        />
       </div>
     </div>
   );

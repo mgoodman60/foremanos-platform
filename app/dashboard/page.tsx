@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Plus, FolderOpen, FileText, Users, Shield, Copy, Share2, Check, Pencil, UserPlus, Eye, Edit, Crown } from 'lucide-react';
@@ -12,6 +12,7 @@ import { BillingCard } from '@/components/billing-card';
 import { QuotaIndicator } from '@/components/quota-indicator';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { SkeletonDashboard } from '@/components/ui/skeleton-card';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Project {
   id: string;
@@ -60,6 +61,58 @@ export default function DashboardPage() {
   const [membersProject, setMembersProject] = useState<Project | null>(null);
   const [projectMembers, setProjectMembers] = useState<any[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; onConfirm: () => void }>({ open: false, title: '', description: '', onConfirm: () => {} });
+
+  // Focus trap for custom modals
+  const useFocusTrap = (isOpen: boolean, onClose: () => void) => {
+    const ref = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      if (!isOpen || !ref.current) return;
+      const el = ref.current;
+      const focusable = el.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      first?.focus();
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') { onClose(); return; }
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
+        }
+      };
+      el.addEventListener('keydown', handleKeyDown);
+      return () => el.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+    return ref;
+  };
+
+  const closeCreateModal = useCallback(() => {
+    setShowCreateModal(false);
+    setNewProjectData({ name: '', guestUsername: '', guestPassword: '' });
+  }, []);
+  const closeRenameModal = useCallback(() => {
+    setRenameModalOpen(false);
+    setRenameProject(null);
+    setNewProjectName('');
+  }, []);
+  const closeInviteModal = useCallback(() => {
+    setInviteModalOpen(false);
+    setInviteData({ emailOrUsername: '', role: 'viewer' });
+  }, []);
+  const closeMembersModal = useCallback(() => {
+    setMembersModalOpen(false);
+    setMembersProject(null);
+    setProjectMembers([]);
+  }, []);
+
+  const createModalRef = useFocusTrap(showCreateModal, closeCreateModal);
+  const renameModalRef = useFocusTrap(renameModalOpen, closeRenameModal);
+  const inviteModalRef = useFocusTrap(inviteModalOpen, closeInviteModal);
+  const membersModalRef = useFocusTrap(membersModalOpen, closeMembersModal);
 
   // Track previous subscription tier for detecting upgrades/downgrades
   const [previousTier, setPreviousTier] = useState<string | null>(null);
@@ -444,13 +497,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleRemoveMember = async (memberId: string, userId: string) => {
+  const doRemoveMember = async (userId: string) => {
     if (!membersProject) return;
-    
-    if (!confirm('Are you sure you want to remove this member?')) {
-      return;
-    }
-
     try {
       const response = await fetchWithRetry(`/api/projects/${membersProject.slug}/members/${userId}`, {
         method: 'DELETE',
@@ -477,6 +525,18 @@ export default function DashboardPage() {
       toast.dismiss('remove-member');
       toast.error(error instanceof Error ? error.message : 'Failed to remove member');
     }
+  };
+
+  const handleRemoveMember = (_memberId: string, userId: string) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Remove Member',
+      description: 'Are you sure you want to remove this member?',
+      onConfirm: () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        doRemoveMember(userId);
+      },
+    });
   };
 
   // Helper to format "Last synced" timestamp
@@ -802,41 +862,46 @@ export default function DashboardPage() {
 
       {/* Create Project Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="create-modal-title" ref={createModalRef}>
           <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-            <h3 className="text-xl font-bold text-slate-50 mb-4">Create New Project</h3>
+            <h3 id="create-modal-title" className="text-xl font-bold text-slate-50 mb-4">Create New Project</h3>
             <form onSubmit={handleCreateProject} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="create-project-name" className="block text-sm font-medium text-gray-300 mb-1">
                   Project Name *
                 </label>
                 <input
+                  id="create-project-name"
                   type="text"
                   value={newProjectData.name}
                   onChange={(e) => setNewProjectData({ ...newProjectData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="e.g., Downtown Office Building"
                   required
+                  aria-required="true"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="create-guest-username" className="block text-sm font-medium text-gray-300 mb-1">
                   Job Pin (Guest Username) *
                 </label>
                 <input
+                  id="create-guest-username"
                   type="text"
                   value={newProjectData.guestUsername}
                   onChange={(e) => setNewProjectData({ ...newProjectData, guestUsername: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="e.g., downtown-2024"
                   required
+                  aria-required="true"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="create-guest-password" className="block text-sm font-medium text-gray-300 mb-1">
                   Guest Password (Optional)
                 </label>
                 <input
+                  id="create-guest-password"
                   type="password"
                   value={newProjectData.guestPassword}
                   onChange={(e) => setNewProjectData({ ...newProjectData, guestPassword: e.target.value })}
@@ -847,10 +912,7 @@ export default function DashboardPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setNewProjectData({ name: '', guestUsername: '', guestPassword: '' });
-                  }}
+                  onClick={closeCreateModal}
                   className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
                 >
                   Cancel
@@ -869,30 +931,28 @@ export default function DashboardPage() {
 
       {/* Rename Project Modal */}
       {renameModalOpen && renameProject && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="rename-modal-title" ref={renameModalRef}>
           <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-            <h3 className="text-xl font-bold text-slate-50 mb-4">Rename Project</h3>
+            <h3 id="rename-modal-title" className="text-xl font-bold text-slate-50 mb-4">Rename Project</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="rename-project-name" className="block text-sm font-medium text-gray-300 mb-1">
                   New Project Name
                 </label>
                 <input
+                  id="rename-project-name"
                   type="text"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="Enter new name"
+                  aria-required="true"
                 />
               </div>
               <div className="flex gap-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => {
-                    setRenameModalOpen(false);
-                    setRenameProject(null);
-                    setNewProjectName('');
-                  }}
+                  onClick={closeRenameModal}
                   className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
                 >
                   Cancel
@@ -911,30 +971,33 @@ export default function DashboardPage() {
 
       {/* Invite Member Modal */}
       {inviteModalOpen && inviteProject && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="invite-modal-title" ref={inviteModalRef}>
           <div className="bg-dark-card rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-700">
-            <h3 className="text-xl font-bold text-slate-50 mb-2">Invite to {inviteProject.name}</h3>
+            <h3 id="invite-modal-title" className="text-xl font-bold text-slate-50 mb-2">Invite to {inviteProject.name}</h3>
             <p className="text-sm text-gray-300 mb-4">Invite team members to collaborate on this project</p>
             <form onSubmit={handleSendInvite} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="invite-email" className="block text-sm font-medium text-gray-300 mb-1">
                   Email or Username
                 </label>
                 <input
+                  id="invite-email"
                   type="text"
                   value={inviteData.emailOrUsername}
                   onChange={(e) => setInviteData({ ...inviteData, emailOrUsername: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50 placeholder-gray-400"
                   placeholder="e.g., john@example.com or john123"
                   required
+                  aria-required="true"
                   disabled={sendingInvite}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="invite-role" className="block text-sm font-medium text-gray-300 mb-1">
                   Role
                 </label>
                 <select
+                  id="invite-role"
                   value={inviteData.role}
                   onChange={(e) => setInviteData({ ...inviteData, role: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-dark-surface text-slate-50"
@@ -947,10 +1010,7 @@ export default function DashboardPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => {
-                    setInviteModalOpen(false);
-                    setInviteData({ emailOrUsername: '', role: 'viewer' });
-                  }}
+                  onClick={closeInviteModal}
                   className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
                   disabled={sendingInvite}
                 >
@@ -971,9 +1031,9 @@ export default function DashboardPage() {
 
       {/* Members Modal */}
       {membersModalOpen && membersProject && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="members-modal-title" ref={membersModalRef}>
           <div className="bg-dark-card rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto border border-gray-700">
-            <h3 className="text-xl font-bold text-slate-50 mb-4">
+            <h3 id="members-modal-title" className="text-xl font-bold text-slate-50 mb-4">
               Project Members - {membersProject.name}
             </h3>
             
@@ -1019,11 +1079,7 @@ export default function DashboardPage() {
             
             <div className="mt-6">
               <button
-                onClick={() => {
-                  setMembersModalOpen(false);
-                  setMembersProject(null);
-                  setProjectMembers([]);
-                }}
+                onClick={closeMembersModal}
                 className="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-dark-surface transition-colors"
               >
                 Close
@@ -1045,6 +1101,15 @@ export default function DashboardPage() {
           onComplete={handleCompleteOnboarding}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        variant="destructive"
+      />
     </div>
   );
 }

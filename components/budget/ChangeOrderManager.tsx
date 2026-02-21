@@ -29,6 +29,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 type ChangeOrderStatus = 'DRAFT' | 'PENDING' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'VOIDED';
 
@@ -107,6 +108,7 @@ export default function ChangeOrderManager({ projectSlug, budgetId: _budgetId }:
   const [_showDetailModal, _setShowDetailModal] = useState(false);
   const [_selectedCO, _setSelectedCO] = useState<ChangeOrder | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteCoId, setDeleteCoId] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -201,9 +203,15 @@ export default function ChangeOrderManager({ projectSlug, budgetId: _budgetId }:
     }
   };
 
-  const handleDeleteCO = async (coId: string) => {
-    if (!confirm('Are you sure you want to delete this change order?')) return;
-    
+  const handleDeleteCO = (coId: string) => {
+    setDeleteCoId(coId);
+  };
+
+  const doDeleteCO = async () => {
+    const coId = deleteCoId;
+    setDeleteCoId(null);
+    if (!coId) return;
+
     try {
       const response = await fetch(`/api/projects/${projectSlug}/change-orders/${coId}`, {
         method: 'DELETE',
@@ -647,6 +655,15 @@ export default function ChangeOrderManager({ projectSlug, budgetId: _budgetId }:
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteCoId !== null}
+        onConfirm={doDeleteCO}
+        onCancel={() => setDeleteCoId(null)}
+        title="Delete Change Order"
+        description="Are you sure you want to delete this change order?"
+        variant="destructive"
+      />
     </div>
   );
 }

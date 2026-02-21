@@ -177,8 +177,13 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
           reports.map((report) => (
             <div
               key={report.id}
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect?.(report)}
-              className="px-6 py-4 hover:bg-gray-800/50 cursor-pointer transition-colors group"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(report); }
+              }}
+              className="px-6 py-4 hover:bg-gray-800/50 cursor-pointer transition-colors group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">

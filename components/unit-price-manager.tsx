@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TAKEOFF_CATEGORIES } from '@/lib/takeoff-categories';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface UnitPrice {
   id: string;
@@ -35,6 +36,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [_editingPrice, setEditingPrice] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [deletePriceId, setDeletePriceId] = useState<string | null>(null);
   
   // New price form state
   const [newPrice, setNewPrice] = useState({
@@ -95,9 +97,15 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
     }
   };
 
-  const handleDeletePrice = async (priceId: string) => {
-    if (!confirm('Delete this custom price? Default pricing will be used instead.')) return;
-    
+  const handleDeletePrice = (priceId: string) => {
+    setDeletePriceId(priceId);
+  };
+
+  const doDeletePrice = async () => {
+    const priceId = deletePriceId;
+    setDeletePriceId(null);
+    if (!priceId) return;
+
     try {
       const res = await fetch(
         `/api/projects/${projectSlug}/unit-prices?id=${priceId}`,
@@ -418,6 +426,15 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
           💡 Project-specific prices override default rates. Default prices are based on 2024 national averages.
         </p>
       </div>
+
+      <ConfirmDialog
+        open={deletePriceId !== null}
+        onConfirm={doDeletePrice}
+        onCancel={() => setDeletePriceId(null)}
+        title="Delete Custom Price"
+        description="Delete this custom price? Default pricing will be used instead."
+        variant="destructive"
+      />
     </div>
   );
 }

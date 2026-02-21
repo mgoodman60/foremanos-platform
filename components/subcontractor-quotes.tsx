@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import ScopeGapAnalysis from './scope-gap-analysis';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Quote {
   id: string;
@@ -86,6 +87,7 @@ export default function SubcontractorQuotes() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterTrade, setFilterTrade] = useState<string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('quotes');
+  const [deleteQuoteId, setDeleteQuoteId] = useState<string | null>(null);
   const [summary, setSummary] = useState<{ total: number; pending: number; approved: number; totalValue: number }>(
     { total: 0, pending: 0, approved: 0, totalValue: 0 }
   );
@@ -203,9 +205,15 @@ export default function SubcontractorQuotes() {
     }
   };
 
-  const handleDelete = async (quoteId: string) => {
-    if (!confirm('Are you sure you want to delete this quote?')) return;
-    
+  const handleDelete = (quoteId: string) => {
+    setDeleteQuoteId(quoteId);
+  };
+
+  const doDelete = async () => {
+    const quoteId = deleteQuoteId;
+    setDeleteQuoteId(null);
+    if (!quoteId) return;
+
     try {
       const res = await fetch(`/api/projects/${slug}/quotes/${quoteId}`, {
         method: 'DELETE',
@@ -631,6 +639,15 @@ export default function SubcontractorQuotes() {
       </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={deleteQuoteId !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteQuoteId(null)}
+        title="Delete Quote"
+        description="Are you sure you want to delete this quote?"
+        variant="destructive"
+      />
     </div>
   );
 }

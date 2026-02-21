@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Upload, Trash2, RefreshCw, Box, FileType, Clock, CheckCircle, XCircle, AlertCircle, X, Database, Zap, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, Info, Layers, Ruler, Scissors, Pencil, Palette, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { ForgeViewerEnhanced, ViewerToolbar, ModelElementTree, ElementPropertiesPanel, MeasurementTools, SectionTools, MarkupTools, BIMDataPanel, RenderingTools, LayerControlPanel, AIRenderPanel } from './viewer';
 import type { ViewerHandle } from './viewer';
 
@@ -49,6 +50,7 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const viewerRef = useRef<ViewerHandle>(null);
+  const [deleteModel, setDeleteModel] = useState<AutodeskModel | null>(null);
 
   // Fetch models for the project
   const fetchModels = useCallback(async () => {
@@ -190,8 +192,14 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
   };
 
   // Handle delete
-  const handleDelete = async (model: AutodeskModel) => {
-    if (!confirm(`Delete ${model.fileName}? This cannot be undone.`)) return;
+  const handleDelete = (model: AutodeskModel) => {
+    setDeleteModel(model);
+  };
+
+  const doDelete = async () => {
+    const model = deleteModel;
+    setDeleteModel(null);
+    if (!model) return;
 
     try {
       const response = await fetch(`/api/autodesk/models/${model.id}`, {
@@ -668,6 +676,15 @@ export default function ModelViewerPanel({ projectSlug }: ModelViewerPanelProps)
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteModel !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteModel(null)}
+        title="Delete Model"
+        description={deleteModel ? `Delete ${deleteModel.fileName}? This cannot be undone.` : ''}
+        variant="destructive"
+      />
     </div>
   );
 }

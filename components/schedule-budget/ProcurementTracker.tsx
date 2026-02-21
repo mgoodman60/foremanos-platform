@@ -16,6 +16,7 @@ import {
   Package, Plus, Truck, Check, AlertTriangle,
   ShoppingCart, Calendar, DollarSign, Edit, Trash2, Search
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Procurement {
   id: string;
@@ -77,6 +78,7 @@ export default function ProcurementTracker() {
   const [editingItem, setEditingItem] = useState<Procurement | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
+  const [deleteProcId, setDeleteProcId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     description: '',
@@ -162,9 +164,14 @@ export default function ProcurementTracker() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this procurement item?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteProcId(id);
+  };
 
+  const doDelete = async () => {
+    const id = deleteProcId;
+    setDeleteProcId(null);
+    if (!id) return;
     try {
       const res = await fetch(`/api/projects/${slug}/procurement/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
@@ -540,6 +547,15 @@ export default function ProcurementTracker() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteProcId !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteProcId(null)}
+        title="Delete Procurement Item"
+        description="Are you sure you want to delete this procurement item? This action cannot be undone."
+        variant="destructive"
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import {
   Layers,
   Plus,
@@ -115,6 +116,7 @@ export default function TakeoffAggregation() {
   const [filterCategory, setFilterCategory] = useState<string>('');
   const [filterTrade, setFilterTrade] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteAggId, setDeleteAggId] = useState<string | null>(null);
 
   const fetchAggregations = useCallback(async () => {
     try {
@@ -207,8 +209,14 @@ export default function TakeoffAggregation() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this aggregation?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteAggId(id);
+  };
+
+  const doDeleteAgg = async () => {
+    const id = deleteAggId;
+    setDeleteAggId(null);
+    if (!id) return;
 
     try {
       const res = await fetch(`/api/projects/${slug}/takeoffs/aggregations/${id}`, {
@@ -777,6 +785,15 @@ export default function TakeoffAggregation() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteAggId !== null}
+        onConfirm={doDeleteAgg}
+        onCancel={() => setDeleteAggId(null)}
+        title="Delete Aggregation"
+        description="Delete this aggregation?"
+        variant="destructive"
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
   Flag, Calendar, Plus, Check, AlertTriangle,
   Clock, DollarSign, Edit, Trash2
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Milestone {
   id: string;
@@ -66,6 +67,7 @@ export default function MilestoneTracker() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [filter, setFilter] = useState<string>('all');
+  const [deleteMilestoneId, setDeleteMilestoneId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -123,9 +125,14 @@ export default function MilestoneTracker() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this milestone?')) return;
+  const handleDelete = (id: string) => {
+    setDeleteMilestoneId(id);
+  };
 
+  const doDelete = async () => {
+    const id = deleteMilestoneId;
+    setDeleteMilestoneId(null);
+    if (!id) return;
     try {
       const res = await fetch(`/api/projects/${slug}/milestones/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
@@ -450,6 +457,15 @@ export default function MilestoneTracker() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteMilestoneId !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteMilestoneId(null)}
+        title="Delete Milestone"
+        description="Are you sure you want to delete this milestone? This action cannot be undone."
+        variant="destructive"
+      />
     </div>
   );
 }

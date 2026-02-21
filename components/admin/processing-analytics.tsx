@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { ProcessingProgressCard } from '@/components/processing-progress-card';
 import { IntelligenceExtractionPanel } from '@/components/admin/intelligence-extraction-panel';
 import { getErrorMessage } from '@/lib/fetch-with-retry';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface ProcessingStats {
   currentMonth: string;
@@ -42,6 +43,7 @@ export function ProcessingAnalytics() {
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
   const [activeProcessing, setActiveProcessing] = useState<ActiveProcessing[]>([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const fetchActiveProcessing = async () => {
     try {
@@ -80,11 +82,12 @@ export function ProcessingAnalytics() {
     }
   };
 
-  const handleResetQuotas = async () => {
-    if (!confirm('Are you sure you want to reset all user quotas? This will set all users\' monthly page counts to zero.')) {
-      return;
-    }
+  const handleResetQuotas = () => {
+    setShowResetConfirm(true);
+  };
 
+  const doResetQuotas = async () => {
+    setShowResetConfirm(false);
     try {
       setResetting(true);
       const response = await fetch('/api/admin/reset-quotas', {
@@ -380,6 +383,15 @@ export function ProcessingAnalytics() {
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showResetConfirm}
+        onConfirm={doResetQuotas}
+        onCancel={() => setShowResetConfirm(false)}
+        title="Reset All User Quotas"
+        description="Are you sure you want to reset all user quotas? This will set all users' monthly page counts to zero."
+        variant="destructive"
+      />
     </div>
   );
 }

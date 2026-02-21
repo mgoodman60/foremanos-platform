@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Crew {
   id: string;
@@ -89,6 +90,7 @@ export default function CrewManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showPerformanceForm, setShowPerformanceForm] = useState(false);
   const [performanceCrew, setPerformanceCrew] = useState<Crew | null>(null);
+  const [deleteCrewId, setDeleteCrewId] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -196,10 +198,14 @@ export default function CrewManagement() {
     }
   };
 
-  const handleDeleteCrew = async (crewId: string) => {
-    if (!confirm('Are you sure you want to delete this crew? This action cannot be undone.')) {
-      return;
-    }
+  const handleDeleteCrew = (crewId: string) => {
+    setDeleteCrewId(crewId);
+  };
+
+  const doDeleteCrew = async () => {
+    const crewId = deleteCrewId;
+    setDeleteCrewId(null);
+    if (!crewId) return;
 
     setIsDeleting(true);
     try {
@@ -583,6 +589,15 @@ export default function CrewManagement() {
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteCrewId !== null}
+        onConfirm={doDeleteCrew}
+        onCancel={() => setDeleteCrewId(null)}
+        title="Delete Crew"
+        description="Are you sure you want to delete this crew? This action cannot be undone."
+        variant="destructive"
+      />
     </div>
   );
 }

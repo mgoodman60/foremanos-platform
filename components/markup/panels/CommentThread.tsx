@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import type { MarkupReplyRecord } from '@/lib/markup/markup-types';
 import { logger } from '@/lib/logger';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface CommentThreadProps {
   slug: string;
@@ -18,6 +19,7 @@ export function CommentThread({ slug, documentId, markupId, currentUserId }: Com
   const [replies, setReplies] = useState<(MarkupReplyRecord & { Creator: { name: string } })[]>([]);
   const [loading, setLoading] = useState(true);
   const [newReply, setNewReply] = useState('');
+  const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -57,8 +59,14 @@ export function CommentThread({ slug, documentId, markupId, currentUserId }: Com
     }
   };
 
-  const handleDeleteReply = async (replyId: string) => {
-    if (!confirm('Delete this comment?')) return;
+  const handleDeleteReply = (replyId: string) => {
+    setDeleteReplyId(replyId);
+  };
+
+  const doDeleteReply = async () => {
+    const replyId = deleteReplyId;
+    setDeleteReplyId(null);
+    if (!replyId) return;
 
     try {
       const reply = replies.find((r) => r.id === replyId);
@@ -135,6 +143,15 @@ export function CommentThread({ slug, documentId, markupId, currentUserId }: Com
           {submitting ? 'Posting...' : 'Reply'}
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={deleteReplyId !== null}
+        onConfirm={doDeleteReply}
+        onCancel={() => setDeleteReplyId(null)}
+        title="Delete Comment"
+        description="Delete this comment?"
+        variant="destructive"
+      />
     </div>
   );
 }
