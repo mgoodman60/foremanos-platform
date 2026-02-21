@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // POST /api/takeoff/[id]/line-items - Add a new line item to a takeoff
 export async function POST(
@@ -12,6 +14,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -117,7 +124,7 @@ export async function POST(
   } catch (error: any) {
     console.error('Error creating line item:', error);
     return NextResponse.json(
-      { error: 'Failed to create line item', details: error.message },
+      { error: 'Failed to create line item', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

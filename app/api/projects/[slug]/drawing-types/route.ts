@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { safeErrorMessage } from '@/lib/api-error';
 import {
   getProjectDrawingTypes,
   getDrawingTypeStats,
@@ -82,7 +83,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: 'Failed to get drawing types',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: safeErrorMessage(error)
       },
       { status: 500 }
     );

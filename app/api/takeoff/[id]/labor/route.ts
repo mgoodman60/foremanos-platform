@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
 import {
   calculateLaborRequirements,
   getLaborSummary,
@@ -101,7 +102,7 @@ export async function GET(
   } catch (error: unknown) {
     console.error('Error in labor GET:', error);
     return NextResponse.json(
-      { error: 'Failed to get labor data', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to get labor data', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

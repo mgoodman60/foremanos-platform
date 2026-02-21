@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractBudgetWithAI, importBudgetToProject } from '@/lib/budget-extractor-ai';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * POST: Extract budget from a document using AI
@@ -122,7 +123,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[BUDGET_API] Extraction error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to extract budget' },
+      { error: safeErrorMessage(error, 'Failed to extract budget') },
       { status: 500 }
     );
   }

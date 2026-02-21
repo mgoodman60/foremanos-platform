@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { suggestDocumentCategory } from '@/lib/document-categorizer';
+import { safeErrorMessage } from '@/lib/api-error';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -39,10 +40,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('[CATEGORY SUGGESTION ERROR]', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to suggest category',
-        details: error.message 
-      },
+      { error: 'Failed to suggest category' },
       { status: 500 }
     );
   }

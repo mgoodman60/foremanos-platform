@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
 import {
   getTakeoffQAMetrics,
   identifyQAIssues,
@@ -85,7 +86,7 @@ export async function GET(
   } catch (error: unknown) {
     console.error('Error in QA GET:', error);
     return NextResponse.json(
-      { error: 'Failed to get QA data', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to get QA data', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -193,7 +194,7 @@ export async function POST(
   } catch (error: unknown) {
     console.error('Error in QA POST:', error);
     return NextResponse.json(
-      { error: 'Failed to perform QA action', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to perform QA action', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

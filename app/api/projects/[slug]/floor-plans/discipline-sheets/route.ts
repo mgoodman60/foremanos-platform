@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { parseSheetNumber, matchesFloor } from '@/lib/sheet-number-parser';
 import { logger } from '@/lib/logger';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * GET /api/projects/[slug]/floor-plans/discipline-sheets?baseSheet=A-101
@@ -169,7 +170,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: 'Failed to fetch discipline sheets',
-        details: error.message,
+        details: safeErrorMessage(error),
       },
       { status: 500 }
     );

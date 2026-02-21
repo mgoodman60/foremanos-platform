@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { runIntelligenceExtraction } from '@/lib/intelligence-orchestrator';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * POST /api/projects/[slug]/extract-intelligence
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
           documentId: document.id,
           documentName: document.name,
           success: false,
-          error: error.message,
+          error: safeErrorMessage(error),
         });
       }
     }
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
   } catch (error: any) {
     console.error('Intelligence extraction API error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to trigger intelligence extraction' },
+      { error: safeErrorMessage(error, 'Failed to trigger intelligence extraction') },
       { status: 500 }
     );
   }
@@ -199,7 +200,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   } catch (error: any) {
     console.error('Get extraction stats error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to get extraction statistics' },
+      { error: safeErrorMessage(error, 'Failed to get extraction statistics') },
       { status: 500 }
     );
   }

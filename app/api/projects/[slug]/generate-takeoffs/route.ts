@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
 import {
   calculateProjectTakeoffs,
   aggregateTakeoffs,
@@ -110,9 +111,8 @@ export async function POST(request: Request, context: RouteContext) {
     });
   } catch (error: unknown) {
     console.error('[Takeoffs] Generation failed:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to generate takeoffs', details: errorMessage },
+      { error: 'Failed to generate takeoffs', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -182,9 +182,8 @@ export async function GET(request: Request, context: RouteContext) {
     });
   } catch (error: unknown) {
     console.error('[Takeoffs] Fetch failed:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch takeoffs', details: errorMessage },
+      { error: 'Failed to fetch takeoffs', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

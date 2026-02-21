@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractScheduleWithAI, deleteScheduleForDocument } from '@/lib/schedule-extractor-ai';
+import { safeErrorMessage } from '@/lib/api-error';
 
 // POST /api/documents/[id]/parse-schedule - Parse schedule from document using AI
 export async function POST(
@@ -113,7 +114,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[PARSE_SCHEDULE] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to parse schedule', details: error.message },
+      { error: 'Failed to parse schedule', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

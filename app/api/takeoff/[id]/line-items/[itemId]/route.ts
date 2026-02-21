@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // PUT /api/takeoff/[id]/line-items/[itemId] - Update a line item
 export async function PUT(
@@ -12,6 +14,11 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id, itemId } = params;
@@ -100,7 +107,7 @@ export async function PUT(
   } catch (error: any) {
     console.error('Error updating line item:', error);
     return NextResponse.json(
-      { error: 'Failed to update line item', details: error.message },
+      { error: 'Failed to update line item', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -115,6 +122,11 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const deleteRateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!deleteRateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id, itemId } = params;
@@ -179,7 +191,7 @@ export async function DELETE(
   } catch (error: any) {
     console.error('Error deleting line item:', error);
     return NextResponse.json(
-      { error: 'Failed to delete line item', details: error.message },
+      { error: 'Failed to delete line item', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

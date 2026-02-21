@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractBIMData } from '@/lib/bim-metadata-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
 import { importBIMToTakeoff } from '@/lib/bim-to-takeoff-service';
 import { indexBIMForRAG } from '@/lib/bim-rag-indexer';
 
@@ -95,7 +96,7 @@ export async function POST(
   } catch (error) {
     console.error('[BIM Extract API] Error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Extraction failed' },
+      { error: safeErrorMessage(error, 'Extraction failed') },
       { status: 500 }
     );
   }

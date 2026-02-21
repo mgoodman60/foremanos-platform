@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * GET /api/projects/[slug]/debug-finish-content
@@ -213,7 +214,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: 'Failed to debug finish content',
-        details: error.message,
+        details: safeErrorMessage(error),
       },
       { status: 500 }
     );

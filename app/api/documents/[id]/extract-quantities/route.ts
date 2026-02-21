@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractQuantitiesFromDocument } from '@/lib/takeoff-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // POST /api/documents/[id]/extract-quantities - Extract material quantities from a document
 export async function POST(
@@ -13,6 +15,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.UPLOAD);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -114,7 +121,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[EXTRACT_QUANTITIES] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to extract quantities', details: error.message },
+      { error: 'Failed to extract quantities', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractDWGMetadata, generateDWGSearchContent, DWGExtractionResult } from '@/lib/dwg-metadata-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,7 +107,7 @@ export async function POST(
   } catch (error) {
     console.error('[DWG Extract API] Error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Extraction failed' },
+      { error: safeErrorMessage(error, 'Extraction failed') },
       { status: 500 }
     );
   }
@@ -163,7 +164,7 @@ export async function GET(
   } catch (error) {
     console.error('[DWG Extract API] GET Error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to get extraction data' },
+      { error: safeErrorMessage(error, 'Failed to get extraction data') },
       { status: 500 }
     );
   }

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractFinishSchedules } from '@/lib/finish-schedule-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * POST /api/projects/[slug]/extract-finish-schedules
@@ -97,7 +98,7 @@ export async function POST(
     return NextResponse.json(
       {
         error: 'Failed to extract finish schedules',
-        details: error.message,
+        details: safeErrorMessage(error),
       },
       { status: 500 }
     );

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getSubscriptionInfo } from '@/lib/subscription';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +17,11 @@ export async function GET() {
         { error: 'Unauthorized' },
         { status: 401 }
       );
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     // Get user from database
@@ -35,7 +42,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('Error fetching subscription info:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch subscription info' },
+      { error: safeErrorMessage(error, 'Failed to fetch subscription info') },
       { status: 500 }
     );
   }

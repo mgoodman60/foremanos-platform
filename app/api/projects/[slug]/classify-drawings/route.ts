@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { classifyProjectDrawings } from '@/lib/drawing-classifier';
+import { safeErrorMessage } from '@/lib/api-error';
 
 export async function POST(
   req: NextRequest,
@@ -80,7 +81,7 @@ export async function POST(
     return NextResponse.json(
       {
         error: 'Failed to classify drawings',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: safeErrorMessage(error)
       },
       { status: 500 }
     );

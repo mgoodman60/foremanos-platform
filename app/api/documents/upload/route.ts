@@ -50,10 +50,7 @@ export async function POST(request: Request) {
     } catch (error: any) {
       console.error('[UPLOAD ERROR] Failed to parse form data:', error);
       return NextResponse.json(
-        { 
-          error: 'Failed to read upload data. Connection may have timed out.',
-          details: error.message 
-        },
+        { error: 'Failed to read upload data. Connection may have timed out.' },
         { status: 400 }
       );
     }

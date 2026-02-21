@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfDay, subDays, differenceInDays } from 'date-fns';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * Calculate Earned Value Management (EVM) metrics
@@ -214,7 +215,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error calculating EVM:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to calculate EVM metrics' },
+      { error: safeErrorMessage(error, 'Failed to calculate EVM metrics') },
       { status: 500 }
     );
   }

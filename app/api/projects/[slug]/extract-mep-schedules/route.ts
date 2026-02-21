@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractMEPSchedules } from '@/lib/mep-schedule-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
 
 export async function POST(
   request: NextRequest,
@@ -79,7 +80,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[API] MEP schedule extraction error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to extract MEP schedules' },
+      { error: safeErrorMessage(error, 'Failed to extract MEP schedules') },
       { status: 500 }
     );
   }
@@ -137,7 +138,7 @@ export async function GET(
   } catch (error: any) {
     console.error('[API] Get MEP schedules error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to get MEP schedules' },
+      { error: safeErrorMessage(error, 'Failed to get MEP schedules') },
       { status: 500 }
     );
   }

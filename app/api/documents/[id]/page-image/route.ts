@@ -6,6 +6,7 @@ import { downloadFile } from '@/lib/s3';
 import { extractPageAsPdf } from '@/lib/pdf-to-image-serverless';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
 import { logger } from '@/lib/logger';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * GET /api/documents/[id]/page-image?page=1&maxWidth=2000
@@ -146,7 +147,7 @@ export async function GET(
         );
       }
       return NextResponse.json(
-        { error: 'Failed to download document', code: 'DOWNLOAD_FAILED', details: error.message },
+        { error: 'Failed to download document', code: 'DOWNLOAD_FAILED', details: safeErrorMessage(error) },
         { status: 500 }
       );
     }
@@ -169,7 +170,7 @@ export async function GET(
         );
       }
       return NextResponse.json(
-        { error: 'Failed to extract page', code: 'EXTRACT_FAILED', details: error.message },
+        { error: 'Failed to extract page', code: 'EXTRACT_FAILED', details: safeErrorMessage(error) },
         { status: 500 }
       );
     }
@@ -188,7 +189,7 @@ export async function GET(
     } catch (error: any) {
       logger.error('PAGE_IMAGE_API', 'Error rasterizing page', error as Error);
       return NextResponse.json(
-        { error: 'Failed to rasterize page', code: 'RASTERIZE_FAILED', details: error.message },
+        { error: 'Failed to rasterize page', code: 'RASTERIZE_FAILED', details: safeErrorMessage(error) },
         { status: 500 }
       );
     }
@@ -205,7 +206,7 @@ export async function GET(
   } catch (error: any) {
     logger.error('PAGE_IMAGE_API', 'Unexpected error', error as Error);
     return NextResponse.json(
-      { error: 'Internal server error', code: 'INTERNAL_ERROR', details: error.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

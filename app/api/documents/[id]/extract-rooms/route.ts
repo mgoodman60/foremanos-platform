@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractRoomsFromDocument, createRoomsFromExtraction } from '@/lib/location-detector';
+import { safeErrorMessage } from '@/lib/api-error';
 
 // POST /api/documents/[id]/extract-rooms - Extract rooms from floor plan
 export async function POST(
@@ -88,7 +89,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[EXTRACT_ROOMS] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to extract rooms', details: error.message },
+      { error: 'Failed to extract rooms', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

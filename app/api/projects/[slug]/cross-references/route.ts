@@ -14,6 +14,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
 import {
   buildCalloutGraph,
   findReferencesToSheet,
@@ -93,7 +94,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: 'Failed to query cross-references',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: safeErrorMessage(error),
       },
       { status: 500 }
     );

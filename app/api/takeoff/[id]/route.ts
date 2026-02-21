@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // GET /api/takeoff/[id] - Get a specific material takeoff with line items
 export async function GET(
@@ -96,7 +98,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error fetching takeoff:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch takeoff', details: error.message },
+      { error: 'Failed to fetch takeoff', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -111,6 +113,11 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -195,7 +202,7 @@ export async function PUT(
   } catch (error: any) {
     console.error('Error updating takeoff:', error);
     return NextResponse.json(
-      { error: 'Failed to update takeoff', details: error.message },
+      { error: 'Failed to update takeoff', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -210,6 +217,11 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const deleteRateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!deleteRateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -258,7 +270,7 @@ export async function DELETE(
   } catch (error: any) {
     console.error('Error deleting takeoff:', error);
     return NextResponse.json(
-      { error: 'Failed to delete takeoff', details: error.message },
+      { error: 'Failed to delete takeoff', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

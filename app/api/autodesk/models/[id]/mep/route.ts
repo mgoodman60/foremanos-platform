@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractBIMData } from '@/lib/bim-metadata-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
 import { extractMEPEquipment } from '@/lib/bim-to-takeoff-service';
 
 export async function GET(
@@ -130,7 +131,7 @@ export async function GET(
   } catch (error) {
     console.error('[MEP API] Error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to get MEP data' },
+      { error: safeErrorMessage(error, 'Failed to get MEP data') },
       { status: 500 }
     );
   }

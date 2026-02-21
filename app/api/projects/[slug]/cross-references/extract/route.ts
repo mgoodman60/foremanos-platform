@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractCalloutsFromText } from '@/lib/detail-callout-extractor';
+import { safeErrorMessage } from '@/lib/api-error';
 
 /**
  * POST /api/projects/[slug]/cross-references/extract
@@ -135,7 +136,7 @@ export async function POST(
           documentId: doc.id,
           documentName: doc.name,
           status: 'failed',
-          error: error.message || 'Extraction failed',
+          error: safeErrorMessage(error, 'Extraction failed'),
         });
       }
     }
@@ -155,7 +156,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[Cross-Reference Extract Error]', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to extract cross-references' },
+      { error: safeErrorMessage(error, 'Failed to extract cross-references') },
       { status: 500 }
     );
   }

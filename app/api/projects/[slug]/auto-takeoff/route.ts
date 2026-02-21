@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { safeErrorMessage } from '@/lib/api-error';
 import { prisma } from '@/lib/db';
 import { autoGenerateTakeoffs } from '@/lib/auto-takeoff-generator';
 
@@ -64,7 +65,7 @@ export async function POST(
   } catch (error: any) {
     console.error('[API] Auto-takeoff error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate takeoffs', details: error.message },
+      { error: 'Failed to generate takeoffs', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -125,7 +126,7 @@ export async function GET(
   } catch (error: any) {
     console.error('[API] Auto-takeoff status error:', error);
     return NextResponse.json(
-      { error: 'Failed to get status', details: error.message },
+      { error: 'Failed to get status', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

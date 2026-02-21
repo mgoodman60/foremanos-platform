@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
           id: doc.id,
           name: doc.name,
           status: 'error',
-          error: error.message,
+          error: 'Retry failed',
         });
       }
     }
