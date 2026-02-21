@@ -38,16 +38,24 @@ interface PunchListProps {
   onSelect?: (item: PunchListItem) => void;
 }
 
+const ITEMS_PER_PAGE = 15;
+
 export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchListProps) {
   const [items, setItems] = useState<PunchListItem[]>([]);
   const [stats, setStats] = useState<PunchListStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchItems();
   }, [projectSlug, filter, priorityFilter]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, priorityFilter]);
 
   const fetchItems = async () => {
     try {
@@ -103,6 +111,12 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
     return stat?._count || 0;
   };
 
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+  const paginatedItems = items.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -112,7 +126,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 sm:p-6">
       {/* Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard label="Open" count={getStatCount('OPEN')} color="blue" />
@@ -181,7 +195,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
               )}
             </div>
           ) : (
-            items.map((item) => (
+            paginatedItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onSelect?.(item)}
@@ -241,6 +255,34 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
             ))
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-6 py-3 border-t border-gray-700 flex items-center justify-between">
+            <p className="text-sm text-gray-400">
+              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, items.length)} of {items.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-400">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

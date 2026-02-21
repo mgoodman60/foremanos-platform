@@ -72,7 +72,7 @@ export default function BudgetPage() {
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-dark-card border border-gray-700 mb-6 flex-wrap">
+          <TabsList className="bg-dark-card border border-gray-700 mb-6 overflow-x-auto whitespace-nowrap h-auto flex-nowrap w-full justify-start">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4 mr-2" aria-hidden="true" />
               Dashboard

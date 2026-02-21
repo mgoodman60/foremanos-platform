@@ -37,11 +37,14 @@ interface DailyReportsListProps {
   onSelect?: (report: DailyReport) => void;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }: DailyReportsListProps) {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchReports();
@@ -118,6 +121,17 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
     return entries.reduce((sum, e) => sum + (e.workerCount * e.regularHours), 0);
   };
 
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
+  const totalPages = Math.ceil(reports.length / ITEMS_PER_PAGE);
+  const paginatedReports = reports.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -174,7 +188,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
             )}
           </div>
         ) : (
-          reports.map((report) => (
+          paginatedReports.map((report) => (
             <div
               key={report.id}
               role="button"
@@ -301,6 +315,34 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="px-6 py-3 border-t border-gray-700 flex items-center justify-between">
+          <p className="text-sm text-gray-400">
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, reports.length)} of {reports.length}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-400">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
