@@ -45,7 +45,7 @@ export default function DailyReportsList({ projectSlug, onCreateNew, onSelect }:
 
   useEffect(() => {
     fetchReports();
-  }, [projectSlug]);
+  }, [projectSlug, filter]);
 
   const fetchReports = async () => {
     try {

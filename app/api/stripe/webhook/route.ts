@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
-import { stripe } from '@/lib/stripe';
+import { stripe, STRIPE_PRICE_IDS } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
 import { SubscriptionTier } from '@prisma/client';
 import {
@@ -361,14 +361,22 @@ async function logPaymentEvent(event: Stripe.Event) {
 function getTierFromPriceId(priceId: string | undefined): SubscriptionTier {
   if (!priceId) return 'free';
 
-  // Map price IDs to tiers
-  // This is a simple implementation - you might want to store this mapping in the database
-  if (priceId.includes('starter')) return 'starter';
-  if (priceId.includes('pro')) return 'pro';
-  if (priceId.includes('team')) return 'team';
-  if (priceId.includes('business')) return 'business';
-  if (priceId.includes('enterprise')) return 'enterprise';
+  // Build a reverse map from actual Stripe price IDs (env vars) to tiers
+  const tierMap: Record<string, SubscriptionTier> = {
+    starter_monthly: 'starter',
+    starter_annual: 'starter',
+    pro_monthly: 'pro',
+    pro_annual: 'pro',
+    team_monthly: 'team',
+    business_monthly: 'business',
+    enterprise_monthly: 'enterprise',
+  };
 
-  // Default to free if we can't determine
+  for (const [key, id] of Object.entries(STRIPE_PRICE_IDS)) {
+    if (id === priceId && tierMap[key]) {
+      return tierMap[key];
+    }
+  }
+
   return 'free';
 }

@@ -3,6 +3,7 @@ import { SUBSCRIPTION_LIMITS, SubscriptionTier } from './stripe';
 
 /**
  * Check if user has reached their query limit
+ * Uses a serializable transaction to prevent race conditions during reset window
  */
 export async function checkQueryLimit(userId: string): Promise<{
   allowed: boolean;
@@ -10,67 +11,65 @@ export async function checkQueryLimit(userId: string): Promise<{
   limit: number;
   tier: string;
 }> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      subscriptionTier: true,
-      queriesUsedThisMonth: true,
-      queriesResetAt: true,
-    },
-  });
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  // Reset queries if it's a new month
-  const now = new Date();
-  const resetDate = new Date(user.queriesResetAt);
-  if (now > resetDate) {
-    const nextMonth = new Date(now);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    nextMonth.setDate(1);
-    nextMonth.setHours(0, 0, 0, 0);
-
-    await prisma.user.update({
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
       where: { id: userId },
-      data: {
-        queriesUsedThisMonth: 0,
-        queriesResetAt: nextMonth,
+      select: {
+        subscriptionTier: true,
+        queriesUsedThisMonth: true,
+        queriesResetAt: true,
       },
     });
 
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const now = new Date();
+    const resetDate = new Date(user.queriesResetAt);
+    let used = user.queriesUsedThisMonth;
+
+    // Reset queries if it's a new month — atomic within this transaction
+    if (now > resetDate) {
+      const nextMonth = new Date(now);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      nextMonth.setDate(1);
+      nextMonth.setHours(0, 0, 0, 0);
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          queriesUsedThisMonth: 0,
+          queriesResetAt: nextMonth,
+        },
+      });
+
+      used = 0;
+    }
+
+    const limits = SUBSCRIPTION_LIMITS[user.subscriptionTier as SubscriptionTier];
+    const limit = limits.queriesPerMonth;
+
+    // -1 means unlimited
+    if (limit === -1) {
+      return {
+        allowed: true,
+        remaining: -1,
+        limit: -1,
+        tier: user.subscriptionTier,
+      };
+    }
+
+    const remaining = Math.max(0, limit - used);
+    const allowed = remaining > 0;
+
     return {
-      allowed: true,
-      remaining: SUBSCRIPTION_LIMITS[user.subscriptionTier as SubscriptionTier].queriesPerMonth,
-      limit: SUBSCRIPTION_LIMITS[user.subscriptionTier as SubscriptionTier].queriesPerMonth,
+      allowed,
+      remaining,
+      limit,
       tier: user.subscriptionTier,
     };
-  }
-
-  const limits = SUBSCRIPTION_LIMITS[user.subscriptionTier as SubscriptionTier];
-  const limit = limits.queriesPerMonth;
-  const used = user.queriesUsedThisMonth;
-
-  // -1 means unlimited
-  if (limit === -1) {
-    return {
-      allowed: true,
-      remaining: -1,
-      limit: -1,
-      tier: user.subscriptionTier,
-    };
-  }
-
-  const remaining = Math.max(0, limit - used);
-  const allowed = remaining > 0;
-
-  return {
-    allowed,
-    remaining,
-    limit,
-    tier: user.subscriptionTier,
-  };
+  });
 }
 
 /**

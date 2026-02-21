@@ -69,7 +69,11 @@ export async function POST(request: NextRequest) {
     // Replay protection: reject requests older than 5 minutes
     const twilioTimestamp = request.headers.get('X-Twilio-Timestamp');
     if (twilioTimestamp) {
-      const requestTime = new Date(twilioTimestamp).getTime();
+      // Handle both Unix epoch seconds and date strings
+      const parsed = Number(twilioTimestamp);
+      const requestTime = !isNaN(parsed) && parsed > 0
+        ? parsed * 1000  // Unix epoch in seconds → milliseconds
+        : new Date(twilioTimestamp).getTime();
       const now = Date.now();
       const fiveMinutesMs = 5 * 60 * 1000;
       if (!isNaN(requestTime) && Math.abs(now - requestTime) > fiveMinutesMs) {
