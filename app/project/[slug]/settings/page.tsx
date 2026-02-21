@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { Settings as SettingsIcon, Save, RefreshCw, ChevronLeft, MessageSquare } from 'lucide-react';
+import { Settings as SettingsIcon, Save, RefreshCw, ChevronLeft, MessageSquare, AlertCircle } from 'lucide-react';
 import SMSConfigPanel from '@/components/daily-reports/SMSConfigPanel';
 
 interface ProjectSettings {
@@ -140,6 +140,20 @@ export default function ProjectSettingsPage() {
     }
   }, [autoUpdateEnabled, autoApplyThreshold, requireManualReview, notifyOnAutoUpdate, settings]);
 
+  // Warn user before leaving with unsaved changes
+  const handleBeforeUnload = useCallback((e: BeforeUnloadEvent) => {
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    if (hasChanges) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasChanges, handleBeforeUnload]);
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -181,6 +195,12 @@ export default function ProjectSettingsPage() {
                 <h1 className="text-3xl font-bold text-white flex items-center space-x-3">
                   <SettingsIcon className="h-8 w-8 text-orange-500" />
                   <span>Project Settings</span>
+                  {hasChanges && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-orange-300 bg-orange-500/15 border border-orange-500/30 rounded-full">
+                      <AlertCircle className="h-3 w-3" />
+                      Unsaved changes
+                    </span>
+                  )}
                 </h1>
                 <p className="text-gray-400 mt-1">{settings.projectName}</p>
               </div>
