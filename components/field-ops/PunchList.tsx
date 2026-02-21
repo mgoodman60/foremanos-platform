@@ -114,7 +114,7 @@ export default function PunchList({ projectSlug, onCreateNew, onSelect }: PunchL
   return (
     <div className="space-y-4">
       {/* Stats Bar */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard label="Open" count={getStatCount('OPEN')} color="blue" />
         <StatCard label="In Progress" count={getStatCount('IN_PROGRESS')} color="yellow" />
         <StatCard label="Completed" count={getStatCount('COMPLETED')} color="purple" />

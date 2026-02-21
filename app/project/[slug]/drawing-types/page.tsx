@@ -9,7 +9,7 @@ export default function DrawingTypesPage({ params }: { params: Promise<{ slug: s
   const resolvedParams = use(params);
   
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-dark-surface">
       {/* Header */}
       <div className="border-b border-gray-700 bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4">

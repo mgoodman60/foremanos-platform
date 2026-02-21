@@ -979,7 +979,7 @@ export default function SchedulesPage() {
                       </TabsTrigger>
                       <TabsTrigger 
                         value="weather" 
-                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-blue-500"
+                        className="text-gray-300 bg-dark-hover hover:bg-gray-700 data-[state=active]:bg-orange-500 data-[state=active]:text-white gap-2 border border-gray-500 data-[state=active]:border-orange-500"
                       >
                         <Cloud className="h-4 w-4" />
                         Weather

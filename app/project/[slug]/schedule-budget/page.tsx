@@ -49,23 +49,23 @@ export default function ScheduleBudgetPage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-dark-card border border-gray-700 mb-6 flex-wrap">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <TrendingUp className="h-4 w-4 mr-2" />
               Analysis
             </TabsTrigger>
-            <TabsTrigger value="milestones" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="milestones" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <Flag className="h-4 w-4 mr-2" />
               Milestones
             </TabsTrigger>
-            <TabsTrigger value="cash-flow" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="cash-flow" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <DollarSign className="h-4 w-4 mr-2" />
               Cash Flow
             </TabsTrigger>
-            <TabsTrigger value="pay-apps" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="pay-apps" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <FileText className="h-4 w-4 mr-2" />
               Pay Apps
             </TabsTrigger>
-            <TabsTrigger value="procurement" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="procurement" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <Package className="h-4 w-4 mr-2" />
               Procurement
             </TabsTrigger>

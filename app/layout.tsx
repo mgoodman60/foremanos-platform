@@ -20,8 +20,6 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://foremanos.site'),
   title: 'ForemanOS - Field Operations Intelligence',
@@ -115,7 +113,7 @@ export default function RootLayout({
                 duration={3000}
                 toastOptions={{
                   style: {
-                    fontFamily: 'Roboto Mono, monospace',
+                    fontFamily: 'Inter, system-ui, sans-serif',
                   },
                 }}
               />

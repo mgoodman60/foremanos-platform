@@ -25,6 +25,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 interface MobileBottomNavProps {
   activeTab: 'overview' | 'docs' | 'capture' | 'field' | 'more';
@@ -167,7 +168,7 @@ export function MobileBottomNav({
         {
           icon: LogOut,
           label: 'Sign Out',
-          onClick: () => { router.push('/api/auth/signout'); setShowMoreMenu(false); },
+          onClick: () => { signOut({ callbackUrl: '/' }); setShowMoreMenu(false); },
         },
       ],
     },

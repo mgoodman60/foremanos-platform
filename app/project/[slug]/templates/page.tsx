@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { Upload, FileText, Download, Trash2, Plus, X, ChevronLeft } from 'lucide-react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Template {
   id: string;
@@ -53,6 +54,7 @@ export default function TemplatesPage() {
     templateType: 'daily_report',
     isPublic: false,
   });
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -184,8 +186,14 @@ export default function TemplatesPage() {
     }
   };
 
-  const handleDelete = async (templateId: string) => {
-    if (!confirm('Are you sure you want to delete this template?')) return;
+  const handleDelete = (templateId: string) => {
+    setDeleteTemplateId(templateId);
+  };
+
+  const doDelete = async () => {
+    const templateId = deleteTemplateId;
+    setDeleteTemplateId(null);
+    if (!templateId) return;
 
     const toastId = toast.loading('Deleting template...');
 
@@ -232,7 +240,7 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-dark-surface">
       {/* Back Navigation */}
       <div className="border-b border-gray-700 bg-gray-800">
         <div className="container mx-auto px-6 py-4">
@@ -490,6 +498,15 @@ export default function TemplatesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteTemplateId !== null}
+        onConfirm={doDelete}
+        onCancel={() => setDeleteTemplateId(null)}
+        title="Delete Template"
+        description="Are you sure you want to delete this template?"
+        variant="destructive"
+      />
       </div>
     </div>
   );

@@ -73,43 +73,43 @@ export default function BudgetPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-dark-card border border-gray-700 mb-6 flex-wrap">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <BarChart3 className="h-4 w-4 mr-2" aria-hidden="true" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="job-cost" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="job-cost" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <DollarSign className="h-4 w-4 mr-2" aria-hidden="true" />
               Job Cost
             </TabsTrigger>
-            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <TrendingUp className="h-4 w-4 mr-2" aria-hidden="true" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="review" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="review" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <ClipboardCheck className="h-4 w-4 mr-2" aria-hidden="true" />
               Review
             </TabsTrigger>
-            <TabsTrigger value="change-orders" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="change-orders" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <FileEdit className="h-4 w-4 mr-2" aria-hidden="true" />
               Change Orders
             </TabsTrigger>
-            <TabsTrigger value="invoices" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="invoices" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <Receipt className="h-4 w-4 mr-2" aria-hidden="true" />
               Invoices
             </TabsTrigger>
-            <TabsTrigger value="labor" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="labor" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <Users className="h-4 w-4 mr-2" aria-hidden="true" />
               Labor
             </TabsTrigger>
-            <TabsTrigger value="quotes" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="quotes" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <FileUp className="h-4 w-4 mr-2" aria-hidden="true" />
               Quotes
             </TabsTrigger>
-            <TabsTrigger value="takeoffs" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="takeoffs" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <Layers className="h-4 w-4 mr-2" aria-hidden="true" />
               Takeoffs
             </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="reports" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
               <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
               Reports
             </TabsTrigger>

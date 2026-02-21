@@ -54,8 +54,32 @@ function ProjectLayoutInner({ children }: { children: React.ReactNode }) {
     if (!pathname) return 'overview';
     if (pathname.includes('/documents')) return 'docs';
     if (pathname.includes('/field-ops')) return 'field';
-    if (pathname.includes('/schedule') || pathname.includes('/budget')) return 'more';
-    if (pathname.includes('/mep')) return 'more';
+    if (
+      pathname.includes('/schedule') ||
+      pathname.includes('/budget') ||
+      pathname.includes('/mep') ||
+      pathname.includes('/takeoffs') ||
+      pathname.includes('/rooms') ||
+      pathname.includes('/intelligence') ||
+      pathname.includes('/settings') ||
+      pathname.includes('/integrations') ||
+      pathname.includes('/reports') ||
+      pathname.includes('/templates') ||
+      pathname.includes('/annotations') ||
+      pathname.includes('/renders') ||
+      pathname.includes('/legends') ||
+      pathname.includes('/scales') ||
+      pathname.includes('/spatial') ||
+      pathname.includes('/isometric') ||
+      pathname.includes('/evm') ||
+      pathname.includes('/contracts') ||
+      pathname.includes('/subcontractors') ||
+      pathname.includes('/crews') ||
+      pathname.includes('/photos') ||
+      pathname.includes('/drawing-types') ||
+      pathname.includes('/requirements') ||
+      pathname.includes('/models')
+    ) return 'more';
     return 'overview';
   };
 

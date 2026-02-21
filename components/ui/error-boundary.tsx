@@ -40,24 +40,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       return (
         <div className="flex items-center justify-center min-h-[400px] p-6">
-          <div className="max-w-md w-full bg-white border border-red-200 rounded-lg shadow-sm p-8">
+          <div className="max-w-md w-full bg-dark-card border border-red-500/30 rounded-lg shadow-sm p-8">
             <div className="flex items-center gap-3 mb-4">
-              <AlertCircle className="w-8 h-8 text-red-600" />
-              <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
+              <AlertCircle className="w-8 h-8 text-red-400" />
+              <h2 className="text-xl font-bold text-white">Something went wrong</h2>
             </div>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-400 mb-6">
               We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
             </p>
             {this.state.error && (
-              <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-6">
-                <p className="text-xs font-mono text-gray-700">
+              <div className="bg-dark-surface border border-gray-700 rounded p-3 mb-6">
+                <p className="text-xs font-mono text-gray-300">
                   {this.state.error.message}
                 </p>
               </div>
             )}
             <Button
               onClick={this.handleReset}
-              className="w-full bg-client-primary hover:bg-client-primary-dark text-white"
+              className="w-full bg-brand-500 hover:bg-brand-600 text-white"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
