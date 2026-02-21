@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
@@ -8,6 +8,7 @@ import { namespacePIN } from '@/lib/guest-pin-utils';
 import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
+import { withCsrf } from '@/lib/csrf';
 
 const createProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required').max(100, 'Project name too long'),
@@ -26,7 +27,7 @@ function generateSlug(name: string): string {
     .trim();
 }
 
-export async function POST(request: Request) {
+export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -178,4 +179,4 @@ export async function POST(request: Request) {
     logger.error('PROJECT_CREATION', 'Error creating project', error instanceof Error ? error : undefined);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+});

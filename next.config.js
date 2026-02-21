@@ -1,4 +1,5 @@
 const path = require('path');
+const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -6,6 +7,7 @@ const nextConfig = {
   output: process.env.NEXT_OUTPUT_MODE,
   experimental: {
     outputFileTracingRoot: path.join(__dirname, './'),
+    instrumentationHook: true,
   },
   eslint: {
     // Kept true: 4,135 lint warnings would block Vercel builds if set to false.
@@ -43,7 +45,7 @@ const nextConfig = {
           "script-src 'self' 'unsafe-inline' https://unpkg.com https://developer.api.autodesk.com https://js.stripe.com",
           "style-src 'self' 'unsafe-inline' https://unpkg.com https://developer.api.autodesk.com",
           "img-src 'self' data: blob: *.r2.cloudflarestorage.com",
-          "connect-src 'self' *.amazonaws.com *.r2.cloudflarestorage.com https://developer.api.autodesk.com https://js.stripe.com",
+          "connect-src 'self' *.amazonaws.com *.r2.cloudflarestorage.com https://developer.api.autodesk.com https://js.stripe.com *.ingest.sentry.io",
           "frame-src 'self' https://js.stripe.com",
           "font-src 'self'",
         ].join('; '),
@@ -52,4 +54,19 @@ const nextConfig = {
   }],
 };
 
-module.exports = nextConfig;
+module.exports = withSentryConfig(nextConfig, {
+  // Upload source maps for better stack traces
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+
+  // Hide source maps from the client
+  hideSourceMaps: true,
+
+  // Automatically instrument API routes and server components
+  autoInstrumentServerFunctions: true,
+  autoInstrumentMiddleware: true,
+});

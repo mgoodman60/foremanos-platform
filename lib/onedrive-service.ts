@@ -8,6 +8,7 @@ import { processUnprocessedDocuments } from './document-processor';
 import { suggestDocumentCategory } from './document-categorizer';
 import { createScopedLogger } from './logger';
 import type { OneDriveItem } from './types/report-data';
+import { encrypt, decrypt } from './encryption';
 
 const log = createScopedLogger('ONEDRIVE');
 
@@ -130,8 +131,8 @@ export class OneDriveService {
 
     return new OneDriveService({
       projectId: project.id,
-      accessToken: project.oneDriveAccessToken,
-      refreshToken: project.oneDriveRefreshToken,
+      accessToken: decrypt(project.oneDriveAccessToken),
+      refreshToken: decrypt(project.oneDriveRefreshToken),
       tokenExpiry: project.oneDriveTokenExpiry || new Date(),
       folderId: project.oneDriveFolderId || undefined,
     });
@@ -170,11 +171,11 @@ export class OneDriveService {
     this.accessToken = data.access_token;
     this.tokenExpiry = new Date(Date.now() + (data.expires_in * 1000) - 60000); // Subtract 1 minute for safety
 
-    // Update tokens in database
+    // Update tokens in database (encrypt before storing)
     await prisma.project.update({
       where: { id: this.projectId },
       data: {
-        oneDriveAccessToken: this.accessToken,
+        oneDriveAccessToken: encrypt(this.accessToken),
         oneDriveTokenExpiry: this.tokenExpiry,
       },
     });

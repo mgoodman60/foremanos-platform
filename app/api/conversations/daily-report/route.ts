@@ -23,6 +23,9 @@ import {
   findAvailableLocations,
   AvailableLocations,
 } from '@/lib/location-detector';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('daily-report');
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +49,7 @@ async function recordWeatherData(
     const weatherData = await fetchWeatherForecast(projectLat, projectLon);
 
     if (!weatherData || weatherData.length === 0) {
-      console.log('[WEATHER_RECORD] Failed to fetch weather data');
+      logger.info('Failed to fetch weather data');
       return {
         snapshots: existingSnapshots || [],
         warning: null,
@@ -72,16 +75,17 @@ async function recordWeatherData(
       if (todayForecast) {
         const snapshot = createWeatherSnapshot(forecastToDailyWeather(todayForecast), timeSlot, new Date());
         updatedSnapshots = recordWeatherSnapshot(existingSnapshots, snapshot);
-        console.log(`[WEATHER_RECORD] Recorded ${timeSlot} snapshot:`, {
+        logger.info('Recorded weather snapshot', {
+          timeSlot,
           temp: snapshot.temperature,
           conditions: snapshot.conditions,
           rainChance: snapshot.rainChance,
         });
       }
     } else if (timeSlot) {
-      console.log(`[WEATHER_RECORD] Snapshot for ${timeSlot} already exists`);
+      logger.debug('Snapshot already exists', { timeSlot });
     } else {
-      console.log('[WEATHER_RECORD] Not in recording window');
+      logger.debug('Not in recording window');
     }
 
     return {
@@ -90,7 +94,7 @@ async function recordWeatherData(
       weatherData,
     };
   } catch (error) {
-    console.error('[WEATHER_RECORD] Error recording weather:', error);
+    logger.error('Error recording weather', error as Error);
     return {
       snapshots: existingSnapshots || [],
       warning: null,
@@ -116,7 +120,7 @@ async function handleScheduleDetection(
   try {
     // Check if project has a confirmed master schedule
     if (project.masterScheduleDocId) {
-      console.log('[SCHEDULE] Using confirmed master schedule:', project.masterScheduleDocId);
+      logger.info('Using confirmed master schedule', { docId: project.masterScheduleDocId });
       
       // Parse activities for today from the confirmed schedule
       const activities = await parseScheduleActivities(
@@ -149,7 +153,7 @@ async function handleScheduleDetection(
     const candidates = await findScheduleCandidates(project.id);
     
     if (candidates.length === 0) {
-      console.log('[SCHEDULE] No schedule candidates found');
+      logger.info('No schedule candidates found');
       return {
         suggestions: [],
         scheduleSuggestionText: '',
@@ -160,7 +164,7 @@ async function handleScheduleDetection(
     
     if (candidates.length === 1) {
       // Single schedule document found - auto-select it without asking
-      console.log('[SCHEDULE] Single schedule found, auto-selecting:', candidates[0].title);
+      logger.info('Single schedule found, auto-selecting', { title: candidates[0].title });
       
       // Auto-set as master schedule
       try {
@@ -168,9 +172,9 @@ async function handleScheduleDetection(
           where: { id: project.id },
           data: { masterScheduleDocId: candidates[0].id },
         });
-        console.log('[SCHEDULE] Auto-confirmed master schedule:', candidates[0].id);
+        logger.info('Auto-confirmed master schedule', { id: candidates[0].id });
       } catch (e) {
-        console.error('[SCHEDULE] Failed to auto-set master schedule:', e);
+        logger.error('Failed to auto-set master schedule', e as Error);
       }
       
       const activities = await parseScheduleActivities(
@@ -190,7 +194,7 @@ async function handleScheduleDetection(
     }
     
     // Multiple candidates or low confidence - ask user to choose
-    console.log(`[SCHEDULE] Found ${candidates.length} schedule candidates, asking user`);
+    logger.info('Multiple schedule candidates found, asking user', { count: candidates.length });
     return {
       suggestions: [],
       scheduleSuggestionText: '',
@@ -198,7 +202,7 @@ async function handleScheduleDetection(
       candidates: candidates.slice(0, 3), // Top 3 candidates
     };
   } catch (error) {
-    console.error('[SCHEDULE] Error handling schedule detection:', error);
+    logger.error('Error handling schedule detection', error as Error);
     return {
       suggestions: [],
       scheduleSuggestionText: '',
@@ -259,7 +263,7 @@ async function handleLocationDetection(
     const hasAnyLocations = hasRooms || hasAreas || hasElevations || hasSiteZones;
     
     if (!hasAnyLocations) {
-      console.log('[LOCATION] No locations detected from plans');
+      logger.info('No locations detected from plans');
       return {
         availableLocations: locations,
         locationSummaryText: '',
@@ -296,7 +300,7 @@ async function handleLocationDetection(
     
     summary += '\\n*I\'ll ask for location details as you report work activities.*';
     
-    console.log(`[LOCATION] Detected: ${locations.rooms.length} rooms, ${locations.elevations.length} elevations, ${locations.siteZones.length} site zones`);
+    logger.info('Locations detected', { rooms: locations.rooms.length, elevations: locations.elevations.length, siteZones: locations.siteZones.length });
     
     return {
       availableLocations: locations,
@@ -304,7 +308,7 @@ async function handleLocationDetection(
       hasLocations: true,
     };
   } catch (error) {
-    console.error('[LOCATION] Error detecting locations:', error);
+    logger.error('Error detecting locations', error as Error);
     return {
       availableLocations: {
         rooms: [], floors: [], zones: [],
@@ -466,7 +470,7 @@ export async function GET(request: Request) {
         
         // If still no coordinates, flag for setup prompt
         if (!projectLat || !projectLon) {
-          console.warn(`[Daily Report] Project ${project.name} has no location set - prompting user`);
+          logger.warn('Project has no location set, prompting user', { projectName: project.name });
           locationSetupNeeded = true;
           // Temporary coordinates for basic functionality (will prompt user)
           projectLat = 38.2085;
@@ -644,7 +648,7 @@ export async function GET(request: Request) {
         // If still no coordinates, use fallback and flag for setup
         if (!projectLat || !projectLon) {
           existingChatLocationSetupNeeded = true;
-          console.warn(`[Daily Report] Project ${project.name} has no location - using fallback`);
+          logger.warn('Project has no location, using fallback', { projectName: project.name });
           projectLat = 38.2085; // Louisville, KY fallback
           projectLon = -85.7585;
         }
@@ -766,7 +770,7 @@ export async function GET(request: Request) {
       
       // Only record if we're in a recording window and snapshot doesn't exist yet
       if (timeSlot && shouldRecordSnapshot(existingSnapshots, timeSlot)) {
-        console.log(`[WEATHER_RECORD] Recording ${timeSlot} snapshot for existing chat`);
+        logger.info('Recording weather snapshot for existing chat', { timeSlot });
         
         const weatherRecording = await recordWeatherData(
           projectLat,
@@ -803,7 +807,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(dailyReportChat);
   } catch (error: any) {
-    console.error('[DAILY_REPORT_ERROR]', error);
+    logger.error('Daily report error', error as Error);
     return NextResponse.json(
       { error: 'Failed to get or create daily report chat' },
       { status: 500 }
@@ -881,7 +885,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('[DAILY_REPORT_ACTION_ERROR]', error);
+    logger.error('Daily report action error', error as Error);
     return NextResponse.json(
       { error: 'Failed to perform daily report action' },
       { status: 500 }

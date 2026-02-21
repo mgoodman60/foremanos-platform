@@ -5,6 +5,9 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendWelcomeEmail as sendWelcomeEmailService } from '@/lib/email-service';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('admin-users');
 
 // Generate cryptographically secure password
 function generateSecurePassword(): string {
@@ -57,7 +60,7 @@ export async function GET() {
 
     return NextResponse.json({ users });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    logger.error('Error fetching users', error as Error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -201,10 +204,10 @@ export async function POST(request: NextRequest) {
     if (sendWelcomeEmail && newUser.email) {
       try {
         await sendWelcomeEmailService(newUser.email, newUser.username, newUser.id);
-        console.log(`Welcome email sent to ${newUser.email}`);
+        logger.info('Welcome email sent', { email: newUser.email });
       } catch (emailError) {
         // Don't fail user creation if email fails - it's not critical
-        console.error('Failed to send welcome email:', emailError);
+        logger.error('Failed to send welcome email', emailError as Error);
       }
     }
 
@@ -221,7 +224,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating user:', error);
+    logger.error('Error creating user', error as Error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

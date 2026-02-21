@@ -3,8 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { createPortalSession } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { withCsrf } from '@/lib/csrf';
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -12,6 +15,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // Rate limit portal session creation
+    const rateLimitResult = await checkRateLimit(
+      `portal:${session.user.email}`,
+      RATE_LIMITS.API
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
       );
     }
 
@@ -45,8 +60,8 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error creating portal session:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create portal session' },
+      { error: safeErrorMessage(error, 'Failed to create portal session') },
       { status: 500 }
     );
   }
-}
+});

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OneDriveService } from '@/lib/onedrive-service';
 import { prisma } from '@/lib/db';
+import { encrypt } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,8 +44,8 @@ export async function GET(request: NextRequest) {
     await prisma.project.update({
       where: { id: project.id },
       data: {
-        oneDriveAccessToken: tokens.accessToken,
-        oneDriveRefreshToken: tokens.refreshToken,
+        oneDriveAccessToken: encrypt(tokens.accessToken),
+        oneDriveRefreshToken: encrypt(tokens.refreshToken),
         oneDriveTokenExpiry: tokenExpiry,
       },
     });

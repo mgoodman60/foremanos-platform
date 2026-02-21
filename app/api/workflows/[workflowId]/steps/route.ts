@@ -8,6 +8,9 @@ import {
   parseScheduleActivities, 
   formatScheduleSuggestions 
 } from '../../../../../lib/schedule-parser';
+import { createLogger } from '../../../../../lib/logger';
+
+const logger = createLogger('workflow-steps');
 
 /**
  * POST /api/workflows/[workflowId]/steps
@@ -57,7 +60,7 @@ export async function POST(
         // Fetch schedule context from project documents
         scheduleContext = await fetchScheduleContextForWorkflow(project.id, projectSlug);
       } catch (error) {
-        console.error('[WORKFLOW_STEPS] Error fetching schedule context:', error);
+        logger.error('Error fetching schedule context', error as Error);
         scheduleContext = { todayTasks: [], hasSchedule: false, error: 'Failed to load schedule' };
       }
     }
@@ -76,7 +79,7 @@ export async function POST(
 
     return NextResponse.json({ steps: nextSteps, scheduleContext });
   } catch (error) {
-    console.error('Error fetching next steps:', error);
+    logger.error('Error fetching next steps', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch next steps' },
       { status: 500 }
@@ -93,13 +96,13 @@ async function fetchScheduleContextForWorkflow(
   projectSlug: string
 ): Promise<any> {
   try {
-    console.log('[WORKFLOW_STEPS] Fetching schedule context for project:', projectId);
+    logger.info('Fetching schedule context', { projectId });
 
     // Find schedule documents in the project
     const scheduleCandidates = await findScheduleCandidates(projectId);
 
     if (scheduleCandidates.length === 0) {
-      console.log('[WORKFLOW_STEPS] No schedule documents found');
+      logger.info('No schedule documents found');
       return {
         hasSchedule: false,
         todayTasks: [],
@@ -109,7 +112,7 @@ async function fetchScheduleContextForWorkflow(
 
     // Use the highest-scoring schedule document
     const bestSchedule = scheduleCandidates[0];
-    console.log('[WORKFLOW_STEPS] Using schedule:', bestSchedule.documentName);
+    logger.info('Using schedule', { documentName: bestSchedule.documentName });
 
     // Get today's date
     const today = new Date();
@@ -122,7 +125,7 @@ async function fetchScheduleContextForWorkflow(
       today
     );
 
-    console.log(`[WORKFLOW_STEPS] Found ${activities.length} activities for today`);
+    logger.info('Found activities for today', { count: activities.length });
 
     // Format activities for display
     const formattedSuggestions = activities.length > 0 
@@ -139,7 +142,7 @@ async function fetchScheduleContextForWorkflow(
       date: today.toISOString()
     };
   } catch (error) {
-    console.error('[WORKFLOW_STEPS] Error in fetchScheduleContextForWorkflow:', error);
+    logger.error('Error in fetchScheduleContextForWorkflow', error as Error);
     throw error;
   }
 }

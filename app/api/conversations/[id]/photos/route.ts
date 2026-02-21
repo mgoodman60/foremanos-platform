@@ -24,6 +24,9 @@ import {
   PhotoMetadata,
 } from '@/lib/photo-analyzer';
 import { randomUUID } from 'crypto';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('photos-api');
 
 export async function GET(
   request: NextRequest,
@@ -68,7 +71,7 @@ export async function GET(
       photoCount: conversation.photoCount,
     });
   } catch (error) {
-    console.error('[PHOTOS_API] Error fetching photos:', error);
+    logger.error('Error fetching photos', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch photos' },
       { status: 500 }
@@ -233,7 +236,7 @@ export async function POST(
       fileContentType = file.type;
     }
 
-    console.log('[PHOTOS_API] Photo uploaded to S3:', cloudStoragePath);
+    logger.info('Photo uploaded to S3', { cloudStoragePath });
 
     // Create photo metadata using the flexible createPhotoMetadata function
     const photoId = randomUUID();
@@ -278,7 +281,7 @@ export async function POST(
       message: responseMessage,
     });
   } catch (error) {
-    console.error('[PHOTOS_API] Error uploading photo:', error);
+    logger.error('Error uploading photo', error as Error);
     return NextResponse.json(
       { error: 'Failed to upload photo' },
       { status: 500 }

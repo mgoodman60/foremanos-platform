@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { OneDriveService } from '@/lib/onedrive-service';
 import { logActivity } from '@/lib/audit-log';
+import { decrypt } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for long-running sync
@@ -78,11 +79,11 @@ export async function POST(
     });
     syncHistoryId = syncHistory.id;
 
-    // Create service instance
+    // Create service instance (decrypt tokens from DB)
     const service = new OneDriveService({
       projectId: project.id,
-      accessToken: project.oneDriveAccessToken,
-      refreshToken: project.oneDriveRefreshToken,
+      accessToken: decrypt(project.oneDriveAccessToken),
+      refreshToken: decrypt(project.oneDriveRefreshToken),
       tokenExpiry: project.oneDriveTokenExpiry || new Date(),
       folderId: project.oneDriveFolderId,
     });

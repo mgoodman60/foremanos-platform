@@ -9,6 +9,9 @@ import { authOptions } from '@/lib/auth-options';
 import { deleteObject } from '@/lib/autodesk-oss';
 import { deleteManifest } from '@/lib/autodesk-model-derivative';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('autodesk-model');
 
 export async function GET(
   request: NextRequest,
@@ -35,7 +38,7 @@ export async function GET(
 
     return NextResponse.json({ model });
   } catch (error) {
-    console.error('[Autodesk Model] Error:', error);
+    logger.error('Failed to fetch model', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch model' },
       { status: 500 }
@@ -65,14 +68,14 @@ export async function DELETE(
     try {
       await deleteObject(model.objectKey);
     } catch (e) {
-      console.warn('[Autodesk Model] Failed to delete OSS object:', e);
+      logger.warn('Failed to delete OSS object', { error: e instanceof Error ? e.message : String(e) });
     }
 
     // Delete manifest/derivatives
     try {
       await deleteManifest(model.urn);
     } catch (e) {
-      console.warn('[Autodesk Model] Failed to delete manifest:', e);
+      logger.warn('Failed to delete manifest', { error: e instanceof Error ? e.message : String(e) });
     }
 
     // Delete from database
@@ -82,7 +85,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Autodesk Model Delete] Error:', error);
+    logger.error('Failed to delete model', error as Error);
     return NextResponse.json(
       { error: 'Failed to delete model' },
       { status: 500 }

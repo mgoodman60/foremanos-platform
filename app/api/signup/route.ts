@@ -13,12 +13,16 @@ import { sendEmailVerification, sendNewSignupNotification } from '@/lib/email-se
 import { stripe, STRIPE_PRICE_IDS } from '@/lib/stripe';
 import crypto from 'crypto';
 import { validatePassword } from '@/lib/password-validator';
+import { createLogger } from '@/lib/logger';
+import { withCsrf } from '@/lib/csrf';
+
+const logger = createLogger('signup');
 
 export const dynamic = 'force-dynamic';
 
 type SubscriptionTier = 'free' | 'starter' | 'pro' | 'team' | 'business' | 'enterprise';
 
-export async function POST(request: NextRequest) {
+export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
     // Apply rate limiting for signup
     const clientIp = getClientIp(request);
@@ -127,7 +131,7 @@ export async function POST(request: NextRequest) {
       user.username,
       `${tier} (${isPaidTier ? 'payment pending' : 'email verification pending'})`
     ).catch(error => {
-      console.error('Error sending signup notification to admins:', error);
+      logger.error('Failed to send signup notification to admins', error as Error);
     });
 
     // Handle Free Tier: Send email verification
@@ -197,7 +201,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log(`Stripe checkout session created for user ${user.username} (${tier})`);
+      logger.info('Stripe checkout session created', { username: user.username, tier });
 
       return NextResponse.json(
         {
@@ -214,7 +218,7 @@ export async function POST(request: NextRequest) {
         { status: 201 }
       );
     } catch (stripeError) {
-      console.error('Stripe checkout creation error:', stripeError);
+      logger.error('Stripe checkout creation failed', stripeError as Error);
       
       // Rollback: Delete the user since we couldn't create checkout
       await prisma.user.delete({ where: { id: user.id } });
@@ -225,10 +229,10 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('Signup error:', error);
+    logger.error('Signup error', error as Error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
-}
+});

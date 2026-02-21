@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
 import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('verify-email');
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
       request,
     });
 
-    console.log(`Email verified for user ${user.username} (${user.email})`);
+    logger.info('Email verified', { username: user.username, email: user.email });
 
     return NextResponse.json(
       {
@@ -82,7 +85,7 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Email verification error:', error);
+    logger.error('Email verification error', error as Error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

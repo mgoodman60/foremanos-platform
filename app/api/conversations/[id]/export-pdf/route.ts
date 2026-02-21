@@ -25,6 +25,9 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
 import { format } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('pdf-export');
 
 interface WeatherSnapshot {
   time: string;
@@ -113,7 +116,7 @@ export async function GET(
       try {
         logoUrl = await getFileUrl(conversation.Project.logoUrl, true);
       } catch (error) {
-        console.error('[PDF_EXPORT] Error getting logo URL:', error);
+        logger.error('Error getting logo URL', error as Error);
       }
     }
 
@@ -124,7 +127,7 @@ export async function GET(
           const url = await getFileUrl(photo.cloud_storage_path, photo.isPublic);
           return { ...photo, url };
         } catch (error) {
-          console.error('[PDF_EXPORT] Error getting photo URL:', error);
+          logger.error('Error getting photo URL', error as Error);
           return null;
         }
       })
@@ -149,7 +152,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[PDF_EXPORT] Error generating PDF:', error);
+    logger.error('Error generating PDF', error as Error);
     return NextResponse.json(
       { error: 'Failed to generate PDF' },
       { status: 500 }

@@ -7,11 +7,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { uploadFile } from '@/lib/autodesk-oss';
+import { safeErrorMessage } from '@/lib/api-error';
 import { startTranslation, isSupportedFormat, SUPPORTED_FORMATS } from '@/lib/autodesk-model-derivative';
 import { prisma } from '@/lib/db';
 import { validateS3Config } from '@/lib/aws-config';
 import { downloadFile } from '@/lib/s3';
-import { logger } from '@/lib/logger';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('autodesk-upload');
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      logger.info('AUTODESK_UPLOAD', `Downloading file from R2 for Autodesk: ${fileName}`, {
+      log.info( `Downloading file from R2 for Autodesk: ${fileName}`, {
         cloudStoragePath: body.cloudStoragePath,
       });
       buffer = await downloadFile(body.cloudStoragePath);
@@ -103,11 +106,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload to Autodesk OSS
-    logger.info('AUTODESK_UPLOAD', `Uploading file: ${fileName}`);
+    log.info( `Uploading file: ${fileName}`);
     const uploadResult = await uploadFile(fileName, buffer, fileType);
 
     // Start translation job
-    logger.info('AUTODESK_UPLOAD', `Starting translation for: ${uploadResult.objectId}`);
+    log.info( `Starting translation for: ${uploadResult.objectId}`);
     const translation = await startTranslation(uploadResult.objectId);
 
     // Determine file type
@@ -145,9 +148,9 @@ export async function POST(request: NextRequest) {
       message: 'File uploaded. Processing will complete automatically.',
     });
   } catch (error) {
-    logger.error('AUTODESK_UPLOAD', 'Upload error', error as Error);
+    log.error('Upload error', error as Error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Upload failed' },
+      { error: safeErrorMessage(error, 'Upload failed') },
       { status: 500 }
     );
   }
@@ -179,7 +182,7 @@ async function scheduleStatusChecks(modelId: string) {
           return;
         }
         
-        console.log(`[Autodesk Auto-Check] Checking status for model ${modelId} (delay: ${delay}ms)`);
+        log.info('Checking translation status', { modelId, delay });
         
         // Check translation status directly
         const translationStatus = await getTranslationStatus(model.urn);
@@ -194,7 +197,7 @@ async function scheduleStatusChecks(modelId: string) {
           newStatus = 'processing';
         }
         
-        console.log(`[Autodesk Auto-Check] Model ${modelId}: ${newStatus} (${translationStatus.progress})`);
+        log.info('Translation status update', { modelId, status: newStatus, progress: translationStatus.progress });
         
         // Detect file type for appropriate extraction
         const fileExt = model.fileName.toLowerCase().substring(model.fileName.lastIndexOf('.'));
@@ -210,12 +213,12 @@ async function scheduleStatusChecks(modelId: string) {
           
           // Auto-trigger extraction when complete
           if (newStatus === 'complete') {
-            console.log(`[Autodesk Auto-Check] Model ${modelId} complete, starting extraction... (Type: ${isDWGFile ? 'DWG' : isBIMFile ? 'BIM' : 'Other'})`);
+            log.info('Model complete, starting extraction', { modelId, fileType: isDWGFile ? 'DWG' : isBIMFile ? 'BIM' : 'Other' });
             
             try {
               if (isDWGFile) {
                 // DWG/DXF file - extract layers, blocks, annotations
-                console.log(`[Autodesk Auto-Check] Using DWG extractor for ${model.fileName}`);
+                log.info('Using DWG extractor', { fileName: model.fileName });
                 const dwgData = await extractDWGMetadata(model.urn, model.fileName);
                 const searchChunks = generateDWGSearchContent(dwgData);
                 
@@ -242,11 +245,11 @@ async function scheduleStatusChecks(modelId: string) {
                   },
                 });
                 
-                console.log(`[Autodesk Auto-Check] DWG extraction complete for ${modelId}: ${dwgData.summary.totalLayers} layers, ${dwgData.summary.totalBlocks} blocks, ${dwgData.summary.totalAnnotations} annotations`);
+                log.info('DWG extraction complete', { modelId, totalLayers: dwgData.summary.totalLayers, totalBlocks: dwgData.summary.totalBlocks, totalAnnotations: dwgData.summary.totalAnnotations });
                 
               } else if (isBIMFile) {
                 // BIM file (Revit, IFC) - extract elements, properties
-                console.log(`[Autodesk Auto-Check] Using BIM extractor for ${model.fileName}`);
+                log.info('Using BIM extractor', { fileName: model.fileName });
                 const bimData = await extractBIMData(model.urn);
                 
                 // Import to takeoff
@@ -273,11 +276,11 @@ async function scheduleStatusChecks(modelId: string) {
                   },
                 });
                 
-                console.log(`[Autodesk Auto-Check] BIM extraction complete for ${modelId}: ${takeoffResult.importedItems} items`);
+                log.info('BIM extraction complete', { modelId, importedItems: takeoffResult.importedItems });
                 
               } else {
                 // Other 3D file types - mark as ready without detailed extraction
-                console.log(`[Autodesk Auto-Check] No specific extractor for ${fileExt}, marking as ready`);
+                log.info('No specific extractor available, marking as ready', { fileExt });
                 await prisma.autodeskModel.update({
                   where: { id: model.id },
                   data: {
@@ -293,7 +296,7 @@ async function scheduleStatusChecks(modelId: string) {
               }
               
             } catch (extractError) {
-              console.error(`[Autodesk Auto-Check] Extraction failed for ${modelId}:`, extractError);
+              log.error('Extraction failed', extractError as Error, { modelId });
               await prisma.autodeskModel.update({
                 where: { id: model.id },
                 data: {
@@ -309,7 +312,7 @@ async function scheduleStatusChecks(modelId: string) {
           }
         }
       } catch (error) {
-        console.error(`[Autodesk Auto-Check] Error checking model ${modelId}:`, error);
+        log.error('Error checking model status', error as Error, { modelId });
       }
     }, delay);
   }

@@ -90,6 +90,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-pdf/renderer": "^4.3.1",
+    "@sentry/nextjs": "^10.39.0",
     "@stripe/stripe-js": "^8.6.4",
     "@trigger.dev/sdk": "4.3.3",
     "@types/bcryptjs": "2.4.6",

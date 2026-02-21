@@ -3,8 +3,12 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { validatePassword } from '@/lib/password-validator';
 import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { withCsrf } from '@/lib/csrf';
+import { createLogger } from '@/lib/logger';
 
-export async function POST(request: NextRequest) {
+const logger = createLogger('reset-password');
+
+export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request);
     const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.AUTH);
@@ -73,17 +77,17 @@ export async function POST(request: NextRequest) {
       data: { used: true },
     });
 
-    console.log(`Password reset successful for user: ${resetToken.User.email}`);
+    logger.info('Password reset successful', { email: resetToken.User.email });
 
     return NextResponse.json(
       { message: 'Password reset successful. You can now login with your new password.' },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error in reset-password:', error);
+    logger.error('Reset password error', error as Error);
     return NextResponse.json(
       { error: 'An error occurred while resetting your password' },
       { status: 500 }
     );
   }
-}
+});

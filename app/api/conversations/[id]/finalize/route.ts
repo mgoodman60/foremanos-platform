@@ -17,6 +17,9 @@ import {
   hasReportData,
 } from '@/lib/report-finalization';
 import { markFirstReportFinalized } from '@/lib/onboarding-tracker';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('finalize-api');
 
 export async function POST(
   request: NextRequest,
@@ -103,13 +106,13 @@ export async function POST(
     // Track onboarding progress - first report finalized
     if (conversation.projectId) {
       markFirstReportFinalized(session.user.id, conversation.projectId).catch((err) => {
-        console.error('[ONBOARDING] Error marking first report finalized:', err);
+        logger.error('Error marking first report finalized', err as Error);
       });
     }
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('[FINALIZE_API] Error:', error);
+    logger.error('Finalization error', error as Error);
     return NextResponse.json(
       { error: 'Failed to finalize report' },
       { status: 500 }
@@ -166,7 +169,7 @@ export async function GET(
 
     return NextResponse.json(status);
   } catch (error) {
-    console.error('[FINALIZE_API] Error:', error);
+    logger.error('Finalization error', error as Error);
     return NextResponse.json(
       { error: 'Failed to get finalization status' },
       { status: 500 }

@@ -3,8 +3,12 @@ import { prisma } from '@/lib/db';
 import { sendPasswordResetEmail } from '@/lib/email-service';
 import crypto from 'crypto';
 import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { withCsrf } from '@/lib/csrf';
+import { createLogger } from '@/lib/logger';
 
-export async function POST(request: NextRequest) {
+const logger = createLogger('forgot-password');
+
+export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request);
     const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.AUTH);
@@ -36,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Always return success to prevent email enumeration
     if (!user) {
-      console.log(`Password reset requested for non-existent email: ${email}`);
+      logger.info('Password reset requested for non-existent email', { email });
       return NextResponse.json(
         { message: 'If the email exists, a password reset link has been sent.' },
         { status: 200 }
@@ -45,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user has a password (not a guest account)
     if (!user.password) {
-      console.log(`Password reset requested for guest account: ${email}`);
+      logger.info('Password reset requested for guest account', { email });
       return NextResponse.json(
         { message: 'If the email exists, a password reset link has been sent.' },
         { status: 200 }
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Send password reset email
     await sendPasswordResetEmail(user.email!, user.username, token, user.id);
 
-    console.log(`Password reset email sent to: ${email}`);
+    logger.info('Password reset email sent', { email });
 
     // Add delay to prevent timing-based email enumeration
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -91,10 +95,10 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error in forgot-password:', error);
+    logger.error('Forgot password error', error as Error);
     return NextResponse.json(
       { error: 'An error occurred while processing your request' },
       { status: 500 }
     );
   }
-}
+});

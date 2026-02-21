@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ai-render');
 
 // Load API secrets
 function getOpenAIKey(): string | null {
@@ -108,7 +111,7 @@ async function extractColorFinishInfo(projectSlug: string, roomName?: string): P
     
     return '';
   } catch (error) {
-    console.error('[AIRender] Error extracting color/finish info:', error);
+    logger.error('Error extracting color/finish info', error as Error);
     return '';
   }
 }
@@ -144,7 +147,7 @@ export async function POST(request: NextRequest) {
       const roomMatch = prompt.match(/(?:room|bedroom|bathroom|kitchen|living|dining|office|lobby|hallway|corridor)\s*(?:\d+)?/i);
       const roomName = roomMatch ? roomMatch[0] : undefined;
       colorFinishInfo = await extractColorFinishInfo(projectSlug, roomName);
-      console.log('[AIRender] Extracted color/finish info:', colorFinishInfo || '(none found)');
+      logger.debug('Extracted color/finish info', { colorFinishInfo: colorFinishInfo || '(none found)' });
     }
 
     // Enhance the prompt for better construction visualization
@@ -155,7 +158,7 @@ clear details of earthwork contours, drainage systems, and site infrastructure.
 Use accurate colors and finishes as specified in the project documents where available.
 No text or labels in the image.`;
 
-    console.log('[AIRender] Generating image with prompt:', enhancedPrompt.substring(0, 300));
+    logger.info('Generating image', { promptPreview: enhancedPrompt.substring(0, 300) });
 
     // Call OpenAI DALL-E API
     const response = await fetch('https://api.openai.com/v1/images/generations', {
@@ -176,7 +179,7 @@ No text or labels in the image.`;
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('[AIRender] OpenAI API error:', errorData);
+      logger.error('OpenAI API error', undefined, { status: response.status, errorData });
       
       if (response.status === 429) {
         return NextResponse.json(
@@ -225,7 +228,7 @@ No text or labels in the image.`;
         },
       });
     } catch (logError) {
-      console.error('[AIRender] Failed to log activity:', logError);
+      logger.error('Failed to log activity', logError as Error);
     }
 
     return NextResponse.json({
@@ -235,7 +238,7 @@ No text or labels in the image.`;
       prompt: enhancedPrompt,
     });
   } catch (error) {
-    console.error('[AIRender] Error:', error);
+    logger.error('Generate render error', error as Error);
     return NextResponse.json(
       { error: 'Failed to generate render' },
       { status: 500 }

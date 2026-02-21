@@ -12,6 +12,9 @@ import { prisma } from '@/lib/db';
 import { extractBIMData } from '@/lib/bim-metadata-extractor';
 import { importBIMToTakeoff } from '@/lib/bim-to-takeoff-service';
 import { indexBIMForRAG } from '@/lib/bim-rag-indexer';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('autodesk-status');
 
 export async function GET(
   request: NextRequest,
@@ -66,11 +69,11 @@ export async function GET(
 
       // Auto-trigger extraction when model becomes ready
       if (newStatus === 'ready') {
-        console.log(`[Autodesk Status] Model ${model.id} ready, triggering auto-extraction`);
+        logger.info('Model ready, triggering auto-extraction', { modelId: model.id });
         
         // Run extraction in background (don't await to avoid timeout)
         triggerExtraction(model.id, model.urn, model.projectId).catch(err => {
-          console.error(`[Autodesk Status] Auto-extraction failed for ${model.id}:`, err);
+          logger.error('Auto-extraction failed', err as Error, { modelId: model.id });
         });
       }
     }
@@ -83,7 +86,7 @@ export async function GET(
       messages: translationStatus.messages,
     });
   } catch (error) {
-    console.error('[Autodesk Status] Error:', error);
+    logger.error('Status check error', error as Error);
     return NextResponse.json(
       { error: 'Failed to get status' },
       { status: 500 }
@@ -96,7 +99,7 @@ export async function GET(
  */
 async function triggerExtraction(modelId: string, urn: string, projectId: string) {
   try {
-    console.log(`[Auto-Extract] Starting for model ${modelId}`);
+    logger.info('Starting auto-extraction', { modelId });
 
     // Step 1: Extract BIM metadata
     const bimData = await extractBIMData(urn);
@@ -123,9 +126,9 @@ async function triggerExtraction(modelId: string, urn: string, projectId: string
       },
     });
 
-    console.log(`[Auto-Extract] Complete for model ${modelId}: ${takeoffResult.importedItems} takeoff items, ${ragChunks} RAG chunks`);
+    logger.info('Auto-extraction complete', { modelId, takeoffItems: takeoffResult.importedItems, ragChunks });
   } catch (error) {
-    console.error(`[Auto-Extract] Error for model ${modelId}:`, error);
+    logger.error('Auto-extraction error', error as Error, { modelId });
     
     // Mark extraction as failed
     await prisma.autodeskModel.update({

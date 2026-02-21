@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { OneDriveService } from '@/lib/onedrive-service';
+import { decrypt } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,11 +52,11 @@ export async function GET(
       );
     }
 
-    // Create service instance
+    // Create service instance (decrypt tokens from DB)
     const service = new OneDriveService({
       projectId: project.id,
-      accessToken: project.oneDriveAccessToken,
-      refreshToken: project.oneDriveRefreshToken,
+      accessToken: decrypt(project.oneDriveAccessToken),
+      refreshToken: decrypt(project.oneDriveRefreshToken),
       tokenExpiry: project.oneDriveTokenExpiry || new Date(),
     });
 

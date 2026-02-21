@@ -3,6 +3,7 @@ import { createScopedLogger } from '@/lib/logger';
 import { OneDriveService } from '@/lib/onedrive-service';
 import { generateDailyReportDOCX, formatDailyReportForExport } from '@/lib/daily-report-docx-generator';
 import { downloadFile } from '@/lib/s3';
+import { decrypt } from '@/lib/encryption';
 
 const log = createScopedLogger('DAILY_REPORT_ONEDRIVE');
 
@@ -57,8 +58,8 @@ export async function syncDailyReportToOneDrive(
 
     const onedrive = new OneDriveService({
       projectId: project.id,
-      accessToken: project.oneDriveAccessToken,
-      refreshToken: project.oneDriveRefreshToken,
+      accessToken: decrypt(project.oneDriveAccessToken),
+      refreshToken: decrypt(project.oneDriveRefreshToken),
       tokenExpiry: project.oneDriveTokenExpiry,
       folderId: project.oneDriveFolderId || undefined,
     });
