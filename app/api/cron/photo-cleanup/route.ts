@@ -32,20 +32,23 @@ export async function GET(request: NextRequest) {
         select: { id: true, name: true, photoRetentionDays: true },
       });
 
-      const results = [];
-      for (const project of projects) {
-        const cleanup = await cleanupExpiredPhotos(project.id);
-        const warnings = await getExpirationWarnings(project.id);
+      const results = await Promise.all(
+        projects.map(async (project) => {
+          const [cleanup, warnings] = await Promise.all([
+            cleanupExpiredPhotos(project.id),
+            getExpirationWarnings(project.id),
+          ]);
 
-        results.push({
-          projectId: project.id,
-          projectName: project.name,
-          deleted: cleanup.deleted,
-          skipped: cleanup.skipped,
-          warnings: warnings.length,
-          errors: cleanup.errors,
-        });
-      }
+          return {
+            projectId: project.id,
+            projectName: project.name,
+            deleted: cleanup.deleted,
+            skipped: cleanup.skipped,
+            warnings: warnings.length,
+            errors: cleanup.errors,
+          };
+        })
+      );
 
       log.info('Photo cleanup cron completed', { projectCount: projects.length });
 

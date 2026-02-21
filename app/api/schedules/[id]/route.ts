@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getScheduleProgress } from '@/lib/schedule-parser';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // GET /api/schedules/[id] - Get single schedule with tasks
 export async function GET(
@@ -52,18 +54,13 @@ export async function GET(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = schedule.Project.ownerId === userId;
+    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = schedule.Project.ownerId === user.id;
-    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -77,7 +74,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error fetching schedule:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch schedule', details: error.message },
+      { error: 'Failed to fetch schedule', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -92,6 +89,11 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -116,18 +118,13 @@ export async function PUT(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = schedule.Project.ownerId === userId;
+    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = schedule.Project.ownerId === user.id;
-    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -163,7 +160,7 @@ export async function PUT(
   } catch (error: any) {
     console.error('Error updating schedule:', error);
     return NextResponse.json(
-      { error: 'Failed to update schedule', details: error.message },
+      { error: 'Failed to update schedule', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -178,6 +175,11 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const deleteRateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!deleteRateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -199,17 +201,12 @@ export async function DELETE(
     }
 
     // Verify access (owner or admin only)
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = schedule.Project.ownerId === userId;
 
-    const isOwner = schedule.Project.ownerId === user.id;
-
-    if (!isOwner && user.role !== 'admin') {
+    if (!isOwner && userRole !== 'admin') {
       return NextResponse.json(
         { error: 'Only project owners and admins can delete schedules' },
         { status: 403 }
@@ -225,7 +222,7 @@ export async function DELETE(
   } catch (error: any) {
     console.error('Error deleting schedule:', error);
     return NextResponse.json(
-      { error: 'Failed to delete schedule', details: error.message },
+      { error: 'Failed to delete schedule', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

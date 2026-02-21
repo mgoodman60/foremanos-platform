@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,18 +44,13 @@ export async function GET(
     }
 
     // Check if user has access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = project.ownerId === userId;
+    const isMember = project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = project.ownerId === user.id;
-    const isMember = project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -262,7 +258,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error fetching dashboard analytics:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch dashboard analytics', details: error.message },
+      { error: 'Failed to fetch dashboard analytics', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

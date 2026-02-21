@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
 import { logger } from '@/lib/logger';
+import { safeErrorMessage } from '@/lib/api-error';
 
 // GET /api/projects/[slug]/floor-plans - List all floor plans
 export async function GET(
@@ -36,18 +37,13 @@ export async function GET(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = project.ownerId === userId;
+    const isMember = project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = project.ownerId === user.id;
-    const isMember = project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -81,7 +77,7 @@ export async function GET(
   } catch (error: any) {
     logger.error('FLOOR_PLANS_API', 'Error fetching floor plans', error as Error);
     return NextResponse.json(
-      { error: 'Failed to fetch floor plans', details: error.message },
+      { error: 'Failed to fetch floor plans', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -115,16 +111,11 @@ export async function POST(
     }
 
     // Verify admin/client access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    const isOwner = project.ownerId === user.id;
-    const isAdmin = user.role === 'admin' || user.role === 'client';
+    const isOwner = project.ownerId === userId;
+    const isAdmin = userRole === 'admin' || userRole === 'client';
 
     if (!isOwner && !isAdmin) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
@@ -169,7 +160,7 @@ export async function POST(
   } catch (error: any) {
     logger.error('FLOOR_PLANS_API', 'Error creating floor plan', error as Error);
     return NextResponse.json(
-      { error: 'Failed to create floor plan', details: error.message },
+      { error: 'Failed to create floor plan', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -15,14 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-      select: { id: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.userId;
 
     const body = await req.json();
     const { workflowId, conversationId, responses, projectSlug } = body;
@@ -53,13 +46,13 @@ export async function POST(req: NextRequest) {
         stepId,
         conversationId,
         response,
-        user.id
+        userId
       );
       savedResponses.push(saved);
     }
 
     // Update reporting pattern (learn user's style)
-    await updateReportingPattern(user.id, project.id, responsesObj);
+    await updateReportingPattern(userId, project.id, responsesObj);
 
     return NextResponse.json({ success: true, responses: savedResponses });
   } catch (error) {

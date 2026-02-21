@@ -468,8 +468,6 @@ model CustomSymbol {
   @@index([category])
   @@index([confidence])
   @@index([projectId])
-  @@index([category], map: "idx_symbols_category")
-  @@index([projectId], map: "idx_symbols_project")
 }
 
 model DetailCallout {
@@ -1125,8 +1123,6 @@ model ProjectMember {
   @@index([projectId])
   @@index([role])
   @@index([userId])
-  @@index([projectId], map: "idx_project_members_project")
-  @@index([userId], map: "idx_project_members_user")
 }
 
 model RegulatoryDocument {
@@ -1382,13 +1378,6 @@ model ScheduleUpdate {
   @@index([createdAt])
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model SheetLegend {
   id            String   @id @default(cuid())
@@ -1820,7 +1809,6 @@ model User {
   ScheduleUpdate_appliedBy                            ScheduleUpdate[]           @relation("ScheduleUpdate_appliedBy")
   ScheduleUpdate_createdBy                            ScheduleUpdate[]           @relation("ScheduleUpdate_createdBy")
   ScheduleUpdate_rejectedBy                           ScheduleUpdate[]           @relation("ScheduleUpdate_rejectedBy")
-  Session                                             Session[]
   Contract_approvedBy                                 SubcontractorContract[]    @relation("ContractApprovedBy")
   Contract_createdBy                                  SubcontractorContract[]    @relation("ContractCreatedBy")
   SubcontractorQuote                                  SubcontractorQuote[]

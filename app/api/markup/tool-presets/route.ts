@@ -17,17 +17,10 @@ export async function GET(_request: Request) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     const presets = await prisma.markupToolPreset.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -50,14 +43,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     const body = await request.json();
     const { name, shapeType, style } = body;
@@ -75,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     const existing = await prisma.markupToolPreset.findFirst({
-      where: { userId: user.id, name: name.trim() },
+      where: { userId, name: name.trim() },
     });
 
     if (existing) {
@@ -84,7 +70,7 @@ export async function POST(request: Request) {
 
     const preset = await prisma.markupToolPreset.create({
       data: {
-        User: { connect: { id: user.id } },
+        User: { connect: { id: userId } },
         name: name.trim(),
         shapeType,
         style: style as Record<string, string | number | boolean | string[] | null>,

@@ -30,18 +30,13 @@ export async function GET(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = project.ownerId === userId;
+    const isMember = project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = project.ownerId === user.id;
-    const isMember = project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -100,16 +95,11 @@ export async function PATCH(
     }
 
     // Verify admin/client access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    const isOwner = project.ownerId === user.id;
-    const isAdmin = user.role === 'admin' || user.role === 'client';
+    const isOwner = project.ownerId === userId;
+    const isAdmin = userRole === 'admin' || userRole === 'client';
 
     if (!isOwner && !isAdmin) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });

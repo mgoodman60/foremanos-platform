@@ -140,11 +140,26 @@ export async function clearCachePattern(pattern: string): Promise<number> {
   }
 
   try {
-    const keys = await redis.keys(pattern);
-    if (keys.length === 0) return 0;
-    
-    await redis.del(...keys);
-    return keys.length;
+    let deleted = 0;
+    let cursor = '0';
+
+    do {
+      const [nextCursor, keys] = await redis.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100
+      );
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        await redis.del(...keys);
+        deleted += keys.length;
+      }
+    } while (cursor !== '0');
+
+    return deleted;
   } catch (error) {
     logger.error('REDIS', 'Clear pattern error', error as Error, { pattern });
     return 0;

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { safeErrorMessage } from '@/lib/api-error';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // GET /api/schedules/[id]/tasks - Get all tasks for a schedule
 export async function GET(
@@ -38,18 +40,13 @@ export async function GET(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = schedule.Project.ownerId === userId;
+    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = schedule.Project.ownerId === user.id;
-    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -78,7 +75,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error fetching tasks:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch tasks', details: error.message },
+      { error: 'Failed to fetch tasks', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -93,6 +90,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkRateLimit(`api:${session.user.email}`, RATE_LIMITS.API);
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id } = params;
@@ -126,18 +128,14 @@ export async function POST(
     }
 
     // Verify access
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email }
-    });
+    // Verify access
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const isOwner = schedule.Project.ownerId === userId;
+    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === userId);
 
-    const isOwner = schedule.Project.ownerId === user.id;
-    const isMember = schedule.Project.ProjectMember.some((m: any) => m.userId === user.id);
-
-    if (!isOwner && !isMember && user.role !== 'admin') {
+    if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -184,7 +182,7 @@ export async function POST(
   } catch (error: any) {
     console.error('Error updating task:', error);
     return NextResponse.json(
-      { error: 'Failed to update task', details: error.message },
+      { error: 'Failed to update task', details: safeErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -184,15 +184,7 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Get user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-      select: { id: true }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     // Create annotation
     const annotation = await prisma.visualAnnotation.create({
@@ -209,7 +201,7 @@ export async function POST(
         sheetNumber: sheetNumber || null,
         gridCoordinate: gridCoordinate || null,
         tags: tags || [],
-        createdBy: user.id,
+        createdBy: userId,
         assignedTo: assignedTo || null
       },
       include: {

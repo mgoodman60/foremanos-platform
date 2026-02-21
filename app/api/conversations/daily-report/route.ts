@@ -341,20 +341,18 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get the user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    // Use session JWT data instead of DB lookup
+    const user = {
+      id: session.user.id,
+      role: session.user.role,
+      subscriptionTier: session.user.subscriptionTier || 'free',
+    };
 
     // Check if user has Pro+ tier (required for Daily Report Chat)
     const eligibleTiers = ['pro', 'team', 'business', 'enterprise'];
     if (!eligibleTiers.includes(user.subscriptionTier)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Daily Report Chat requires Pro tier or higher',
           requiresUpgrade: true,
           currentTier: user.subscriptionTier
@@ -834,23 +832,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    // Use session JWT data instead of DB lookup
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
     // Verify user has admin access to the project
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
-        ownerId: user.id,
+        ownerId: userId,
       },
     });
 
-    if (!project && user.role !== 'admin') {
+    if (!project && userRole !== 'admin') {
       return NextResponse.json(
         { error: 'Only project owners and admins can manage daily reports' },
         { status: 403 }

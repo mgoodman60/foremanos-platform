@@ -35,14 +35,6 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
     // Fetch conversation with project and reportData
     const conversation = await prisma.conversation.findUnique({
       where: { id: params.id },
@@ -190,7 +182,7 @@ export async function POST(
       equipment: equipment.length > 0 ? equipment : undefined,
       scheduleUpdates: scheduleUpdates.length > 0 ? scheduleUpdates : undefined,
       notes: reportData.notes || reportData.summary || undefined,
-      preparedBy: user.email || 'System',
+      preparedBy: session.user.email || 'System',
       finalizationDate: format(new Date(), 'MMMM dd, yyyy'),
     };
 

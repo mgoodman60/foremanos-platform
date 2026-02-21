@@ -34,15 +34,6 @@ export async function POST(
       );
     }
 
-    // Get the user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
     // Get the conversation
     const conversation = await prisma.conversation.findUnique({
       where: { id: params.id },

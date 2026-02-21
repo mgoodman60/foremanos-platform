@@ -21,18 +21,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     const params = await context.params;
     const preset = await prisma.markupToolPreset.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id: params.id, userId },
     });
 
     if (!preset) {
@@ -72,18 +65,11 @@ export async function DELETE(request: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     const params = await context.params;
     const preset = await prisma.markupToolPreset.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id: params.id, userId },
     });
 
     if (!preset) {

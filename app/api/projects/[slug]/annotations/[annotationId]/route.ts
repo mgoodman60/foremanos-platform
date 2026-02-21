@@ -22,15 +22,7 @@ export async function PATCH(
 
     const { status, priority, assignedTo, content, title } = body;
 
-    // Get user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email },
-      select: { id: true }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     // Prepare update data
     const updateData: any = {};
@@ -39,7 +31,7 @@ export async function PATCH(
       updateData.status = status;
       if (status === 'resolved') {
         updateData.resolvedAt = new Date();
-        updateData.resolvedBy = user.id;
+        updateData.resolvedBy = userId;
       }
     }
 

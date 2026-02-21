@@ -15,8 +15,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Construction document images from PDF rasterization don't benefit from Next.js image optimization
-  images: { unoptimized: true },
+  images: {},
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = config.externals || [];
@@ -33,16 +32,19 @@ const nextConfig = {
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
       { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-      // CSP: 'unsafe-inline' required by Next.js framework inline scripts (no nonce support without custom server)
+      // CSP: 'unsafe-inline' is required by Next.js App Router for inline scripts/styles
+      // (no nonce support without a custom server). This weakens XSS protection —
+      // migrate to nonces if Next.js adds native support, or switch to a custom server.
+      // unpkg.com is used for Swagger UI on /api/docs only (pinned version with SRI).
       {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' unpkg.com developer.api.autodesk.com js.stripe.com apps.abacus.ai",
-          "style-src 'self' 'unsafe-inline' unpkg.com developer.api.autodesk.com",
+          "script-src 'self' 'unsafe-inline' https://unpkg.com https://developer.api.autodesk.com https://js.stripe.com https://apps.abacus.ai",
+          "style-src 'self' 'unsafe-inline' https://unpkg.com https://developer.api.autodesk.com",
           "img-src 'self' data: blob: *.r2.cloudflarestorage.com",
-          "connect-src 'self' *.amazonaws.com *.r2.cloudflarestorage.com developer.api.autodesk.com js.stripe.com apps.abacus.ai",
-          "frame-src 'self' js.stripe.com",
+          "connect-src 'self' *.amazonaws.com *.r2.cloudflarestorage.com https://developer.api.autodesk.com https://js.stripe.com https://apps.abacus.ai",
+          "frame-src 'self' https://js.stripe.com",
           "font-src 'self'",
         ].join('; '),
       },
