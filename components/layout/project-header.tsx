@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronDown,
 } from 'lucide-react';
+import NextImage from 'next/image';
 import { useProject } from './project-context';
 import { useDocumentUpload } from '@/hooks/use-document-upload';
 import { useProjectModals } from '@/hooks/use-project-modals';
@@ -56,16 +57,20 @@ export function ProjectHeader() {
           </button>
 
           {/* Logo */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/foremanos-new-logo.png"
-            alt="ForemanOS"
-            className="h-10 sm:h-12 w-auto object-contain flex-shrink-0 cursor-pointer"
+          <button
             onClick={() => router.push('/dashboard')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') router.push('/dashboard'); }}
-          />
+            className="flex-shrink-0 cursor-pointer"
+            aria-label="Go to dashboard"
+          >
+            <NextImage
+              src="/foremanos-new-logo.png"
+              alt="ForemanOS"
+              width={180}
+              height={48}
+              className="h-10 sm:h-12 w-auto object-contain"
+              priority
+            />
+          </button>
 
           {/* Breadcrumb */}
           <nav className="hidden sm:flex items-center text-sm text-gray-400 min-w-0" aria-label="Breadcrumb">

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { HardHat, Lock, User, Loader2, Shield, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -146,11 +147,13 @@ export function LoginForm({ onClose }: LoginFormProps) {
         <div className="absolute top-16 -right-[1rem] w-8 h-8 bg-red-800 transform rotate-45 shadow-xl" style={{ clipPath: 'polygon(0 0, 0 100%, 100% 0)' }}></div>
       </div>
       <div className="flex flex-col items-center justify-center mb-10">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/foremanos-new-logo.png"
           alt="ForemanOS - Construction Project Intelligence"
+          width={300}
+          height={80}
           className="h-20 w-auto object-contain mb-6"
+          priority
         />
         <div className="text-center mb-6">
           <p className="text-lg text-gray-300 mt-2">AI-Powered Construction Plan Intelligence</p>

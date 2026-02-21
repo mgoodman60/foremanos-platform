@@ -3,6 +3,7 @@
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import Image from 'next/image';
 import { Shield, Loader2, LogOut } from 'lucide-react';
 
 export default function SignOutPage() {
@@ -32,10 +33,11 @@ export default function SignOutPage() {
         <div className="bg-dark-card rounded-2xl shadow-2xl border border-gray-700 p-8 md:p-10">
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/foremanos-new-logo.png"
               alt="ForemanOS"
+              width={240}
+              height={64}
               className="h-16 w-auto object-contain"
             />
           </div>

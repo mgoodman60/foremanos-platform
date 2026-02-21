@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { HardHat, LogOut, User, FileText } from 'lucide-react';
 import { ChatInterface } from '@/components/chat-interface';
@@ -30,11 +31,13 @@ export function MainApp({ session }: MainAppProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/foremanos-new-logo.png"
                 alt="ForemanOS Logo"
+                width={180}
+                height={48}
                 className="h-12 w-auto object-contain"
+                priority
               />
             </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, lazy } from 'react';
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ArrowLeft, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,17 @@ import { ExportDialog } from '@/components/markup/panels/ExportDialog';
 import { MarkupSummaryBar } from '@/components/markup/panels/MarkupSummaryBar';
 import type { MarkupRecord } from '@/lib/markup/markup-types';
 
-const MarkupViewer = lazy(() => import('@/components/markup/MarkupViewer').then((mod) => ({ default: mod.MarkupViewer })));
+const MarkupViewer = dynamic(
+  () => import('@/components/markup/MarkupViewer').then((mod) => ({ default: mod.MarkupViewer })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-sm text-gray-500">Loading markup viewer...</div>
+      </div>
+    ),
+  }
+);
 
 interface MarkupPageProps {
   slug: string;

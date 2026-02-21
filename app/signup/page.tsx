@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -231,11 +232,13 @@ export default function SignupPage() {
       >
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/foremanos-new-logo.png"
             alt="ForemanOS Logo"
+            width={300}
+            height={80}
             className="h-20 w-auto object-contain"
+            priority
           />
         </div>
         

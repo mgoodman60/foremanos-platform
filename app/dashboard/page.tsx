@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Plus, FolderOpen, FileText, Users, Shield, Copy, Share2, Check, Pencil, UserPlus, Eye, Edit, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { NotificationCenter } from '@/components/admin/notification-center';
@@ -675,11 +676,13 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/foremanos-new-logo.png"
                 alt="ForemanOS"
+                width={150}
+                height={40}
                 className="h-10 w-auto object-contain"
+                priority
               />
             </div>
             <div className="flex items-center gap-3">

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -182,11 +183,13 @@ export default function AdminDashboard() {
                 Back to Dashboard
               </Link>
               <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src="/foremanos-new-logo.png"
                   alt="ForemanOS"
+                  width={150}
+                  height={40}
                   className="h-10 w-auto object-contain"
+                  priority
                 />
                 <div>
                   <h1 className="text-xl font-bold text-slate-900">Admin Dashboard</h1>
