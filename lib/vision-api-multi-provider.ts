@@ -1112,7 +1112,8 @@ export async function analyzeWithDirectPdf(
   prompt: string,
   startPage?: number,
   endPage?: number,
-  model?: string  // Override model (default: VISION_MODEL / claude-opus-4-6)
+  model?: string,  // Override model (default: VISION_MODEL / claude-opus-4-6)
+  maxAttempts?: number
 ): Promise<VisionResponse> {
   logger.info('VISION_API', 'Direct PDF Analysis Started', { startPage: startPage || 1, endPage: endPage || 'all' });
 
@@ -1130,7 +1131,7 @@ export async function analyzeWithDirectPdf(
     };
   }
 
-  const maxRetries = 3;
+  const maxRetries = maxAttempts ?? 3;
   let lastError = '';
   
   // Extract single page if processing a specific page (better results)
@@ -1462,5 +1463,77 @@ export async function analyzeWithSmartRouting(
       logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterErrMsg.substring(0, 50) });
       return directResult;
     }
+  }
+}
+
+/**
+ * Lightweight Opus-only fallback for the discipline pipeline.
+ * Called after Gemini 2.5 Pro and GPT-5.2 have both failed.
+ * Tries Opus twice (native PDF then rasterized image) and gives up.
+ *
+ * Unlike analyzeWithSmartRouting, this function:
+ * - Does NOT retry GPT-5.2 (already tried in the discipline pipeline)
+ * - Does NOT re-rasterize redundantly
+ * - Limits Opus to 2 total attempts (not 9)
+ */
+export async function analyzeWithOpusFallback(
+  pdfBuffer: Buffer,
+  prompt: string,
+  pageNumber?: number
+): Promise<VisionResponse> {
+  logger.info('OPUS_FALLBACK', 'Opus-only fallback started (post Gemini + GPT-5.2 failure)', { pageNumber });
+
+  // Attempt 1: Opus with native PDF (single attempt, 120s timeout)
+  const pdfBase64 = pdfBuffer.toString('base64');
+  const directResult = await analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber, undefined, 1);
+
+  if (directResult.success && directResult.content) {
+    logger.info('OPUS_FALLBACK', 'Opus native PDF succeeded', {
+      confidence: directResult.confidenceScore,
+      pageNumber,
+    });
+    return directResult;
+  }
+
+  logger.warn('OPUS_FALLBACK', 'Opus native PDF failed, trying rasterized image', {
+    error: directResult.error,
+    pageNumber,
+  });
+
+  // Attempt 2: Opus with rasterized image (single attempt)
+  try {
+    const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
+    const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
+
+    const imageResult = await callClaudeOpusVision(rasterized.base64, prompt, 0);
+
+    if (imageResult.success && imageResult.content) {
+      const quality = validateQuality(imageResult.content);
+      imageResult.confidenceScore = quality.score;
+
+      logger.info('OPUS_FALLBACK', 'Opus rasterized image succeeded', {
+        confidence: quality.score,
+        pageNumber,
+      });
+      return imageResult;
+    }
+
+    logger.warn('OPUS_FALLBACK', 'Opus rasterized image also failed', {
+      error: imageResult.error,
+      pageNumber,
+    });
+    return imageResult;
+  } catch (rasterError: unknown) {
+    const errMsg = rasterError instanceof Error ? rasterError.message : String(rasterError);
+    logger.error('OPUS_FALLBACK', 'Rasterization failed in fallback', rasterError as Error, { pageNumber });
+
+    return {
+      success: false,
+      content: '',
+      provider: 'claude-opus-4-6' as VisionProvider,
+      attempts: 2,
+      error: `Opus fallback failed: native PDF error: ${directResult.error}; rasterization error: ${errMsg}`,
+      confidenceScore: 0,
+    };
   }
 }

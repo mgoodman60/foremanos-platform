@@ -5,7 +5,7 @@
 
 import { prisma } from './db';
 import { getFileUrl } from './s3';
-import { analyzeWithSmartRouting, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
+import { analyzeWithSmartRouting, analyzeWithOpusFallback, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
 import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity } from './vision-api-quality';
 import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
@@ -358,16 +358,29 @@ async function callOpusVision(
 }
 
 /**
- * Call GPT-5.2 for vision analysis — sends an IMAGE + prompt.
- * Fallback when Opus vision fails in the discipline pipeline.
+ * Call GPT-5.2 for vision analysis — rasterizes the PDF page to JPEG then sends it.
+ * Fallback when Gemini vision fails in the discipline pipeline.
  */
 async function callGPT52Vision(
-  base64Image: string,
+  pdfBuffer: Buffer,
   prompt: string,
   pageNumber: number
 ): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY not configured');
+
+  // Rasterize PDF page to JPEG — GPT-5.2 only supports image formats, not PDF
+  logger.info('GPT52_VISION', 'Rasterizing PDF page to JPEG for GPT-5.2', { pageNumber });
+  let imageBase64: string;
+  try {
+    const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
+    const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber, { dpi: 150, maxWidth: 2000 });
+    imageBase64 = rasterized.base64;
+  } catch (rasterError: unknown) {
+    const errMsg = rasterError instanceof Error ? rasterError.message : String(rasterError);
+    logger.warn('GPT52_VISION', `Rasterization failed for page ${pageNumber}`, { error: errMsg });
+    throw rasterError;
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 120000);
@@ -389,7 +402,7 @@ async function callGPT52Vision(
           content: [
             {
               type: 'image_url',
-              image_url: { url: `data:application/pdf;base64,${base64Image}` },
+              image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
             },
             { type: 'text', text: prompt },
           ],
@@ -691,7 +704,7 @@ async function analyzeWithDisciplinePipeline(
   // Step 3: GPT-5.2 fallback
   try {
     attempts++;
-    const rawContent = await callGPT52Vision(base64, prompt, pageNumber);
+    const rawContent = await callGPT52Vision(pdfBuffer, prompt, pageNumber);
     const jsonContent = stripToJson(rawContent);
     JSON.parse(jsonContent); // Validate
 
@@ -708,9 +721,9 @@ async function analyzeWithDisciplinePipeline(
     logger.warn('DISCIPLINE_PIPELINE', `GPT-5.2 vision also failed, falling back to smart routing`, { error: errMsg, pageNumber });
   }
 
-  // Step 4: Full fallback to smart routing
-  const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
-  return { ...smartResult, processingTier: 'fallback-single-pass' };
+  // Step 4: Lightweight Opus-only fallback (Gemini + GPT-5.2 already failed)
+  const opusResult = await analyzeWithOpusFallback(pdfBuffer, prompt, pageNumber);
+  return { ...opusResult, processingTier: 'fallback-opus-only' };
 }
 
 /**

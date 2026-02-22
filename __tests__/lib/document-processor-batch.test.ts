@@ -22,6 +22,7 @@ const mockLogger = vi.hoisted(() => ({
 
 const mockGetFileUrl = vi.hoisted(() => vi.fn());
 const mockAnalyzeWithSmartRouting = vi.hoisted(() => vi.fn());
+const mockAnalyzeWithOpusFallback = vi.hoisted(() => vi.fn());
 const mockCallGeminiVision = vi.hoisted(() => vi.fn());
 const mockCallGeminiPro3Vision = vi.hoisted(() => vi.fn());
 const mockGetProviderDisplayName = vi.hoisted(() => vi.fn());
@@ -35,6 +36,7 @@ const mockConvertSinglePage = vi.hoisted(() => vi.fn());
 const mockClassifyPage = vi.hoisted(() => vi.fn());
 const mockLoadSymbolContext = vi.hoisted(() => vi.fn());
 const mockGetDisciplinePrompt = vi.hoisted(() => vi.fn());
+const mockRasterizeSinglePage = vi.hoisted(() => vi.fn());
 
 // Mock all dependencies
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
@@ -45,6 +47,7 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@/lib/s3', () => ({ getFileUrl: mockGetFileUrl }));
 vi.mock('@/lib/vision-api-multi-provider', () => ({
   analyzeWithSmartRouting: mockAnalyzeWithSmartRouting,
+  analyzeWithOpusFallback: mockAnalyzeWithOpusFallback,
   callGeminiVision: mockCallGeminiVision,
   callGeminiPro3Vision: mockCallGeminiPro3Vision,
   getProviderDisplayName: mockGetProviderDisplayName,
@@ -77,6 +80,9 @@ vi.mock('@/lib/pdf-to-image', () => ({
 vi.mock('@/lib/discipline-classifier', () => ({ classifyPage: mockClassifyPage }));
 vi.mock('@/lib/symbol-context-loader', () => ({ loadSymbolContext: mockLoadSymbolContext }));
 vi.mock('@/lib/discipline-prompts', () => ({ getDisciplinePrompt: mockGetDisciplinePrompt }));
+vi.mock('@/lib/pdf-to-image-raster', () => ({
+  rasterizeSinglePage: mockRasterizeSinglePage,
+}));
 
 // Mock pdf-to-image-serverless dynamically
 const mockExtractPageAsPdf = vi.fn();
@@ -130,6 +136,24 @@ describe('document-processor-batch', () => {
     mockClassifyPage.mockResolvedValue({ discipline: 'Architectural', confidence: 0.85, drawingType: 'floor_plan' });
     mockLoadSymbolContext.mockResolvedValue([]);
     mockGetDisciplinePrompt.mockReturnValue('Mock discipline prompt for testing');
+    mockRasterizeSinglePage.mockResolvedValue({
+      pageNumber: 1,
+      base64: 'mock-rasterized-jpeg-base64',
+      buffer: Buffer.from('mock-jpeg'),
+      width: 2000,
+      height: 1500,
+      mimeType: 'image/jpeg',
+      isPdfNative: false,
+    });
+
+    // Default: analyzeWithOpusFallback returns success (discipline pipeline final fallback)
+    mockAnalyzeWithOpusFallback.mockResolvedValue({
+      success: true,
+      content: '{"sheet_number": "A-101", "title": "Floor Plan"}',
+      provider: 'claude-opus-4-6',
+      attempts: 1,
+      confidenceScore: 75,
+    });
 
     // Default: Both Gemini models fail so three-pass pipeline falls back to analyzeWithSmartRouting
     // This preserves existing test behavior that expects analyzeWithSmartRouting calls
@@ -1157,6 +1181,11 @@ describe('document-processor-batch', () => {
       const result = await processDocumentBatch('doc-123', 1, 1);
 
       expect(result.success).toBe(true);
+      expect(mockRasterizeSinglePage).toHaveBeenCalledWith(
+        expect.any(Buffer),
+        1,
+        { dpi: 150, maxWidth: 2000 }
+      );
       expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -1189,7 +1218,7 @@ describe('document-processor-batch', () => {
         error: 'Gemini Error',
       });
 
-      mockAnalyzeWithSmartRouting.mockResolvedValue({
+      mockAnalyzeWithOpusFallback.mockResolvedValue({
         success: true,
         content: JSON.stringify({ sheetNumber: 'A-101' }),
         provider: 'claude-opus-4-6',
@@ -1200,12 +1229,17 @@ describe('document-processor-batch', () => {
       const result = await processDocumentBatch('doc-123', 1, 1);
 
       expect(result.success).toBe(true);
-      expect(mockAnalyzeWithSmartRouting).toHaveBeenCalled();
+      expect(mockRasterizeSinglePage).toHaveBeenCalledWith(
+        expect.any(Buffer),
+        1,
+        { dpi: 150, maxWidth: 2000 }
+      );
+      expect(mockAnalyzeWithOpusFallback).toHaveBeenCalled();
       expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             metadata: expect.objectContaining({
-              processingTier: 'fallback-single-pass',
+              processingTier: 'fallback-opus-only',
             }),
           }),
         })
