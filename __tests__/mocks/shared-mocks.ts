@@ -448,5 +448,7 @@ export const mockLogger = {
 
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,
+  createLogger: vi.fn().mockReturnValue(mockLogger),
   createScopedLogger: vi.fn().mockReturnValue(mockLogger),
+  createRequestLogger: vi.fn().mockReturnValue(mockLogger),
 }));

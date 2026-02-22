@@ -176,6 +176,7 @@ describe('Stripe Webhook Route', () => {
         { id: 'price_team_monthly', expectedTier: 'team' },
         { id: 'price_business_annual', expectedTier: 'business' },
         { id: 'price_enterprise_custom', expectedTier: 'enterprise' },
+        { id: 'price_unknown_custom', expectedTier: 'free' },
       ];
 
       for (const { id, expectedTier } of priceIds) {
