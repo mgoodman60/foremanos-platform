@@ -101,10 +101,10 @@ export async function classifyPage(
             role: 'user',
             content: [
               {
-                type: 'image',
+                type: 'document',
                 source: {
                   type: 'base64',
-                  media_type: 'image/png',
+                  media_type: 'application/pdf',
                   data: base64Image,
                 },
               },

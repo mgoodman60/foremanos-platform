@@ -759,7 +759,7 @@ export async function callGeminiVision(
   }
 
   const isPdf = isPdfContent(imageBase64);
-  const timeoutMs = isPdf ? 300000 : 90000; // 300s for PDFs, 90s for images
+  const timeoutMs = isPdf ? 120000 : 90000; // 120s for PDFs, 90s for images
   const maxRetries = 3;
   const baseDelay = 1000;
 

@@ -234,7 +234,8 @@ describe('discipline-classifier', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.model).toBe('claude-haiku-4-5-20251001');
     expect(body.max_tokens).toBe(256);
-    expect(body.messages[0].content[0].type).toBe('image');
+    expect(body.messages[0].content[0].type).toBe('document');
+    expect(body.messages[0].content[0].source.media_type).toBe('application/pdf');
     expect(body.messages[0].content[0].source.data).toBe('testbase64');
     expect(body.messages[0].content[1].type).toBe('text');
   });
