@@ -147,7 +147,7 @@ src/trigger/          # Trigger.dev v3 long-running tasks (document processing)
 | `lib/document-auto-sync.ts` | Document sync orchestration |
 | `lib/feature-sync-services.ts` | Room/door/MEP/scale/schedule sync |
 | `lib/analytics-service.ts` | Project KPIs, schedule/cost variance, metrics dashboard |
-| `lib/vision-api-multi-provider.ts` | Multi-provider vision with three-pass pipeline (Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Opus interpretation) and fallback chain (GPT-5.2 → smart routing) |
+| `lib/vision-api-multi-provider.ts` | Multi-provider vision with three-pass pipeline (Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Opus interpretation), Opus-only fallback (`analyzeWithOpusFallback`), and legacy smart routing |
 | `lib/budget-sync-service.ts` | Budget synchronization and AI extraction |
 | `lib/workflow-service.ts` | Workflow orchestration and state transitions |
 | `lib/report-finalization.ts` | Barrel re-export → `lib/report-finalization/` (8 modules: types, validation, pdf-generation, document-library, onedrive-export, rag-indexing, schedule-processing, orchestrator) |
@@ -285,7 +285,7 @@ Downstream triggers on APPROVED: RAG indexing → budget/schedule sync → OneDr
 
 ### Document Intelligence Pipeline
 
-Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI. Default mode (discipline-single-pass): Haiku classification → Gemini 2.5 Pro vision extraction → GPT-5.2 fallback → smart routing. Legacy mode (three-pass-legacy): Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Claude Opus interpretation. Cost per page: ~$0.05 discipline-single-pass, ~$0.03 GPT-5.2 fallback, ~$0.16 three-pass-legacy.
+Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI. Default mode (discipline-single-pass): Haiku classification → Gemini 2.5 Pro vision extraction → GPT-5.2 fallback (rasterized JPEG) → Opus-only fallback (native PDF then rasterized image). Legacy mode (three-pass-legacy): Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Claude Opus interpretation → smart routing. Cost per page: ~$0.05 discipline-single-pass, ~$0.03 GPT-5.2 fallback, ~$0.20 Opus fallback worst-case, ~$0.16 three-pass-legacy.
 
 ```
 Upload → Vision Extraction (15 categories) → Phase A/B/C Intelligence
@@ -492,7 +492,8 @@ npm run build
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:
 - `resolveModelAlias()` maps deprecated models (gpt-4o, gpt-3.5-turbo, claude-3-5-sonnet) to current ones
-- Vision provider chain: Gemini Pro 3 (extraction) → Gemini 2.5 Pro (validation) → Claude Opus 4.6 (interpretation) → GPT-5.2 (interpretation fallback) → smart routing (full fallback)
+- Discipline pipeline chain: Haiku (classify) → Gemini 2.5 Pro (vision) → GPT-5.2 (rasterized JPEG fallback) → `analyzeWithOpusFallback` (Opus native PDF → Opus rasterized image)
+- Legacy three-pass chain: Gemini Pro 3 (extraction) → Gemini 2.5 Pro (validation) → Claude Opus 4.6 (interpretation) → GPT-5.2 (interpretation fallback) → `analyzeWithSmartRouting` (full fallback)
 
 ### Known Test Limitations
 - `fillPdfForm` tests skipped (pdf-lib/Vitest compatibility issue)
