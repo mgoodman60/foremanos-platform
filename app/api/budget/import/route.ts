@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import { ONE_SENIOR_CARE_BUDGET } from '@/lib/budget-parser';
 import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Create budget items from phases
-    const budgetItems = [];
+    const budgetItems: Prisma.BudgetItemCreateManyInput[] = [];
     for (const phase of budgetData.phases) {
       for (const item of phase.lineItems) {
         budgetItems.push({

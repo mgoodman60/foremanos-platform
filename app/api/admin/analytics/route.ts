@@ -62,7 +62,9 @@ export async function GET() {
     });
 
     // Get conversation-to-project mapping
-    const conversationIds = messageCountsByProject.map(mc => mc.conversationId);
+    const conversationIds = messageCountsByProject
+      .map(mc => mc.conversationId)
+      .filter((id): id is string => id !== null);
     const conversations = await prisma.conversation.findMany({
       where: {
         id: { in: conversationIds },
@@ -78,7 +80,7 @@ export async function GET() {
     const convToProjectMap = new Map(conversations.map(c => [c.id, c.projectId]));
 
     messageCountsByProject.forEach(mc => {
-      const projectId = convToProjectMap.get(mc.conversationId);
+      const projectId = mc.conversationId ? convToProjectMap.get(mc.conversationId) : undefined;
       if (projectId) {
         projectMessageCounts.set(
           projectId,

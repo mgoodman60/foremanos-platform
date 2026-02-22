@@ -152,7 +152,7 @@ export async function scanFileBuffer(
     logger.error('VIRUS_SCANNER', 'Scan error', error as Error);
     await logSecurityEvent('VIRUS_SCAN_ERROR', {
       fileName,
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
     });
 
     // Graceful degradation - allow upload but log error

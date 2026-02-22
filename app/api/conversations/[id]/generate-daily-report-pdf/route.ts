@@ -132,7 +132,7 @@ export async function POST(
     }
 
     // Build equipment list from workflow data
-    const equipment = [];
+    const equipment: Array<{ name: string; status: string }> = [];
     if (reportData.equipmentOnSite) {
       const equipmentItems = reportData.equipmentOnSite.split(',');
       for (const item of equipmentItems) {

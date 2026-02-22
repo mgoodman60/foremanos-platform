@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('AUTODESK_MODELS_MARKUPS');
 
@@ -103,7 +104,7 @@ export async function DELETE(
 
     await prisma.autodeskModel.update({
       where: { id: modelId },
-      data: { markups: null },
+      data: { markups: Prisma.DbNull },
     });
 
     return NextResponse.json({ success: true });

@@ -160,7 +160,7 @@ export function DailyReportPhotos({
             {/* Expiration and sync badges */}
             <div className="flex flex-wrap gap-1.5">
               {photos.map((photo: any) => {
-                const badges = [];
+                const badges: React.ReactNode[] = [];
 
                 if (photo.expiresAt) {
                   const badge = getExpirationBadge(photo.expiresAt);

@@ -15,7 +15,7 @@ import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from
 import { scanFileBuffer, logSecurityEvent } from '@/lib/virus-scanner';
 import { getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
-import { logger } from '@/lib/logger';
+import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('DOCUMENTS_UPLOAD');
 

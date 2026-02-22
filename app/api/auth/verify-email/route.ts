@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const ip = getClientIp(request);
+    const ip = getClientIp(request) ?? 'unknown';
     const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.AUTH);
     if (!rateLimitResult.success) {
       return NextResponse.json(

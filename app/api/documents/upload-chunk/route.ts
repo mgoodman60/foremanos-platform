@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { logger } from '@/lib/logger';
+import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('DOCUMENTS_UPLOAD_CHUNK');
 

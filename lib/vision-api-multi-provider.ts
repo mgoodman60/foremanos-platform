@@ -1265,11 +1265,12 @@ export async function analyzeWithDirectPdf(
       logger.error('DIRECT_PDF', `Attempt ${attempt + 1} failed`, error);
 
       // Check if this is an unrecoverable error
+      const errMsg = error instanceof Error ? error.message : String(error);
       const isUnrecoverable =
-        error.message.includes('invalid_request') ||
-        error.message.includes('document') ||
-        error.message.includes('too large') ||
-        error.message.includes('413');
+        errMsg.includes('invalid_request') ||
+        errMsg.includes('document') ||
+        errMsg.includes('too large') ||
+        errMsg.includes('413');
 
       if (isUnrecoverable) {
         logger.warn('DIRECT_PDF', 'PDF processing error - document may be too large or in unsupported format');
