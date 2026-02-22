@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getSheetDimensions, searchDimensions, getDimensionStats } from '@/lib/dimension-intelligence';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DIMENSIONS');
 
 export async function GET(
   request: NextRequest,
@@ -110,7 +112,7 @@ export async function GET(
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('Error getting dimensions:', error);
+    logger.error('Error getting dimensions', error);
     return NextResponse.json({ error: 'Failed to get dimensions' }, { status: 500 });
   }
 }

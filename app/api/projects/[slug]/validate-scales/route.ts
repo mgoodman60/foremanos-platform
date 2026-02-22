@@ -12,6 +12,8 @@ import {
   validateProjectScales,
   getScaleStatistics
 } from '@/lib/scale-detector';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_VALIDATE_SCALES');
 
 /**
  * POST - Validate scales for project
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     });
 
   } catch (error) {
-    console.error('Scale validation error:', error);
+    logger.error('Scale validation error', error);
     return NextResponse.json(
       { error: 'Failed to validate scales', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -83,7 +85,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     });
 
   } catch (error) {
-    console.error('Scale statistics error:', error);
+    logger.error('Scale statistics error', error);
     return NextResponse.json(
       { error: 'Failed to get scale statistics', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

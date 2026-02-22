@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PUNCH_LIST');
 
 export async function GET(
   request: NextRequest,
@@ -51,7 +53,7 @@ export async function GET(
 
     return NextResponse.json({ items, stats });
   } catch (error) {
-    console.error('[Punch List API] Error:', error);
+    logger.error('[Punch List API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch punch list' },
       { status: 500 }
@@ -128,7 +130,7 @@ export async function POST(
 
     return NextResponse.json({ item });
   } catch (error) {
-    console.error('[Punch List API] Create error:', error);
+    logger.error('[Punch List API] Create error', error);
     return NextResponse.json(
       { error: 'Failed to create punch list item' },
       { status: 500 }

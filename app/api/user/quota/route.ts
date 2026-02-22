@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getProcessingLimits, getRemainingPages, shouldResetQuota, getNextResetDate } from '@/lib/processing-limits';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('USER_QUOTA');
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +38,7 @@ export async function GET(_request: Request) {
 
     // CRITICAL FIX: Check if quota needs to be reset before returning info
     if (await shouldResetQuota(user)) {
-      console.log(`[QUOTA RESET] Resetting quota for user ${userId} in quota check (was ${user.pagesProcessedThisMonth} pages)`);
+      logger.info('Resetting quota for user in quota check', { userId, previousPages: user.pagesProcessedThisMonth });
       
       // Reset quota and update reset date
       await prisma.user.update({
@@ -71,7 +74,7 @@ export async function GET(_request: Request) {
       isUnlimited: limits.monthlyPageLimit === Infinity,
     });
   } catch (error) {
-    console.error('Error getting user quota:', error);
+    logger.error('Failed to get user quota', error);
     return NextResponse.json(
       { error: 'Failed to get quota information' },
       { status: 500 }

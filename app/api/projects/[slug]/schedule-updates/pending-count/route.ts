@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_UPDATES_PENDING_COUNT');
 
 // GET /api/projects/[slug]/schedule-updates/pending-count - Get count of pending updates
 export async function GET(
@@ -53,7 +55,7 @@ export async function GET(
 
     return NextResponse.json({ count: pendingCount });
   } catch (error: unknown) {
-    console.error('[API] Error fetching pending count:', error);
+    logger.error('Error fetching pending count', error);
     return NextResponse.json(
       { error: 'Failed to fetch pending count' },
       { status: 500 }

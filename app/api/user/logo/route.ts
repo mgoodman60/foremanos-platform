@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl, deleteFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('USER_LOGO');
 
 // GET - Retrieve current logo info
 export async function GET(_req: NextRequest) {
@@ -29,7 +32,7 @@ export async function GET(_req: NextRequest) {
       companyLogoUploadedAt: user.companyLogoUploadedAt,
     });
   } catch (error) {
-    console.error('Error fetching logo:', error);
+    logger.error('Failed to fetch logo', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -72,7 +75,7 @@ export async function POST(req: NextRequest) {
       cloud_storage_path,
     });
   } catch (error) {
-    console.error('Error generating presigned URL:', error);
+    logger.error('Failed to generate presigned URL', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -106,7 +109,7 @@ export async function PUT(req: NextRequest) {
       try {
         await deleteFile(currentUser.companyLogo);
       } catch (error) {
-        console.error('Error deleting old logo:', error);
+        logger.error('Failed to delete old logo', error);
         // Continue even if deletion fails
       }
     }
@@ -130,7 +133,7 @@ export async function PUT(req: NextRequest) {
       companyLogoUploadedAt: updatedUser.companyLogoUploadedAt,
     });
   } catch (error) {
-    console.error('Error updating logo:', error);
+    logger.error('Failed to update logo', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -160,7 +163,7 @@ export async function DELETE(_req: NextRequest) {
     try {
       await deleteFile(currentUser.companyLogo);
     } catch (error) {
-      console.error('Error deleting logo from S3:', error);
+      logger.error('Failed to delete logo from S3', error);
       // Continue to remove from database even if S3 deletion fails
     }
 
@@ -175,7 +178,7 @@ export async function DELETE(_req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting logo:', error);
+    logger.error('Failed to delete logo', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

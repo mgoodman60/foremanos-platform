@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('NOTIFICATIONS');
 
 export async function DELETE(
   req: NextRequest,
@@ -42,7 +45,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting notification:', error);
+    logger.error('Failed to delete notification', error);
     return NextResponse.json(
       { error: 'Failed to delete notification' },
       { status: 500 }

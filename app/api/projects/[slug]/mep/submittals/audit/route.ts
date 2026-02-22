@@ -11,6 +11,8 @@ import {
   getProjectVerificationHistory,
   getVerificationLogDetails 
 } from '@/lib/verification-audit-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_AUDIT');
 
 export async function GET(
   request: Request,
@@ -60,7 +62,7 @@ export async function GET(
 
     return NextResponse.json(history);
   } catch (error) {
-    console.error('[Verification Audit API] Error:', error);
+    logger.error('[Verification Audit API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch audit history' },
       { status: 500 }

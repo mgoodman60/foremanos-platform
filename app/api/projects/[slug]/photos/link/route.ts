@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_LINK');
 
 export async function POST(
   req: NextRequest,
@@ -125,7 +127,7 @@ export async function POST(
       linkedCount: updatedCount,
     });
   } catch (error) {
-    console.error('Error linking photos:', error);
+    logger.error('Error linking photos', error);
     return NextResponse.json(
       { error: 'Failed to link photos' },
       { status: 500 }

@@ -12,6 +12,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { initializeRegulatoryDocumentsForProject } from '@/lib/regulatory-documents';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('REGULATORY_DOCUMENTS_INITIALIZE');
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
           : 'No cached regulatory documents available',
     });
   } catch (error) {
-    console.error('Error initializing regulatory documents:', error);
+    logger.error('Error initializing regulatory documents', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

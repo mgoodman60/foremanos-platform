@@ -7,6 +7,8 @@ import {
   syncAllProjectDocuments,
   getProjectSyncStatus,
 } from '@/lib/document-auto-sync';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SYNC');
 
 // GET /api/projects/[slug]/sync - Get sync status for all features
 export async function GET(
@@ -36,7 +38,7 @@ export async function GET(
       ...status,
     });
   } catch (error) {
-    console.error('[Sync API] Error:', error);
+    logger.error('[Sync API] Error', error);
     return NextResponse.json(
       { error: 'Failed to get sync status' },
       { status: 500 }
@@ -87,7 +89,7 @@ export async function POST(
       });
     }
   } catch (error: any) {
-    console.error('[Sync API] Error:', error);
+    logger.error('[Sync API] Error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to sync' },
       { status: 500 }

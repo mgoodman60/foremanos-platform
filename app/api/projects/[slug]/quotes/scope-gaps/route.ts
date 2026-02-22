@@ -12,6 +12,8 @@ import {
   analyzeTradeGaps,
   getProjectGapSummary 
 } from '@/lib/scope-gap-analysis-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_QUOTES_SCOPE_GAPS');
 
 // GET - Fetch gap summary or analysis for specific trade
 export async function GET(
@@ -54,7 +56,7 @@ export async function GET(
     return NextResponse.json(analysis);
 
   } catch (error) {
-    console.error('[SCOPE-GAP-API] Error:', error);
+    logger.error('[SCOPE-GAP-API] Error', error);
     return NextResponse.json(
       { error: 'Failed to analyze scope gaps' },
       { status: 500 }
@@ -93,7 +95,7 @@ export async function POST(
     return NextResponse.json(analysis);
 
   } catch (error) {
-    console.error('[SCOPE-GAP-API] Error:', error);
+    logger.error('[SCOPE-GAP-API] Error', error);
     return NextResponse.json(
       { error: 'Failed to analyze scope gaps' },
       { status: 500 }

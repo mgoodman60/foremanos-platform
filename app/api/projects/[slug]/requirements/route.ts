@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractAllRequirements, getAvailableCategories } from '@/lib/submittal-requirement-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_REQUIREMENTS');
 
 /**
  * GET: Get all extracted requirements for a project
@@ -66,7 +68,7 @@ export async function GET(
       filters: { category, specSection }
     });
   } catch (error) {
-    console.error('[Requirements GET] Error:', error);
+    logger.error('[Requirements GET] Error', error);
     return NextResponse.json({ error: 'Failed to fetch requirements' }, { status: 500 });
   }
 }

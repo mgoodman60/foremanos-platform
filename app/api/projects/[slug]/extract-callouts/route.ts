@@ -23,6 +23,8 @@ import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_CALLOUTS');
 
 const _execAsync = promisify(exec);
 
@@ -95,7 +97,7 @@ export async function POST(
     // Process each document
     for (const document of documents) {
       try {
-        console.log(`Extracting callouts from: ${document.name}`);
+        logger.info('Extracting callouts from: ${document.name}');
 
         // Group chunks by sheet number
         const sheetMap = new Map<string, any[]>();
@@ -121,7 +123,7 @@ export async function POST(
             });
 
             if (existing > 0) {
-              console.log(`Sheet ${sheetNumber} already processed, skipping`);
+              logger.info('Sheet ${sheetNumber} already processed, skipping');
               continue;
             }
           }
@@ -136,9 +138,7 @@ export async function POST(
               sheetNumber
             );
             callouts = callouts.concat(patternCallouts);
-            console.log(
-              `  Pattern matching found ${patternCallouts.length} callouts`
-            );
+            logger.info('Pattern matching found ${patternCallouts.length} callouts');
           }
 
           // Method 2: Vision analysis
@@ -175,9 +175,7 @@ export async function POST(
                   }
                 }
 
-                console.log(
-                  `  Vision analysis found ${visionCallouts.length} callouts`
-                );
+                logger.info('Vision analysis found ${visionCallouts.length} callouts');
               } finally {
                 // Clean up temp file
                 await fs.unlink(imagePath).catch(() => {});
@@ -205,7 +203,7 @@ export async function POST(
 
         processedDocs++;
       } catch (error) {
-        console.error(`Error processing document ${document.name}:`, error);
+        logger.error('Error processing document ${document.name}', error);
         results.push({
           document: document.name,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -220,7 +218,7 @@ export async function POST(
       results,
     });
   } catch (error) {
-    console.error('Callout extraction error:', error);
+    logger.error('Callout extraction error', error);
     return NextResponse.json(
       {
         error: 'Failed to extract callouts',
@@ -248,10 +246,10 @@ async function convertPdfPageToImage(
     // Download from S3 and convert
     // For now, return null if cloud_storage_path is not accessible
     // In production, you'd download from S3 first
-    console.warn('PDF to image conversion not fully implemented for S3');
+    logger.warn('PDF to image conversion not fully implemented for S3');
     return null;
   } catch (error) {
-    console.error('PDF conversion error:', error);
+    logger.error('PDF conversion error', error);
     return null;
   }
 }

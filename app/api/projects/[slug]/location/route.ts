@@ -12,13 +12,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_LOCATION');
 
 // Geocode using OpenWeatherMap Geocoding API
 async function geocodeLocation(city: string, state: string): Promise<{ lat: number; lon: number } | null> {
   try {
     const apiKey = process.env.OPENWEATHERMAP_API_KEY;
     if (!apiKey) {
-      console.warn('[Location API] No OpenWeatherMap API key for geocoding');
+      logger.warn('[Location API] No OpenWeatherMap API key for geocoding');
       return null;
     }
     
@@ -28,7 +30,7 @@ async function geocodeLocation(city: string, state: string): Promise<{ lat: numb
     );
     
     if (!response.ok) {
-      console.error('[Location API] Geocoding request failed:', response.status);
+      logger.error('Geocoding request failed', undefined, { status: response.status });
       return null;
     }
     
@@ -39,7 +41,7 @@ async function geocodeLocation(city: string, state: string): Promise<{ lat: numb
     
     return null;
   } catch (error) {
-    console.error('[Location API] Geocoding error:', error);
+    logger.error('[Location API] Geocoding error', error);
     return null;
   }
 }
@@ -85,7 +87,7 @@ export async function GET(
       isConfigured,
     });
   } catch (error) {
-    console.error('[Location API] Error fetching location:', error);
+    logger.error('[Location API] Error fetching location', error);
     return NextResponse.json(
       { error: 'Failed to fetch location' },
       { status: 500 }
@@ -191,7 +193,7 @@ export async function PUT(
         : 'Location updated but coordinates could not be determined',
     });
   } catch (error) {
-    console.error('[Location API] Error updating location:', error);
+    logger.error('[Location API] Error updating location', error);
     return NextResponse.json(
       { error: 'Failed to update location' },
       { status: 500 }

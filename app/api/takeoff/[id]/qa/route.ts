@@ -11,6 +11,8 @@ import {
   recalculateConfidenceScores,
   analyzeItemConfidence
 } from '@/lib/takeoff-qa-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_QA');
 
 /**
  * GET /api/takeoff/[id]/qa
@@ -84,7 +86,7 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error: unknown) {
-    console.error('Error in QA GET:', error);
+    logger.error('Error in QA GET', error);
     return NextResponse.json(
       { error: 'Failed to get QA data', details: safeErrorMessage(error) },
       { status: 500 }
@@ -192,7 +194,7 @@ export async function POST(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error: unknown) {
-    console.error('Error in QA POST:', error);
+    logger.error('Error in QA POST', error);
     return NextResponse.json(
       { error: 'Failed to perform QA action', details: safeErrorMessage(error) },
       { status: 500 }

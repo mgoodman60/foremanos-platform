@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { markScheduleUpdatesReviewed } from '@/lib/onboarding-tracker';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_UPDATES_BULK_ACTION');
 
 // POST /api/projects/[slug]/schedule-updates/bulk-action - Bulk approve or reject schedule updates
 export async function POST(
@@ -146,7 +148,7 @@ export async function POST(
     // Track onboarding progress - schedule updates reviewed (if any were processed)
     if (results.processed > 0 && session.user.id) {
       markScheduleUpdatesReviewed(session.user.id, project.id).catch((err) => {
-        console.error('[ONBOARDING] Error marking schedule updates reviewed:', err);
+        logger.error('Error marking schedule updates reviewed', err);
       });
     }
 
@@ -155,7 +157,7 @@ export async function POST(
       results,
     });
   } catch (error: unknown) {
-    console.error('[API] Error bulk updating schedule updates:', error);
+    logger.error('Error bulk updating schedule updates', error);
     return NextResponse.json(
       { error: 'Failed to bulk update schedule updates' },
       { status: 500 }

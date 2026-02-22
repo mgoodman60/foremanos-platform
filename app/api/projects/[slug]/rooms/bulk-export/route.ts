@@ -12,6 +12,8 @@ import {
   generateBulkPDF,
   generateBulkDOCX,
 } from '@/lib/room-bulk-export';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ROOMS_BULK_EXPORT');
 
 export async function POST(
   request: NextRequest,
@@ -86,7 +88,7 @@ export async function POST(
       },
     });
   } catch (error: any) {
-    console.error('[Bulk Export API] Error:', error);
+    logger.error('[Bulk Export API] Error', error);
     return NextResponse.json(
       { error: error?.message || 'Failed to generate export' },
       { status: 500 }

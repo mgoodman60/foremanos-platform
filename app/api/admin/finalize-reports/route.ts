@@ -13,6 +13,9 @@ import {
   getReportsReadyForFinalization,
   finalizeReport,
 } from '@/lib/report-finalization';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ADMIN_FINALIZE');
 
 export async function POST(request: NextRequest) {
   try {
@@ -75,7 +78,7 @@ export async function POST(request: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('[ADMIN_FINALIZE] Error:', error);
+    logger.error('Failed to finalize reports', error);
     return NextResponse.json(
       { error: 'Failed to finalize reports' },
       { status: 500 }

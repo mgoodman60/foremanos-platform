@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS');
 
 export const dynamic = 'force-dynamic';
 
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ models });
   } catch (error) {
-    console.error('[Autodesk Models] Error:', error);
+    logger.error('[Autodesk Models] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch models' },
       { status: 500 }

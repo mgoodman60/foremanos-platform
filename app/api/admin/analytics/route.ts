@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ADMIN_ANALYTICS');
 
 export const dynamic = 'force-dynamic';
 
@@ -92,7 +95,7 @@ export async function GET() {
 
     return NextResponse.json({ analytics });
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    logger.error('Failed to fetch analytics', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

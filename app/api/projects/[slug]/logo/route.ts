@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl, deleteFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_LOGO');
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +52,7 @@ export async function GET(
       logoUploadedAt: project.logoUploadedAt,
     });
   } catch (error) {
-    console.error('Error fetching project logo:', error);
+    logger.error('Error fetching project logo', error);
     return NextResponse.json(
       { error: 'Failed to fetch logo' },
       { status: 500 }
@@ -140,7 +142,7 @@ export async function POST(
 
     return NextResponse.json({ uploadUrl, cloud_storage_path });
   } catch (error) {
-    console.error('Error generating presigned URL:', error);
+    logger.error('Error generating presigned URL', error);
     return NextResponse.json(
       { error: 'Failed to generate upload URL' },
       { status: 500 }
@@ -204,7 +206,7 @@ export async function DELETE(
       try {
         await deleteFile(project.logoUrl);
       } catch (error) {
-        console.error('Error deleting old logo from S3:', error);
+        logger.error('Error deleting old logo from S3', error);
         // Continue even if S3 deletion fails
       }
     }
@@ -221,7 +223,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting logo:', error);
+    logger.error('Error deleting logo', error);
     return NextResponse.json(
       { error: 'Failed to delete logo' },
       { status: 500 }

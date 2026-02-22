@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getScheduleProgress } from '@/lib/schedule-parser';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULES');
 
 // GET /api/projects/[slug]/schedules - List all schedules for a project
 export async function GET(
@@ -92,7 +94,7 @@ export async function GET(
 
     return NextResponse.json({ schedules: schedulesWithProgress });
   } catch (error: any) {
-    console.error('Error fetching schedules:', error);
+    logger.error('Error fetching schedules', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedules', details: error.message },
       { status: 500 }

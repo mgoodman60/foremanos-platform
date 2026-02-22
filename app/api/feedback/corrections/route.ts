@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('FEEDBACK_CORRECTIONS');
 
 export const dynamic = 'force-dynamic';
 
@@ -75,7 +77,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ corrections });
   } catch (error) {
-    console.error('Error fetching corrections:', error);
+    logger.error('Error fetching corrections', error);
     return NextResponse.json(
       { error: 'Failed to fetch corrections' },
       { status: 500 }
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ correction }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating correction:', error);
+    logger.error('Error creating correction', error);
     
     // Handle unique constraint violation (correction already exists for this feedback)
     if (error.code === 'P2002') {

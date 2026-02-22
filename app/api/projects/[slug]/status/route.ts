@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_STATUS');
 
 export async function PATCH(
   request: NextRequest,
@@ -62,7 +64,7 @@ export async function PATCH(
       project: updatedProject,
     });
   } catch (error) {
-    console.error('Error updating project status:', error);
+    logger.error('Error updating project status', error);
     return NextResponse.json(
       { error: 'Failed to update project status' },
       { status: 500 }

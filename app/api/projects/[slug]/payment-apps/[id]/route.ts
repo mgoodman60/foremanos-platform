@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { reviewPaymentApplication } from '@/lib/cash-flow-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PAYMENT_APPS');
 
 // GET /api/projects/[slug]/payment-apps/[id]
 export async function GET(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
@@ -31,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json(payApp);
   } catch (error) {
-    console.error('[API] Get pay app error:', error);
+    logger.error('Get pay app error', error);
     return NextResponse.json({ error: 'Failed to fetch payment application' }, { status: 500 });
   }
 }
@@ -106,7 +108,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { slug: stri
 
     return NextResponse.json({ error: 'Invalid update parameters' }, { status: 400 });
   } catch (error) {
-    console.error('[API] Update pay app error:', error);
+    logger.error('Update pay app error', error);
     return NextResponse.json({ error: 'Failed to update payment application' }, { status: 500 });
   }
 }
@@ -141,7 +143,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[API] Delete pay app error:', error);
+    logger.error('Delete pay app error', error);
     return NextResponse.json({ error: 'Failed to delete payment application' }, { status: 500 });
   }
 }

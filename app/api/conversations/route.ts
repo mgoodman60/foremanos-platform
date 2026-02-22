@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry-util';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS');
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +46,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ conversations });
   } catch (error: any) {
-    console.error('[API] Error fetching conversations:', error);
+    logger.error('Error fetching conversations', error);
     
     // Return more specific error messages
     if (error?.code?.startsWith('P1')) {

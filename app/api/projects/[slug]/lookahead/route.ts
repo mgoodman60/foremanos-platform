@@ -13,6 +13,8 @@ import {
   suggestWeatherAdjustments,
   syncLookaheadToSchedule,
 } from '@/lib/lookahead-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_LOOKAHEAD');
 
 export async function GET(
   req: NextRequest,
@@ -53,7 +55,7 @@ export async function GET(
       weatherAdjustments,
     });
   } catch (error) {
-    console.error('Lookahead generation error:', error);
+    logger.error('Lookahead generation error', error);
     return NextResponse.json(
       { error: 'Failed to generate lookahead' },
       { status: 500 }
@@ -107,7 +109,7 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Lookahead sync error:', error);
+    logger.error('Lookahead sync error', error);
     return NextResponse.json(
       { error: 'Failed to sync lookahead' },
       { status: 500 }

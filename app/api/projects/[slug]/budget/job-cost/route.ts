@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { BUDGET_PHASES } from '@/lib/budget-phases';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_JOB_COST');
 
 // GET /api/projects/[slug]/budget/job-cost - Get job cost report data
 export async function GET(
@@ -88,7 +90,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('[API] Error fetching job cost:', error);
+    logger.error('Error fetching job cost', error);
     return NextResponse.json(
       { error: 'Failed to fetch job cost data' },
       { status: 500 }
@@ -197,7 +199,7 @@ export async function POST(
 
     return NextResponse.json({ item });
   } catch (error) {
-    console.error('[API] Error adding budget item:', error);
+    logger.error('Error adding budget item', error);
     return NextResponse.json(
       { error: 'Failed to add budget item' },
       { status: 500 }

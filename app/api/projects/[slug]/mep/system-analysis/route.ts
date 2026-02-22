@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractMEPElements, detectAllClashes, identifyVerticalRisers, type MEPSystem } from '@/lib/mep-path-tracer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SYSTEM_ANALYSIS');
 
 export async function GET(
   request: NextRequest,
@@ -87,7 +89,7 @@ export async function GET(
       analysis
     });
   } catch (error) {
-    console.error('System analysis error:', error);
+    logger.error('System analysis error', error);
     return NextResponse.json(
       { error: 'Failed to analyze MEP system' },
       { status: 500 }

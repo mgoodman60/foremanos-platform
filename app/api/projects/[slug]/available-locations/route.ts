@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { findAvailableLocations } from '@/lib/location-detector';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_AVAILABLE_LOCATIONS');
 
 export async function GET(
   request: NextRequest,
@@ -59,7 +61,7 @@ export async function GET(
 
     return NextResponse.json(locations);
   } catch (error) {
-    console.error('Error fetching available locations:', error);
+    logger.error('Error fetching available locations', error);
     return NextResponse.json(
       { error: 'Failed to fetch available locations' },
       { status: 500 }

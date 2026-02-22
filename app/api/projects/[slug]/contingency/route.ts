@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CONTINGENCY');
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
@@ -45,7 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       usages
     });
   } catch (error) {
-    console.error('[API] Error fetching contingency:', error);
+    logger.error('Error fetching contingency', error);
     return NextResponse.json({ error: 'Failed to fetch contingency data' }, { status: 500 });
   }
 }
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(usage);
   } catch (error) {
-    console.error('[API] Error recording contingency usage:', error);
+    logger.error('Error recording contingency usage', error);
     return NextResponse.json({ error: 'Failed to record contingency usage' }, { status: 500 });
   }
 }

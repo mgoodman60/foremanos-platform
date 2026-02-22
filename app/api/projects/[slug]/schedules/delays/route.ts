@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULES_DELAYS');
 
 export async function GET(
   request: Request,
@@ -170,7 +172,7 @@ export async function GET(
       reportsAnalyzed: dailyReports.length + weatherImpacts.length
     });
   } catch (error) {
-    console.error('[Delays API] Error:', error);
+    logger.error('[Delays API] Error', error);
     return NextResponse.json(
       { error: 'Failed to analyze delays' },
       { status: 500 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getToleranceSettings, saveToleranceSettings } from '@/lib/tolerance-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_TOLERANCE');
 
 /**
  * GET: Retrieve tolerance settings for a project
@@ -32,7 +34,7 @@ export async function GET(
 
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('[Tolerance GET] Error:', error);
+    logger.error('[Tolerance GET] Error', error);
     return NextResponse.json({ error: 'Failed to fetch tolerance settings' }, { status: 500 });
   }
 }
@@ -105,7 +107,7 @@ export async function PUT(
       settings: updatedSettings
     });
   } catch (error) {
-    console.error('[Tolerance PUT] Error:', error);
+    logger.error('[Tolerance PUT] Error', error);
     return NextResponse.json({ error: 'Failed to update tolerance settings' }, { status: 500 });
   }
 }

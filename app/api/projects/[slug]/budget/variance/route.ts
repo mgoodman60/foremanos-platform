@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_VARIANCE');
 
 export async function GET(
   request: NextRequest,
@@ -183,7 +185,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[BudgetVariance API] Error:', error);
+    logger.error('[BudgetVariance API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch budget variance' },
       { status: 500 }

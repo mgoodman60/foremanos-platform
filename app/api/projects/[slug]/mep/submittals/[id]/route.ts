@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS');
 
 export async function GET(
   request: Request,
@@ -36,7 +38,7 @@ export async function GET(
 
     return NextResponse.json({ submittal });
   } catch (error) {
-    console.error('[MEP Submittal GET Error]:', error);
+    logger.error('[MEP Submittal GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch submittal' },
       { status: 500 }
@@ -118,7 +120,7 @@ export async function PATCH(
 
     return NextResponse.json({ submittal });
   } catch (error) {
-    console.error('[MEP Submittal PATCH Error]:', error);
+    logger.error('[MEP Submittal PATCH Error]', error);
     return NextResponse.json(
       { error: 'Failed to update submittal' },
       { status: 500 }

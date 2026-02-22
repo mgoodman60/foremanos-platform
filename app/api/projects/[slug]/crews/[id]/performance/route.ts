@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CREWS_PERFORMANCE');
 
 export async function POST(
   request: NextRequest,
@@ -73,7 +75,7 @@ export async function POST(
 
     return NextResponse.json({ performance }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating performance record:', error);
+    logger.error('Error creating performance record', error);
     
     if (error.code === 'P2002') {
       return NextResponse.json(
@@ -128,7 +130,7 @@ export async function GET(
 
     return NextResponse.json({ records });
   } catch (error) {
-    console.error('Error fetching performance records:', error);
+    logger.error('Error fetching performance records', error);
     return NextResponse.json(
       { error: 'Failed to fetch performance records' },
       { status: 500 }

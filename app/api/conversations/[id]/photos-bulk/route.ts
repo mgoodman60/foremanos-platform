@@ -22,6 +22,8 @@ import {
   PhotoMetadata,
 } from '@/lib/photo-analyzer';
 import { randomUUID } from 'crypto';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_PHOTOS_BULK');
 
 interface BulkUploadResult {
   success: boolean;
@@ -175,7 +177,7 @@ export async function POST(
           })
         );
 
-        console.log('[BULK_UPLOAD] Uploaded to S3:', cloudStoragePath);
+        logger.info('Uploaded to S3', { cloudStoragePath });
 
         // Create photo metadata
         const photoId = randomUUID();
@@ -194,7 +196,7 @@ export async function POST(
         currentPhotos.push(photoMetadata);
         result.uploaded.push(photoMetadata);
       } catch (error) {
-        console.error('[BULK_UPLOAD] Error processing file:', file.name, error);
+        logger.error('Error processing file', error, { fileName: file.name });
         result.failed.push({
           fileName: file.name,
           error: 'Processing failed',
@@ -218,7 +220,7 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('[BULK_UPLOAD] Error uploading photos:', error);
+    logger.error('Error uploading photos', error);
     return NextResponse.json(
       { error: 'Failed to upload photos' },
       { status: 500 }

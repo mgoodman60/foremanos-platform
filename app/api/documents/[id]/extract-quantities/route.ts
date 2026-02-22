@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { extractQuantitiesFromDocument } from '@/lib/takeoff-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_EXTRACT_QUANTITIES');
 
 // POST /api/documents/[id]/extract-quantities - Extract material quantities from a document
 export async function POST(
@@ -73,7 +75,7 @@ export async function POST(
       );
     }
 
-    console.log(`[EXTRACT_QUANTITIES] Starting extraction for document ${document.name}`);
+    logger.info('Starting extraction for document ${document.name}');
 
     // Extract quantities
     const result = await extractQuantitiesFromDocument(
@@ -83,7 +85,7 @@ export async function POST(
       takeoffName
     );
 
-    console.log(`[EXTRACT_QUANTITIES] Extraction complete: ${result.totalItems} items found`);
+    logger.info('Extraction complete: ${result.totalItems} items found');
 
     // Get the created takeoff with full details
     const takeoff = await prisma.materialTakeoff.findUnique({
@@ -119,7 +121,7 @@ export async function POST(
       }
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[EXTRACT_QUANTITIES] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to extract quantities', details: safeErrorMessage(error) },
       { status: 500 }

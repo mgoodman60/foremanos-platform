@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getSheetIndex } from '@/lib/title-block-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SHEET_INDEX');
 
 /**
  * GET /api/projects/[slug]/sheet-index
@@ -57,7 +59,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       stats
     });
   } catch (error) {
-    console.error('Sheet index error:', error);
+    logger.error('Sheet index error', error);
     return NextResponse.json(
       { error: 'Failed to get sheet index' },
       { status: 500 }

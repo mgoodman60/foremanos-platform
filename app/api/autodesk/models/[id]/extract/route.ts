@@ -11,6 +11,8 @@ import { extractBIMData } from '@/lib/bim-metadata-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
 import { importBIMToTakeoff } from '@/lib/bim-to-takeoff-service';
 import { indexBIMForRAG } from '@/lib/bim-rag-indexer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS_EXTRACT');
 
 export async function POST(
   request: NextRequest,
@@ -38,7 +40,7 @@ export async function POST(
       );
     }
 
-    console.log(`[BIM Extract API] Starting extraction for model ${model.id}`);
+    logger.info('[BIM Extract API] Starting extraction for model ${model.id}');
 
     // Step 1: Extract BIM metadata from Autodesk
     const bimData = await extractBIMData(model.urn);
@@ -74,7 +76,7 @@ export async function POST(
       },
     });
 
-    console.log(`[BIM Extract API] Extraction complete for model ${model.id}`);
+    logger.info('[BIM Extract API] Extraction complete for model ${model.id}');
 
     return NextResponse.json({
       success: true,
@@ -94,7 +96,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[BIM Extract API] Error:', error);
+    logger.error('[BIM Extract API] Error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Extraction failed') },
       { status: 500 }
@@ -132,7 +134,7 @@ export async function GET(
       ragChunks: metadata.ragChunks,
     });
   } catch (error) {
-    console.error('[BIM Extract API] Error:', error);
+    logger.error('[BIM Extract API] Error', error);
     return NextResponse.json(
       { error: 'Failed to get extraction status' },
       { status: 500 }

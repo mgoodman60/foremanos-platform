@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_INVITATIONS_DECLINE');
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -69,7 +71,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       message: 'Invitation declined',
     });
   } catch (error) {
-    console.error('Error declining invitation:', error);
+    logger.error('Error declining invitation', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

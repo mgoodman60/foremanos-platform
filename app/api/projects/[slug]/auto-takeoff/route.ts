@@ -11,6 +11,8 @@ import { authOptions } from '@/lib/auth-options';
 import { safeErrorMessage } from '@/lib/api-error';
 import { prisma } from '@/lib/db';
 import { autoGenerateTakeoffs } from '@/lib/auto-takeoff-generator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_AUTO_TAKEOFF');
 
 export async function POST(
   request: NextRequest,
@@ -56,14 +58,14 @@ export async function POST(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    console.log(`[API] Starting auto-takeoff generation for project: ${slug}`);
+    logger.info('Starting auto-takeoff generation for project: ${slug}');
 
     // Run auto-generation
     const result = await autoGenerateTakeoffs(slug);
 
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error('[API] Auto-takeoff error:', error);
+    logger.error('Auto-takeoff error', error);
     return NextResponse.json(
       { error: 'Failed to generate takeoffs', details: safeErrorMessage(error) },
       { status: 500 }
@@ -124,7 +126,7 @@ export async function GET(
       })),
     });
   } catch (error: any) {
-    console.error('[API] Auto-takeoff status error:', error);
+    logger.error('Auto-takeoff status error', error);
     return NextResponse.json(
       { error: 'Failed to get status', details: safeErrorMessage(error) },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfDay, subDays, differenceInDays } from 'date-fns';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EVM');
 
 /**
  * Calculate Earned Value Management (EVM) metrics
@@ -213,7 +215,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('Error calculating EVM:', error);
+    logger.error('Error calculating EVM', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to calculate EVM metrics') },
       { status: 500 }
@@ -299,7 +301,7 @@ export async function POST(
 
     return NextResponse.json({ evmRecord }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating EVM record:', error);
+    logger.error('Error creating EVM record', error);
     
     if (error.code === 'P2002') {
       return NextResponse.json(

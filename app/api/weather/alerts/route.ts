@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('WEATHER_ALERTS');
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -75,7 +77,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ alerts });
   } catch (error) {
-    console.error('[API] Error fetching weather alerts:', error);
+    logger.error('Error fetching weather alerts', error);
     return NextResponse.json(
       { error: 'Failed to fetch alerts' },
       { status: 500 }

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('FEEDBACK');
 
 export const dynamic = 'force-dynamic';
 
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ feedback });
   } catch (error) {
-    console.error('Error submitting feedback:', error);
+    logger.error('Failed to submit feedback', error);
     return NextResponse.json(
       { error: 'Failed to submit feedback' },
       { status: 500 }

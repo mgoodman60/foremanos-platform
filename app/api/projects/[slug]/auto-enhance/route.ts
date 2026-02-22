@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { runAutoMEPExtraction, countDoorsByType } from '@/lib/auto-mep-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_AUTO_ENHANCE');
 
 export async function POST(req: Request, { params }: { params: { slug: string } }) {
   try {
@@ -20,15 +22,15 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    console.log(`[Auto-Enhance] Starting for project: ${project.name}`);
+    logger.info('[Auto-Enhance] Starting for project: ${project.name}');
 
     // Run MEP extraction and room linking
     const mepResult = await runAutoMEPExtraction(project.id);
-    console.log(`[Auto-Enhance] MEP: ${mepResult.roomsUpdated} rooms updated`);
+    logger.info('[Auto-Enhance] MEP: ${mepResult.roomsUpdated} rooms updated');
 
     // Get door counts
     const doorCounts = await countDoorsByType(project.id);
-    console.log(`[Auto-Enhance] Doors: ${doorCounts.total} found (from schedule: ${doorCounts.fromSchedule})`);
+    logger.info('[Auto-Enhance] Doors: ${doorCounts.total} found (from schedule: ${doorCounts.fromSchedule})');
 
     return NextResponse.json({
       success: true,
@@ -46,7 +48,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
       }
     });
   } catch (error) {
-    console.error('[Auto-Enhance] Error:', error);
+    logger.error('[Auto-Enhance] Error', error);
     return NextResponse.json(
       { error: 'Failed to run auto-enhancement' },
       { status: 500 }
@@ -79,7 +81,7 @@ export async function GET(req: Request, { params }: { params: { slug: string } }
       doors: doorCounts
     });
   } catch (error) {
-    console.error('[Auto-Enhance] Error:', error);
+    logger.error('[Auto-Enhance] Error', error);
     return NextResponse.json(
       { error: 'Failed to get enhancement status' },
       { status: 500 }

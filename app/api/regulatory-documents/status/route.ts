@@ -10,6 +10,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getRegulatoryDocumentsStatus } from '@/lib/regulatory-documents';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('REGULATORY_DOCUMENTS_STATUS');
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +41,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error fetching regulatory documents status:', error);
+    logger.error('Error fetching regulatory documents status', error);
     return NextResponse.json(
       { error: 'Failed to fetch status' },
       { status: 500 }

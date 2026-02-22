@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getNextSubmittalNumber } from '@/lib/mep-tracking-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS');
 
 export async function GET(
   request: Request,
@@ -70,7 +72,7 @@ export async function GET(
 
     return NextResponse.json({ submittals, stats });
   } catch (error) {
-    console.error('[MEP Submittals GET Error]:', error);
+    logger.error('[MEP Submittals GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch submittals' },
       { status: 500 }
@@ -144,7 +146,7 @@ export async function POST(
 
     return NextResponse.json({ submittal }, { status: 201 });
   } catch (error) {
-    console.error('[MEP Submittals POST Error]:', error);
+    logger.error('[MEP Submittals POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create submittal' },
       { status: 500 }

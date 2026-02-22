@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ROOMS_BULK_UPDATE_FLOOR');
 
 /**
  * POST /api/projects/[slug]/rooms/bulk-update-floor
@@ -105,9 +107,7 @@ export async function POST(
       );
     }
 
-    console.log(
-      `[ROOMS] Bulk updating ${roomIds.length} rooms to floor ${floorNumber} in project ${project.name}`
-    );
+    logger.info('Bulk updating ${roomIds.length} rooms to floor ${floorNumber} in project ${project.name}');
 
     // Bulk update floor number
     const result = await prisma.room.updateMany({
@@ -119,7 +119,7 @@ export async function POST(
       },
     });
 
-    console.log(`[ROOMS] Successfully updated ${result.count} rooms`);
+    logger.info('Successfully updated ${result.count} rooms');
 
     return NextResponse.json({
       success: true,
@@ -132,7 +132,7 @@ export async function POST(
       })),
     });
   } catch (error: any) {
-    console.error('[ROOMS] Error bulk updating floor:', error);
+    logger.error('Error bulk updating floor', error);
     return NextResponse.json(
       {
         error: 'Failed to bulk update rooms',

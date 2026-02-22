@@ -7,6 +7,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format, differenceInDays, startOfWeek } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXECUTIVE_DASHBOARD_EXPORT');
 
 export async function GET(
   request: NextRequest,
@@ -469,7 +471,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[Executive Dashboard Export Error]:', error);
+    logger.error('[Executive Dashboard Export Error]', error);
     return NextResponse.json(
       { error: 'Failed to generate report' },
       { status: 500 }

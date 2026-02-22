@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS_MARKUPS');
 
 // GET - Retrieve markups for a model
 export async function GET(
@@ -32,7 +34,7 @@ export async function GET(
       updatedAt: data?.updatedAt,
     });
   } catch (error) {
-    console.error('[API] Get markups error:', error);
+    logger.error('Get markups error', error);
     return NextResponse.json({ error: 'Failed to get markups' }, { status: 500 });
   }
 }
@@ -80,7 +82,7 @@ export async function POST(
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 });
     }
-    console.error('[API] Save markups error:', error);
+    logger.error('Save markups error', error);
     return NextResponse.json({ error: 'Failed to save markups' }, { status: 500 });
   }
 }
@@ -108,7 +110,7 @@ export async function DELETE(
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 });
     }
-    console.error('[API] Delete markups error:', error);
+    logger.error('Delete markups error', error);
     return NextResponse.json({ error: 'Failed to delete markups' }, { status: 500 });
   }
 }

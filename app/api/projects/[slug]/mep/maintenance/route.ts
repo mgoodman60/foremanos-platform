@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_MAINTENANCE');
 
 export async function GET(
   request: Request,
@@ -76,7 +78,7 @@ export async function GET(
 
     return NextResponse.json({ schedules, stats });
   } catch (error) {
-    console.error('[MEP Maintenance GET Error]:', error);
+    logger.error('[MEP Maintenance GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch maintenance schedules' },
       { status: 500 }
@@ -168,7 +170,7 @@ export async function POST(
 
     return NextResponse.json({ schedule }, { status: 201 });
   } catch (error) {
-    console.error('[MEP Maintenance POST Error]:', error);
+    logger.error('[MEP Maintenance POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create maintenance schedule' },
       { status: 500 }

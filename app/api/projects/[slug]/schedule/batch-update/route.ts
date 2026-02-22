@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
 import { syncBudgetFromSchedule } from '@/lib/budget-sync-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_BATCH_UPDATE');
 
 export const dynamic = 'force-dynamic';
 
@@ -203,7 +205,7 @@ export async function POST(
 
         applied.push(1);
       } catch (error) {
-        console.error(`Error processing update for task ${update.taskId}:`, error);
+        logger.error('Error processing update for task ${update.taskId}', error);
         failed.push({
           taskId: update.taskId,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -223,7 +225,7 @@ export async function POST(
 
       // Trigger budget sync after schedule updates
       syncBudgetFromSchedule(project.id, session.user.id).catch((err) => {
-        console.error('[BATCH_UPDATE] Budget sync failed:', err);
+        logger.error('Budget sync failed', err);
       });
     }
 
@@ -237,7 +239,7 @@ export async function POST(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[BATCH_UPDATE] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       {
         error: 'Internal server error',

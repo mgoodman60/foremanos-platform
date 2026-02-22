@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('USER_ONBOARDING');
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +23,7 @@ export async function POST() {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error completing onboarding:', error);
+    logger.error('Failed to complete onboarding', error);
     return NextResponse.json(
       { error: 'Failed to complete onboarding' },
       { status: 500 }
@@ -44,7 +47,7 @@ export async function GET() {
       hasCompletedOnboarding: user?.hasCompletedOnboarding || false,
     });
   } catch (error) {
-    console.error('Error fetching onboarding status:', error);
+    logger.error('Failed to fetch onboarding status', error);
     return NextResponse.json(
       { error: 'Failed to fetch onboarding status' },
       { status: 500 }

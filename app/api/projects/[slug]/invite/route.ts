@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_INVITE');
 
 export const dynamic = 'force-dynamic';
 
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       },
     });
   } catch (error) {
-    console.error('Error creating invitation:', error);
+    logger.error('Error creating invitation', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -11,6 +11,8 @@ import {
   generateDailyReportDOCX,
   formatDailyReportForExport,
 } from '@/lib/daily-report-docx-generator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DAILY_REPORTS_EXPORT_DOCX');
 
 export async function GET(
   request: NextRequest,
@@ -83,7 +85,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[DailyReportDOCX] Export error:', error);
+    logger.error('Export error', error);
     return NextResponse.json(
       { error: 'Failed to generate DOCX' },
       { status: 500 }

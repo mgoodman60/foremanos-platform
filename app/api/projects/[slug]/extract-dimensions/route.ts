@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
 import { extractDimensionsWithVision } from '@/lib/dimension-intelligence';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_DIMENSIONS');
 
 export async function POST(
   request: NextRequest,
@@ -36,7 +38,7 @@ export async function POST(
       }
     });
 
-    console.log(`[DIMENSION EXTRACTION] Starting extraction for ${documents.length} documents...`);
+    logger.info('[DIMENSION EXTRACTION] Starting extraction for ${documents.length} documents...');
 
     let totalDimensions = 0;
     let processedSheets = 0;
@@ -54,7 +56,7 @@ export async function POST(
           });
 
           if (existing) {
-            console.log(`[DIMENSION EXTRACTION] Skipping ${document.name} - already processed`);
+            logger.info('[DIMENSION EXTRACTION] Skipping ${document.name} - already processed');
             const dims = existing.dimensions as any;
             if (Array.isArray(dims)) {
               totalDimensions += dims.length;
@@ -64,11 +66,11 @@ export async function POST(
           }
         }
 
-        console.log(`[DIMENSION EXTRACTION] Processing ${document.name}...`);
+        logger.info('[DIMENSION EXTRACTION] Processing ${document.name}...');
 
         // Skip if no cloud storage path
         if (!document.cloud_storage_path) {
-          console.log(`[DIMENSION EXTRACTION] Skipping ${document.name} - no cloud storage path`);
+          logger.info('[DIMENSION EXTRACTION] Skipping ${document.name} - no cloud storage path');
           continue;
         }
 
@@ -107,14 +109,14 @@ export async function POST(
         const pageBase64 = rasterResult.base64;
 
         // Extract dimensions using vision (supports both PDF and image input)
-        console.log(`[DIMENSION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...`);
+        logger.info('[DIMENSION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...');
         const dimensions = await extractDimensionsWithVision(
           pageBase64,
           sheetNumber,
           scaleData
         );
 
-        console.log(`[DIMENSION EXTRACTION] Extracted ${dimensions.length} dimensions from ${sheetNumber}`);
+        logger.info('[DIMENSION EXTRACTION] Extracted ${dimensions.length} dimensions from ${sheetNumber}');
 
         // Validate dimension chains
         const dimensionsWithIds = dimensions.map((d, idx) => ({
@@ -189,12 +191,12 @@ export async function POST(
         processedSheets++;
 
       } catch (error: any) {
-        console.error(`[DIMENSION EXTRACTION] Error processing ${document.name}:`, error);
+        logger.error('[DIMENSION EXTRACTION] Error processing ${document.name}', error);
         errors.push(`${document.name}: ${error.message}`);
       }
     }
 
-    console.log(`[DIMENSION EXTRACTION] Complete. Extracted ${totalDimensions} dimensions from ${processedSheets} sheets.`);
+    logger.info('[DIMENSION EXTRACTION] Complete. Extracted ${totalDimensions} dimensions from ${processedSheets} sheets.');
 
     return NextResponse.json({
       success: true,
@@ -204,7 +206,7 @@ export async function POST(
       errors: errors.length > 0 ? errors : undefined
     });
   } catch (error: any) {
-    console.error('Error extracting dimensions:', error);
+    logger.error('Error extracting dimensions', error);
     return NextResponse.json({ 
       error: 'Failed to extract dimensions',
       details: error.message 

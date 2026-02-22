@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEMBERS');
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +71,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       })),
     });
   } catch (error) {
-    console.error('Error fetching project members:', error);
+    logger.error('Error fetching project members', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { importOneSeniorCareBudget, getBudgetSummaryByPhase } from '@/lib/budget-importer';
 import { enhanceProjectData } from '@/lib/project-data-enhancer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_IMPORT');
 
 export async function POST(
   request: NextRequest,
@@ -22,7 +24,7 @@ export async function POST(
     }
 
     const { slug } = params;
-    console.log(`[Budget Import API] Starting import for project: ${slug}`);
+    logger.info('[Budget Import API] Starting import for project: ${slug}');
 
     // Import budget
     const importResult = await importOneSeniorCareBudget(slug);
@@ -52,7 +54,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[Budget Import API] Error:', error);
+    logger.error('[Budget Import API] Error', error);
     return NextResponse.json(
       { error: `Import failed: ${error}` },
       { status: 500 }
@@ -81,7 +83,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[Budget API] Error:', error);
+    logger.error('[Budget API] Error', error);
     return NextResponse.json(
       { error: `Failed to get budget: ${error}` },
       { status: 500 }

@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { syncDailyReportFull } from '@/lib/daily-report-sync-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DAILY_REPORTS_SYNC');
 
 export async function POST(
   request: NextRequest,
@@ -60,7 +62,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[DailyReportSync API] Error:', error);
+    logger.error('[DailyReportSync API] Error', error);
     return NextResponse.json(
       { error: 'Failed to sync daily report' },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { removeDuplicates } from '@/lib/duplicate-detector';
 import { requireProjectPermission } from '@/lib/project-permissions';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DUPLICATES');
 
 export const dynamic = 'force-dynamic';
 
@@ -49,11 +51,11 @@ export async function POST(
     }
 
     // Remove duplicates
-    console.log(`Removing duplicates from project ${project.id} (${slug})...`);
+    logger.info('Removing duplicates from project ${project.id} (${slug})...');
     const result = await removeDuplicates(project.id);
 
     if (result.errors.length > 0) {
-      console.error('Errors during duplicate removal:', result.errors);
+      logger.error('Errors during duplicate removal', undefined, { errors: result.errors });
     }
 
     return NextResponse.json({
@@ -63,7 +65,7 @@ export async function POST(
       errors: result.errors,
     });
   } catch (error) {
-    console.error('Error removing duplicates:', error);
+    logger.error('Error removing duplicates', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -154,7 +156,7 @@ export async function GET(
       uniqueCount: documents.length - duplicateCount,
     });
   } catch (error) {
-    console.error('Error checking duplicates:', error);
+    logger.error('Error checking duplicates', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_UNLINK');
 
 export async function POST(
   req: NextRequest,
@@ -109,7 +111,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error unlinking photo:', error);
+    logger.error('Error unlinking photo', error);
     return NextResponse.json(
       { error: 'Failed to unlink photo' },
       { status: 500 }

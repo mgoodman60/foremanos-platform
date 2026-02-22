@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { updateLastActivity } from '@/lib/report-finalization';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_ACTIVITY');
 
 export async function POST(
   request: NextRequest,
@@ -54,7 +56,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[ACTIVITY_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to update activity' },
       { status: 500 }

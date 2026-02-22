@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_ASSIGN_LOCATIONS');
 
 export const dynamic = 'force-dynamic';
 
@@ -136,7 +138,7 @@ export async function POST(
       ...results
     });
   } catch (error: any) {
-    console.error('Error assigning MEP locations:', error);
+    logger.error('Error assigning MEP locations', error);
     return NextResponse.json(
       { error: 'Failed to assign locations', details: error.message },
       { status: 500 }
@@ -652,7 +654,7 @@ export async function PUT(
       message: `Auto-assigned ${updated} MEP items to ${rooms.length} rooms`
     });
   } catch (error: any) {
-    console.error('Error auto-assigning MEP locations:', error);
+    logger.error('Error auto-assigning MEP locations', error);
     return NextResponse.json(
       { error: 'Failed to auto-assign locations', details: error.message },
       { status: 500 }
@@ -733,7 +735,7 @@ export async function GET(
       }
     });
   } catch (error: any) {
-    console.error('Error fetching MEP location data:', error);
+    logger.error('Error fetching MEP location data', error);
     return NextResponse.json(
       { error: 'Failed to fetch MEP location data', details: error.message },
       { status: 500 }

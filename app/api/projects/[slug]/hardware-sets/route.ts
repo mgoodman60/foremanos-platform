@@ -13,6 +13,8 @@ import {
   calculateHardwareRequirements,
   extractAndSyncAllHardwareSets 
 } from '@/lib/hardware-set-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_HARDWARE_SETS');
 
 export async function GET(
   request: Request,
@@ -44,7 +46,7 @@ export async function GET(
       return NextResponse.json({ sets });
     }
   } catch (error) {
-    console.error('[Hardware Sets GET Error]:', error);
+    logger.error('[Hardware Sets GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch hardware sets' },
       { status: 500 }
@@ -78,7 +80,7 @@ export async function POST(
       extracted: stats
     });
   } catch (error) {
-    console.error('[Hardware Sets POST Error]:', error);
+    logger.error('[Hardware Sets POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to extract hardware sets' },
       { status: 500 }

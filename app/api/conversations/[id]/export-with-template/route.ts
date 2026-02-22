@@ -7,6 +7,8 @@ import {
   processTemplateById,
   getTemplatesForType,
 } from '@/lib/template-processor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_EXPORT_WITH_TEMPLATE');
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +64,7 @@ export async function GET(
 
     return NextResponse.json({ templates });
   } catch (error) {
-    console.error('[EXPORT_WITH_TEMPLATE] Error fetching templates:', error);
+    logger.error('Error fetching templates', error);
     return NextResponse.json(
       { error: 'Failed to fetch templates' },
       { status: 500 }
@@ -158,7 +160,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[EXPORT_WITH_TEMPLATE] Error exporting with template:', error);
+    logger.error('Error exporting with template', error);
     return NextResponse.json(
       {
         error: 'Failed to export with template',

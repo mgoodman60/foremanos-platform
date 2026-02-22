@@ -13,6 +13,8 @@ import {
   autoImportRequirements,
   getAvailableCategories,
 } from '@/lib/submittal-requirement-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_REQUIREMENTS');
 
 export async function GET(
   req: NextRequest,
@@ -46,7 +48,7 @@ export async function GET(
     const requirements = await extractAllRequirements(project.id);
     return NextResponse.json(requirements);
   } catch (error) {
-    console.error('Error extracting requirements:', error);
+    logger.error('Error extracting requirements', error);
     return NextResponse.json(
       { error: 'Failed to extract requirements' },
       { status: 500 }
@@ -123,7 +125,7 @@ export async function POST(
       ...result,
     });
   } catch (error) {
-    console.error('Error auto-importing requirements:', error);
+    logger.error('Error auto-importing requirements', error);
     return NextResponse.json(
       { error: 'Failed to auto-import requirements' },
       { status: 500 }

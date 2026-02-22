@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { deleteFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS');
 
 /**
  * GET /api/projects/[slug]/photos/[id]
@@ -58,7 +60,7 @@ export async function GET(
       photo,
     });
   } catch (error: any) {
-    console.error('[Photo Get] Error:', error);
+    logger.error('[Photo Get] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to fetch photo',
@@ -165,14 +167,14 @@ export async function PATCH(
       },
     });
 
-    console.log(`[Photo Update] Updated photo ${id}`);
+    logger.info('[Photo Update] Updated photo ${id}');
 
     return NextResponse.json({
       success: true,
       photo: updatedPhoto,
     });
   } catch (error: any) {
-    console.error('[Photo Update] Error:', error);
+    logger.error('[Photo Update] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to update photo',
@@ -249,7 +251,7 @@ export async function DELETE(
         await deleteFile(photo.thumbnailPath);
       }
     } catch (s3Error) {
-      console.error('Error deleting from S3:', s3Error);
+      logger.error('Error deleting from S3', s3Error);
       // Continue with database deletion even if S3 deletion fails
     }
 
@@ -258,14 +260,14 @@ export async function DELETE(
       where: { id },
     });
 
-    console.log(`[Photo Delete] Deleted photo ${id}`);
+    logger.info('[Photo Delete] Deleted photo ${id}');
 
     return NextResponse.json({
       success: true,
       message: 'Photo deleted successfully',
     });
   } catch (error: any) {
-    console.error('[Photo Delete] Error:', error);
+    logger.error('[Photo Delete] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to delete photo',

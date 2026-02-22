@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_STATS');
 
 export async function GET(
   req: NextRequest,
@@ -79,7 +81,7 @@ export async function GET(
       verificationStats,
     });
   } catch (error) {
-    console.error('Error fetching submittal stats:', error);
+    logger.error('Error fetching submittal stats', error);
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
   }
 }

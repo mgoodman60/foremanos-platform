@@ -9,6 +9,8 @@ import {
   enhanceAggregationWithAI,
   exportAggregationToCSV
 } from '@/lib/takeoff-aggregation-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TAKEOFFS_AGGREGATIONS');
 
 /**
  * GET /api/projects/[slug]/takeoffs/aggregations/[id]
@@ -47,7 +49,7 @@ export async function GET(
 
     return NextResponse.json({ aggregation });
   } catch (error: unknown) {
-    console.error('Error fetching aggregation:', error);
+    logger.error('Error fetching aggregation', error);
     return NextResponse.json(
       { error: 'Failed to fetch aggregation', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -109,7 +111,7 @@ export async function PATCH(
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error: unknown) {
-    console.error('Error updating aggregation:', error);
+    logger.error('Error updating aggregation', error);
     return NextResponse.json(
       { error: 'Failed to update aggregation', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -137,7 +139,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Aggregation deleted' });
   } catch (error: unknown) {
-    console.error('Error deleting aggregation:', error);
+    logger.error('Error deleting aggregation', error);
     return NextResponse.json(
       { error: 'Failed to delete aggregation', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { generatePresignedUploadUrl } from '@/lib/s3';
 import { validateS3Config } from '@/lib/aws-config';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_PHOTOS_PRESIGNED');
 
 // POST - Get presigned URL for photo upload
 export async function POST(
@@ -68,7 +70,7 @@ export async function POST(
       cloud_storage_path,
     });
   } catch (error) {
-    console.error('Error generating presigned URL:', error);
+    logger.error('Error generating presigned URL', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

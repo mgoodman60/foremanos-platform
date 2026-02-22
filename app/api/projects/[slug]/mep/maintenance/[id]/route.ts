@@ -9,6 +9,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_MAINTENANCE');
 
 export async function GET(
   request: Request,
@@ -38,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({ schedule });
   } catch (error) {
-    console.error('[MEP Maintenance GET Error]:', error);
+    logger.error('[MEP Maintenance GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch maintenance schedule' },
       { status: 500 }
@@ -93,7 +95,7 @@ export async function PATCH(
 
     return NextResponse.json({ schedule });
   } catch (error) {
-    console.error('[MEP Maintenance PATCH Error]:', error);
+    logger.error('[MEP Maintenance PATCH Error]', error);
     return NextResponse.json(
       { error: 'Failed to update maintenance schedule' },
       { status: 500 }
@@ -117,7 +119,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[MEP Maintenance DELETE Error]:', error);
+    logger.error('[MEP Maintenance DELETE Error]', error);
     return NextResponse.json(
       { error: 'Failed to delete maintenance schedule' },
       { status: 500 }

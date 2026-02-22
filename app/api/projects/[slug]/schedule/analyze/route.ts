@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { analyzeScheduleForImprovements } from '@/lib/schedule-improvement-analyzer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_ANALYZE');
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +56,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       analysis
     });
   } catch (error) {
-    console.error('[SCHEDULE_ANALYZE] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to analyze schedule' },
       { status: 500 }
@@ -110,7 +112,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       analysis
     });
   } catch (error) {
-    console.error('[SCHEDULE_ANALYZE] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to analyze schedule' },
       { status: 500 }

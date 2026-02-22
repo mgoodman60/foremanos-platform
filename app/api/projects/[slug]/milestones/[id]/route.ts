@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MILESTONES');
 
 // GET /api/projects/[slug]/milestones/[id]
 export async function GET(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ ...milestone, linkedTasks });
   } catch (error) {
-    console.error('[API] Get milestone error:', error);
+    logger.error('Get milestone error', error);
     return NextResponse.json({ error: 'Failed to fetch milestone' }, { status: 500 });
   }
 }
@@ -95,7 +97,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { slug: stri
 
     return NextResponse.json(milestone);
   } catch (error) {
-    console.error('[API] Update milestone error:', error);
+    logger.error('Update milestone error', error);
     return NextResponse.json({ error: 'Failed to update milestone' }, { status: 500 });
   }
 }
@@ -114,7 +116,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[API] Delete milestone error:', error);
+    logger.error('Delete milestone error', error);
     return NextResponse.json({ error: 'Failed to delete milestone' }, { status: 500 });
   }
 }

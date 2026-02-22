@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 import { callLLM } from '@/lib/llm-providers';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_IMPORT_PDF');
 
 // Helper to parse Walker Company PDF text
 function _parseWalkerCompanyPDF(text: string): Array<{
@@ -177,7 +179,7 @@ Only return the JSON array, no other text.`
         parsedItems = JSON.parse(jsonMatch[0]);
       }
     } catch (e) {
-      console.error('Failed to parse LLM response:', e);
+      logger.error('Failed to parse LLM response', e);
       return NextResponse.json(
         { error: 'Failed to parse budget data from PDF' },
         { status: 500 }
@@ -256,7 +258,7 @@ Only return the JSON array, no other text.`
       totalBudgetAdded
     });
   } catch (error) {
-    console.error('[API] Error importing PDF:', error);
+    logger.error('Error importing PDF', error);
     return NextResponse.json(
       { error: 'Failed to import budget from PDF' },
       { status: 500 }

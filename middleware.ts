@@ -15,11 +15,19 @@ function isPublicApiRoute(pathname: string): boolean {
 
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
-    // Public API routes bypass auth (they have their own auth: CRON_SECRET, webhook signatures, etc.)
-    if (isPublicApiRoute(req.nextUrl.pathname)) {
-      return NextResponse.next();
-    }
-    return NextResponse.next();
+    const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+
+    // Forward request ID to API routes via request headers
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-request-id', requestId);
+
+    const response = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+
+    // Also set on response for clients/monitoring
+    response.headers.set('x-request-id', requestId);
+    return response;
   },
   {
     callbacks: {

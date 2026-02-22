@@ -9,6 +9,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_EQUIPMENT');
 
 export async function GET(
   request: Request,
@@ -49,7 +51,7 @@ export async function GET(
 
     return NextResponse.json({ equipment });
   } catch (error) {
-    console.error('[MEP Equipment GET Error]:', error);
+    logger.error('[MEP Equipment GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch equipment' },
       { status: 500 }
@@ -126,7 +128,7 @@ export async function PATCH(
 
     return NextResponse.json({ equipment });
   } catch (error) {
-    console.error('[MEP Equipment PATCH Error]:', error);
+    logger.error('[MEP Equipment PATCH Error]', error);
     return NextResponse.json(
       { error: 'Failed to update equipment' },
       { status: 500 }
@@ -150,7 +152,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[MEP Equipment DELETE Error]:', error);
+    logger.error('[MEP Equipment DELETE Error]', error);
     return NextResponse.json(
       { error: 'Failed to delete equipment' },
       { status: 500 }

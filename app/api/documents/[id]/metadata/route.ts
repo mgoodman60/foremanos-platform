@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_METADATA');
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +78,7 @@ export async function PATCH(
       },
     });
   } catch (error) {
-    console.error('Error updating document metadata:', error);
+    logger.error('Error updating document metadata', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

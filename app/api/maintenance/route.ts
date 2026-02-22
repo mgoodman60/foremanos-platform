@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('MAINTENANCE');
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +19,7 @@ export async function GET() {
       message: maintenance?.message || 'Updating documents... Please check back in a few minutes',
     });
   } catch (error) {
-    console.error('Error checking maintenance mode:', error);
+    logger.error('Failed to check maintenance mode', error);
     return NextResponse.json(
       { isActive: false },
       { status: 500 }
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(maintenance);
   } catch (error) {
-    console.error('Error updating maintenance mode:', error);
+    logger.error('Failed to update maintenance mode', error);
     return NextResponse.json(
       { error: 'Failed to update maintenance mode' },
       { status: 500 }

@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry-util';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('DASHBOARD');
 
 interface ProjectWithCounts {
   id: string;
@@ -168,7 +171,7 @@ export async function GET() {
       },
     });
   } catch (error: unknown) {
-    console.error('[API] Error fetching dashboard data:', error);
+    logger.error('Failed to fetch dashboard data', error);
 
     // Return more specific error messages
     const prismaError = error as PrismaError;

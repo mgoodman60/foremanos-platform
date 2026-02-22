@@ -22,6 +22,8 @@ import {
   bulkApplySuggestions,
   getLearningSystemSummary,
 } from '@/lib/takeoff-learning-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_LEARNING');
 
 export async function GET(
   request: NextRequest,
@@ -74,7 +76,7 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Learning API] GET Error:', error);
+    logger.error('[Learning API] GET Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch learning data' },
       { status: 500 }
@@ -157,7 +159,7 @@ export async function POST(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Learning API] POST Error:', error);
+    logger.error('[Learning API] POST Error', error);
     return NextResponse.json(
       { error: 'Failed to process learning action' },
       { status: 500 }

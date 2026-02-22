@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SUBCONTRACTORS');
 
 // Valid trade types that match the schema
 const VALID_TRADE_TYPES = [
@@ -60,7 +62,7 @@ export async function GET(
 
     return NextResponse.json(subcontractors);
   } catch (error) {
-    console.error('Error fetching subcontractors:', error);
+    logger.error('Error fetching subcontractors', error);
     return NextResponse.json(
       { error: 'Failed to fetch subcontractors' },
       { status: 500 }
@@ -150,7 +152,7 @@ export async function POST(
 
     return NextResponse.json(subcontractor, { status: 201 });
   } catch (error: any) {
-    console.error('[SUBCONTRACTORS_POST] Error:', error);
+    logger.error('Error', error);
     
     if (error?.code === 'P2002') {
       return NextResponse.json(

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ADMIN_STATS');
 
 export const dynamic = 'force-dynamic';
 
@@ -75,7 +78,7 @@ export async function GET() {
       recentSignups,
     });
   } catch (error) {
-    console.error('Error fetching admin stats:', error);
+    logger.error('Failed to fetch admin stats', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

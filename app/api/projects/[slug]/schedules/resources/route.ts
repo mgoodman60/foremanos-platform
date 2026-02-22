@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULES_RESOURCES');
 
 // GET /api/projects/[slug]/schedules/resources - Get resource histogram and earned value data
 export async function GET(
@@ -260,7 +262,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('[API] Error fetching resource data:', error);
+    logger.error('Error fetching resource data', error);
     return NextResponse.json(
       { error: 'Failed to fetch resource data' },
       { status: 500 }

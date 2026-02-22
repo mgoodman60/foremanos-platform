@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { TradeType } from '@prisma/client';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_AUTO_ASSIGN_TRADES');
 
 // Mapping of keywords to trade types based on CSI divisions
 const TRADE_KEYWORD_MAP: Record<TradeType, string[]> = {
@@ -158,7 +160,7 @@ export async function POST(
       message: `Auto-assigned ${results.assigned} items to trades`,
     });
   } catch (error: any) {
-    console.error('Error auto-assigning trades:', error);
+    logger.error('Error auto-assigning trades', error);
     return NextResponse.json(
       { error: 'Failed to auto-assign trades' },
       { status: 500 }

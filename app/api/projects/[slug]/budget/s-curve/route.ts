@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addWeeks, format } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_S_CURVE');
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
@@ -86,7 +88,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       latestSnapshot: snapshots[snapshots.length - 1]
     });
   } catch (error) {
-    console.error('[API] Error fetching S-curve data:', error);
+    logger.error('Error fetching S-curve data', error);
     return NextResponse.json({ error: 'Failed to fetch S-curve data' }, { status: 500 });
   }
 }
@@ -130,7 +132,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(snapshot);
   } catch (error) {
-    console.error('[API] Error creating snapshot:', error);
+    logger.error('Error creating snapshot', error);
     return NextResponse.json({ error: 'Failed to create snapshot' }, { status: 500 });
   }
 }

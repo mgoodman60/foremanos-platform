@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { extractAllSchedules } from '@/lib/schedule-extraction-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULES_EXTRACT');
 
 // POST: Trigger schedule extraction for a project
 export async function POST(
@@ -21,7 +23,7 @@ export async function POST(
       ...result,
     });
   } catch (error) {
-    console.error('Error extracting schedules:', error);
+    logger.error('Error extracting schedules', error);
     return NextResponse.json({ error: 'Failed to extract schedules' }, { status: 500 });
   }
 }
@@ -45,7 +47,7 @@ export async function GET(
       message: 'Schedule extraction is available for this project',
     });
   } catch (error) {
-    console.error('Error checking extraction status:', error);
+    logger.error('Error checking extraction status', error);
     return NextResponse.json({ error: 'Failed to check extraction status' }, { status: 500 });
   }
 }

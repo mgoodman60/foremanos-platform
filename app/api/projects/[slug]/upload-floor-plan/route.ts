@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl } from '@/lib/s3';
 import { validateS3Config } from '@/lib/aws-config';
 import sizeOf from 'image-size';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_UPLOAD_FLOOR_PLAN');
 
 // POST /api/projects/[slug]/upload-floor-plan - Upload floor plan image
 export async function POST(
@@ -102,7 +104,7 @@ export async function POST(
           imageWidth = dimensions.width || null;
           imageHeight = dimensions.height || null;
         } catch (error) {
-          console.error('Error getting image dimensions:', error);
+          logger.error('Error getting image dimensions', error);
         }
       }
 
@@ -136,7 +138,7 @@ export async function POST(
       imageHeight
     });
   } catch (error) {
-    console.error('Error uploading floor plan:', error);
+    logger.error('Error uploading floor plan', error);
     return NextResponse.json(
       { error: 'Failed to upload floor plan' },
       { status: 500 }

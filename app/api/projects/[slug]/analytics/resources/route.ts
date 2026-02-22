@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getResourceUtilization, getTeamPerformance } from '@/lib/analytics-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANALYTICS_RESOURCES');
 
 export async function GET(
   request: NextRequest,
@@ -29,7 +31,7 @@ export async function GET(
 
     return NextResponse.json({ utilization, teamPerformance });
   } catch (error) {
-    console.error('[Analytics Resources] Error:', error);
+    logger.error('[Analytics Resources] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch resource analytics' },
       { status: 500 }

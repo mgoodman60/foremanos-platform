@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ROOMS_TAKEOFFS');
 
 /**
  * GET /api/projects/[slug]/rooms/[id]/takeoffs
@@ -170,7 +172,7 @@ export async function GET(
       summary,
     });
   } catch (error) {
-    console.error('[API] Error fetching room takeoffs:', error);
+    logger.error('Error fetching room takeoffs', error);
     return NextResponse.json(
       { error: 'Failed to fetch room takeoffs' },
       { status: 500 }

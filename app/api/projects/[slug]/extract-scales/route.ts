@@ -15,6 +15,8 @@ import {
   type SheetScaleData,
 } from '@/lib/scale-detector';
 import { rasterizePdfToImages } from '@/lib/pdf-to-image-raster';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_SCALES');
 
 export async function POST(req: Request, { params }: { params: { slug: string } }) {
   try {
@@ -47,7 +49,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
 
     // Process each document
     for (const document of project.Document) {
-      console.log(`\n📄 Processing document: ${document.name}`);
+      logger.info('\n📄 Processing document: ${document.name}');
       
       // Check if already processed
       if (!forceReprocess) {
@@ -58,7 +60,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
         });
 
         if (existingScale) {
-          console.log(`  ⏭️  Already has scale data, skipping`);
+          logger.info('⏭️  Already has scale data, skipping');
           continue;
         }
       }
@@ -86,7 +88,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
         for (const page of rasterizedPages) {
           const pageNumber = page.pageNumber;
 
-          console.log(`  📃 Processing page ${pageNumber}/${rasterizedPages.length}`);
+          logger.info('📃 Processing page ${pageNumber}/${rasterizedPages.length}');
 
           // Use page number as sheet identifier
           const sheetNumber = `Page ${pageNumber}`;
@@ -110,14 +112,14 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
 
             extracted++;
             totalScales += visionResult.scales.length;
-            console.log(`  ✓ Extracted ${visionResult.scales.length} scale(s) from page ${pageNumber}`);
+            logger.info('✓ Extracted ${visionResult.scales.length} scale(s) from page ${pageNumber}');
           } else {
-            console.log(`  ⚠️  No scales found on page ${pageNumber}`);
+            logger.info('⚠️  No scales found on page ${pageNumber}');
           }
         }
 
       } catch (error) {
-        console.error(`Error processing document ${document.name}:`, error);
+        logger.error('Error processing document ${document.name}', error);
       }
     }
 
@@ -129,7 +131,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
     });
 
   } catch (error) {
-    console.error('Extract scales error:', error);
+    logger.error('Extract scales error', error);
     return NextResponse.json(
       { error: 'Failed to extract scales' },
       { status: 500 }

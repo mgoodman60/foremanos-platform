@@ -7,6 +7,8 @@ import {
   getProjectRegulatoryDocuments,
   getRegulatoryDocumentStats,
 } from '@/lib/regulatory-documents';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_REGULATORY');
 
 /**
  * GET /api/projects/[slug]/regulatory
@@ -50,7 +52,7 @@ export async function GET(
 
     return NextResponse.json({ documents, stats });
   } catch (error) {
-    console.error('Error fetching regulatory documents:', error);
+    logger.error('Error fetching regulatory documents', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -125,7 +127,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('Error adding regulatory documents:', error);
+    logger.error('Error adding regulatory documents', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

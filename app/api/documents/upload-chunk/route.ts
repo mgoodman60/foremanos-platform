@@ -5,6 +5,8 @@ import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-con
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '@/lib/logger';
 
+const logger = createLogger('DOCUMENTS_UPLOAD_CHUNK');
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -58,7 +60,7 @@ export async function POST(request: Request) {
       Body: chunkBuffer,
     }));
 
-    console.log(`[CHUNK] Uploaded chunk ${chunkIndex + 1}/${totalChunks} for ${fileName}`);
+    logger.info('Uploaded chunk ${chunkIndex + 1}/${totalChunks} for ${fileName}');
 
     return NextResponse.json({
       success: true,

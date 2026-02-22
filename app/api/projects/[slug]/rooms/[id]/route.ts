@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ROOMS');
 
 // GET /api/projects/[slug]/rooms/[id] - Get single room with finish schedules
 export async function GET(
@@ -59,7 +61,7 @@ export async function GET(
 
     return NextResponse.json({ room });
   } catch (error) {
-    console.error('Error fetching room:', error);
+    logger.error('Error fetching room', error);
     return NextResponse.json(
       { error: 'Failed to fetch room' },
       { status: 500 }
@@ -132,7 +134,7 @@ export async function PATCH(
 
     return NextResponse.json({ room });
   } catch (error) {
-    console.error('Error updating room:', error);
+    logger.error('Error updating room', error);
     return NextResponse.json(
       { error: 'Failed to update room' },
       { status: 500 }

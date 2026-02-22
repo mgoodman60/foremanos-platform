@@ -7,6 +7,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isAutodeskConfigured } from '@/lib/autodesk-auth';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_TOKEN');
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +49,7 @@ export async function GET() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Autodesk Token API] Failed to get token:', errorText);
+      logger.error('[Autodesk Token API] Failed to get token', errorText);
       return NextResponse.json(
         { error: 'Failed to get viewer token' },
         { status: 500 }
@@ -62,7 +64,7 @@ export async function GET() {
       expires_in: data.expires_in,
     });
   } catch (error) {
-    console.error('[Autodesk Token API] Error:', error);
+    logger.error('[Autodesk Token API] Error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -6,6 +6,8 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PLANS_METADATA');
 
 const execAsync = promisify(exec);
 
@@ -91,7 +93,7 @@ export async function GET(
             totalPages = pages;
           }
         } catch (error) {
-          console.error('Error getting PDF page count:', error);
+          logger.error('Error getting PDF page count', error);
         }
       }
     }
@@ -106,7 +108,7 @@ export async function GET(
       processed: document.processed
     });
   } catch (error: any) {
-    console.error('Error fetching plan metadata:', error);
+    logger.error('Error fetching plan metadata', error);
     return NextResponse.json(
       { error: 'Failed to fetch plan metadata', details: error.message },
       { status: 500 }

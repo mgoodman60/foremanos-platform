@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { analyzeScheduleForImprovements } from '@/lib/schedule-improvement-analyzer';
 import { callAbacusLLM } from '@/lib/abacus-llm';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_COACH');
 
 export const maxDuration = 120;
 
@@ -79,7 +81,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('[SCHEDULE_COACH] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json({ error: 'Failed to process' }, { status: 500 });
   }
 }
@@ -183,7 +185,7 @@ Return JSON format:
       return JSON.parse(cleanContent);
     }
   } catch (error) {
-    console.error('[SCHEDULE_COACH] AI insights error:', error);
+    logger.error('AI insights error', error);
   }
 
   return {
@@ -373,7 +375,7 @@ Return JSON format:
       };
     }
   } catch (error) {
-    console.error('[SCHEDULE_COACH] Generation error:', error);
+    logger.error('Generation error', error);
   }
 
   return {
@@ -579,7 +581,7 @@ export async function PUT(
             });
             tasksCreated++;
           } catch (err) {
-            console.error('[SCHEDULE_COACH] Failed to create task:', err);
+            logger.error('Failed to create task', err);
           }
         }
       }
@@ -609,7 +611,7 @@ export async function PUT(
       message: `Applied ${appliedCount} improvements, created ${tasksCreated} tasks`
     });
   } catch (error) {
-    console.error('[SCHEDULE_COACH] PUT Error:', error);
+    logger.error('PUT Error', error);
     return NextResponse.json({ error: 'Failed to apply improvements' }, { status: 500 });
   }
 }

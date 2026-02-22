@@ -13,6 +13,8 @@ import { createS3Client, getBucketConfig } from '@/lib/aws-config';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { PhotoMetadata } from '@/lib/photo-analyzer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_PHOTOS_EXPORT');
 
 export const dynamic = 'force-dynamic';
 
@@ -96,11 +98,7 @@ export async function GET(
             signedUrl,
           };
         } catch (error) {
-          console.error(
-            '[PHOTO_EXPORT] Error generating signed URL for photo:',
-            photo.id,
-            error
-          );
+          logger.error('Error generating signed URL for photo', error, { photoId: photo.id });
           return {
             ...photo,
             signedUrl: null,
@@ -132,7 +130,7 @@ export async function GET(
 
     return NextResponse.json(exportData);
   } catch (error) {
-    console.error('[PHOTO_EXPORT] Error exporting photos:', error);
+    logger.error('Error exporting photos', error);
     return NextResponse.json(
       { error: 'Failed to export photos' },
       { status: 500 }

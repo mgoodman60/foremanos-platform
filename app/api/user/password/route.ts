@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('USER_PASSWORD');
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -68,7 +71,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error changing password:', error);
+    logger.error('Failed to change password', error);
     return NextResponse.json(
       { error: 'Failed to change password' },
       { status: 500 }

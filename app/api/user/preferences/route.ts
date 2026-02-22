@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('USER_PREFERENCES');
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +25,7 @@ export async function GET() {
 
     return NextResponse.json({ preferences: user?.preferences || {} });
   } catch (error) {
-    console.error('Error fetching preferences:', error);
+    logger.error('Failed to fetch preferences', error);
     return NextResponse.json(
       { error: 'Failed to fetch preferences' },
       { status: 500 }
@@ -60,7 +63,7 @@ export async function PATCH(request: NextRequest) {
       preferences: user.preferences,
     });
   } catch (error) {
-    console.error('Error updating preferences:', error);
+    logger.error('Failed to update preferences', error);
     return NextResponse.json(
       { error: 'Failed to update preferences' },
       { status: 500 }

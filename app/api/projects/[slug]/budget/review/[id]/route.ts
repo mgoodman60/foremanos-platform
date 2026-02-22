@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_REVIEW');
 
 export async function PATCH(
   request: NextRequest,
@@ -79,14 +81,14 @@ export async function PATCH(
       });
     }
 
-    console.log(`[BudgetReview] Updated ${type} entry ${id}`);
+    logger.info('Updated ${type} entry ${id}');
 
     return NextResponse.json({
       success: true,
       entry: updated,
     });
   } catch (error) {
-    console.error('[BudgetReview] Update error:', error);
+    logger.error('Update error', error);
     return NextResponse.json(
       { error: 'Failed to update entry' },
       { status: 500 }

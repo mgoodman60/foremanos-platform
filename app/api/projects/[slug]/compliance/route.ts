@@ -12,6 +12,8 @@ import {
   getProjectComplianceChecks,
   getProjectComplianceSummary,
 } from '@/lib/spec-compliance-checker';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_COMPLIANCE');
 
 /**
  * GET /api/projects/[slug]/compliance
@@ -60,7 +62,7 @@ export async function GET(
       total: checks.length,
     });
   } catch (error) {
-    console.error('[ComplianceAPI] GET error:', error);
+    logger.error('GET error', error);
     return NextResponse.json(
       { error: 'Failed to fetch compliance data' },
       { status: 500 }
@@ -133,7 +135,7 @@ export async function POST(
       result,
     });
   } catch (error) {
-    console.error('[ComplianceAPI] POST error:', error);
+    logger.error('POST error', error);
     return NextResponse.json(
       { error: 'Failed to run compliance check' },
       { status: 500 }

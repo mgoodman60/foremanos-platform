@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { classifyProjectDrawings } from '@/lib/drawing-classifier';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CLASSIFY_DRAWINGS');
 
 export async function POST(
   req: NextRequest,
@@ -27,8 +29,8 @@ export async function POST(
     const body = await req.json();
     const { forceReprocess = false, useVision = false } = body;
     
-    console.log(`[classify-drawings] Starting classification for project: ${slug}`);
-    console.log(`[classify-drawings] Options: forceReprocess=${forceReprocess}, useVision=${useVision}`);
+    logger.info('[classify-drawings] Starting classification for project: ${slug}');
+    logger.info('[classify-drawings] Options: forceReprocess=${forceReprocess}, useVision=${useVision}');
     
     // Classify all drawings
     const results = await classifyProjectDrawings(slug, {
@@ -36,7 +38,7 @@ export async function POST(
       useVision
     });
     
-    console.log(`[classify-drawings] Classified ${results.length} drawings`);
+    logger.info('[classify-drawings] Classified ${results.length} drawings');
     
     // Calculate statistics
     const stats = {
@@ -77,7 +79,7 @@ export async function POST(
     });
     
   } catch (error) {
-    console.error('[classify-drawings] Error:', error);
+    logger.error('[classify-drawings] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to classify drawings',

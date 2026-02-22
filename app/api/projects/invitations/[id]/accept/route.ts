@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_INVITATIONS_ACCEPT');
 
 export const dynamic = 'force-dynamic';
 
@@ -109,7 +111,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       projectSlug: invitation.Project.slug,
     });
   } catch (error) {
-    console.error('Error accepting invitation:', error);
+    logger.error('Error accepting invitation', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

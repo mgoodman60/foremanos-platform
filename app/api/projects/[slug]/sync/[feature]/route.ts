@@ -14,6 +14,8 @@ import {
 } from '@/lib/feature-sync-services';
 import { processUploadedBudgetDocument } from '@/lib/budget-auto-sync';
 import { determineSourceType, DATA_SOURCE_PRIORITY } from '@/lib/document-intelligence-router';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SYNC');
 
 // POST /api/projects/[slug]/sync/[feature] - Manually sync a specific feature
 export async function POST(
@@ -140,7 +142,7 @@ export async function POST(
       results,
     });
   } catch (error: any) {
-    console.error(`[Sync ${params.feature} API] Error:`, error);
+    logger.error('[Sync ${params.feature} API] Error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to sync feature' },
       { status: 500 }
@@ -190,7 +192,7 @@ export async function GET(
       metadata: dataSource.metadata,
     });
   } catch (error) {
-    console.error(`[Sync ${params.feature} API] Error:`, error);
+    logger.error('[Sync ${params.feature} API] Error', error);
     return NextResponse.json(
       { error: 'Failed to get feature status' },
       { status: 500 }

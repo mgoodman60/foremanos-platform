@@ -17,6 +17,8 @@ import { getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { shouldBlockMacroFile } from '@/lib/macro-detector';
 import { logger } from '@/lib/logger';
 
+const logger = createLogger('DOCUMENTS_UPLOAD');
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max for upload
 
@@ -24,7 +26,7 @@ const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image
 
 export async function POST(request: Request) {
   const startTime = Date.now();
-  console.log('[UPLOAD START]', new Date().toISOString());
+  logger.info('[UPLOAD START]', { detail: new Date( }).toISOString());
 
   try {
     const ip = getClientIp(request);
@@ -42,13 +44,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[UPLOAD] Parsing form data...');
+    logger.info('Parsing form data...');
     let formData: FormData;
     try {
       formData = await request.formData();
-      console.log('[UPLOAD] Form data parsed successfully');
+      logger.info('Form data parsed successfully');
     } catch (error: any) {
-      console.error('[UPLOAD ERROR] Failed to parse form data:', error);
+      logger.error('[UPLOAD ERROR] Failed to parse form data', error);
       return NextResponse.json(
         { error: 'Failed to read upload data. Connection may have timed out.' },
         { status: 400 }
@@ -125,7 +127,7 @@ export async function POST(request: Request) {
     const fileName = file.name;
     const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'pdf';
     const fileSize = file.size;
-    console.log(`[UPLOAD] Reading file data: ${fileName}, Expected size: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+    logger.info('Reading file data: ${fileName}, Expected size: ${(fileSize / 1024 / 1024).toFixed(2)}MB');
     
     // Check file size before reading
     if (fileSize > 209715200) { // 200MB
@@ -137,17 +139,17 @@ export async function POST(request: Request) {
     
     let buffer: Buffer;
     try {
-      console.log('[UPLOAD] Converting file to buffer...');
+      logger.info('Converting file to buffer...');
       const bytes = await file.arrayBuffer();
       buffer = Buffer.from(bytes);
-      console.log(`[UPLOAD] Buffer created successfully: ${(buffer.length / 1024 / 1024).toFixed(2)}MB`);
+      logger.info('Buffer created successfully: ${(buffer.length / 1024 / 1024).toFixed(2)}MB');
     } catch (error: any) {
-      console.error('[UPLOAD ERROR] Failed to read file:', error);
+      logger.error('[UPLOAD ERROR] Failed to read file', error);
       throw new Error(`Failed to read file: ${error.message}`);
     }
 
     // Virus scan (before expensive operations like S3 upload)
-    console.log('[UPLOAD] Scanning for viruses...');
+    logger.info('Scanning for viruses...');
     const scanStartTime = Date.now();
     let virusStatus = 'skipped';
     let virusScanProvider = null;
@@ -158,7 +160,7 @@ export async function POST(request: Request) {
       });
 
       const scanTime = Date.now() - scanStartTime;
-      console.log(`[UPLOAD] Virus scan completed in ${scanTime}ms: ${scanResult.clean ? 'CLEAN' : 'THREAT DETECTED'}`);
+      logger.info('Virus scan completed', { scanTime, clean: scanResult.clean });
 
       if (!scanResult.clean) {
         virusStatus = 'infected';
@@ -184,13 +186,13 @@ export async function POST(request: Request) {
       virusStatus = 'clean';
       virusScanProvider = scanResult.engine;
     } catch (scanError: any) {
-      console.error('[UPLOAD] Virus scan error (non-blocking):', scanError.message);
+      logger.error('Virus scan error (non-blocking)', scanError);
       virusStatus = 'error';
       // Continue with upload - graceful degradation
     }
 
     // Macro detection for Office documents
-    console.log('[UPLOAD] Checking for embedded macros...');
+    logger.info('Checking for embedded macros...');
     try {
       const macroCheck = await shouldBlockMacroFile(buffer, fileName);
       if (macroCheck.blocked) {
@@ -209,18 +211,18 @@ export async function POST(request: Request) {
           { status: 415 }
         );
       }
-      console.log('[UPLOAD] No macros detected');
+      logger.info('No macros detected');
     } catch (macroError: any) {
-      console.error('[UPLOAD] Macro detection error (non-blocking):', macroError.message);
+      logger.error('Macro detection error (non-blocking)', macroError);
       // Continue with upload - graceful degradation
     }
 
     // Calculate file hash for duplicate detection
-    console.log('[UPLOAD] Calculating file hash...');
+    logger.info('Calculating file hash...');
     const fileHash = calculateFileHash(buffer);
 
     // Check for duplicates
-    console.log('[UPLOAD] Checking for duplicates...');
+    logger.info('Checking for duplicates...');
     const hasDuplicate = await isDuplicate(projectId, fileName, buffer.length, fileHash);
 
     if (hasDuplicate) {
@@ -253,7 +255,7 @@ export async function POST(request: Request) {
 
     // CRITICAL FIX: Check if quota needs to be reset before validation
     if (await shouldResetQuota(user)) {
-      console.log(`[QUOTA RESET] Resetting quota for user ${userId} (was ${user.pagesProcessedThisMonth} pages)`);
+      logger.info('[QUOTA RESET] Resetting quota for user ${userId} (was ${user.pagesProcessedThisMonth} pages)');
       
       // Reset quota and update reset date
       await withDatabaseRetry(
@@ -274,7 +276,7 @@ export async function POST(request: Request) {
         processingResetAt: getNextResetDate(),
       };
       
-      console.log(`[QUOTA RESET] User ${userId} quota reset to 0, next reset: ${user.processingResetAt}`);
+      logger.info('[QUOTA RESET] User ${userId} quota reset to 0, next reset: ${user.processingResetAt}');
     }
 
     // Classify document to estimate pages
@@ -308,14 +310,14 @@ export async function POST(request: Request) {
     const isPublic = false; // Default to private for construction documents
 
     // Upload to S3
-    console.log('[UPLOAD] Uploading to S3...');
+    logger.info('Uploading to S3...');
     const s3UploadStart = Date.now();
     const cloud_storage_path = await uploadFile(buffer, fileName, isPublic);
     const s3UploadTime = Date.now() - s3UploadStart;
-    console.log(`[UPLOAD] S3 upload completed in ${s3UploadTime}ms, path: ${cloud_storage_path}`);
+    logger.info('S3 upload completed in ${s3UploadTime}ms, path: ${cloud_storage_path}');
 
     // Create document record with cloud storage path and processor info
-    console.log('[UPLOAD] Creating database record...');
+    logger.info('Creating database record...');
     const document: any = await withDatabaseRetry(
       () => prisma.document.create({
         data: {
@@ -343,13 +345,13 @@ export async function POST(request: Request) {
     );
 
     // Trigger vision processing asynchronously with classification info
-    console.log('[UPLOAD] Triggering async document processing...');
+    logger.info('Triggering async document processing...');
     processDocument(document.id, classification)
       .then(() => {
-        console.log(`[UPLOAD] ✅ Processing started successfully for document ${document.id}`);
+        logger.info('✅ Processing started successfully for document ${document.id}');
       })
       .catch(async (error) => {
-        console.error(`[UPLOAD ERROR] ❌ Processing failed for document ${document.id}:`, error);
+        logger.error('[UPLOAD ERROR] ❌ Processing failed for document ${document.id}', error);
         
         // Update document with error status and message
         try {
@@ -365,9 +367,9 @@ export async function POST(request: Request) {
             }),
             'Mark document as failed'
           );
-          console.error(`[UPLOAD ERROR] Marked document ${document.id} as failed in database`);
+          logger.error('[UPLOAD ERROR] Marked document ${document.id} as failed in database');
         } catch (updateError) {
-          console.error(`[UPLOAD ERROR] Failed to update document status:`, updateError);
+          logger.error('[UPLOAD ERROR] Failed to update document status', updateError);
         }
       });
 
@@ -377,19 +379,19 @@ export async function POST(request: Request) {
       document.name,
       session.user.username || session.user?.email || 'A user'
     ).catch(error => {
-      console.error('[UPLOAD ERROR] Error sending document upload notification:', error);
+      logger.error('[UPLOAD ERROR] Error sending document upload notification', error);
     });
 
     // Track first document upload for onboarding (async, don't wait)
     markDocumentUploaded(userId, projectId).catch(error => {
-      console.error('[UPLOAD] Error tracking onboarding progress:', error);
+      logger.error('Error tracking onboarding progress', error);
     });
 
     // Get updated remaining pages after queuing for processing (estimate minus the document)
     const updatedRemainingPages = getRemainingPages(user.pagesProcessedThisMonth, user.subscriptionTier);
 
     const totalTime = Date.now() - startTime;
-    console.log(`[UPLOAD COMPLETE] Total time: ${totalTime}ms, Document ID: ${document.id}`);
+    logger.info('[UPLOAD COMPLETE] Total time: ${totalTime}ms, Document ID: ${document.id}');
 
     return NextResponse.json(
       {

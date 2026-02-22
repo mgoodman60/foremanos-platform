@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth-options';
 import { getAvailableWorkflows } from '../../../../lib/workflow-service';
 import { prisma } from '../../../../lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('WORKFLOWS_AVAILABLE');
 
 // Force dynamic rendering (required for authentication)
 export const dynamic = 'force-dynamic';
@@ -50,7 +52,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ workflows });
   } catch (error) {
-    console.error('Error fetching workflows:', error);
+    logger.error('Error fetching workflows', error);
     return NextResponse.json(
       { error: 'Failed to fetch workflows' },
       { status: 500 }

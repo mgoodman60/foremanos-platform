@@ -10,6 +10,8 @@ import {
   suggestScheduleAdjustments,
   exportLaborPlan
 } from '@/lib/takeoff-labor-schedule-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_LABOR');
 
 /**
  * GET /api/takeoff/[id]/labor
@@ -100,7 +102,7 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error: unknown) {
-    console.error('Error in labor GET:', error);
+    logger.error('Error in labor GET', error);
     return NextResponse.json(
       { error: 'Failed to get labor data', details: safeErrorMessage(error) },
       { status: 500 }

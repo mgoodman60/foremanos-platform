@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { updateProcurementStatus } from '@/lib/cash-flow-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PROCUREMENT');
 
 // GET /api/projects/[slug]/procurement/[id]
 export async function GET(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
@@ -27,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json(procurement);
   } catch (error) {
-    console.error('[API] Get procurement error:', error);
+    logger.error('Get procurement error', error);
     return NextResponse.json({ error: 'Failed to fetch procurement item' }, { status: 500 });
   }
 }
@@ -87,7 +89,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { slug: stri
 
     return NextResponse.json(procurement);
   } catch (error) {
-    console.error('[API] Update procurement error:', error);
+    logger.error('Update procurement error', error);
     return NextResponse.json({ error: 'Failed to update procurement item' }, { status: 500 });
   }
 }
@@ -106,7 +108,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[API] Delete procurement error:', error);
+    logger.error('Delete procurement error', error);
     return NextResponse.json({ error: 'Failed to delete procurement item' }, { status: 500 });
   }
 }

@@ -22,6 +22,8 @@ import {
   validateCrossReferences,
   getCalloutStats,
 } from '@/lib/detail-callout-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CROSS_REFERENCES');
 
 export async function GET(
   request: Request,
@@ -90,7 +92,7 @@ export async function GET(
         );
     }
   } catch (error) {
-    console.error('Cross-reference API error:', error);
+    logger.error('Cross-reference API error', error);
     return NextResponse.json(
       {
         error: 'Failed to query cross-references',

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { downloadFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('VIEW_DOCUMENT');
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +69,7 @@ export async function GET(
       );
     }
   } catch (error) {
-    console.error('Error serving document:', error);
+    logger.error('Error serving document', error);
     return NextResponse.json(
       { error: 'Failed to serve document' },
       { status: 500 }

@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { processWindowScheduleForProject } from '@/lib/window-schedule-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_WINDOW_SCHEDULE');
 
 export async function GET(
   request: NextRequest,
@@ -59,7 +61,7 @@ export async function GET(
       types: Object.keys(byType),
     });
   } catch (error: any) {
-    console.error('[Window Schedule API] Error:', error);
+    logger.error('[Window Schedule API] Error', error);
     return NextResponse.json(
       { error: error?.message || 'Failed to fetch window schedule' },
       { status: 500 }
@@ -89,7 +91,7 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    console.log(`[Window Schedule API] Starting extraction for project: ${slug}`);
+    logger.info('[Window Schedule API] Starting extraction for project: ${slug}');
 
     // Extract window schedule from documents
     const result = await processWindowScheduleForProject(project.id);
@@ -100,7 +102,7 @@ export async function POST(
       errors: result.errors,
     });
   } catch (error: any) {
-    console.error('[Window Schedule API] Extraction error:', error?.message || error);
+    logger.error('Extraction error', error);
     return NextResponse.json(
       { error: error?.message || 'Failed to extract window schedule' },
       { status: 500 }

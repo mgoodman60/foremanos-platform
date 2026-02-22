@@ -8,6 +8,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
 import { format } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_ALL');
 
 export async function GET(
   req: NextRequest,
@@ -148,7 +150,7 @@ export async function GET(
 
     return NextResponse.json({ photos: formattedPhotos });
   } catch (error) {
-    console.error('Error fetching photos:', error);
+    logger.error('Error fetching photos', error);
     return NextResponse.json(
       { error: 'Failed to fetch photos' },
       { status: 500 }

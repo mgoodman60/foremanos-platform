@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULES_TASKS');
 
 export async function PATCH(
   request: Request,
@@ -100,7 +102,7 @@ export async function PATCH(
         }
       });
     } catch (logError) {
-      console.warn('[Task Update] Failed to log activity:', logError);
+      logger.warn('[Task Update] Failed to log activity', { logError });
     }
 
     return NextResponse.json({
@@ -108,7 +110,7 @@ export async function PATCH(
       task: updatedTask
     });
   } catch (error) {
-    console.error('[Task Update API] Error:', error);
+    logger.error('[Task Update API] Error', error);
     return NextResponse.json(
       { error: 'Failed to update task' },
       { status: 500 }
@@ -159,7 +161,7 @@ export async function GET(
 
     return NextResponse.json({ task });
   } catch (error) {
-    console.error('[Task GET API] Error:', error);
+    logger.error('[Task GET API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch task' },
       { status: 500 }

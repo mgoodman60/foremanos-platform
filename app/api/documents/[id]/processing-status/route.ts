@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getProcessingStatus } from '@/lib/document-processing-queue';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_PROCESSING_STATUS');
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +63,7 @@ export async function GET(
       } : null,
     });
   } catch (error: any) {
-    console.error('[PROCESSING STATUS] Error:', error);
+    logger.error('[PROCESSING STATUS] Error', error);
     return NextResponse.json(
       { error: 'Failed to get processing status' },
       { status: 500 }

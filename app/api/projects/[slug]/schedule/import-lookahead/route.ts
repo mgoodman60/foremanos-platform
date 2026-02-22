@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { addDays, parseISO, startOfWeek } from 'date-fns';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 import { callLLM } from '@/lib/llm-providers';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_IMPORT_LOOKAHEAD');
 
 // POST /api/projects/[slug]/schedule/import-lookahead - Import 3WLA from Excel
 export async function POST(
@@ -135,7 +137,7 @@ Only return the JSON object, no other text.`
         parsedData = JSON.parse(jsonMatch[0]);
       }
     } catch (e) {
-      console.error('Failed to parse LLM response:', e);
+      logger.error('Failed to parse LLM response', e);
       return NextResponse.json(
         { error: 'Failed to parse schedule data from file' },
         { status: 500 }
@@ -168,7 +170,7 @@ Only return the JSON object, no other text.`
             subcontractorMap.set(subName.toLowerCase(), newSub.id);
           } catch (e) {
             // Subcontractor may already exist with different case
-            console.log(`Could not create subcontractor ${subName}:`, e);
+            logger.info('Could not create subcontractor ${subName}', { e });
           }
         }
       }
@@ -244,7 +246,7 @@ Only return the JSON object, no other text.`
       subcontractorsCreated: parsedData.subcontractors?.length || 0
     });
   } catch (error) {
-    console.error('[API] Error importing 3WLA:', error);
+    logger.error('Error importing 3WLA', error);
     return NextResponse.json(
       { error: 'Failed to import 3-week lookahead' },
       { status: 500 }

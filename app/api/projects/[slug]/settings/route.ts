@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SETTINGS');
 
 // GET /api/projects/[slug]/settings - Retrieve project settings
 export async function GET(
@@ -61,7 +63,7 @@ export async function GET(
       canEdit: isOwner || isAdmin, // Only owners and admins can edit settings
     });
   } catch (error: unknown) {
-    console.error('[API] Error fetching project settings:', error);
+    logger.error('Error fetching project settings', error);
     return NextResponse.json(
       { error: 'Failed to fetch project settings' },
       { status: 500 }
@@ -155,7 +157,7 @@ export async function PATCH(
       settings: updatedProject,
     });
   } catch (error: unknown) {
-    console.error('[API] Error updating project settings:', error);
+    logger.error('Error updating project settings', error);
     return NextResponse.json(
       { error: 'Failed to update project settings' },
       { status: 500 }

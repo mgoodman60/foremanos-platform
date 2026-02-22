@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
 import { callLLM } from '@/lib/llm-providers';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SUBCONTRACTORS_IMPORT');
 
 // Valid trade types
 const VALID_TRADE_TYPES = [
@@ -199,7 +201,7 @@ EXAMPLE OUTPUT:
       // Handle both array and object with subcontractors property
       extracted = Array.isArray(parsed) ? parsed : (parsed.subcontractors || parsed.data || []);
     } catch (e) {
-      console.error('Failed to parse AI response:', e);
+      logger.error('Failed to parse AI response', e);
       return NextResponse.json(
         { error: 'Failed to parse subcontractor data from document' },
         { status: 500 }
@@ -259,7 +261,7 @@ EXAMPLE OUTPUT:
 
         results.imported++;
       } catch (error: any) {
-        console.error('Error importing subcontractor:', error);
+        logger.error('Error importing subcontractor', error);
         results.errors.push(`Failed to import ${sub.companyName}: ${error.message}`);
       }
     }
@@ -270,7 +272,7 @@ EXAMPLE OUTPUT:
     });
 
   } catch (error: any) {
-    console.error('[SUBCONTRACTORS_IMPORT] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to import subcontractors' },
       { status: 500 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ROOMS_BULK_DELETE');
 
 // POST /api/projects/[slug]/rooms/bulk-delete - Delete multiple rooms
 export async function POST(
@@ -73,14 +75,14 @@ export async function POST(
       }
     });
 
-    console.log(`[ROOMS] Bulk deleted ${result.count} rooms from project ${project.name}`);
+    logger.info('Bulk deleted ${result.count} rooms from project ${project.name}');
 
     return NextResponse.json({ 
       success: true,
       deleted: result.count 
     });
   } catch (error: any) {
-    console.error('Error bulk deleting rooms:', error);
+    logger.error('Error bulk deleting rooms', error);
     return NextResponse.json(
       { error: 'Failed to delete rooms', details: error.message },
       { status: 500 }

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ADMIN_PROCESSING_STATS');
 
 export const dynamic = 'force-dynamic';
 
@@ -129,7 +132,7 @@ export async function GET() {
       })),
     });
   } catch (error) {
-    console.error('Error getting processing stats:', error);
+    logger.error('Failed to get processing stats', error);
     return NextResponse.json(
       { error: 'Failed to get processing stats' },
       { status: 500 }

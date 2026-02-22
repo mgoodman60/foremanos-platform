@@ -8,6 +8,8 @@ import {
 } from '@/lib/title-block-extractor';
 import { getFileUrl } from '@/lib/s3';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_TITLE_BLOCKS');
 
 /**
  * POST /api/projects/[slug]/extract-title-blocks
@@ -54,12 +56,12 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         continue;
       }
 
-      console.log(`Processing ${document.name}...`);
+      logger.info('Processing ${document.name}...');
 
       try {
         // Skip if no cloud storage path
         if (!document.cloud_storage_path) {
-          console.log(`Skipping ${document.name} - no cloud storage path`);
+          logger.info('Skipping ${document.name} - no cloud storage path');
           continue;
         }
 
@@ -127,12 +129,12 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
               errorCount++;
             }
           } catch (chunkError) {
-            console.error(`Error processing chunk ${chunk.id}:`, chunkError);
+            logger.error('Error processing chunk ${chunk.id}', chunkError);
             errorCount++;
           }
         }
       } catch (docError) {
-        console.error(`Error processing document ${document.id}:`, docError);
+        logger.error('Error processing document ${document.id}', docError);
         results.push({
           documentId: document.id,
           documentName: document.name,
@@ -151,7 +153,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       results
     });
   } catch (error) {
-    console.error('Title block extraction error:', error);
+    logger.error('Title block extraction error', error);
     return NextResponse.json(
       { error: 'Failed to extract title blocks' },
       { status: 500 }

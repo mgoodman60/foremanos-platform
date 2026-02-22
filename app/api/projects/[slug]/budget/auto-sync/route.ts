@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { processUploadedBudgetDocument, compareTakeoffsToBudget } from '@/lib/budget-auto-sync';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_AUTO_SYNC');
 
 // POST /api/projects/[slug]/budget/auto-sync - Manually trigger budget sync from documents
 export async function POST(
@@ -71,7 +73,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[Budget Auto-Sync API] Error:', error);
+    logger.error('[Budget Auto-Sync API] Error', error);
     return NextResponse.json(
       { error: 'Failed to sync budget' },
       { status: 500 }
@@ -154,7 +156,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Budget Auto-Sync API] Error:', error);
+    logger.error('[Budget Auto-Sync API] Error', error);
     return NextResponse.json(
       { error: 'Failed to get comparison' },
       { status: 500 }

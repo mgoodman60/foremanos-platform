@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TAKEOFFS_SYNC_FROM_BUDGET');
 
 /**
  * POST /api/projects/[slug]/takeoffs/sync-from-budget
@@ -155,7 +157,7 @@ export async function POST(
       unmappedCategories: [...new Set(unmappedItems.map(i => i.bimCategory || i.category))].slice(0, 10),
     });
   } catch (error) {
-    console.error('[Takeoff Budget Sync Error]', error);
+    logger.error('[Takeoff Budget Sync Error]', error);
     return NextResponse.json(
       { error: 'Failed to sync budget to takeoff' },
       { status: 500 }

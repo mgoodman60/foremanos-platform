@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_EXPORT');
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +58,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('Error exporting conversation:', error);
+    logger.error('Error exporting conversation', error);
     return NextResponse.json(
       { error: 'Failed to export conversation' },
       { status: 500 }

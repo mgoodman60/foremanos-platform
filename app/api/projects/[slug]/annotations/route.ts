@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANNOTATIONS');
 
 /**
  * GET /api/projects/[slug]/annotations
@@ -127,7 +129,7 @@ export async function GET(
 
     return NextResponse.json({ annotations: formattedAnnotations });
   } catch (error: any) {
-    console.error('Error fetching annotations:', error);
+    logger.error('Error fetching annotations', error);
     return NextResponse.json(
       { error: 'Failed to fetch annotations' },
       { status: 500 }
@@ -232,7 +234,7 @@ export async function POST(
       }
     });
   } catch (error: any) {
-    console.error('Error creating annotation:', error);
+    logger.error('Error creating annotation', error);
     return NextResponse.json(
       { error: 'Failed to create annotation' },
       { status: 500 }

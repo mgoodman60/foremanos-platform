@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth-options';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('WEATHER_IMPACTS');
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ impacts });
   } catch (error) {
-    console.error('Error fetching weather impacts:', error);
+    logger.error('Error fetching weather impacts', error);
     return NextResponse.json(
       { error: 'Failed to fetch weather impacts' },
       { status: 500 }
@@ -143,7 +145,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ impact }, { status: 201 });
   } catch (error) {
-    console.error('Error creating weather impact:', error);
+    logger.error('Error creating weather impact', error);
     return NextResponse.json(
       { error: 'Failed to create weather impact' },
       { status: 500 }

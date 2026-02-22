@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { applyChangeOrderToBudget, previewChangeOrderImpact } from '@/lib/change-order-budget-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CONTRACTS_CHANGE_ORDERS');
 
 export async function GET(
   request: Request,
@@ -58,7 +60,7 @@ export async function GET(
 
     return NextResponse.json({ changeOrder });
   } catch (error) {
-    console.error('[Change Order GET Error]:', error);
+    logger.error('[Change Order GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch change order' },
       { status: 500 }
@@ -264,7 +266,7 @@ export async function PATCH(
 
     return NextResponse.json({ changeOrder });
   } catch (error) {
-    console.error('[Change Order PATCH Error]:', error);
+    logger.error('[Change Order PATCH Error]', error);
     return NextResponse.json(
       { error: 'Failed to update change order' },
       { status: 500 }
@@ -317,7 +319,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Change Order DELETE Error]:', error);
+    logger.error('[Change Order DELETE Error]', error);
     return NextResponse.json(
       { error: 'Failed to delete change order' },
       { status: 500 }

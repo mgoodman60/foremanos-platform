@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_LOAD_CALCULATIONS');
 
 export async function GET(
   request: Request,
@@ -68,7 +70,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('[MEP Load Calculations GET Error]:', error);
+    logger.error('[MEP Load Calculations GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch load calculations' },
       { status: 500 }
@@ -170,7 +172,7 @@ export async function POST(
 
     return NextResponse.json({ calculation }, { status: 201 });
   } catch (error) {
-    console.error('[MEP Load Calculations POST Error]:', error);
+    logger.error('[MEP Load Calculations POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create load calculation' },
       { status: 500 }

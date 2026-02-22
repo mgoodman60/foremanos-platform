@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { analyzeQuotePDF, linkOrCreateSubcontractor, convertQuoteToBudgetItems } from '@/lib/quote-analysis-service';
 import { getFileUrl, deleteFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_QUOTES');
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +50,7 @@ export async function GET(
       downloadUrl,
     });
   } catch (error) {
-    console.error('[QUOTE API] GET Error:', error);
+    logger.error('[QUOTE API] GET Error', error);
     return NextResponse.json({ error: 'Failed to fetch quote' }, { status: 500 });
   }
 }
@@ -193,7 +195,7 @@ export async function PATCH(
 
     return NextResponse.json({ quote: updatedQuote });
   } catch (error) {
-    console.error('[QUOTE API] PATCH Error:', error);
+    logger.error('[QUOTE API] PATCH Error', error);
     return NextResponse.json({ error: 'Failed to update quote' }, { status: 500 });
   }
 }
@@ -229,7 +231,7 @@ export async function DELETE(
     try {
       await deleteFile(quote.cloudStoragePath);
     } catch (e) {
-      console.error('[QUOTE API] Error deleting file:', e);
+      logger.error('[QUOTE API] Error deleting file', e);
     }
 
     // Delete quote record
@@ -239,7 +241,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[QUOTE API] DELETE Error:', error);
+    logger.error('[QUOTE API] DELETE Error', error);
     return NextResponse.json({ error: 'Failed to delete quote' }, { status: 500 });
   }
 }

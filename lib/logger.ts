@@ -165,3 +165,34 @@ export function createLogger(scope: string) {
 
 /** @deprecated Use createLogger instead */
 export const createScopedLogger = createLogger;
+
+/**
+ * Create a logger bound to a specific request ID for distributed tracing.
+ * Extracts x-request-id from the incoming request headers.
+ *
+ * Usage in API routes:
+ * ```typescript
+ * import { createRequestLogger } from '@/lib/logger';
+ * const log = createRequestLogger(request, 'MY_ROUTE');
+ * log.info('Processing request', { userId });
+ * ```
+ */
+export function createRequestLogger(request: Request, scope: string) {
+  const requestId = request.headers.get('x-request-id') || 'unknown';
+  return {
+    debug: (message: string, meta?: LogContext) =>
+      log('debug', scope, message, { requestId, ...meta }),
+    info: (message: string, meta?: LogContext) =>
+      log('info', scope, message, { requestId, ...meta }),
+    warn: (message: string, meta?: LogContext) =>
+      log('warn', scope, message, { requestId, ...meta }),
+    error: (message: string, error?: Error | unknown, meta?: LogContext) => {
+      const errorMeta: LogContext = error instanceof Error
+        ? { errorMessage: error.message, stack: error.stack?.split('\n').slice(0, 3).join(' | ') }
+        : error !== undefined
+          ? { error: String(error) }
+          : {};
+      log('error', scope, message, { requestId, ...errorMeta, ...meta });
+    },
+  };
+}

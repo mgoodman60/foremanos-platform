@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE');
 
 export const dynamic = 'force-dynamic';
 
@@ -83,7 +85,7 @@ export async function POST(
       },
     });
 
-    console.log(`[SCHEDULE_CONFIRM] Set master schedule for project ${project.slug}: ${document.name}`);
+    logger.info('Set master schedule for project ${project.slug}: ${document.name}');
 
     return NextResponse.json({
       success: true,
@@ -95,7 +97,7 @@ export async function POST(
       },
     });
   } catch (error: any) {
-    console.error('[SCHEDULE_CONFIRM_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to set master schedule' },
       { status: 500 }
@@ -151,7 +153,7 @@ export async function GET(
       hasSchedule: !!project.masterScheduleDocId,
     });
   } catch (error: any) {
-    console.error('[SCHEDULE_GET_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to get master schedule info' },
       { status: 500 }
@@ -213,14 +215,14 @@ export async function DELETE(
       },
     });
 
-    console.log(`[SCHEDULE_REMOVE] Removed master schedule from project ${project.slug}`);
+    logger.info('Removed master schedule from project ${project.slug}');
 
     return NextResponse.json({
       success: true,
       project: updatedProject,
     });
   } catch (error: any) {
-    console.error('[SCHEDULE_REMOVE_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to remove master schedule' },
       { status: 500 }

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { OneDriveService } from '@/lib/onedrive-service';
 import { logActivity } from '@/lib/audit-log';
 import { decrypt } from '@/lib/encryption';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ONEDRIVE_SYNC');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for long-running sync
@@ -139,7 +141,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('Error syncing OneDrive:', error);
+    logger.error('Error syncing OneDrive', error);
 
     // Update sync history with error
     if (syncHistoryId) {

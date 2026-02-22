@@ -12,6 +12,8 @@ import { generatePresignedUploadUrl } from '@/lib/s3';
 import { extractContractData } from '@/lib/contract-extraction-service';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { createS3Client, getBucketConfig } from '@/lib/aws-config';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CONTRACTS');
 
 export async function GET(
   request: Request,
@@ -99,7 +101,7 @@ export async function GET(
 
     return NextResponse.json({ contracts: formattedContracts, stats });
   } catch (error) {
-    console.error('[Contracts GET Error]:', error);
+    logger.error('[Contracts GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch contracts' },
       { status: 500 }
@@ -299,7 +301,7 @@ export async function POST(
 
     return NextResponse.json({ contract }, { status: 201 });
   } catch (error) {
-    console.error('[Contracts POST Error]:', error);
+    logger.error('[Contracts POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create contract' },
       { status: 500 }

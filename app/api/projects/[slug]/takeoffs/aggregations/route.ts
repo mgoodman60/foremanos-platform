@@ -7,6 +7,8 @@ import {
   aggregateTakeoffs,
   listAggregations
 } from '@/lib/takeoff-aggregation-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TAKEOFFS_AGGREGATIONS');
 
 /**
  * GET /api/projects/[slug]/takeoffs/aggregations
@@ -91,7 +93,7 @@ export async function GET(
       }))
     });
   } catch (error: unknown) {
-    console.error('Error in aggregations GET:', error);
+    logger.error('Error in aggregations GET', error);
     return NextResponse.json(
       { error: 'Failed to fetch aggregations', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -168,7 +170,7 @@ export async function POST(
 
     return NextResponse.json({ aggregation: result }, { status: 201 });
   } catch (error: unknown) {
-    console.error('Error creating aggregation:', error);
+    logger.error('Error creating aggregation', error);
     return NextResponse.json(
       { error: 'Failed to create aggregation', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

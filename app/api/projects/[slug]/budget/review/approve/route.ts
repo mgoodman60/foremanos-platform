@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_REVIEW_APPROVE');
 
 export async function POST(
   request: NextRequest,
@@ -105,14 +107,14 @@ export async function POST(
       }
     }
 
-    console.log(`[BudgetReview] Approved ${updatedCount} ${type} entries`);
+    logger.info('Approved ${updatedCount} ${type} entries');
 
     return NextResponse.json({
       success: true,
       updatedCount,
     });
   } catch (error) {
-    console.error('[BudgetReview] Approve error:', error);
+    logger.error('Approve error', error);
     return NextResponse.json(
       { error: 'Failed to approve entries' },
       { status: 500 }

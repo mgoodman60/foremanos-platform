@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_LINE_ITEMS');
 
 export async function GET(
   request: Request,
@@ -45,7 +47,7 @@ export async function GET(
 
     return NextResponse.json({ lineItems, stats });
   } catch (error) {
-    console.error('[Submittal Line Items GET Error]:', error);
+    logger.error('[Submittal Line Items GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch line items' },
       { status: 500 }
@@ -128,7 +130,7 @@ export async function POST(
 
     return NextResponse.json({ lineItem }, { status: 201 });
   } catch (error) {
-    console.error('[Submittal Line Items POST Error]:', error);
+    logger.error('[Submittal Line Items POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create line item' },
       { status: 500 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_INVOICES');
 
 export async function PATCH(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
   try {
@@ -56,7 +58,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { slug: stri
 
     return NextResponse.json(invoice);
   } catch (error) {
-    console.error('[API] Error updating invoice:', error);
+    logger.error('Error updating invoice', error);
     return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 });
   }
 }

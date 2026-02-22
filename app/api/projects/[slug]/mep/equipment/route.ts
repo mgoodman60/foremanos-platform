@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getNextEquipmentTag, createDefaultMaintenanceSchedules } from '@/lib/mep-tracking-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_EQUIPMENT');
 
 export async function GET(
   request: Request,
@@ -59,7 +61,7 @@ export async function GET(
 
     return NextResponse.json({ equipment });
   } catch (error) {
-    console.error('[MEP Equipment GET Error]:', error);
+    logger.error('[MEP Equipment GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch equipment' },
       { status: 500 }
@@ -159,7 +161,7 @@ export async function POST(
 
     return NextResponse.json({ equipment, schedulesCreated }, { status: 201 });
   } catch (error) {
-    console.error('[MEP Equipment POST Error]:', error);
+    logger.error('[MEP Equipment POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create equipment' },
       { status: 500 }

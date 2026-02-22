@@ -12,6 +12,8 @@ import {
   getProjectPhotos,
   PhotoMetadata,
 } from '@/lib/photo-documentation';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS');
 
 /**
  * GET /api/projects/[slug]/photos
@@ -69,7 +71,7 @@ export async function GET(
       offset,
     });
   } catch (error) {
-    console.error('[PhotosAPI] GET error:', error);
+    logger.error('GET error', error);
     return NextResponse.json(
       { error: 'Failed to fetch photos' },
       { status: 500 }
@@ -158,7 +160,7 @@ export async function POST(
       ...result,
     });
   } catch (error) {
-    console.error('[PhotosAPI] POST error:', error);
+    logger.error('POST error', error);
     return NextResponse.json(
       { error: 'Failed to initialize photo upload' },
       { status: 500 }

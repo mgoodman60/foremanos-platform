@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANNOTATIONS_REPLIES');
 
 export async function GET(
   request: NextRequest,
@@ -43,7 +45,7 @@ export async function GET(
 
     return NextResponse.json({ replies: formattedReplies });
   } catch (error) {
-    console.error('[Annotation Replies GET Error]:', error);
+    logger.error('[Annotation Replies GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch replies' },
       { status: 500 }
@@ -112,7 +114,7 @@ export async function POST(
       }
     }, { status: 201 });
   } catch (error) {
-    console.error('[Annotation Replies POST Error]:', error);
+    logger.error('[Annotation Replies POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create reply' },
       { status: 500 }

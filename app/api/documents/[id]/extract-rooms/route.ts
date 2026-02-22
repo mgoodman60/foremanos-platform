@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractRoomsFromDocument, createRoomsFromExtraction } from '@/lib/location-detector';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_EXTRACT_ROOMS');
 
 // POST /api/documents/[id]/extract-rooms - Extract rooms from floor plan
 export async function POST(
@@ -59,7 +61,7 @@ export async function POST(
       );
     }
 
-    console.log(`[EXTRACT_ROOMS] Starting extraction for document ${document.name}`);
+    logger.info('Starting extraction for document ${document.name}');
 
     // Extract rooms
     const rooms = await extractRoomsFromDocument(id, document.Project.id);
@@ -78,7 +80,7 @@ export async function POST(
       user.id
     );
 
-    console.log(`[EXTRACT_ROOMS] Extraction complete: ${rooms.length} found, ${created} created`);
+    logger.info('Extraction complete: ${rooms.length} found, ${created} created');
 
     return NextResponse.json({
       message: `Successfully extracted ${rooms.length} rooms, created ${created} new entries`,
@@ -87,7 +89,7 @@ export async function POST(
       rooms
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[EXTRACT_ROOMS] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to extract rooms', details: safeErrorMessage(error) },
       { status: 500 }

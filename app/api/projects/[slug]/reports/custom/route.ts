@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generateCustomReport, reportToCSV, ReportConfig } from '@/lib/report-generator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_REPORTS_CUSTOM');
 
 export async function POST(
   request: NextRequest,
@@ -53,7 +55,7 @@ export async function POST(
 
     return NextResponse.json(report);
   } catch (error) {
-    console.error('[Reports Custom] Error:', error);
+    logger.error('[Reports Custom] Error', error);
     return NextResponse.json(
       { error: 'Failed to generate custom report' },
       { status: 500 }

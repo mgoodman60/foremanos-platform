@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { ProcessingQueueStatus } from '@prisma/client';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('PROCESSING_ACTIVE');
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +44,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json(activeProcessing);
   } catch (error: any) {
-    console.error('Error fetching active processing:', error);
+    logger.error('Failed to fetch active processing', error);
     return NextResponse.json(
       { error: 'Failed to fetch active processing' },
       { status: 500 }

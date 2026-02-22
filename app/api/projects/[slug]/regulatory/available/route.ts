@@ -6,6 +6,8 @@ import {
   getFreeRegulatoryCodes,
   calculateRegulatoryProcessingCost,
 } from '@/lib/regulatory-documents';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_REGULATORY_AVAILABLE');
 
 /**
  * GET /api/projects/[slug]/regulatory/available
@@ -49,7 +51,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error fetching available regulatory codes:', error);
+    logger.error('Error fetching available regulatory codes', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

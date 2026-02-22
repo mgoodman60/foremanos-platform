@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('SCHEDULES_TASKS');
 
 // GET /api/schedules/[id]/tasks - Get all tasks for a schedule
 export async function GET(
@@ -73,7 +75,7 @@ export async function GET(
 
     return NextResponse.json({ tasks });
   } catch (error: any) {
-    console.error('Error fetching tasks:', error);
+    logger.error('Error fetching tasks', error);
     return NextResponse.json(
       { error: 'Failed to fetch tasks', details: safeErrorMessage(error) },
       { status: 500 }
@@ -176,11 +178,11 @@ export async function POST(
       }
     });
 
-    console.log(`[SCHEDULE] Updated task ${existingTaskId}: ${percentComplete}% complete, status: ${status}, subcontractor: ${subcontractorId || 'none'}`);
+    logger.info('Updated task', { taskId: existingTaskId, percentComplete, status, subcontractorId: subcontractorId || 'none' });
 
     return NextResponse.json({ task: updated });
   } catch (error: any) {
-    console.error('Error updating task:', error);
+    logger.error('Error updating task', error);
     return NextResponse.json(
       { error: 'Failed to update task', details: safeErrorMessage(error) },
       { status: 500 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getScheduleAnalytics } from '@/lib/analytics-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANALYTICS_SCHEDULE');
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +27,7 @@ export async function GET(
     const analytics = await getScheduleAnalytics(project.id);
     return NextResponse.json(analytics);
   } catch (error) {
-    console.error('[Analytics Schedule] Error:', error);
+    logger.error('[Analytics Schedule] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule analytics' },
       { status: 500 }

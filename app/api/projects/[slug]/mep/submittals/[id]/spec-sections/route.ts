@@ -13,6 +13,8 @@ import {
   findDocumentsForSpecSection,
   updateSubmittalSpecSection,
 } from '@/lib/spec-section-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_SPEC_SECTIONS');
 
 export async function GET(
   req: NextRequest,
@@ -51,7 +53,7 @@ export async function GET(
       currentSpecSection: submittal.specSection,
     });
   } catch (error) {
-    console.error('Error fetching spec sections:', error);
+    logger.error('Error fetching spec sections', error);
     return NextResponse.json(
       { error: 'Failed to fetch spec sections' },
       { status: 500 }
@@ -96,7 +98,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, specSection });
   } catch (error) {
-    console.error('Error updating spec section:', error);
+    logger.error('Error updating spec section', error);
     return NextResponse.json(
       { error: 'Failed to update spec section' },
       { status: 500 }

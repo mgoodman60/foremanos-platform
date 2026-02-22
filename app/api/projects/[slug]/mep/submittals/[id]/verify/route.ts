@@ -9,6 +9,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { verifySubmittalQuantities } from '@/lib/submittal-verification-service';
 import { createVerificationAuditLog } from '@/lib/verification-audit-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_VERIFY');
 
 export async function POST(
   request: Request,
@@ -44,13 +46,13 @@ export async function POST(
         'manual'
       );
     } catch (auditError) {
-      console.error('[Audit Log Error]:', auditError);
+      logger.error('[Audit Log Error]', auditError);
       // Don't fail the verification if audit logging fails
     }
 
     return NextResponse.json({ report });
   } catch (error) {
-    console.error('[Submittal Verify Error]:', error);
+    logger.error('[Submittal Verify Error]', error);
     return NextResponse.json(
       { error: 'Failed to verify submittal' },
       { status: 500 }

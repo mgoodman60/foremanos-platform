@@ -5,6 +5,9 @@ import { getSubscriptionInfo } from '@/lib/subscription';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('SUBSCRIPTION_INFO');
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +43,7 @@ export async function GET() {
 
     return NextResponse.json(subscriptionInfo);
   } catch (error: any) {
-    console.error('Error fetching subscription info:', error);
+    logger.error('Failed to fetch subscription info', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to fetch subscription info') },
       { status: 500 }

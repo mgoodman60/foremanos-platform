@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { transcribeVoiceToReport } from '@/lib/daily-report-enhancements';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DAILY_REPORTS_VOICE');
 
 export async function POST(
   request: Request,
@@ -49,7 +51,7 @@ export async function POST(
       structured: result.structured,
     });
   } catch (error) {
-    console.error('[Voice API] Error:', error);
+    logger.error('[Voice API] Error', error);
     return NextResponse.json({ error: 'Failed to transcribe audio' }, { status: 500 });
   }
 }

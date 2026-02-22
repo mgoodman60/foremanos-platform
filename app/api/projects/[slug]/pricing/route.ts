@@ -16,6 +16,8 @@ import {
   generatePriceComparisonReport,
   PriceUpdateSession
 } from '@/lib/dynamic-pricing-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PRICING');
 
 export const maxDuration = 120; // 2 minutes for price searching
 
@@ -44,7 +46,7 @@ export async function POST(
 
     if (action === 'search') {
       // Initiate full price search session
-      console.log('[PRICING_API] Initiating price search for project:', slug);
+      logger.info('Initiating price search for project', { slug });
       const session = await initiatePriceUpdateSession(slug);
       
       return NextResponse.json({
@@ -56,7 +58,7 @@ export async function POST(
 
     if (action === 'search-selected' && items?.length > 0) {
       // Search prices for specific items only
-      console.log('[PRICING_API] Searching prices for', items.length, 'selected items');
+      logger.info('Searching prices for', { detail: items.length, 'selected items' });
       
       const results = await searchMaterialPrices(items, {
         city: project.locationCity || undefined,
@@ -89,7 +91,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('[PRICING_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to process pricing request' },
       { status: 500 }
@@ -128,7 +130,7 @@ export async function PUT(
     }
 
     // Apply the price updates
-    console.log('[PRICING_API] Applying', updates.length, 'price updates');
+    logger.info('Applying', { detail: updates.length, 'price updates' });
     const result = await applyPriceUpdates(project.id, updates);
 
     // Log the activity
@@ -149,7 +151,7 @@ export async function PUT(
       message: `Successfully updated ${result.updated} item prices`
     });
   } catch (error) {
-    console.error('[PRICING_API] Error applying updates:', error);
+    logger.error('Error applying updates', error);
     return NextResponse.json(
       { error: 'Failed to apply price updates' },
       { status: 500 }

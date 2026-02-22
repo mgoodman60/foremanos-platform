@@ -16,6 +16,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_CALCULATIONS');
 // Note: Old quantity-calculator feature has been deprecated
 // Use the new Material Takeoff system instead:
 // - Create takeoff: POST /api/projects/[slug]/takeoffs
@@ -64,7 +66,7 @@ export async function GET(
       pending: conversation.calculationsPending,
     });
   } catch (error) {
-    console.error('[CALCULATIONS_API] Error fetching calculations:', error);
+    logger.error('Error fetching calculations', error);
     return NextResponse.json(
       { error: 'Failed to fetch calculations' },
       { status: 500 }

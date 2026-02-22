@@ -9,6 +9,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { verifySubmittalQuantities, SubmittalVerificationReport } from '@/lib/submittal-verification-service';
 import { createBulkVerificationAuditLog } from '@/lib/verification-audit-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_BULK_VERIFY');
 
 export async function POST(
   request: Request,
@@ -92,7 +94,7 @@ export async function POST(
         'manual'
       );
     } catch (auditError) {
-      console.error('[Bulk Audit Log Error]:', auditError);
+      logger.error('[Bulk Audit Log Error]', auditError);
     }
 
     return NextResponse.json({
@@ -110,7 +112,7 @@ export async function POST(
       errors
     });
   } catch (error) {
-    console.error('[Bulk Verify Error]:', error);
+    logger.error('[Bulk Verify Error]', error);
     return NextResponse.json(
       { error: 'Failed to run bulk verification' },
       { status: 500 }
@@ -205,7 +207,7 @@ export async function GET(
       submittals: submittalSummaries
     });
   } catch (error) {
-    console.error('[Bulk Verify GET Error]:', error);
+    logger.error('[Bulk Verify GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to get verification summary' },
       { status: 500 }

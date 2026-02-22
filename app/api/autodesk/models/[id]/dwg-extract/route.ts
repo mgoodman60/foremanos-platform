@@ -9,6 +9,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractDWGMetadata, generateDWGSearchContent, DWGExtractionResult } from '@/lib/dwg-metadata-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS_DWG_EXTRACT');
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +59,7 @@ export async function POST(
       );
     }
 
-    console.log('[DWG Extract API] Starting extraction for model:', model.fileName);
+    logger.info('[DWG Extract API] Starting extraction for model', { detail: model.fileName });
 
     // Extract DWG metadata
     const dwgData = await extractDWGMetadata(model.urn, model.fileName);
@@ -83,7 +85,7 @@ export async function POST(
       },
     });
 
-    console.log('[DWG Extract API] Extraction complete:', {
+    logger.info('Extraction complete', {
       layers: dwgData.layers.length,
       blocks: dwgData.blocks.length,
       annotations: dwgData.textAnnotations.length,
@@ -105,7 +107,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[DWG Extract API] Error:', error);
+    logger.error('[DWG Extract API] Error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Extraction failed') },
       { status: 500 }
@@ -162,7 +164,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[DWG Extract API] GET Error:', error);
+    logger.error('[DWG Extract API] GET Error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to get extraction data') },
       { status: 500 }

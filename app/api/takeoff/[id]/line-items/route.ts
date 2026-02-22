@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_LINE_ITEMS');
 
 // POST /api/takeoff/[id]/line-items - Add a new line item to a takeoff
 export async function POST(
@@ -122,7 +124,7 @@ export async function POST(
 
     return NextResponse.json({ item: lineItem }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating line item:', error);
+    logger.error('Error creating line item', error);
     return NextResponse.json(
       { error: 'Failed to create line item', details: safeErrorMessage(error) },
       { status: 500 }

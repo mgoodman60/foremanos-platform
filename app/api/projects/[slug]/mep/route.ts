@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getMEPDashboardStats } from '@/lib/mep-tracking-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP');
 
 // MEP categories for takeoff items (match both cases as stored in DB)
 const MEP_CATEGORIES = [
@@ -135,11 +137,11 @@ export async function GET(
       }
     });
     
-    console.log('[MEP API] Project:', project.id);
-    console.log('[MEP API] MEP Equipment from table:', dbEquipment.length);
-    console.log('[MEP API] Takeoffs found:', mepTakeoffs.length);
+    logger.info('[MEP API] Project', { detail: project.id });
+    logger.info('[MEP API] MEP Equipment from table', { detail: dbEquipment.length });
+    logger.info('[MEP API] Takeoffs found', { detail: mepTakeoffs.length });
     const takeoffItemCount = mepTakeoffs.reduce((sum, t) => sum + t.TakeoffLineItem.length, 0);
-    console.log('[MEP API] Takeoff MEP items:', takeoffItemCount);
+    logger.info('[MEP API] Takeoff MEP items', { takeoffItemCount });
 
     // Transform TakeoffLineItems to browser-expected format
     // Group items by name to aggregate quantities and create room breakdowns
@@ -263,10 +265,10 @@ export async function GET(
     // Apply trade filter
     const equipment = allEquipment.filter((eq) => !tradeFilter || eq.trade === tradeFilter);
     
-    console.log('[MEP API] Total equipment after dedup:', allEquipment.length);
-    console.log('[MEP API] Equipment after trade filter:', equipment.length);
+    logger.info('[MEP API] Total equipment after dedup', { detail: allEquipment.length });
+    logger.info('[MEP API] Equipment after trade filter', { detail: equipment.length });
     if (equipment.length > 0) {
-      console.log('[MEP API] First item:', JSON.stringify(equipment[0], null, 2));
+      logger.info('[MEP API] First item', { detail: JSON.stringify(equipment[0], null, 2 }));
     }
 
     // Calculate stats for equipment browser
@@ -307,7 +309,7 @@ export async function GET(
       dashboardStats
     });
   } catch (error) {
-    console.error('[MEP Dashboard API Error]:', error);
+    logger.error('[MEP Dashboard API Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch MEP stats' },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_LINE_ITEMS');
 
 // PUT /api/takeoff/[id]/line-items/[itemId] - Update a line item
 export async function PUT(
@@ -105,7 +107,7 @@ export async function PUT(
 
     return NextResponse.json({ lineItem: updated });
   } catch (error: any) {
-    console.error('Error updating line item:', error);
+    logger.error('Error updating line item', error);
     return NextResponse.json(
       { error: 'Failed to update line item', details: safeErrorMessage(error) },
       { status: 500 }
@@ -189,7 +191,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Line item deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting line item:', error);
+    logger.error('Error deleting line item', error);
     return NextResponse.json(
       { error: 'Failed to delete line item', details: safeErrorMessage(error) },
       { status: 500 }

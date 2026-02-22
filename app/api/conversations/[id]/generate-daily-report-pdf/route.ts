@@ -21,6 +21,8 @@ import { generatePresignedUploadUrl, getFileUrl } from '@/lib/s3';
 import { format } from 'date-fns';
 import ReactPDF from '@react-pdf/renderer';
 import { DailyReportPDF, DailyReportData } from '@/lib/pdf-template';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_GENERATE_DAILY_REPORT_PDF');
 
 export const dynamic = 'force-dynamic';
 
@@ -251,7 +253,7 @@ export async function POST(
       message: 'Daily report PDF generated and saved successfully',
     });
   } catch (error) {
-    console.error('[GENERATE_DAILY_REPORT_PDF_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to generate daily report PDF' },
       { status: 500 }

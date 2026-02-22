@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CREWS');
 
 export async function GET(
   request: NextRequest,
@@ -82,7 +84,7 @@ export async function GET(
 
     return NextResponse.json({ crews });
   } catch (error) {
-    console.error('Error fetching crews:', error);
+    logger.error('Error fetching crews', error);
     return NextResponse.json(
       { error: 'Failed to fetch crews' },
       { status: 500 }
@@ -159,7 +161,7 @@ export async function POST(
 
     return NextResponse.json({ crew }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating crew:', error);
+    logger.error('Error creating crew', error);
     
     if (error.code === 'P2002') {
       return NextResponse.json(

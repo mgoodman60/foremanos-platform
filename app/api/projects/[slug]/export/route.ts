@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { exportProjectData } from '@/lib/export-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXPORT');
 
 export async function GET(
   request: Request,
@@ -55,7 +57,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('[Export API] Error:', error);
+    logger.error('[Export API] Error', error);
     return NextResponse.json(
       { error: 'Export failed' },
       { status: 500 }

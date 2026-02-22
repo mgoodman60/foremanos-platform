@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { processUploadedPhoto } from '@/lib/photo-analyzer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_ANALYZE');
 
 /**
  * POST /api/projects/[slug]/photos/[id]/analyze
@@ -43,7 +45,7 @@ export async function POST(
     }
 
     // Process the photo
-    console.log(`[Photo Analysis] Starting analysis for photo ${id}`);
+    logger.info('[Photo Analysis] Starting analysis for photo ${id}');
     await processUploadedPhoto(id, slug);
 
     // Get updated photo
@@ -55,7 +57,7 @@ export async function POST(
       },
     });
 
-    console.log(`[Photo Analysis] Completed analysis for photo ${id}`);
+    logger.info('[Photo Analysis] Completed analysis for photo ${id}');
 
     return NextResponse.json({
       success: true,
@@ -63,7 +65,7 @@ export async function POST(
       message: 'Photo analysis completed',
     });
   } catch (error: any) {
-    console.error('[Photo Analysis] Error:', error);
+    logger.error('[Photo Analysis] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to analyze photo',

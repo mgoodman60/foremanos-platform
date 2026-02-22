@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_RFIS');
 
 export async function GET(
   request: NextRequest,
@@ -32,7 +34,7 @@ export async function GET(
 
     return NextResponse.json({ rfi });
   } catch (error) {
-    console.error('[RFI API] Get error:', error);
+    logger.error('[RFI API] Get error', error);
     return NextResponse.json(
       { error: 'Failed to fetch RFI' },
       { status: 500 }
@@ -118,7 +120,7 @@ export async function PATCH(
 
     return NextResponse.json({ rfi });
   } catch (error) {
-    console.error('[RFI API] Update error:', error);
+    logger.error('[RFI API] Update error', error);
     return NextResponse.json(
       { error: 'Failed to update RFI' },
       { status: 500 }
@@ -142,7 +144,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[RFI API] Delete error:', error);
+    logger.error('[RFI API] Delete error', error);
     return NextResponse.json(
       { error: 'Failed to delete RFI' },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl } from '@/lib/s3';
 import { validateS3Config } from '@/lib/aws-config';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_LOGO_PRESIGNED');
 
 export const dynamic = 'force-dynamic';
 
@@ -104,7 +106,7 @@ export async function POST(
       cloud_storage_path,
     });
   } catch (error: any) {
-    console.error('[LOGO_PRESIGNED_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to generate upload URL' },
       { status: 500 }

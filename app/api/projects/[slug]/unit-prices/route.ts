@@ -11,6 +11,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { saveUnitPrice, getProjectUnitPrices, DEFAULT_UNIT_PRICES, REGIONAL_MULTIPLIERS } from '@/lib/cost-calculation-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_UNIT_PRICES');
 
 export async function GET(
   request: NextRequest,
@@ -75,7 +77,7 @@ export async function GET(
       currentRegion: region,
     });
   } catch (error: any) {
-    console.error('[UnitPrices API] GET error:', error);
+    logger.error('[UnitPrices API] GET error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch prices' },
       { status: 500 }
@@ -134,7 +136,7 @@ export async function POST(
       created: result.created,
     });
   } catch (error: any) {
-    console.error('[UnitPrices API] POST error:', error);
+    logger.error('[UnitPrices API] POST error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to save price' },
       { status: 500 }
@@ -165,7 +167,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[UnitPrices API] DELETE error:', error);
+    logger.error('[UnitPrices API] DELETE error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete price' },
       { status: 500 }

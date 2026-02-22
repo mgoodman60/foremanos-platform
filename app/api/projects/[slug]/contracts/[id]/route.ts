@@ -11,6 +11,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl, deleteFile } from '@/lib/s3';
 import { calculateContractFinancials, checkInsuranceCompliance } from '@/lib/contract-extraction-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CONTRACTS');
 
 export async function GET(
   request: Request,
@@ -93,7 +95,7 @@ export async function GET(
       insuranceCompliance,
     });
   } catch (error) {
-    console.error('[Contract GET Error]:', error);
+    logger.error('[Contract GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch contract' },
       { status: 500 }
@@ -235,7 +237,7 @@ export async function PATCH(
 
     return NextResponse.json({ contract });
   } catch (error) {
-    console.error('[Contract PATCH Error]:', error);
+    logger.error('[Contract PATCH Error]', error);
     return NextResponse.json(
       { error: 'Failed to update contract' },
       { status: 500 }
@@ -286,7 +288,7 @@ export async function DELETE(
       try {
         await deleteFile(contract.cloudStoragePath);
       } catch (e) {
-        console.warn('[Contract Delete] Failed to delete S3 file:', e);
+        logger.warn('[Contract Delete] Failed to delete S3 file', { e });
       }
     }
 
@@ -296,7 +298,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Contract DELETE Error]:', error);
+    logger.error('[Contract DELETE Error]', error);
     return NextResponse.json(
       { error: 'Failed to delete contract' },
       { status: 500 }

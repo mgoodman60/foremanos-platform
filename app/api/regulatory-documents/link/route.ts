@@ -12,6 +12,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { ensureRegulatoryDocumentForProject } from '@/lib/regulatory-documents';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('REGULATORY_DOCUMENTS_LINK');
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('Error linking regulatory document:', error);
+    logger.error('Error linking regulatory document', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

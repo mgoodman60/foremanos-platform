@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays, subDays, format, differenceInDays } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_FORECAST');
 
 export async function GET(
   request: NextRequest,
@@ -204,7 +206,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[CostForecast API] Error:', error);
+    logger.error('[CostForecast API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch cost forecast' },
       { status: 500 }

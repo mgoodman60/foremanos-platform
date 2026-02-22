@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getAnnotationSummary, searchAnnotations } from '@/lib/annotation-processor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ENHANCED_ANNOTATIONS');
 
 export async function GET(
   request: NextRequest,
@@ -96,7 +98,7 @@ export async function GET(
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('Error getting enhanced annotations:', error);
+    logger.error('Error getting enhanced annotations', error);
     return NextResponse.json({ error: 'Failed to get enhanced annotations' }, { status: 500 });
   }
 }

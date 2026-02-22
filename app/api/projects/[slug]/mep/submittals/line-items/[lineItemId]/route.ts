@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { triggerAutoReverify } from '@/lib/tolerance-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_LINE_ITEMS');
 
 /**
  * PATCH: Update a line item's quantities
@@ -74,7 +76,7 @@ export async function PATCH(
       try {
         await triggerAutoReverify(project.id, lineItem.submittal.id, 'submittal_change');
       } catch (error) {
-        console.log('[LineItem PATCH] Auto-reverify skipped:', error);
+        logger.info('[LineItem PATCH] Auto-reverify skipped', { error });
       }
     }
 
@@ -98,7 +100,7 @@ export async function PATCH(
       lineItem: updated
     });
   } catch (error) {
-    console.error('[LineItem PATCH] Error:', error);
+    logger.error('[LineItem PATCH] Error', error);
     return NextResponse.json({ error: 'Failed to update line item' }, { status: 500 });
   }
 }
@@ -164,7 +166,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Line item deleted' });
   } catch (error) {
-    console.error('[LineItem DELETE] Error:', error);
+    logger.error('[LineItem DELETE] Error', error);
     return NextResponse.json({ error: 'Failed to delete line item' }, { status: 500 });
   }
 }

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('NOTIFICATIONS');
 
 export async function PATCH(
   req: NextRequest,
@@ -34,7 +37,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error marking notification as read:', error);
+    logger.error('Failed to mark notification as read', error);
     return NextResponse.json(
       { error: 'Failed to mark notification as read' },
       { status: 500 }

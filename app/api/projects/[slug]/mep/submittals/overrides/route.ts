@@ -15,6 +15,8 @@ import {
   getPendingOverrides,
   getLineItemOverrideHistory
 } from '@/lib/verification-audit-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_OVERRIDES');
 
 export async function GET(
   request: Request,
@@ -84,7 +86,7 @@ export async function GET(
       }))
     });
   } catch (error) {
-    console.error('[Override API] GET Error:', error);
+    logger.error('[Override API] GET Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch overrides' },
       { status: 500 }
@@ -151,7 +153,7 @@ export async function POST(
       message: 'Override created successfully'
     });
   } catch (error) {
-    console.error('[Override API] POST Error:', error);
+    logger.error('[Override API] POST Error', error);
     return NextResponse.json(
       { error: 'Failed to create override' },
       { status: 500 }
@@ -205,7 +207,7 @@ export async function PATCH(
       message: approved ? 'Override approved' : 'Override rejected'
     });
   } catch (error) {
-    console.error('[Override API] PATCH Error:', error);
+    logger.error('[Override API] PATCH Error', error);
     return NextResponse.json(
       { error: 'Failed to review override' },
       { status: 500 }

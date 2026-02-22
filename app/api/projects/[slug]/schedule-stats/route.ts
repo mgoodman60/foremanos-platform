@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_STATS');
 
 export const dynamic = 'force-dynamic';
 
@@ -97,7 +99,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching schedule stats:', error);
+    logger.error('Error fetching schedule stats', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule stats' },
       { status: 500 }

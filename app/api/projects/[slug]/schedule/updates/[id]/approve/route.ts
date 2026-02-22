@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
 import { markScheduleUpdatesReviewed } from '@/lib/onboarding-tracker';
 import { syncBudgetFromSchedule } from '@/lib/budget-sync-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_UPDATES_APPROVE');
 
 export const dynamic = 'force-dynamic';
 
@@ -140,12 +142,12 @@ export async function POST(
 
     // Track onboarding progress - schedule updates reviewed
     markScheduleUpdatesReviewed(session.user.id, project.id).catch((err) => {
-      console.error('[ONBOARDING] Error marking schedule updates reviewed:', err);
+      logger.error('Error marking schedule updates reviewed', err);
     });
 
     // Trigger budget sync after schedule update approval
     syncBudgetFromSchedule(project.id, session.user.id).catch((err) => {
-      console.error('[APPROVE_UPDATE] Budget sync failed:', err);
+      logger.error('Budget sync failed', err);
     });
 
     return NextResponse.json({
@@ -153,7 +155,7 @@ export async function POST(
       scheduleUpdate: updated,
     });
   } catch (error) {
-    console.error('[APPROVE_UPDATE] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       {
         error: 'Internal server error',

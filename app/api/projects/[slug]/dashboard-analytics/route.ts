@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DASHBOARD_ANALYTICS');
 
 export const dynamic = 'force-dynamic';
 
@@ -256,7 +258,7 @@ export async function GET(
 
     return NextResponse.json(analytics);
   } catch (error: any) {
-    console.error('Error fetching dashboard analytics:', error);
+    logger.error('Error fetching dashboard analytics', error);
     return NextResponse.json(
       { error: 'Failed to fetch dashboard analytics', details: safeErrorMessage(error) },
       { status: 500 }

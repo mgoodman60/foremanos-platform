@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { SSEStream } from '@/lib/websocket-server';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_REALTIME');
 
 export const runtime = 'nodejs';
 
@@ -30,7 +32,7 @@ export async function GET(
       }
     });
   } catch (error: any) {
-    console.error('Realtime stream error:', error);
+    logger.error('Realtime stream error', error);
     return new Response(
       JSON.stringify({ error: error.message || 'Failed to create realtime stream' }),
       {

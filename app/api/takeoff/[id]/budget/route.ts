@@ -17,6 +17,8 @@ import {
   generateVarianceReport,
   updateBudgetFromTakeoff,
 } from '@/lib/takeoff-budget-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_BUDGET');
 
 export async function GET(
   request: Request,
@@ -94,7 +96,7 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Takeoff Budget API Error]', error);
+    logger.error('[Takeoff Budget API Error]', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Server error' },
       { status: 500 }
@@ -205,7 +207,7 @@ export async function POST(
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Takeoff Budget API Error]', error);
+    logger.error('[Takeoff Budget API Error]', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Server error' },
       { status: 500 }

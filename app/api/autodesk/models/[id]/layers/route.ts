@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getAccessToken } from '@/lib/autodesk-auth';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS_LAYERS');
 
 export async function GET(
   request: NextRequest,
@@ -70,7 +72,7 @@ export async function GET(
       );
 
       if (!manifestResponse.ok) {
-        console.error('[API] Manifest fetch failed:', manifestResponse.status);
+        logger.error('Manifest fetch failed', undefined, { status: manifestResponse.status });
         return NextResponse.json({ layers: [] }, { status: 200 });
       }
 
@@ -154,11 +156,11 @@ export async function GET(
         viewable: dwg2dView?.guid,
       });
     } catch (apiError) {
-      console.error('[API] Autodesk API error:', apiError);
+      logger.error('Autodesk API error', apiError);
       return NextResponse.json({ layers: [] }, { status: 200 });
     }
   } catch (error) {
-    console.error('[API] Get layers error:', error);
+    logger.error('Get layers error', error);
     return NextResponse.json(
       { error: 'Failed to get layers' },
       { status: 500 }

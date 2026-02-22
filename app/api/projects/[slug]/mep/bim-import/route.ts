@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { populateFromBIM } from '@/lib/mep-tracking-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_BIM_IMPORT');
 
 export async function POST(
   request: Request,
@@ -77,7 +79,7 @@ export async function POST(
       message: `Imported ${result.systems} systems, ${result.equipment} equipment items, and ${result.calculations} load calculations from BIM model.`
     });
   } catch (error) {
-    console.error('[MEP BIM Import Error]:', error);
+    logger.error('[MEP BIM Import Error]', error);
     return NextResponse.json(
       { error: 'Failed to import from BIM' },
       { status: 500 }

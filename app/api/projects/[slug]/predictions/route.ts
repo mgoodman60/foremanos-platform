@@ -13,6 +13,8 @@ import {
   analyzeProjectRisks,
   recordActualOutcome,
 } from '@/lib/predictive-scheduling';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PREDICTIONS');
 
 /**
  * GET /api/projects/[slug]/predictions
@@ -55,7 +57,7 @@ export async function GET(
       total: predictions.length,
     });
   } catch (error) {
-    console.error('[PredictionsAPI] GET error:', error);
+    logger.error('GET error', error);
     return NextResponse.json(
       { error: 'Failed to fetch predictions' },
       { status: 500 }
@@ -114,7 +116,7 @@ export async function POST(
       risks,
     });
   } catch (error) {
-    console.error('[PredictionsAPI] POST error:', error);
+    logger.error('POST error', error);
     return NextResponse.json(
       { error: 'Failed to generate prediction' },
       { status: 500 }

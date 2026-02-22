@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getUsageStats, getProjectProcessingLimits } from '@/lib/processing-limits';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PROCESSING_LIMITS');
 
 // GET /api/projects/[slug]/processing-limits - Get usage stats and limits
 export async function GET(
@@ -64,7 +66,7 @@ export async function GET(
       queuedCount,
     });
   } catch (error: any) {
-    console.error('[PROCESSING_LIMITS] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to get processing limits', details: error.message },
       { status: 500 }
@@ -126,14 +128,14 @@ export async function PUT(
       },
     });
 
-    console.log(`[PROCESSING_LIMITS] Updated limits for project ${project.name}`);
+    logger.info('Updated limits for project ${project.name}');
 
     return NextResponse.json({
       message: 'Processing limits updated successfully',
       project: updatedProject,
     });
   } catch (error: any) {
-    console.error('[PROCESSING_LIMITS] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to update processing limits', details: error.message },
       { status: 500 }

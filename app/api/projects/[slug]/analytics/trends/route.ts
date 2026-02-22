@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getProgressTrends } from '@/lib/analytics-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANALYTICS_TRENDS');
 
 export async function GET(
   request: NextRequest,
@@ -29,7 +31,7 @@ export async function GET(
     const trends = await getProgressTrends(project.id, period, lookback);
     return NextResponse.json(trends);
   } catch (error) {
-    console.error('[Analytics Trends] Error:', error);
+    logger.error('[Analytics Trends] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch trends' },
       { status: 500 }

@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { extractMEPTakeoffs } from '@/lib/mep-takeoff-generator';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_TAKEOFF');
 
 export async function POST(
   request: NextRequest,
@@ -21,7 +23,7 @@ export async function POST(
     }
 
     const { slug } = params;
-    console.log(`[MEP Takeoff API] Starting extraction for project: ${slug}`);
+    logger.info('[MEP Takeoff API] Starting extraction for project: ${slug}');
 
     const result = await extractMEPTakeoffs(slug);
 
@@ -48,7 +50,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[MEP Takeoff API] Error:', error);
+    logger.error('[MEP Takeoff API] Error', error);
     return NextResponse.json(
       { error: `MEP extraction failed: ${error}` },
       { status: 500 }
@@ -151,7 +153,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[MEP Takeoff API] Error:', error);
+    logger.error('[MEP Takeoff API] Error', error);
     return NextResponse.json(
       { error: `Failed to get MEP takeoff: ${error}` },
       { status: 500 }

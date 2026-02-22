@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CHANGE_ORDERS');
 
 // GET - Get single change order
 export async function GET(
@@ -37,7 +39,7 @@ export async function GET(
     return NextResponse.json(changeOrder);
 
   } catch (error) {
-    console.error('[ChangeOrder GET] Error:', error);
+    logger.error('[ChangeOrder GET] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch change order' },
       { status: 500 }
@@ -142,7 +144,7 @@ export async function PATCH(
     return NextResponse.json(updatedCO);
 
   } catch (error) {
-    console.error('[ChangeOrder PATCH] Error:', error);
+    logger.error('[ChangeOrder PATCH] Error', error);
     return NextResponse.json(
       { error: 'Failed to update change order' },
       { status: 500 }
@@ -187,7 +189,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('[ChangeOrder DELETE] Error:', error);
+    logger.error('[ChangeOrder DELETE] Error', error);
     return NextResponse.json(
       { error: 'Failed to delete change order' },
       { status: 500 }

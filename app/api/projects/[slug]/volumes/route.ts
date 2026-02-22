@@ -19,6 +19,8 @@ import {
   AggregateVolumeInput,
   BackfillVolumeInput,
 } from '@/lib/volume-calculator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_VOLUMES');
 
 // POST: Calculate volumes
 export async function POST(req: NextRequest) {
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid calculationType' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Volume Calculator API Error]:', error);
+    logger.error('[Volume Calculator API Error]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

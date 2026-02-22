@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS');
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +43,7 @@ export async function GET(
 
     return NextResponse.json({ conversation });
   } catch (error) {
-    console.error('Error fetching conversation:', error);
+    logger.error('Error fetching conversation', error);
     return NextResponse.json(
       { error: 'Failed to fetch conversation' },
       { status: 500 }
@@ -91,7 +93,7 @@ export async function PATCH(
 
     return NextResponse.json({ conversation: updatedConversation });
   } catch (error) {
-    console.error('Error updating conversation:', error);
+    logger.error('Error updating conversation', error);
     return NextResponse.json(
       { error: 'Failed to update conversation' },
       { status: 500 }
@@ -130,7 +132,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting conversation:', error);
+    logger.error('Error deleting conversation', error);
     return NextResponse.json(
       { error: 'Failed to delete conversation' },
       { status: 500 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_UPDATES');
 
 // PATCH /api/projects/[slug]/schedule-updates/[id] - Approve or reject a schedule update
 export async function PATCH(
@@ -122,7 +124,7 @@ export async function PATCH(
       });
     }
   } catch (error: unknown) {
-    console.error('[API] Error updating schedule update:', error);
+    logger.error('Error updating schedule update', error);
     return NextResponse.json(
       { error: 'Failed to update schedule update' },
       { status: 500 }
@@ -174,7 +176,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Schedule update deleted successfully' });
   } catch (error: unknown) {
-    console.error('[API] Error deleting schedule update:', error);
+    logger.error('Error deleting schedule update', error);
     return NextResponse.json(
       { error: 'Failed to delete schedule update' },
       { status: 500 }

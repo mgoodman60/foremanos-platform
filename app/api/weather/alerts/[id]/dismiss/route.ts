@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('WEATHER_ALERTS_DISMISS');
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -65,7 +67,7 @@ export async function POST(
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('[API] Error dismissing weather alert:', error);
+    logger.error('Error dismissing weather alert', error);
     return NextResponse.json(
       { error: 'Failed to dismiss alert' },
       { status: 500 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_METRICS_EXPORT');
 
 export const dynamic = 'force-dynamic';
 
@@ -113,7 +115,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     });
 
   } catch (error) {
-    console.error('Error exporting schedule metrics:', error);
+    logger.error('Error exporting schedule metrics', error);
     return NextResponse.json(
       { error: 'Failed to export schedule metrics' },
       { status: 500 }

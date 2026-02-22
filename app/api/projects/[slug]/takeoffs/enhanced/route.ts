@@ -6,6 +6,8 @@ import {
   extractTakeoffsWithVision,
   saveEnhancedTakeoff,
 } from '@/lib/enhanced-takeoff-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TAKEOFFS_ENHANCED');
 
 interface RouteContext {
   params: {
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    console.log(`[ENHANCED-TAKEOFF-API] Starting extraction for document ${documentId}`);
+    logger.info('[ENHANCED-TAKEOFF-API] Starting extraction for document ${documentId}');
 
     // Extract with enhanced vision
     const items = await extractTakeoffsWithVision(
@@ -142,7 +144,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[ENHANCED-TAKEOFF-API] Error:', errorMessage);
+    logger.error('[ENHANCED-TAKEOFF-API] Error', errorMessage);
     return NextResponse.json(
       { error: 'Failed to extract takeoffs', details: errorMessage },
       { status: 500 }
@@ -262,7 +264,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[ENHANCED-TAKEOFF-API] Error:', errorMessage);
+    logger.error('[ENHANCED-TAKEOFF-API] Error', errorMessage);
     return NextResponse.json(
       { error: 'Failed to fetch takeoffs', details: errorMessage },
       { status: 500 }

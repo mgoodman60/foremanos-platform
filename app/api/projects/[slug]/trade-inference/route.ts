@@ -15,6 +15,8 @@ import {
   TRADE_TYPES,
   TRADE_DISPLAY_NAMES,
 } from '@/lib/trade-inference';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TRADE_INFERENCE');
 
 export const dynamic = 'force-dynamic';
 
@@ -111,7 +113,7 @@ export async function GET(
       })),
     });
   } catch (error: any) {
-    console.error('[TRADE-INFERENCE API] Error:', error);
+    logger.error('[TRADE-INFERENCE API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch trade inference data' },
       { status: 500 }
@@ -239,7 +241,7 @@ export async function POST(
         );
     }
   } catch (error: any) {
-    console.error('[TRADE-INFERENCE API] Error:', error);
+    logger.error('[TRADE-INFERENCE API] Error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to process trade inference' },
       { status: 500 }

@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DAILY_REPORTS_HISTORY');
 
 export async function GET(
   request: NextRequest,
@@ -104,7 +106,7 @@ export async function GET(
               documentName = document.name;
             }
           } catch (error) {
-            console.error(`[DAILY_REPORTS_HISTORY] Error getting document for report ${report.id}:`, error);
+            logger.error('Error getting document for report ${report.id}', error);
           }
         }
 
@@ -170,7 +172,7 @@ export async function GET(
       reports: reportsWithDocuments,
     });
   } catch (error) {
-    console.error('[DAILY_REPORTS_HISTORY] Error fetching history:', error);
+    logger.error('Error fetching history', error);
     return NextResponse.json(
       { error: 'Failed to fetch daily reports history' },
       { status: 500 }

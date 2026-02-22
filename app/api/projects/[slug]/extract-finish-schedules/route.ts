@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractFinishSchedules } from '@/lib/finish-schedule-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_FINISH_SCHEDULES');
 
 /**
  * POST /api/projects/[slug]/extract-finish-schedules
@@ -70,9 +72,7 @@ export async function POST(
       );
     }
 
-    console.log(
-      `[API] Extracting finish schedules for project ${project.name} (slug: ${slug})`
-    );
+    logger.info('Extracting finish schedules for project ${project.name} (slug: ${slug})');
 
     // Extract finish schedules
     const result = await extractFinishSchedules(slug);
@@ -94,7 +94,7 @@ export async function POST(
       totalFinishes: result.totalFinishes
     });
   } catch (error: any) {
-    console.error('[API] Error extracting finish schedules:', error);
+    logger.error('Error extracting finish schedules', error);
     return NextResponse.json(
       {
         error: 'Failed to extract finish schedules',

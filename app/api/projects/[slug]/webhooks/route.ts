@@ -12,6 +12,8 @@ import {
   getWebhookLogs,
   WebhookEvent
 } from '@/lib/webhook-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_WEBHOOKS');
 
 // Get webhooks for a project
 export async function GET(
@@ -45,7 +47,7 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[Webhooks API] Error:', error);
+    logger.error('[Webhooks API] Error', error);
     return NextResponse.json({ error: 'Failed to fetch webhooks' }, { status: 500 });
   }
 }
@@ -103,7 +105,7 @@ export async function POST(
 
     return NextResponse.json({ webhook }, { status: 201 });
   } catch (error) {
-    console.error('[Webhooks API] Error:', error);
+    logger.error('[Webhooks API] Error', error);
     return NextResponse.json({ error: 'Failed to create webhook' }, { status: 500 });
   }
 }
@@ -142,7 +144,7 @@ export async function PATCH(
 
     return NextResponse.json({ webhook });
   } catch (error) {
-    console.error('[Webhooks API] Error:', error);
+    logger.error('[Webhooks API] Error', error);
     return NextResponse.json({ error: 'Failed to update webhook' }, { status: 500 });
   }
 }
@@ -178,7 +180,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Webhooks API] Error:', error);
+    logger.error('[Webhooks API] Error', error);
     return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
   }
 }

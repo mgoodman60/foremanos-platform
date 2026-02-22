@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getNextSystemNumber } from '@/lib/mep-tracking-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SYSTEMS');
 
 export async function GET(
   request: Request,
@@ -56,7 +58,7 @@ export async function GET(
 
     return NextResponse.json({ systems });
   } catch (error) {
-    console.error('[MEP Systems GET Error]:', error);
+    logger.error('[MEP Systems GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch systems' },
       { status: 500 }
@@ -131,7 +133,7 @@ export async function POST(
 
     return NextResponse.json({ system }, { status: 201 });
   } catch (error) {
-    console.error('[MEP Systems POST Error]:', error);
+    logger.error('[MEP Systems POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create system' },
       { status: 500 }

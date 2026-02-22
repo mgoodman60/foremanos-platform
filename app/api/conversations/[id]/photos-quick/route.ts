@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_PHOTOS_QUICK');
 
 // POST - Quick capture photo upload (mobile optimized)
 export async function POST(
@@ -78,7 +80,7 @@ export async function POST(
       photo: newPhoto,
     });
   } catch (error) {
-    console.error('Error in quick photo upload:', error);
+    logger.error('Error in quick photo upload', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

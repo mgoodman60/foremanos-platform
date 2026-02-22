@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { TRADE_DISPLAY_NAMES } from '@/lib/trade-inference';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_LOOKAHEAD');
 
 export const dynamic = 'force-dynamic';
 
@@ -148,7 +150,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     });
 
   } catch (error) {
-    console.error('Error fetching schedule lookahead:', error);
+    logger.error('Error fetching schedule lookahead', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule lookahead' },
       { status: 500 }

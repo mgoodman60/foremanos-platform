@@ -13,6 +13,8 @@ import {
   getSiteProgressSummary,
   analyzeConstructionPhoto,
 } from '@/lib/progress-detection-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DAILY_REPORTS_PROGRESS_DETECTION');
 
 export async function GET(
   request: Request,
@@ -44,7 +46,7 @@ export async function GET(
 
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('[Progress Detection API] Error:', error);
+    logger.error('[Progress Detection API] Error', error);
     return NextResponse.json({ error: 'Failed to get progress summary' }, { status: 500 });
   }
 }
@@ -108,7 +110,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('[Progress Detection API] Error:', error);
+    logger.error('[Progress Detection API] Error', error);
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }

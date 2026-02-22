@@ -13,6 +13,8 @@ import {
   DrawingType,
   DrawingSubtype
 } from '@/lib/drawing-classifier';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DRAWING_TYPES');
 
 export async function GET(
   req: NextRequest,
@@ -79,7 +81,7 @@ export async function GET(
     );
     
   } catch (error) {
-    console.error('[drawing-types] Error:', error);
+    logger.error('[drawing-types] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to get drawing types',

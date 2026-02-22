@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_APPROVE');
 
 // POST /api/takeoff/[id]/approve - Approve a material takeoff
 export async function POST(
@@ -82,7 +84,7 @@ export async function POST(
 
     return NextResponse.json({ takeoff: approved });
   } catch (error: any) {
-    console.error('Error approving takeoff:', error);
+    logger.error('Error approving takeoff', error);
     return NextResponse.json(
       { error: 'Failed to approve takeoff', details: error.message },
       { status: 500 }

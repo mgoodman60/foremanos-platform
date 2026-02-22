@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DOCUMENTS');
 
 /**
  * GET /api/projects/[slug]/documents
@@ -56,7 +58,7 @@ export async function GET(
 
     return NextResponse.json({ documents });
   } catch (error: any) {
-    console.error('Error fetching documents:', error);
+    logger.error('Error fetching documents', error);
     return NextResponse.json(
       { error: 'Failed to fetch documents' },
       { status: 500 }

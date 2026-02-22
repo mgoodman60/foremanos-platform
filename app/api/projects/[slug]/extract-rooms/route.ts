@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractRoomsFromDocuments, saveExtractedRooms } from '@/lib/room-extractor';
 import { withDatabaseRetry } from '@/lib/retry-util';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_ROOMS');
 
 /**
  * POST /api/projects/[slug]/extract-rooms
@@ -56,7 +58,7 @@ export async function POST(
     }
 
     // Extract rooms from documents
-    console.log(`[Extract Rooms] Starting extraction for project: ${slug}`);
+    logger.info('[Extract Rooms] Starting extraction for project: ${slug}');
     const extractionResult = await extractRoomsFromDocuments(slug);
 
     if (extractionResult.rooms.length === 0) {
@@ -72,9 +74,7 @@ export async function POST(
     // Save extracted rooms to database
     const saveResult = await saveExtractedRooms(slug, extractionResult.rooms);
 
-    console.log(
-      `[Extract Rooms] Completed: ${saveResult.created} created, ${saveResult.updated} updated`
-    );
+    logger.info('[Extract Rooms] Completed: ${saveResult.created} created, ${saveResult.updated} updated');
 
     return NextResponse.json({
       success: true,
@@ -85,7 +85,7 @@ export async function POST(
       summary: extractionResult.summary,
     });
   } catch (error: any) {
-    console.error('[Extract Rooms] Error:', error);
+    logger.error('[Extract Rooms] Error', error);
     
     // Check for database connection errors
     if (error.code && error.code.startsWith('P1')) {

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getCostBreakdown } from '@/lib/analytics-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANALYTICS_COST_BREAKDOWN');
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +27,7 @@ export async function GET(
     const breakdown = await getCostBreakdown(project.id);
     return NextResponse.json(breakdown);
   } catch (error) {
-    console.error('[Analytics Cost Breakdown] Error:', error);
+    logger.error('[Analytics Cost Breakdown] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch cost breakdown' },
       { status: 500 }

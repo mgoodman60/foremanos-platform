@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createProcurement, getProcurementDashboard } from '@/lib/cash-flow-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PROCUREMENT');
 
 // GET /api/projects/[slug]/procurement
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
@@ -24,7 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json(dashboard);
   } catch (error) {
-    console.error('[API] Procurement error:', error);
+    logger.error('Procurement error', error);
     return NextResponse.json({ error: 'Failed to fetch procurement data' }, { status: 500 });
   }
 }
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(procurement);
   } catch (error) {
-    console.error('[API] Create procurement error:', error);
+    logger.error('Create procurement error', error);
     return NextResponse.json({ error: 'Failed to create procurement item' }, { status: 500 });
   }
 }

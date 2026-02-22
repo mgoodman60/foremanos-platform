@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SUBCONTRACTORS');
 // type TradeType = string; // Unused type removed
 
 // PUT /api/projects/[slug]/subcontractors/[id] - Update a subcontractor
@@ -59,7 +61,7 @@ export async function PUT(
 
     return NextResponse.json(subcontractor);
   } catch (error: any) {
-    console.error('[SUBCONTRACTORS_PUT] Error:', error);
+    logger.error('Error', error);
     
     if (error?.code === 'P2002') {
       return NextResponse.json(
@@ -107,7 +109,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[SUBCONTRACTORS_DELETE] Error:', error);
+    logger.error('Error', error);
 
     if (error?.code === 'P2025') {
       return NextResponse.json(

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { TAKEOFF_TO_BUDGET_MAP, ONE_SENIOR_CARE_BUDGET } from '@/lib/budget-parser';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_SYNC_BUDGET');
 
 /**
  * Find matching phase for a category using fuzzy matching
@@ -219,7 +221,7 @@ export async function POST(request: NextRequest) {
       unmappedCategories: [...new Set(unmappedItems.map(i => i.bimCategory || i.category))],
     });
   } catch (error) {
-    console.error('[Takeoff Budget Sync Error]', error);
+    logger.error('[Takeoff Budget Sync Error]', error);
     return NextResponse.json(
       { error: 'Failed to sync budget to takeoff' },
       { status: 500 }

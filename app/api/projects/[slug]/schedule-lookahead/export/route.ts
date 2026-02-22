@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format, eachDayOfInterval, differenceInDays, startOfDay, isWeekend, getDay } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_LOOKAHEAD_EXPORT');
 
 export const dynamic = 'force-dynamic';
 
@@ -566,7 +568,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     });
 
   } catch (error) {
-    console.error('Error exporting lookahead:', error);
+    logger.error('Error exporting lookahead', error);
     return NextResponse.json(
       { error: 'Failed to export lookahead' },
       { status: 500 }

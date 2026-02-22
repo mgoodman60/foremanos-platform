@@ -7,6 +7,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfWeek, format, differenceInDays } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXECUTIVE_DASHBOARD');
 
 export async function GET(
   request: NextRequest,
@@ -243,7 +245,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[Executive Dashboard API Error]:', error);
+    logger.error('[Executive Dashboard API Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch dashboard data' },
       { status: 500 }

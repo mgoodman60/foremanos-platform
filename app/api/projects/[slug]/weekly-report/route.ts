@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfWeek, endOfWeek } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_WEEKLY_REPORT');
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
@@ -31,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ reports });
   } catch (error) {
-    console.error('[API] Error fetching weekly reports:', error);
+    logger.error('Error fetching weekly reports', error);
     return NextResponse.json({ error: 'Failed to fetch weekly reports' }, { status: 500 });
   }
 }
@@ -146,7 +148,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(report);
   } catch (error) {
-    console.error('[API] Error generating weekly report:', error);
+    logger.error('Error generating weekly report', error);
     return NextResponse.json({ error: 'Failed to generate weekly report' }, { status: 500 });
   }
 }

@@ -12,6 +12,8 @@ import {
   linkTasksToBudget,
   calculateScheduleDrivenCosts
 } from '@/lib/schedule-budget-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_ANALYSIS');
 
 // GET /api/projects/[slug]/schedule-analysis
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
@@ -84,7 +86,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       scheduleDrivenCosts
     });
   } catch (error) {
-    console.error('[API] Schedule analysis error:', error);
+    logger.error('Schedule analysis error', error);
     return NextResponse.json({ error: 'Failed to fetch schedule analysis' }, { status: 500 });
   }
 }
@@ -159,7 +161,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[API] Schedule analysis action error:', error);
+    logger.error('Schedule analysis action error', error);
     return NextResponse.json({ error: 'Failed to perform schedule analysis' }, { status: 500 });
   }
 }

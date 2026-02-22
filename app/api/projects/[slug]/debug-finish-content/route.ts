@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DEBUG_FINISH_CONTENT');
 
 /**
  * GET /api/projects/[slug]/debug-finish-content
@@ -95,7 +97,7 @@ export async function GET(
       }
     }
 
-    console.log(`[Debug] Total chunks: ${allChunks.length}`);
+    logger.info('Total chunks: ${allChunks.length}');
 
     // Search for finish-related keywords
     // Enhanced with construction abbreviations
@@ -210,7 +212,7 @@ export async function GET(
       topFinishChunks: finishChunks.slice(0, 5),
     });
   } catch (error: any) {
-    console.error('[Debug] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       {
         error: 'Failed to debug finish content',

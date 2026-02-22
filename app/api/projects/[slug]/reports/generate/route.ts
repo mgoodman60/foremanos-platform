@@ -10,6 +10,8 @@ import {
   generateResourceReport,
   ReportType
 } from '@/lib/report-generator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_REPORTS_GENERATE');
 
 export async function POST(
   request: NextRequest,
@@ -58,7 +60,7 @@ export async function POST(
 
     return NextResponse.json(report);
   } catch (error) {
-    console.error('[Reports Generate] Error:', error);
+    logger.error('[Reports Generate] Error', error);
     return NextResponse.json(
       { error: 'Failed to generate report' },
       { status: 500 }

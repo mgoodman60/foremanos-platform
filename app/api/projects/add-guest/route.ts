@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ADD_GUEST');
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +88,7 @@ export async function POST(request: Request) {
       message: 'Guest access granted',
     });
   } catch (error) {
-    console.error('Error adding guest access:', error);
+    logger.error('Error adding guest access', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

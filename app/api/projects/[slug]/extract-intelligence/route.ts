@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { runIntelligenceExtraction } from '@/lib/intelligence-orchestrator';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_INTELLIGENCE');
 
 /**
  * POST /api/projects/[slug]/extract-intelligence
@@ -56,10 +58,10 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     const results = [];
     const requestedPhases = phases || ['A', 'B', 'C'];
 
-    console.log(`\n🚀 Manual intelligence extraction triggered by ${session.user?.email}`);
-    console.log(`   Project: ${project.name}`);
-    console.log(`   Documents: ${project.Document.length}`);
-    console.log(`   Phases: ${requestedPhases.join(', ')}\n`);
+    logger.info('\n🚀 Manual intelligence extraction triggered by ${session.user?.email}');
+    logger.info('Project: ${project.name}');
+    logger.info('Documents: ${project.Document.length}');
+    logger.info('Phases: ${requestedPhases.join(', { detail: ' })}\n`);
 
     for (const document of project.Document) {
       try {
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
           ...result,
         });
       } catch (error: any) {
-        console.error(`Failed to extract intelligence from ${document.name}:`, error);
+        logger.error('Failed to extract intelligence from ${document.name}', error);
         results.push({
           documentId: document.id,
           documentName: document.name,
@@ -99,7 +101,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       results,
     });
   } catch (error: any) {
-    console.error('Intelligence extraction API error:', error);
+    logger.error('Intelligence extraction API error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to trigger intelligence extraction') },
       { status: 500 }
@@ -198,7 +200,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       extractionStats: stats,
     });
   } catch (error: any) {
-    console.error('Get extraction stats error:', error);
+    logger.error('Get extraction stats error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to get extraction statistics') },
       { status: 500 }

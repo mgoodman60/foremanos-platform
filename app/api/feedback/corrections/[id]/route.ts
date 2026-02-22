@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('FEEDBACK_CORRECTIONS');
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +61,7 @@ export async function PATCH(
 
     return NextResponse.json({ correction });
   } catch (error) {
-    console.error('Error updating correction:', error);
+    logger.error('Error updating correction', error);
     return NextResponse.json(
       { error: 'Failed to update correction' },
       { status: 500 }
@@ -102,7 +104,7 @@ export async function DELETE(
       { success: true, message: 'Correction deleted successfully' }
     );
   } catch (error) {
-    console.error('Error deleting correction:', error);
+    logger.error('Error deleting correction', error);
     return NextResponse.json(
       { error: 'Failed to delete correction' },
       { status: 500 }

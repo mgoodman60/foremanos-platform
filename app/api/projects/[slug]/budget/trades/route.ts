@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getTradeBudgetBreakdown } from '@/lib/budget-extractor-ai';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_TRADES');
 
 /**
  * GET: Get trade-level budget breakdown
@@ -47,7 +49,7 @@ export async function GET(
       breakdown,
     });
   } catch (error: any) {
-    console.error('[BUDGET_TRADES_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch trade breakdown' },
       { status: 500 }

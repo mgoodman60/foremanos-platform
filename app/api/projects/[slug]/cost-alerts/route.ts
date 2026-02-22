@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_COST_ALERTS');
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ alerts });
   } catch (error) {
-    console.error('[API] Error fetching cost alerts:', error);
+    logger.error('Error fetching cost alerts', error);
     return NextResponse.json({ error: 'Failed to fetch cost alerts' }, { status: 500 });
   }
 }
@@ -81,7 +83,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(alert);
   } catch (error) {
-    console.error('[API] Error creating cost alert:', error);
+    logger.error('Error creating cost alert', error);
     return NextResponse.json({ error: 'Failed to create cost alert' }, { status: 500 });
   }
 }

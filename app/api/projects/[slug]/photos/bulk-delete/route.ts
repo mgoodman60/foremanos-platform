@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { deleteFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_BULK_DELETE');
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +95,7 @@ export async function POST(
       try {
         await deleteFile(s3Path);
       } catch (error) {
-        console.error(`Error deleting ${s3Path} from S3:`, error);
+        logger.error('Error deleting ${s3Path} from S3', error);
         // Continue with other deletions
       }
     }
@@ -103,7 +105,7 @@ export async function POST(
       deletedCount,
     });
   } catch (error) {
-    console.error('Error bulk deleting photos:', error);
+    logger.error('Error bulk deleting photos', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

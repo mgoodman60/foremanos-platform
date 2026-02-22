@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_ITEMS');
 
 export async function GET(
   request: NextRequest,
@@ -52,7 +54,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[BudgetItems API] Error:', error);
+    logger.error('[BudgetItems API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch budget items' },
       { status: 500 }

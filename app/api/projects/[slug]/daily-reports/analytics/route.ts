@@ -13,6 +13,8 @@ import {
   getTrendAnalytics,
   getEquipmentSummary,
 } from '@/lib/daily-report-enhancements';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DAILY_REPORTS_ANALYTICS');
 
 export async function GET(
   request: Request,
@@ -84,7 +86,7 @@ export async function GET(
       ...result,
     });
   } catch (error) {
-    console.error('[Analytics API] Error:', error);
+    logger.error('[Analytics API] Error', error);
     return NextResponse.json({ error: 'Failed to get analytics' }, { status: 500 });
   }
 }

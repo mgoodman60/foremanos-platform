@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('FILES_URL');
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ url });
   } catch (error) {
-    console.error('Error getting file URL:', error);
+    logger.error('Failed to get file URL', error);
     return NextResponse.json(
       { error: 'Failed to get file URL' },
       { status: 500 }

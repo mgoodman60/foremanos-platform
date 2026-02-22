@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractScheduleWithAI, deleteScheduleForDocument } from '@/lib/schedule-extractor-ai';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_PARSE_SCHEDULE');
 
 // POST /api/documents/[id]/parse-schedule - Parse schedule from document using AI
 export async function POST(
@@ -61,7 +63,7 @@ export async function POST(
       );
     }
 
-    console.log(`[PARSE_SCHEDULE] Starting AI-powered parse for document ${document.name}`);
+    logger.info('Starting AI-powered parse for document ${document.name}');
 
     // Delete any existing schedules for this document
     await deleteScheduleForDocument(id);
@@ -74,7 +76,7 @@ export async function POST(
       scheduleName
     );
 
-    console.log(`[PARSE_SCHEDULE] Parse complete: ${result.totalTasks} tasks found`);
+    logger.info('Parse complete: ${result.totalTasks} tasks found');
 
     // Get created schedule with tasks
     const schedule = await prisma.schedule.findUnique({
@@ -112,7 +114,7 @@ export async function POST(
       }
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[PARSE_SCHEDULE] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to parse schedule', details: safeErrorMessage(error) },
       { status: 500 }

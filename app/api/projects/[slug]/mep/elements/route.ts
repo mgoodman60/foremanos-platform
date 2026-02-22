@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractMEPElements, type MEPSystem } from '@/lib/mep-path-tracer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_ELEMENTS');
 
 export async function GET(
   request: NextRequest,
@@ -62,7 +64,7 @@ export async function GET(
       filter: system || 'all'
     });
   } catch (error) {
-    console.error('MEP elements extraction error:', error);
+    logger.error('MEP elements extraction error', error);
     return NextResponse.json(
       { error: 'Failed to extract MEP elements' },
       { status: 500 }

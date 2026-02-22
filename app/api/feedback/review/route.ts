@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('FEEDBACK_REVIEW');
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +88,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ feedback: filteredFeedback });
   } catch (error) {
-    console.error('Error fetching feedback for review:', error);
+    logger.error('Error fetching feedback for review', error);
     return NextResponse.json(
       { error: 'Failed to fetch feedback' },
       { status: 500 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_RFIS');
 
 export async function GET(
   request: NextRequest,
@@ -48,7 +50,7 @@ export async function GET(
 
     return NextResponse.json({ rfis });
   } catch (error) {
-    console.error('[RFI API] Error:', error);
+    logger.error('[RFI API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch RFIs' },
       { status: 500 }
@@ -121,7 +123,7 @@ export async function POST(
 
     return NextResponse.json({ rfi });
   } catch (error) {
-    console.error('[RFI API] Create error:', error);
+    logger.error('[RFI API] Create error', error);
     return NextResponse.json(
       { error: 'Failed to create RFI' },
       { status: 500 }

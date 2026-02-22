@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_BULK_VERIFY');
 
 // POST /api/takeoff/[id]/bulk-verify - Bulk verify multiple line items
 export async function POST(
@@ -77,7 +79,7 @@ export async function POST(
       count: result.count
     });
   } catch (error: any) {
-    console.error('Error bulk verifying line items:', error);
+    logger.error('Error bulk verifying line items', error);
     return NextResponse.json(
       { error: 'Failed to bulk verify items', details: error.message },
       { status: 500 }

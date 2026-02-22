@@ -10,6 +10,8 @@ import { prisma } from '@/lib/db';
 import { extractBIMData } from '@/lib/bim-metadata-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
 import { extractMEPEquipment } from '@/lib/bim-to-takeoff-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS_MEP');
 
 export async function GET(
   request: NextRequest,
@@ -43,7 +45,7 @@ export async function GET(
     }
 
     // Extract fresh BIM data
-    console.log(`[MEP API] Extracting MEP data for model ${model.id}`);
+    logger.info('[MEP API] Extracting MEP data for model ${model.id}');
     const bimData = await extractBIMData(model.urn);
     const mepEquipment = extractMEPEquipment(bimData);
 
@@ -129,7 +131,7 @@ export async function GET(
 
     return NextResponse.json(mepSummary);
   } catch (error) {
-    console.error('[MEP API] Error:', error);
+    logger.error('[MEP API] Error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to get MEP data') },
       { status: 500 }

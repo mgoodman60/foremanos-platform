@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_RENAME');
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +76,7 @@ export async function PATCH(
       document: updatedDocument 
     });
   } catch (error) {
-    console.error('Error renaming document:', error);
+    logger.error('Error renaming document', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

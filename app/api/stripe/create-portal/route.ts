@@ -6,6 +6,9 @@ import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { withCsrf } from '@/lib/csrf';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('STRIPE_PORTAL');
 
 export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
@@ -58,7 +61,7 @@ export const POST = withCsrf(async function POST(request: NextRequest) {
       url: portalSession.url,
     });
   } catch (error: any) {
-    console.error('Error creating portal session:', error);
+    logger.error('Failed to create portal session', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to create portal session') },
       { status: 500 }

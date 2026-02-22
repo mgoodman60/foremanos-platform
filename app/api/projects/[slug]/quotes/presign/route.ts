@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_QUOTES_PRESIGN');
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +58,7 @@ export async function POST(
       cloudStoragePath: cloud_storage_path,
     });
   } catch (error) {
-    console.error('[QUOTES PRESIGN] Error:', error);
+    logger.error('[QUOTES PRESIGN] Error', error);
     return NextResponse.json({ error: 'Failed to generate upload URL' }, { status: 500 });
   }
 }

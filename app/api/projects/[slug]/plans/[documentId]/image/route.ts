@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { downloadFile, getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PLANS_IMAGE');
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +82,7 @@ export async function GET(
         try {
           pdfUrl = await getFileUrl(document.cloud_storage_path, document.isPublic || false);
         } catch (e) {
-          console.error('[Document Viewer] Failed to get S3 URL:', e);
+          logger.error('[Document Viewer] Failed to get S3 URL', e);
         }
       }
       
@@ -105,25 +107,25 @@ export async function GET(
     // Option 1: Download from S3 if cloud_storage_path exists (preferred)
     if (document.cloud_storage_path) {
       try {
-        console.log(`[Document Viewer] Downloading from S3: ${document.cloud_storage_path}`);
+        logger.info('[Document Viewer] Downloading from S3: ${document.cloud_storage_path}');
         pdfBuffer = await downloadFile(document.cloud_storage_path);
-        console.log(`[Document Viewer] Downloaded from S3`);
+        logger.info('[Document Viewer] Downloaded from S3');
       } catch (s3Error: any) {
-        console.error(`[Document Viewer] S3 download failed:`, s3Error.message);
+        logger.error('S3 download failed', s3Error);
       }
     }
 
     // Option 2: Try to fetch from fileUrl if available
     if (!pdfBuffer && document.fileUrl) {
       try {
-        console.log(`[Document Viewer] Fetching from fileUrl: ${document.fileUrl}`);
+        logger.info('[Document Viewer] Fetching from fileUrl: ${document.fileUrl}');
         const response = await fetch(document.fileUrl);
         if (response.ok) {
           pdfBuffer = Buffer.from(await response.arrayBuffer());
-          console.log(`[Document Viewer] Downloaded from fileUrl`);
+          logger.info('[Document Viewer] Downloaded from fileUrl');
         }
       } catch (urlError: any) {
-        console.error(`[Document Viewer] fileUrl fetch failed:`, urlError.message);
+        logger.error('fileUrl fetch failed', urlError);
       }
     }
 
@@ -132,7 +134,7 @@ export async function GET(
     // This provides better quality anyway since the client can render at any resolution.
     // The rasterizeSinglePage function now returns PDF pages by default.
     if (pdfBuffer) {
-      console.log(`[Document Viewer] PDF rasterization not available (canvas removed). Using PDF URL fallback.`);
+      logger.info('[Document Viewer] PDF rasterization not available (canvas removed). Using PDF URL fallback.');
       // Fall through to PDF URL fallback below
     }
 
@@ -143,7 +145,7 @@ export async function GET(
       try {
         pdfUrl = await getFileUrl(document.cloud_storage_path, document.isPublic || false);
       } catch (e) {
-        console.error('[Document Viewer] Failed to get S3 URL for fallback:', e);
+        logger.error('[Document Viewer] Failed to get S3 URL for fallback', e);
       }
     }
     
@@ -167,7 +169,7 @@ export async function GET(
       { status: 500 }
     );
   } catch (error: any) {
-    console.error('[Document Viewer] Error:', error);
+    logger.error('[Document Viewer] Error', error);
     return NextResponse.json(
       { error: 'Failed to generate document image', details: error.message },
       { status: 500 }

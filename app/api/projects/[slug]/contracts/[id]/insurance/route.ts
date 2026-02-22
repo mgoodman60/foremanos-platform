@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl, getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CONTRACTS_INSURANCE');
 
 export async function GET(
   request: Request,
@@ -72,7 +74,7 @@ export async function GET(
 
     return NextResponse.json({ certificates: certsWithStatus, stats });
   } catch (error) {
-    console.error('[Insurance GET Error]:', error);
+    logger.error('[Insurance GET Error]', error);
     return NextResponse.json(
       { error: 'Failed to fetch certificates' },
       { status: 500 }
@@ -193,7 +195,7 @@ export async function POST(
 
     return NextResponse.json({ certificate }, { status: 201 });
   } catch (error) {
-    console.error('[Insurance POST Error]:', error);
+    logger.error('[Insurance POST Error]', error);
     return NextResponse.json(
       { error: 'Failed to create certificate' },
       { status: 500 }

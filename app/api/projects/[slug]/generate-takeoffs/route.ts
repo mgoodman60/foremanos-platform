@@ -8,6 +8,8 @@ import {
   aggregateTakeoffs,
   saveTakeoffsToDatabase,
 } from '@/lib/takeoff-calculator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_GENERATE_TAKEOFFS');
 
 interface RouteContext {
   params: {
@@ -72,7 +74,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     // Calculate takeoffs for all rooms
-    console.log(`[Takeoffs] Calculating takeoffs for project: ${project.slug}`);
+    logger.info('Calculating takeoffs for project: ${project.slug}');
     const calculations = await calculateProjectTakeoffs(project.id, ceilingHeight);
 
     if (calculations.length === 0) {
@@ -97,9 +99,7 @@ export async function POST(request: Request, context: RouteContext) {
       `Automatic Takeoff - ${new Date().toLocaleDateString()}`
     );
 
-    console.log(
-      `[Takeoffs] Created takeoff ${takeoffId} with ${calculations.length} line items`
-    );
+    logger.info('Created takeoff ${takeoffId} with ${calculations.length} line items');
 
     return NextResponse.json({
       success: true,
@@ -110,7 +110,7 @@ export async function POST(request: Request, context: RouteContext) {
       message: `Generated ${calculations.length} takeoff line items from ${new Set(calculations.map((c) => c.roomId)).size} rooms`,
     });
   } catch (error: unknown) {
-    console.error('[Takeoffs] Generation failed:', error);
+    logger.error('Generation failed', error);
     return NextResponse.json(
       { error: 'Failed to generate takeoffs', details: safeErrorMessage(error) },
       { status: 500 }
@@ -181,7 +181,7 @@ export async function GET(request: Request, context: RouteContext) {
       takeoffs,
     });
   } catch (error: unknown) {
-    console.error('[Takeoffs] Fetch failed:', error);
+    logger.error('Fetch failed', error);
     return NextResponse.json(
       { error: 'Failed to fetch takeoffs', details: safeErrorMessage(error) },
       { status: 500 }

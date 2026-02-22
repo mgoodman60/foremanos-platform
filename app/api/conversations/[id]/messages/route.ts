@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_MESSAGES');
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +80,7 @@ export async function GET(
       })),
     });
   } catch (error) {
-    console.error('Error fetching conversation messages:', error);
+    logger.error('Error fetching conversation messages', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { analyzeQuotePDF, linkOrCreateSubcontractor } from '@/lib/quote-analysis-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_QUOTES');
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +67,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[QUOTES API] GET Error:', error);
+    logger.error('[QUOTES API] GET Error', error);
     return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
   }
 }
@@ -161,7 +163,7 @@ export async function POST(
 
     return NextResponse.json({ quote }, { status: 201 });
   } catch (error) {
-    console.error('[QUOTES API] POST Error:', error);
+    logger.error('[QUOTES API] POST Error', error);
     return NextResponse.json({ error: 'Failed to create quote' }, { status: 500 });
   }
 }

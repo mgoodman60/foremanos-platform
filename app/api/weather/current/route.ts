@@ -12,6 +12,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { fetchCurrentWeather } from '@/lib/weather-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('WEATHER_CURRENT');
 
 // Mark this route as dynamic
 export const dynamic = 'force-dynamic';
@@ -105,7 +107,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[WEATHER_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch weather data' },
       { status: 500 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { compareQuotes } from '@/lib/quote-analysis-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_QUOTES_COMPARE');
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +41,7 @@ export async function POST(
 
     return NextResponse.json({ comparison });
   } catch (error) {
-    console.error('[QUOTES COMPARE] Error:', error);
+    logger.error('[QUOTES COMPARE] Error', error);
     return NextResponse.json({ error: 'Failed to compare quotes' }, { status: 500 });
   }
 }

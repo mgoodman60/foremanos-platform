@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { enhanceProjectData } from '@/lib/project-data-enhancer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ENHANCE');
 
 export async function POST(
   request: NextRequest,
@@ -21,7 +23,7 @@ export async function POST(
     }
 
     const { slug } = params;
-    console.log(`[Enhancement API] Starting enhancement for project: ${slug}`);
+    logger.info('[Enhancement API] Starting enhancement for project: ${slug}');
 
     const result = await enhanceProjectData(slug);
 
@@ -33,7 +35,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[Enhancement API] Error:', error);
+    logger.error('[Enhancement API] Error', error);
     return NextResponse.json(
       { error: `Enhancement failed: ${error}` },
       { status: 500 }

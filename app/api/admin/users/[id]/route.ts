@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
 import bcrypt from 'bcryptjs';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ADMIN_USERS');
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +68,7 @@ export async function PATCH(
       },
     });
   } catch (error) {
-    console.error('Error updating user:', error);
+    logger.error('Failed to update user', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -132,7 +135,7 @@ export async function DELETE(
       message: 'User deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
+    logger.error('Failed to delete user', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

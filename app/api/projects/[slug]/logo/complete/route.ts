@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { deleteFile, getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_LOGO_COMPLETE');
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +75,7 @@ export async function POST(
       try {
         await deleteFile(project.logoUrl);
       } catch (error) {
-        console.error('[LOGO_DELETE_ERROR]', error);
+        logger.error('', error);
         // Continue even if delete fails
       }
     }
@@ -139,7 +141,7 @@ export async function POST(
       logoUrl: logoPublicUrl,
     });
   } catch (error: any) {
-    console.error('[LOGO_COMPLETE_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to complete logo upload' },
       { status: 500 }

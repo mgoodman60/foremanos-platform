@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CHANGE_ORDERS');
 
 // GET - List all change orders
 export async function GET(
@@ -87,7 +89,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[ChangeOrders GET] Error:', error);
+    logger.error('[ChangeOrders GET] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch change orders' },
       { status: 500 }
@@ -154,7 +156,7 @@ export async function POST(
     return NextResponse.json(changeOrder, { status: 201 });
 
   } catch (error) {
-    console.error('[ChangeOrders POST] Error:', error);
+    logger.error('[ChangeOrders POST] Error', error);
     return NextResponse.json(
       { error: 'Failed to create change order' },
       { status: 500 }

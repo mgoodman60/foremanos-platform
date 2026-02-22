@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_LABOR');
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
@@ -67,7 +69,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ laborEntries, summary });
   } catch (error) {
-    console.error('[API] Error fetching labor entries:', error);
+    logger.error('Error fetching labor entries', error);
     return NextResponse.json({ error: 'Failed to fetch labor entries' }, { status: 500 });
   }
 }
@@ -125,7 +127,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(laborEntry);
   } catch (error) {
-    console.error('[API] Error creating labor entry:', error);
+    logger.error('Error creating labor entry', error);
     return NextResponse.json({ error: 'Failed to create labor entry' }, { status: 500 });
   }
 }

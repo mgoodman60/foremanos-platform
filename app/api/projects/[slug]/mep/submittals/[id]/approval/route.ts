@@ -8,6 +8,8 @@ import {
   ApprovalAction,
 } from '@/lib/submittal-approval-service';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_APPROVAL');
 
 // GET: Fetch approval history and available actions
 export async function GET(
@@ -43,7 +45,7 @@ export async function GET(
       availableActions,
     });
   } catch (error) {
-    console.error('Error fetching approval history:', error);
+    logger.error('Error fetching approval history', error);
     return NextResponse.json({ error: 'Failed to fetch approval data' }, { status: 500 });
   }
 }
@@ -89,7 +91,7 @@ export async function POST(
       availableActions,
     });
   } catch (error) {
-    console.error('Error performing approval action:', error);
+    logger.error('Error performing approval action', error);
     return NextResponse.json({ error: 'Failed to perform action' }, { status: 500 });
   }
 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF');
 
 // GET /api/takeoff/[id] - Get a specific material takeoff with line items
 export async function GET(
@@ -96,7 +98,7 @@ export async function GET(
 
     return NextResponse.json({ takeoff: normalizedTakeoff, project: takeoff.Project });
   } catch (error: any) {
-    console.error('Error fetching takeoff:', error);
+    logger.error('Error fetching takeoff', error);
     return NextResponse.json(
       { error: 'Failed to fetch takeoff', details: safeErrorMessage(error) },
       { status: 500 }
@@ -200,7 +202,7 @@ export async function PUT(
 
     return NextResponse.json({ takeoff: normalizedTakeoff });
   } catch (error: any) {
-    console.error('Error updating takeoff:', error);
+    logger.error('Error updating takeoff', error);
     return NextResponse.json(
       { error: 'Failed to update takeoff', details: safeErrorMessage(error) },
       { status: 500 }
@@ -268,7 +270,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Takeoff deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting takeoff:', error);
+    logger.error('Error deleting takeoff', error);
     return NextResponse.json(
       { error: 'Failed to delete takeoff', details: safeErrorMessage(error) },
       { status: 500 }

@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { findSheetsAtLocation, type CrossSheetQuery } from '@/lib/spatial-correlation';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SPATIAL_QUERY');
 
 export async function POST(
   request: NextRequest,
@@ -75,7 +77,7 @@ export async function POST(
       }
     });
   } catch (error) {
-    console.error('Spatial query error:', error);
+    logger.error('Spatial query error', error);
     return NextResponse.json(
       { error: 'Failed to execute spatial query' },
       { status: 500 }

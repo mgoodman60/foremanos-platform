@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractMEPSchedules } from '@/lib/mep-schedule-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_MEP_SCHEDULES');
 
 export async function POST(
   request: NextRequest,
@@ -45,7 +47,7 @@ export async function POST(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    console.log(`[API] Extracting MEP schedules for project: ${slug}`);
+    logger.info('Extracting MEP schedules for project: ${slug}');
 
     // Run the MEP schedule extraction
     const result = await extractMEPSchedules(slug);
@@ -78,7 +80,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error('[API] MEP schedule extraction error:', error);
+    logger.error('MEP schedule extraction error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to extract MEP schedules') },
       { status: 500 }
@@ -136,7 +138,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error('[API] Get MEP schedules error:', error);
+    logger.error('Get MEP schedules error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to get MEP schedules') },
       { status: 500 }

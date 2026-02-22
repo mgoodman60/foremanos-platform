@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { updateMilestoneStatus, getMilestoneTimeline } from '@/lib/schedule-budget-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MILESTONES');
 
 // GET /api/projects/[slug]/milestones - List milestones
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
@@ -38,7 +40,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ milestones, timeline, stats });
   } catch (error) {
-    console.error('[API] Milestones error:', error);
+    logger.error('Milestones error', error);
     return NextResponse.json({ error: 'Failed to fetch milestones' }, { status: 500 });
   }
 }
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(milestone);
   } catch (error) {
-    console.error('[API] Create milestone error:', error);
+    logger.error('Create milestone error', error);
     return NextResponse.json({ error: 'Failed to create milestone' }, { status: 500 });
   }
 }

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { getScheduleProgress } from '@/lib/schedule-parser';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('SCHEDULES');
 
 // GET /api/schedules/[id] - Get single schedule with tasks
 export async function GET(
@@ -72,7 +74,7 @@ export async function GET(
       progress
     });
   } catch (error: any) {
-    console.error('Error fetching schedule:', error);
+    logger.error('Error fetching schedule', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule', details: safeErrorMessage(error) },
       { status: 500 }
@@ -158,7 +160,7 @@ export async function PUT(
 
     return NextResponse.json({ schedule: updated });
   } catch (error: any) {
-    console.error('Error updating schedule:', error);
+    logger.error('Error updating schedule', error);
     return NextResponse.json(
       { error: 'Failed to update schedule', details: safeErrorMessage(error) },
       { status: 500 }
@@ -220,7 +222,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Schedule deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting schedule:', error);
+    logger.error('Error deleting schedule', error);
     return NextResponse.json(
       { error: 'Failed to delete schedule', details: safeErrorMessage(error) },
       { status: 500 }

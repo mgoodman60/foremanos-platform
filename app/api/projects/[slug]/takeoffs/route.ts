@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TAKEOFFS');
 
 // GET /api/projects/[slug]/takeoffs - List all material takeoffs for a project
 export async function GET(
@@ -116,7 +118,7 @@ export async function GET(
 
     return NextResponse.json({ takeoffs: takeoffsWithSummary });
   } catch (error: any) {
-    console.error('Error fetching takeoffs:', error);
+    logger.error('Error fetching takeoffs', error);
     return NextResponse.json(
       { error: 'Failed to fetch takeoffs', details: error.message },
       { status: 500 }
@@ -243,7 +245,7 @@ export async function POST(
 
     return NextResponse.json({ takeoff: normalizedTakeoff }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating takeoff:', error);
+    logger.error('Error creating takeoff', error);
     return NextResponse.json(
       { error: 'Failed to create takeoff', details: error.message },
       { status: 500 }

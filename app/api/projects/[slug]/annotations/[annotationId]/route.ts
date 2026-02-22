@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANNOTATIONS');
 
 /**
  * PATCH /api/projects/[slug]/annotations/[annotationId]
@@ -82,7 +84,7 @@ export async function PATCH(
       }
     });
   } catch (error: any) {
-    console.error('Error updating annotation:', error);
+    logger.error('Error updating annotation', error);
     return NextResponse.json(
       { error: 'Failed to update annotation' },
       { status: 500 }
@@ -113,7 +115,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting annotation:', error);
+    logger.error('Error deleting annotation', error);
     return NextResponse.json(
       { error: 'Failed to delete annotation' },
       { status: 500 }

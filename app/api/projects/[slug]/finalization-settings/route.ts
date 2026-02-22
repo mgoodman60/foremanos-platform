@@ -12,6 +12,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_FINALIZATION_SETTINGS');
 
 export async function GET(
   request: NextRequest,
@@ -51,7 +53,7 @@ export async function GET(
 
     return NextResponse.json(project);
   } catch (error) {
-    console.error('[FINALIZATION_SETTINGS_API] Error fetching settings:', error);
+    logger.error('Error fetching settings', error);
     return NextResponse.json(
       { error: 'Failed to fetch finalization settings' },
       { status: 500 }
@@ -141,7 +143,8 @@ export async function PATCH(
       },
     });
 
-    console.log(`[FINALIZATION_SETTINGS] Updated settings for project ${project.name}:`, {
+    logger.info('Updated settings for project', {
+      projectName: project.name,
       timezone: updatedProject.timezone,
       finalizationTime: updatedProject.finalizationTime,
       dailyReportsFolderId: updatedProject.dailyReportsFolderId,
@@ -152,7 +155,7 @@ export async function PATCH(
       project: updatedProject,
     });
   } catch (error) {
-    console.error('[FINALIZATION_SETTINGS_API] Error updating settings:', error);
+    logger.error('Error updating settings', error);
     return NextResponse.json(
       { error: 'Failed to update finalization settings' },
       { status: 500 }

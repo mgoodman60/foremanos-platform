@@ -25,6 +25,8 @@ import {
   createElevationGrid,
   estimateFromSiteParams,
 } from '@/lib/earthwork-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EARTHWORK');
 
 export async function POST(
   request: NextRequest,
@@ -160,7 +162,7 @@ export async function POST(
               : await extractElevationsFromDocument(content, docType);
             extractedSources.push(extracted);
           } catch (err) {
-            console.error(`[Earthwork] Failed to extract from ${doc.name}:`, err);
+            logger.error('Failed to extract from ${doc.name}', err);
           }
         }
 
@@ -220,7 +222,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('[Earthwork API] Error:', error);
+    logger.error('[Earthwork API] Error', error);
     return NextResponse.json(
       { error: 'Failed to calculate earthwork volumes' },
       { status: 500 }
@@ -286,7 +288,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[Earthwork API] Error:', error);
+    logger.error('[Earthwork API] Error', error);
     return NextResponse.json(
       { error: 'Failed to get earthwork data' },
       { status: 500 }

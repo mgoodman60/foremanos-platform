@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_REPORT');
 
 interface ReportRequest {
   submittalId?: string;
@@ -101,7 +103,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[Report Export Error]:', error);
+    logger.error('[Report Export Error]', error);
     return NextResponse.json({ error: 'Failed to generate report' }, { status: 500 });
   }
 }

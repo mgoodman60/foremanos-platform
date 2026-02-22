@@ -19,6 +19,8 @@ import {
   validateLocation,
   findAvailableLocations,
 } from '@/lib/location-detector';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_LOCATIONS');
 
 export async function GET(
   request: NextRequest,
@@ -64,7 +66,7 @@ export async function GET(
       locationAskedUser: conversation.locationAskedUser,
     });
   } catch (error) {
-    console.error('Error fetching conversation locations:', error);
+    logger.error('Error fetching conversation locations', error);
     return NextResponse.json(
       { error: 'Failed to fetch conversation locations' },
       { status: 500 }
@@ -197,7 +199,7 @@ export async function POST(
       );
     }
   } catch (error) {
-    console.error('Error updating conversation locations:', error);
+    logger.error('Error updating conversation locations', error);
     return NextResponse.json(
       { error: 'Failed to update conversation locations' },
       { status: 500 }

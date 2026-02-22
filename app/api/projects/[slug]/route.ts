@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { withDatabaseRetry } from '@/lib/retry-util';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS');
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +75,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[API] Error fetching project:', error);
+    logger.error('Error fetching project', error);
     
     // Return more specific error messages
     if (error?.code?.startsWith('P1')) {

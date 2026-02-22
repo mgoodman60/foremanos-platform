@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ONEDRIVE_FOLDER');
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +72,7 @@ export async function POST(
       message: 'OneDrive folder configured successfully',
     });
   } catch (error) {
-    console.error('Error setting OneDrive folder:', error);
+    logger.error('Error setting OneDrive folder', error);
     return NextResponse.json(
       { error: 'Failed to configure OneDrive folder' },
       { status: 500 }
@@ -147,7 +149,7 @@ export async function PATCH(
       message: `OneDrive sync ${syncEnabled ? 'enabled' : 'disabled'} successfully`,
     });
   } catch (error) {
-    console.error('Error toggling OneDrive sync:', error);
+    logger.error('Error toggling OneDrive sync', error);
     return NextResponse.json(
       { error: 'Failed to toggle OneDrive sync' },
       { status: 500 }

@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_INTELLIGENCE');
 
 export const dynamic = 'force-dynamic';
 
@@ -251,7 +253,7 @@ export async function GET(
       visionPipeline,
     });
   } catch (error) {
-    console.error('Error fetching document intelligence:', error);
+    logger.error('Error fetching document intelligence', error);
     return NextResponse.json(
       { error: 'Failed to fetch document intelligence' },
       { status: 500 }

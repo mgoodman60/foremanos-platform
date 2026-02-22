@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateTakeoffCSV, type TakeoffResult, type ExportOptions } from '@/lib/rag-enhancements';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_EXPORT');
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error generating takeoff export:', error);
+    logger.error('Error generating takeoff export', error);
     return NextResponse.json(
       { error: 'Failed to generate export' },
       { status: 500 }

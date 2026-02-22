@@ -9,6 +9,8 @@ import {
   ALL_STANDARD_SYMBOLS,
   Trade
 } from '@/lib/symbol-libraries';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SYMBOLS');
 
 /**
  * GET /api/projects/[slug]/symbols
@@ -85,7 +87,7 @@ export async function GET(req: NextRequest, { params: _params }: { params: { slu
     }
 
   } catch (error) {
-    console.error('Failed to get symbols:', error);
+    logger.error('Failed to get symbols', error);
     return NextResponse.json(
       { error: 'Failed to get symbols' },
       { status: 500 }

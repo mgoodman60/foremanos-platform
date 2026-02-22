@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { detectIsometricViews, reconstructFrom2D, generateIsometricView } from '@/lib/isometric-interpreter';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ISOMETRIC');
 
 // Sheet categories suitable for isometric views (MEP-related)
 const ISOMETRIC_SHEET_PREFIXES = ['M', 'P', 'E', 'FP', 'H', 'HVAC', 'MECH', 'PLMB', 'ELEC', 'FIRE'];
@@ -131,7 +133,7 @@ export async function GET(
       );
     }
   } catch (error) {
-    console.error('Isometric analysis error:', error);
+    logger.error('Isometric analysis error', error);
     return NextResponse.json(
       { error: 'Failed to analyze isometric view' },
       { status: 500 }
@@ -253,7 +255,7 @@ async function getIsometricCompatibleSheets(projectId: string): Promise<Array<{
       return (a.sheetNumber || '').localeCompare(b.sheetNumber || '');
     });
   } catch (error) {
-    console.error('Error fetching isometric-compatible sheets:', error);
+    logger.error('Error fetching isometric-compatible sheets', error);
     return [];
   }
 }

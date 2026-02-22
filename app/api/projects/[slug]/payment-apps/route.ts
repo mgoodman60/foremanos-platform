@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePaymentApplication, getPaymentApplicationSummary } from '@/lib/cash-flow-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PAYMENT_APPS');
 
 // GET /api/projects/[slug]/payment-apps
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
@@ -33,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ paymentApplications: payApps, summary });
   } catch (error) {
-    console.error('[API] Payment apps error:', error);
+    logger.error('Payment apps error', error);
     return NextResponse.json({ error: 'Failed to fetch payment applications' }, { status: 500 });
   }
 }
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json(payApp);
   } catch (error) {
-    console.error('[API] Generate pay app error:', error);
+    logger.error('Generate pay app error', error);
     return NextResponse.json({ error: 'Failed to generate payment application' }, { status: 500 });
   }
 }

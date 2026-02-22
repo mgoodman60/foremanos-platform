@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { correlateTwoSheets, extractGridSystem } from '@/lib/spatial-correlation';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SPATIAL_CORRELATE');
 
 export async function POST(
   request: NextRequest,
@@ -99,7 +101,7 @@ export async function POST(
       }
     });
   } catch (error) {
-    console.error('Sheet correlation error:', error);
+    logger.error('Sheet correlation error', error);
     return NextResponse.json(
       { error: 'Failed to correlate sheets' },
       { status: 500 }

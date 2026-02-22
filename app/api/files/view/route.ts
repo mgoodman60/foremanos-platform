@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('FILES_VIEW');
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +30,7 @@ export async function GET(request: NextRequest) {
     // Redirect to the S3 URL
     return NextResponse.redirect(fileUrl);
   } catch (error) {
-    console.error('Error generating file URL:', error);
+    logger.error('Failed to generate file URL', error);
     return NextResponse.json(
       { error: 'Failed to generate file URL' },
       { status: 500 }

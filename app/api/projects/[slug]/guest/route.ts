@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
 import bcrypt from 'bcryptjs';
 import { namespacePIN, stripPINPrefix } from '@/lib/guest-pin-utils';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_GUEST');
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +69,7 @@ export async function GET(
       })),
     });
   } catch (error) {
-    console.error('Error fetching guest credentials:', error);
+    logger.error('Error fetching guest credentials', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -172,7 +174,7 @@ export async function PATCH(
       generatedPassword: generatePassword ? newPassword : undefined,
     });
   } catch (error) {
-    console.error('Error updating guest credentials:', error);
+    logger.error('Error updating guest credentials', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -229,7 +231,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error revoking guest access:', error);
+    logger.error('Error revoking guest access', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

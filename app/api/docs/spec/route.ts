@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('DOCS_SPEC');
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +28,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error serving OpenAPI spec:', error);
+    logger.error('Failed to serve OpenAPI spec', error);
     return NextResponse.json(
       {
         error: 'Failed to load API documentation',

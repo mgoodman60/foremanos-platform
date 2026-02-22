@@ -6,6 +6,9 @@ import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
 import { checkRateLimit, getClientIp, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { withCsrf } from '@/lib/csrf';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('STRIPE_CHECKOUT');
 
 export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
@@ -69,7 +72,7 @@ export const POST = withCsrf(async function POST(request: NextRequest) {
       url: checkoutSession.url,
     });
   } catch (error: any) {
-    console.error('Error creating checkout session:', error);
+    logger.error('Failed to create checkout session', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to create checkout session') },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractBudgetWithAI, importBudgetToProject } from '@/lib/budget-extractor-ai';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_EXTRACT');
 
 /**
  * POST: Extract budget from a document using AI
@@ -64,7 +66,7 @@ export async function POST(
     }
 
     // Extract budget
-    console.log(`[BUDGET_API] Extracting budget from document: ${document.name}`);
+    logger.info('Extracting budget from document: ${document.name}');
     const extraction = await extractBudgetWithAI(
       documentId,
       project.id,
@@ -85,7 +87,7 @@ export async function POST(
     let takeoffSyncResult = null;
     if (importResult) {
       try {
-        console.log(`[BUDGET_API] Auto-syncing takeoff pricing from budget...`);
+        logger.info('Auto-syncing takeoff pricing from budget...');
         const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
         const syncResponse = await fetch(
           `${baseUrl}/api/projects/${slug}/takeoffs/sync-from-budget`,
@@ -96,10 +98,10 @@ export async function POST(
         );
         if (syncResponse.ok) {
           takeoffSyncResult = await syncResponse.json();
-          console.log(`[BUDGET_API] Takeoff sync completed: ${takeoffSyncResult.summary?.pricedItems || 0} items updated`);
+          logger.info('Takeoff sync completed: ${takeoffSyncResult.summary?.pricedItems || 0} items updated');
         }
       } catch (syncError) {
-        console.error('[BUDGET_API] Takeoff sync error:', syncError);
+        logger.error('Takeoff sync error', syncError);
       }
     }
 
@@ -121,7 +123,7 @@ export async function POST(
       } : null,
     });
   } catch (error: any) {
-    console.error('[BUDGET_API] Extraction error:', error);
+    logger.error('Extraction error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to extract budget') },
       { status: 500 }

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getCacheStats, getTopCachedQueries, clearCache } from '@/lib/query-cache';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('CACHE_STATS');
 
 /**
  * GET /api/cache/stats
@@ -30,7 +33,7 @@ export async function GET() {
       message: 'Cache statistics retrieved successfully',
     });
   } catch (error) {
-    console.error('Error fetching cache stats:', error);
+    logger.error('Failed to fetch cache stats', error);
     return NextResponse.json(
       { error: 'Failed to fetch cache statistics' },
       { status: 500 }
@@ -62,7 +65,7 @@ export async function DELETE() {
       message: 'Cache cleared successfully',
     });
   } catch (error) {
-    console.error('Error clearing cache:', error);
+    logger.error('Failed to clear cache', error);
     return NextResponse.json(
       { error: 'Failed to clear cache' },
       { status: 500 }

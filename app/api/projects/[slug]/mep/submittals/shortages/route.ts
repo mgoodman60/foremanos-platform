@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_SHORTAGES');
 
 /**
  * GET: Fetch all shortages across project submittals
@@ -92,7 +94,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('[Shortages GET] Error:', error);
+    logger.error('[Shortages GET] Error', error);
     return NextResponse.json({ error: 'Failed to fetch shortages' }, { status: 500 });
   }
 }

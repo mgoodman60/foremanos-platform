@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generateCashFlowForecast, getCashFlowSummary, calculateCostForecast } from '@/lib/cash-flow-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CASH_FLOW');
 
 // GET /api/projects/[slug]/cash-flow
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       periodType
     });
   } catch (error) {
-    console.error('[API] Cash flow error:', error);
+    logger.error('Cash flow error', error);
     return NextResponse.json({ error: 'Failed to fetch cash flow data' }, { status: 500 });
   }
 }
@@ -64,7 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json({ forecasts });
   } catch (error) {
-    console.error('[API] Generate cash flow error:', error);
+    logger.error('Generate cash flow error', error);
     return NextResponse.json({ error: 'Failed to generate cash flow forecast' }, { status: 500 });
   }
 }

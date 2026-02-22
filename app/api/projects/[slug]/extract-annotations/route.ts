@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
 import { extractAnnotationsWithVision } from '@/lib/annotation-processor';
 import { rasterizeSinglePage } from '@/lib/pdf-to-image-raster';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXTRACT_ANNOTATIONS');
 
 export async function POST(
   request: NextRequest,
@@ -36,7 +38,7 @@ export async function POST(
       }
     });
 
-    console.log(`[ANNOTATION EXTRACTION] Starting extraction for ${documents.length} documents...`);
+    logger.info('[ANNOTATION EXTRACTION] Starting extraction for ${documents.length} documents...');
 
     let totalAnnotations = 0;
     let processedSheets = 0;
@@ -55,7 +57,7 @@ export async function POST(
           });
 
           if (existing) {
-            console.log(`[ANNOTATION EXTRACTION] Skipping ${document.name} - already processed`);
+            logger.info('[ANNOTATION EXTRACTION] Skipping ${document.name} - already processed');
             const anns = existing.annotations as any;
             if (Array.isArray(anns)) {
               totalAnnotations += anns.length;
@@ -66,11 +68,11 @@ export async function POST(
           }
         }
 
-        console.log(`[ANNOTATION EXTRACTION] Processing ${document.name}...`);
+        logger.info('[ANNOTATION EXTRACTION] Processing ${document.name}...');
 
         // Skip if no cloud storage path
         if (!document.cloud_storage_path) {
-          console.log(`[ANNOTATION EXTRACTION] Skipping ${document.name} - no cloud storage path`);
+          logger.info('[ANNOTATION EXTRACTION] Skipping ${document.name} - no cloud storage path');
           continue;
         }
 
@@ -99,13 +101,13 @@ export async function POST(
         const pageBase64 = rasterResult.base64;
 
         // Extract annotations using vision (supports both PDF and image input)
-        console.log(`[ANNOTATION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...`);
+        logger.info('[ANNOTATION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...');
         const annotations = await extractAnnotationsWithVision(
           pageBase64,
           sheetNumber
         );
 
-        console.log(`[ANNOTATION EXTRACTION] Extracted ${annotations.length} annotations from ${sheetNumber}`);
+        logger.info('[ANNOTATION EXTRACTION] Extracted ${annotations.length} annotations from ${sheetNumber}');
 
         // Transform to match component expectations
         const formattedAnnotations = annotations.map((ann, idx) => ({
@@ -160,12 +162,12 @@ export async function POST(
         processedSheets++;
 
       } catch (error: any) {
-        console.error(`[ANNOTATION EXTRACTION] Error processing ${document.name}:`, error);
+        logger.error('[ANNOTATION EXTRACTION] Error processing ${document.name}', error);
         errors.push(`${document.name}: ${error.message}`);
       }
     }
 
-    console.log(`[ANNOTATION EXTRACTION] Complete. Extracted ${totalAnnotations} annotations (${criticalCount} critical) from ${processedSheets} sheets.`);
+    logger.info('[ANNOTATION EXTRACTION] Complete. Extracted ${totalAnnotations} annotations (${criticalCount} critical) from ${processedSheets} sheets.');
 
     return NextResponse.json({
       success: true,
@@ -176,7 +178,7 @@ export async function POST(
       errors: errors.length > 0 ? errors : undefined
     });
   } catch (error: any) {
-    console.error('Error extracting annotations:', error);
+    logger.error('Error extracting annotations', error);
     return NextResponse.json({ 
       error: 'Failed to extract annotations',
       details: error.message 

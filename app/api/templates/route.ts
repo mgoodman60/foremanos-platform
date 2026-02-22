@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TEMPLATES');
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +78,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ templates });
   } catch (error) {
-    console.error('[TEMPLATES_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch templates' },
       { status: 500 }
@@ -215,7 +217,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('[TEMPLATES_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to upload template' },
       { status: 500 }

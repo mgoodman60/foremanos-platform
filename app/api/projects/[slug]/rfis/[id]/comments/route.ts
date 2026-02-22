@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_RFIS_COMMENTS');
 
 export async function GET(
   request: NextRequest,
@@ -23,7 +25,7 @@ export async function GET(
 
     return NextResponse.json({ comments });
   } catch (error) {
-    console.error('[RFI Comments] Get error:', error);
+    logger.error('[RFI Comments] Get error', error);
     return NextResponse.json(
       { error: 'Failed to fetch comments' },
       { status: 500 }
@@ -74,7 +76,7 @@ export async function POST(
 
     return NextResponse.json({ comment });
   } catch (error) {
-    console.error('[RFI Comments] Create error:', error);
+    logger.error('[RFI Comments] Create error', error);
     return NextResponse.json(
       { error: 'Failed to create comment' },
       { status: 500 }

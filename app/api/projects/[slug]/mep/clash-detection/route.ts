@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { detectAllClashes, type MEPSystem } from '@/lib/mep-path-tracer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_CLASH_DETECTION');
 
 export async function POST(
   request: NextRequest,
@@ -69,7 +71,7 @@ export async function POST(
       recommendations: generateRecommendations(critical, major)
     });
   } catch (error) {
-    console.error('Clash detection error:', error);
+    logger.error('Clash detection error', error);
     return NextResponse.json(
       { error: 'Failed to detect clashes' },
       { status: 500 }

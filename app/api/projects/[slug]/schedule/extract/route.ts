@@ -7,6 +7,8 @@ import {
   matchTasksToSubcontractors,
   importExtractedTasks 
 } from '@/lib/schedule-document-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_EXTRACT');
 
 export const dynamic = 'force-dynamic';
 
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       importResult
     });
   } catch (error) {
-    console.error('[SCHEDULE_EXTRACT] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to extract schedule' },
       { status: 500 }
@@ -143,7 +145,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       count: documents.length
     });
   } catch (error) {
-    console.error('[SCHEDULE_EXTRACT] List error:', error);
+    logger.error('List error', error);
     return NextResponse.json(
       { error: 'Failed to list extractable documents' },
       { status: 500 }

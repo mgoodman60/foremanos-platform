@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       try {
         await incrementQueryCount(auth.userId);
       } catch (error) {
-        console.error('Error incrementing query count:', error);
+        logger.error('CHAT_API', 'Failed to increment query count', error as Error);
       }
     }
   }

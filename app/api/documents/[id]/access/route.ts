@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_ACCESS');
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +88,7 @@ export async function PATCH(
       message: 'Document visibility updated successfully',
     });
   } catch (error) {
-    console.error('Error updating document access:', error);
+    logger.error('Error updating document access', error);
     return NextResponse.json(
       { error: 'Failed to update document visibility' },
       { status: 500 }

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth-options';
 import { saveWorkflowResponse, updateReportingPattern } from '../../../../lib/workflow-service';
 import { prisma } from '../../../../lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('WORKFLOWS_RESPONSES');
 
 /**
  * POST /api/workflows/responses
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, responses: savedResponses });
   } catch (error) {
-    console.error('Error saving workflow responses:', error);
+    logger.error('Error saving workflow responses', error);
     return NextResponse.json(
       { error: 'Failed to save workflow responses' },
       { status: 500 }
@@ -102,7 +104,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ responses });
   } catch (error) {
-    console.error('Error fetching workflow responses:', error);
+    logger.error('Error fetching workflow responses', error);
     return NextResponse.json(
       { error: 'Failed to fetch workflow responses' },
       { status: 500 }

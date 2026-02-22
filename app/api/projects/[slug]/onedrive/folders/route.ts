@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { OneDriveService } from '@/lib/onedrive-service';
 import { decrypt } from '@/lib/encryption';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ONEDRIVE_FOLDERS');
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +67,7 @@ export async function GET(
 
     return NextResponse.json({ folders });
   } catch (error) {
-    console.error('Error listing OneDrive folders:', error);
+    logger.error('Error listing OneDrive folders', error);
     return NextResponse.json(
       { error: 'Failed to list OneDrive folders' },
       { status: 500 }

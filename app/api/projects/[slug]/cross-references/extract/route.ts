@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractCalloutsFromText } from '@/lib/detail-callout-extractor';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CROSS_REFERENCES_EXTRACT');
 
 /**
  * POST /api/projects/[slug]/cross-references/extract
@@ -131,7 +133,7 @@ export async function POST(
           });
         }
       } catch (error: any) {
-        console.error(`[Cross-Ref Extract] Error processing ${doc.name}:`, error);
+        logger.error('[Cross-Ref Extract] Error processing ${doc.name}', error);
         results.push({
           documentId: doc.id,
           documentName: doc.name,
@@ -154,7 +156,7 @@ export async function POST(
       results,
     });
   } catch (error: any) {
-    console.error('[Cross-Reference Extract Error]', error);
+    logger.error('[Cross-Reference Extract Error]', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to extract cross-references') },
       { status: 500 }

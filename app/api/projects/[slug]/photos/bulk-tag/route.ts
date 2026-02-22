@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_BULK_TAG');
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +79,7 @@ export async function POST(
       updatedCount,
     });
   } catch (error) {
-    console.error('Error bulk tagging photos:', error);
+    logger.error('Error bulk tagging photos', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

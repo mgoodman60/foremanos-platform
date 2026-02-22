@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('AUTODESK_MODELS_MEASUREMENTS');
 
 // GET - Retrieve measurements for a model
 export async function GET(
@@ -28,7 +30,7 @@ export async function GET(
     const data = model.measurements as any;
     return NextResponse.json({ measurements: data?.measurements || [] });
   } catch (error) {
-    console.error('[API] Get measurements error:', error);
+    logger.error('Get measurements error', error);
     return NextResponse.json({ error: 'Failed to get measurements' }, { status: 500 });
   }
 }
@@ -72,7 +74,7 @@ export async function POST(
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 });
     }
-    console.error('[API] Save measurements error:', error);
+    logger.error('Save measurements error', error);
     return NextResponse.json({ error: 'Failed to save measurements' }, { status: 500 });
   }
 }

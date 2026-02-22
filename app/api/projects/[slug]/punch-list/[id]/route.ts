@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PUNCH_LIST');
 
 export async function GET(
   request: NextRequest,
@@ -26,7 +28,7 @@ export async function GET(
 
     return NextResponse.json({ item });
   } catch (error) {
-    console.error('[Punch List API] Get error:', error);
+    logger.error('[Punch List API] Get error', error);
     return NextResponse.json(
       { error: 'Failed to fetch item' },
       { status: 500 }
@@ -104,7 +106,7 @@ export async function PATCH(
 
     return NextResponse.json({ item });
   } catch (error) {
-    console.error('[Punch List API] Update error:', error);
+    logger.error('[Punch List API] Update error', error);
     return NextResponse.json(
       { error: 'Failed to update item' },
       { status: 500 }
@@ -128,7 +130,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Punch List API] Delete error:', error);
+    logger.error('[Punch List API] Delete error', error);
     return NextResponse.json(
       { error: 'Failed to delete item' },
       { status: 500 }

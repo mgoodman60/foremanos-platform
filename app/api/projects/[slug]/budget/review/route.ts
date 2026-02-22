@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_REVIEW');
 
 export async function GET(
   request: NextRequest,
@@ -143,7 +145,7 @@ export async function GET(
       budgetItems,
     });
   } catch (error) {
-    console.error('[BudgetReview] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch review data' },
       { status: 500 }

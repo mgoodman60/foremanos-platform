@@ -13,6 +13,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_METADATA');
 
 export async function GET(
   request: NextRequest,
@@ -62,7 +64,7 @@ export async function GET(
       try {
         logoPublicUrl = await getFileUrl(project.logoUrl, true);
       } catch (error) {
-        console.error('[METADATA_API] Error getting logo URL:', error);
+        logger.error('Error getting logo URL', error);
       }
     }
 
@@ -71,7 +73,7 @@ export async function GET(
       logoPublicUrl,
     });
   } catch (error) {
-    console.error('[METADATA_API] Error fetching metadata:', error);
+    logger.error('Error fetching metadata', error);
     return NextResponse.json(
       { error: 'Failed to fetch metadata' },
       { status: 500 }
@@ -158,7 +160,7 @@ export async function PATCH(
       project: updatedProject,
     });
   } catch (error) {
-    console.error('[METADATA_API] Error updating metadata:', error);
+    logger.error('Error updating metadata', error);
     return NextResponse.json(
       { error: 'Failed to update metadata' },
       { status: 500 }

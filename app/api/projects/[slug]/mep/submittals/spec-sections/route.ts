@@ -5,6 +5,8 @@ import {
   getProjectSpecSections,
   getSubmittalsForSpecSection,
 } from '@/lib/spec-section-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_SUBMITTALS_SPEC_SECTIONS');
 
 export async function GET(
   req: NextRequest,
@@ -29,7 +31,7 @@ export async function GET(
     const sections = await getProjectSpecSections(params.slug);
     return NextResponse.json({ sections });
   } catch (error) {
-    console.error('Error fetching spec sections:', error);
+    logger.error('Error fetching spec sections', error);
     return NextResponse.json({ error: 'Failed to fetch spec sections' }, { status: 500 });
   }
 }

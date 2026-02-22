@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET');
 
 export async function GET(
   request: NextRequest,
@@ -43,7 +45,7 @@ export async function GET(
 
     return NextResponse.json({ budget: project.ProjectBudget });
   } catch (error) {
-    console.error('Error fetching budget:', error);
+    logger.error('Error fetching budget', error);
     return NextResponse.json(
       { error: 'Failed to fetch budget' },
       { status: 500 }
@@ -116,7 +118,7 @@ export async function POST(
 
     return NextResponse.json({ budget }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating budget:', error);
+    logger.error('Error creating budget', error);
     return NextResponse.json(
       { error: 'Failed to create budget' },
       { status: 500 }
@@ -190,7 +192,7 @@ export async function PUT(
 
     return NextResponse.json({ budget });
   } catch (error: any) {
-    console.error('Error updating budget:', error);
+    logger.error('Error updating budget', error);
     return NextResponse.json(
       { error: 'Failed to update budget' },
       { status: 500 }

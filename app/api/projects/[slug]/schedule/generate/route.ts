@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generateMasterSchedule, canGenerateSchedule } from '@/lib/master-schedule-generator';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_GENERATE');
 
 export const dynamic = 'force-dynamic';
 
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       }
     });
   } catch (error) {
-    console.error('[SCHEDULE_GENERATE] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to generate schedule' },
       { status: 500 }
@@ -149,7 +151,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       ]
     });
   } catch (error) {
-    console.error('[SCHEDULE_GENERATE] Check error:', error);
+    logger.error('Check error', error);
     return NextResponse.json(
       { error: 'Failed to check schedule generation capability' },
       { status: 500 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_METRICS');
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     
     // If no valid source and we have orphaned data, deactivate schedules
     if (!hasValidSource && allTasks.length > 0) {
-      console.log(`[Schedule Metrics] No valid data source for project ${slug}, deactivating orphaned schedules`);
+      logger.info('[Schedule Metrics] No valid data source for project ${slug}, deactivating orphaned schedules');
       await prisma.schedule.updateMany({
         where: { projectId: project.id },
         data: { isActive: false }
@@ -385,7 +387,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     });
 
   } catch (error) {
-    console.error('Error fetching schedule metrics:', error);
+    logger.error('Error fetching schedule metrics', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule metrics' },
       { status: 500 }

@@ -7,6 +7,8 @@ import {
   generateScheduleUpdateDraft,
   ScheduledActivity,
 } from '@/lib/schedule-parser';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_SCHEDULE_COMPARE');
 
 export const dynamic = 'force-dynamic';
 
@@ -93,9 +95,7 @@ export async function POST(
       });
     }
 
-    console.log(
-      `[SCHEDULE_COMPARE] Conversation ${conversation.id}: ${comparison.differences.length} differences found`
-    );
+    logger.info('Conversation ${conversation.id}: ${comparison.differences.length} differences found');
 
     return NextResponse.json({
       hasDifferences: comparison.hasDifferences,
@@ -106,7 +106,7 @@ export async function POST(
         : 'All scheduled activities match reported work',
     });
   } catch (error: any) {
-    console.error('[SCHEDULE_COMPARE_ERROR]', error);
+    logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to compare schedule' },
       { status: 500 }

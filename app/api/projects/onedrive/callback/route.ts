@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { OneDriveService } from '@/lib/onedrive-service';
 import { prisma } from '@/lib/db';
 import { encrypt } from '@/lib/encryption';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ONEDRIVE_CALLBACK');
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +16,7 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get('error');
 
     if (error) {
-      console.error('OAuth error:', error);
+      logger.error('OAuth error', error);
       return NextResponse.redirect(
         new URL(`/project/${state}?onedrive_error=${encodeURIComponent(error)}`, request.url)
       );
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
       new URL(`/project/${state}?onedrive_connected=true`, request.url)
     );
   } catch (error) {
-    console.error('Error in OneDrive OAuth callback:', error);
+    logger.error('Error in OneDrive OAuth callback', error);
     return NextResponse.json(
       { error: 'Failed to complete OneDrive authentication' },
       { status: 500 }

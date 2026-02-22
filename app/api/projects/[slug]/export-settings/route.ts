@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_EXPORT_SETTINGS');
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 
     return NextResponse.json({ settings: project.exportSettings || null });
   } catch (error) {
-    console.error('Error fetching export settings:', error);
+    logger.error('Error fetching export settings', error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
 }
@@ -71,7 +73,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error saving export settings:', error);
+    logger.error('Error saving export settings', error);
     return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
   }
 }

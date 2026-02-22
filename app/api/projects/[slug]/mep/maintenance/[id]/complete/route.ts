@@ -7,6 +7,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEP_MAINTENANCE_COMPLETE');
 
 export async function POST(
   request: Request,
@@ -85,7 +87,7 @@ export async function POST(
       message: 'Maintenance completed successfully'
     }, { status: 201 });
   } catch (error) {
-    console.error('[MEP Maintenance Complete Error]:', error);
+    logger.error('[MEP Maintenance Complete Error]', error);
     return NextResponse.json(
       { error: 'Failed to complete maintenance task' },
       { status: 500 }

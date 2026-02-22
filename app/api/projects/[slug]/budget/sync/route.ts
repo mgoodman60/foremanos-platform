@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_SYNC');
 
 export async function POST(
   request: NextRequest,
@@ -121,7 +123,7 @@ export async function POST(
       message: changeMessage,
     });
   } catch (error: any) {
-    console.error('Error syncing budget:', error);
+    logger.error('Error syncing budget', error);
     return NextResponse.json(
       { error: 'Failed to sync budget' },
       { status: 500 }
@@ -172,7 +174,7 @@ export async function PUT(
       budget: updatedBudget,
     });
   } catch (error: any) {
-    console.error('Error updating budget:', error);
+    logger.error('Error updating budget', error);
     return NextResponse.json(
       { error: 'Failed to update budget' },
       { status: 500 }

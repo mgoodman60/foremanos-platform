@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_TAKEOFFS_REGENERATE');
 
 /**
  * POST /api/projects/[slug]/takeoffs/regenerate
@@ -171,7 +173,7 @@ export async function POST(
         budgetSyncResult = await syncResponse.json();
       }
     } catch (e) {
-      console.log('Budget sync skipped:', e);
+      logger.info('Budget sync skipped', { e });
     }
 
     return NextResponse.json({
@@ -194,7 +196,7 @@ export async function POST(
       } : null,
     });
   } catch (error: any) {
-    console.error('[Takeoff Regenerate Error]', error);
+    logger.error('[Takeoff Regenerate Error]', error);
     return NextResponse.json(
       { error: error.message || 'Failed to regenerate takeoff' },
       { status: 500 }

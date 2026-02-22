@@ -19,6 +19,8 @@ import {
   convertDrawingToRealWorld,
   getSheetScaleData,
 } from '@/lib/scale-detector';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCALES');
 
 export async function GET(req: Request, { params }: { params: { slug: string } }) {
   try {
@@ -127,7 +129,7 @@ export async function GET(req: Request, { params }: { params: { slug: string } }
     }
 
   } catch (error) {
-    console.error('Scales API error:', error);
+    logger.error('Scales API error', error);
     return NextResponse.json(
       { error: 'Failed to process request' },
       { status: 500 }

@@ -10,6 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { processDoorScheduleForProject } from '@/lib/door-schedule-extractor';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_DOOR_SCHEDULE');
 
 export async function GET(
   request: NextRequest,
@@ -71,7 +73,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[Door Schedule API] Error:', error?.message || error);
+    logger.error('Failed to fetch door schedule', error);
     return NextResponse.json(
       { error: 'Failed to fetch door schedule' },
       { status: 500 }
@@ -101,7 +103,7 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    console.log(`[Door Schedule API] Starting extraction for project: ${slug}`);
+    logger.info('[Door Schedule API] Starting extraction for project: ${slug}');
 
     // Extract door schedule from documents
     const result = await processDoorScheduleForProject(project.id);
@@ -112,7 +114,7 @@ export async function POST(
       errors: result.errors,
     });
   } catch (error: any) {
-    console.error('[Door Schedule API] Extraction error:', error?.message || error);
+    logger.error('Extraction error', error);
     return NextResponse.json(
       { error: error?.message || 'Failed to extract door schedule' },
       { status: 500 }

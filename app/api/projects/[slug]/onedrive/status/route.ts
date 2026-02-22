@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ONEDRIVE_STATUS');
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +79,7 @@ export async function GET(
       history: syncHistory,
     });
   } catch (error) {
-    console.error('Error fetching OneDrive status:', error);
+    logger.error('Error fetching OneDrive status', error);
     return NextResponse.json(
       { error: 'Failed to fetch OneDrive status' },
       { status: 500 }

@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getProjectWeather, autoPopulateDailyReportWeather, fetchCurrentWeather, calculateWorkImpact } from '@/lib/weather-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_WEATHER');
 
 // Fallback coordinates - Louisville, KY (only used if project has no location set)
 const _FALLBACK_LAT = 38.2085;
@@ -54,7 +56,7 @@ export async function GET(
     const lon = project.locationLon;
     const locationInfo = `${project.locationCity || 'Unknown'}, ${project.locationState || 'Unknown'}`;
 
-    console.log(`[Weather API] Using coordinates for ${project.name}: lat=${lat}, lon=${lon} (${locationInfo})`);
+    logger.info('[Weather API] Using coordinates for ${project.name}: lat=${lat}, lon=${lon} (${locationInfo})');
 
     const url = new URL(request.url);
     const forDailyReport = url.searchParams.get('forDailyReport') === 'true';
@@ -84,7 +86,7 @@ export async function GET(
       lastUpdated: new Date().toISOString()
     });
   } catch (error) {
-    console.error('[Weather API] Error:', error);
+    logger.error('[Weather API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch weather data' },
       { status: 500 }

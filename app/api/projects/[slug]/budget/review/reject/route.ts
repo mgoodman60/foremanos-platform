@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_REVIEW_REJECT');
 
 export async function POST(
   request: NextRequest,
@@ -64,14 +66,14 @@ export async function POST(
       updatedCount = result.count;
     }
 
-    console.log(`[BudgetReview] Rejected ${updatedCount} ${type} entries`);
+    logger.info('Rejected ${updatedCount} ${type} entries');
 
     return NextResponse.json({
       success: true,
       updatedCount,
     });
   } catch (error) {
-    console.error('[BudgetReview] Reject error:', error);
+    logger.error('Reject error', error);
     return NextResponse.json(
       { error: 'Failed to reject entries' },
       { status: 500 }

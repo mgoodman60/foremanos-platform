@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { calculateTakeoffCosts, applyCalculatedCosts } from '@/lib/cost-calculation-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TAKEOFF_CALCULATE');
 
 export async function GET(
   request: NextRequest,
@@ -28,7 +30,7 @@ export async function GET(
 
     return NextResponse.json(summary);
   } catch (error: any) {
-    console.error('[Calculate API] GET error:', error);
+    logger.error('[Calculate API] GET error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to calculate costs' },
       { status: 500 }
@@ -63,7 +65,7 @@ export async function POST(
       summary,
     });
   } catch (error: any) {
-    console.error('[Calculate API] POST error:', error);
+    logger.error('[Calculate API] POST error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to apply costs' },
       { status: 500 }

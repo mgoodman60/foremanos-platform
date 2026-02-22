@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_UPDATES');
 
 // GET /api/projects/[slug]/schedule-updates - Get all schedule updates for a project
 export async function GET(
@@ -125,7 +127,7 @@ export async function GET(
       canEdit: isOwner || isAdmin, // Only owners and admins can approve/reject
     });
   } catch (error: unknown) {
-    console.error('[API] Error fetching schedule updates:', error);
+    logger.error('Error fetching schedule updates', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule updates' },
       { status: 500 }

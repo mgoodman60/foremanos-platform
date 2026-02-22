@@ -7,6 +7,8 @@ import {
   backfillActualsFromHistory,
   updateTaskActuals,
 } from '@/lib/schedule-actuals-service';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_SCHEDULE_ACTUALS');
 
 // GET - Get schedule with actuals summary
 export async function GET(
@@ -86,7 +88,7 @@ export async function GET(
       tasks,
     });
   } catch (error) {
-    console.error('[Schedule Actuals API] Error:', error);
+    logger.error('[Schedule Actuals API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule actuals' },
       { status: 500 }
@@ -165,7 +167,7 @@ export async function POST(
         );
     }
   } catch (error) {
-    console.error('[Schedule Actuals API] Error:', error);
+    logger.error('[Schedule Actuals API] Error', error);
     return NextResponse.json(
       { error: 'Failed to process schedule actuals' },
       { status: 500 }

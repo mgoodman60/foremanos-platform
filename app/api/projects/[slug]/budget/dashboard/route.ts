@@ -9,6 +9,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { subDays, format } from 'date-fns';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_BUDGET_DASHBOARD');
 
 export async function GET(
   request: NextRequest,
@@ -239,7 +241,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[BudgetDashboard] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch dashboard data' },
       { status: 500 }

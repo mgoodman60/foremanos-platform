@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { suggestDocumentCategory } from '@/lib/document-categorizer';
 import { safeErrorMessage } from '@/lib/api-error';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('DOCUMENTS_SUGGEST_CATEGORY');
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
       reasoning: suggestion.reasoning,
     });
   } catch (error: any) {
-    console.error('[CATEGORY SUGGESTION ERROR]', error);
+    logger.error('[CATEGORY SUGGESTION ERROR]', error);
     return NextResponse.json(
       { error: 'Failed to suggest category' },
       { status: 500 }

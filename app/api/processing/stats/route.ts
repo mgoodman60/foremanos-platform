@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { ProcessingQueueStatus } from '@prisma/client';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('PROCESSING_STATS');
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error: any) {
-    console.error('Error fetching processing stats:', error);
+    logger.error('Failed to fetch processing stats', error);
     return NextResponse.json(
       { error: 'Failed to fetch processing stats' },
       { status: 500 }

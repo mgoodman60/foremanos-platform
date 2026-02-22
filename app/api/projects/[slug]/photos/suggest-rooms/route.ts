@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getRoomSuggestionsForPhoto, getRoomSuggestionsFromText } from '@/lib/room-suggester';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_PHOTOS_SUGGEST_ROOMS');
 
 /**
  * POST /api/projects/[slug]/photos/suggest-rooms
@@ -97,7 +99,7 @@ export async function POST(
       );
     }
 
-    console.log(`[Room Suggestions] Generated ${suggestions.length} suggestions for project ${slug}`);
+    logger.info('[Room Suggestions] Generated ${suggestions.length} suggestions for project ${slug}');
 
     return NextResponse.json({
       success: true,
@@ -105,7 +107,7 @@ export async function POST(
       count: suggestions.length,
     });
   } catch (error: any) {
-    console.error('[Room Suggestions] Error:', error);
+    logger.error('[Room Suggestions] Error', error);
     return NextResponse.json(
       {
         error: 'Failed to generate room suggestions',

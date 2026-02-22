@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl, deleteFile } from '@/lib/s3';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('TEMPLATES');
 
 export const dynamic = 'force-dynamic';
 
@@ -92,7 +94,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[TEMPLATE_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch template' },
       { status: 500 }
@@ -154,7 +156,7 @@ export async function DELETE(
     try {
       await deleteFile(template.cloud_storage_path);
     } catch (error) {
-      console.error('[TEMPLATE_API] Error deleting file from S3:', error);
+      logger.error('Error deleting file from S3', error);
       // Continue with database deletion even if S3 deletion fails
     }
 
@@ -167,7 +169,7 @@ export async function DELETE(
       message: 'Template deleted successfully',
     });
   } catch (error) {
-    console.error('[TEMPLATE_API] Error:', error);
+    logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to delete template' },
       { status: 500 }

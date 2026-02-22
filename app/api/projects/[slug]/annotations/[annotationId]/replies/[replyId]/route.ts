@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_ANNOTATIONS_REPLIES');
 
 export async function PATCH(
   request: NextRequest,
@@ -66,7 +68,7 @@ export async function PATCH(
       }
     });
   } catch (error) {
-    console.error('[Annotation Reply PATCH Error]:', error);
+    logger.error('[Annotation Reply PATCH Error]', error);
     return NextResponse.json(
       { error: 'Failed to update reply' },
       { status: 500 }
@@ -106,7 +108,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[Annotation Reply DELETE Error]:', error);
+    logger.error('[Annotation Reply DELETE Error]', error);
     return NextResponse.json(
       { error: 'Failed to delete reply' },
       { status: 500 }

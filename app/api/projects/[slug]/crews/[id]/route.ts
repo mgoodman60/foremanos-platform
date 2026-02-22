@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_CREWS');
 
 export async function GET(
   request: NextRequest,
@@ -65,7 +67,7 @@ export async function GET(
 
     return NextResponse.json({ crew });
   } catch (error) {
-    console.error('Error fetching crew:', error);
+    logger.error('Error fetching crew', error);
     return NextResponse.json(
       { error: 'Failed to fetch crew' },
       { status: 500 }
@@ -128,7 +130,7 @@ export async function PUT(
 
     return NextResponse.json({ crew });
   } catch (error: any) {
-    console.error('Error updating crew:', error);
+    logger.error('Error updating crew', error);
     
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
@@ -180,7 +182,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting crew:', error);
+    logger.error('Error deleting crew', error);
     
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Crew not found' }, { status: 404 });

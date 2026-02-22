@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('PROJECTS_MEMBERS');
 
 export const dynamic = 'force-dynamic';
 
@@ -109,7 +111,7 @@ export async function DELETE(
       message: isSelf ? 'You have left the project' : 'Member removed successfully',
     });
   } catch (error) {
-    console.error('Error removing project member:', error);
+    logger.error('Error removing project member', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

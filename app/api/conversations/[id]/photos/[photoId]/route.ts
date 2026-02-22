@@ -15,6 +15,8 @@ import { prisma } from '@/lib/db';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { PhotoMetadata } from '@/lib/photo-analyzer';
+import { createLogger } from '@/lib/logger';
+const logger = createLogger('CONVERSATIONS_PHOTOS');
 
 export async function PATCH(
   request: NextRequest,
@@ -88,7 +90,7 @@ export async function PATCH(
       photo: updatedPhoto,
     });
   } catch (error) {
-    console.error('[PHOTO_PATCH] Error updating photo:', error);
+    logger.error('Error updating photo', error);
     return NextResponse.json(
       { error: 'Failed to update photo' },
       { status: 500 }
@@ -162,9 +164,9 @@ export async function DELETE(
         })
       );
 
-      console.log('[PHOTO_DELETE] Deleted from S3:', photoToDelete.cloud_storage_path);
+      logger.info('Deleted from S3', { detail: photoToDelete.cloud_storage_path });
     } catch (s3Error) {
-      console.error('[PHOTO_DELETE] S3 deletion error:', s3Error);
+      logger.error('S3 deletion error', s3Error);
       // Continue even if S3 deletion fails
     }
 
@@ -186,7 +188,7 @@ export async function DELETE(
       photoCount: updatedPhotos.length,
     });
   } catch (error) {
-    console.error('[PHOTO_DELETE] Error deleting photo:', error);
+    logger.error('Error deleting photo', error);
     return NextResponse.json(
       { error: 'Failed to delete photo' },
       { status: 500 }
