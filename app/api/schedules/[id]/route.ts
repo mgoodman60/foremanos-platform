@@ -73,7 +73,7 @@ export async function GET(
       schedule,
       progress
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching schedule', error);
     return NextResponse.json(
       { error: 'Failed to fetch schedule', details: safeErrorMessage(error) },
@@ -159,7 +159,7 @@ export async function PUT(
     });
 
     return NextResponse.json({ schedule: updated });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating schedule', error);
     return NextResponse.json(
       { error: 'Failed to update schedule', details: safeErrorMessage(error) },
@@ -221,7 +221,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Schedule deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting schedule', error);
     return NextResponse.json(
       { error: 'Failed to delete schedule', details: safeErrorMessage(error) },

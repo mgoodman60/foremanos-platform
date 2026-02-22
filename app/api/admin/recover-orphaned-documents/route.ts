@@ -38,7 +38,7 @@ export async function POST() {
       recoveredCount,
       message: `Recovery complete: ${recoveredCount} document(s) recovered`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Recovery failed', error);
     return apiError('Failed to recover orphaned documents', 500, 'INTERNAL_ERROR');
   }
@@ -69,7 +69,7 @@ export async function GET() {
       success: true,
       ...stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Failed to get orphaned document stats', error);
     return apiError('Failed to get orphaned document stats', 500, 'INTERNAL_ERROR');
   }

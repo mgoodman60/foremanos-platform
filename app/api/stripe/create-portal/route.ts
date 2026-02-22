@@ -60,7 +60,7 @@ export const POST = withCsrf(async function POST(request: NextRequest) {
     return NextResponse.json({
       url: portalSession.url,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to create portal session', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to create portal session') },

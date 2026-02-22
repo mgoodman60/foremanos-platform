@@ -45,16 +45,17 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json({ conversations });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching conversations', error);
-    
+
     // Return more specific error messages
-    if (error?.code?.startsWith('P1')) {
-      return NextResponse.json({ 
-        error: 'Database connection error. Please try again.' 
+    const code = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+    if (code?.startsWith('P1')) {
+      return NextResponse.json({
+        error: 'Database connection error. Please try again.'
       }, { status: 503 });
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to fetch conversations' },
       { status: 500 }

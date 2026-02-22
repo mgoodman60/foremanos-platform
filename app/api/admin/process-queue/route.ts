@@ -74,7 +74,7 @@ export async function GET() {
       queue: enrichedQueue,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PROCESS_QUEUE', 'Queue stats error', error);
     return NextResponse.json(
       { error: 'Failed to get queue stats' },

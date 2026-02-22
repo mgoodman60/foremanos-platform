@@ -223,7 +223,7 @@ export async function POST(request: Request) {
       cloudStoragePath: cloud_storage_path,
       expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PRESIGN', 'Failed to generate presigned URL', error);
 
     return NextResponse.json(

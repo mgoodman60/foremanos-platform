@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Failed to update subscription tier', error);
     return apiError('Failed to update subscription tier', 500, 'INTERNAL_ERROR');
   }

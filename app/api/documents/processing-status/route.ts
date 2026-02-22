@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
       documents: enhancedDocuments,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PROCESSING_STATUS', 'Error fetching processing status', error);
     return NextResponse.json(
       { error: 'Failed to fetch processing status' },

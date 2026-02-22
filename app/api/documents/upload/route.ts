@@ -143,9 +143,9 @@ export async function POST(request: Request) {
       const bytes = await file.arrayBuffer();
       buffer = Buffer.from(bytes);
       logger.info('Buffer created successfully', { sizeMB: (buffer.length / 1024 / 1024).toFixed(2) });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[UPLOAD ERROR] Failed to read file', error);
-      throw new Error(`Failed to read file: ${error.message}`);
+      throw new Error(`Failed to read file: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Virus scan (before expensive operations like S3 upload)
@@ -185,7 +185,7 @@ export async function POST(request: Request) {
 
       virusStatus = 'clean';
       virusScanProvider = scanResult.engine;
-    } catch (scanError: any) {
+    } catch (scanError: unknown) {
       logger.error('Virus scan error (non-blocking)', scanError);
       virusStatus = 'error';
       // Continue with upload - graceful degradation
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
         );
       }
       logger.info('No macros detected');
-    } catch (macroError: any) {
+    } catch (macroError: unknown) {
       logger.error('Macro detection error (non-blocking)', macroError);
       // Continue with upload - graceful degradation
     }
@@ -410,38 +410,41 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     const totalTime = Date.now() - startTime;
-    const s3Meta = error.$metadata;
+    const err = error as Record<string, any>;
+    const s3Meta = err.$metadata;
+    const errMessage = error instanceof Error ? error.message : String(error);
+    const errName = error instanceof Error ? error.name : String(error);
     logger.error('UPLOAD', `Failed after ${totalTime}ms`, error, {
-      errorName: error.name,
-      errorCode: error.code || error.Code,
-      httpStatus: s3Meta?.httpStatusCode || error.httpStatus,
+      errorName: errName,
+      errorCode: err.code || err.Code,
+      httpStatus: s3Meta?.httpStatusCode || err.httpStatus,
       requestId: s3Meta?.requestId,
-      attempts: error.attempts,
+      attempts: err.attempts,
     });
 
     // Classify the error using structured S3 properties (from Task #1) or fallback heuristics
-    const isTimeout = error.isTimeout
-      || error.message?.includes('timeout')
-      || error.message?.includes('timed out')
-      || error.code === 'ETIMEDOUT';
-    const isAuthError = error.isAuthError
-      || error.name === 'InvalidAccessKeyId'
-      || error.name === 'SignatureDoesNotMatch'
-      || error.name === 'AccessDenied'
-      || error.$metadata?.httpStatusCode === 403;
-    const isNetworkError = error.code === 'ECONNRESET'
-      || error.code === 'ECONNREFUSED'
-      || error.code === 'ENOTFOUND'
-      || error.message?.includes('network')
-      || error.message?.includes('ECONNREFUSED');
-    const isDbError = error.message?.includes('Prisma')
-      || error.message?.includes('database');
-    const isS3Error = error.message?.includes('S3')
-      || error.message?.includes('upload')
-      || error.code === 'NoSuchBucket'
-      || !!error.httpStatus
+    const isTimeout = err.isTimeout
+      || errMessage?.includes('timeout')
+      || errMessage?.includes('timed out')
+      || err.code === 'ETIMEDOUT';
+    const isAuthError = err.isAuthError
+      || errName === 'InvalidAccessKeyId'
+      || errName === 'SignatureDoesNotMatch'
+      || errName === 'AccessDenied'
+      || s3Meta?.httpStatusCode === 403;
+    const isNetworkError = err.code === 'ECONNRESET'
+      || err.code === 'ECONNREFUSED'
+      || err.code === 'ENOTFOUND'
+      || errMessage?.includes('network')
+      || errMessage?.includes('ECONNREFUSED');
+    const isDbError = errMessage?.includes('Prisma')
+      || errMessage?.includes('database');
+    const isS3Error = errMessage?.includes('S3')
+      || errMessage?.includes('upload')
+      || err.code === 'NoSuchBucket'
+      || !!err.httpStatus
       || !!s3Meta;
 
     let errorMessage: string;
@@ -483,9 +486,9 @@ export async function POST(request: Request) {
 
     // Build sanitized technical details safe for production (no stack traces or internal paths)
     const technicalDetails: Record<string, string | number | undefined> = {
-      errorCode: error.code || error.Code || error.name || undefined,
-      httpStatus: s3Meta?.httpStatusCode || error.httpStatus || undefined,
-      attempts: error.attempts || undefined,
+      errorCode: err.code || err.Code || errName || undefined,
+      httpStatus: s3Meta?.httpStatusCode || err.httpStatus || undefined,
+      attempts: err.attempts || undefined,
     };
     // Remove undefined keys
     for (const key of Object.keys(technicalDetails)) {

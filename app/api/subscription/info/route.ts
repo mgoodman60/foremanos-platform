@@ -42,7 +42,7 @@ export async function GET() {
     const subscriptionInfo = await getSubscriptionInfo(user.id);
 
     return NextResponse.json(subscriptionInfo);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch subscription info', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to fetch subscription info') },

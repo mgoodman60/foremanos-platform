@@ -167,17 +167,18 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ correction }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating correction', error);
-    
+
     // Handle unique constraint violation (correction already exists for this feedback)
-    if (error.code === 'P2002') {
+    const code = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+    if (code === 'P2002') {
       return NextResponse.json(
         { error: 'Correction already exists for this feedback' },
         { status: 409 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to create correction' },
       { status: 500 }

@@ -74,7 +74,7 @@ export async function GET(
     });
 
     return NextResponse.json({ tasks });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching tasks', error);
     return NextResponse.json(
       { error: 'Failed to fetch tasks', details: safeErrorMessage(error) },
@@ -181,7 +181,7 @@ export async function POST(
     logger.info('Updated task', { taskId: existingTaskId, percentComplete, status, subcontractorId: subcontractorId || 'none' });
 
     return NextResponse.json({ task: updated });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating task', error);
     return NextResponse.json(
       { error: 'Failed to update task', details: safeErrorMessage(error) },

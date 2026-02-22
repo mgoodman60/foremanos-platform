@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
           status: 'queued',
           retryAttempt: doc.processingRetries + 1,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('RETRY_FAILED', `Error retrying document ${doc.id}`, error);
         results.push({
           id: doc.id,
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
       retried: results.length,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('RETRY_FAILED', 'Error in retry-failed endpoint', error);
     return NextResponse.json(
       { error: 'Failed to retry documents' },

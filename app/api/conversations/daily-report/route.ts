@@ -806,7 +806,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(dailyReportChat);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Daily report error', error as Error);
     return NextResponse.json(
       { error: 'Failed to get or create daily report chat' },
@@ -884,7 +884,7 @@ export async function POST(request: Request) {
       { error: 'Invalid action' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Daily report action error', error as Error);
     return NextResponse.json(
       { error: 'Failed to perform daily report action' },

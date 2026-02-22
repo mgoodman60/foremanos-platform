@@ -105,7 +105,7 @@ export async function POST(
         ? `Found ${comparison.differences.length} difference(s) between scheduled and actual work`
         : 'All scheduled activities match reported work',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to compare schedule' },

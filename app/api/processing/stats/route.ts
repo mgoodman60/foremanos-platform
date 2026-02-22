@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(stats);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch processing stats', error);
     return NextResponse.json(
       { error: 'Failed to fetch processing stats' },

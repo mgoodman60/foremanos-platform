@@ -54,7 +54,7 @@ export function setCsrfCookie(response: NextResponse, token: string): void {
 
 type RouteHandler = (
   request: NextRequest,
-  context?: any
+  context?: { params: Record<string, string> }
 ) => Promise<NextResponse>;
 
 /**
@@ -63,7 +63,7 @@ type RouteHandler = (
  * - POST/PUT/PATCH/DELETE requests must include a valid CSRF token.
  */
 export function withCsrf(handler: RouteHandler): RouteHandler {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: { params: Record<string, string> }) => {
     const method = request.method.toUpperCase();
 
     // Safe methods — skip validation

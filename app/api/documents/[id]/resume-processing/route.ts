@@ -64,7 +64,7 @@ export async function POST(
       success: true,
       message: `Processing resumed for ${document.name}`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('RESUME_PROCESSING', 'Failed to resume processing', error);
     return NextResponse.json(
       { error: 'Failed to resume processing' },

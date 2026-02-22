@@ -71,7 +71,7 @@ export const POST = withCsrf(async function POST(request: NextRequest) {
       sessionId: checkoutSession.id,
       url: checkoutSession.url,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to create checkout session', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to create checkout session') },

@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest) {
     }));
 
     return NextResponse.json(activeProcessing);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch active processing', error);
     return NextResponse.json(
       { error: 'Failed to fetch active processing' },

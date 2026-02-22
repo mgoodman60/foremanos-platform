@@ -120,7 +120,7 @@ export async function POST(
         pagesProcessed: result.pagesProcessed
       }
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to extract quantities', details: safeErrorMessage(error) },
