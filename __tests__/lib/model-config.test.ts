@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
   DEFAULT_FREE_MODEL,
   DEFAULT_MODEL,
@@ -7,14 +7,22 @@ import {
   FALLBACK_MODEL,
   SIMPLE_MODEL,
   EXTRACTION_MODEL,
-  GEMINI_PRIMARY_MODEL,
-  GEMINI_SECONDARY_MODEL,
-  GEMINI_EXTRACTION_MODEL,
   resolveModelAlias,
   isClaudeModel,
   isOpenAIModel,
   isGeminiModel,
 } from '@/lib/model-config';
+
+const originalGeminiPrimaryModel = process.env.GEMINI_PRIMARY_MODEL;
+
+afterEach(() => {
+  if (originalGeminiPrimaryModel === undefined) {
+    delete process.env.GEMINI_PRIMARY_MODEL;
+  } else {
+    process.env.GEMINI_PRIMARY_MODEL = originalGeminiPrimaryModel;
+  }
+  vi.resetModules();
+});
 
 describe('Model Config', () => {
   describe('Constants', () => {
@@ -80,16 +88,40 @@ describe('Model Config', () => {
   });
 
   describe('Gemini Constants', () => {
-    it('should define GEMINI_PRIMARY_MODEL as gemini-3-pro-preview', () => {
-      expect(GEMINI_PRIMARY_MODEL).toBe('gemini-3-pro-preview');
+    it('should default GEMINI_PRIMARY_MODEL to gemini-2.0-flash when env is unset', async () => {
+      delete process.env.GEMINI_PRIMARY_MODEL;
+      vi.resetModules();
+
+      const { GEMINI_PRIMARY_MODEL } = await import('@/lib/model-config');
+      expect(GEMINI_PRIMARY_MODEL).toBe('gemini-2.0-flash');
     });
 
-    it('should define GEMINI_SECONDARY_MODEL as gemini-2.5-pro', () => {
+    it('should define GEMINI_SECONDARY_MODEL as gemini-2.5-pro', async () => {
+      vi.resetModules();
+      const { GEMINI_SECONDARY_MODEL } = await import('@/lib/model-config');
       expect(GEMINI_SECONDARY_MODEL).toBe('gemini-2.5-pro');
     });
 
-    it('should define GEMINI_EXTRACTION_MODEL same as GEMINI_PRIMARY_MODEL', () => {
+    it('should define GEMINI_EXTRACTION_MODEL same as GEMINI_PRIMARY_MODEL', async () => {
+      vi.resetModules();
+      const { GEMINI_EXTRACTION_MODEL, GEMINI_PRIMARY_MODEL } = await import('@/lib/model-config');
       expect(GEMINI_EXTRACTION_MODEL).toBe(GEMINI_PRIMARY_MODEL);
+    });
+
+    it('should override GEMINI_PRIMARY_MODEL from env when set', async () => {
+      process.env.GEMINI_PRIMARY_MODEL = 'gemini-3-pro-preview';
+      vi.resetModules();
+
+      const { GEMINI_PRIMARY_MODEL } = await import('@/lib/model-config');
+      expect(GEMINI_PRIMARY_MODEL).toBe('gemini-3-pro-preview');
+    });
+
+    it('should ignore blank GEMINI_PRIMARY_MODEL env value', async () => {
+      process.env.GEMINI_PRIMARY_MODEL = '   ';
+      vi.resetModules();
+
+      const { GEMINI_PRIMARY_MODEL } = await import('@/lib/model-config');
+      expect(GEMINI_PRIMARY_MODEL).toBe('gemini-2.0-flash');
     });
   });
 

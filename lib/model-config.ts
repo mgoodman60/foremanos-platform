@@ -78,7 +78,11 @@ export function isOpenAIModel(model: string): boolean {
 }
 
 /** Gemini primary model for extraction pass 1 (three-pass pipeline) */
-export const GEMINI_PRIMARY_MODEL = 'gemini-2.0-flash';
+const geminiPrimaryModelFromEnv = process.env.GEMINI_PRIMARY_MODEL?.trim();
+export const GEMINI_PRIMARY_MODEL =
+  geminiPrimaryModelFromEnv && geminiPrimaryModelFromEnv.length > 0
+    ? geminiPrimaryModelFromEnv
+    : 'gemini-2.0-flash';
 
 /** Gemini secondary model for validation pass 2 (three-pass pipeline) */
 export const GEMINI_SECONDARY_MODEL = 'gemini-2.5-pro';
