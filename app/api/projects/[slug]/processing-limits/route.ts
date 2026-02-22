@@ -128,7 +128,7 @@ export async function PUT(
       },
     });
 
-    logger.info('Updated limits for project ${project.name}');
+    logger.info('Updated limits for project', { project: project.name });
 
     return NextResponse.json({
       message: 'Processing limits updated successfully',

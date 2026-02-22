@@ -99,7 +99,7 @@ export async function POST(
       );
     }
 
-    logger.info('[Room Suggestions] Generated ${suggestions.length} suggestions for project ${slug}');
+    logger.info('[Room Suggestions] Generated suggestions', { count: suggestions.length, slug });
 
     return NextResponse.json({
       success: true,

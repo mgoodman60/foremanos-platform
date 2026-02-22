@@ -23,7 +23,7 @@ export async function POST(
     }
 
     const { slug } = params;
-    logger.info('[MEP Takeoff API] Starting extraction for project: ${slug}');
+    logger.info('[MEP Takeoff API] Starting extraction for project', { slug });
 
     const result = await extractMEPTakeoffs(slug);
 

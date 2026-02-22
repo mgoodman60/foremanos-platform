@@ -29,8 +29,8 @@ export async function POST(
     const body = await req.json();
     const { forceReprocess = false, useVision = false } = body;
     
-    logger.info('[classify-drawings] Starting classification for project: ${slug}');
-    logger.info('[classify-drawings] Options: forceReprocess=${forceReprocess}, useVision=${useVision}');
+    logger.info('[classify-drawings] Starting classification for project', { slug });
+    logger.info('[classify-drawings] Options', { forceReprocess, useVision });
     
     // Classify all drawings
     const results = await classifyProjectDrawings(slug, {
@@ -38,7 +38,7 @@ export async function POST(
       useVision
     });
     
-    logger.info('[classify-drawings] Classified ${results.length} drawings');
+    logger.info('[classify-drawings] Classification complete', { count: results.length });
     
     // Calculate statistics
     const stats = {

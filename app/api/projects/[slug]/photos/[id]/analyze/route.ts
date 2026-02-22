@@ -45,7 +45,7 @@ export async function POST(
     }
 
     // Process the photo
-    logger.info('[Photo Analysis] Starting analysis for photo ${id}');
+    logger.info('[Photo Analysis] Starting analysis for photo', { photoId: id });
     await processUploadedPhoto(id, slug);
 
     // Get updated photo
@@ -57,7 +57,7 @@ export async function POST(
       },
     });
 
-    logger.info('[Photo Analysis] Completed analysis for photo ${id}');
+    logger.info('[Photo Analysis] Completed analysis for photo', { photoId: id });
 
     return NextResponse.json({
       success: true,

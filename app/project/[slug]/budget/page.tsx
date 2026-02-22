@@ -74,44 +74,44 @@ export default function BudgetPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-dark-card border border-gray-700 mb-6 overflow-x-auto whitespace-nowrap h-auto flex-nowrap w-full justify-start">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <BarChart3 className="h-4 w-4 mr-2" aria-hidden="true" />
-              Dashboard
+              <BarChart3 className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Dashboard</span>
             </TabsTrigger>
             <TabsTrigger value="job-cost" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <DollarSign className="h-4 w-4 mr-2" aria-hidden="true" />
-              Job Cost
+              <DollarSign className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Job Cost</span>
             </TabsTrigger>
             <TabsTrigger value="overview" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <TrendingUp className="h-4 w-4 mr-2" aria-hidden="true" />
-              Overview
+              <TrendingUp className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
             <TabsTrigger value="review" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <ClipboardCheck className="h-4 w-4 mr-2" aria-hidden="true" />
-              Review
+              <ClipboardCheck className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Review</span>
             </TabsTrigger>
             <TabsTrigger value="change-orders" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <FileEdit className="h-4 w-4 mr-2" aria-hidden="true" />
-              Change Orders
+              <FileEdit className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Changes</span>
             </TabsTrigger>
             <TabsTrigger value="invoices" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <Receipt className="h-4 w-4 mr-2" aria-hidden="true" />
-              Invoices
+              <Receipt className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Invoices</span>
             </TabsTrigger>
             <TabsTrigger value="labor" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <Users className="h-4 w-4 mr-2" aria-hidden="true" />
-              Labor
+              <Users className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Labor</span>
             </TabsTrigger>
             <TabsTrigger value="quotes" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <FileUp className="h-4 w-4 mr-2" aria-hidden="true" />
-              Quotes
+              <FileUp className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Quotes</span>
             </TabsTrigger>
             <TabsTrigger value="takeoffs" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <Layers className="h-4 w-4 mr-2" aria-hidden="true" />
-              Takeoffs
+              <Layers className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Takeoffs</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="data-[state=active]:bg-brand-500 data-[state=active]:text-white">
-              <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
-              Reports
+              <FileText className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+              <span className="hidden sm:inline">Reports</span>
             </TabsTrigger>
           </TabsList>
 

@@ -61,7 +61,7 @@ export async function POST(
       );
     }
 
-    logger.info('Starting extraction for document ${document.name}');
+    logger.info('Starting extraction for document', { document: document.name });
 
     // Extract rooms
     const rooms = await extractRoomsFromDocument(id, document.Project.id);
@@ -80,7 +80,7 @@ export async function POST(
       user.id
     );
 
-    logger.info('Extraction complete: ${rooms.length} found, ${created} created');
+    logger.info('Extraction complete', { roomsFound: rooms.length, created });
 
     return NextResponse.json({
       message: `Successfully extracted ${rooms.length} rooms, created ${created} new entries`,

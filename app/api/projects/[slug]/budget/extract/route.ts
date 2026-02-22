@@ -66,7 +66,7 @@ export async function POST(
     }
 
     // Extract budget
-    logger.info('Extracting budget from document: ${document.name}');
+    logger.info('Extracting budget from document', { document: document.name });
     const extraction = await extractBudgetWithAI(
       documentId,
       project.id,
@@ -98,7 +98,7 @@ export async function POST(
         );
         if (syncResponse.ok) {
           takeoffSyncResult = await syncResponse.json();
-          logger.info('Takeoff sync completed: ${takeoffSyncResult.summary?.pricedItems || 0} items updated');
+          logger.info('Takeoff sync completed', { pricedItems: takeoffSyncResult.summary?.pricedItems || 0 });
         }
       } catch (syncError) {
         logger.error('Takeoff sync error', syncError);

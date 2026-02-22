@@ -95,7 +95,7 @@ export async function POST(
       });
     }
 
-    logger.info('Conversation ${conversation.id}: ${comparison.differences.length} differences found');
+    logger.info('Conversation schedule comparison complete', { conversationId: conversation.id, differences: comparison.differences.length });
 
     return NextResponse.json({
       hasDifferences: comparison.hasDifferences,

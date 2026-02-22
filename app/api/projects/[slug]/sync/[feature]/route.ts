@@ -142,7 +142,7 @@ export async function POST(
       results,
     });
   } catch (error: any) {
-    logger.error('[Sync ${params.feature} API] Error', error);
+    logger.error('[Sync API] Error', error, { feature: params.feature });
     return NextResponse.json(
       { error: error.message || 'Failed to sync feature' },
       { status: 500 }
@@ -192,7 +192,7 @@ export async function GET(
       metadata: dataSource.metadata,
     });
   } catch (error) {
-    logger.error('[Sync ${params.feature} API] Error', error);
+    logger.error('[Sync API] Error', error, { feature: params.feature });
     return NextResponse.json(
       { error: 'Failed to get feature status' },
       { status: 500 }

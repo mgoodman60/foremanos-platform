@@ -58,7 +58,7 @@ export async function POST(
     }
 
     // Extract rooms from documents
-    logger.info('[Extract Rooms] Starting extraction for project: ${slug}');
+    logger.info('[Extract Rooms] Starting extraction for project', { slug });
     const extractionResult = await extractRoomsFromDocuments(slug);
 
     if (extractionResult.rooms.length === 0) {
@@ -74,7 +74,7 @@ export async function POST(
     // Save extracted rooms to database
     const saveResult = await saveExtractedRooms(slug, extractionResult.rooms);
 
-    logger.info('[Extract Rooms] Completed: ${saveResult.created} created, ${saveResult.updated} updated');
+    logger.info('[Extract Rooms] Completed', { created: saveResult.created, updated: saveResult.updated });
 
     return NextResponse.json({
       success: true,

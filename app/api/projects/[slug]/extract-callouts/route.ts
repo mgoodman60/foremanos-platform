@@ -97,7 +97,7 @@ export async function POST(
     // Process each document
     for (const document of documents) {
       try {
-        logger.info('Extracting callouts from: ${document.name}');
+        logger.info('Extracting callouts from document', { document: document.name });
 
         // Group chunks by sheet number
         const sheetMap = new Map<string, any[]>();
@@ -123,7 +123,7 @@ export async function POST(
             });
 
             if (existing > 0) {
-              logger.info('Sheet ${sheetNumber} already processed, skipping');
+              logger.info('Sheet already processed, skipping', { sheet: sheetNumber });
               continue;
             }
           }
@@ -138,7 +138,7 @@ export async function POST(
               sheetNumber
             );
             callouts = callouts.concat(patternCallouts);
-            logger.info('Pattern matching found ${patternCallouts.length} callouts');
+            logger.info('Pattern matching found callouts', { count: patternCallouts.length });
           }
 
           // Method 2: Vision analysis
@@ -175,7 +175,7 @@ export async function POST(
                   }
                 }
 
-                logger.info('Vision analysis found ${visionCallouts.length} callouts');
+                logger.info('Vision analysis found callouts', { count: visionCallouts.length });
               } finally {
                 // Clean up temp file
                 await fs.unlink(imagePath).catch(() => {});
@@ -203,7 +203,7 @@ export async function POST(
 
         processedDocs++;
       } catch (error) {
-        logger.error('Error processing document ${document.name}', error);
+        logger.error('Error processing document', error, { document: document.name });
         results.push({
           document: document.name,
           error: error instanceof Error ? error.message : 'Unknown error',

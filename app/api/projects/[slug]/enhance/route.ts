@@ -23,7 +23,7 @@ export async function POST(
     }
 
     const { slug } = params;
-    logger.info('[Enhancement API] Starting enhancement for project: ${slug}');
+    logger.info('[Enhancement API] Starting enhancement for project', { slug });
 
     const result = await enhanceProjectData(slug);
 

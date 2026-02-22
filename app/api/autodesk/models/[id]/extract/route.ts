@@ -40,7 +40,7 @@ export async function POST(
       );
     }
 
-    logger.info('[BIM Extract API] Starting extraction for model ${model.id}');
+    logger.info('[BIM Extract API] Starting extraction for model', { modelId: model.id });
 
     // Step 1: Extract BIM metadata from Autodesk
     const bimData = await extractBIMData(model.urn);
@@ -76,7 +76,7 @@ export async function POST(
       },
     });
 
-    logger.info('[BIM Extract API] Extraction complete for model ${model.id}');
+    logger.info('[BIM Extract API] Extraction complete for model', { modelId: model.id });
 
     return NextResponse.json({
       success: true,

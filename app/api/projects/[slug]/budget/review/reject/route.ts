@@ -66,7 +66,7 @@ export async function POST(
       updatedCount = result.count;
     }
 
-    logger.info('Rejected ${updatedCount} ${type} entries');
+    logger.info('Rejected entries', { updatedCount, type });
 
     return NextResponse.json({
       success: true,

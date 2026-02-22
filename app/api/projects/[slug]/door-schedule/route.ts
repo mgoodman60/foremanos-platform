@@ -103,7 +103,7 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    logger.info('[Door Schedule API] Starting extraction for project: ${slug}');
+    logger.info('[Door Schedule API] Starting extraction for project', { slug });
 
     // Extract door schedule from documents
     const result = await processDoorScheduleForProject(project.id);

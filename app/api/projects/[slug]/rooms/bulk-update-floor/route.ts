@@ -107,7 +107,7 @@ export async function POST(
       );
     }
 
-    logger.info('Bulk updating ${roomIds.length} rooms to floor ${floorNumber} in project ${project.name}');
+    logger.info('Bulk updating rooms to floor', { roomCount: roomIds.length, floorNumber, project: project.name });
 
     // Bulk update floor number
     const result = await prisma.room.updateMany({
@@ -119,7 +119,7 @@ export async function POST(
       },
     });
 
-    logger.info('Successfully updated ${result.count} rooms');
+    logger.info('Successfully updated rooms', { count: result.count });
 
     return NextResponse.json({
       success: true,

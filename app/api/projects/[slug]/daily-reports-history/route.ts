@@ -106,7 +106,7 @@ export async function GET(
               documentName = document.name;
             }
           } catch (error) {
-            logger.error('Error getting document for report ${report.id}', error);
+            logger.error('Error getting document for report', error, { reportId: report.id });
           }
         }
 

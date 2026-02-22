@@ -170,7 +170,7 @@ Only return the JSON object, no other text.`
             subcontractorMap.set(subName.toLowerCase(), newSub.id);
           } catch (e) {
             // Subcontractor may already exist with different case
-            logger.info('Could not create subcontractor ${subName}', { e });
+            logger.info('Could not create subcontractor', { subName, error: e });
           }
         }
       }

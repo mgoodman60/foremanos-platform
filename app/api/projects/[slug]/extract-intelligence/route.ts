@@ -58,10 +58,12 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     const results = [];
     const requestedPhases = phases || ['A', 'B', 'C'];
 
-    logger.info('\n🚀 Manual intelligence extraction triggered by ${session.user?.email}');
-    logger.info('Project: ${project.name}');
-    logger.info('Documents: ${project.Document.length}');
-    logger.info('Phases: ${requestedPhases.join(', { detail: ' })}\n`);
+    logger.info('Manual intelligence extraction triggered', {
+      user: session.user?.email,
+      project: project.name,
+      documents: project.Document.length,
+      phases: requestedPhases.join(', '),
+    });
 
     for (const document of project.Document) {
       try {
@@ -77,7 +79,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
           ...result,
         });
       } catch (error: any) {
-        logger.error('Failed to extract intelligence from ${document.name}', error);
+        logger.error('Failed to extract intelligence', error, { document: document.name });
         results.push({
           documentId: document.id,
           documentName: document.name,

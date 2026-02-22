@@ -94,7 +94,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    logger.info('[ENHANCED-TAKEOFF-API] Starting extraction for document ${documentId}');
+    logger.info('[ENHANCED-TAKEOFF-API] Starting extraction for document', { documentId });
 
     // Extract with enhanced vision
     const items = await extractTakeoffsWithVision(

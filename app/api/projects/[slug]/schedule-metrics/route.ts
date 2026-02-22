@@ -54,7 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     
     // If no valid source and we have orphaned data, deactivate schedules
     if (!hasValidSource && allTasks.length > 0) {
-      logger.info('[Schedule Metrics] No valid data source for project ${slug}, deactivating orphaned schedules');
+      logger.info('[Schedule Metrics] No valid data source for project, deactivating orphaned schedules', { slug });
       await prisma.schedule.updateMany({
         where: { projectId: project.id },
         data: { isActive: false }

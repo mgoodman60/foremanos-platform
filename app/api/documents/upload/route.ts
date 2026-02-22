@@ -26,7 +26,7 @@ const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image
 
 export async function POST(request: Request) {
   const startTime = Date.now();
-  logger.info('[UPLOAD START]', { detail: new Date( }).toISOString());
+  logger.info('[UPLOAD START]', { detail: new Date().toISOString() });
 
   try {
     const ip = getClientIp(request);
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
     const fileName = file.name;
     const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'pdf';
     const fileSize = file.size;
-    logger.info('Reading file data: ${fileName}, Expected size: ${(fileSize / 1024 / 1024).toFixed(2)}MB');
+    logger.info('Reading file data', { fileName, expectedSizeMB: (fileSize / 1024 / 1024).toFixed(2) });
     
     // Check file size before reading
     if (fileSize > 209715200) { // 200MB
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
       logger.info('Converting file to buffer...');
       const bytes = await file.arrayBuffer();
       buffer = Buffer.from(bytes);
-      logger.info('Buffer created successfully: ${(buffer.length / 1024 / 1024).toFixed(2)}MB');
+      logger.info('Buffer created successfully', { sizeMB: (buffer.length / 1024 / 1024).toFixed(2) });
     } catch (error: any) {
       logger.error('[UPLOAD ERROR] Failed to read file', error);
       throw new Error(`Failed to read file: ${error.message}`);
@@ -255,7 +255,7 @@ export async function POST(request: Request) {
 
     // CRITICAL FIX: Check if quota needs to be reset before validation
     if (await shouldResetQuota(user)) {
-      logger.info('[QUOTA RESET] Resetting quota for user ${userId} (was ${user.pagesProcessedThisMonth} pages)');
+      logger.info('[QUOTA RESET] Resetting quota for user', { userId, previousPages: user.pagesProcessedThisMonth });
       
       // Reset quota and update reset date
       await withDatabaseRetry(
@@ -276,7 +276,7 @@ export async function POST(request: Request) {
         processingResetAt: getNextResetDate(),
       };
       
-      logger.info('[QUOTA RESET] User ${userId} quota reset to 0, next reset: ${user.processingResetAt}');
+      logger.info('[QUOTA RESET] User quota reset to 0', { userId, nextReset: user.processingResetAt });
     }
 
     // Classify document to estimate pages
@@ -314,7 +314,7 @@ export async function POST(request: Request) {
     const s3UploadStart = Date.now();
     const cloud_storage_path = await uploadFile(buffer, fileName, isPublic);
     const s3UploadTime = Date.now() - s3UploadStart;
-    logger.info('S3 upload completed in ${s3UploadTime}ms, path: ${cloud_storage_path}');
+    logger.info('S3 upload completed', { durationMs: s3UploadTime, path: cloud_storage_path });
 
     // Create document record with cloud storage path and processor info
     logger.info('Creating database record...');
@@ -348,10 +348,10 @@ export async function POST(request: Request) {
     logger.info('Triggering async document processing...');
     processDocument(document.id, classification)
       .then(() => {
-        logger.info('✅ Processing started successfully for document ${document.id}');
+        logger.info('Processing started successfully for document', { documentId: document.id });
       })
       .catch(async (error) => {
-        logger.error('[UPLOAD ERROR] ❌ Processing failed for document ${document.id}', error);
+        logger.error('[UPLOAD ERROR] Processing failed for document', error, { documentId: document.id });
         
         // Update document with error status and message
         try {
@@ -367,7 +367,7 @@ export async function POST(request: Request) {
             }),
             'Mark document as failed'
           );
-          logger.error('[UPLOAD ERROR] Marked document ${document.id} as failed in database');
+          logger.error('[UPLOAD ERROR] Marked document as failed in database', undefined, { documentId: document.id });
         } catch (updateError) {
           logger.error('[UPLOAD ERROR] Failed to update document status', updateError);
         }
@@ -391,7 +391,7 @@ export async function POST(request: Request) {
     const updatedRemainingPages = getRemainingPages(user.pagesProcessedThisMonth, user.subscriptionTier);
 
     const totalTime = Date.now() - startTime;
-    logger.info('[UPLOAD COMPLETE] Total time: ${totalTime}ms, Document ID: ${document.id}');
+    logger.info('[UPLOAD COMPLETE] Upload finished', { totalTimeMs: totalTime, documentId: document.id });
 
     return NextResponse.json(
       {

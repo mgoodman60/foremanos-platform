@@ -91,7 +91,7 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    logger.info('[Window Schedule API] Starting extraction for project: ${slug}');
+    logger.info('[Window Schedule API] Starting extraction for project', { slug });
 
     // Extract window schedule from documents
     const result = await processWindowScheduleForProject(project.id);

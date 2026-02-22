@@ -107,7 +107,7 @@ export async function POST(
       }
     }
 
-    logger.info('Approved ${updatedCount} ${type} entries');
+    logger.info('Approved entries', { updatedCount, type });
 
     return NextResponse.json({
       success: true,

@@ -24,7 +24,7 @@ export async function POST(
     }
 
     const { slug } = params;
-    logger.info('[Budget Import API] Starting import for project: ${slug}');
+    logger.info('[Budget Import API] Starting import for project', { slug });
 
     // Import budget
     const importResult = await importOneSeniorCareBudget(slug);

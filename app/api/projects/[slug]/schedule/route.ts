@@ -85,7 +85,7 @@ export async function POST(
       },
     });
 
-    logger.info('Set master schedule for project ${project.slug}: ${document.name}');
+    logger.info('Set master schedule for project', { slug: project.slug, document: document.name });
 
     return NextResponse.json({
       success: true,
@@ -215,7 +215,7 @@ export async function DELETE(
       },
     });
 
-    logger.info('Removed master schedule from project ${project.slug}');
+    logger.info('Removed master schedule from project', { slug: project.slug });
 
     return NextResponse.json({
       success: true,

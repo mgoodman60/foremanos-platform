@@ -162,7 +162,7 @@ export async function POST(
               : await extractElevationsFromDocument(content, docType);
             extractedSources.push(extracted);
           } catch (err) {
-            logger.error('Failed to extract from ${doc.name}', err);
+            logger.error('Failed to extract elevations', err, { document: doc.name });
           }
         }
 

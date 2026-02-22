@@ -205,7 +205,7 @@ export async function POST(
 
         applied.push(1);
       } catch (error) {
-        logger.error('Error processing update for task ${update.taskId}', error);
+        logger.error('Error processing update for task', error, { taskId: update.taskId });
         failed.push({
           taskId: update.taskId,
           error: error instanceof Error ? error.message : 'Unknown error',

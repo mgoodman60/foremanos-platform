@@ -47,7 +47,7 @@ export async function POST(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    logger.info('Extracting MEP schedules for project: ${slug}');
+    logger.info('Extracting MEP schedules for project', { slug });
 
     // Run the MEP schedule extraction
     const result = await extractMEPSchedules(slug);

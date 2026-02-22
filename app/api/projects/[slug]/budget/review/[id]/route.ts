@@ -81,7 +81,7 @@ export async function PATCH(
       });
     }
 
-    logger.info('Updated ${type} entry ${id}');
+    logger.info('Updated entry', { type, id });
 
     return NextResponse.json({
       success: true,

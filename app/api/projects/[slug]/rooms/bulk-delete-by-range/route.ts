@@ -119,7 +119,7 @@ export async function POST(
       }
     });
 
-    logger.info('Bulk deleted ${result.count} rooms from project ${project.name}');
+    logger.info('Bulk deleted rooms from project', { count: result.count, project: project.name });
 
     return NextResponse.json({ 
       success: true,

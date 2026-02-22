@@ -56,7 +56,7 @@ export async function GET(
     const lon = project.locationLon;
     const locationInfo = `${project.locationCity || 'Unknown'}, ${project.locationState || 'Unknown'}`;
 
-    logger.info('[Weather API] Using coordinates for ${project.name}: lat=${lat}, lon=${lon} (${locationInfo})');
+    logger.info('[Weather API] Using coordinates for project', { project: project.name, lat, lon, location: locationInfo });
 
     const url = new URL(request.url);
     const forDailyReport = url.searchParams.get('forDailyReport') === 'true';

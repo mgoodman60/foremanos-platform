@@ -97,7 +97,7 @@ export async function GET(
       }
     }
 
-    logger.info('Total chunks: ${allChunks.length}');
+    logger.info('Total chunks found', { count: allChunks.length });
 
     // Search for finish-related keywords
     // Enhanced with construction abbreviations

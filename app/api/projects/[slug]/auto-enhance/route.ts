@@ -22,15 +22,15 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    logger.info('[Auto-Enhance] Starting for project: ${project.name}');
+    logger.info('[Auto-Enhance] Starting for project', { project: project.name });
 
     // Run MEP extraction and room linking
     const mepResult = await runAutoMEPExtraction(project.id);
-    logger.info('[Auto-Enhance] MEP: ${mepResult.roomsUpdated} rooms updated');
+    logger.info('[Auto-Enhance] MEP extraction complete', { roomsUpdated: mepResult.roomsUpdated });
 
     // Get door counts
     const doorCounts = await countDoorsByType(project.id);
-    logger.info('[Auto-Enhance] Doors: ${doorCounts.total} found (from schedule: ${doorCounts.fromSchedule})');
+    logger.info('[Auto-Enhance] Doors counted', { total: doorCounts.total, fromSchedule: doorCounts.fromSchedule });
 
     return NextResponse.json({
       success: true,

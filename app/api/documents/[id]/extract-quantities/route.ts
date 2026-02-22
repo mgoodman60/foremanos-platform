@@ -75,7 +75,7 @@ export async function POST(
       );
     }
 
-    logger.info('Starting extraction for document ${document.name}');
+    logger.info('Starting extraction for document', { document: document.name });
 
     // Extract quantities
     const result = await extractQuantitiesFromDocument(
@@ -85,7 +85,7 @@ export async function POST(
       takeoffName
     );
 
-    logger.info('Extraction complete: ${result.totalItems} items found');
+    logger.info('Extraction complete', { totalItems: result.totalItems });
 
     // Get the created takeoff with full details
     const takeoff = await prisma.materialTakeoff.findUnique({

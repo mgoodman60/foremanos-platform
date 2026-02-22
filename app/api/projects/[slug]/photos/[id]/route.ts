@@ -167,7 +167,7 @@ export async function PATCH(
       },
     });
 
-    logger.info('[Photo Update] Updated photo ${id}');
+    logger.info('[Photo Update] Updated photo', { photoId: id });
 
     return NextResponse.json({
       success: true,
@@ -260,7 +260,7 @@ export async function DELETE(
       where: { id },
     });
 
-    logger.info('[Photo Delete] Deleted photo ${id}');
+    logger.info('[Photo Delete] Deleted photo', { photoId: id });
 
     return NextResponse.json({
       success: true,

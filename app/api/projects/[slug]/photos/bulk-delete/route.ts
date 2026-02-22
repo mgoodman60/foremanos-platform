@@ -95,7 +95,7 @@ export async function POST(
       try {
         await deleteFile(s3Path);
       } catch (error) {
-        logger.error('Error deleting ${s3Path} from S3', error);
+        logger.error('Error deleting file from S3', error, { s3Path });
         // Continue with other deletions
       }
     }

@@ -268,7 +268,7 @@ export async function GET(
     logger.info('[MEP API] Total equipment after dedup', { detail: allEquipment.length });
     logger.info('[MEP API] Equipment after trade filter', { detail: equipment.length });
     if (equipment.length > 0) {
-      logger.info('[MEP API] First item', { detail: JSON.stringify(equipment[0], null, 2 }));
+      logger.info('[MEP API] First item', { detail: JSON.stringify(equipment[0], null, 2) });
     }
 
     // Calculate stats for equipment browser

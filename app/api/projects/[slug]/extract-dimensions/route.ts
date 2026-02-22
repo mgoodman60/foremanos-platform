@@ -38,7 +38,7 @@ export async function POST(
       }
     });
 
-    logger.info('[DIMENSION EXTRACTION] Starting extraction for ${documents.length} documents...');
+    logger.info('[DIMENSION EXTRACTION] Starting extraction', { documentCount: documents.length });
 
     let totalDimensions = 0;
     let processedSheets = 0;
@@ -56,7 +56,7 @@ export async function POST(
           });
 
           if (existing) {
-            logger.info('[DIMENSION EXTRACTION] Skipping ${document.name} - already processed');
+            logger.info('[DIMENSION EXTRACTION] Skipping document - already processed', { document: document.name });
             const dims = existing.dimensions as any;
             if (Array.isArray(dims)) {
               totalDimensions += dims.length;
@@ -66,11 +66,11 @@ export async function POST(
           }
         }
 
-        logger.info('[DIMENSION EXTRACTION] Processing ${document.name}...');
+        logger.info('[DIMENSION EXTRACTION] Processing document', { document: document.name });
 
         // Skip if no cloud storage path
         if (!document.cloud_storage_path) {
-          logger.info('[DIMENSION EXTRACTION] Skipping ${document.name} - no cloud storage path');
+          logger.info('[DIMENSION EXTRACTION] Skipping document - no cloud storage path', { document: document.name });
           continue;
         }
 
@@ -109,14 +109,14 @@ export async function POST(
         const pageBase64 = rasterResult.base64;
 
         // Extract dimensions using vision (supports both PDF and image input)
-        logger.info('[DIMENSION EXTRACTION] Analyzing ${sheetNumber} with GPT-5.2 Vision...');
+        logger.info('[DIMENSION EXTRACTION] Analyzing sheet with GPT-5.2 Vision', { sheet: sheetNumber });
         const dimensions = await extractDimensionsWithVision(
           pageBase64,
           sheetNumber,
           scaleData
         );
 
-        logger.info('[DIMENSION EXTRACTION] Extracted ${dimensions.length} dimensions from ${sheetNumber}');
+        logger.info('[DIMENSION EXTRACTION] Extracted dimensions', { count: dimensions.length, sheet: sheetNumber });
 
         // Validate dimension chains
         const dimensionsWithIds = dimensions.map((d, idx) => ({
@@ -191,12 +191,12 @@ export async function POST(
         processedSheets++;
 
       } catch (error: any) {
-        logger.error('[DIMENSION EXTRACTION] Error processing ${document.name}', error);
+        logger.error('[DIMENSION EXTRACTION] Error processing document', error, { document: document.name });
         errors.push(`${document.name}: ${error.message}`);
       }
     }
 
-    logger.info('[DIMENSION EXTRACTION] Complete. Extracted ${totalDimensions} dimensions from ${processedSheets} sheets.');
+    logger.info('[DIMENSION EXTRACTION] Complete', { totalDimensions, processedSheets });
 
     return NextResponse.json({
       success: true,

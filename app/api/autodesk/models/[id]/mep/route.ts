@@ -45,7 +45,7 @@ export async function GET(
     }
 
     // Extract fresh BIM data
-    logger.info('[MEP API] Extracting MEP data for model ${model.id}');
+    logger.info('[MEP API] Extracting MEP data for model', { modelId: model.id });
     const bimData = await extractBIMData(model.urn);
     const mepEquipment = extractMEPEquipment(bimData);
 

@@ -51,7 +51,7 @@ export async function POST(
     }
 
     // Remove duplicates
-    logger.info('Removing duplicates from project ${project.id} (${slug})...');
+    logger.info('Removing duplicates from project', { projectId: project.id, slug });
     const result = await removeDuplicates(project.id);
 
     if (result.errors.length > 0) {

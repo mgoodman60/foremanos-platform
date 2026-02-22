@@ -72,7 +72,7 @@ export async function POST(
       );
     }
 
-    logger.info('Extracting finish schedules for project ${project.name} (slug: ${slug})');
+    logger.info('Extracting finish schedules for project', { project: project.name, slug });
 
     // Extract finish schedules
     const result = await extractFinishSchedules(slug);

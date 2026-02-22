@@ -49,7 +49,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
 
     // Process each document
     for (const document of project.Document) {
-      logger.info('\n📄 Processing document: ${document.name}');
+      logger.info('Processing document', { document: document.name });
       
       // Check if already processed
       if (!forceReprocess) {
@@ -88,7 +88,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
         for (const page of rasterizedPages) {
           const pageNumber = page.pageNumber;
 
-          logger.info('📃 Processing page ${pageNumber}/${rasterizedPages.length}');
+          logger.info('Processing page', { page: pageNumber, totalPages: rasterizedPages.length });
 
           // Use page number as sheet identifier
           const sheetNumber = `Page ${pageNumber}`;
@@ -112,14 +112,14 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
 
             extracted++;
             totalScales += visionResult.scales.length;
-            logger.info('✓ Extracted ${visionResult.scales.length} scale(s) from page ${pageNumber}');
+            logger.info('Extracted scales from page', { count: visionResult.scales.length, page: pageNumber });
           } else {
-            logger.info('⚠️  No scales found on page ${pageNumber}');
+            logger.info('No scales found on page', { page: pageNumber });
           }
         }
 
       } catch (error) {
-        logger.error('Error processing document ${document.name}', error);
+        logger.error('Error processing document', error, { document: document.name });
       }
     }
 

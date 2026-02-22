@@ -58,7 +58,7 @@ export async function POST(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    logger.info('Starting auto-takeoff generation for project: ${slug}');
+    logger.info('Starting auto-takeoff generation for project', { slug });
 
     // Run auto-generation
     const result = await autoGenerateTakeoffs(slug);

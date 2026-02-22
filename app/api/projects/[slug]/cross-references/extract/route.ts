@@ -133,7 +133,7 @@ export async function POST(
           });
         }
       } catch (error: any) {
-        logger.error('[Cross-Ref Extract] Error processing ${doc.name}', error);
+        logger.error('[Cross-Ref Extract] Error processing document', error, { document: doc.name });
         results.push({
           documentId: doc.id,
           documentName: doc.name,

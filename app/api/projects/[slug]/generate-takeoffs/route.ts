@@ -74,7 +74,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     // Calculate takeoffs for all rooms
-    logger.info('Calculating takeoffs for project: ${project.slug}');
+    logger.info('Calculating takeoffs for project', { slug: project.slug });
     const calculations = await calculateProjectTakeoffs(project.id, ceilingHeight);
 
     if (calculations.length === 0) {
@@ -99,7 +99,7 @@ export async function POST(request: Request, context: RouteContext) {
       `Automatic Takeoff - ${new Date().toLocaleDateString()}`
     );
 
-    logger.info('Created takeoff ${takeoffId} with ${calculations.length} line items');
+    logger.info('Created takeoff', { takeoffId, lineItems: calculations.length });
 
     return NextResponse.json({
       success: true,

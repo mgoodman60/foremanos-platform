@@ -63,7 +63,7 @@ export async function POST(
       );
     }
 
-    logger.info('Starting AI-powered parse for document ${document.name}');
+    logger.info('Starting AI-powered parse for document', { document: document.name });
 
     // Delete any existing schedules for this document
     await deleteScheduleForDocument(id);
@@ -76,7 +76,7 @@ export async function POST(
       scheduleName
     );
 
-    logger.info('Parse complete: ${result.totalTasks} tasks found');
+    logger.info('Parse complete', { totalTasks: result.totalTasks });
 
     // Get created schedule with tasks
     const schedule = await prisma.schedule.findUnique({

@@ -56,12 +56,12 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         continue;
       }
 
-      logger.info('Processing ${document.name}...');
+      logger.info('Processing document', { document: document.name });
 
       try {
         // Skip if no cloud storage path
         if (!document.cloud_storage_path) {
-          logger.info('Skipping ${document.name} - no cloud storage path');
+          logger.info('Skipping document - no cloud storage path', { document: document.name });
           continue;
         }
 
@@ -129,12 +129,12 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
               errorCount++;
             }
           } catch (chunkError) {
-            logger.error('Error processing chunk ${chunk.id}', chunkError);
+            logger.error('Error processing chunk', chunkError, { chunkId: chunk.id });
             errorCount++;
           }
         }
       } catch (docError) {
-        logger.error('Error processing document ${document.id}', docError);
+        logger.error('Error processing document', docError, { documentId: document.id });
         results.push({
           documentId: document.id,
           documentName: document.name,

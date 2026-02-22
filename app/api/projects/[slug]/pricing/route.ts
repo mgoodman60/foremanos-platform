@@ -58,7 +58,7 @@ export async function POST(
 
     if (action === 'search-selected' && items?.length > 0) {
       // Search prices for specific items only
-      logger.info('Searching prices for', { detail: items.length, 'selected items' });
+      logger.info('Searching prices for selected items', { count: items.length });
       
       const results = await searchMaterialPrices(items, {
         city: project.locationCity || undefined,
@@ -130,7 +130,7 @@ export async function PUT(
     }
 
     // Apply the price updates
-    logger.info('Applying', { detail: updates.length, 'price updates' });
+    logger.info('Applying price updates', { count: updates.length });
     const result = await applyPriceUpdates(project.id, updates);
 
     // Log the activity

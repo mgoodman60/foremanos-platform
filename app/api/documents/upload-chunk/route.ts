@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       Body: chunkBuffer,
     }));
 
-    logger.info('Uploaded chunk ${chunkIndex + 1}/${totalChunks} for ${fileName}');
+    logger.info('Uploaded chunk', { chunk: chunkIndex + 1, totalChunks, fileName });
 
     return NextResponse.json({
       success: true,

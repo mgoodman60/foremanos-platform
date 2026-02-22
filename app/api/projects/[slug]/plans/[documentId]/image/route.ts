@@ -107,7 +107,7 @@ export async function GET(
     // Option 1: Download from S3 if cloud_storage_path exists (preferred)
     if (document.cloud_storage_path) {
       try {
-        logger.info('[Document Viewer] Downloading from S3: ${document.cloud_storage_path}');
+        logger.info('[Document Viewer] Downloading from S3', { path: document.cloud_storage_path });
         pdfBuffer = await downloadFile(document.cloud_storage_path);
         logger.info('[Document Viewer] Downloaded from S3');
       } catch (s3Error: any) {
@@ -118,7 +118,7 @@ export async function GET(
     // Option 2: Try to fetch from fileUrl if available
     if (!pdfBuffer && document.fileUrl) {
       try {
-        logger.info('[Document Viewer] Fetching from fileUrl: ${document.fileUrl}');
+        logger.info('[Document Viewer] Fetching from fileUrl', { fileUrl: document.fileUrl });
         const response = await fetch(document.fileUrl);
         if (response.ok) {
           pdfBuffer = Buffer.from(await response.arrayBuffer());

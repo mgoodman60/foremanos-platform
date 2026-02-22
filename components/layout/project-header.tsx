@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronDown,
   ClipboardCheck,
+  SlidersHorizontal,
 } from 'lucide-react';
 import NextImage from 'next/image';
 import { useProject } from './project-context';
@@ -162,7 +163,7 @@ export function ProjectHeader() {
                       onClick={() => { router.push(`/project/${slug}/settings`); setShowSettingsMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                     >
-                      <Settings className="w-4 h-4 text-orange-400" />
+                      <SlidersHorizontal className="w-4 h-4 text-orange-400" />
                       Project Settings
                     </button>
                     <button
