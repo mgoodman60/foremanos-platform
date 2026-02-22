@@ -1349,9 +1349,10 @@ export async function analyzeDocumentSmart(
     const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
     
     return analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
-  } catch (rasterError: any) {
+  } catch (rasterError: unknown) {
     // Canvas/native module not available - return direct result
-    logger.warn('SMART_ANALYSIS', 'Rasterization unavailable, returning direct result', { error: rasterError.message?.substring(0, 50) });
+    const rasterErrMsg = rasterError instanceof Error ? rasterError.message : String(rasterError);
+    logger.warn('SMART_ANALYSIS', 'Rasterization unavailable, returning direct result', { error: rasterErrMsg.substring(0, 50) });
     return directResult;
   }
 }
@@ -1395,9 +1396,10 @@ export async function analyzeWithSmartRouting(
       const { rasterizeSinglePage } = await import('./pdf-to-image-raster');
       const rasterized = await rasterizeSinglePage(pdfBuffer, pageNumber || 1, { dpi: 150, maxWidth: 2000 });
       return analyzeWithLoadBalancing(rasterized.base64, prompt, pageNumber, minQualityScore);
-    } catch (rasterError: any) {
+    } catch (rasterError: unknown) {
       // Canvas/native module not available - return direct result or empty
-      logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterError.message?.substring(0, 50) });
+      const rasterErrMsg = rasterError instanceof Error ? rasterError.message : String(rasterError);
+      logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterErrMsg.substring(0, 50) });
       return directResult;
     }
 
@@ -1420,9 +1422,10 @@ export async function analyzeWithSmartRouting(
       // Fallback to direct PDF if image processing fails
       logger.warn('SMART_ROUTING', 'Image processing failed, trying direct PDF');
       return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber, VISION_MODEL);
-    } catch (rasterError: any) {
+    } catch (rasterError: unknown) {
       // Canvas/native module not available (common in production/serverless)
-      logger.warn('SMART_ROUTING', 'Rasterization unavailable, using direct PDF', { error: rasterError.message?.substring(0, 50) });
+      const rasterErrMsg = rasterError instanceof Error ? rasterError.message : String(rasterError);
+      logger.warn('SMART_ROUTING', 'Rasterization unavailable, using direct PDF', { error: rasterErrMsg.substring(0, 50) });
       return analyzeWithDirectPdf(pdfBase64, prompt, pageNumber, pageNumber, VISION_MODEL);
     }
 
@@ -1454,9 +1457,10 @@ export async function analyzeWithSmartRouting(
 
       // Return direct result if image didn't improve
       return directResult.success ? directResult : imageResult;
-    } catch (rasterError: any) {
+    } catch (rasterError: unknown) {
       // Canvas/native module not available - return direct result
-      logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterError.message?.substring(0, 50) });
+      const rasterErrMsg = rasterError instanceof Error ? rasterError.message : String(rasterError);
+      logger.warn('SMART_ROUTING', 'Rasterization unavailable, returning direct result', { error: rasterErrMsg.substring(0, 50) });
       return directResult;
     }
   }
