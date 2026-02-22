@@ -7,7 +7,7 @@ const mockRedisInstance = vi.hoisted(() => ({
   set: vi.fn(),
   setex: vi.fn(),
   del: vi.fn(),
-  keys: vi.fn(),
+  scan: vi.fn(),
   incr: vi.fn(),
   expire: vi.fn(),
   quit: vi.fn(),
@@ -293,12 +293,12 @@ describe('Redis Client', () => {
       const result = await clearCachePattern('test:*');
 
       expect(result).toBe(0);
-      expect(mockRedisInstance.keys).not.toHaveBeenCalled();
+      expect(mockRedisInstance.scan).not.toHaveBeenCalled();
     });
 
     it('should return 0 when no keys match pattern', async () => {
       process.env.REDIS_URL = 'redis://localhost:6379';
-      mockRedisInstance.keys.mockResolvedValue([]);
+      mockRedisInstance.scan.mockResolvedValue(['0', []]);
 
       const redisModule = await import('@/lib/redis');
       const eventHandlers = mockRedisInstance.on.mock.calls;
@@ -308,14 +308,21 @@ describe('Redis Client', () => {
       const result = await redisModule.clearCachePattern('nonexistent:*');
 
       expect(result).toBe(0);
-      expect(mockRedisInstance.keys).toHaveBeenCalledWith('nonexistent:*');
+      expect(mockRedisInstance.scan).toHaveBeenCalledWith(
+        '0',
+        'MATCH',
+        'nonexistent:*',
+        'COUNT',
+        100
+      );
       expect(mockRedisInstance.del).not.toHaveBeenCalled();
     });
 
     it('should delete all matching keys and return count', async () => {
       process.env.REDIS_URL = 'redis://localhost:6379';
-      const matchingKeys = ['user:1', 'user:2', 'user:3'];
-      mockRedisInstance.keys.mockResolvedValue(matchingKeys);
+      mockRedisInstance.scan
+        .mockResolvedValueOnce(['1', ['user:1', 'user:2']])
+        .mockResolvedValueOnce(['0', ['user:3']]);
       mockRedisInstance.del.mockResolvedValue(3);
 
       const redisModule = await import('@/lib/redis');
@@ -326,13 +333,29 @@ describe('Redis Client', () => {
       const result = await redisModule.clearCachePattern('user:*');
 
       expect(result).toBe(3);
-      expect(mockRedisInstance.keys).toHaveBeenCalledWith('user:*');
-      expect(mockRedisInstance.del).toHaveBeenCalledWith(...matchingKeys);
+      expect(mockRedisInstance.scan).toHaveBeenNthCalledWith(
+        1,
+        '0',
+        'MATCH',
+        'user:*',
+        'COUNT',
+        100
+      );
+      expect(mockRedisInstance.scan).toHaveBeenNthCalledWith(
+        2,
+        '1',
+        'MATCH',
+        'user:*',
+        'COUNT',
+        100
+      );
+      expect(mockRedisInstance.del).toHaveBeenNthCalledWith(1, 'user:1', 'user:2');
+      expect(mockRedisInstance.del).toHaveBeenNthCalledWith(2, 'user:3');
     });
 
     it('should handle Redis pattern clear errors gracefully', async () => {
       process.env.REDIS_URL = 'redis://localhost:6379';
-      mockRedisInstance.keys.mockRejectedValue(new Error('Keys scan failed'));
+      mockRedisInstance.scan.mockRejectedValue(new Error('Keys scan failed'));
 
       const redisModule = await import('@/lib/redis');
       const eventHandlers = mockRedisInstance.on.mock.calls;
