@@ -383,7 +383,7 @@ export default function SchedulesPage() {
       } else if (data.schedules.length > 0) {
         setSelectedSchedule(data.schedules[0]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading schedules:', error);
       toast.error('Failed to load schedules');
     } finally {
@@ -468,9 +468,10 @@ export default function SchedulesPage() {
       
       // Reload documents list
       await loadScheduleDocuments();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error reprocessing document:', error);
-      toast.error(error.message || 'Failed to reprocess document');
+      const errMsg = error instanceof Error ? error.message : 'Failed to reprocess document';
+      toast.error(errMsg);
     } finally {
       setReprocessingDocumentId(null);
     }
@@ -514,9 +515,10 @@ export default function SchedulesPage() {
       // Trigger schedule update event for progress ribbon
       window.dispatchEvent(new CustomEvent('scheduleUpdated'));
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error parsing schedule:', error);
-      toast.error(error.message || 'Failed to parse schedule');
+      const errMsg = error instanceof Error ? error.message : 'Failed to parse schedule';
+      toast.error(errMsg);
     } finally {
       setParsingDocumentId(null);
     }
@@ -529,7 +531,7 @@ export default function SchedulesPage() {
       const data = await res.json();
       setTasks(data.tasks);
       setMilestones(data.milestones || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading tasks:', error);
       toast.error('Failed to load tasks');
     }
@@ -610,7 +612,7 @@ export default function SchedulesPage() {
       
       // Trigger schedule update event for progress ribbon
       window.dispatchEvent(new CustomEvent('scheduleUpdated'));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating task:', error);
       toast.error('Failed to update task');
     } finally {

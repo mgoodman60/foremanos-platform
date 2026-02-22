@@ -166,9 +166,10 @@ export function AdminFeedbackReview({ projectSlug }: AdminFeedbackReviewProps) {
       toast.success('Correction saved! The chatbot will learn from this.');
       setShowCorrectionDialog(false);
       fetchFeedback();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving correction:', error);
-      toast.error(error.message || 'Failed to save correction');
+      const errMsg = error instanceof Error ? error.message : 'Failed to save correction';
+      toast.error(errMsg);
     } finally {
       setSaving(false);
     }

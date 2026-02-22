@@ -286,8 +286,9 @@ describe('convertPdfToImages', () => {
       try {
         await convertPdfToImages(invalidBuffer);
         expect.fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toContain('PDF page extraction failed:');
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        expect(errMsg).toContain('PDF page extraction failed:');
       }
     });
 
@@ -469,8 +470,9 @@ describe('convertSinglePage', () => {
       try {
         await convertSinglePage(pdfBuffer, 100);
         expect.fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toBe('Failed to extract page 100');
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        expect(errMsg).toBe('Failed to extract page 100');
       }
     });
   });
@@ -563,8 +565,9 @@ describe('getPdfPageCount', () => {
       try {
         await getPdfPageCount(invalidBuffer);
         expect.fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toContain('Failed to get PDF page count:');
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        expect(errMsg).toContain('Failed to get PDF page count:');
       }
     });
 

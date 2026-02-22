@@ -130,9 +130,10 @@ export async function scanFileBuffer(
     }
 
     return scanResult;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle timeout
-    if (error.name === 'AbortError') {
+    const errName = error instanceof Error ? error.name : undefined;
+    if (errName === 'AbortError') {
       logger.error('VIRUS_SCANNER', 'Scan timeout', error as Error, { fileName });
       await logSecurityEvent('VIRUS_SCAN_TIMEOUT', {
         fileName,
@@ -212,7 +213,7 @@ export async function getScanResult(scanId: string): Promise<VirusScanResult> {
       scanId,
       timestamp: new Date(),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('VIRUS_SCANNER', 'Error getting scan result', error as Error);
     throw error;
   }

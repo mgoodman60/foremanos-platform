@@ -244,8 +244,9 @@ export default function DocumentProcessingMonitor({
       
       toast.success('Document processing started');
       fetchStatus(); // Refresh status
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to process document');
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Failed to process document';
+      toast.error(errMsg);
     }
   };
 

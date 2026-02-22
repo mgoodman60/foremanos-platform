@@ -118,7 +118,7 @@ export function Phase3Dashboard({
 
       const data = await response.json();
       setAnalytics(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching dashboard analytics:', error);
       toast.error('Failed to load dashboard analytics');
     } finally {

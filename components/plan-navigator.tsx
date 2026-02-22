@@ -150,7 +150,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
       if (firstDocWithRefs) {
         setExpandedDocs(new Set([firstDocWithRefs]));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching cross-references:', error);
       toast.error('Failed to load cross-references');
     } finally {

@@ -164,8 +164,9 @@ export default function SignupPage() {
       } else {
         throw new Error('Failed to create checkout session');
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during signup. Please try again.');
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'An error occurred during signup. Please try again.';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

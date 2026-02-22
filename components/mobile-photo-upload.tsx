@@ -160,14 +160,15 @@ export function MobilePhotoUpload({
       );
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading photo:', error);
+      const errMsg = error instanceof Error ? error.message : 'Upload failed';
 
       // Update photo status with error
       setPhotos((prev) =>
         prev.map((p) =>
           p.id === photo.id
-            ? { ...p, uploading: false, uploaded: false, error: error.message }
+            ? { ...p, uploading: false, uploaded: false, error: errMsg }
             : p
         )
       );

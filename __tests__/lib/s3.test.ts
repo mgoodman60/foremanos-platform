@@ -808,8 +808,9 @@ describe('S3 Module - uploadFile retry with mixed errors', () => {
 
     try {
       await uploadFile(Buffer.from('test'), 'file.pdf', false, 1000, 4);
-    } catch (error: any) {
-      expect(error.message).toBe('S3 upload failed after 5 attempts: fail');
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      expect(errMsg).toBe('S3 upload failed after 5 attempts: fail');
     }
   });
 

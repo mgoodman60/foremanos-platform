@@ -114,14 +114,15 @@ async function testDatabaseConnection(): Promise<boolean> {
     logSuccess('Database query successful');
 
     return true;
-  } catch (error: any) {
-    logError(`Database connection failed: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logError(`Database connection failed: ${errMsg}`);
 
-    if (error.message.includes('ECONNREFUSED')) {
+    if (errMsg.includes('ECONNREFUSED')) {
       log('    Hint: Is your database server running?', 'yellow');
-    } else if (error.message.includes('authentication')) {
+    } else if (errMsg.includes('authentication')) {
       log('    Hint: Check your database credentials in DATABASE_URL', 'yellow');
-    } else if (error.message.includes('does not exist')) {
+    } else if (errMsg.includes('does not exist')) {
       log('    Hint: The database may need to be created first', 'yellow');
     }
 
@@ -147,8 +148,9 @@ async function checkExistingSchema(): Promise<{ hasSchema: boolean; tableCount: 
       logWarning('No tables found - database is empty');
       return { hasSchema: false, tableCount: 0 };
     }
-  } catch (error: any) {
-    logWarning(`Could not check schema: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logWarning(`Could not check schema: ${errMsg}`);
     return { hasSchema: false, tableCount: 0 };
   }
 }
@@ -180,8 +182,9 @@ async function applySchema(force: boolean = false): Promise<boolean> {
 
     logSuccess('Schema applied successfully');
     return true;
-  } catch (error: any) {
-    logError(`Schema push failed: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logError(`Schema push failed: ${errMsg}`);
     return false;
   }
 }
@@ -230,11 +233,13 @@ async function createAdminUser(): Promise<boolean> {
 
     logSuccess(`Admin user created: ${user.email}`);
     return true;
-  } catch (error: any) {
-    if (error.code === 'P2002') {
+  } catch (error: unknown) {
+    const errCode = error instanceof Object && 'code' in error ? (error as { code?: string }).code : undefined;
+    if (errCode === 'P2002') {
       logError('User with that email or username already exists');
     } else {
-      logError(`Failed to create user: ${error.message}`);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      logError(`Failed to create user: ${errMsg}`);
     }
     return false;
   }
@@ -292,8 +297,9 @@ async function main() {
     // Summary
     await printSummary();
 
-  } catch (error: any) {
-    logError(`Unexpected error: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logError(`Unexpected error: ${errMsg}`);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

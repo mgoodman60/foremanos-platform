@@ -372,8 +372,9 @@ export async function autoImportRequirements(
         },
       });
       imported++;
-    } catch (e: any) {
-      errors.push(`Failed to import ${item.productName}: ${e.message}`);
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : String(e);
+      errors.push(`Failed to import ${item.productName}: ${errMsg}`);
     }
   }
 

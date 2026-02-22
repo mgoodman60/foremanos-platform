@@ -57,8 +57,9 @@ export default function CrossReferenceMap({ projectSlug }: Props) {
 
       const data = await response.json();
       setRelationships(data.relationships || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

@@ -130,8 +130,9 @@ export function RequirementAutoImport({
 
       onImportComplete?.(result);
       onImported?.();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to import requirements');
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Failed to import requirements';
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }

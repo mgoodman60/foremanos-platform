@@ -125,9 +125,10 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
       });
 
       toast.success(`Extracted ${result.extraction.itemCount} budget items`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Extraction error:', error);
-      toast.error(error.message || 'Failed to extract budget');
+      const errMsg = error instanceof Error ? error.message : 'Failed to extract budget';
+      toast.error(errMsg);
     } finally {
       setExtracting(false);
     }
@@ -160,9 +161,10 @@ export default function BudgetImportModal({ isOpen, onClose, onSuccess }: Budget
       toast.success(`Imported ${result.import.itemsCreated} budget items`);
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Import error:', error);
-      toast.error(error.message || 'Failed to import budget');
+      const errMsg = error instanceof Error ? error.message : 'Failed to import budget';
+      toast.error(errMsg);
     } finally {
       setExtracting(false);
     }

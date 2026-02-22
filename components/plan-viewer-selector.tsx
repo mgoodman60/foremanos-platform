@@ -65,7 +65,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
         doc.fileType === 'pdf' || doc.fileType === 'application/pdf' || doc.fileType?.includes('pdf')
       );
       setDocuments(plans);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching documents:', error);
       toast.error('Failed to load plan documents');
     } finally {
@@ -85,7 +85,7 @@ export function PlanViewerSelector({ projectSlug, onClose }: PlanViewerSelectorP
         name: doc.name,
         totalPages: metadata.totalPages || 1
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading plan:', error);
       toast.error('Failed to load plan viewer');
     }

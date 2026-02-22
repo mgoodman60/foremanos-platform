@@ -56,11 +56,12 @@ export async function callVisionAPIWithRetry(
       error: result.error || 'All providers failed',
       retriesUsed: result.attempts,
     };
-  } catch (error: any) {
-    logger.error('VISION_API', 'analyzeWithMultiProvider threw unexpected error', error);
+  } catch (error: unknown) {
+    logger.error('VISION_API', 'analyzeWithMultiProvider threw unexpected error', error as Error);
+    const errMsg = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      error: error.message || 'Unknown error',
+      error: errMsg,
       retriesUsed: 0,
     };
   }

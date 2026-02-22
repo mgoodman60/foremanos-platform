@@ -154,8 +154,9 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
       const projectData = await projectRes.json();
       projectId = projectData.id || projectData.project?.id;
       if (!projectId) throw new Error('Project ID not found');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to resolve project');
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Failed to resolve project';
+      toast.error(errMsg);
       setUploading(false);
       return;
     }
@@ -239,9 +240,10 @@ export function BatchUploadModal({ projectSlug, onClose, onSuccess }: BatchUploa
         setFiles(prev => prev.map((f, idx) =>
           idx === i ? { ...f, status: 'success' as const, progress: 100, cloudStoragePath, documentId } : f
         ));
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : 'Upload failed';
         setFiles(prev => prev.map((f, idx) =>
-          idx === i ? { ...f, status: 'error' as const, error: error.message } : f
+          idx === i ? { ...f, status: 'error' as const, error: errMsg } : f
         ));
       }
     }

@@ -172,9 +172,10 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       document.body.removeChild(a);
 
       toast.success('Room sheet PDF downloaded!', { id: `export-room-${room.id}` });
-    } catch (error: any) {
-      logger.error('ROOM_BROWSER', 'Error exporting room PDF', error);
-      toast.error(error.message || 'Failed to export room PDF', { id: `export-room-${room.id}` });
+    } catch (error: unknown) {
+      logger.error('ROOM_BROWSER', 'Error exporting room PDF', error as Error);
+      const errMsg = error instanceof Error ? error.message : 'Failed to export room PDF';
+      toast.error(errMsg, { id: `export-room-${room.id}` });
     } finally {
       setExportingRoomId(null);
     }
@@ -209,9 +210,10 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       document.body.removeChild(a);
 
       toast.success('Room sheet DOCX downloaded!', { id: `export-docx-${room.id}` });
-    } catch (error: any) {
-      logger.error('ROOM_BROWSER', 'Error exporting room DOCX', error);
-      toast.error(error.message || 'Failed to export room DOCX', { id: `export-docx-${room.id}` });
+    } catch (error: unknown) {
+      logger.error('ROOM_BROWSER', 'Error exporting room DOCX', error as Error);
+      const errMsg = error instanceof Error ? error.message : 'Failed to export room DOCX';
+      toast.error(errMsg, { id: `export-docx-${room.id}` });
     } finally {
       setExportingDocxRoomId(null);
     }
@@ -247,9 +249,10 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       document.body.removeChild(a);
 
       toast.success(`Exported ${count} rooms to ${format.toUpperCase()}`, { id: 'bulk-export' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Bulk export error:', error);
-      toast.error(error.message || 'Failed to export rooms', { id: 'bulk-export' });
+      const errMsg = error instanceof Error ? error.message : 'Failed to export rooms';
+      toast.error(errMsg, { id: 'bulk-export' });
     } finally {
       setBulkExporting(false);
     }
@@ -275,7 +278,7 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       const data = await response.json();
       setRooms(data.rooms || []);
       setSummary(data.summary || null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching rooms:', error);
       toast.error('Failed to load rooms');
     } finally {
@@ -319,9 +322,10 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       } else {
         toast.info(data.message || 'No rooms found in documents', { id: 'extract-rooms' });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error extracting rooms:', error);
-      toast.error(error.message || 'Failed to extract rooms', { id: 'extract-rooms' });
+      const errMsg = error instanceof Error ? error.message : 'Failed to extract rooms';
+      toast.error(errMsg, { id: 'extract-rooms' });
     } finally {
       setExtracting(false);
     }
@@ -364,9 +368,10 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       } else {
         toast.info(data.message || 'No finish schedule data found', { id: 'extract-finishes' });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error extracting finish schedules:', error);
-      toast.error(error.message || 'Failed to extract finish schedules', { id: 'extract-finishes' });
+      const errMsg = error instanceof Error ? error.message : 'Failed to extract finish schedules';
+      toast.error(errMsg, { id: 'extract-finishes' });
     } finally {
       setExtractingFinishes(false);
     }
@@ -397,9 +402,10 @@ export function RoomBrowser({ projectSlug, onClose, onRoomSelect }: RoomBrowserP
       } else {
         toast.info(data.message || 'No MEP schedules found in documents', { id: 'extract-mep' });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error extracting MEP schedules:', error);
-      toast.error(error.message || 'Failed to extract MEP schedules', { id: 'extract-mep' });
+      const errMsg = error instanceof Error ? error.message : 'Failed to extract MEP schedules';
+      toast.error(errMsg, { id: 'extract-mep' });
     } finally {
       setExtractingMEP(false);
     }
@@ -467,7 +473,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
           { duration: 7000 }
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error debugging finish content:', error);
       toast.error('Failed to analyze finish content', { id: 'debug-finishes' });
     } finally {
@@ -556,9 +562,10 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
 
       toast.success('Room floor updated successfully', { id: toastId });
       await fetchRooms(); // Refresh the list
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating room floor:', error);
-      toast.error(error.message || 'Failed to update room floor');
+      const errMsg = error instanceof Error ? error.message : 'Failed to update room floor';
+      toast.error(errMsg);
     } finally {
       setUpdatingRoomId(null);
     }
@@ -634,9 +641,10 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
       // Clear selection and refresh
       clearSelection();
       await fetchRooms();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error bulk updating floors:', error);
-      toast.error(error.message || 'Failed to update rooms', { id: 'bulk-update-floor' });
+      const errMsg = error instanceof Error ? error.message : 'Failed to update rooms';
+      toast.error(errMsg, { id: 'bulk-update-floor' });
     } finally {
       setBulkUpdating(false);
     }

@@ -247,9 +247,10 @@ export async function extractRoomsFromDocuments(
       summary: `Successfully extracted ${extractedRooms.length} rooms from ${documentsProcessed} documents.`,
       documentsProcessed,
     };
-  } catch (llmError: any) {
+  } catch (llmError: unknown) {
     log.error('LLM extraction error', llmError as Error);
-    throw new Error(`Failed to extract rooms: ${llmError?.message || 'Unknown error'}`);
+    const errMsg = llmError instanceof Error ? llmError.message : 'Unknown error';
+    throw new Error(`Failed to extract rooms: ${errMsg}`);
   }
 }
 
@@ -498,9 +499,10 @@ Return ONLY the JSON array, no additional text.`;
       log.error('JSON parse error', parseError as Error, { preview: jsonMatch[0].substring(0, 500) });
       return [];
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Error extracting room data with LLM', error as Error);
-    throw new Error(`Failed to extract rooms: ${error?.message || 'Unknown error'}`);
+    const errMsg = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to extract rooms: ${errMsg}`);
   }
 }
 

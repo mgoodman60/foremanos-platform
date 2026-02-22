@@ -93,10 +93,12 @@ async function applyCorsRules(): Promise<boolean> {
     logSuccess('CORS rules applied successfully');
 
     return true;
-  } catch (error: any) {
-    logError(`Failed to apply CORS rules: ${error.message}`);
-    if (error.Code) {
-      log(`    Error code: ${error.Code}`, 'yellow');
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logError(`Failed to apply CORS rules: ${errMsg}`);
+    const errCode = error instanceof Object && 'Code' in error ? (error as { Code?: string }).Code : undefined;
+    if (errCode) {
+      log(`    Error code: ${errCode}`, 'yellow');
     }
     return false;
   }
@@ -131,8 +133,9 @@ async function verifyCorsRules(): Promise<boolean> {
       logWarning('No CORS rules found after applying');
       return false;
     }
-  } catch (error: any) {
-    logError(`Failed to verify CORS rules: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logError(`Failed to verify CORS rules: ${errMsg}`);
     return false;
   }
 }
@@ -184,9 +187,10 @@ async function main() {
     log('');
 
     process.exit(0);
-  } catch (error: any) {
-    logError(`\nUnexpected error: ${error.message}`);
-    if (error.stack) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logError(`\nUnexpected error: ${errMsg}`);
+    if (error instanceof Error && error.stack) {
       console.error(error.stack);
     }
     process.exit(1);

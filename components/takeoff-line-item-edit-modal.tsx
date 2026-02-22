@@ -203,9 +203,10 @@ export function TakeoffLineItemEditModal({
       toast.success('Item updated successfully');
       onSave(updatedItem);
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating line item:', error);
-      toast.error(error.message || 'Failed to update item');
+      const errMsg = error instanceof Error ? error.message : 'Failed to update item';
+      toast.error(errMsg);
     }
   };
 

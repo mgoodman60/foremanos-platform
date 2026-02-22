@@ -157,8 +157,9 @@ export async function inferTradesForSchedule(
               needsClarification++;
             }
           }
-        } catch (batchError: any) {
-          errors.push(`Batch ${i}-${i + BATCH_SIZE}: ${batchError.message}`);
+        } catch (batchError: unknown) {
+          const errMsg = batchError instanceof Error ? batchError.message : String(batchError);
+          errors.push(`Batch ${i}-${i + BATCH_SIZE}: ${errMsg}`);
         }
       }
     }
@@ -171,9 +172,10 @@ export async function inferTradesForSchedule(
     logger.info('TRADE_INFERENCE', 'Inference complete', { updated, needsClarification });
     return { updated, needsClarification, errors };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('TRADE_INFERENCE', 'Inference error', error as Error);
-    errors.push(error.message);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    errors.push(errMsg);
     return { updated, needsClarification, errors };
   }
 }
@@ -316,15 +318,16 @@ function parseTradeInferenceResponse(
     }
 
     return results;
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('TRADE_INFERENCE', 'Parse error', error as Error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return tasks.map(t => ({
       taskId: t.taskId,
       taskName: t.name,
       inference: {
         tradeType: 'general_contractor',
         confidence: 40,
-        reasoning: 'Parse error: ' + error.message,
+        reasoning: 'Parse error: ' + errMsg,
         needsClarification: true,
       },
     }));
@@ -409,7 +412,7 @@ async function createTradeInferenceNotification(
     });
 
     logger.info('TRADE_INFERENCE', 'Created notification for tasks needing clarification', { count });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('TRADE_INFERENCE', 'Failed to create notification', error as Error);
   }
 }

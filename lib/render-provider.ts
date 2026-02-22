@@ -225,10 +225,11 @@ export async function callFlux2Pro(
         durationMs: Date.now() - start,
         estimatedCostUsd: config.costPerImage,
       };
-    } catch (err: any) {
-      const isRateLimit = err.isRateLimit === true;
+    } catch (err: unknown) {
+      const isRateLimit = err instanceof Object && 'isRateLimit' in err && err.isRateLimit === true;
+      const errMsg = err instanceof Error ? err.message : String(err);
       log.warn(`Flux 2 Pro attempt ${attempt + 1} failed`, {
-        error: err.message,
+        error: errMsg,
         isRateLimit,
       });
 
@@ -236,7 +237,7 @@ export async function callFlux2Pro(
         return {
           success: false,
           provider: 'flux-2-pro',
-          error: err.message,
+          error: errMsg,
           errorCode: isRateLimit ? 'rate_limit' : 'api_error',
           attempts: attempt + 1,
           durationMs: Date.now() - start,
@@ -364,17 +365,19 @@ export async function callGPTImage(
         durationMs: Date.now() - start,
         estimatedCostUsd: config.costPerImage,
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errCode = err instanceof Object && 'errorCode' in err ? (err as { errorCode?: string }).errorCode : undefined;
       log.warn(`${config.displayName} attempt ${attempt + 1} failed`, {
-        error: err.message,
+        error: errMsg,
       });
 
       if (attempt === config.maxRetries) {
         return {
           success: false,
           provider: model,
-          error: err.message,
-          errorCode: err.errorCode || 'api_error',
+          error: errMsg,
+          errorCode: errCode || 'api_error',
           attempts: attempt + 1,
           durationMs: Date.now() - start,
           estimatedCostUsd: 0,
@@ -619,8 +622,9 @@ export async function generateWithSitePhoto(
       durationMs: Date.now() - start,
       estimatedCostUsd: 0.08, // Image edits cost ~2x standard generation
     };
-  } catch (err: any) {
-    log.error('Site composite failed', { error: err.message });
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    log.error('Site composite failed', { error: errMsg });
 
     // Graceful fallback to standalone
     log.info('Falling back to standalone generation');

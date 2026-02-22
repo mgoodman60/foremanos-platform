@@ -195,9 +195,10 @@ export default function SubcontractorsPage() {
       toast.success('Subcontractor added successfully');
       setShowAddDialog(false);
       fetchSubcontractors();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding subcontractor:', error);
-      toast.error(error.message || 'Failed to add subcontractor');
+      const errMsg = error instanceof Error ? error.message : 'Failed to add subcontractor';
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -228,9 +229,10 @@ export default function SubcontractorsPage() {
       toast.success('Subcontractor updated successfully');
       setShowEditDialog(false);
       fetchSubcontractors();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating subcontractor:', error);
-      toast.error(error.message || 'Failed to update subcontractor');
+      const errMsg = error instanceof Error ? error.message : 'Failed to update subcontractor';
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -312,9 +314,10 @@ export default function SubcontractorsPage() {
 
       setShowImportDialog(false);
       fetchSubcontractors();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error importing subcontractors:', error);
-      toast.error(error.message || 'Failed to import subcontractors');
+      const errMsg = error instanceof Error ? error.message : 'Failed to import subcontractors';
+      toast.error(errMsg);
     } finally {
       setImporting(false);
     }

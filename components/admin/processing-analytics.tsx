@@ -74,9 +74,10 @@ export function ProcessingAnalytics() {
       
       const data = await response.json();
       setStats(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching processing stats:', error);
-      toast.error(error.message || 'Failed to load processing analytics');
+      const errMsg = error instanceof Error ? error.message : 'Failed to load processing analytics';
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }

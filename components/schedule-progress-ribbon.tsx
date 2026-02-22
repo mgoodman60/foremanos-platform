@@ -251,8 +251,9 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
       
       // Dispatch event for other components
       window.dispatchEvent(new CustomEvent('scheduleUpdated'));
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to parse schedule');
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Failed to parse schedule';
+      toast.error(errMsg);
     } finally {
       setParsing(false);
     }

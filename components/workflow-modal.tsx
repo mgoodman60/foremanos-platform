@@ -109,9 +109,10 @@ export function WorkflowModal({
       }
 
       setWorkflows(data.workflows);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading workflows:', error);
-      toast.error(error.message || 'Failed to load workflows');
+      const errMsg = error instanceof Error ? error.message : 'Failed to load workflows';
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -141,9 +142,10 @@ export function WorkflowModal({
 
       setCurrentSteps(data.steps);
       setScheduleContext(data.scheduleContext);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading next steps:', error);
-      toast.error(error.message || 'Failed to load next steps');
+      const errMsg = error instanceof Error ? error.message : 'Failed to load next steps';
+      toast.error(errMsg);
     }
   };
 
@@ -160,9 +162,10 @@ export function WorkflowModal({
 
       setSelectedWorkflow(data.workflow);
       setResponses({});
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading workflow:', error);
-      toast.error(error.message || 'Failed to load workflow');
+      const errMsg = error instanceof Error ? error.message : 'Failed to load workflow';
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
@@ -316,9 +319,10 @@ export function WorkflowModal({
       }
       
       handleClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving responses:', error);
-      toast.error(error.message || 'Failed to save responses');
+      const errMsg = error instanceof Error ? error.message : 'Failed to save responses';
+      toast.error(errMsg);
     } finally {
       setSaving(false);
     }

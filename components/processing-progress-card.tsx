@@ -61,8 +61,9 @@ export function ProcessingProgressCard({
             onComplete();
           }
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        setError(errMsg);
         setLoading(false);
       }
     };
