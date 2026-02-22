@@ -1034,30 +1034,30 @@ describe('document-processor-batch', () => {
     it('should use discipline pipeline when PIPELINE_MODE is discipline-single-pass', async () => {
       const extractedData = { sheetNumber: 'M-101', discipline: 'Mechanical', sheetTitle: 'HVAC Plan' };
 
-      // Opus vision succeeds
+      // PDF download fetch mock
       (global.fetch as any)
         .mockResolvedValueOnce({
           ok: true,
           arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          text: async () => JSON.stringify({
-            content: [{ text: JSON.stringify(extractedData) }],
-          }),
         });
 
-      mockGetProviderDisplayName.mockReturnValue('Claude Opus 4.6');
+      // Gemini 2.5 Pro vision succeeds
+      mockCallGeminiVision.mockResolvedValueOnce({
+        success: true,
+        content: JSON.stringify(extractedData),
+        provider: 'gemini-2.5-pro',
+      });
+
+      mockGetProviderDisplayName.mockReturnValue('Gemini 2.5 Pro');
 
       const result = await processDocumentBatch('doc-123', 1, 1);
 
       expect(result.success).toBe(true);
       expect(result.pagesProcessed).toBe(1);
       expect(mockClassifyPage).toHaveBeenCalled();
-      // Should NOT call three-pass Gemini functions
+      // Should NOT call three-pass Gemini Pro 3 function
       expect(mockCallGeminiPro3Vision).not.toHaveBeenCalled();
-      expect(mockCallGeminiVision).not.toHaveBeenCalled();
+      expect(mockCallGeminiVision).toHaveBeenCalled();
       expect(mockPrisma.documentChunk.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -1095,20 +1095,21 @@ describe('document-processor-batch', () => {
 
       const extractedData = { sheetNumber: 'X-001' };
 
+      // PDF download fetch mock
       (global.fetch as any)
         .mockResolvedValueOnce({
           ok: true,
           arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          text: async () => JSON.stringify({
-            content: [{ text: JSON.stringify(extractedData) }],
-          }),
         });
 
-      mockGetProviderDisplayName.mockReturnValue('Claude Opus 4.6');
+      // Gemini 2.5 Pro vision succeeds
+      mockCallGeminiVision.mockResolvedValueOnce({
+        success: true,
+        content: JSON.stringify(extractedData),
+        provider: 'gemini-2.5-pro',
+      });
+
+      mockGetProviderDisplayName.mockReturnValue('Gemini 2.5 Pro');
 
       const result = await processDocumentBatch('doc-123', 1, 1);
 
@@ -1126,19 +1127,14 @@ describe('document-processor-batch', () => {
       );
     });
 
-    it('should fall back to GPT-5.2 when Opus vision fails', async () => {
+    it('should fall back to GPT-5.2 when Gemini vision fails', async () => {
       const extractedData = { sheetNumber: 'A-101' };
 
-      // First fetch: PDF download. Second fetch: Opus fails. Third fetch: GPT-5.2 succeeds.
+      // First fetch: PDF download. Second fetch: GPT-5.2 succeeds.
       (global.fetch as any)
         .mockResolvedValueOnce({
           ok: true,
           arrayBuffer: () => Promise.resolve(Buffer.from('pdf').buffer),
-        })
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          text: async () => 'Internal Server Error',
         })
         .mockResolvedValueOnce({
           ok: true,
@@ -1147,6 +1143,14 @@ describe('document-processor-batch', () => {
             choices: [{ message: { content: JSON.stringify(extractedData) } }],
           }),
         });
+
+      // Gemini 2.5 Pro vision fails
+      mockCallGeminiVision.mockResolvedValueOnce({
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        error: 'Gemini Error',
+      });
 
       mockGetProviderDisplayName.mockReturnValue('GPT-5.2');
 
@@ -1164,8 +1168,8 @@ describe('document-processor-batch', () => {
       );
     });
 
-    it('should fall back to smart routing when both Opus and GPT-5.2 fail', async () => {
-      // All fetch calls fail
+    it('should fall back to smart routing when both Gemini and GPT-5.2 fail', async () => {
+      // PDF download succeeds; GPT-5.2 fetch fails
       (global.fetch as any)
         .mockResolvedValueOnce({
           ok: true,
@@ -1174,13 +1178,16 @@ describe('document-processor-batch', () => {
         .mockResolvedValueOnce({
           ok: false,
           status: 500,
-          text: async () => 'Opus Error',
-        })
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
           text: async () => 'GPT Error',
         });
+
+      // Gemini 2.5 Pro vision fails
+      mockCallGeminiVision.mockResolvedValueOnce({
+        success: false,
+        content: '',
+        provider: 'gemini-2.5-pro',
+        error: 'Gemini Error',
+      });
 
       mockAnalyzeWithSmartRouting.mockResolvedValue({
         success: true,

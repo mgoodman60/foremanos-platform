@@ -83,6 +83,9 @@ export const GEMINI_PRIMARY_MODEL = 'gemini-2.0-flash';
 /** Gemini secondary model for validation pass 2 (three-pass pipeline) */
 export const GEMINI_SECONDARY_MODEL = 'gemini-2.5-pro';
 
+/** Vision extraction model for batch document processing pipeline */
+export const VISION_EXTRACTION_MODEL = GEMINI_SECONDARY_MODEL; // gemini-2.5-pro
+
 /** Backward compatibility alias */
 export const GEMINI_EXTRACTION_MODEL = GEMINI_PRIMARY_MODEL;
 

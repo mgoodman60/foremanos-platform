@@ -665,24 +665,27 @@ async function analyzeWithDisciplinePipeline(
     processingTier = 'generic-single-pass';
   }
 
-  // Step 2: Opus vision call
+  // Step 2: Gemini 2.5 Pro vision call (primary extractor)
   try {
     attempts++;
-    const rawContent = await callOpusVision(base64, prompt, pageNumber);
-    const jsonContent = stripToJson(rawContent);
+    const geminiResult = await callGeminiVision(base64, prompt);
+    if (!geminiResult.success) {
+      throw new Error(geminiResult.error || 'Gemini vision failed');
+    }
+    const jsonContent = stripToJson(geminiResult.content);
     JSON.parse(jsonContent); // Validate
 
-    logger.info('DISCIPLINE_PIPELINE', `Opus vision succeeded`, { pageNumber, processingTier, contentLength: jsonContent.length });
+    logger.info('DISCIPLINE_PIPELINE', `Gemini 2.5 Pro vision succeeded`, { pageNumber, processingTier, contentLength: jsonContent.length });
     return {
       success: true,
       content: jsonContent,
-      provider: 'claude-opus-4-6' as VisionProvider,
+      provider: 'gemini-2.5-pro' as VisionProvider,
       attempts,
       processingTier,
     };
-  } catch (opusError: unknown) {
-    const errMsg = opusError instanceof Error ? opusError.message : String(opusError);
-    logger.warn('DISCIPLINE_PIPELINE', `Opus vision failed, trying GPT-5.2`, { error: errMsg, pageNumber });
+  } catch (geminiError: unknown) {
+    const errMsg = geminiError instanceof Error ? geminiError.message : String(geminiError);
+    logger.warn('DISCIPLINE_PIPELINE', `Gemini 2.5 Pro vision failed, trying GPT-5.2`, { error: errMsg, pageNumber });
   }
 
   // Step 3: GPT-5.2 fallback

@@ -285,7 +285,7 @@ Downstream triggers on APPROVED: RAG indexing → budget/schedule sync → OneDr
 
 ### Document Intelligence Pipeline
 
-Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI. Batch processing uses a three-pass pipeline: Gemini Pro 3 for extraction, Gemini 2.5 Pro for validation, Claude Opus for interpretation (GPT-5.2 fallback). Falls back to smart routing if both Gemini models fail. Cost per page: ~$0.16 three-pass, $0.11 with GPT-5.2 fallback, $0.05 extraction-only.
+Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI. Default mode (discipline-single-pass): Haiku classification → Gemini 2.5 Pro vision extraction → GPT-5.2 fallback → smart routing. Legacy mode (three-pass-legacy): Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Claude Opus interpretation. Cost per page: ~$0.05 discipline-single-pass, ~$0.03 GPT-5.2 fallback, ~$0.16 three-pass-legacy.
 
 ```
 Upload → Vision Extraction (15 categories) → Phase A/B/C Intelligence
