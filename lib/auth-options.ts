@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './db';
 import { logActivity } from './audit-log';
 import { sendSignInNotification } from './email-service';
+import { isTokenRevoked } from './jwt-revocation';
 import bcrypt from 'bcryptjs';
 import { logger } from './logger';
 
@@ -166,6 +167,15 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async jwt({ token, user, trigger: __trigger }) {
+      // On subsequent requests (not initial sign-in), check if token is revoked
+      if (!user && token.sub && token.iat) {
+        const revoked = await isTokenRevoked(token.sub, token.iat);
+        if (revoked) {
+          logger.info('AUTH', 'Token revoked, forcing re-authentication', { userId: token.sub });
+          return { ...token, revoked: true };
+        }
+      }
+
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -223,6 +233,11 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      // If token was revoked, return empty session to force re-auth
+      if (token?.revoked) {
+        return { ...session, user: undefined } as any;
+      }
+
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
