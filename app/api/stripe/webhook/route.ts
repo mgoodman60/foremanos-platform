@@ -13,12 +13,13 @@ import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('stripe-webhook');
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-if (!webhookSecret) {
-  throw new Error('STRIPE_WEBHOOK_SECRET environment variable is not set. Stripe webhooks will not function.');
-}
-
 export async function POST(request: NextRequest) {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    logger.error('STRIPE_WEBHOOK_SECRET environment variable is not set');
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
+  }
+
   try {
     const body = await request.text();
     const headersList = await headers();

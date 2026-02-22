@@ -416,7 +416,7 @@ export async function POST(request: Request) {
     const s3Meta = err.$metadata;
     const errMessage = error instanceof Error ? error.message : String(error);
     const errName = error instanceof Error ? error.name : String(error);
-    logger.error('UPLOAD', `Failed after ${totalTime}ms`, error, {
+    logger.error(`Failed after ${totalTime}ms`, error, {
       errorName: errName,
       errorCode: err.code || err.Code,
       httpStatus: s3Meta?.httpStatusCode || err.httpStatus,

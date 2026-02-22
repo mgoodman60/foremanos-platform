@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     const errMsg = error instanceof Error ? error.message : String(error);
     const errName = error instanceof Error ? error.name : String(error);
     const s3Meta = err.$metadata;
-    logger.error('CHUNK_UPLOAD', 'Failed to upload chunk', error, {
+    logger.error('Failed to upload chunk', error, {
       errorCode: err.Code || errName,
       httpStatus: s3Meta?.httpStatusCode,
       requestId: s3Meta?.requestId,

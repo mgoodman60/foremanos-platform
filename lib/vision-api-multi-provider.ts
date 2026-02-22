@@ -1265,7 +1265,6 @@ export async function analyzeWithDirectPdf(
       logger.error('DIRECT_PDF', `Attempt ${attempt + 1} failed`, error);
 
       // Check if this is an unrecoverable error
-      const errMsg = error instanceof Error ? error.message : String(error);
       const isUnrecoverable =
         errMsg.includes('invalid_request') ||
         errMsg.includes('document') ||

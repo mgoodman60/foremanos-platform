@@ -169,7 +169,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger: __trigger }) {
       // On subsequent requests (not initial sign-in), check if token is revoked
       if (!user && token.sub && token.iat) {
-        const revoked = await isTokenRevoked(token.sub, token.iat);
+        const revoked = await isTokenRevoked(token.sub, token.iat as number);
         if (revoked) {
           logger.info('AUTH', 'Token revoked, forcing re-authentication', { userId: token.sub });
           return { ...token, revoked: true };
