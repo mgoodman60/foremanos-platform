@@ -628,7 +628,6 @@ model DocumentChunk {
   @@index([drawingType])
   @@index([regulatoryDocumentId])
   @@index([sheetNumber])
-  @@index([documentId], map: "idx_document_chunks_document")
 }
 
 model DrawingType {
