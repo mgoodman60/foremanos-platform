@@ -64,7 +64,7 @@ export async function POST(
     const result = await autoGenerateTakeoffs(slug);
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Auto-takeoff error', error);
     return NextResponse.json(
       { error: 'Failed to generate takeoffs', details: safeErrorMessage(error) },
@@ -125,7 +125,7 @@ export async function GET(
         totalCost: t.totalCost,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Auto-takeoff status error', error);
     return NextResponse.json(
       { error: 'Failed to get status', details: safeErrorMessage(error) },

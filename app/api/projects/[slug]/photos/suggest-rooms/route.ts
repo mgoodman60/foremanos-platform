@@ -106,12 +106,13 @@ export async function POST(
       suggestions,
       count: suggestions.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Room Suggestions] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to generate room suggestions',
-        message: error.message,
+        message: errMsg,
       },
       { status: 500 }
     );

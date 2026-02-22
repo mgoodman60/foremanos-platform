@@ -88,10 +88,11 @@ export async function POST(
         results: result.results,
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Sync API] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to sync' },
+      { error: errMsg || 'Failed to sync' },
       { status: 500 }
     );
   }

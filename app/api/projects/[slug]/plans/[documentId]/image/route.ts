@@ -110,7 +110,7 @@ export async function GET(
         logger.info('[Document Viewer] Downloading from S3', { path: document.cloud_storage_path });
         pdfBuffer = await downloadFile(document.cloud_storage_path);
         logger.info('[Document Viewer] Downloaded from S3');
-      } catch (s3Error: any) {
+      } catch (s3Error: unknown) {
         logger.error('S3 download failed', s3Error);
       }
     }
@@ -124,7 +124,7 @@ export async function GET(
           pdfBuffer = Buffer.from(await response.arrayBuffer());
           logger.info('[Document Viewer] Downloaded from fileUrl');
         }
-      } catch (urlError: any) {
+      } catch (urlError: unknown) {
         logger.error('fileUrl fetch failed', urlError);
       }
     }
@@ -168,10 +168,11 @@ export async function GET(
       { error: 'Unable to generate document image. Document may need to be re-uploaded.' },
       { status: 500 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Document Viewer] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to generate document image', details: error.message },
+      { error: 'Failed to generate document image', details: errMsg },
       { status: 500 }
     );
   }

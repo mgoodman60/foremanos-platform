@@ -107,10 +107,11 @@ export async function GET(
       uploadedAt: document.createdAt,
       processed: document.processed
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching plan metadata', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to fetch plan metadata', details: error.message },
+      { error: 'Failed to fetch plan metadata', details: errMsg },
       { status: 500 }
     );
   }

@@ -540,7 +540,7 @@ Return results as a JSON array.`
     log.info('Extracted items from document', { count: extractedItems.length });
     return extractedItems;
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('AI extraction failed', error as Error);
     return [];
   }
@@ -663,7 +663,7 @@ function parseAITakeoffResponse(response: string, _documentId: string): TakeoffI
       calculationMethod: item.calculationMethod,
     })).filter((item: TakeoffItem) => item.quantity > 0);
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Failed to parse AI response', error as Error);
     return [];
   }
@@ -825,7 +825,7 @@ export async function autoExtractTakeoffs(
     log.info('Created takeoff items', { count: allItems.length });
     return { success: true, itemCount: allItems.length, takeoffId: takeoff.id };
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Auto-extraction failed', error as Error);
     return { success: false, itemCount: 0 };
   }

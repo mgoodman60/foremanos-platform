@@ -74,18 +74,19 @@ export async function GET(
         ownerId: project.ownerId,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching project', error);
-    
+
     // Return more specific error messages
-    if (error?.code?.startsWith('P1')) {
-      return NextResponse.json({ 
-        error: 'Database connection error. Please try again.' 
+    const errCode = error instanceof Object && 'code' in error ? (error as { code?: string }).code : undefined;
+    if (errCode?.startsWith('P1')) {
+      return NextResponse.json({
+        error: 'Database connection error. Please try again.'
       }, { status: 503 });
     }
-    
-    return NextResponse.json({ 
-      error: 'Internal server error' 
+
+    return NextResponse.json({
+      error: 'Internal server error'
     }, { status: 500 });
   }
 }

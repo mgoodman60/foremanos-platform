@@ -69,9 +69,9 @@ export async function acquireLock(
       lockId: lock.id,
       processId,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Unique constraint violation - lock already exists
-    if (error.code === 'P2002') {
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
       const existingLock = await prisma.extractionLock.findUnique({
         where: {
           resourceType_resourceId_extractionType: {
@@ -351,9 +351,10 @@ export async function withLock<T>(
   try {
     const result = await fn();
     return { success: true, result };
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Error during locked operation', error as Error);
-    return { success: false, error: error.message };
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: errMsg };
   } finally {
     // Always release the lock
     if (lockResult.processId) {

@@ -160,10 +160,10 @@ export async function POST(
     });
 
     return NextResponse.json({ crew }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating crew', error);
-    
-    if (error.code === 'P2002') {
+
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
       return NextResponse.json(
         { error: 'A crew with this name already exists in this project' },
         { status: 409 }

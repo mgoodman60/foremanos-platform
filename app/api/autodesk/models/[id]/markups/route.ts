@@ -78,8 +78,9 @@ export async function POST(
       success: true,
       count: markups.length,
     });
-  } catch (error: any) {
-    if (error.code === 'P2025') {
+  } catch (error: unknown) {
+    const err = error as Record<string, any>;
+    if (err.code === 'P2025') {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 });
     }
     logger.error('Save markups error', error);
@@ -106,8 +107,9 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    if (error.code === 'P2025') {
+  } catch (error: unknown) {
+    const err = error as Record<string, any>;
+    if (err.code === 'P2025') {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 });
     }
     logger.error('Delete markups error', error);

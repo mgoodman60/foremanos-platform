@@ -48,7 +48,7 @@ export async function GET(
       budget: budget || { totalBudget: 0, actualCost: 0, committedCost: 0, contingency: 0 },
       breakdown,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch trade breakdown' },

@@ -83,7 +83,7 @@ export async function PATCH(
         updatedAt: annotation.updatedAt.toISOString()
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating annotation', error);
     return NextResponse.json(
       { error: 'Failed to update annotation' },
@@ -114,7 +114,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting annotation', error);
     return NextResponse.json(
       { error: 'Failed to delete annotation' },

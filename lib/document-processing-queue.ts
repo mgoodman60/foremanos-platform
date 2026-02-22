@@ -181,14 +181,15 @@ export async function processNextQueuedBatch(): Promise<boolean> {
 
       return false; // Stop processing for now
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PROCESS_QUEUE', 'Error processing batch', error, { documentId: entry.documentId });
 
+    const errMsg = error instanceof Error ? error.message : String(error);
     await prisma.processingQueue.update({
       where: { id: entry.id },
       data: {
         status: ProcessingQueueStatus.failed,
-        lastError: error.message,
+        lastError: errMsg,
         updatedAt: new Date(),
       },
     });
@@ -538,14 +539,15 @@ async function __processNextBatchForDocument(documentId: string): Promise<boolea
       });
       return false;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PROCESS_QUEUE', `Error processing batch for ${documentId}`, error);
 
+    const errMsg = error instanceof Error ? error.message : String(error);
     await prisma.processingQueue.update({
       where: { id: entry.id },
       data: {
         status: ProcessingQueueStatus.failed,
-        lastError: error.message,
+        lastError: errMsg,
         updatedAt: new Date(),
       },
     });

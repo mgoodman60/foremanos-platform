@@ -93,7 +93,7 @@ export async function POST(
       matchedRooms: result.matchedRooms,
       totalFinishes: result.totalFinishes
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error extracting finish schedules', error);
     return NextResponse.json(
       {

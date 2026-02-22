@@ -165,7 +165,7 @@ export async function GET(
       sheets: matchingSheets,
       total: matchingSheets.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('DISCIPLINE_SHEETS_API', 'Error fetching discipline sheets', error as Error);
     return NextResponse.json(
       {

@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     try {
       formData = await request.formData();
       logger.info('Form data parsed successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[UPLOAD ERROR] Failed to parse form data', error);
       return NextResponse.json(
         { error: 'Failed to read upload data. Connection may have timed out.' },

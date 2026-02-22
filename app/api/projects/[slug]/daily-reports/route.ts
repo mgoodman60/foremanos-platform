@@ -215,8 +215,8 @@ export async function POST(
     });
 
     return NextResponse.json({ report });
-  } catch (error: any) {
-    if (error.code === 'P2002') {
+  } catch (error: unknown) {
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
       return NextResponse.json(
         { error: 'A report for this date already exists' },
         { status: 400 }

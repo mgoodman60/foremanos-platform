@@ -138,9 +138,10 @@ export async function GET(
     let pdfBuffer: Buffer;
     try {
       pdfBuffer = await Promise.race([downloadPromise, timeoutPromise]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('PAGE_IMAGE_API', 'Error downloading PDF from S3', error as Error);
-      if (error.message.includes('timeout')) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      if (errMsg.includes('timeout')) {
         return NextResponse.json(
           { error: 'Download timeout', code: 'DOWNLOAD_TIMEOUT' },
           { status: 504 }
@@ -161,9 +162,10 @@ export async function GET(
       const extractResult = await extractPageAsPdf(pdfBuffer, pageNumber);
       base64Pdf = extractResult.base64;
       pageCount = extractResult.pageCount;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('PAGE_IMAGE_API', 'Error extracting page', error as Error);
-      if (error.message.includes('out of range')) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      if (errMsg.includes('out of range')) {
         return NextResponse.json(
           { error: `Page ${pageNumber} does not exist (document has ${pageCount || 'unknown'} pages)`, code: 'PAGE_OUT_OF_RANGE' },
           { status: 400 }
@@ -186,7 +188,7 @@ export async function GET(
         format: 'png',
       });
       pngBuffer = result.buffer;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('PAGE_IMAGE_API', 'Error rasterizing page', error as Error);
       return NextResponse.json(
         { error: 'Failed to rasterize page', code: 'RASTERIZE_FAILED', details: safeErrorMessage(error) },
@@ -203,7 +205,7 @@ export async function GET(
         'Cache-Control': 'public, max-age=86400', // Cache for 1 day
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PAGE_IMAGE_API', 'Unexpected error', error as Error);
     return NextResponse.json(
       { error: 'Internal server error', code: 'INTERNAL_ERROR', details: safeErrorMessage(error) },

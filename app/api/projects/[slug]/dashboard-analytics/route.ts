@@ -257,7 +257,7 @@ export async function GET(
     };
 
     return NextResponse.json(analytics);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching dashboard analytics', error);
     return NextResponse.json(
       { error: 'Failed to fetch dashboard analytics', details: safeErrorMessage(error) },

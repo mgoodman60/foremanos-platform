@@ -217,16 +217,18 @@ export async function rasterizePdfToImages(
 
           logger.info('PDF_RASTER', `Page ${pageNum}: ${finalMetadata.width}x${finalMetadata.height} ${format} (placeholder)`);
         }
-      } catch (pageError: any) {
-        logger.error('PDF_RASTER', `Error processing page ${pageNum}`, undefined, { error: pageError.message });
+      } catch (pageError: unknown) {
+        const errMsg = pageError instanceof Error ? pageError.message : String(pageError);
+        logger.error('PDF_RASTER', `Error processing page ${pageNum}`, undefined, { error: errMsg });
         // Continue with other pages
       }
     }
 
     return results;
-  } catch (error: any) {
-    logger.error('PDF_RASTER', 'Processing error', undefined, { error: error.message });
-    throw new Error(`PDF processing failed: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logger.error('PDF_RASTER', 'Processing error', undefined, { error: errMsg });
+    throw new Error(`PDF processing failed: ${errMsg}`);
   }
 }
 
@@ -261,9 +263,10 @@ export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
   try {
     const doc = await PDFDocument.load(new Uint8Array(pdfBuffer));
     return doc.getPageCount();
-  } catch (error: any) {
-    logger.error('PDF_RASTER', 'Error getting page count', undefined, { error: error.message });
-    throw new Error(`Failed to get PDF page count: ${error.message}`);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logger.error('PDF_RASTER', 'Error getting page count', undefined, { error: errMsg });
+    throw new Error(`Failed to get PDF page count: ${errMsg}`);
   }
 }
 

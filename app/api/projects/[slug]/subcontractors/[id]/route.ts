@@ -60,23 +60,24 @@ export async function PUT(
     });
 
     return NextResponse.json(subcontractor);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
-    
-    if (error?.code === 'P2002') {
+
+    const errCode = error instanceof Object && 'code' in error ? (error as { code?: string }).code : undefined;
+    if (errCode === 'P2002') {
       return NextResponse.json(
         { error: 'A subcontractor with this company name already exists in this project' },
         { status: 409 }
       );
     }
 
-    if (error?.code === 'P2025') {
+    if (errCode === 'P2025') {
       return NextResponse.json(
         { error: 'Subcontractor not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to update subcontractor' },
       { status: 500 }
@@ -108,16 +109,17 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
 
-    if (error?.code === 'P2025') {
+    const errCode = error instanceof Object && 'code' in error ? (error as { code?: string }).code : undefined;
+    if (errCode === 'P2025') {
       return NextResponse.json(
         { error: 'Subcontractor not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to delete subcontractor' },
       { status: 500 }

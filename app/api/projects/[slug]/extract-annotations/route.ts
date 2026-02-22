@@ -161,9 +161,10 @@ export async function POST(
         criticalCount += critical;
         processedSheets++;
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('[ANNOTATION EXTRACTION] Error processing document', error, { document: document.name });
-        errors.push(`${document.name}: ${error.message}`);
+        const errMsg = error instanceof Error ? error.message : String(error);
+        errors.push(`${document.name}: ${errMsg}`);
       }
     }
 
@@ -177,11 +178,12 @@ export async function POST(
       criticalCount,
       errors: errors.length > 0 ? errors : undefined
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error extracting annotations', error);
-    return NextResponse.json({ 
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({
       error: 'Failed to extract annotations',
-      details: error.message 
+      details: errMsg
     }, { status: 500 });
   }
 }

@@ -270,7 +270,7 @@ export async function compareDocumentVersions(
     logger.info('DOC_INTELLIGENCE', 'Version comparison complete', { summary, changeCount: changes.length });
 
     return { changes, summary };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('DOC_INTELLIGENCE', 'Error comparing versions', error as Error, { oldDocumentId, newDocumentId });
     throw error;
   }

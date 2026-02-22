@@ -57,7 +57,7 @@ export async function GET(
     });
 
     return NextResponse.json({ documents });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching documents', error);
     return NextResponse.json(
       { error: 'Failed to fetch documents' },

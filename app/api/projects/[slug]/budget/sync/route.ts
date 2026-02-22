@@ -122,7 +122,7 @@ export async function POST(
       totalChanged,
       message: changeMessage,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error syncing budget', error);
     return NextResponse.json(
       { error: 'Failed to sync budget' },
@@ -173,7 +173,7 @@ export async function PUT(
       success: true,
       budget: updatedBudget,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating budget', error);
     return NextResponse.json(
       { error: 'Failed to update budget' },

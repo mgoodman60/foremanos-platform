@@ -66,10 +66,11 @@ export async function GET(
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Summary Report API] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to generate report' },
+      { error: errMsg || 'Failed to generate report' },
       { status: 500 }
     );
   }

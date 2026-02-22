@@ -62,7 +62,7 @@ export async function GET(
         updatedAt: queueStatus.updatedAt,
       } : null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[PROCESSING STATUS] Error', error);
     return NextResponse.json(
       { error: 'Failed to get processing status' },

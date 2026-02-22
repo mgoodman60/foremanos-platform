@@ -60,10 +60,11 @@ export async function GET(
       byType,
       types: Object.keys(byType),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Window Schedule API] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch window schedule' },
+      { error: errMsg || 'Failed to fetch window schedule' },
       { status: 500 }
     );
   }
@@ -101,10 +102,11 @@ export async function POST(
       windowsExtracted: result.windowsExtracted,
       errors: result.errors,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Extraction error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to extract window schedule' },
+      { error: errMsg || 'Failed to extract window schedule' },
       { status: 500 }
     );
   }

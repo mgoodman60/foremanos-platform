@@ -112,7 +112,7 @@ export async function GET(
         label: TRADE_DISPLAY_NAMES[t],
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[TRADE-INFERENCE API] Error', error);
     return NextResponse.json(
       { error: 'Failed to fetch trade inference data' },
@@ -240,10 +240,11 @@ export async function POST(
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[TRADE-INFERENCE API] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to process trade inference' },
+      { error: errMsg || 'Failed to process trade inference' },
       { status: 500 }
     );
   }

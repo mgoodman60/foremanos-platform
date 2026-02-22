@@ -209,8 +209,9 @@ export async function createRoomsFromExtraction(
       });
 
       created++;
-    } catch (error: any) {
-      logger.error('LOCATION_DETECTOR', `Error creating room ${roomData.name}`, undefined, { error: error.message });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      logger.error('LOCATION_DETECTOR', `Error creating room ${roomData.name}`, undefined, { error: errMsg });
     }
   }
 

@@ -76,10 +76,11 @@ export async function GET(
       regions: Object.keys(REGIONAL_MULTIPLIERS),
       currentRegion: region,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[UnitPrices API] GET error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch prices' },
+      { error: errMsg || 'Failed to fetch prices' },
       { status: 500 }
     );
   }
@@ -135,10 +136,11 @@ export async function POST(
       id: result.id,
       created: result.created,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[UnitPrices API] POST error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to save price' },
+      { error: errMsg || 'Failed to save price' },
       { status: 500 }
     );
   }
@@ -166,10 +168,11 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[UnitPrices API] DELETE error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete price' },
+      { error: errMsg || 'Failed to delete price' },
       { status: 500 }
     );
   }

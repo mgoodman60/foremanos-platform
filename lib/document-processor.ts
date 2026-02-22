@@ -74,9 +74,9 @@ export async function processDocument(
     let response: Response;
     try {
       response = await fetch(fileUrl, { signal: downloadController.signal });
-    } catch (fetchErr: any) {
+    } catch (fetchErr: unknown) {
       clearTimeout(downloadTimeout);
-      if (fetchErr.name === 'AbortError') {
+      if (fetchErr instanceof Error && fetchErr.name === 'AbortError') {
         logger.warn('DOCUMENT_PROCESSOR', `S3 download timeout after 90s for document ${documentId}, marking queued for retry`);
         await prisma.document.update({
           where: { id: documentId },
@@ -289,21 +289,22 @@ export async function processDocument(
         }
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('DOCUMENT_PROCESSOR', `Error processing document ${documentId}`, error);
-    
+
+    const errMsg = error instanceof Error ? error.message : String(error);
     // Update document with error information
     await prisma.document.update({
       where: { id: documentId },
       data: {
         queueStatus: 'failed',
         processed: false,
-        lastProcessingError: error?.message || String(error),
+        lastProcessingError: errMsg,
       },
-    }).catch((updateError: any) => {
+    }).catch((updateError: unknown) => {
       logger.error('DOCUMENT_PROCESSOR', 'Failed to update document error status', updateError);
     });
-    
+
     throw error;
   }
 }

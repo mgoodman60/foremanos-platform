@@ -74,7 +74,7 @@ export async function GET(
     );
 
     return NextResponse.json({ floorPlans: floorPlansWithUrls });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('FLOOR_PLANS_API', 'Error fetching floor plans', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch floor plans', details: safeErrorMessage(error) },
@@ -157,7 +157,7 @@ export async function POST(
     });
 
     return NextResponse.json({ floorPlan }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('FLOOR_PLANS_API', 'Error creating floor plan', error as Error);
     return NextResponse.json(
       { error: 'Failed to create floor plan', details: safeErrorMessage(error) },

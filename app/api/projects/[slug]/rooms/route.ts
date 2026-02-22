@@ -506,10 +506,11 @@ export async function GET(
     );
 
     return NextResponse.json({ rooms: roomsWithDoors, summary });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('ROOMS_API', 'Error fetching rooms', error as Error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to fetch rooms', details: error.message },
+      { error: 'Failed to fetch rooms', details: errMsg },
       { status: 500 }
     );
   }
@@ -592,10 +593,11 @@ export async function POST(
     logger.info('ROOMS_API', 'Created room', { roomName: room.name, projectName: project.name });
 
     return NextResponse.json({ room }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('ROOMS_API', 'Error creating room', error as Error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to create room', details: error.message },
+      { error: 'Failed to create room', details: errMsg },
       { status: 500 }
     );
   }

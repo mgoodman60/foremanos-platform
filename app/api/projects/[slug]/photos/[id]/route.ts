@@ -59,12 +59,13 @@ export async function GET(
       success: true,
       photo,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Photo Get] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to fetch photo',
-        message: error.message,
+        message: errMsg,
       },
       { status: 500 }
     );
@@ -173,12 +174,13 @@ export async function PATCH(
       success: true,
       photo: updatedPhoto,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Photo Update] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to update photo',
-        message: error.message,
+        message: errMsg,
       },
       { status: 500 }
     );
@@ -266,12 +268,13 @@ export async function DELETE(
       success: true,
       message: 'Photo deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Photo Delete] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to delete photo',
-        message: error.message,
+        message: errMsg,
       },
       { status: 500 }
     );

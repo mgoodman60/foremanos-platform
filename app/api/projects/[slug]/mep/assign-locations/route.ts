@@ -112,9 +112,10 @@ export async function POST(
         });
 
         results.updated++;
-      } catch (error: any) {
+      } catch (error: unknown) {
         results.failed++;
-        results.errors.push(`Failed to update ${itemId}: ${error.message}`);
+        const errMsg = error instanceof Error ? error.message : String(error);
+        results.errors.push(`Failed to update ${itemId}: ${errMsg}`);
       }
     }
 
@@ -137,10 +138,11 @@ export async function POST(
       success: true,
       ...results
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error assigning MEP locations', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to assign locations', details: error.message },
+      { error: 'Failed to assign locations', details: errMsg },
       { status: 500 }
     );
   }
@@ -653,10 +655,11 @@ export async function PUT(
       failed,
       message: `Auto-assigned ${updated} MEP items to ${rooms.length} rooms`
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error auto-assigning MEP locations', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to auto-assign locations', details: error.message },
+      { error: 'Failed to auto-assign locations', details: errMsg },
       { status: 500 }
     );
   }
@@ -734,10 +737,11 @@ export async function GET(
         withoutLocation
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching MEP location data', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to fetch MEP location data', details: error.message },
+      { error: 'Failed to fetch MEP location data', details: errMsg },
       { status: 500 }
     );
   }

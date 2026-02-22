@@ -132,7 +132,7 @@ export async function POST(
             error: 'No cross-references found in text',
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('[Cross-Ref Extract] Error processing document', error, { document: doc.name });
         results.push({
           documentId: doc.id,
@@ -155,7 +155,7 @@ export async function POST(
       },
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Cross-Reference Extract Error]', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to extract cross-references') },

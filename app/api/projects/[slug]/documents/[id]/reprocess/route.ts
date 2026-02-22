@@ -133,10 +133,11 @@ export async function POST(
       message: 'Document reprocessing started',
       documentId: id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('REPROCESS', 'Error initiating reprocess', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to reprocess document' },
+      { error: errMsg || 'Failed to reprocess document' },
       { status: 500 }
     );
   }

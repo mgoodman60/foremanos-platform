@@ -133,12 +133,13 @@ export async function POST(
             error: 'Extraction failed',
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
         results.push({
           documentId: doc.id,
           documentName: doc.name,
           status: 'failed',
-          error: error.message,
+          error: errMsg,
         });
       }
     }
@@ -195,10 +196,11 @@ export async function POST(
         totalAllocated: budgetSyncResult.summary?.totalAllocated || 0,
       } : null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Takeoff Regenerate Error]', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to regenerate takeoff' },
+      { error: errMsg || 'Failed to regenerate takeoff' },
       { status: 500 }
     );
   }

@@ -167,12 +167,13 @@ export async function POST(
         name: r.name,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('ROOMS_API', 'Error bulk updating hotspots', error as Error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to bulk update room hotspots',
-        details: error.message,
+        details: errMsg,
       },
       { status: 500 }
     );

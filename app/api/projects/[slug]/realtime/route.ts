@@ -31,10 +31,11 @@ export async function GET(
         'X-Accel-Buffering': 'no' // Disable nginx buffering
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Realtime stream error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return new Response(
-      JSON.stringify({ error: error.message || 'Failed to create realtime stream' }),
+      JSON.stringify({ error: errMsg || 'Failed to create realtime stream' }),
       {
         status: 500,
         headers: { 'Content-Type': 'application/json' }

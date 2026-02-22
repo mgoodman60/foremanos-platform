@@ -67,10 +67,13 @@ export async function POST(request: Request) {
       chunkIndex,
       message: `Chunk ${chunkIndex + 1}/${totalChunks} uploaded`,
     });
-  } catch (error: any) {
-    const s3Meta = error.$metadata;
+  } catch (error: unknown) {
+    const err = error as Record<string, any>;
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errName = error instanceof Error ? error.name : String(error);
+    const s3Meta = err.$metadata;
     logger.error('CHUNK_UPLOAD', 'Failed to upload chunk', error, {
-      errorCode: error.Code || error.name,
+      errorCode: err.Code || errName,
       httpStatus: s3Meta?.httpStatusCode,
       requestId: s3Meta?.requestId,
     });
@@ -78,13 +81,13 @@ export async function POST(request: Request) {
     let statusCode = 500;
     let errorMessage = 'Failed to upload chunk';
 
-    if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch' || error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+    if (errName === 'InvalidAccessKeyId' || errName === 'SignatureDoesNotMatch' || errName === 'AccessDenied' || err.$metadata?.httpStatusCode === 403) {
       errorMessage = 'Storage authentication failed. Please contact your administrator.';
       statusCode = 503;
     }
 
     return NextResponse.json(
-      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? errMsg : undefined },
       { status: statusCode }
     );
   }

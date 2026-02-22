@@ -78,11 +78,12 @@ export async function detectMacros(
     }
 
     return { hasMacros: false };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
     // If it's not a valid ZIP, it might be a corrupted or non-Office file
     return {
       hasMacros: false,
-      error: `Failed to analyze file: ${error.message}`,
+      error: `Failed to analyze file: ${errMsg}`,
     };
   }
 }

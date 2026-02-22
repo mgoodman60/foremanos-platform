@@ -126,11 +126,12 @@ export async function POST(
           confidence: DATA_SOURCE_PRIORITY[sourceType],
           result: syncResult,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
         results.push({
           documentId: doc.id,
           fileName: doc.fileName,
-          error: error.message,
+          error: errMsg,
         });
       }
     }
@@ -141,10 +142,11 @@ export async function POST(
       documentsProcessed: documents.length,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Sync API] Error', error, { feature: params.feature });
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to sync feature' },
+      { error: errMsg || 'Failed to sync feature' },
       { status: 500 }
     );
   }

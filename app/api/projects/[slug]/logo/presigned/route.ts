@@ -105,7 +105,7 @@ export async function POST(
       uploadUrl,
       cloud_storage_path,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to generate upload URL' },

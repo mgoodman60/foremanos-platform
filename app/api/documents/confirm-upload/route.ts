@@ -169,7 +169,7 @@ export async function POST(request: Request) {
     try {
       const s3Client = createS3Client();
       await s3Client.send(new HeadObjectCommand({ Bucket: bucketName, Key: cloudStoragePath }));
-    } catch (headError: any) {
+    } catch (headError: unknown) {
       logger.error('CONFIRM_UPLOAD', 'File not found in storage', headError, { cloudStoragePath });
       return NextResponse.json(
         { error: 'Uploaded file not found in storage' },
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
     let buffer: Buffer;
     try {
       buffer = await downloadFile(cloudStoragePath);
-    } catch (downloadError: any) {
+    } catch (downloadError: unknown) {
       logger.error('CONFIRM_UPLOAD', 'Failed to download file for scanning', downloadError, { cloudStoragePath });
       return NextResponse.json(
         { error: 'Failed to retrieve uploaded file for security scanning' },
@@ -231,7 +231,7 @@ export async function POST(request: Request) {
 
       virusStatus = 'clean';
       virusScanProvider = scanResult.engine;
-    } catch (scanError: any) {
+    } catch (scanError: unknown) {
       logger.error('CONFIRM_UPLOAD', 'Virus scan error (non-blocking)', scanError);
       virusStatus = 'error';
     }
@@ -262,7 +262,7 @@ export async function POST(request: Request) {
           { status: 415 }
         );
       }
-    } catch (macroError: any) {
+    } catch (macroError: unknown) {
       logger.error('CONFIRM_UPLOAD', 'Macro detection error (non-blocking)', macroError);
     }
 
@@ -439,37 +439,40 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     const totalTime = Date.now() - startTime;
-    const s3Meta = error.$metadata;
+    const err = error as Record<string, any>;
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errName = error instanceof Error ? error.name : String(error);
+    const s3Meta = err.$metadata;
     logger.error('CONFIRM_UPLOAD', `Failed after ${totalTime}ms`, error, {
-      errorName: error.name,
-      errorCode: error.code || error.Code,
-      httpStatus: s3Meta?.httpStatusCode || error.httpStatus,
+      errorName: errName,
+      errorCode: err.code || err.Code,
+      httpStatus: s3Meta?.httpStatusCode || err.httpStatus,
       requestId: s3Meta?.requestId,
-      attempts: error.attempts,
+      attempts: err.attempts,
     });
 
-    const isTimeout = error.isTimeout
-      || error.message?.includes('timeout')
-      || error.message?.includes('timed out')
-      || error.code === 'ETIMEDOUT';
-    const isAuthError = error.isAuthError
-      || error.name === 'InvalidAccessKeyId'
-      || error.name === 'SignatureDoesNotMatch'
-      || error.name === 'AccessDenied'
-      || error.$metadata?.httpStatusCode === 403;
-    const isNetworkError = error.code === 'ECONNRESET'
-      || error.code === 'ECONNREFUSED'
-      || error.code === 'ENOTFOUND'
-      || error.message?.includes('network')
-      || error.message?.includes('ECONNREFUSED');
-    const isDbError = error.message?.includes('Prisma')
-      || error.message?.includes('database');
-    const isS3Error = error.message?.includes('S3')
-      || error.message?.includes('upload')
-      || error.code === 'NoSuchBucket'
-      || !!error.httpStatus
+    const isTimeout = err.isTimeout
+      || errMsg?.includes('timeout')
+      || errMsg?.includes('timed out')
+      || err.code === 'ETIMEDOUT';
+    const isAuthError = err.isAuthError
+      || errName === 'InvalidAccessKeyId'
+      || errName === 'SignatureDoesNotMatch'
+      || errName === 'AccessDenied'
+      || err.$metadata?.httpStatusCode === 403;
+    const isNetworkError = err.code === 'ECONNRESET'
+      || err.code === 'ECONNREFUSED'
+      || err.code === 'ENOTFOUND'
+      || errMsg?.includes('network')
+      || errMsg?.includes('ECONNREFUSED');
+    const isDbError = errMsg?.includes('Prisma')
+      || errMsg?.includes('database');
+    const isS3Error = errMsg?.includes('S3')
+      || errMsg?.includes('upload')
+      || err.code === 'NoSuchBucket'
+      || !!err.httpStatus
       || !!s3Meta;
 
     let errorMessage: string;
@@ -510,9 +513,9 @@ export async function POST(request: Request) {
     }
 
     const technicalDetails: Record<string, string | number | undefined> = {
-      errorCode: error.code || error.Code || error.name || undefined,
-      httpStatus: s3Meta?.httpStatusCode || error.httpStatus || undefined,
-      attempts: error.attempts || undefined,
+      errorCode: err.code || err.Code || errName || undefined,
+      httpStatus: s3Meta?.httpStatusCode || err.httpStatus || undefined,
+      attempts: err.attempts || undefined,
     };
     for (const key of Object.keys(technicalDetails)) {
       if (technicalDetails[key] === undefined) delete technicalDetails[key];

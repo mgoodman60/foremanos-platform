@@ -87,10 +87,11 @@ export async function POST(
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Bulk Export API] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to generate export' },
+      { error: errMsg || 'Failed to generate export' },
       { status: 500 }
     );
   }

@@ -231,7 +231,7 @@ export async function POST(request: Request) {
       }));
     } catch (s3UploadError) {
       logger.error('UPLOAD_COMPLETE', 'S3 upload failed, rolling back document record', s3UploadError as Error, { documentId: document.id });
-      await prisma.document.delete({ where: { id: document.id } }).catch((deleteError: any) => {
+      await prisma.document.delete({ where: { id: document.id } }).catch((deleteError: unknown) => {
         logger.error('UPLOAD_COMPLETE', 'Failed to roll back document record', deleteError, { documentId: document.id });
       });
       throw s3UploadError;
@@ -267,7 +267,7 @@ export async function POST(request: Request) {
             queueStatus: 'failed',
             lastProcessingError: 'Failed to start processing task',
           },
-        }).catch((updateError: any) => {
+        }).catch((updateError: unknown) => {
           logger.error('UPLOAD_COMPLETE', 'Failed to update document status', updateError);
         });
       }
@@ -288,10 +288,13 @@ export async function POST(request: Request) {
         ? 'Document uploaded successfully and will be processed'
         : 'Document uploaded but quota exceeded - document will not be processed',
     });
-  } catch (error: any) {
-    const s3Meta = error.$metadata;
+  } catch (error: unknown) {
+    const err = error as Record<string, any>;
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errName = error instanceof Error ? error.name : String(error);
+    const s3Meta = err.$metadata;
     logger.error('UPLOAD_COMPLETE', 'Failed to complete upload', error, {
-      errorCode: error.Code || error.name,
+      errorCode: err.Code || errName,
       httpStatus: s3Meta?.httpStatusCode,
       requestId: s3Meta?.requestId,
     });
@@ -299,13 +302,13 @@ export async function POST(request: Request) {
     let statusCode = 500;
     let errorMessage = 'Failed to complete upload';
 
-    if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch' || error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+    if (errName === 'InvalidAccessKeyId' || errName === 'SignatureDoesNotMatch' || errName === 'AccessDenied' || err.$metadata?.httpStatusCode === 403) {
       errorMessage = 'Storage authentication failed. Please contact your administrator.';
       statusCode = 503;
     }
 
     return NextResponse.json(
-      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? errMsg : undefined },
       { status: statusCode }
     );
   }

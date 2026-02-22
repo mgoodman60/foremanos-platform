@@ -128,7 +128,7 @@ export async function GET(
     }));
 
     return NextResponse.json({ annotations: formattedAnnotations });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching annotations', error);
     return NextResponse.json(
       { error: 'Failed to fetch annotations' },
@@ -233,7 +233,7 @@ export async function POST(
         createdAt: annotation.createdAt.toISOString()
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating annotation', error);
     return NextResponse.json(
       { error: 'Failed to create annotation' },

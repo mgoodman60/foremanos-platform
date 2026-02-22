@@ -78,7 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
           documentName: document.name,
           ...result,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Failed to extract intelligence', error, { document: document.name });
         results.push({
           documentId: document.id,
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       summary,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Intelligence extraction API error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to trigger intelligence extraction') },
@@ -201,7 +201,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
       documents: project.Document,
       extractionStats: stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Get extraction stats error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to get extraction statistics') },

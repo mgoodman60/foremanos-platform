@@ -151,16 +151,17 @@ export async function POST(
     });
 
     return NextResponse.json(subcontractor, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
-    
-    if (error?.code === 'P2002') {
+
+    const errCode = error instanceof Object && 'code' in error ? (error as { code?: string }).code : undefined;
+    if (errCode === 'P2002') {
       return NextResponse.json(
         { error: 'A subcontractor with this company name already exists in this project' },
         { status: 409 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to create subcontractor' },
       { status: 500 }

@@ -74,10 +74,10 @@ export async function POST(
     });
 
     return NextResponse.json({ performance }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating performance record', error);
-    
-    if (error.code === 'P2002') {
+
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
       return NextResponse.json(
         { error: 'Performance record already exists for this crew and date' },
         { status: 409 }

@@ -84,11 +84,12 @@ export async function POST(
       updated: saveResult.updated,
       summary: extractionResult.summary,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Extract Rooms] Error', error);
-    
+
     // Check for database connection errors
-    if (error.code && error.code.startsWith('P1')) {
+    const errCode = error instanceof Error && 'code' in error ? (error as any).code : undefined;
+    if (errCode && typeof errCode === 'string' && errCode.startsWith('P1')) {
       return NextResponse.json(
         {
           error: 'Database connection error',
@@ -97,11 +98,12 @@ export async function POST(
         { status: 503 }
       );
     }
-    
+
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to extract rooms',
-        message: error.message || 'An unexpected error occurred',
+        message: errMsg || 'An unexpected error occurred',
       },
       { status: 500 }
     );

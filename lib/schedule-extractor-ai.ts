@@ -518,7 +518,7 @@ Extract all tasks now:`;
         allTasks.push(...tasks);
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('AI_SCHEDULE_EXTRACTOR', 'Vision API error', error);
     throw error;
   }

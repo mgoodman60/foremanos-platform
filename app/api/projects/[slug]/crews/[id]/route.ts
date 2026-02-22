@@ -129,10 +129,10 @@ export async function PUT(
     });
 
     return NextResponse.json({ crew });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating crew', error);
-    
-    if (error.code === 'P2025') {
+
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2025') {
       return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
     }
 
@@ -181,10 +181,10 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting crew', error);
-    
-    if (error.code === 'P2025') {
+
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2025') {
       return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
     }
 

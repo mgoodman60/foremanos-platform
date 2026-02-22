@@ -190,9 +190,10 @@ export async function POST(
         totalDimensions += dimensions.length;
         processedSheets++;
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('[DIMENSION EXTRACTION] Error processing document', error, { document: document.name });
-        errors.push(`${document.name}: ${error.message}`);
+        const errMsg = error instanceof Error ? error.message : String(error);
+        errors.push(`${document.name}: ${errMsg}`);
       }
     }
 
@@ -205,11 +206,12 @@ export async function POST(
       totalDimensions,
       errors: errors.length > 0 ? errors : undefined
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error extracting dimensions', error);
-    return NextResponse.json({ 
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({
       error: 'Failed to extract dimensions',
-      details: error.message 
+      details: errMsg
     }, { status: 500 });
   }
 }

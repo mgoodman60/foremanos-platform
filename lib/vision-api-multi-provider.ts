@@ -268,11 +268,11 @@ async function callClaudeOpusVision(
       provider: 'claude-opus-4-6',
       attempts: retryCount + 1,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeout);
 
     // Retry Opus on timeout for PDFs (once), otherwise fall through
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       const isPdf = isPdfContent(imageBase64);
       if (isPdf && retryCount < 1) {
         logger.warn('VISION_API', `${config.displayName}: timeout after 600s, retrying Opus (attempt ${retryCount + 2})`);
@@ -289,6 +289,7 @@ async function callClaudeOpusVision(
       };
     }
 
+    const errMsg = error instanceof Error ? error.message : String(error);
     // Retry on other errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
@@ -302,7 +303,7 @@ async function callClaudeOpusVision(
       content: '',
       provider: 'claude-opus-4-6',
       attempts: retryCount + 1,
-      error: error.message,
+      error: errMsg,
     };
   }
 }
@@ -409,11 +410,11 @@ async function _callClaudeSonnetVision(
       provider: 'claude-sonnet-4-5',
       attempts: retryCount + 1,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeout);
 
     // Don't retry on timeout — immediately fall through to next provider
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       logger.info('VISION_API', `${config.displayName}: timeout after 45s, switching provider`);
       return {
         success: false,
@@ -424,6 +425,7 @@ async function _callClaudeSonnetVision(
       };
     }
 
+    const errMsg = error instanceof Error ? error.message : String(error);
     // Retry on other errors
     if (retryCount < config.maxRetries) {
       const delay = config.baseDelay * Math.pow(2, retryCount);
@@ -437,7 +439,7 @@ async function _callClaudeSonnetVision(
       content: '',
       provider: 'claude-sonnet-4-5',
       attempts: retryCount + 1,
-      error: error.message,
+      error: errMsg,
     };
   }
 }
@@ -545,10 +547,11 @@ async function callGPT52Vision(
       provider: 'gpt-5.2',
       attempts: retryCount + 1,
     };
-  } catch (error: any) {
-    const isCloudflare = error.message === 'CLOUDFLARE_BLOCK';
-    const isTimeout = error.name === 'AbortError';
-    const isNetworkError = error.message?.includes('fetch failed') || error.message?.includes('ENOTFOUND');
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const isCloudflare = errMsg === 'CLOUDFLARE_BLOCK';
+    const isTimeout = error instanceof Error && error.name === 'AbortError';
+    const isNetworkError = errMsg.includes('fetch failed') || errMsg.includes('ENOTFOUND');
 
     // Don't retry on Cloudflare blocks - immediately switch provider
     if (isCloudflare) {
@@ -588,7 +591,7 @@ async function callGPT52Vision(
       content: '',
       provider: 'gpt-5.2',
       attempts: retryCount + 1,
-      error: error.message,
+      error: errMsg,
     };
   }
 }
@@ -681,8 +684,8 @@ export async function callGeminiPro3Vision(
       provider: 'gemini-3-pro-preview',
       attempts: retryCount + 1,
     };
-  } catch (error: any) {
-    const errorMsg = error.message || String(error);
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
 
     // Check for timeout
     if (errorMsg === 'Gemini Pro 3 vision timeout') {
@@ -824,8 +827,8 @@ export async function callGeminiVision(
       provider: 'gemini-2.5-pro',
       attempts: retryCount + 1,
     };
-  } catch (error: any) {
-    const errorMsg = error.message || String(error);
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
 
     // Check for timeout
     if (errorMsg === 'Gemini vision timeout') {
@@ -978,7 +981,7 @@ export async function analyzeWithLoadBalancing(
     } else {
       logger.warn('VISION_API', `${primaryConfig.displayName} failed`, { error: result.error });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('VISION_API', `${primaryConfig.displayName} error`, error);
   }
 
@@ -1062,9 +1065,9 @@ export async function analyzeWithMultiProvider(
           continue;
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('VISION_API', `${providerConfigs[i].displayName} threw error`, error);
-      lastError = error.message;
+      lastError = error instanceof Error ? error.message : String(error);
     }
 
     // Add delay between provider switches (except on Cloudflare block)
@@ -1146,8 +1149,9 @@ export async function analyzeWithDirectPdf(
       const { base64: singlePageBase64, pageCount } = await extractPageAsPdf(pdfBuffer, startPage);
       pdfBase64 = singlePageBase64;
       logger.info('DIRECT_PDF', `Extracted page ${startPage}/${pageCount} for focused processing`);
-    } catch (extractError: any) {
-      logger.warn('DIRECT_PDF', `Could not extract single page, using full PDF`, { error: extractError.message });
+    } catch (extractError: unknown) {
+      const errMsg = extractError instanceof Error ? extractError.message : String(extractError);
+      logger.warn('DIRECT_PDF', `Could not extract single page, using full PDF`, { error: errMsg });
     }
   }
 
@@ -1240,12 +1244,13 @@ export async function analyzeWithDirectPdf(
         attempts: attempt + 1,
         confidenceScore: quality.score,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeout);
-      lastError = error.message;
+      const errMsg = error instanceof Error ? error.message : String(error);
+      lastError = errMsg;
 
       // Don't retry on timeout — immediately return failure
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         logger.info('DIRECT_PDF', `timeout after 120s on attempt ${attempt + 1}`);
         return {
           success: false,

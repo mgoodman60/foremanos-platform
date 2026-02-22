@@ -159,7 +159,7 @@ export async function POST(
       results,
       message: `Auto-assigned ${results.assigned} items to trades`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error auto-assigning trades', error);
     return NextResponse.json(
       { error: 'Failed to auto-assign trades' },

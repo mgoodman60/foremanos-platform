@@ -78,10 +78,11 @@ export async function POST(
       message: `Successfully ${verified ? 'verified' : 'unverified'} ${result.count} items`,
       count: result.count
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error bulk verifying line items', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to bulk verify items', details: error.message },
+      { error: 'Failed to bulk verify items', details: errMsg },
       { status: 500 }
     );
   }

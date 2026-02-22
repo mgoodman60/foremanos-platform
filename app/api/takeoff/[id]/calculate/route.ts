@@ -29,10 +29,11 @@ export async function GET(
     const summary = await calculateTakeoffCosts(takeoffId, region);
 
     return NextResponse.json(summary);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Calculate API] GET error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to calculate costs' },
+      { error: errMsg || 'Failed to calculate costs' },
       { status: 500 }
     );
   }
@@ -64,10 +65,11 @@ export async function POST(
       skipped: result.skipped,
       summary,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Calculate API] POST error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to apply costs' },
+      { error: errMsg || 'Failed to apply costs' },
       { status: 500 }
     );
   }

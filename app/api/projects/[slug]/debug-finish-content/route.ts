@@ -211,7 +211,7 @@ export async function GET(
       projectRoomNumbers: roomNumbers,
       topFinishChunks: finishChunks.slice(0, 5),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
     return NextResponse.json(
       {

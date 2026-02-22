@@ -59,8 +59,9 @@ export async function extractPageAsPdf(
       base64: Buffer.from(singlePagePdf).toString('base64'),
       pageCount,
     };
-  } catch (error: any) {
-    logger.error('PDF_SERVERLESS', 'Error extracting page', undefined, { message: error.message });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logger.error('PDF_SERVERLESS', 'Error extracting page', undefined, { message: errMsg });
     throw error;
   }
 }
@@ -151,8 +152,9 @@ export async function splitPdfIntoPages(
       });
       
       logger.info('PDF_SERVERLESS', 'Extracted page', { page: i, totalPages: lastPage, pageType });
-    } catch (error: any) {
-      logger.error('PDF_SERVERLESS', 'Error extracting page', undefined, { page: i, message: error.message });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      logger.error('PDF_SERVERLESS', 'Error extracting page', undefined, { page: i, message: errMsg });
     }
   }
   

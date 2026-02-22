@@ -214,7 +214,7 @@ export async function GET(
         committedCost: project.ProjectBudget.committedCost,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error calculating EVM', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to calculate EVM metrics') },
@@ -300,10 +300,10 @@ export async function POST(
     });
 
     return NextResponse.json({ evmRecord }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating EVM record', error);
-    
-    if (error.code === 'P2002') {
+
+    if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
       return NextResponse.json(
         { error: 'EVM record already exists for this date and period type' },
         { status: 409 }

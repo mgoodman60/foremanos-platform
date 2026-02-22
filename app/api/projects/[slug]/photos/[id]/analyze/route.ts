@@ -64,12 +64,13 @@ export async function POST(
       photo: updatedPhoto,
       message: 'Photo analysis completed',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[Photo Analysis] Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to analyze photo',
-        message: error.message,
+        message: errMsg,
       },
       { status: 500 }
     );

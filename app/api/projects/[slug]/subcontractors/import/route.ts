@@ -260,9 +260,10 @@ EXAMPLE OUTPUT:
         });
 
         results.imported++;
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Error importing subcontractor', error);
-        results.errors.push(`Failed to import ${sub.companyName}: ${error.message}`);
+        const errMsg = error instanceof Error ? error.message : String(error);
+        results.errors.push(`Failed to import ${sub.companyName}: ${errMsg}`);
       }
     }
 
@@ -271,10 +272,11 @@ EXAMPLE OUTPUT:
       message: `Successfully imported ${results.imported} subcontractors${results.skipped > 0 ? `, ${results.skipped} already existed` : ''}`
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error.message || 'Failed to import subcontractors' },
+      { error: errMsg || 'Failed to import subcontractors' },
       { status: 500 }
     );
   }

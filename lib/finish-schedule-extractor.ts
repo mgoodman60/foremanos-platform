@@ -419,7 +419,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.
     log.info('Successfully parsed finish schedules', { count: finishSchedules.length });
     
     return finishSchedules;
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Finish schedule extraction error', error as Error);
     return [];
   }
@@ -510,7 +510,7 @@ Return ONLY a valid JSON array. No markdown, no extra text.`;
     }
     
     return legendMap;
-  } catch (error: any) {
+  } catch (error: unknown) {
     log.error('Legend extraction error', error as Error);
     return new Map();
   }

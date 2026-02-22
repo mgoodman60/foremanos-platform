@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       confidence: suggestion.confidence,
       reasoning: suggestion.reasoning,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[CATEGORY SUGGESTION ERROR]', error);
     return NextResponse.json(
       { error: 'Failed to suggest category' },

@@ -79,7 +79,7 @@ export async function POST(
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('MEP schedule extraction error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to extract MEP schedules') },
@@ -137,7 +137,7 @@ export async function GET(
       abbreviations: data.abbreviations || []
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Get MEP schedules error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to get MEP schedules') },

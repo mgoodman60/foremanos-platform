@@ -171,10 +171,10 @@ Respond with the complete JSON (original data + your additions). Preserve ALL or
     logger.info('OPUS_INTERPRETATION', `Interpretation complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
 
     return content;
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeout);
 
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       logger.warn('OPUS_INTERPRETATION', `Timeout after 120s for page ${pageNumber}`);
       throw new Error('Opus interpretation timed out');
     }
@@ -278,10 +278,10 @@ Respond with the complete JSON (original data + your additions). Preserve ALL or
     logger.info('GPT52_INTERPRETATION', `Interpretation complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
 
     return content;
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeout);
 
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       logger.warn('GPT52_INTERPRETATION', `Timeout after 120s for page ${pageNumber}`);
       throw new Error('GPT-5.2 interpretation timed out');
     }
@@ -346,9 +346,9 @@ async function callOpusVision(
     const elapsedMs = Date.now() - fetchStart;
     logger.info('OPUS_VISION', `Vision call complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
     return content;
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeout);
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       logger.warn('OPUS_VISION', `Timeout after 120s for page ${pageNumber}`);
       throw new Error('Opus vision call timed out');
     }
@@ -411,9 +411,9 @@ async function callGPT52Vision(
     const elapsedMs = Date.now() - fetchStart;
     logger.info('GPT52_VISION', `Vision call complete for page ${pageNumber}`, { elapsedMs, contentLength: content.length });
     return content;
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeout);
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       logger.warn('GPT52_VISION', `Timeout after 120s for page ${pageNumber}`);
       throw new Error('GPT-5.2 vision call timed out');
     }
@@ -457,8 +457,9 @@ async function analyzeWithThreePassPipeline(
         interpretationProvider: 'claude-opus-4-6' as VisionProvider,
         processingTier: tierPrefix,
       };
-    } catch (opusError: any) {
-      logger.warn('THREE_PASS_PIPELINE', `Opus interpretation failed, trying GPT-5.2`, { error: opusError.message, pageNumber });
+    } catch (opusError: unknown) {
+      const errMsg = opusError instanceof Error ? opusError.message : String(opusError);
+      logger.warn('THREE_PASS_PIPELINE', `Opus interpretation failed, trying GPT-5.2`, { error: errMsg, pageNumber });
     }
 
     // GPT-5.2 fallback
@@ -471,8 +472,9 @@ async function analyzeWithThreePassPipeline(
         interpretationProvider: 'gpt-5.2' as VisionProvider,
         processingTier: `${tierPrefix}-gpt-fallback`,
       };
-    } catch (gptError: any) {
-      logger.warn('THREE_PASS_PIPELINE', `GPT-5.2 interpretation also failed, returning raw`, { error: gptError.message, pageNumber });
+    } catch (gptError: unknown) {
+      const errMsg = gptError instanceof Error ? gptError.message : String(gptError);
+      logger.warn('THREE_PASS_PIPELINE', `GPT-5.2 interpretation also failed, returning raw`, { error: errMsg, pageNumber });
     }
 
     // Both failed — return raw JSON
@@ -498,8 +500,9 @@ async function analyzeWithThreePassPipeline(
       try {
         fallbackJson = stripToJson(fallbackGeminiResult.content);
         JSON.parse(fallbackJson);
-      } catch (parseError: any) {
-        logger.warn('THREE_PASS_PIPELINE', `Gemini 2.5 Pro JSON parse failed, falling back to smart routing`, { error: parseError.message, pageNumber });
+      } catch (parseError: unknown) {
+        const errMsg = parseError instanceof Error ? parseError.message : String(parseError);
+        logger.warn('THREE_PASS_PIPELINE', `Gemini 2.5 Pro JSON parse failed, falling back to smart routing`, { error: errMsg, pageNumber });
         const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
         return { ...smartResult, processingTier: 'fallback-single-pass' };
       }
@@ -530,8 +533,9 @@ async function analyzeWithThreePassPipeline(
     pass1Json = stripToJson(pass1Result.content);
     JSON.parse(pass1Json);
     logger.info('THREE_PASS_PIPELINE', `Pass 1 complete (Gemini Pro 3)`, { pageNumber, contentLength: pass1Json.length });
-  } catch (parseError: any) {
-    logger.warn('THREE_PASS_PIPELINE', `Pass 1 JSON parse failed, falling back to smart routing`, { error: parseError.message, pageNumber });
+  } catch (parseError: unknown) {
+    const errMsg = parseError instanceof Error ? parseError.message : String(parseError);
+    logger.warn('THREE_PASS_PIPELINE', `Pass 1 JSON parse failed, falling back to smart routing`, { error: errMsg, pageNumber });
     const smartResult = await analyzeWithSmartRouting(pdfBuffer, prompt, processorType, pageNumber, minQualityScore);
     return { ...smartResult, processingTier: 'fallback-single-pass' };
   }
@@ -584,8 +588,9 @@ Return the complete validated JSON with all original fields plus any additions/c
     } else {
       logger.warn('THREE_PASS_PIPELINE', `Pass 2 failed, skipping validation`, { error: pass2Result.error, pageNumber });
     }
-  } catch (pass2Error: any) {
-    logger.warn('THREE_PASS_PIPELINE', `Pass 2 error, skipping validation`, { error: pass2Error.message, pageNumber });
+  } catch (pass2Error: unknown) {
+    const errMsg = pass2Error instanceof Error ? pass2Error.message : String(pass2Error);
+    logger.warn('THREE_PASS_PIPELINE', `Pass 2 error, skipping validation`, { error: errMsg, pageNumber });
   }
 
   // Determine which JSON goes to Pass 3
@@ -653,8 +658,9 @@ async function analyzeWithDisciplinePipeline(
       prompt = getVisionPrompt(fileName, pageNumber);
       processingTier = 'generic-single-pass';
     }
-  } catch (classifyError: any) {
-    logger.warn('DISCIPLINE_PIPELINE', `Classification failed, using generic prompt`, { error: classifyError.message, pageNumber });
+  } catch (classifyError: unknown) {
+    const errMsg = classifyError instanceof Error ? classifyError.message : String(classifyError);
+    logger.warn('DISCIPLINE_PIPELINE', `Classification failed, using generic prompt`, { error: errMsg, pageNumber });
     prompt = getVisionPrompt(fileName, pageNumber);
     processingTier = 'generic-single-pass';
   }
@@ -674,8 +680,9 @@ async function analyzeWithDisciplinePipeline(
       attempts,
       processingTier,
     };
-  } catch (opusError: any) {
-    logger.warn('DISCIPLINE_PIPELINE', `Opus vision failed, trying GPT-5.2`, { error: opusError.message, pageNumber });
+  } catch (opusError: unknown) {
+    const errMsg = opusError instanceof Error ? opusError.message : String(opusError);
+    logger.warn('DISCIPLINE_PIPELINE', `Opus vision failed, trying GPT-5.2`, { error: errMsg, pageNumber });
   }
 
   // Step 3: GPT-5.2 fallback
@@ -693,8 +700,9 @@ async function analyzeWithDisciplinePipeline(
       attempts,
       processingTier: `${processingTier}-gpt-fallback`,
     };
-  } catch (gptError: any) {
-    logger.warn('DISCIPLINE_PIPELINE', `GPT-5.2 vision also failed, falling back to smart routing`, { error: gptError.message, pageNumber });
+  } catch (gptError: unknown) {
+    const errMsg = gptError instanceof Error ? gptError.message : String(gptError);
+    logger.warn('DISCIPLINE_PIPELINE', `GPT-5.2 vision also failed, falling back to smart routing`, { error: errMsg, pageNumber });
   }
 
   // Step 4: Full fallback to smart routing
@@ -777,8 +785,9 @@ export async function processDocumentBatch(
           const { base64: singlePageBase64 } = await extractPageAsPdf(buffer, pageNum);
           pageBuffer = Buffer.from(singlePageBase64, 'base64');
           logger.info('BATCH_PROCESSOR', `Extracted page ${pageNum} (${(pageBuffer.length / 1024 / 1024).toFixed(1)}MB)`);
-        } catch (extractErr: any) {
-          logger.warn('BATCH_PROCESSOR', `Page extraction failed for page ${pageNum}, using full PDF`, { error: extractErr.message });
+        } catch (extractErr: unknown) {
+          const errMsg = extractErr instanceof Error ? extractErr.message : String(extractErr);
+          logger.warn('BATCH_PROCESSOR', `Page extraction failed for page ${pageNum}, using full PDF`, { error: errMsg });
         }
 
         // Use discipline-aware pipeline (default) or three-pass legacy pipeline based on PIPELINE_MODE
@@ -925,9 +934,10 @@ export async function processDocumentBatch(
         pagesProcessed++;
         logger.info('BATCH_PROCESSOR', `Page ${pageNum} stored successfully`);
 
-      } catch (pageError: any) {
+      } catch (pageError: unknown) {
         logger.error('BATCH_PROCESSOR', `Error processing page ${pageNum}`, pageError);
 
+        const errMsg = pageError instanceof Error ? pageError.message : String(pageError);
         // Create error chunk so we don't lose track of the page
         // Mark with skipForRag so RAG won't retrieve garbage content
         await prisma.documentChunk.create({
@@ -935,13 +945,13 @@ export async function processDocumentBatch(
             documentId,
             pageNumber: pageNum,
             chunkIndex: pageNum - 1,
-            content: `PAGE: ${pageNum}\nERROR: ${pageError.message}`,
+            content: `PAGE: ${pageNum}\nERROR: ${errMsg}`,
             metadata: {
               page: pageNum,
               source: 'error',
-              error: pageError.message,
+              error: errMsg,
               skipForRag: true,
-              extractionError: pageError.message,
+              extractionError: errMsg,
             },
           },
         });
@@ -966,12 +976,13 @@ export async function processDocumentBatch(
       estimatedCost,
     };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('BATCH_PROCESSOR', 'Batch processing failed', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return {
       success: false,
       pagesProcessed,
-      error: error.message,
+      error: errMsg,
     };
   } finally {
     // Cleanup temp files

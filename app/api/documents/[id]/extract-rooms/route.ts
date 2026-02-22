@@ -88,7 +88,7 @@ export async function POST(
       created,
       rooms
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to extract rooms', details: safeErrorMessage(error) },

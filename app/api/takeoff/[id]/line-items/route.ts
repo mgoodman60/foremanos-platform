@@ -123,7 +123,7 @@ export async function POST(
     });
 
     return NextResponse.json({ item: lineItem }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating line item', error);
     return NextResponse.json(
       { error: 'Failed to create line item', details: safeErrorMessage(error) },

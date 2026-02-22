@@ -113,7 +113,7 @@ export async function POST(
         endDate: result.endDate
       }
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
     return NextResponse.json(
       { error: 'Failed to parse schedule', details: safeErrorMessage(error) },

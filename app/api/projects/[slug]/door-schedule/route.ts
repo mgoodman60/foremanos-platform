@@ -72,7 +72,7 @@ export async function GET(
         byFireRating: doorsByFireRating,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch door schedule', error);
     return NextResponse.json(
       { error: 'Failed to fetch door schedule' },
@@ -113,10 +113,11 @@ export async function POST(
       doorsExtracted: result.doorsExtracted,
       errors: result.errors,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Extraction error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to extract door schedule' },
+      { error: errMsg || 'Failed to extract door schedule' },
       { status: 500 }
     );
   }

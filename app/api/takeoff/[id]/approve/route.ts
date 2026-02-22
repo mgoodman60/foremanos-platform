@@ -83,10 +83,11 @@ export async function POST(
     });
 
     return NextResponse.json({ takeoff: approved });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error approving takeoff', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to approve takeoff', details: error.message },
+      { error: 'Failed to approve takeoff', details: errMsg },
       { status: 500 }
     );
   }

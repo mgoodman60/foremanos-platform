@@ -122,7 +122,7 @@ export async function POST(
         totalAllocated: takeoffSyncResult.summary?.totalAllocated || 0,
       } : null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Extraction error', error);
     return NextResponse.json(
       { error: safeErrorMessage(error, 'Failed to extract budget') },

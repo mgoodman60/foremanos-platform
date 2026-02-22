@@ -140,7 +140,7 @@ export async function POST(
       project: updatedProject,
       logoUrl: logoPublicUrl,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to complete logo upload' },

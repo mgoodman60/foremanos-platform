@@ -106,7 +106,7 @@ export async function PUT(
     });
 
     return NextResponse.json({ lineItem: updated });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating line item', error);
     return NextResponse.json(
       { error: 'Failed to update line item', details: safeErrorMessage(error) },
@@ -190,7 +190,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Line item deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting line item', error);
     return NextResponse.json(
       { error: 'Failed to delete line item', details: safeErrorMessage(error) },

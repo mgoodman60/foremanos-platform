@@ -117,10 +117,11 @@ export async function GET(
     }));
 
     return NextResponse.json({ takeoffs: takeoffsWithSummary });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching takeoffs', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to fetch takeoffs', details: error.message },
+      { error: 'Failed to fetch takeoffs', details: errMsg },
       { status: 500 }
     );
   }
@@ -244,10 +245,11 @@ export async function POST(
     };
 
     return NextResponse.json({ takeoff: normalizedTakeoff }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating takeoff', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to create takeoff', details: error.message },
+      { error: 'Failed to create takeoff', details: errMsg },
       { status: 500 }
     );
   }

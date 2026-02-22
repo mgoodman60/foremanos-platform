@@ -667,10 +667,11 @@ export async function runIntelligenceExtraction(
           });
         }
       }
-    } catch (styleError: any) {
+    } catch (styleError: unknown) {
+      const errMsg = styleError instanceof Error ? styleError.message : String(styleError);
       logger.warn('INTELLIGENCE', 'Architectural style inference failed (non-blocking)', {
         documentId,
-        error: styleError?.message,
+        error: errMsg,
       });
     }
 
@@ -679,8 +680,9 @@ export async function runIntelligenceExtraction(
       const { runQuantityCalculations } = await import('./quantity-calculation-orchestrator');
       await runQuantityCalculations(documentId);
       logger.info('INTELLIGENCE_ORCHESTRATOR', 'Quantity calculations completed', { documentId });
-    } catch (calcError: any) {
-      logger.warn('INTELLIGENCE_ORCHESTRATOR', 'Quantity calculations failed (non-blocking)', { documentId, error: calcError?.message });
+    } catch (calcError: unknown) {
+      const errMsg = calcError instanceof Error ? calcError.message : String(calcError);
+      logger.warn('INTELLIGENCE_ORCHESTRATOR', 'Quantity calculations failed (non-blocking)', { documentId, error: errMsg });
     }
 
     // Phase: Auto-generate MaterialTakeoff from calculations
@@ -688,15 +690,17 @@ export async function runIntelligenceExtraction(
       const { generateTakeoffFromCalculations } = await import('./calculated-takeoff-generator');
       await generateTakeoffFromCalculations(documentId, document.projectId, 'system');
       logger.info('INTELLIGENCE_ORCHESTRATOR', 'Calculated takeoff generation completed', { documentId });
-    } catch (takeoffError: any) {
-      logger.warn('INTELLIGENCE_ORCHESTRATOR', 'Calculated takeoff generation failed (non-blocking)', { documentId, error: takeoffError?.message });
+    } catch (takeoffError: unknown) {
+      const errMsg = takeoffError instanceof Error ? takeoffError.message : String(takeoffError);
+      logger.warn('INTELLIGENCE_ORCHESTRATOR', 'Calculated takeoff generation failed (non-blocking)', { documentId, error: errMsg });
     }
 
     result.success = true;
     logger.info('INTELLIGENCE_ORCHESTRATOR', 'Intelligence extraction completed');
 
-  } catch (error: any) {
-    result.errors.push(error.message);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    result.errors.push(errMsg);
     logger.error('INTELLIGENCE_ORCHESTRATOR', 'Intelligence extraction failed', error);
   }
 

@@ -126,10 +126,11 @@ export async function POST(
       deleted: result.count,
       deletedRooms: roomsToDelete
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error bulk deleting rooms by range', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to delete rooms', details: error.message },
+      { error: 'Failed to delete rooms', details: errMsg },
       { status: 500 }
     );
   }

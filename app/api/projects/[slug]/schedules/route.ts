@@ -93,10 +93,11 @@ export async function GET(
     );
 
     return NextResponse.json({ schedules: schedulesWithProgress });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching schedules', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to fetch schedules', details: error.message },
+      { error: 'Failed to fetch schedules', details: errMsg },
       { status: 500 }
     );
   }

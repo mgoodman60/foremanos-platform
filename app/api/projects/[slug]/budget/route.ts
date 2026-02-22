@@ -117,7 +117,7 @@ export async function POST(
     });
 
     return NextResponse.json({ budget }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error creating budget', error);
     return NextResponse.json(
       { error: 'Failed to create budget' },
@@ -191,7 +191,7 @@ export async function PUT(
     });
 
     return NextResponse.json({ budget });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error updating budget', error);
     return NextResponse.json(
       { error: 'Failed to update budget' },

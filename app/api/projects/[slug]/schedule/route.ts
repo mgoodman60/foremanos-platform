@@ -96,7 +96,7 @@ export async function POST(
         fileName: document.fileName,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to set master schedule' },
@@ -152,7 +152,7 @@ export async function GET(
       document: masterScheduleDoc,
       hasSchedule: !!project.masterScheduleDocId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to get master schedule info' },
@@ -221,7 +221,7 @@ export async function DELETE(
       success: true,
       project: updatedProject,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('', error);
     return NextResponse.json(
       { error: 'Failed to remove master schedule' },

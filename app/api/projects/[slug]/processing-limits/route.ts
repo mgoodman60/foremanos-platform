@@ -65,10 +65,11 @@ export async function GET(
       limits,
       queuedCount,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to get processing limits', details: error.message },
+      { error: 'Failed to get processing limits', details: errMsg },
       { status: 500 }
     );
   }
@@ -134,10 +135,11 @@ export async function PUT(
       message: 'Processing limits updated successfully',
       project: updatedProject,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to update processing limits', details: error.message },
+      { error: 'Failed to update processing limits', details: errMsg },
       { status: 500 }
     );
   }

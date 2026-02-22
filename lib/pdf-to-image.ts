@@ -84,9 +84,10 @@ export async function convertPdfToImages(
     }
 
     return results;
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PDF_TO_IMAGE', 'Page extraction error', error as Error);
-    throw new Error(`PDF page extraction failed: ${error.message}`);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    throw new Error(`PDF page extraction failed: ${errMsg}`);
   }
 }
 
@@ -124,8 +125,9 @@ export async function getPdfPageCount(pdfBuffer: Buffer): Promise<number> {
     const pdfArray = new Uint8Array(pdfBuffer);
     const doc = await PDFDocument.load(pdfArray);
     return doc.getPageCount();
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('PDF_TO_IMAGE', 'Error getting page count', error as Error);
-    throw new Error(`Failed to get PDF page count: ${error.message}`);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to get PDF page count: ${errMsg}`);
   }
 }

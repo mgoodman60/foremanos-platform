@@ -131,12 +131,13 @@ export async function POST(
         name: r.name,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error bulk updating floor', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
         error: 'Failed to bulk update rooms',
-        details: error.message,
+        details: errMsg,
       },
       { status: 500 }
     );
