@@ -33,6 +33,7 @@ vi.mock('bcryptjs', () => ({ default: { hash: mockBcryptHash } }));
 vi.mock('@/lib/email-service', () => ({ sendWelcomeEmail: mockSendWelcomeEmail }));
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,
+  createLogger: vi.fn(() => mockLogger),
   createScopedLogger: vi.fn(() => mockLogger),
 }));
 

@@ -96,16 +96,23 @@ describe('GET /api/markup/tool-presets', () => {
     );
   });
 
-  it('should return 404 if user not found', async () => {
+  it('should use session user id path and not require a user lookup', async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
+    mockPrisma.markupToolPreset.findMany.mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/markup/tool-presets/route');
     const request = new NextRequest('http://localhost/api/markup/tool-presets');
     const response = await GET(request);
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.error).toBe('User not found');
+    expect(data.presets).toEqual([]);
+    expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+    expect(mockPrisma.markupToolPreset.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: 'user-123' },
+      })
+    );
   });
 
   it('should handle rate limit exceeded', async () => {

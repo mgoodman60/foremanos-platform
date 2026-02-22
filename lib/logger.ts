@@ -20,14 +20,24 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   error: 3,
 };
 
-const isProd = process.env.NODE_ENV === 'production';
+function getNodeEnv(): string {
+  return (process.env.NODE_ENV || '').toLowerCase();
+}
+
+function isProduction(): boolean {
+  return getNodeEnv() === 'production';
+}
+
+function isDevelopment(): boolean {
+  return getNodeEnv() === 'development';
+}
 
 function getMinLevel(): number {
   const envLevel = process.env.LOG_LEVEL?.toLowerCase() as LogLevel | undefined;
   if (envLevel && envLevel in LOG_LEVELS) {
     return LOG_LEVELS[envLevel];
   }
-  return isProd ? LOG_LEVELS.info : LOG_LEVELS.debug;
+  return isDevelopment() ? LOG_LEVELS.debug : LOG_LEVELS.info;
 }
 
 function shouldLog(level: LogLevel): boolean {
@@ -52,10 +62,12 @@ function serializeMeta(meta: LogContext): LogContext {
 function log(level: LogLevel, scope: string, message: string, context?: LogContext): void {
   if (!shouldLog(level)) return;
 
-  if (isProd) {
+  const timestamp = new Date().toISOString();
+
+  if (isProduction()) {
     // JSON lines for production
     const entry: Record<string, unknown> = {
-      timestamp: new Date().toISOString(),
+      timestamp,
       level,
       scope,
       message,
@@ -75,7 +87,7 @@ function log(level: LogLevel, scope: string, message: string, context?: LogConte
     } catch {
       // Fallback if JSON serialization fails (circular refs, etc.)
       console.error(JSON.stringify({
-        timestamp: new Date().toISOString(),
+        timestamp,
         level: 'error',
         scope,
         message: `[serialization failed] ${message}`,
@@ -84,14 +96,14 @@ function log(level: LogLevel, scope: string, message: string, context?: LogConte
   } else {
     // Human-readable colored output for development
     let metaStr = '';
-    if (context && Object.keys(context).length > 0) {
+    if (context !== undefined) {
       try {
         metaStr = ` ${JSON.stringify(serializeMeta(context))}`;
       } catch {
         metaStr = ' [unable to serialize context]';
       }
     }
-    const formatted = `[${level.toUpperCase()}] [${scope}] ${message}${metaStr}`;
+    const formatted = `[${timestamp}] [${level.toUpperCase()}] [${scope}] ${message}${metaStr}`;
     switch (level) {
       case 'debug': console.debug(formatted); break;
       case 'info': console.info(formatted); break;

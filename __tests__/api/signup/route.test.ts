@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { withMutationCsrfHeaders } from '../../helpers/csrf-test-utils';
 
 // Mock data
 const mockUser = {
@@ -142,7 +143,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -160,7 +161,7 @@ describe('POST /api/signup', () => {
         password: 'SecurePassword123!',
         confirmPassword: 'SecurePassword123!',
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -178,7 +179,7 @@ describe('POST /api/signup', () => {
         username: 'newuser',
         confirmPassword: 'SecurePassword123!',
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -195,7 +196,7 @@ describe('POST /api/signup', () => {
         ...validSignupData,
         confirmPassword: 'DifferentPassword123!',
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -218,7 +219,7 @@ describe('POST /api/signup', () => {
         password: 'weak',
         confirmPassword: 'weak',
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -234,7 +235,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -248,7 +249,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -262,7 +263,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -286,7 +287,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -303,7 +304,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -315,7 +316,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -332,7 +333,7 @@ describe('POST /api/signup', () => {
     const request = new NextRequest('http://localhost/api/signup', {
       method: 'POST',
       body: JSON.stringify(validSignupData),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -354,7 +355,7 @@ describe('POST /api/signup', () => {
         selectedTier: 'pro',
         billingPeriod: 'monthly',
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -376,7 +377,7 @@ describe('POST /api/signup', () => {
         selectedTier: 'pro',
         billingPeriod: 'monthly',
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -386,3 +387,4 @@ describe('POST /api/signup', () => {
     expect(data.error).toContain('Failed to create payment session');
   });
 });
+

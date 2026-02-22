@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { withMutationCsrfHeaders } from '../../helpers/csrf-test-utils';
 
 // Mock data
 const mockUser = {
@@ -95,7 +96,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'some-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -109,7 +110,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -123,7 +124,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'some-token' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -139,7 +140,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'invalid-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -158,7 +159,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'expired-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -177,7 +178,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'used-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -196,7 +197,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'valid-token', password: 'weak' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -210,7 +211,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'valid-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -224,7 +225,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'valid-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -239,7 +240,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'valid-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -254,7 +255,7 @@ describe('POST /api/auth/reset-password', () => {
     const request = new NextRequest('http://localhost/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token: 'valid-token', password: 'NewPassword123!' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -263,3 +264,4 @@ describe('POST /api/auth/reset-password', () => {
     expect(data.message).toContain('Password reset successful');
   });
 });
+

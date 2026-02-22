@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
+import { withMutationCsrfHeaders } from '../helpers/csrf-test-utils';
 
 // Mock prisma for auth operations
 vi.mock('@/lib/db', () => ({
@@ -47,7 +48,7 @@ describe('Auth Endpoints Smoke Tests', () => {
       const request = new NextRequest('http://localhost/api/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({}),
-        headers: { 'Content-Type': 'application/json' },
+        headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
       });
 
       const response = await POST(request);
@@ -64,7 +65,7 @@ describe('Auth Endpoints Smoke Tests', () => {
       const request = new NextRequest('http://localhost/api/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({ email: 'invalid-email' }),
-        headers: { 'Content-Type': 'application/json' },
+        headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
       });
 
       const response = await POST(request);
@@ -80,7 +81,7 @@ describe('Auth Endpoints Smoke Tests', () => {
       const request = new NextRequest('http://localhost/api/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({ email: 'test@example.com' }),
-        headers: { 'Content-Type': 'application/json' },
+        headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
       });
 
       const response = await POST(request);
@@ -97,7 +98,7 @@ describe('Auth Endpoints Smoke Tests', () => {
       const request = new NextRequest('http://localhost/api/auth/reset-password', {
         method: 'POST',
         body: JSON.stringify({}),
-        headers: { 'Content-Type': 'application/json' },
+        headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
       });
 
       const response = await POST(request);
@@ -115,7 +116,7 @@ describe('Auth Endpoints Smoke Tests', () => {
           token: 'invalid-token',
           password: 'NewPassword123!'
         }),
-        headers: { 'Content-Type': 'application/json' },
+        headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
       });
 
       const response = await POST(request);
@@ -153,3 +154,4 @@ describe('Auth Endpoints Smoke Tests', () => {
     });
   });
 });
+
