@@ -1,0 +1,3 @@
+[submodule "ai-intelligence"]
+	path = ai-intelligence
+	url = https://github.com/mgoodman60/foreman-os.git

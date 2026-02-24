@@ -11,6 +11,8 @@
 import { prisma } from '@/lib/db';
 import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { isPluginAvailable } from '@/lib/plugin';
+import { searchPluginReferences } from '@/lib/plugin/reference-loader';
 import type {
   ChunkMetadata,
   DocumentChunk,
@@ -117,6 +119,54 @@ export async function retrieveRelevantDocuments(
     // Sort by score and take top results
     scoredChunks.sort((a, b) => b.score - a.score);
     const topChunks = scoredChunks.slice(0, limit).map(sc => sc.chunk);
+
+    // ── Plugin Reference Integration ───────────────────────────────
+    // When the ai-intelligence plugin is available, search its reference
+    // documents for relevant construction knowledge and merge into results.
+    // Plugin chunks are scored slightly lower so actual project documents
+    // rank higher than general reference material.
+    if (isPluginAvailable()) {
+      try {
+        const pluginResults = searchPluginReferences(query, Math.max(2, Math.floor(limit / 2)));
+
+        // Determine the score floor: plugin results should not outrank
+        // the lowest-scoring project document already in the results.
+        const lowestProjectScore = scoredChunks.length > 0
+          ? scoredChunks[Math.min(scoredChunks.length - 1, limit - 1)]?.score ?? 0
+          : 0;
+
+        for (const result of pluginResults) {
+          // Scale plugin score to be below project document scores.
+          // Use 70% of the plugin's raw score, capped at 90% of the lowest project chunk score.
+          let adjustedScore = result.score * 0.7;
+          if (lowestProjectScore > 0) {
+            adjustedScore = Math.min(adjustedScore, lowestProjectScore * 0.9);
+          }
+
+          // Only include if the plugin chunk has a meaningful score
+          if (adjustedScore < 5) continue;
+
+          const pluginChunk: DocumentChunk = {
+            id: `plugin-ref-${result.chunk.skillSlug}-${result.chunk.filename}-${result.chunk.chunkIndex}`,
+            content: result.chunk.content,
+            documentId: 'plugin-reference',
+            pageNumber: result.chunk.chunkIndex + 1,
+            metadata: {
+              documentName: `[Reference] ${result.chunk.title}`,
+              category: 'plugin_reference',
+              accessLevel: 'admin',
+            } as ChunkMetadata,
+            documentCategory: 'plugin_reference',
+            documentName: `[Reference] ${result.chunk.title}`,
+          };
+
+          topChunks.push(pluginChunk);
+        }
+      } catch (err) {
+        // Plugin reference search should never break the main RAG pipeline
+        logger.warn('RAG', 'Plugin reference search failed (non-fatal)', { error: String(err) });
+      }
+    }
 
     // Get unique document names
     const documentNames = [...new Set(
