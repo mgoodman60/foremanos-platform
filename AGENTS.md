@@ -32,11 +32,13 @@ AI-powered construction project management platform. Think "Procore meets AI" �
 ```
 app/api/              # 428 API routes (auth → rate limit → validate → logic → response)
 lib/                  # 295 service modules (the backend brain)
+lib/plugin/           # 7 modules — AI intelligence plugin integration
 components/           # 398 React components (Shadcn/Radix UI)
 prisma/               # 112-model schema (sync with `npx prisma db push`)
 __tests__/            # Vitest unit/integration tests
 e2e/                  # Playwright E2E tests
-src/trigger/          # Trigger.dev v3 tasks (document processing)
+src/trigger/          # Trigger.dev v3 tasks (document processing + 10 plugin agent tasks)
+ai-intelligence/      # Git submodule — foreman-os plugin (42 skills, 10 agents, 37 commands)
 .claude/              # Claude Code agents, skills, plans (Claude-specific tooling)
 ```
 
@@ -55,6 +57,7 @@ src/trigger/          # Trigger.dev v3 tasks (document processing)
 | `lib/auth-options.ts` | NextAuth configuration |
 | `lib/s3.ts` | AWS S3 / Cloudflare R2 operations |
 | `lib/design-tokens.ts` | Color palette — use tokens, not hex codes |
+| `lib/plugin/index.ts` | Plugin integration barrel (skills, agents, commands, references) |
 | `prisma/schema.prisma` | Database schema (112 models) |
 
 ---

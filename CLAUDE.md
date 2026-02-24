@@ -111,11 +111,13 @@ lib/                  # 295 service modules (RAG, S3, Stripe, auth, offline-stor
   lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
   lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
+  lib/plugin/         # 7 modules — AI intelligence plugin integration (see Plugin System below)
 components/           # 398 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
 prisma/               # Database schema and migrations (112 models)
 __tests__/            # Vitest tests (248 test files)
 e2e/                  # Playwright E2E tests (23 spec files)
-src/trigger/          # Trigger.dev v3 long-running tasks (document processing)
+src/trigger/          # Trigger.dev v3 long-running tasks (document processing + 10 plugin agent tasks)
+ai-intelligence/      # Git submodule — foreman-os plugin (42 skills, 10 agents, 37 commands, 21 references)
 .claude/agents/       # 24 custom Claude Code agents
 .claude/skills/       # 14 project slash commands + 24 installed skills (see below)
 ```
@@ -176,6 +178,7 @@ src/trigger/          # Trigger.dev v3 long-running tasks (document processing)
 | `lib/sitework-takeoff-extractor.ts` | Barrel re-export → `lib/sitework/` (7 modules: patterns, unit-conversion, drawing-classification, extraction, quantity-derivation, geotech-integration, cad-integration) |
 | `lib/discipline-colors.ts` | Shared discipline → color/icon mapping |
 | `lib/api-error.ts` | Standardized API error response helper (`apiError()`, `apiSuccess()`) |
+| `lib/plugin/index.ts` | Barrel re-export → `lib/plugin/` (7 modules: skill-loader, skill-selector, extraction-prompt-loader, agent-executor, reference-loader, command-router) |
 
 295 total service modules in `lib/` — see directory for full listing.
 
@@ -218,8 +221,59 @@ Processors: Conversation → RestrictedCheck → RAG → Cache → LLM Stream
 
 - `lib/chat/middleware/` - Request validation and auth
 - `lib/chat/processors/` - Business logic and streaming
-  - `context-builder.ts` - RAG retrieval, Phase A/3A/3C enrichment, daily report chunks, web search
+  - `context-builder.ts` - Plugin command detection → plugin skill injection → RAG retrieval → Phase A/3A/3C enrichment → daily report chunks → web search
 - `lib/chat/utils/` - Helpers (restricted query check, query classifier)
+
+### Plugin System (`ai-intelligence/` submodule)
+
+The `foreman-os` plugin repo is mounted as a git submodule at `ai-intelligence/`. It provides the AI intelligence layer — defining WHAT the AI does, while the app provides HOW (database, UI, APIs, auth, storage, Trigger.dev).
+
+**Submodule**: `https://github.com/mgoodman60/foreman-os.git` → `ai-intelligence/`
+
+**Plugin contents**: 42 skills, 10 agents, 37 slash commands, 21 field-reference docs. All markdown/JSON — no executable code.
+
+**Integration modules** (`lib/plugin/`):
+
+| Module | Purpose |
+|--------|---------|
+| `skill-loader.ts` | Reads SKILL.md files from `ai-intelligence/skills/`, parses YAML frontmatter, caches in memory (5-min TTL) |
+| `skill-selector.ts` | Maps user queries → relevant skills (max 3 per query, 4000-token budget) via trigger phrases + keyword patterns |
+| `extraction-prompt-loader.ts` | Loads 28 deep-extraction references to enhance discipline prompts (replaces hardcoded prompts in `discipline-prompts.ts`) |
+| `agent-executor.ts` | Reads agent definitions, loads project data from Prisma, calls LLM, stores results in ActivityLog/ProjectHealthSnapshot |
+| `reference-loader.ts` | Scans all `references/*.md` files, chunks into ~600-word segments, provides keyword search for RAG |
+| `command-router.ts` | Detects `/command` patterns in chat, loads command definitions + referenced skills, builds system prompt enhancement |
+| `index.ts` | Barrel re-export for all plugin modules |
+
+**Integration seams** (where plugin connects to app):
+
+| Seam | App File | What Happens |
+|------|----------|-------------|
+| Chat skill injection | `lib/chat/processors/context-builder.ts` | Plugin skills injected into LLM context based on query intent |
+| Chat command routing | `lib/chat/processors/context-builder.ts` | `/command` messages load full command + skill definitions |
+| Extraction prompts | `lib/discipline-prompts.ts` | Plugin deep-extraction references supplement hardcoded prompts |
+| Quality thresholds | `lib/vision-api-quality.ts` | Alert thresholds loaded from plugin's `alert-thresholds.md` |
+| RAG reference search | `lib/rag/document-retrieval.ts` | Plugin reference docs returned as search results (scored below project docs) |
+| Agent tasks | `src/trigger/agents/*.ts` | 10 Trigger.dev tasks, one per plugin agent |
+
+**Graceful fallback**: All integration points check `isPluginAvailable()` before loading. When the submodule is absent, the app falls back to its existing hardcoded behavior with zero errors.
+
+**Submodule commands**:
+```bash
+git submodule update --init --recursive  # Initialize (runs automatically in build)
+git submodule update --remote            # Pull latest plugin changes
+```
+
+**10 Agent Tasks** (in `src/trigger/agents/`):
+- `project-health-monitor` — 8 KPIs + 5 anomaly rules, daily health dashboard
+- `deadline-sentinel` — Scans all deadline sources, cascading impact analysis
+- `data-integrity-watchdog` — Cross-validates 23 JSON data relationships
+- `dashboard-intelligence-analyst` — Generates dashboard insights and trends
+- `doc-orchestrator` — Coordinates multi-document extraction pipelines
+- `field-intelligence-advisor` — Proactive field operation recommendations
+- `project-data-navigator` — Natural language project data queries
+- `report-quality-auditor` — Validates report accuracy and completeness
+- `superintendent-assistant` — Contextual superintendent decision support
+- `weekly-planning-coordinator` — Last Planner coordination and lookahead management
 
 ### Database Models (Prisma)
 
@@ -286,6 +340,8 @@ Downstream triggers on APPROVED: RAG indexing → budget/schedule sync → OneDr
 ### Document Intelligence Pipeline
 
 Pipeline extracting 15 categories of visual intelligence from construction plans via vision AI. Default mode (discipline-single-pass): Haiku classification → Gemini 2.5 Pro vision extraction → GPT-5.2 fallback (rasterized JPEG) → Opus-only fallback (native PDF then rasterized image). Legacy mode (three-pass-legacy): Gemini Pro 3 extraction → Gemini 2.5 Pro validation → Claude Opus interpretation → smart routing. Cost per page: ~$0.05 discipline-single-pass, ~$0.03 GPT-5.2 fallback, ~$0.20 Opus fallback worst-case, ~$0.16 three-pass-legacy.
+
+**Plugin-enhanced extraction**: When the `ai-intelligence` submodule is present, `lib/discipline-prompts.ts` appends deep-extraction rules from 28 plugin reference docs (e.g., `plans-deep-extraction.md`, `mep-deep-extraction.md`). Quality scoring thresholds in `lib/vision-api-quality.ts` are loaded from the plugin's `alert-thresholds.md`. Both fall back to hardcoded values when the submodule is absent.
 
 ```
 Upload → Vision Extraction (15 categories) → Phase A/B/C Intelligence
@@ -389,7 +445,7 @@ See `.claude/AGENTS_GUIDE.md` for full agent definitions, team compositions, wor
 ## Important Patterns
 
 ### Graceful Degradation
-Redis, Stripe, and other optional services fail gracefully with in-memory fallbacks or disabled features.
+Redis, Stripe, the `ai-intelligence` plugin submodule, and other optional services fail gracefully with in-memory fallbacks, hardcoded defaults, or disabled features.
 
 ### RAG Scoring System
 `lib/rag.ts` uses a 1000+ point scoring system with:
