@@ -577,6 +577,6 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
 
     expect(response.status).toBe(500);
     expect(data.error).toBe('Failed to fetch discipline sheets');
-    expect(data.details).toBe('Database error');
+    expect(data.details).toBe('Internal server error');
   });
 });

@@ -18,6 +18,15 @@ const DEFAULT_LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 const LOCK_CHECK_INTERVAL_MS = 500; // 500ms between lock attempts
 const MAX_LOCK_ATTEMPTS = 10; // Maximum wait of ~5 seconds
 
+function getPrismaErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const code = (error as { code?: unknown }).code;
+  return typeof code === 'string' ? code : undefined;
+}
+
 export interface LockResult {
   acquired: boolean;
   lockId?: string;
@@ -71,7 +80,7 @@ export async function acquireLock(
     };
   } catch (error: unknown) {
     // Unique constraint violation - lock already exists
-    if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
+    if (getPrismaErrorCode(error) === 'P2002') {
       const existingLock = await prisma.extractionLock.findUnique({
         where: {
           resourceType_resourceId_extractionType: {
@@ -112,7 +121,7 @@ export async function acquireLock(
       }
     }
 
-    log.error('Error acquiring lock', error as Error);
+    log.error('Error acquiring lock', error);
     throw error;
   }
 }

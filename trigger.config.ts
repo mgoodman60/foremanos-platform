@@ -16,7 +16,7 @@ export default defineConfig({
       randomize: true,
     },
   },
-  dirs: ["./src/trigger"],
+  dirs: ["./src/trigger", "./src/trigger/agents"],
   build: {
     extensions: [
       prismaExtension({ mode: "legacy", schema: "prisma/schema.prisma", version: "6.7.0", migrate: false }),

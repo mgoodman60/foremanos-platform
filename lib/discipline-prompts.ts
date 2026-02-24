@@ -4,7 +4,14 @@
  * Contains 8 discipline-specific extraction prompts for construction
  * document pages, plus a generic fallback that matches the existing
  * getVisionPrompt() output for backward compatibility.
+ *
+ * PLUGIN INTEGRATION: When the ai-intelligence submodule is available,
+ * prompts are enhanced with deep-extraction reference docs from the plugin.
+ * The plugin provides 28 specialized extraction references vs. the 8
+ * hardcoded prompts here. Plugin content is appended to the base prompt,
+ * preserving the JSON response schema while adding richer extraction rules.
  */
+import { getPluginExtractionEnhancement, isExtractionPluginAvailable } from '@/lib/plugin';
 
 /**
  * Get the appropriate discipline-specific extraction prompt.
@@ -54,6 +61,14 @@ export function getDisciplinePrompt(
 
   if (symbolHints) {
     prompt += `\n${symbolHints}`;
+  }
+
+  // Plugin enhancement: append deep-extraction rules from the plugin if available
+  if (isExtractionPluginAvailable()) {
+    const enhancement = getPluginExtractionEnhancement(discipline, drawingType);
+    if (enhancement) {
+      prompt += `\n${enhancement}`;
+    }
   }
 
   prompt += '\n\nIMPORTANT: Extract EVERYTHING visible. Omit categories with no data rather than including empty arrays.';

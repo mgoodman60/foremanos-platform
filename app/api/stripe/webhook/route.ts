@@ -385,5 +385,22 @@ function getTierFromPriceId(priceId: string | undefined): SubscriptionTier {
     }
   }
 
+  // Fallback for non-canonical price IDs (for example: "price_business_annual")
+  const normalized = priceId.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const tokens = new Set(normalized.split('_').filter(Boolean));
+  const heuristicOrder: SubscriptionTier[] = [
+    'enterprise',
+    'business',
+    'team',
+    'starter',
+    'pro',
+  ];
+
+  for (const tier of heuristicOrder) {
+    if (tokens.has(tier)) {
+      return tier;
+    }
+  }
+
   return 'free';
 }

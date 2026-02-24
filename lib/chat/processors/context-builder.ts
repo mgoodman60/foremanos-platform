@@ -25,6 +25,8 @@ import {
 import { shouldUseWebSearch, performWebSearch, formatWebResultsForContext } from '@/lib/web-search';
 import { getAccessibleDocuments } from '@/lib/access-control';
 import { classifyQuery } from '@/lib/chat/utils/query-classifier';
+import { selectSkillsForQuery, isPluginAvailable } from '@/lib/plugin';
+import { detectCommand, buildCommandContext } from '@/lib/plugin/command-router';
 import type { ContextBuilderOptions, BuiltContext, WebSearchResult } from '@/types/chat';
 
 /**
@@ -42,6 +44,20 @@ import type { ContextBuilderOptions, BuiltContext, WebSearchResult } from '@/typ
  */
 export async function buildContext(options: ContextBuilderOptions): Promise<BuiltContext> {
   const { message, image, projectSlug, userRole } = options;
+
+  // ========================================
+  // PLUGIN COMMAND DETECTION (before RAG)
+  // ========================================
+  let commandContext = '';
+  if (isPluginAvailable() && message) {
+    const commandResult = detectCommand(message);
+    if (commandResult.detected && commandResult.command) {
+      commandContext = buildCommandContext(commandResult.command);
+      logger.info('PLUGIN', 'Detected command: /' + commandResult.command.name, {
+        args: commandResult.arguments ? commandResult.arguments.substring(0, 100) : undefined,
+      });
+    }
+  }
 
   // Classify query type to determine retrieval limit
   const queryClassification = classifyQuery(message || '');
@@ -249,6 +265,21 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
 
   logger.info('PHASE_3C', 'Advanced analysis complete');
 
+  // ========================================
+  // PLUGIN SKILL INTEGRATION
+  // ========================================
+  let pluginSkillContext = '';
+  if (isPluginAvailable()) {
+    const skillSelection = selectSkillsForQuery(message);
+    if (skillSelection.skills.length > 0) {
+      pluginSkillContext = `\n\n=== CONSTRUCTION INTELLIGENCE (ForemanOS Plugin) ===\n${skillSelection.instructions}`;
+      logger.info('PLUGIN', `Injected ${skillSelection.skills.length} plugin skills`, {
+        skills: skillSelection.skills.map(s => s.slug),
+        tokens: skillSelection.estimatedTokens,
+      });
+    }
+  }
+
   // Convert enhanced chunks to standard format
   const chunks = enrichedChunks
     .filter((ec) => ec.documentId !== null)
@@ -295,8 +326,13 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
   // Generate Phase 3-enhanced context with corrections
   const _documentContext = await generateContextWithPhase3(chunks, adminCorrections, message || '', projectSlug);
 
-  // Combine contexts
-  const combinedContext = `${enhancedContext}${dailyReportContext}\n\n=== ADMIN CORRECTIONS (Priority Teaching) ===\n${
+  // Build command context prefix (commands are more specific than general skills)
+  const commandContextBlock = commandContext
+    ? '\n\n=== PLUGIN COMMAND CONTEXT (ForemanOS) ===\n' + commandContext
+    : '';
+
+  // Combine contexts (RAG + daily reports + command context + plugin skills + admin corrections)
+  const combinedContext = `${enhancedContext}${dailyReportContext}${commandContextBlock}${pluginSkillContext}\n\n=== ADMIN CORRECTIONS (Priority Teaching) ===\n${
     adminCorrections.length > 0
       ? adminCorrections
           .map(

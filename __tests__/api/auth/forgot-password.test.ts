@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { withMutationCsrfHeaders } from '../../helpers/csrf-test-utils';
 
 // Mock dependencies BEFORE importing the route
 const mockUser = {
@@ -72,7 +73,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'test@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -86,7 +87,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({}),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -102,7 +103,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'nonexistent@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -123,7 +124,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'guest@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -140,7 +141,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'test@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -161,7 +162,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'test@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     await POST(request);
 
@@ -183,7 +184,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'test@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -203,7 +204,7 @@ describe('POST /api/auth/forgot-password', () => {
     const request = new NextRequest('http://localhost/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email: 'test@example.com' }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: withMutationCsrfHeaders({ 'Content-Type': 'application/json' }),
     });
     const response = await POST(request);
 
@@ -212,3 +213,4 @@ describe('POST /api/auth/forgot-password', () => {
     expect(data.error).toContain('error occurred');
   });
 });
+

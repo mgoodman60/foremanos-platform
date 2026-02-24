@@ -28,6 +28,7 @@ vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
 vi.mock('@/lib/retry-util', () => ({ withDatabaseRetry: mockWithDatabaseRetry }));
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,
+  createLogger: vi.fn(() => mockLogger),
   createScopedLogger: vi.fn(() => mockLogger),
 }));
 

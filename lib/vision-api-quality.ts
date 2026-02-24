@@ -1,9 +1,47 @@
 /**
  * Quality Validation Layer for Vision API Responses
- * 
+ *
  * Validates extracted data completeness and assigns confidence scores
- * to determine if response should be accepted or retried with different provider
+ * to determine if response should be accepted or retried with different provider.
+ *
+ * PLUGIN INTEGRATION: When the ai-intelligence submodule is available,
+ * alert thresholds for KPI scoring (SPI, CPI, FPIR, TRIR, PPC) are loaded
+ * from the plugin's alert-thresholds.md reference doc. Base quality scoring
+ * for document extraction remains hardcoded for stability.
  */
+import { loadAlertThresholds, type AlertThresholds } from '@/lib/plugin';
+
+// Plugin-loaded thresholds (lazy-loaded, cached)
+let _pluginThresholds: AlertThresholds | null | undefined;
+function getPluginThresholds(): AlertThresholds | null {
+  if (_pluginThresholds === undefined) {
+    _pluginThresholds = loadAlertThresholds();
+  }
+  return _pluginThresholds;
+}
+
+/** Reset plugin threshold cache (call when submodule is updated) */
+export function resetPluginThresholdCache(): void {
+  _pluginThresholds = undefined;
+}
+
+/**
+ * Get project health alert thresholds.
+ * Returns plugin-defined thresholds if available, otherwise returns hardcoded defaults.
+ */
+export function getAlertThresholds(): AlertThresholds {
+  const plugin = getPluginThresholds();
+  if (plugin) return plugin;
+
+  // Hardcoded defaults (kept as fallback)
+  return {
+    spi: { healthy: { min: 0.95, max: 1.05 }, warning: { min: 0.90, max: 0.95 }, critical: { min: 0, max: 0.90 } },
+    cpi: { healthy: { min: 0.95, max: 1.05 }, warning: { min: 0.90, max: 0.95 }, critical: { min: 0, max: 0.90 } },
+    fpir: { healthy: { min: 0, max: 10 }, warning: { min: 20, max: 30 }, critical: { min: 30, max: 100 } },
+    trir: { healthy: { min: 0, max: 0 }, warning: { min: 2.0, max: Infinity }, critical: { min: 0, max: Infinity } },
+    ppc: { healthy: { min: 85, max: 100 }, warning: { min: 60, max: 70 }, critical: { min: 0, max: 60 } },
+  };
+}
 
 export interface QualityCheckResult {
   passed: boolean;
