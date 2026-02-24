@@ -116,24 +116,20 @@ export async function retrieveRelevantDocuments(
       }
     }
 
-    // Sort by score and take top results
-    scoredChunks.sort((a, b) => b.score - a.score);
-    const topChunks = scoredChunks.slice(0, limit).map(sc => sc.chunk);
-
     // ── Plugin Reference Integration ───────────────────────────────
-    // When the ai-intelligence plugin is available, search its reference
-    // documents for relevant construction knowledge and merge into results.
-    // Plugin chunks are scored slightly lower so actual project documents
-    // rank higher than general reference material.
-    if (isPluginAvailable()) {
+    // When the ai-intelligence plugin is available and enough project
+    // documents exist, merge plugin reference chunks into the scored pool
+    // BEFORE applying the limit. Plugin refs only fill supplemental slots
+    // (max 25% of limit) and never appear when fewer than 3 project docs match.
+    const projectChunkCount = scoredChunks.length;
+    const pluginSlots = Math.min(Math.floor(limit * 0.25), 3);
+    if (isPluginAvailable() && projectChunkCount >= 3 && pluginSlots > 0) {
       try {
-        const pluginResults = searchPluginReferences(query, Math.max(2, Math.floor(limit / 2)));
+        const pluginResults = searchPluginReferences(query, pluginSlots);
 
         // Determine the score floor: plugin results should not outrank
         // the lowest-scoring project document already in the results.
-        const lowestProjectScore = scoredChunks.length > 0
-          ? scoredChunks[Math.min(scoredChunks.length - 1, limit - 1)]?.score ?? 0
-          : 0;
+        const lowestProjectScore = scoredChunks[scoredChunks.length - 1]?.score ?? 0;
 
         for (const result of pluginResults) {
           // Scale plugin score to be below project document scores.
@@ -160,13 +156,17 @@ export async function retrieveRelevantDocuments(
             documentName: `[Reference] ${result.chunk.title}`,
           };
 
-          topChunks.push(pluginChunk);
+          scoredChunks.push({ chunk: pluginChunk, score: adjustedScore });
         }
       } catch (err) {
         // Plugin reference search should never break the main RAG pipeline
         logger.warn('RAG', 'Plugin reference search failed (non-fatal)', { error: String(err) });
       }
     }
+
+    // Sort by score and take top results (limit applied AFTER plugin merge)
+    scoredChunks.sort((a, b) => b.score - a.score);
+    const topChunks = scoredChunks.slice(0, limit).map(sc => sc.chunk);
 
     // Get unique document names
     const documentNames = [...new Set(
