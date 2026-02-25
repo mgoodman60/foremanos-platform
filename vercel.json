@@ -51,6 +51,10 @@
     {
       "path": "/api/cron/processing-queue-cleanup",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/stalled-processing-recovery",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

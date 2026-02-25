@@ -209,7 +209,7 @@ export const processDocumentTask = task({
           })
         );
 
-        // Collect batch results
+        // Collect batch results with per-page progress updates
         let batchCost = 0;
         for (const [i, result] of results.entries()) {
           if (result.status === 'fulfilled') {
@@ -217,7 +217,20 @@ export const processDocumentTask = task({
             providerBreakdown = accumulateProviderStats([result.value.result], providerBreakdown);
             batchCost += result.value.result.estimatedCost || 0;
 
-            triggerLogger.log(`Page ${result.value.page} completed`, {
+            // Per-page progress update — UI sees progress immediately per page, not per batch
+            await prisma.document.update({
+              where: { id: documentId },
+              data: { pagesProcessed },
+            });
+            await prisma.processingQueue.update({
+              where: { id: queueEntry.id },
+              data: {
+                pagesProcessed,
+                updatedAt: new Date(),
+              },
+            });
+
+            triggerLogger.log(`Page ${result.value.page} completed (${pagesProcessed}/${totalPages})`, {
               documentId,
               cost: result.value.result.estimatedCost,
             });
@@ -231,26 +244,18 @@ export const processDocumentTask = task({
           }
         }
 
-        // Single DB progress update per batch (reduces writes by ~4x)
-        await prisma.$transaction([
-          prisma.document.update({
-            where: { id: documentId },
-            data: { pagesProcessed },
-          }),
-          prisma.processingQueue.update({
-            where: { id: queueEntry.id },
-            data: {
-              pagesProcessed,
-              currentBatch: batchEnd,
-              updatedAt: new Date(),
-              metadata: {
-                ...metadata,
-                providerBreakdown,
-                lastBatchAt: new Date().toISOString(),
-              },
+        // Batch-level metadata update (provider breakdown, currentBatch)
+        await prisma.processingQueue.update({
+          where: { id: queueEntry.id },
+          data: {
+            currentBatch: batchEnd,
+            metadata: {
+              ...metadata,
+              providerBreakdown,
+              lastBatchAt: new Date().toISOString(),
             },
-          }),
-        ]);
+          },
+        });
 
         // Accumulate cost for batch
         if (batchCost > 0) {

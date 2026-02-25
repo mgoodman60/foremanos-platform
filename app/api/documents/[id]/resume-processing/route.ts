@@ -5,6 +5,8 @@ import { resumeFailedProcessing } from '@/lib/document-processing-queue';
 import { prisma } from '@/lib/db';
 import { ProcessingQueueStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { tasks } from '@trigger.dev/sdk/v3';
+import type { processDocumentTask } from '@/src/trigger/process-document';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,11 +60,45 @@ export async function POST(
       },
     });
 
+    // Fetch totalPages from ProcessingQueue, processorType from Document
+    const queueEntry = await prisma.processingQueue.findFirst({
+      where: { documentId },
+      select: { totalPages: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    const docMeta = await prisma.document.findUnique({
+      where: { id: documentId },
+      select: { processorType: true },
+    });
+
+    const totalPages = queueEntry?.totalPages ?? 1;
+    const processorType = docMeta?.processorType ?? 'vision-ai';
+
+    // Re-trigger the Trigger.dev task to resume processing
+    try {
+      const handle = await tasks.trigger<typeof processDocumentTask>('process-document', {
+        documentId,
+        totalPages,
+        processorType,
+      });
+      logger.info('RESUME_PROCESSING', 'Trigger.dev task triggered', { documentId, runId: handle.id });
+    } catch (triggerError) {
+      logger.error('RESUME_PROCESSING', 'Failed to trigger Trigger.dev task', triggerError);
+      await prisma.document.update({
+        where: { id: documentId },
+        data: {
+          queueStatus: 'failed',
+          lastProcessingError: 'Failed to start resume processing task',
+        },
+      }).catch(() => {});
+      throw triggerError;
+    }
+
     logger.info('RESUME_PROCESSING', `Processing resumed for ${document.name}`, { documentId });
 
     return NextResponse.json({
       success: true,
-      message: `Processing resumed for ${document.name}`,
+      message: `Processing resumed for ${document.name} — task re-triggered`,
     });
   } catch (error: unknown) {
     logger.error('RESUME_PROCESSING', 'Failed to resume processing', error);

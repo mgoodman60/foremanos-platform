@@ -27,12 +27,14 @@ import {
   getProcessingType,
   callGeminiVision,
   isPdfContent,
+  resetCircuitBreakers,
 } from '@/lib/vision-api-multi-provider';
 
 describe('Vision API Multi-Provider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchMock.mockReset();
+    resetCircuitBreakers();
   });
 
   afterEach(() => {

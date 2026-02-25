@@ -71,6 +71,42 @@ const PROVIDERS: ProviderConfig[] = [
   },
 ];
 
+// Circuit breaker state — prevents wasting time on providers that are clearly down
+interface CircuitBreakerState {
+  failures: number;
+  lastFailure: number;
+}
+const circuitBreaker = new Map<VisionProvider, CircuitBreakerState>();
+const CIRCUIT_BREAKER_THRESHOLD = 3; // consecutive failures to trip
+const CIRCUIT_BREAKER_COOLDOWN = 5 * 60 * 1000; // 5 minutes before retrying a tripped provider
+
+function isCircuitOpen(provider: VisionProvider): boolean {
+  const state = circuitBreaker.get(provider);
+  if (!state || state.failures < CIRCUIT_BREAKER_THRESHOLD) return false;
+  if (Date.now() - state.lastFailure > CIRCUIT_BREAKER_COOLDOWN) {
+    // Cooldown expired, allow retry (half-open)
+    circuitBreaker.delete(provider);
+    return false;
+  }
+  return true;
+}
+
+function recordProviderFailure(provider: VisionProvider): void {
+  const state = circuitBreaker.get(provider) || { failures: 0, lastFailure: 0 };
+  state.failures++;
+  state.lastFailure = Date.now();
+  circuitBreaker.set(provider, state);
+}
+
+function recordProviderSuccess(provider: VisionProvider): void {
+  circuitBreaker.delete(provider);
+}
+
+/** Reset all circuit breaker state (exported for testing) */
+export function resetCircuitBreakers(): void {
+  circuitBreaker.clear();
+}
+
 // Load API secrets - checks environment variables first, then falls back to secrets file
 function getApiSecrets() {
   // Priority 1: Environment variables (works in production)
@@ -166,8 +202,13 @@ async function callClaudeOpusVision(
     };
   }
 
+  if (isCircuitOpen('claude-opus-4-6')) {
+    logger.warn('VISION_API', 'Circuit breaker tripped for claude-opus-4-6, skipping');
+    return { success: false, content: '', provider: 'claude-opus-4-6', attempts: 0, error: 'Circuit breaker open' };
+  }
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 600000); // 600s - increased from 90s for dense construction PDFs
+  const timeout = setTimeout(() => controller.abort(), 180000); // 180s - 3 minutes for dense construction PDFs
 
   try {
     // Detect content type - PDF or image
@@ -262,6 +303,7 @@ async function callClaudeOpusVision(
     const elapsedMs = Date.now() - fetchStart;
     logger.info('VISION_API', `${config.displayName}: Response received`, { elapsedMs, status: response.status, contentLength: content.length });
 
+    recordProviderSuccess('claude-opus-4-6');
     return {
       success: true,
       content,
@@ -275,11 +317,12 @@ async function callClaudeOpusVision(
     if (error instanceof Error && error.name === 'AbortError') {
       const isPdf = isPdfContent(imageBase64);
       if (isPdf && retryCount < 1) {
-        logger.warn('VISION_API', `${config.displayName}: timeout after 600s, retrying Opus (attempt ${retryCount + 2})`);
+        logger.warn('VISION_API', `${config.displayName}: timeout after 180s, retrying Opus (attempt ${retryCount + 2})`);
         await new Promise(resolve => setTimeout(resolve, 2000));
         return callClaudeOpusVision(imageBase64, prompt, retryCount + 1);
       }
-      logger.info('VISION_API', `${config.displayName}: timeout after 600s`);
+      logger.info('VISION_API', `${config.displayName}: timeout after 180s`);
+      recordProviderFailure('claude-opus-4-6');
       return {
         success: false,
         content: '',
@@ -298,6 +341,7 @@ async function callClaudeOpusVision(
       return callClaudeOpusVision(imageBase64, prompt, retryCount + 1);
     }
 
+    recordProviderFailure('claude-opus-4-6');
     return {
       success: false,
       content: '',
@@ -326,6 +370,11 @@ async function _callClaudeSonnetVision(
       attempts: retryCount + 1,
       error: 'Anthropic API key not configured',
     };
+  }
+
+  if (isCircuitOpen('claude-sonnet-4-5')) {
+    logger.warn('VISION_API', 'Circuit breaker tripped for claude-sonnet-4-5, skipping');
+    return { success: false, content: '', provider: 'claude-sonnet-4-5', attempts: 0, error: 'Circuit breaker open' };
   }
 
   const controller = new AbortController();
@@ -404,6 +453,7 @@ async function _callClaudeSonnetVision(
     const elapsedMs = Date.now() - fetchStart;
     logger.info('VISION_API', `${config.displayName}: Response received`, { elapsedMs, status: response.status, contentLength: content.length });
 
+    recordProviderSuccess('claude-sonnet-4-5');
     return {
       success: true,
       content,
@@ -416,6 +466,7 @@ async function _callClaudeSonnetVision(
     // Don't retry on timeout — immediately fall through to next provider
     if (error instanceof Error && error.name === 'AbortError') {
       logger.info('VISION_API', `${config.displayName}: timeout after 45s, switching provider`);
+      recordProviderFailure('claude-sonnet-4-5');
       return {
         success: false,
         content: '',
@@ -434,6 +485,7 @@ async function _callClaudeSonnetVision(
       return _callClaudeSonnetVision(imageBase64, prompt, retryCount + 1);
     }
 
+    recordProviderFailure('claude-sonnet-4-5');
     return {
       success: false,
       content: '',
@@ -461,6 +513,11 @@ async function callGPT52Vision(
       attempts: retryCount + 1,
       error: 'OpenAI API key not configured',
     };
+  }
+
+  if (isCircuitOpen('gpt-5.2')) {
+    logger.warn('VISION_API', 'Circuit breaker tripped for gpt-5.2, skipping');
+    return { success: false, content: '', provider: 'gpt-5.2', attempts: 0, error: 'Circuit breaker open' };
   }
 
   // GPT-5.2 cannot handle PDF native content — fail fast
@@ -541,6 +598,7 @@ async function callGPT52Vision(
       contentLength: content.length,
     });
 
+    recordProviderSuccess('gpt-5.2');
     return {
       success: true,
       content,
@@ -556,6 +614,7 @@ async function callGPT52Vision(
     // Don't retry on Cloudflare blocks - immediately switch provider
     if (isCloudflare) {
       logger.info('VISION_API', `${config.displayName}: Cloudflare block detected, switching provider`);
+      recordProviderFailure('gpt-5.2');
       return {
         success: false,
         content: '',
@@ -569,6 +628,7 @@ async function callGPT52Vision(
     if (isTimeout || isNetworkError) {
       const errorType = isTimeout ? 'timeout' : 'network error';
       logger.info('VISION_API', `${config.displayName}: ${errorType} detected (expected in dev), switching provider`);
+      recordProviderFailure('gpt-5.2');
       return {
         success: false,
         content: '',
@@ -586,6 +646,7 @@ async function callGPT52Vision(
       return callGPT52Vision(imageBase64, prompt, retryCount + 1);
     }
 
+    recordProviderFailure('gpt-5.2');
     return {
       success: false,
       content: '',
@@ -1481,6 +1542,11 @@ export async function analyzeWithOpusFallback(
   prompt: string,
   pageNumber?: number
 ): Promise<VisionResponse> {
+  if (isCircuitOpen('claude-opus-4-6')) {
+    logger.warn('VISION_API', 'Circuit breaker tripped for claude-opus-4-6, skipping Opus fallback');
+    return { success: false, content: '', provider: 'claude-opus-4-6' as VisionProvider, attempts: 0, error: 'Circuit breaker open' };
+  }
+
   logger.info('OPUS_FALLBACK', 'Opus-only fallback started (post Gemini + GPT-5.2 failure)', { pageNumber });
 
   // Attempt 1: Opus with native PDF (single attempt, 120s timeout)
