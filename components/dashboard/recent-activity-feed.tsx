@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-interface ActivityItem {
+export interface ActivityItem {
   id: string;
   type: string;
   title: string;
@@ -27,6 +27,7 @@ interface ActivityItem {
 
 interface RecentActivityFeedProps {
   projectSlug: string;
+  initialActivities?: ActivityItem[];
 }
 
 const TYPE_CONFIG: Record<string, { icon: typeof FileText; dotColor: string }> = {
@@ -57,9 +58,9 @@ function getInitial(name: string): string {
   return (name || '?').charAt(0).toUpperCase();
 }
 
-export function RecentActivityFeed({ projectSlug }: RecentActivityFeedProps) {
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [loading, setLoading] = useState(true);
+export function RecentActivityFeed({ projectSlug, initialActivities }: RecentActivityFeedProps) {
+  const [activities, setActivities] = useState<ActivityItem[]>(initialActivities || []);
+  const [loading, setLoading] = useState(!initialActivities);
   const [expanded, setExpanded] = useState(false);
 
   const fetchActivity = useCallback(async () => {
@@ -77,8 +78,9 @@ export function RecentActivityFeed({ projectSlug }: RecentActivityFeedProps) {
   }, [projectSlug]);
 
   useEffect(() => {
+    if (initialActivities) return; // Skip fetch when server-provided
     fetchActivity();
-  }, [fetchActivity]);
+  }, [fetchActivity, initialActivities]);
 
   const displayedItems = expanded ? activities : activities.slice(0, 5);
 

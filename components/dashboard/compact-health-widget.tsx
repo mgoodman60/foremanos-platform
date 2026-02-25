@@ -6,9 +6,10 @@ import { DashboardWidget } from './dashboard-widget';
 
 interface CompactHealthWidgetProps {
   projectSlug: string;
+  initialData?: HealthData | null;
 }
 
-interface HealthData {
+export interface HealthData {
   overallScore: number | null;
   scheduleScore: number | null;
   budgetScore: number | null;
@@ -54,13 +55,14 @@ function ScoreBar({ label, score, setupHref, setupLabel }: ScoreBarProps) {
   );
 }
 
-export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [loading, setLoading] = useState(true);
+export function CompactHealthWidget({ projectSlug, initialData }: CompactHealthWidgetProps) {
+  const [health, setHealth] = useState<HealthData | null>(initialData ?? null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetched, setLastFetched] = useState<Date | undefined>();
+  const [lastFetched, setLastFetched] = useState<Date | undefined>(initialData ? new Date() : undefined);
 
   useEffect(() => {
+    if (initialData !== undefined) return; // Skip fetch when server-provided
     const fetchHealth = async () => {
       try {
         const res = await fetch(`/api/projects/${projectSlug}/health`);
@@ -78,7 +80,7 @@ export function CompactHealthWidget({ projectSlug }: CompactHealthWidgetProps) {
       }
     };
     fetchHealth();
-  }, [projectSlug]);
+  }, [projectSlug, initialData]);
 
   const hasScore = health?.overallScore !== null && health?.overallScore !== undefined;
 

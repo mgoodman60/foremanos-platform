@@ -1,91 +1,34 @@
-'use client';
-
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-import { useProject } from '@/components/layout/project-context';
-import { ProjectOverview } from '@/components/dashboard/project-overview';
-import { RecentActivityFeed } from '@/components/dashboard/recent-activity-feed';
-import { AskForemanWidget } from '@/components/dashboard/ask-foreman-widget';
+import { Suspense } from 'react';
+import { getProject } from '@/lib/data/get-project';
 import OnboardingChecklist from '@/components/onboarding-checklist';
 import { FeatureTip } from '@/components/feature-tip';
+import { DashboardToolbar } from '@/components/dashboard/dashboard-toolbar';
+import { AskForemanWidget } from '@/components/dashboard/ask-foreman-widget';
+import {
+  HealthWidgetServer,
+  ScheduleWidgetServer,
+  BudgetWidgetServer,
+  DocumentsWidgetServer,
+  FieldOpsWidgetServer,
+  SubmittalsWidgetServer,
+  StatsWidgetServer,
+  ActivityFeedServer,
+} from '@/components/dashboard/server-widgets';
+import {
+  WidgetSkeleton,
+  WideWidgetSkeleton,
+  ActivitySkeleton,
+} from '@/components/dashboard/widget-skeletons';
 
-function DashboardSkeleton() {
-  return (
-    <div className="p-6 space-y-6 animate-pulse">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="bg-dark-surface border-2 border-gray-700 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-gray-700" />
-              <div className="h-4 w-24 bg-gray-700 rounded" />
-            </div>
-            <div className="h-8 w-20 bg-gray-700 rounded mb-2" />
-            <div className="h-3 w-32 bg-gray-700 rounded" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function ProjectPage() {
-  const { project, loading } = useProject();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const touchStartY = useRef(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
-  }, []);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    setRefreshKey((k) => k + 1);
-    setTimeout(() => setRefreshing(false), 1500);
-  }, []);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  }, []);
-
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-      const atTop = window.scrollY <= 0;
-      if (atTop && deltaY > 80 && !refreshing) {
-        handleRefresh();
-      }
-    },
-    [handleRefresh, refreshing]
-  );
-
-  if (loading || !project) {
-    return <DashboardSkeleton />;
-  }
+export default async function ProjectPage({ params }: { params: { slug: string } }) {
+  const { project, session } = await getProject(params.slug);
+  const userName = session?.user?.username || undefined;
 
   return (
-    <div
-      ref={containerRef}
-      className="min-h-full"
-      onTouchStart={isTouchDevice ? handleTouchStart : undefined}
-      onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
-    >
-      {/* Pull-to-refresh spinner */}
-      {refreshing && (
-        <div className="flex justify-center py-3">
-          <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
-        </div>
-      )}
-
+    <div className="min-h-full">
       {/* Onboarding for new projects */}
       <div className="px-3 sm:px-6 py-2">
-        <OnboardingChecklist
-          projectSlug={project.slug}
-          onRefresh={() => {}}
-          onOpenDocumentLibrary={() => {}}
-        />
+        <OnboardingChecklist projectSlug={project.slug} />
       </div>
 
       {/* Dashboard transition tip (shows once) */}
@@ -99,13 +42,51 @@ export default function ProjectPage() {
         />
       </div>
 
-      {/* Dashboard Widget Grid */}
-      <ProjectOverview key={refreshKey} projectSlug={project.slug} projectId={project.id} />
+      {/* Interactive toolbar: greeting, quick actions, upload, density, rescan */}
+      <DashboardToolbar
+        projectSlug={project.slug}
+        projectId={project.id}
+        userName={userName}
+      />
 
-      {/* Activity + Insights */}
+      {/* Widget Grid — each widget streams independently */}
+      <div className="px-5 pb-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Row 1: Health (1-col) + Schedule (2-col) */}
+          <Suspense fallback={<WidgetSkeleton />}>
+            <HealthWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+          <Suspense fallback={<WideWidgetSkeleton />}>
+            <ScheduleWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+
+          {/* Row 2: Budget + Documents + Field Ops */}
+          <Suspense fallback={<WidgetSkeleton />}>
+            <BudgetWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+          <Suspense fallback={<WidgetSkeleton />}>
+            <DocumentsWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+          <Suspense fallback={<WidgetSkeleton />}>
+            <FieldOpsWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+
+          {/* Row 3: Submittals + Takeoffs + Rooms + Photos */}
+          <Suspense fallback={<WidgetSkeleton />}>
+            <SubmittalsWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+          <Suspense fallback={<WidgetSkeleton />}>
+            <StatsWidgetServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
+        </div>
+      </div>
+
+      {/* Activity + AI Assistant */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 px-6 pb-6">
         <div className="xl:col-span-2">
-          <RecentActivityFeed projectSlug={project.slug} />
+          <Suspense fallback={<ActivitySkeleton />}>
+            <ActivityFeedServer projectId={project.id} projectSlug={project.slug} />
+          </Suspense>
         </div>
         <div>
           <AskForemanWidget projectSlug={project.slug} projectId={project.id} />

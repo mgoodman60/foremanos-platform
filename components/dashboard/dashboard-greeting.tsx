@@ -6,9 +6,10 @@ interface DashboardGreetingProps {
   projectSlug: string;
   projectId: string;
   userName?: string;
+  initialData?: GreetingData;
 }
 
-interface GreetingData {
+export interface GreetingData {
   overallScore: number | null;
   overdueCount: number;
   pendingSubmittals: number;
@@ -22,14 +23,14 @@ function getTimeOfDayGreeting(): string {
   return 'Good evening';
 }
 
-export function DashboardGreeting({ projectSlug, projectId, userName }: DashboardGreetingProps) {
-  const [data, setData] = useState<GreetingData>({
+export function DashboardGreeting({ projectSlug, projectId, userName, initialData }: DashboardGreetingProps) {
+  const [data, setData] = useState<GreetingData>(initialData || {
     overallScore: null,
     overdueCount: 0,
     pendingSubmittals: 0,
     unprocessedDocs: 0,
   });
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(!!initialData);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -63,8 +64,9 @@ export function DashboardGreeting({ projectSlug, projectId, userName }: Dashboar
   }, [projectSlug]);
 
   useEffect(() => {
+    if (initialData) return; // Skip fetch when server-provided
     fetchData();
-  }, [fetchData, projectId]);
+  }, [fetchData, projectId, initialData]);
 
   const greeting = getTimeOfDayGreeting();
   const attentionItems = data.overdueCount + data.pendingSubmittals + data.unprocessedDocs;

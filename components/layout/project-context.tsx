@@ -179,3 +179,106 @@ export function ProjectProvider({ slug, children }: ProjectProviderProps) {
     </ProjectContext.Provider>
   );
 }
+
+// Server-fetched variant: accepts pre-loaded data, no client fetch needed
+interface ProjectUIProviderProps {
+  initialProject: Project;
+  initialSession: any;
+  initialIsOwner: boolean;
+  initialIsAdmin: boolean;
+  children: ReactNode;
+}
+
+export function ProjectUIProvider({
+  initialProject,
+  initialSession,
+  initialIsOwner,
+  initialIsAdmin,
+  children,
+}: ProjectUIProviderProps) {
+  const router = useRouter();
+  const [project, setProject] = useState<Project | null>(initialProject);
+  const [loading] = useState(false);
+  const [pendingUpdatesCount, setPendingUpdatesCount] = useState(0);
+  const [aiDrawerOpen, setAiDrawerOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsedState] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Load persisted sidebar state
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('foremanos_sidebar_collapsed');
+      if (stored !== null) {
+        setSidebarCollapsedState(stored === 'true');
+      }
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  // Load persisted drawer state
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('foremanos_ai_drawer_open');
+      if (stored !== null) {
+        setAiDrawerOpen(stored === 'true');
+      }
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  const setSidebarCollapsed = useCallback((collapsed: boolean) => {
+    setSidebarCollapsedState(collapsed);
+    try {
+      localStorage.setItem('foremanos_sidebar_collapsed', String(collapsed));
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  const setAiDrawerOpenPersisted = useCallback((open: boolean) => {
+    setAiDrawerOpen(open);
+    try {
+      localStorage.setItem('foremanos_ai_drawer_open', String(open));
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  const refreshProject = useCallback(async () => {
+    if (!initialProject.slug) return;
+    try {
+      const res = await fetch(`/api/projects/${initialProject.slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        setProject(data.project);
+      }
+    } catch {
+      // Refresh failed silently
+    }
+  }, [initialProject.slug]);
+
+  return (
+    <ProjectContext.Provider
+      value={{
+        project,
+        loading,
+        session: initialSession,
+        isOwner: initialIsOwner,
+        isAdmin: initialIsAdmin,
+        refreshProject,
+        pendingUpdatesCount,
+        setPendingUpdatesCount,
+        aiDrawerOpen,
+        setAiDrawerOpen: setAiDrawerOpenPersisted,
+        sidebarCollapsed,
+        setSidebarCollapsed,
+        mobileSidebarOpen,
+        setMobileSidebarOpen,
+      }}
+    >
+      {children}
+    </ProjectContext.Provider>
+  );
+}

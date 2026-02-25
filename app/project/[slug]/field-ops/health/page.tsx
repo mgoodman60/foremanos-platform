@@ -1,5 +1,3 @@
-'use client';
-
 import ProjectHealthWidget from '@/components/field-ops/ProjectHealthWidget';
 
 export default function HealthDashboardPage({ params }: { params: { slug: string } }) {

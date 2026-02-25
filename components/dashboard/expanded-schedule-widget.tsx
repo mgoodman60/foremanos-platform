@@ -9,9 +9,11 @@ import { primaryColors } from '@/lib/design-tokens';
 
 interface ExpandedScheduleWidgetProps {
   projectSlug: string;
+  initialScheduleData?: ScheduleData | null;
+  initialDailyReportData?: DailyReportData | null;
 }
 
-interface ScheduleData {
+export interface ScheduleData {
   overallProgress: number;
   tasksCompleted: number;
   totalTasks: number;
@@ -23,7 +25,7 @@ interface ScheduleData {
   noDataSource?: boolean;
 }
 
-interface DailyReportData {
+export interface DailyReportData {
   weather?: { condition?: string; temperature?: number };
   crewCount?: number;
 }
@@ -65,15 +67,16 @@ function MiniSparkline({ data }: { data: number[] }) {
   );
 }
 
-export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetProps) {
+export function ExpandedScheduleWidget({ projectSlug, initialScheduleData, initialDailyReportData }: ExpandedScheduleWidgetProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'upcoming'>('overview');
-  const [schedule, setSchedule] = useState<ScheduleData | null>(null);
-  const [dailyReport, setDailyReport] = useState<DailyReportData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [schedule, setSchedule] = useState<ScheduleData | null>(initialScheduleData ?? null);
+  const [dailyReport, setDailyReport] = useState<DailyReportData | null>(initialDailyReportData ?? null);
+  const [loading, setLoading] = useState(initialScheduleData === undefined);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetched, setLastFetched] = useState<Date | undefined>();
+  const [lastFetched, setLastFetched] = useState<Date | undefined>(initialScheduleData !== undefined ? new Date() : undefined);
 
   useEffect(() => {
+    if (initialScheduleData !== undefined) return; // Skip fetch when server-provided
     const fetchData = async () => {
       const results = await Promise.allSettled([
         fetch(`/api/projects/${projectSlug}/schedule-metrics`, { cache: 'no-store' }).then((r) =>
@@ -109,7 +112,7 @@ export function ExpandedScheduleWidget({ projectSlug }: ExpandedScheduleWidgetPr
     };
 
     fetchData();
-  }, [projectSlug]);
+  }, [projectSlug, initialScheduleData]);
 
   const hasData = schedule && !schedule.noDataSource && schedule.totalTasks > 0;
 
