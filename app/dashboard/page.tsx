@@ -12,6 +12,7 @@ import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { BillingCard } from '@/components/billing-card';
 import { QuotaIndicator } from '@/components/quota-indicator';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
+import { csrfFetch } from '@/lib/csrf-client';
 import { SkeletonDashboard } from '@/components/ui/skeleton-card';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 
@@ -336,7 +337,6 @@ export default function DashboardPage() {
     }
 
     try {
-      const { csrfFetch } = await import('@/lib/csrf-client');
       const response = await csrfFetch('/api/projects', {
         method: 'POST',
         headers: {
