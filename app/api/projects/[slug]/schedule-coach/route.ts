@@ -1,9 +1,10 @@
 import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { analyzeScheduleForImprovements } from '@/lib/schedule-improvement-analyzer';
+import { analyzeScheduleForImprovements, ScheduleAnalysisResult, ScheduleImprovementRecommendation } from '@/lib/schedule-improvement-analyzer';
 import { callAbacusLLM } from '@/lib/abacus-llm';
 import { EXTRACTION_MODEL } from '@/lib/model-config';
+import type { ScheduleTask } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_SCHEDULE_COACH');
 
@@ -133,7 +134,7 @@ async function analyzeScheduleWithAI(scheduleId: string, projectId: string) {
   };
 }
 
-async function generateAIInsights(tasks: any[], baseAnalysis: any, documents: any[]) {
+async function generateAIInsights(tasks: ScheduleTask[], baseAnalysis: ScheduleAnalysisResult, documents: { name: string; category: string | null }[]) {
   const tasksSummary = tasks.slice(0, 50).map(t => ({
     name: t.name,
     duration: t.duration,
@@ -158,7 +159,7 @@ PROJECT DOCUMENTS:
 ${documents.map(d => `- ${d.name} (${d.category || 'Uncategorized'})`).join('\n')}
 
 EXISTING ISSUES:
-${baseAnalysis.recommendations.slice(0, 5).map((r: any) => `- ${r.title}: ${r.description}`).join('\n')}
+${baseAnalysis.recommendations.slice(0, 5).map((r) => `- ${r.title}: ${r.description}`).join('\n')}
 
 Provide:
 1. 5 specific insights about the schedule quality and risks
@@ -191,12 +192,12 @@ Return JSON format:
       `Critical path has ${tasks.filter(t => t.isCritical).length} tasks`,
       `Schedule health score: ${baseAnalysis.healthScore}/100`
     ],
-    improvementReasons: baseAnalysis.recommendations.map((r: any) => r.description)
+    improvementReasons: baseAnalysis.recommendations.map((r) => r.description)
   };
 }
 
-function analyzeTradeBreakdowns(tasks: any[]): TradeBreakdown[] {
-  const tradeMap: Record<string, { tasks: any[]; criticalCount: number; totalDays: number }> = {};
+function analyzeTradeBreakdowns(tasks: ScheduleTask[]): TradeBreakdown[] {
+  const tradeMap: Record<string, { tasks: ScheduleTask[]; criticalCount: number; totalDays: number }> = {};
 
   tasks.forEach(task => {
     const trade = task.assignedTo || 'Unassigned';
@@ -217,9 +218,9 @@ function analyzeTradeBreakdowns(tasks: any[]): TradeBreakdown[] {
   })).sort((a, b) => b.totalDays - a.totalDays);
 }
 
-function identifyMilestoneBreakdowns(tasks: any[]) {
+function identifyMilestoneBreakdowns(tasks: ScheduleTask[]) {
   // Group tasks by WBS or phase
-  const phases: Record<string, any[]> = {};
+  const phases: Record<string, ScheduleTask[]> = {};
   tasks.forEach(task => {
     const phase = task.wbsCode?.split('.')[0] || task.name.split(' ')[0] || 'General';
     if (!phases[phase]) phases[phase] = [];

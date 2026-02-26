@@ -224,8 +224,8 @@ export function IntelligenceExtractionPanel({ projectSlug, projectName }: Props)
               <p className="text-amber-200 font-medium">Intelligence Extraction Info</p>
               <ul className="text-gray-400 space-y-1 list-disc list-inside">
                 <li>Extraction runs automatically after document processing</li>
-                <li>Use "Extract All Phases" for documents added before auto-extraction</li>
-                <li>"Phase C Only" re-runs advanced intelligence without re-extracting basics</li>
+                <li>Use &quot;Extract All Phases&quot; for documents added before auto-extraction</li>
+                <li>&quot;Phase C Only&quot; re-runs advanced intelligence without re-extracting basics</li>
                 <li>Extraction skips pages that already have data (non-destructive)</li>
               </ul>
             </div>

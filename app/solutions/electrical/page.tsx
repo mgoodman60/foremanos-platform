@@ -26,7 +26,7 @@ export default function ElectricalPage() {
               Pull Panel Schedules and Circuit Details in Seconds
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-              Upload your E-sheets and ask questions like "What's the amp rating on panel EP-3?" or "Show me conduit routing to MCC-1." AI reads your electrical plans and answers with sheet references.
+              Upload your E-sheets and ask questions like &quot;What&apos;s the amp rating on panel EP-3?&quot; or &quot;Show me conduit routing to MCC-1.&quot; AI reads your electrical plans and answers with sheet references.
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@ export default function ElectricalPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ 40-Sheet E-Plans, One Panel Detail</h3>
-              <p className="text-gray-300">You need the load schedule for panel LP-2A. It could be on E-201, E-401, or buried in the one-line diagram. You flip through every sheet and still aren't sure you found the latest revision.</p>
+              <p className="text-gray-300">You need the load schedule for panel LP-2A. It could be on E-201, E-401, or buried in the one-line diagram. You flip through every sheet and still aren&apos;t sure you found the latest revision.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Conduit Conflicts Discovered at Rough-In</h3>
@@ -50,8 +50,8 @@ export default function ElectricalPage() {
               <p className="text-gray-300">Counting receptacles, switches, and light fixtures across 30 sheets for a bid. One missed symbol on one sheet means your number is off and your margin disappears.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
-              <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Journeymen Can't Access Plans in the Field</h3>
-              <p className="text-gray-300">Your guys are in the ceiling asking "which circuit feeds this?" and nobody on-site has the latest panel schedule. They call the office, the office calls the PM, the PM digs through email.</p>
+              <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Journeymen Can&apos;t Access Plans in the Field</h3>
+              <p className="text-gray-300">Your guys are in the ceiling asking &quot;which circuit feeds this?&quot; and nobody on-site has the latest panel schedule. They call the office, the office calls the PM, the PM digs through email.</p>
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function ElectricalPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Panel Schedule Extraction</h3>
-              <p className="text-gray-300">Ask "What circuits are on panel EP-3?" or "What's the breaker size for the kitchen receptacle circuit?" AI reads your panel schedules, one-lines, and E-sheets, then answers with sheet references.</p>
+              <p className="text-gray-300">Ask &quot;What circuits are on panel EP-3?&quot; or &quot;What&apos;s the breaker size for the kitchen receptacle circuit?&quot; AI reads your panel schedules, one-lines, and E-sheets, then answers with sheet references.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
@@ -90,14 +90,14 @@ export default function ElectricalPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Search Across All Your E-Sheets</h3>
-                <p className="text-gray-300">"Show me all panels on the 2nd floor" or "What's the feeder size to MDP-1?" -- AI searches every uploaded electrical sheet and returns the answer with the exact page reference.</p>
+                <p className="text-gray-300">&quot;Show me all panels on the 2nd floor&quot; or &quot;What&apos;s the feeder size to MDP-1?&quot; -- AI searches every uploaded electrical sheet and returns the answer with the exact page reference.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">ADA and Code Compliance Checks</h3>
-                <p className="text-gray-300">Ask "What's the ADA requirement for switch height?" or "What's the clearance for a 200A panel?" Get cited code answers instantly. Keep inspections on track without the callback wait.</p>
+                <p className="text-gray-300">Ask &quot;What&apos;s the ADA requirement for switch height?&quot; or &quot;What&apos;s the clearance for a 200A panel?&quot; Get cited code answers instantly. Keep inspections on track without the callback wait.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">

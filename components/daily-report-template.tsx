@@ -390,7 +390,7 @@ export default function DailyReportTemplate({
             <SyncStatusIndicator status={syncStatus} className="ml-2" />
           </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Fill out today's progress report with structured data
+            Fill out today&apos;s progress report with structured data
           </DialogDescription>
         </DialogHeader>
 
@@ -418,7 +418,7 @@ export default function DailyReportTemplate({
           {loadingCarryover ? (
             <div className="flex items-center gap-2 text-gray-400 text-sm">
               <RefreshCw className="w-4 h-4 animate-spin" />
-              Loading yesterday's data...
+              Loading yesterday&apos;s data...
             </div>
           ) : carryoverAvailable ? (
             <div className="flex items-center gap-2 text-green-400 text-sm">
@@ -528,7 +528,7 @@ export default function DailyReportTemplate({
 
           {/* Tasks */}
           <div className="space-y-3">
-            <Label className="text-gray-300 font-semibold">Today's Scheduled Tasks</Label>
+            <Label className="text-gray-300 font-semibold">Today&apos;s Scheduled Tasks</Label>
             {todayTasks.length === 0 ? (
               <div className="text-gray-400 text-sm py-4 text-center border border-dashed border-gray-700 rounded">
                 No tasks scheduled for today
@@ -650,7 +650,7 @@ export default function DailyReportTemplate({
 
           {/* Tomorrow's Plan */}
           <div>
-            <Label className="text-gray-300">Tomorrow's Plan</Label>
+            <Label className="text-gray-300">Tomorrow&apos;s Plan</Label>
             <Textarea
               value={tomorrowPlan}
               onChange={(e) => setTomorrowPlan(e.target.value)}

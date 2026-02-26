@@ -22,6 +22,10 @@ export function StampShape({
 }: StampShapeProps) {
   const { geometry, style, label, shapeType } = markup;
 
+  const handleClick = useCallback(() => {
+    onSelect(markup.id);
+  }, [onSelect, markup.id]);
+
   if (
     geometry.x == null ||
     geometry.y == null ||
@@ -34,10 +38,6 @@ export function StampShape({
   const topLeft = pdfToKonva(geometry.x, geometry.y + geometry.height, pageHeight, scale);
   const width = geometry.width * scale;
   const height = geometry.height * scale;
-
-  const handleClick = useCallback(() => {
-    onSelect(markup.id);
-  }, [onSelect, markup.id]);
 
   const displayLabel = label ?? (shapeType === 'count_marker' ? '1' : 'STAMP');
   const fontSize = (style.fontSize ?? 14) * scale;

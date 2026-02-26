@@ -22,6 +22,10 @@ export function PolylineShape({
 }: PolylineShapeProps) {
   const { geometry, style } = markup;
 
+  const handleClick = useCallback(() => {
+    onSelect(markup.id);
+  }, [onSelect, markup.id]);
+
   if (!geometry.points || geometry.points.length < 4) {
     return null;
   }
@@ -36,10 +40,6 @@ export function PolylineShape({
   }
 
   const dashPattern = getDashPattern(style.lineStyle, style.strokeWidth);
-
-  const handleClick = useCallback(() => {
-    onSelect(markup.id);
-  }, [onSelect, markup.id]);
 
   return (
     <Line

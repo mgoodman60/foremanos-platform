@@ -90,7 +90,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-400">
-                {pathData.totalDistance.toFixed(1)}' total
+                {pathData.totalDistance.toFixed(1)}&apos; total
               </span>
               <span className={`text-xs font-medium ${getEfficiencyColor(pathData.efficiency)}`}>
                 {pathData.efficiency}% efficient
@@ -132,7 +132,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
           <div className="bg-dark-surface rounded-lg p-2">
             <div className="text-xs text-gray-400 mb-1">Total Distance</div>
             <div className="text-lg font-semibold text-gray-200">
-              {pathData.totalDistance.toFixed(1)}'
+              {pathData.totalDistance.toFixed(1)}&apos;
             </div>
           </div>
           <div className="bg-dark-surface rounded-lg p-2">
@@ -170,7 +170,7 @@ export function MEPPathVisualization({ pathData, compact = false }: MEPPathVisua
               <div className="flex items-center gap-1 text-gray-400">
                 {getRouteIcon(segment.route)}
                 <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                <span className="text-xs">{segment.distance.toFixed(1)}'</span>
+                <span className="text-xs">{segment.distance.toFixed(1)}&apos;</span>
               </div>
 
               {/* To Equipment */}

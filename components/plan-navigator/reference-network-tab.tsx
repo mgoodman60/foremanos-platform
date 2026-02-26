@@ -106,7 +106,7 @@ export const ReferenceNetworkTab = React.memo(function ReferenceNetworkTab({
                             {getReferenceTypeBadge(ref.referenceType)}
                           </div>
                           <p className="text-xs text-gray-400 mb-1">{summary}</p>
-                          <p className="text-xs text-gray-400 mb-2 italic">"{ref.context}"</p>
+                          <p className="text-xs text-gray-400 mb-2 italic">&quot;{ref.context}&quot;</p>
                           <button
                             onClick={() => onJumpToDocument(ref.targetDocumentId, ref.targetDoc?.name || 'Unknown')}
                             className="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"

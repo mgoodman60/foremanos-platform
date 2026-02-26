@@ -9,9 +9,7 @@ const nextConfig = {
     outputFileTracingRoot: path.join(__dirname, './'),
   },
   eslint: {
-    // Kept true: 4,135 lint warnings would block Vercel builds if set to false.
-    // Security-relevant rules (no-unescaped-entities) are set to error in .eslintrc.json.
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
     ignoreBuildErrors: false,

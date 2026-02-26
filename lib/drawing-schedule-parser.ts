@@ -7,6 +7,51 @@
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
+/** Represents a schedule table extracted from drawing metadata */
+interface ScheduleTable {
+  scheduleType?: string;
+  headers?: string[];
+  rows?: unknown[][];
+  panelName?: string;
+  voltage?: string;
+  phase?: string;
+  mainBreaker?: string;
+}
+
+/** Structured metadata stored on DocumentChunk.metadata */
+interface ChunkScheduleMetadata {
+  drawingScheduleTables?: ScheduleTable[];
+  lightingSchedules?: LightingScheduleEntry[];
+  panelSchedules?: PanelScheduleEntry[];
+  [key: string]: unknown;
+}
+
+interface LightingFixture {
+  tag: string;
+  manufacturer: string | null;
+  catalog: string | null;
+  description: string | null;
+  wattage: string | null;
+  voltage: string | null;
+  mounting: string | null;
+  sourceSheet: string | null;
+}
+
+interface LightingScheduleEntry {
+  fixtures: LightingFixture[];
+  fixtureCount: number;
+  parsedAt: string;
+}
+
+interface PanelScheduleEntry {
+  panelName: string | null;
+  voltage: string | null;
+  phase: string | null;
+  mainBreaker: string | null;
+  circuits: number;
+  rawData: { headers: string[] | undefined; rowCount: number };
+}
+
 export interface ScheduleParseResult {
   doorsCreated: number;
   windowsCreated: number;
@@ -47,7 +92,7 @@ export async function parseDrawingSchedules(
   });
 
   for (const chunk of chunks) {
-    const meta = chunk.metadata as Record<string, any> | null;
+    const meta = chunk.metadata as ChunkScheduleMetadata | null;
     if (!meta?.drawingScheduleTables?.length) continue;
 
     for (const table of meta.drawingScheduleTables) {
@@ -140,7 +185,7 @@ export async function parseDrawingSchedules(
 
 // Internal helpers
 
-function getColumn(headers: string[], row: any[], colNames: string[]): string | null {
+function getColumn(headers: string[], row: unknown[], colNames: string[]): string | null {
   for (const name of colNames) {
     const idx = headers.findIndex((h: string) => h.includes(name));
     if (idx >= 0 && idx < row.length && row[idx] != null) {
@@ -152,7 +197,7 @@ function getColumn(headers: string[], row: any[], colNames: string[]): string | 
 }
 
 async function parseDoorSchedule(
-  table: any,
+  table: ScheduleTable,
   projectId: string,
   documentId: string,
   sheetNumber: string | null
@@ -211,7 +256,7 @@ async function parseDoorSchedule(
 }
 
 async function parseWindowSchedule(
-  table: any,
+  table: ScheduleTable,
   projectId: string,
   documentId: string,
   sheetNumber: string | null
@@ -270,7 +315,7 @@ async function parseWindowSchedule(
 }
 
 async function parseFinishSchedule(
-  table: any,
+  table: ScheduleTable,
   projectId: string,
   documentId: string,
   sheetNumber: string | null
@@ -355,7 +400,7 @@ async function parseFinishSchedule(
 }
 
 async function parseEquipmentSchedule(
-  _table: any,
+  _table: ScheduleTable,
   _projectId: string,
   documentId: string,
   __sheetNumber: string | null
@@ -367,7 +412,7 @@ async function parseEquipmentSchedule(
 }
 
 async function parseFixtureSchedule(
-  table: any,
+  table: ScheduleTable,
   projectId: string,
   documentId: string,
   sheetNumber: string | null
@@ -442,7 +487,7 @@ async function parseFixtureSchedule(
 }
 
 async function parseHardwareSchedule(
-  table: any,
+  table: ScheduleTable,
   projectId: string,
   documentId: string,
   sheetNumber: string | null

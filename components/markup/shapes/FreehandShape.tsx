@@ -22,6 +22,10 @@ export function FreehandShape({
 }: FreehandShapeProps) {
   const { geometry, style, shapeType } = markup;
 
+  const handleClick = useCallback(() => {
+    onSelect(markup.id);
+  }, [onSelect, markup.id]);
+
   if (!geometry.points || geometry.points.length < 4) {
     return null;
   }
@@ -34,10 +38,6 @@ export function FreehandShape({
     const konvaPoint = pdfToKonva(pdfX, pdfY, pageHeight, scale);
     konvaPoints.push(konvaPoint.x, konvaPoint.y);
   }
-
-  const handleClick = useCallback(() => {
-    onSelect(markup.id);
-  }, [onSelect, markup.id]);
 
   // Highlighter: wide stroke, semi-transparent
   const isHighlighter = shapeType === 'highlighter';

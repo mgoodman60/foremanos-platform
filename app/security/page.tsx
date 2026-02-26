@@ -98,7 +98,7 @@ export default function SecurityPage() {
             <div className="text-center">
               <div className="text-4xl font-bold text-green-500 mb-2">99.9%</div>
               <p className="text-xl font-semibold mb-2">Uptime SLA</p>
-              <p className="text-gray-400">Hosted on Vercel's edge network with serverless PostgreSQL. Your plans are accessible from the trailer or the jobsite.</p>
+              <p className="text-gray-400">Hosted on Vercel&apos;s edge network with serverless PostgreSQL. Your plans are accessible from the trailer or the jobsite.</p>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-blue-500 mb-2">24/7</div>
@@ -143,7 +143,7 @@ export default function SecurityPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">Need More Detail on Our Security Posture?</h2>
           <p className="text-xl text-orange-100 mb-8">
-            We're happy to walk through our infrastructure, compliance certifications, and data handling practices in a call tailored to your organization's requirements.
+            We&apos;re happy to walk through our infrastructure, compliance certifications, and data handling practices in a call tailored to your organization&apos;s requirements.
           </p>
           <Link
             href="/demo"

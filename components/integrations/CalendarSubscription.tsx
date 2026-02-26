@@ -97,7 +97,7 @@ export default function CalendarSubscription({ projectSlug }: CalendarSubscripti
         <h4 className="text-sm font-medium text-blue-400 mb-2">How to Subscribe</h4>
         <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
           <li>Copy the calendar URL above</li>
-          <li>In your calendar app, find "Add calendar from URL"</li>
+          <li>In your calendar app, find &quot;Add calendar from URL&quot;</li>
           <li>Paste the URL and save</li>
           <li>Calendar will auto-update as project changes</li>
         </ol>

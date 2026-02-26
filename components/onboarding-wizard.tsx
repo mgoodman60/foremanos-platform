@@ -29,7 +29,7 @@ const steps = [
         </div>
         <h3 className="text-2xl font-bold text-white">Welcome to ForemanOS!</h3>
         <p className="text-gray-300 leading-relaxed">
-          Your intelligent construction project assistant. Let's take a quick tour to get you started.
+          Your intelligent construction project assistant. Let&apos;s take a quick tour to get you started.
         </p>
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-6">
           <p className="text-sm text-blue-300">
@@ -81,10 +81,10 @@ const steps = [
         <h3 className="text-xl font-bold text-white">How to Create a Project</h3>
         <ol className="space-y-3 list-decimal list-inside text-gray-300">
           <li className="leading-relaxed">
-            <span className="font-semibold">Navigate to Dashboard:</span> Click the "Dashboard" link in the header
+            <span className="font-semibold">Navigate to Dashboard:</span> Click the &quot;Dashboard&quot; link in the header
           </li>
           <li className="leading-relaxed">
-            <span className="font-semibold">Create New Project:</span> Click the "Create New Project" button in the stats section
+            <span className="font-semibold">Create New Project:</span> Click the &quot;Create New Project&quot; button in the stats section
           </li>
           <li className="leading-relaxed">
             <span className="font-semibold">Fill in Details:</span> Enter project name and optional guest credentials
@@ -143,10 +143,10 @@ const steps = [
         <div className="space-y-2 bg-gray-800 p-4 rounded-lg">
           <p className="text-sm font-semibold text-white">Example Questions:</p>
           <ul className="space-y-1 text-sm text-gray-300">
-            <li>• "What is the total project budget?"</li>
-            <li>• "When is the concrete pour scheduled?"</li>
-            <li>• "What are the soil bearing capacity requirements?"</li>
-            <li>• "Show me the parking layout dimensions"</li>
+            <li>• &quot;What is the total project budget?&quot;</li>
+            <li>• &quot;When is the concrete pour scheduled?&quot;</li>
+            <li>• &quot;What are the soil bearing capacity requirements?&quot;</li>
+            <li>• &quot;Show me the parking layout dimensions&quot;</li>
           </ul>
         </div>
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-6">

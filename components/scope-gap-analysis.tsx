@@ -226,7 +226,7 @@ export default function ScopeGapAnalysis({ selectedTrade, selectedQuoteIds }: Pr
           <FileSearch className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-400">No analysis run yet</p>
           <p className="text-sm text-gray-400 mt-1">
-            Click "Run Analysis" to compare quotes against project requirements
+            Click &quot;Run Analysis&quot; to compare quotes against project requirements
           </p>
         </div>
       )}

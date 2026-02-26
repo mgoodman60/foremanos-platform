@@ -25,7 +25,7 @@ export function MaintenancePage({ message }: MaintenancePageProps) {
         
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
           <p className="text-sm text-blue-300">
-            We're syncing the latest project documents from OneDrive. This usually takes just a minute or two.
+            We&apos;re syncing the latest project documents from OneDrive. This usually takes just a minute or two.
           </p>
         </div>
         

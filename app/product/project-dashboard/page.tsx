@@ -48,17 +48,17 @@ export default function ProjectDashboardPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Answer Owner Questions Instantly</h3>
-              <p className="text-gray-300">"Where are we on budget?" "What's the schedule variance?" Instead of pulling data from three places, you open the dashboard and have the answer. During the call, not after.</p>
+              <p className="text-gray-300">&quot;Where are we on budget?&quot; &quot;What&apos;s the schedule variance?&quot; Instead of pulling data from three places, you open the dashboard and have the answer. During the call, not after.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Catch Cost Overruns Before the Draw</h3>
-              <p className="text-gray-300">See budget vs. actual by CSI division, track change order impact, and monitor cost performance index (CPI) in real time. Know you're trending over before the monthly pay app, not after.</p>
+              <p className="text-gray-300">See budget vs. actual by CSI division, track change order impact, and monitor cost performance index (CPI) in real time. Know you&apos;re trending over before the monthly pay app, not after.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Track Schedule Health at a Glance</h3>
-              <p className="text-gray-300">Earned value metrics, critical path status, and weather-impacted tasks -- all on one screen. SPI and CPI tell you whether you're ahead or behind without digging into the Gantt chart.</p>
+              <p className="text-gray-300">Earned value metrics, critical path status, and weather-impacted tasks -- all on one screen. SPI and CPI tell you whether you&apos;re ahead or behind without digging into the Gantt chart.</p>
             </div>
           </div>
         </div>

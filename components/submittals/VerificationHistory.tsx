@@ -376,7 +376,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                                         {override.previousStatus} → {override.newStatus}
                                       </p>
                                       <p className="text-sm text-slate-300 mt-1 italic">
-                                        "{override.justification}"
+                                        &quot;{override.justification}&quot;
                                       </p>
                                       <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                                         <span>By: {override.overriddenByName}</span>
@@ -473,7 +473,7 @@ export default function VerificationHistory({ projectSlug, submittalId }: Verifi
                       )}
                     </div>
                     <p className="mt-2 text-sm text-slate-400 italic">
-                      Justification: "{override.justification}"
+                      Justification: &quot;{override.justification}&quot;
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
                       By {override.overriddenByName} • {format(new Date(override.createdAt), 'MMM d, yyyy h:mm a')}

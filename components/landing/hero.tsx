@@ -102,7 +102,7 @@ export function Hero() {
                   {/* User Message */}
                   <div className="flex justify-end">
                     <div className="bg-[var(--color-primary)] text-white px-4 py-3 rounded-2xl rounded-tr-sm max-w-[80%]">
-                      <p className="text-sm">What's the ADA parking requirement for this site?</p>
+                      <p className="text-sm">What&apos;s the ADA parking requirement for this site?</p>
                     </div>
                   </div>
 

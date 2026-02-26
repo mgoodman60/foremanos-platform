@@ -564,7 +564,7 @@ export default function TakeoffsPage() {
               <div>
                 <h3 className="text-xl font-semibold text-gray-200">No Material Takeoffs Yet</h3>
                 <p className="text-gray-400 mt-2 max-w-md mx-auto">
-                  Click "Auto-Generate" to extract quantities from your floor plans, or create a manual takeoff.
+                  Click &quot;Auto-Generate&quot; to extract quantities from your floor plans, or create a manual takeoff.
                 </p>
                 <p className="text-gray-500 text-sm mt-2">
                   Note: Auto-generate requires rooms with finish schedules to be extracted from floor plans first.

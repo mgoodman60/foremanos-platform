@@ -156,7 +156,7 @@ export default function ToleranceSettings({ projectSlug }: ToleranceSettingsProp
           Shortage Tolerance
         </h4>
         <p className="text-sm text-slate-400 mb-4">
-          Allow items to be marked as "Sufficient" even when slightly under the requirement.
+          Allow items to be marked as &quot;Sufficient&quot; even when slightly under the requirement.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

@@ -78,7 +78,7 @@ export default function ChatPage() {
           </div>
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-gray-500 text-sm italic">
-              "Ask me anything about your construction project - schedules, documents, specifications..."
+              &quot;Ask me anything about your construction project - schedules, documents, specifications...&quot;
             </p>
           </div>
           <div className="relative">
@@ -108,7 +108,7 @@ export default function ChatPage() {
 
           {projects.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">You don't have any projects yet.</p>
+              <p className="text-gray-500 mb-4">You don&apos;t have any projects yet.</p>
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

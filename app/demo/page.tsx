@@ -54,7 +54,7 @@ export default function DemoPage() {
             See Your Plans Analyzed in Real Time
           </h1>
           <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-            We'll walk through ForemanOS using drawings from your trade. No generic demo -- you'll see how AI handles the documents your team works with every day.
+            We&apos;ll walk through ForemanOS using drawings from your trade. No generic demo -- you&apos;ll see how AI handles the documents your team works with every day.
           </p>
         </div>
       </section>
@@ -224,7 +224,7 @@ export default function DemoPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Live Plan Analysis</h4>
-                    <p className="text-gray-300">We'll upload a sample drawing set and show AI extraction, MEP analysis, and compliance checking in real time -- not slides.</p>
+                    <p className="text-gray-300">We&apos;ll upload a sample drawing set and show AI extraction, MEP analysis, and compliance checking in real time -- not slides.</p>
                   </div>
                 </div>
 
@@ -234,7 +234,7 @@ export default function DemoPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">You Decide</h4>
-                    <p className="text-gray-300">No pressure, no hard sell. If it's a fit, you can start with the free plan that same day. If not, no follow-up calls.</p>
+                    <p className="text-gray-300">No pressure, no hard sell. If it&apos;s a fit, you can start with the free plan that same day. If not, no follow-up calls.</p>
                   </div>
                 </div>
               </div>

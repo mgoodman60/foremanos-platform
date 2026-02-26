@@ -11,6 +11,7 @@
  */
 
 import { prisma } from './db';
+import { Prisma } from '@prisma/client';
 import { callAbacusLLM } from './abacus-llm';
 import { logger } from './logger';
 
@@ -92,8 +93,8 @@ export async function detectIsometricViews(
     if (chunks.length === 0) return null;
 
     // Analyze content for isometric indicators
-    const content = chunks.map((c: any) => c.content).join(' ');
-    const metadata = chunks[0].metadata as any;
+    const content = chunks.map((c) => c.content).join(' ');
+    const metadata = chunks[0].metadata as Record<string, unknown> | null;
 
     const isometricKeywords = [
       'isometric',
@@ -109,7 +110,7 @@ export async function detectIsometricViews(
       content.toLowerCase().includes(kw)
     );
 
-    const drawingType = (metadata?.drawing_type || '').toLowerCase();
+    const drawingType = (String(metadata?.drawing_type || '')).toLowerCase();
     const isIsometricType = isometricKeywords.some(kw =>
       drawingType.includes(kw)
     );
@@ -133,7 +134,7 @@ export async function detectIsometricViews(
  */
 async function analyzeIsometricWithAI(
   content: string,
-  metadata: any
+  metadata: Record<string, unknown> | null
 ): Promise<IsometricAnalysis> {
   try {
     const prompt = `Analyze this construction drawing for isometric view characteristics:
@@ -239,10 +240,10 @@ export async function reconstructFrom2D(
 
     // Extract elements from chunks
     for (const chunk of chunks) {
-      const metadata = chunk.metadata as any;
+      const metadata = chunk.metadata as Record<string, unknown> | null;
 
-      if (metadata?.mepCallouts) {
-        for (const callout of metadata.mepCallouts) {
+      if (metadata?.mepCallouts && Array.isArray(metadata.mepCallouts)) {
+        for (const callout of metadata.mepCallouts as Array<Record<string, unknown>>) {
           // Parse 2D position from context (simplified)
           const position2D = { x: 0, y: 0 }; // Would be extracted from actual coordinates
 
@@ -251,12 +252,12 @@ export async function reconstructFrom2D(
 
           elements.push({
             id: `iso-element-${elementIdCounter++}`,
-            type: inferIsometricElementType(callout.type || callout.description),
+            type: inferIsometricElementType(String(callout.type || callout.description || '')),
             position2D,
             position3D,
-            orientation: inferOrientation(callout.description || ''),
-            size: callout.size,
-            elevation: callout.elevation,
+            orientation: inferOrientation(String(callout.description || '')),
+            size: callout.size as string | undefined,
+            elevation: callout.elevation as number | undefined,
             connections: []
           });
         }
@@ -485,7 +486,7 @@ export async function generateIsometricView(
 ): Promise<IsometricGenerationResult> {
   try {
     // Get document chunks with MEP data
-    const whereClause: any = {
+    const whereClause: Prisma.DocumentChunkWhereInput = {
       documentId,
       Document: {
         projectId,
@@ -533,24 +534,24 @@ export async function generateIsometricView(
     let elementCounter = 0;
 
     for (const chunk of chunks) {
-      const metadata = chunk.metadata as any;
+      const metadata = chunk.metadata as Record<string, unknown> | null;
       const content = chunk.content || '';
 
       // Extract MEP callouts if available
       if (metadata?.mepCallouts && Array.isArray(metadata.mepCallouts)) {
-        for (const callout of metadata.mepCallouts) {
+        for (const callout of metadata.mepCallouts as Array<Record<string, unknown>>) {
           elementCounter++;
           mepElements.push({
             id: `elem-${elementCounter}`,
-            type: inferElementType(callout.type || callout.description || ''),
-            system: inferSystem(callout.type || callout.description || '', content),
-            size: callout.size,
-            elevation: callout.elevation || parseElevation(callout.description || content),
-            x: callout.x || Math.random() * 100,
-            y: callout.y || Math.random() * 100,
-            z: callout.elevation || callout.z || 0,
+            type: inferElementType(String(callout.type || callout.description || '')),
+            system: inferSystem(String(callout.type || callout.description || ''), content),
+            size: callout.size as string | undefined,
+            elevation: (callout.elevation as number | undefined) || parseElevation(String(callout.description || content)),
+            x: (callout.x as number) || Math.random() * 100,
+            y: (callout.y as number) || Math.random() * 100,
+            z: (callout.elevation as number) || (callout.z as number) || 0,
             connections: [],
-            label: callout.tag || callout.label
+            label: (callout.tag || callout.label) as string | undefined
           });
         }
       }
@@ -571,7 +572,7 @@ export async function generateIsometricView(
     if (mepElements.length === 0) {
       // Try AI-based extraction from full content
       const fullContent = chunks.map(c => c.content).join('\n').substring(0, 3000);
-      const aiElements = await extractElementsWithAI(fullContent, chunks[0]?.metadata);
+      const aiElements = await extractElementsWithAI(fullContent, chunks[0]?.metadata as Record<string, unknown> | null);
       
       if (aiElements.length === 0) {
         return {
@@ -626,7 +627,7 @@ export async function generateIsometricView(
 /**
  * Use AI to extract MEP elements from document content
  */
-async function extractElementsWithAI(content: string, metadata: any): Promise<Array<{
+async function extractElementsWithAI(content: string, metadata: Record<string, unknown> | null): Promise<Array<{
   type: string;
   system: string;
   size?: string;
@@ -666,7 +667,7 @@ If no MEP elements are found, respond with an empty array: []`;
     });
 
     // Parse response
-    let parsed: any[] = [];
+    let parsed: Array<Record<string, unknown>> = [];
     try {
       let contentToParse = response.content;
       const jsonMatch = contentToParse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -686,16 +687,16 @@ If no MEP elements are found, respond with an empty array: []`;
     if (!Array.isArray(parsed)) return [];
 
     // Convert to our format with positions
-    return parsed.slice(0, 20).map((elem, idx) => ({
-      type: elem.type || 'equipment',
-      system: elem.system || 'mechanical',
-      size: elem.size,
-      elevation: elem.elevation || 0,
+    return parsed.slice(0, 20).map((elem: Record<string, any>, idx: number) => ({
+      type: String(elem.type || 'equipment'),
+      system: String(elem.system || 'mechanical'),
+      size: elem.size ? String(elem.size) : undefined,
+      elevation: Number(elem.elevation) || 0,
       x: 20 + (idx % 5) * 20,
       y: 20 + Math.floor(idx / 5) * 20,
-      z: elem.elevation || 0,
-      connections: [],
-      label: elem.label
+      z: Number(elem.elevation) || 0,
+      connections: [] as string[],
+      label: elem.label ? String(elem.label) : undefined
     }));
   } catch (error) {
     logger.error('ISOMETRIC', 'AI extraction error', error as Error);

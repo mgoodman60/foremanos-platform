@@ -24,7 +24,7 @@ export default function LandscapingPage() {
               Planting Schedules, Irrigation Layouts, and Hardscape Specs -- from Your L-Sheets in Seconds
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-              Upload your landscape plans and ask "What's the plant count for zone 3?" or "Show me the irrigation head layout." AI reads your L-sheets and answers with cited sheet references.
+              Upload your landscape plans and ask &quot;What&apos;s the plant count for zone 3?&quot; or &quot;Show me the irrigation head layout.&quot; AI reads your L-sheets and answers with cited sheet references.
             </p>
           </div>
         </div>
@@ -68,7 +68,7 @@ export default function LandscapingPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Irrigation and Planting Schedule Lookup</h3>
-              <p className="text-gray-300">Ask "What irrigation heads are in zone 3?" or "What's the planting spec for the courtyard?" AI reads your L-sheets, irrigation plans, and planting schedules, then answers with cited sheet references.</p>
+              <p className="text-gray-300">Ask &quot;What irrigation heads are in zone 3?&quot; or &quot;What&apos;s the planting spec for the courtyard?&quot; AI reads your L-sheets, irrigation plans, and planting schedules, then answers with cited sheet references.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
@@ -88,7 +88,7 @@ export default function LandscapingPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Search All Your L-Sheets at Once</h3>
-                <p className="text-gray-300">"What species are specified for the parking island?" or "What's the paver detail for the plaza?" AI searches every uploaded landscape sheet and returns answers with exact page references.</p>
+                <p className="text-gray-300">&quot;What species are specified for the parking island?&quot; or &quot;What&apos;s the paver detail for the plaza?&quot; AI searches every uploaded landscape sheet and returns answers with exact page references.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">

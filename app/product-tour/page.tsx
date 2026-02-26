@@ -22,7 +22,7 @@ export default function FeaturesPage() {
             Upload Plans. Ask Questions. Get Cited Answers.
           </h1>
           <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-            ForemanOS reads construction drawings the way your best PM would -- extracting dimensions, tracing MEP systems, checking code compliance, and answering questions with exact sheet references. Here's how it works.
+            ForemanOS reads construction drawings the way your best PM would -- extracting dimensions, tracing MEP systems, checking code compliance, and answering questions with exact sheet references. Here&apos;s how it works.
           </p>
         </div>
       </section>
@@ -59,7 +59,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Symbol Recognition</h3>
               <p className="text-gray-300 text-sm">
-                Identifies 230+ construction symbols across CSI, ASHRAE, IEEE, and IBC standards. The AI learns your project's custom symbols and improves with every drawing set.
+                Identifies 230+ construction symbols across CSI, ASHRAE, IEEE, and IBC standards. The AI learns your project&apos;s custom symbols and improves with every drawing set.
               </p>
             </div>
             
@@ -89,7 +89,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Spatial Correlation</h3>
               <p className="text-gray-300 text-sm">
-                Ask "What's at Grid B-3?" and get results from architectural, structural, and MEP sheets simultaneously. Grid coordinates are mapped across every discipline in the set.
+                Ask &quot;What&apos;s at Grid B-3?&quot; and get results from architectural, structural, and MEP sheets simultaneously. Grid coordinates are mapped across every discipline in the set.
               </p>
             </div>
             
@@ -109,7 +109,7 @@ export default function FeaturesPage() {
             <div className="grid md:grid-cols-2 gap-6 text-gray-300">
               <div>
                 <p className="mb-3">
-                  <strong className="text-white">Traditional OCR</strong> reads text character-by-character. It has no idea that "3/A-401" is a detail callout, that the 12" label refers to duct size, or that Sheet M-101 and Sheet S-101 share the same grid system.
+                  <strong className="text-white">Traditional OCR</strong> reads text character-by-character. It has no idea that &quot;3/A-401&quot; is a detail callout, that the 12&quot; label refers to duct size, or that Sheet M-101 and Sheet S-101 share the same grid system.
                 </p>
                 <p>
                   <strong className="text-white">ForemanOS Plan Intelligence</strong> uses computer vision trained on construction documents. It understands drawing conventions, interprets spatial relationships between disciplines, and builds a structured data model of your entire drawing set.
@@ -149,7 +149,7 @@ export default function FeaturesPage() {
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start gap-3">
                   <span className="text-[#F97316] font-bold">•</span>
-                  <span><strong>Natural Language Search:</strong> "What's the parking space requirement?" or "Show me the rebar spacing for footing F-1"</span>
+                  <span><strong>Natural Language Search:</strong> &quot;What&apos;s the parking space requirement?&quot; or &quot;Show me the rebar spacing for footing F-1&quot;</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#F97316] font-bold">•</span>
@@ -170,7 +170,7 @@ export default function FeaturesPage() {
               <div className="space-y-4">
                 <div className="bg-gray-900/50 rounded-lg p-4">
                   <p className="text-sm text-gray-400 mb-1">User asks:</p>
-                  <p className="text-white">"What's the parking space requirement for this project?"</p>
+                  <p className="text-white">&quot;What&apos;s the parking space requirement for this project?&quot;</p>
                 </div>
                 <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700/30">
                   <p className="text-sm text-gray-400 mb-1">ForemanOS responds:</p>
@@ -199,15 +199,15 @@ export default function FeaturesPage() {
               <div className="space-y-4">
                 <div className="bg-red-900/20 rounded-lg p-4 border border-red-700/30">
                   <h4 className="font-semibold text-red-400 mb-2">🔴 Hard Clash</h4>
-                  <p className="text-sm text-gray-300">Physical interference detected: 12" duct intersects with structural beam at Grid B-3, Level 2. Both elements occupy the same space.</p>
+                  <p className="text-sm text-gray-300">Physical interference detected: 12&quot; duct intersects with structural beam at Grid B-3, Level 2. Both elements occupy the same space.</p>
                 </div>
                 <div className="bg-orange-900/20 rounded-lg p-4 border border-orange-700/30">
                   <h4 className="font-semibold text-orange-400 mb-2">🟠 Clearance Violation</h4>
-                  <p className="text-sm text-gray-300">Minimum clearance not met: Sprinkler head requires 18" from ceiling, only 12" available. Code compliance risk.</p>
+                  <p className="text-sm text-gray-300">Minimum clearance not met: Sprinkler head requires 18&quot; from ceiling, only 12&quot; available. Code compliance risk.</p>
                 </div>
                 <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700/30">
                   <h4 className="font-semibold text-blue-400 mb-2">💡 Resolution Suggested</h4>
-                  <p className="text-sm text-gray-300">Route duct 6" north to avoid beam. Clearance check passed with reroute. Coordination drawing auto-generated.</p>
+                  <p className="text-sm text-gray-300">Route duct 6&quot; north to avoid beam. Clearance check passed with reroute. Coordination drawing auto-generated.</p>
                 </div>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function FeaturesPage() {
               Beyond Document Search
             </h2>
             <p className="text-xl text-gray-300">
-              ForemanOS doesn't just find information -- it interprets drawings, manages collaboration, and tracks project health
+              ForemanOS doesn&apos;t just find information -- it interprets drawings, manages collaboration, and tracks project health
             </p>
           </div>
           
@@ -302,7 +302,7 @@ export default function FeaturesPage() {
                 Automatically maps grid coordinate systems across architectural, structural, and MEP disciplines. Find the same location on any sheet instantly.
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>• Parses grid formats: "A-3", "B/12", "Grid A-3"</li>
+                <li>• Parses grid formats: &quot;A-3&quot;, &quot;B/12&quot;, &quot;Grid A-3&quot;</li>
                 <li>• Cross-references between discipline sheets</li>
                 <li>• Calculates grid distances and adjacency</li>
                 <li>• Identifies overlapping zones between sheets</li>
@@ -315,7 +315,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold">Intelligence Dashboard</h3>
               </div>
               <p className="text-gray-300 mb-4">
-                A single view of your project's data quality, extraction completeness, and coordination status. AI-generated insights flag missing information and recommend actions before they become issues.
+                A single view of your project&apos;s data quality, extraction completeness, and coordination status. AI-generated insights flag missing information and recommend actions before they become issues.
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li>• Overall intelligence score with health status indicators</li>
@@ -432,7 +432,7 @@ export default function FeaturesPage() {
             <div className="bg-blue-900/20 rounded-lg p-6 border border-blue-700/30">
               <h4 className="text-lg font-semibold mb-3 text-blue-400">Example Code Query</h4>
               <p className="text-gray-400 text-sm mb-2">User asks:</p>
-              <p className="text-white mb-4">"What's the IBC requirement for corridor width in assembly occupancy?"</p>
+              <p className="text-white mb-4">&quot;What&apos;s the IBC requirement for corridor width in assembly occupancy?&quot;</p>
               <p className="text-gray-400 text-sm mb-2">ForemanOS responds:</p>
               <p className="text-gray-300">Per IBC 2021 Section 1020.2, corridors serving an occupant load of 50 or more shall be not less than 44 inches in width. <span className="text-blue-400 text-sm">[IBC 2021, Section 1020.2]</span></p>
             </div>
@@ -527,7 +527,7 @@ export default function FeaturesPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#F97316] font-bold">•</span>
-                  <span><strong>Activity Feed:</strong> See who's viewing what and when questions are asked</span>
+                  <span><strong>Activity Feed:</strong> See who&apos;s viewing what and when questions are asked</span>
                 </li>
               </ul>
             </div>
@@ -538,7 +538,7 @@ export default function FeaturesPage() {
               </p>
               <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700/30">
                 <p className="text-gray-300 text-sm">
-                  <strong className="text-blue-400">Real Scenario:</strong> Superintendent on site gets a question about electrical panel location. Opens ForemanOS on phone, asks "Where is panel EP-3?", gets answer with sheet reference in 5 seconds. Owner impressed, no delay.
+                  <strong className="text-blue-400">Real Scenario:</strong> Superintendent on site gets a question about electrical panel location. Opens ForemanOS on phone, asks &quot;Where is panel EP-3?&quot;, gets answer with sheet reference in 5 seconds. Owner impressed, no delay.
                 </p>
               </div>
             </div>

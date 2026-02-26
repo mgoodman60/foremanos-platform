@@ -23,18 +23,6 @@ export function MeasurementShape({
   const { geometry, style, shapeType, measurementValue, measurementUnit } = markup;
 
   const points = geometry.points;
-  if (!points || points.length < 4) {
-    return null;
-  }
-
-  // Convert points from PDF space to Konva space
-  const konvaPoints: number[] = [];
-  for (let i = 0; i < points.length; i += 2) {
-    const pdfX = points[i];
-    const pdfY = points[i + 1];
-    const konvaPoint = pdfToKonva(pdfX, pdfY, pageHeight, scale);
-    konvaPoints.push(konvaPoint.x, konvaPoint.y);
-  }
 
   const handleClick = useCallback(() => {
     onSelect(markup.id);
@@ -42,6 +30,7 @@ export function MeasurementShape({
 
   // Calculate measurement display
   const measurementText = useMemo(() => {
+    if (!points || points.length < 4) return '';
     if (measurementValue != null && measurementUnit) {
       return `${measurementValue.toFixed(2)} ${measurementUnit}`;
     }
@@ -67,8 +56,21 @@ export function MeasurementShape({
     return '';
   }, [shapeType, measurementValue, measurementUnit, points]);
 
+  if (!points || points.length < 4) {
+    return null;
+  }
+
+  // Convert points from PDF space to Konva space
+  const konvaPoints: number[] = [];
+  for (let i = 0; i < points.length; i += 2) {
+    const pdfX = points[i];
+    const pdfY = points[i + 1];
+    const konvaPoint = pdfToKonva(pdfX, pdfY, pageHeight, scale);
+    konvaPoints.push(konvaPoint.x, konvaPoint.y);
+  }
+
   // Label position (midpoint for line, centroid for polygon)
-  const labelPos = useMemo(() => {
+  const labelPos = (() => {
     if (konvaPoints.length === 4) {
       return {
         x: (konvaPoints[0] + konvaPoints[2]) / 2,
@@ -84,7 +86,7 @@ export function MeasurementShape({
       sumY += konvaPoints[i + 1];
     }
     return { x: sumX / n, y: sumY / n };
-  }, [konvaPoints]);
+  })();
 
   return (
     <Group draggable={isSelected} onClick={handleClick} onTap={handleClick}>

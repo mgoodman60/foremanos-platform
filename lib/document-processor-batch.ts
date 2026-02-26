@@ -6,7 +6,7 @@
 import { prisma } from './db';
 import { getFileUrl } from './s3';
 import { analyzeWithSmartRouting, analyzeWithOpusFallback, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
-import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity } from './vision-api-quality';
+import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity, type ExtractedData } from './vision-api-quality';
 import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -16,6 +16,258 @@ import { PREMIUM_MODEL } from '@/lib/model-config';
 import { classifyPage } from './discipline-classifier';
 import { loadSymbolContext } from './symbol-context-loader';
 import { getDisciplinePrompt } from './discipline-prompts';
+
+// --- Vision extraction sub-types (shapes returned by LLM JSON) ---
+
+interface VisionRoom {
+  number?: string;
+  name?: string;
+  area?: string;
+  floor?: string;
+  bounds?: { x: number; y: number; w: number; h: number };
+}
+
+interface VisionDimension {
+  value?: string;
+  label?: string;
+  context?: string;
+  type?: string;
+}
+
+interface VisionEquipment {
+  tag?: string;
+  description?: string;
+}
+
+interface VisionLegendEntry {
+  symbol?: string;
+  meaning?: string;
+}
+
+interface VisionScheduleItem {
+  scheduleType?: string;
+  headers?: string[];
+  rows?: (string[] | Record<string, unknown>)[];
+  sourceArea?: string;
+}
+
+interface VisionMaterial {
+  material?: string;
+  hatchingType?: string;
+  locations?: string[];
+  confidence?: number;
+}
+
+interface VisionPlumbingFixture {
+  type: string;
+  tag?: string;
+  room?: string;
+  count?: number;
+  confidence?: number;
+}
+
+interface VisionElectricalDevice {
+  type: string;
+  subtype?: string;
+  tag?: string;
+  room?: string;
+  circuit?: string;
+  count?: number;
+  confidence?: number;
+}
+
+interface VisionContextualDimension {
+  value: string;
+  context: string;
+  type: string;
+}
+
+interface VisionHeight {
+  value: string;
+  type: string;
+  location: string;
+}
+
+interface VisionSpotElevation {
+  value: string;
+  type: string;
+  location: string;
+}
+
+interface VisionLevel {
+  name: string;
+  elevation: string;
+}
+
+interface VisionGridSpacing {
+  from: string;
+  to: string;
+  distance: string;
+}
+
+interface VisionFireRatedAssembly {
+  type: string;
+  rating: string;
+  location: string;
+}
+
+interface VisionRevisionCloud {
+  revNumber: string;
+  location: string;
+  description: string;
+}
+
+interface VisionSectionCut {
+  number: string;
+  referenceSheet: string;
+  direction?: string;
+}
+
+interface VisionDetailCallout {
+  number: string;
+  referenceSheet: string;
+}
+
+interface VisionScheduleTable {
+  scheduleType?: string;
+  headers?: string[];
+  rows?: (string[] | Record<string, unknown>)[];
+  sourceArea?: string;
+}
+
+interface VisionKeynote {
+  number: string;
+  text?: string;
+  definition?: string;
+  sheetReference?: string;
+}
+
+interface VisionFinishColor {
+  room?: string;
+  surface?: string;
+  colorName?: string;
+  colorCode?: string;
+  manufacturer?: string;
+}
+
+interface VisionFixtureScheduleItem {
+  type?: string;
+  count?: number;
+  rooms?: string[];
+  connectionSize?: string;
+  manufacturer?: string;
+}
+
+interface VisionHardwareScheduleItem {
+  mark?: string;
+  hinges?: string;
+  closer?: string;
+  lockset?: string;
+  pulls?: string;
+}
+
+interface VisionStructuralScheduleItem {
+  mark?: string;
+  type?: string;
+  size?: string;
+  reinforcement?: string;
+  elevation?: string;
+}
+
+interface VisionLightingScheduleItem {
+  type?: string;
+  wattage?: string;
+  mounting?: string;
+  countPerRoom?: number;
+  manufacturer?: string;
+}
+
+interface VisionPanelScheduleItem {
+  panelName?: string;
+  circuits?: number;
+  mainBreaker?: string;
+  voltage?: string;
+  phase?: string;
+}
+
+interface VisionPlumbingFixtureScheduleItem {
+  fixture?: string;
+  count?: number;
+  rooms?: string[];
+  connectionSize?: string;
+}
+
+interface VisionStairScheduleItem {
+  stairId?: string;
+  riserHeight?: string;
+  treadDepth?: string;
+  width?: string;
+  flights?: number;
+}
+
+interface VisionElevatorScheduleItem {
+  elevatorId?: string;
+  capacity?: string;
+  speed?: string;
+  cabFinish?: string;
+}
+
+interface VisionCSIReference {
+  section?: string;
+  title?: string;
+  manufacturer?: string;
+  productNumber?: string;
+}
+
+interface VisionDuctSizing {
+  ductId?: string;
+  width?: string;
+  height?: string;
+  diameter?: string;
+  cfm?: string;
+}
+
+interface VisionPipeSizing {
+  pipeId?: string;
+  diameter?: string;
+  material?: string;
+  system?: string;
+}
+
+interface VisionNoteClause {
+  clauseNumber?: string;
+  text?: string;
+  category?: string;
+  referencedSpecs?: string[];
+}
+
+/** Metadata stored alongside a DocumentChunk from vision extraction */
+interface VisionChunkMetadata {
+  page: number;
+  source: string;
+  provider?: VisionProvider;
+  providerDisplayName?: string;
+  confidenceScore?: number;
+  qualityScore?: number;
+  qualityPassed?: boolean;
+  attempts?: number;
+  interpretationProvider?: VisionProvider | null;
+  pass2Provider?: VisionProvider | null;
+  processingTier?: string;
+  parseError?: string;
+  error?: string;
+  skipForRag?: boolean;
+  extractionError?: string;
+  sheetNumber?: string | null;
+  discipline?: string | null;
+  titleBlock?: Record<string, unknown> | null;
+  hasScale?: boolean;
+  hasDimensions?: boolean;
+  roomsCount?: number;
+  rooms?: VisionRoom[] | null;
+  notesCount?: number;
+  [key: string]: unknown;
+}
 
 // Cost per page by provider (estimated USD)
 const COST_PER_PAGE: Record<string, number> = {
@@ -829,7 +1081,7 @@ export async function processDocumentBatch(
         const processingTime = Date.now() - startTime;
 
         let chunkContent = '';
-        let metadata: any = {};
+        let metadata: VisionChunkMetadata = { page: pageNum, source: 'pending' };
 
         if (visionResult.success && visionResult.content) {
           // Track which provider was used with timing
@@ -940,9 +1192,9 @@ export async function processDocumentBatch(
             pageNumber: pageNum,
             chunkIndex: pageNum - 1,
             content: chunkContent,
-            metadata,
+            metadata: metadata as any,
             sheetNumber: metadata.sheetNumber || null,
-            titleBlockData: metadata.titleBlock || null,
+            titleBlockData: (metadata.titleBlock || null) as any,
             discipline: metadata.discipline || null,
           },
         });
@@ -1225,7 +1477,7 @@ IMPORTANT: Extract EVERYTHING visible. Omit categories with no data rather than 
 /**
  * Format vision data for storage - enhanced for RAG retrieval
  */
-function formatVisionData(data: any): string {
+function formatVisionData(data: ExtractedData): string {
   const lines: string[] = [];
   
   // Header info
@@ -1270,7 +1522,7 @@ function formatVisionData(data: any): string {
   if (data.rooms?.length > 0) {
     lines.push('');
     lines.push('ROOMS:');
-    data.rooms.forEach((r: any) => {
+    data.rooms.forEach((r: VisionRoom) => {
       const roomInfo = [r.number, r.name, r.area].filter(Boolean).join(' - ');
       lines.push(`  • ${roomInfo}`);
     });
@@ -1280,7 +1532,7 @@ function formatVisionData(data: any): string {
   if (data.dimensions?.length > 0) {
     lines.push('');
     lines.push('DIMENSIONS:');
-    data.dimensions.forEach((d: any) => {
+    data.dimensions.forEach((d: string | VisionDimension) => {
       if (typeof d === 'string') {
         lines.push(`  • ${d}`);
       } else {
@@ -1304,7 +1556,7 @@ function formatVisionData(data: any): string {
   if (data.equipment?.length > 0) {
     lines.push('');
     lines.push('EQUIPMENT:');
-    data.equipment.forEach((eq: any) => {
+    data.equipment.forEach((eq: string | VisionEquipment) => {
       lines.push(`  • ${typeof eq === 'string' ? eq : eq.tag || eq.description || JSON.stringify(eq)}`);
     });
   }
@@ -1313,7 +1565,7 @@ function formatVisionData(data: any): string {
   if (data.legendEntries?.length > 0) {
     lines.push('');
     lines.push('LEGEND:');
-    data.legendEntries.forEach((entry: any) => {
+    data.legendEntries.forEach((entry: string | VisionLegendEntry) => {
       if (typeof entry === 'string') {
         lines.push(`  • ${entry}`);
       } else {
@@ -1344,11 +1596,11 @@ function formatVisionData(data: any): string {
   if (data.scheduleData?.length > 0) {
     lines.push('');
     lines.push('SCHEDULE DATA:');
-    data.scheduleData.forEach((item: any) => {
+    (data.scheduleData as unknown[]).forEach((item: unknown) => {
       lines.push(`  • ${JSON.stringify(item)}`);
     });
   }
-  
+
   // Text content (for specs)
   if (data.textContent) {
     lines.push('');
@@ -1360,7 +1612,7 @@ function formatVisionData(data: any): string {
   if (data.visualMaterials?.length > 0) {
     lines.push('');
     lines.push('VISUAL MATERIALS:');
-    data.visualMaterials.forEach((m: any) => {
+    data.visualMaterials.forEach((m: VisionMaterial) => {
       lines.push(`  • ${m.material} (${m.hatchingType}) at ${(m.locations || []).join(', ')}`);
     });
   }
@@ -1383,7 +1635,7 @@ function formatVisionData(data: any): string {
   if (data.plumbingFixtures?.length > 0) {
     lines.push('');
     lines.push('PLUMBING FIXTURES:');
-    data.plumbingFixtures.forEach((f: any) => {
+    data.plumbingFixtures.forEach((f: VisionPlumbingFixture) => {
       lines.push(`  • ${f.tag || f.type} (${f.type}, Room ${f.room || 'unknown'})`);
     });
   }
@@ -1394,7 +1646,7 @@ function formatVisionData(data: any): string {
     lines.push('ELECTRICAL DEVICES:');
     // Summarize by type
     const typeCounts: Record<string, number> = {};
-    data.electricalDevices.forEach((d: any) => {
+    data.electricalDevices.forEach((d: VisionElectricalDevice) => {
       const key = d.subtype ? `${d.type} (${d.subtype})` : d.type;
       typeCounts[key] = (typeCounts[key] || 0) + (d.count || 1);
     });
@@ -1409,10 +1661,10 @@ function formatVisionData(data: any): string {
     if (sd.contextualDimensions?.length > 0 || sd.heights?.length > 0 || sd.spotElevations?.length > 0) {
       lines.push('');
       lines.push('SPATIAL DATA:');
-      sd.contextualDimensions?.forEach((d: any) => {
+      sd.contextualDimensions?.forEach((d: VisionContextualDimension) => {
         lines.push(`  • ${d.context}: ${d.value} (${d.type})`);
       });
-      sd.heights?.forEach((h: any) => {
+      sd.heights?.forEach((h: VisionHeight) => {
         lines.push(`  • ${h.type}: ${h.value} at ${h.location}`);
       });
       sd.spotElevations?.forEach((e: any) => {

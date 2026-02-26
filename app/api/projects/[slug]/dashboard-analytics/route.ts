@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
     const userRole = session.user.role;
 
     const isOwner = project.ownerId === userId;
-    const isMember = project.ProjectMember.some((m: any) => m.userId === userId);
+    const isMember = project.ProjectMember.some((m) => m.userId === userId);
 
     if (!isOwner && !isMember && userRole !== 'admin') {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
@@ -84,14 +84,15 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
     });
 
     // Calculate takeoff metrics
-    const allLineItems = takeoffs.flatMap((t: any) => t.TakeoffLineItem || []);
-    const totalCost = allLineItems.reduce((sum: number, item: any) => sum + (item.totalCost || 0), 0);
-    const verifiedItems = allLineItems.filter((item: any) => item.verified).length;
+    const allLineItems = takeoffs.flatMap((t) => t.TakeoffLineItem || []);
+    const totalCost = allLineItems.reduce((sum: number, item) => sum + (item.totalCost || 0), 0);
+    const verifiedItems = allLineItems.filter((item) => item.verified).length;
     const verificationRate = allLineItems.length > 0 ? (verifiedItems / allLineItems.length) * 100 : 0;
 
     // Group takeoffs by category
-    const categoryBreakdown = takeoffs.reduce((acc: any, takeoff: any) => {
-      const category = takeoff.category || 'Other';
+    interface CategoryData { count: number; totalCost: number; items: number }
+    const categoryBreakdown = takeoffs.reduce<Record<string, CategoryData>>((acc, takeoff) => {
+      const category = (takeoff as Record<string, unknown>).category as string || 'Other';
       if (!acc[category]) {
         acc[category] = {
           count: 0,
@@ -101,7 +102,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
       }
       acc[category].count += 1;
       acc[category].items += takeoff.TakeoffLineItem?.length || 0;
-      acc[category].totalCost += takeoff.TakeoffLineItem?.reduce((sum: number, item: any) => sum + (item.totalCost || 0), 0) || 0;
+      acc[category].totalCost += takeoff.TakeoffLineItem?.reduce((sum: number, item) => sum + (item.totalCost || 0), 0) || 0;
       return acc;
     }, {});
 
@@ -124,8 +125,8 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
     let plumbingCount = 0;
     let fireCount = 0;
 
-    mepChunks.forEach((chunk: any) => {
-      const metadata = chunk.metadata as any;
+    mepChunks.forEach((chunk) => {
+      const metadata = chunk.metadata as Record<string, unknown> | null;
       if (metadata?.mepCallouts) {
         const callouts = Array.isArray(metadata.mepCallouts) ? metadata.mepCallouts : [];
         callouts.forEach((callout: string) => {
@@ -146,7 +147,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
     const totalMEP = hvacCount + electricalCount + plumbingCount + fireCount;
 
     // Calculate room metrics
-    const roomsByFloor = rooms.reduce((acc: any, room: any) => {
+    const roomsByFloor = rooms.reduce<Record<string, number>>((acc, room) => {
       const floor = room.floorNumber ? `Floor ${room.floorNumber}` : 'Unknown';
       if (!acc[floor]) {
         acc[floor] = 0;
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
       return acc;
     }, {});
 
-    const roomsByStatus = rooms.reduce((acc: any, room: any) => {
+    const roomsByStatus = rooms.reduce<Record<string, number>>((acc, room) => {
       const status = room.status || 'unknown';
       if (!acc[status]) {
         acc[status] = 0;
@@ -165,18 +166,18 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
     }, {});
 
     // Document metrics
-    const processedDocs = project.Document.filter((d: any) => d.processed).length;
+    const processedDocs = project.Document.filter((d) => d.processed).length;
     const processingRate = project.Document.length > 0 ? (processedDocs / project.Document.length) * 100 : 0;
 
-    const pdfDocs = project.Document.filter((d: any) => d.fileType === 'pdf').length;
-    const imageDocs = project.Document.filter((d: any) => ['jpg', 'jpeg', 'png', 'gif'].includes(d.fileType.toLowerCase())).length;
+    const pdfDocs = project.Document.filter((d) => d.fileType === 'pdf').length;
+    const imageDocs = project.Document.filter((d) => ['jpg', 'jpeg', 'png', 'gif'].includes(d.fileType.toLowerCase())).length;
 
     // Calculate recent activity (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const recentRooms = rooms.filter((r: any) => new Date(r.createdAt) > sevenDaysAgo).length;
-    const recentDocs = project.Document.filter((d: any) => new Date(d.createdAt) > sevenDaysAgo).length;
+    const recentRooms = rooms.filter((r) => new Date(r.createdAt) > sevenDaysAgo).length;
+    const recentDocs = project.Document.filter((d) => new Date(d.createdAt) > sevenDaysAgo).length;
 
     // Build comprehensive analytics
     const analytics = {
@@ -224,14 +225,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
         verificationRate: Math.round(verificationRate),
         categories: Object.keys(categoryBreakdown).length,
         categoryBreakdown: Object.entries(categoryBreakdown)
-          .map(([name, data]: [string, any]) => ({
+          .map(([name, data]: [string, CategoryData]) => ({
             name,
             count: data.count,
             items: data.items,
             totalCost: data.totalCost,
             percentage: totalCost > 0 ? Math.round((data.totalCost / totalCost) * 100) : 0
           }))
-          .sort((a: any, b: any) => b.totalCost - a.totalCost)
+          .sort((a, b) => b.totalCost - a.totalCost)
           .slice(0, 10) // Top 10 categories
       },
       activity: {

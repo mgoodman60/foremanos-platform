@@ -191,7 +191,7 @@ export default function SignupPage() {
                 Check Your Email!
               </h2>
               <p className="text-gray-600">
-                We've sent a verification link to <strong>{formData.email}</strong>.
+                We&apos;ve sent a verification link to <strong>{formData.email}</strong>.
               </p>
               <p className="text-gray-600 mt-2">
                 Click the link to verify your email and activate your free account.
@@ -199,7 +199,7 @@ export default function SignupPage() {
             </div>
             <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription className="text-blue-800 text-sm">
-                The verification link will expire in 24 hours. If you don't see the email, check your spam folder.
+                The verification link will expire in 24 hours. If you don&apos;t see the email, check your spam folder.
               </AlertDescription>
             </Alert>
             <div className="space-y-3 pt-4">
@@ -488,7 +488,7 @@ export default function SignupPage() {
               {selectedTier === 'free' && (
                 <Alert className="bg-blue-50 border-blue-200">
                   <AlertDescription className="text-blue-800 text-sm">
-                    <strong>Free tier requires email verification.</strong> You'll receive a verification link after signing up.
+                    <strong>Free tier requires email verification.</strong> You&apos;ll receive a verification link after signing up.
                   </AlertDescription>
                 </Alert>
               )}

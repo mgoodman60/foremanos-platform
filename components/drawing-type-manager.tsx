@@ -256,7 +256,7 @@ export default function DrawingTypeManager({ projectSlug }: DrawingTypeManagerPr
           <Grid3x3 className="h-12 w-12 text-gray-600 mx-auto mb-3" />
           <p className="text-gray-400 mb-2">No classified drawings found</p>
           <p className="text-sm text-gray-400 mb-4">
-            Click "Classify Drawings" to analyze your sheets
+            Click &quot;Classify Drawings&quot; to analyze your sheets
           </p>
         </div>
       ) : (

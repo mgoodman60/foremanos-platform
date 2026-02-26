@@ -258,7 +258,7 @@ export default function PricingPage() {
               <span className="block text-[#003B71]">No Per-User Fees.</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-              AI-powered plan analysis, MEP clash detection, and compliance checking starting at $15/month. Stop paying per seat for tools your field crew won't open.
+              AI-powered plan analysis, MEP clash detection, and compliance checking starting at $15/month. Stop paying per seat for tools your field crew won&apos;t open.
             </p>
             <p className="text-lg text-[#003B71] font-semibold max-w-2xl mx-auto mb-8">
               2.6x cheaper than Fieldwire • 7.9x cheaper than Handoff AI • 25x cheaper than Procore
@@ -374,7 +374,7 @@ export default function PricingPage() {
             <div className="space-y-6">
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  What's the difference between monthly and annual billing?
+                  What&apos;s the difference between monthly and annual billing?
                 </h3>
                 <p className="text-gray-600">
                   Annual billing locks in a lower rate. Starter drops from $19/mo to $15/mo (save $48/year), and Pro drops from $49/mo to $39/mo (save $120/year). Same features, same support, lower cost.
@@ -393,7 +393,7 @@ export default function PricingPage() {
                   What happens when I reach my AI query limit?
                 </h3>
                 <p className="text-gray-600">
-                  You'll get a heads-up at 80% usage so there are no surprises. If you hit the limit, upgrade your plan instantly or purchase additional query packs. All your projects, documents, and conversation history stay fully accessible regardless.
+                  You&apos;ll get a heads-up at 80% usage so there are no surprises. If you hit the limit, upgrade your plan instantly or purchase additional query packs. All your projects, documents, and conversation history stay fully accessible regardless.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">

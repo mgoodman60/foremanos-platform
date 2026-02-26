@@ -80,6 +80,7 @@ export function ConversationSidebar({
   const [historyExpanded, setHistoryExpanded] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingDeleteConv, setPendingDeleteConv] = useState<{ id: string; conv: Conversation } | null>(null);
+  const [compactOpen, setCompactOpen] = useState(false);
 
   // Check if user has access to daily reports (Pro tier or higher)
   const eligibleTiers = ['pro', 'team', 'business', 'enterprise'];
@@ -269,7 +270,6 @@ export function ConversationSidebar({
   // Compact mode: dropdown selector for drawer context
   if (compact) {
     const activeConv = conversations.find(c => c.id === activeConversationId);
-    const [compactOpen, setCompactOpen] = useState(false);
 
     return (
       <div className="relative border-b border-gray-700 px-3 py-2">

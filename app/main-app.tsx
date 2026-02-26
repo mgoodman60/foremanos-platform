@@ -181,7 +181,7 @@ export function MainApp({ session }: MainAppProps) {
                     <br /><br />
                     You can start using the chatbot right away to get information about plans, schedules, specifications, and site surveys.
                     <br /><br />
-                    <span className="text-sm">Admin/Client staff: Click "Login" above for access to budget and contract information. Chat history is only saved for logged-in users.</span>
+                    <span className="text-sm">Admin/Client staff: Click &quot;Login&quot; above for access to budget and contract information. Chat history is only saved for logged-in users.</span>
                   </>
                 )}
               </p>

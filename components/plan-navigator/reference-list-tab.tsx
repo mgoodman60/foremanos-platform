@@ -73,7 +73,7 @@ export const ReferenceListTab = React.memo(function ReferenceListTab({
             {/* Reference Body - Always show basic info */}
             <div className="p-4">
               {/* Context/Description */}
-              <p className="text-sm text-gray-300 mb-4 leading-relaxed italic">"{ref.context}"</p>
+              <p className="text-sm text-gray-300 mb-4 leading-relaxed italic">&quot;{ref.context}&quot;</p>
 
               {/* Document Flow - Source to Target */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-3">

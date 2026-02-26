@@ -445,7 +445,7 @@ export default function BIMDataPanel({
                 </p>
                 <ul className="text-sm text-gray-400 mt-2 space-y-1">
                   <li>“How many HVAC units are in the model?”</li>
-                  <li>“What's the total concrete volume?”</li>
+                  <li>“What&apos;s the total concrete volume?”</li>
                   <li>“List all doors on Level 2”</li>
                 </ul>
               </div>

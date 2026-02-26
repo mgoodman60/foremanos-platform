@@ -22,6 +22,10 @@ export function EllipseShape({
 }: EllipseShapeProps) {
   const { geometry, style } = markup;
 
+  const handleClick = useCallback(() => {
+    onSelect(markup.id);
+  }, [onSelect, markup.id]);
+
   if (
     geometry.x == null ||
     geometry.y == null ||
@@ -40,10 +44,6 @@ export function EllipseShape({
   const radiusY = (geometry.height * scale) / 2;
 
   const dashPattern = getDashPattern(style.lineStyle, style.strokeWidth);
-
-  const handleClick = useCallback(() => {
-    onSelect(markup.id);
-  }, [onSelect, markup.id]);
 
   return (
     <Ellipse

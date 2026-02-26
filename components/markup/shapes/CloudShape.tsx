@@ -22,22 +22,12 @@ export function CloudShape({
 }: CloudShapeProps) {
   const { geometry, style } = markup;
 
-  if (
-    geometry.x == null ||
-    geometry.y == null ||
-    geometry.width == null ||
-    geometry.height == null
-  ) {
-    return null;
-  }
-
-  const topLeft = pdfToKonva(geometry.x, geometry.y + geometry.height, pageHeight, scale);
-  const width = geometry.width * scale;
-  const height = geometry.height * scale;
-
   const handleClick = useCallback(() => {
     onSelect(markup.id);
   }, [onSelect, markup.id]);
+
+  const width = (geometry.width ?? 0) * scale;
+  const height = (geometry.height ?? 0) * scale;
 
   const sceneFunc = useCallback(
     (context: any, shape: any) => {
@@ -88,6 +78,17 @@ export function CloudShape({
     },
     [width, height]
   );
+
+  if (
+    geometry.x == null ||
+    geometry.y == null ||
+    geometry.width == null ||
+    geometry.height == null
+  ) {
+    return null;
+  }
+
+  const topLeft = pdfToKonva(geometry.x, geometry.y + geometry.height, pageHeight, scale);
 
   return (
     <Shape

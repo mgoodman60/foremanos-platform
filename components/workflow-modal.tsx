@@ -548,7 +548,7 @@ export function WorkflowModal({
                       <div>Wind: {weatherData.windSpeed} mph</div>
                       <div>Humidity: {weatherData.humidity}%</div>
                       {(weatherData.precipitation ?? 0) > 0 && (
-                        <div className="text-yellow-400">Rain: {weatherData.precipitation!.toFixed(2)}"</div>
+                        <div className="text-yellow-400">Rain: {weatherData.precipitation!.toFixed(2)}&quot;</div>
                       )}
                     </div>
                   </div>
@@ -570,7 +570,7 @@ export function WorkflowModal({
                 <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4">
                   <h3 className="text-sm font-semibold text-blue-400 mb-2 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                    Today's Scheduled Activities
+                    Today&apos;s Scheduled Activities
                   </h3>
                   <ul className="text-sm text-gray-300 space-y-1">
                     {scheduleContext.todayTasks.slice(0, 3).map((task: any, idx: number) => (

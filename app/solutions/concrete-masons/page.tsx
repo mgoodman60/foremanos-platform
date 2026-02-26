@@ -26,7 +26,7 @@ export default function ConcreteMasonsPage() {
               Rebar Schedules, Footing Details, and Pour Specs -- Pulled from Your S-Sheets in Seconds
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-              Upload your structural plans and ask "What's the rebar spacing for footing F-1?" or "Show me the concrete mix spec for the elevated slab." AI reads your S-sheets and answers with cited sheet references.
+              Upload your structural plans and ask &quot;What&apos;s the rebar spacing for footing F-1?&quot; or &quot;Show me the concrete mix spec for the elevated slab.&quot; AI reads your S-sheets and answers with cited sheet references.
             </p>
           </div>
         </div>
@@ -39,19 +39,19 @@ export default function ConcreteMasonsPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Rebar Details Scattered Across 30 Sheets</h3>
-              <p className="text-gray-300">The footing schedule is on S-101, the rebar detail is on S-501, and the structural notes reference a different bar spacing than what's on the plan. Your iron workers need a definitive answer before they tie steel.</p>
+              <p className="text-gray-300">The footing schedule is on S-101, the rebar detail is on S-501, and the structural notes reference a different bar spacing than what&apos;s on the plan. Your iron workers need a definitive answer before they tie steel.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Concrete Quantity Estimates Miss the Mark</h3>
-              <p className="text-gray-300">Calculating cubic yards across multiple footings, grade beams, slabs, and walls from hand-scaled drawings. One missed dimension or wrong thickness and you're ordering short -- or eating the overrun on excess concrete.</p>
+              <p className="text-gray-300">Calculating cubic yards across multiple footings, grade beams, slabs, and walls from hand-scaled drawings. One missed dimension or wrong thickness and you&apos;re ordering short -- or eating the overrun on excess concrete.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Pour Sequence Conflicts</h3>
-              <p className="text-gray-300">The engineer wants the north wall poured before the slab, but the GC's schedule has slab first. The pour sequence isn't clearly documented, and now your batch plant needs a revised schedule by tomorrow morning.</p>
+              <p className="text-gray-300">The engineer wants the north wall poured before the slab, but the GC&apos;s schedule has slab first. The pour sequence isn&apos;t clearly documented, and now your batch plant needs a revised schedule by tomorrow morning.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
-              <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Finishers and Masons Can't Access Specs in the Field</h3>
-              <p className="text-gray-300">Your crew needs the concrete mix spec, the masonry wall detail, or the grout schedule -- and it's buried in a Division 3 or Division 4 spec section nobody printed. Calls back to the office slow everything down.</p>
+              <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Finishers and Masons Can&apos;t Access Specs in the Field</h3>
+              <p className="text-gray-300">Your crew needs the concrete mix spec, the masonry wall detail, or the grout schedule -- and it&apos;s buried in a Division 3 or Division 4 spec section nobody printed. Calls back to the office slow everything down.</p>
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function ConcreteMasonsPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Rebar and Footing Detail Extraction</h3>
-              <p className="text-gray-300">Ask "What's the rebar spacing for footing F-3?" or "Show me the grade beam reinforcing detail." AI reads your structural plans, rebar schedules, and detail sheets, then answers with cited sheet references.</p>
+              <p className="text-gray-300">Ask &quot;What&apos;s the rebar spacing for footing F-3?&quot; or &quot;Show me the grade beam reinforcing detail.&quot; AI reads your structural plans, rebar schedules, and detail sheets, then answers with cited sheet references.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
@@ -75,7 +75,7 @@ export default function ConcreteMasonsPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Spec and Mix Design Lookup</h3>
-              <p className="text-gray-300">Ask "What's the concrete mix spec for the elevated slab?" or "What's the masonry grout requirement?" AI searches your uploaded specs and returns cited answers from Division 3 and Division 4 sections.</p>
+              <p className="text-gray-300">Ask &quot;What&apos;s the concrete mix spec for the elevated slab?&quot; or &quot;What&apos;s the masonry grout requirement?&quot; AI searches your uploaded specs and returns cited answers from Division 3 and Division 4 sections.</p>
             </div>
           </div>
         </div>
@@ -90,14 +90,14 @@ export default function ConcreteMasonsPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Search All Your Structural Sheets at Once</h3>
-                <p className="text-gray-300">"What's the depth of footing F-3?" or "Show me the wall section at grid C-4." AI searches every uploaded S-sheet and returns answers with exact page references. No more flipping through plan sets.</p>
+                <p className="text-gray-300">&quot;What&apos;s the depth of footing F-3?&quot; or &quot;Show me the wall section at grid C-4.&quot; AI searches every uploaded S-sheet and returns answers with exact page references. No more flipping through plan sets.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">IBC and ACI Code Compliance</h3>
-                <p className="text-gray-300">Ask "What's the IBC minimum for masonry wall thickness?" or "What's the ACI requirement for rebar cover in footings?" Get cited code answers for inspections and quality control.</p>
+                <p className="text-gray-300">Ask &quot;What&apos;s the IBC minimum for masonry wall thickness?&quot; or &quot;What&apos;s the ACI requirement for rebar cover in footings?&quot; Get cited code answers for inspections and quality control.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">

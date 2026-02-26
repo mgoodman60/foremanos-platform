@@ -413,7 +413,7 @@ export function UnitPriceManager({ projectSlug, onClose, onPricesUpdated }: Unit
               <div className="text-center py-12 text-gray-400">
                 <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No unit prices configured</p>
-                <p className="text-sm">Click "Add Price" to create custom pricing</p>
+                <p className="text-sm">Click &quot;Add Price&quot; to create custom pricing</p>
               </div>
             )}
           </div>

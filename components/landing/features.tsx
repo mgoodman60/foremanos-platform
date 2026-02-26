@@ -123,7 +123,7 @@ export function Features() {
               <BarChart className="h-10 w-10 text-amber-600 mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">Intelligence Dashboard</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                See your project's pulse at a glance. Track extraction quality, data completeness, and AI confidence scores — so you know exactly what the system has covered.
+                See your project&apos;s pulse at a glance. Track extraction quality, data completeness, and AI confidence scores — so you know exactly what the system has covered.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
                 View the Dashboard →
@@ -148,7 +148,7 @@ export function Features() {
               <Search className="h-10 w-10 text-[var(--color-primary)] mb-4" />
               <h3 className="text-xl font-headline font-semibold mb-3">AI Document Search</h3>
               <p className="text-[var(--color-text-muted)] mb-4">
-                "What's the slab thickness at grid B-3?" Ask in plain English, get the answer with the exact sheet and section cited. No more digging through 200-page plan sets.
+                &quot;What&apos;s the slab thickness at grid B-3?&quot; Ask in plain English, get the answer with the exact sheet and section cited. No more digging through 200-page plan sets.
               </p>
               <Link href="/signup" className="text-[var(--color-secondary)] font-medium hover:underline">
                 Ask Your First Question →
@@ -219,7 +219,7 @@ export function Features() {
               Your Trade. Your Workflows. Your AI.
             </h2>
             <p className="text-xl text-[var(--color-text-muted)]">
-              ForemanOS speaks your discipline's language — whether you're coordinating 20 subs or pulling wire on the third floor.
+              ForemanOS speaks your discipline&apos;s language — whether you&apos;re coordinating 20 subs or pulling wire on the third floor.
             </p>
           </div>
           
@@ -287,7 +287,7 @@ export function Features() {
               Your Plans Have the Answers. Let AI Find Them.
             </h2>
             <p className="text-xl text-[var(--color-text-light)] mb-8">
-              Free plan includes 50 queries/month and 1 project. No credit card required. Upgrade when you're ready.
+              Free plan includes 50 queries/month and 1 project. No credit card required. Upgrade when you&apos;re ready.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/signup">

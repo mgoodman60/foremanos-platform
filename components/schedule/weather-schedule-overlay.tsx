@@ -284,7 +284,7 @@ export function WeatherScheduleOverlay({
         </div>
         <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 text-center">
           <Droplets className="h-5 w-5 text-purple-400 mx-auto mb-1" aria-hidden="true" />
-          <p className="text-2xl font-bold text-purple-400">{stats.totalPrecip}"</p>
+          <p className="text-2xl font-bold text-purple-400">{stats.totalPrecip}&quot;</p>
           <p className="text-xs text-gray-400">Total Precip</p>
         </div>
       </div>

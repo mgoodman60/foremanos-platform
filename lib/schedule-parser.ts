@@ -10,6 +10,7 @@
 
 import { prisma } from './db';
 import { createScopedLogger } from './logger';
+import type { DocumentChunk, ScheduleTask } from '@prisma/client';
 
 const log = createScopedLogger('SCHEDULE_PARSER');
 
@@ -131,7 +132,7 @@ export async function parseScheduleFromDocument(
     // Calculate successors for each task
     await updateTaskSuccessors(schedule.id);
 
-    const criticalPathTasks = tasks.filter((t: any) => t.isCritical).length;
+    const criticalPathTasks = tasks.filter((t: ParsedTask) => t.isCritical).length;
 
     log.info('Parsed tasks', { taskCount: tasks.length, criticalPathTasks });
 
@@ -152,12 +153,12 @@ export async function parseScheduleFromDocument(
 /**
  * Extract tasks from document chunks using pattern matching
  */
-async function extractTasksFromChunks(chunks: any[]): Promise<ParsedTask[]> {
+async function extractTasksFromChunks(chunks: DocumentChunk[]): Promise<ParsedTask[]> {
   const tasks: ParsedTask[] = [];
 
   for (const chunk of chunks) {
     const content = chunk.content;
-    const metadata = chunk.metadata as any;
+    const metadata = chunk.metadata as Record<string, unknown> | null;
 
     // Extract tasks using various patterns
     const extractedTasks = parseScheduleContent(content, metadata);
@@ -170,7 +171,7 @@ async function extractTasksFromChunks(chunks: any[]): Promise<ParsedTask[]> {
 /**
  * Parse schedule content to extract task information
  */
-function parseScheduleContent(content: string, _metadata: any): ParsedTask[] {
+function parseScheduleContent(content: string, _metadata: Record<string, unknown> | null): ParsedTask[] {
   const tasks: ParsedTask[] = [];
   const lines = content.split('\n');
 
@@ -316,8 +317,8 @@ export async function calculateCriticalPath(scheduleId: string): Promise<string[
 
   // Simple critical path: tasks with zero float
   const criticalTasks = tasks
-    .filter((task: any) => task.totalFloat === 0 || task.isCritical)
-    .map((task: any) => task.id);
+    .filter((task) => task.totalFloat === 0 || task.isCritical)
+    .map((task) => task.id);
 
   return criticalTasks;
 }
@@ -331,11 +332,11 @@ export async function getScheduleProgress(scheduleId: string) {
   });
 
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t: any) => t.status === 'completed').length;
-  const inProgressTasks = tasks.filter((t: any) => t.status === 'in_progress').length;
-  const delayedTasks = tasks.filter((t: any) => t.status === 'delayed').length;
+  const completedTasks = tasks.filter((t) => t.status === 'completed').length;
+  const inProgressTasks = tasks.filter((t) => t.status === 'in_progress').length;
+  const delayedTasks = tasks.filter((t) => t.status === 'delayed').length;
 
-  const totalProgress = tasks.reduce((sum: any, t: any) => sum + t.percentComplete, 0) / totalTasks;
+  const totalProgress = tasks.reduce((sum: number, t) => sum + t.percentComplete, 0) / totalTasks;
 
   return {
     totalTasks,
@@ -398,7 +399,7 @@ export async function findScheduleCandidates(projectId: string): Promise<Schedul
     }
 
     // Score each document based on relevance
-    const candidates: ScheduleCandidate[] = documents.map((doc: any) => {
+    const candidates: ScheduleCandidate[] = documents.map((doc) => {
       let matchScore = 0;
       let confidence = 0.5;
 
@@ -650,22 +651,49 @@ export function formatScheduleSuggestions(activities: ScheduledActivity[]): stri
   return formatted;
 }
 
+interface ScheduleMatch {
+  scheduled: string;
+  actual: string;
+  location?: string;
+}
+
+interface ScheduleMissing {
+  activity: string;
+  location?: string;
+  reason: string;
+}
+
+interface ScheduleExtra {
+  activity: string;
+  location?: string;
+  reason: string;
+}
+
+interface ScheduleDifference {
+  type: 'missing' | 'extra';
+  activity: string;
+  location?: string;
+  reason: string;
+}
+
+export interface ScheduleComparisonResult {
+  hasDifferences: boolean;
+  matches: ScheduleMatch[];
+  missing: ScheduleMissing[];
+  extra: ScheduleExtra[];
+  differences: ScheduleDifference[];
+}
+
 /**
  * Compare scheduled activities with actual work performed
  */
 export function compareScheduleActivities(
   scheduled: ScheduledActivity[],
   actual: ScheduledActivity[]
-): { 
-  hasDifferences: boolean; 
-  matches: any[]; 
-  missing: any[]; 
-  extra: any[]; 
-  differences: any[] 
-} {
-  const matches: any[] = [];
-  const missing: any[] = [];
-  const extra: any[] = [];
+): ScheduleComparisonResult {
+  const matches: ScheduleMatch[] = [];
+  const missing: ScheduleMissing[] = [];
+  const extra: ScheduleExtra[] = [];
 
   // Normalize activities for comparison
   const normalizeActivity = (act: ScheduledActivity) => 
@@ -718,8 +746,8 @@ export function compareScheduleActivities(
   }
 
   const hasDifferences = missing.length > 0 || extra.length > 0;
-  const differences = [...missing.map(m => ({ type: 'missing', ...m })), 
-                       ...extra.map(e => ({ type: 'extra', ...e }))];
+  const differences: ScheduleDifference[] = [...missing.map(m => ({ type: 'missing' as const, ...m })),
+                       ...extra.map(e => ({ type: 'extra' as const, ...e }))];
 
   return {
     hasDifferences,
@@ -734,7 +762,7 @@ export function compareScheduleActivities(
  * Generate schedule update draft based on comparison
  */
 export function generateScheduleUpdateDraft(
-  comparison: any,
+  comparison: ScheduleComparisonResult,
   reportDate: Date | string
 ): string {
   const dateStr = typeof reportDate === 'string' 
@@ -746,7 +774,7 @@ export function generateScheduleUpdateDraft(
   // Completed activities
   if (comparison.matches.length > 0) {
     draft += `## ✅ Completed Scheduled Activities (${comparison.matches.length})\n\n`;
-    comparison.matches.forEach((match: any, index: number) => {
+    comparison.matches.forEach((match: ScheduleMatch, index: number) => {
       draft += `${index + 1}. ${match.scheduled}`;
       if (match.location) {
         draft += ` - ${match.location}`;
@@ -759,12 +787,12 @@ export function generateScheduleUpdateDraft(
   // Missing/delayed activities
   if (comparison.missing.length > 0) {
     draft += `## ⚠️ Incomplete/Delayed Activities (${comparison.missing.length})\n\n`;
-    comparison.missing.forEach((missing: any, index: number) => {
-      draft += `${index + 1}. ${missing.activity}`;
-      if (missing.location) {
-        draft += ` - ${missing.location}`;
+    comparison.missing.forEach((item: ScheduleMissing, index: number) => {
+      draft += `${index + 1}. ${item.activity}`;
+      if (item.location) {
+        draft += ` - ${item.location}`;
       }
-      draft += `\n   - Status: ${missing.reason}\n`;
+      draft += `\n   - Status: ${item.reason}\n`;
     });
     draft += '\n';
   }
@@ -772,10 +800,10 @@ export function generateScheduleUpdateDraft(
   // Unscheduled work
   if (comparison.extra.length > 0) {
     draft += `## 🔧 Additional Unscheduled Work (${comparison.extra.length})\n\n`;
-    comparison.extra.forEach((extra: any, index: number) => {
-      draft += `${index + 1}. ${extra.activity}`;
-      if (extra.location) {
-        draft += ` - ${extra.location}`;
+    comparison.extra.forEach((item: ScheduleExtra, index: number) => {
+      draft += `${index + 1}. ${item.activity}`;
+      if (item.location) {
+        draft += ` - ${item.location}`;
       }
       draft += '\n';
     });

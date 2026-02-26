@@ -194,7 +194,7 @@ export default function SpatialCorrelationPage() {
                     className="bg-dark-surface border-gray-600 text-white"
                   />
                   <p className="text-xs text-gray-400 mt-1">
-                    Examples: "Grid A-3", "Room 101", "Northeast corner"
+                    Examples: &quot;Grid A-3&quot;, &quot;Room 101&quot;, &quot;Northeast corner&quot;
                   </p>
                 </div>
 
@@ -290,7 +290,7 @@ export default function SpatialCorrelationPage() {
                 <div className="text-center py-12">
                   <Map className="h-12 w-12 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400">
-                    Enter a location and click "Search Across Sheets" to find matching sheets
+                    Enter a location and click &quot;Search Across Sheets&quot; to find matching sheets
                   </p>
                 </div>
               ) : (

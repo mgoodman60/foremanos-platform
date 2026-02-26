@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 import { suggestDocumentCategory } from '@/lib/document-categorizer';
-import { safeErrorMessage } from '@/lib/api-error';
+
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('DOCUMENTS_SUGGEST_CATEGORY');
 

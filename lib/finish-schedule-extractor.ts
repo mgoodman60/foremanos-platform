@@ -151,7 +151,7 @@ export async function extractFinishSchedules(
 
   // Use LLM to extract structured finish schedule data
   // Process rooms in batches to get better coverage (LLM handles ~20-25 rooms well per call)
-  const allRoomNumbers = project.Room.map((r: any) => r.roomNumber);
+  const allRoomNumbers = project.Room.map((r) => r.roomNumber).filter((n): n is string => n !== null);
   const BATCH_SIZE = 25;
   const allFinishSchedules: FinishScheduleEntry[] = [];
   
@@ -185,7 +185,7 @@ export async function extractFinishSchedules(
   let totalFinishes = 0;
 
   for (const schedule of finishSchedules) {
-    const room = project.Room.find((r: any) => r.roomNumber === schedule.roomNumber);
+    const room = project.Room.find((r) => r.roomNumber === schedule.roomNumber);
     
     if (room) {
       // Create finish schedule items with legend enrichment

@@ -388,7 +388,7 @@ export default function ScheduleProgressRibbon({ projectSlug, compact = false, p
                   ) : (
                     <>
                       <FileText className="h-4 w-4 mr-2" />
-                      Parse "{doc.name}"
+                      Parse &quot;{doc.name}&quot;
                     </>
                   )}
                 </Button>

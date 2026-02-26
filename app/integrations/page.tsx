@@ -34,7 +34,7 @@ export default function IntegrationsPage() {
           <div className="bg-gray-800/50 rounded-lg p-12 border border-gray-700 text-center">
             <h2 className="text-3xl font-bold mb-6">Current and Planned Integrations</h2>
             <p className="text-xl text-gray-300 mb-8">
-              OneDrive sync is live. We're building integrations with popular construction and accounting tools based on customer requests:
+              OneDrive sync is live. We&apos;re building integrations with popular construction and accounting tools based on customer requests:
             </p>
             
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">

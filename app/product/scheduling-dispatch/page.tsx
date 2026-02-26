@@ -57,7 +57,7 @@ export default function SchedulingDispatchPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Three-Week Look-Aheads</h3>
-              <p className="text-gray-300">Generate look-ahead schedules for subcontractor coordination meetings. Everyone sees what's coming up, what's behind, and what needs to happen this week to stay on track.</p>
+              <p className="text-gray-300">Generate look-ahead schedules for subcontractor coordination meetings. Everyone sees what&apos;s coming up, what&apos;s behind, and what needs to happen this week to stay on track.</p>
             </div>
           </div>
         </div>

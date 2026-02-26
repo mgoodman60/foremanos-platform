@@ -579,7 +579,7 @@ export default function IsometricViewPage() {
                   <Card className="p-3 bg-dark-surface border-gray-700">
                     <div className="text-xs text-gray-400 mb-1">Z Range (Elevation)</div>
                     <div className="text-sm font-medium text-white">
-                      {model3D.bounds.minZ.toFixed(1)}' → {model3D.bounds.maxZ.toFixed(1)}'
+                      {model3D.bounds.minZ.toFixed(1)}&apos; → {model3D.bounds.maxZ.toFixed(1)}&apos;
                     </div>
                   </Card>
                 </div>
@@ -606,13 +606,13 @@ export default function IsometricViewPage() {
                               <div>
                                 <span className="text-gray-400">Length: </span>
                                 <span className="text-white font-medium">
-                                  {path.totalLength}'
+                                  {path.totalLength}&apos;
                                 </span>
                               </div>
                               <div>
                                 <span className="text-gray-400">Elevation Δ: </span>
                                 <span className="text-cyan-400 font-medium">
-                                  {path.elevationChange}'
+                                  {path.elevationChange}&apos;
                                 </span>
                               </div>
                             </div>
@@ -630,7 +630,7 @@ export default function IsometricViewPage() {
               <Card className="p-12 bg-dark-card border-gray-700 text-center">
                 <Box className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                 <p className="text-gray-400 mb-2">
-                  Select a sheet and click "Generate Isometric View" to create a 3D visualization
+                  Select a sheet and click &quot;Generate Isometric View&quot; to create a 3D visualization
                 </p>
                 <p className="text-xs text-gray-500">
                   MEP plan sheets will be analyzed and converted into isometric representations

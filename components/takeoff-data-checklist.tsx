@@ -20,16 +20,52 @@ import {
   RefreshCw,
   ArrowRight
 } from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
+/** Shape of a document returned from /api/projects/:slug/documents */
+interface ProjectDocument {
+  name?: string;
+  category?: string;
+  [key: string]: unknown;
+}
+
+/** Shape of a takeoff line item from /api/projects/:slug/takeoffs */
+interface TakeoffLineItem {
+  category?: string;
+  itemName?: string;
+  unitCost?: number;
+  [key: string]: unknown;
+}
+
+/** Shape of a takeoff containing line items */
+interface TakeoffData {
+  lineItems?: TakeoffLineItem[];
+  [key: string]: unknown;
+}
+
+/** Shape of MEP extraction response */
+interface MEPResponse {
+  exists: boolean;
+  electrical?: { itemCount?: number; total?: number };
+  plumbing?: { itemCount?: number; total?: number };
+  hvac?: { itemCount?: number; total?: number };
+}
+
+/** Shape of budget response */
+interface BudgetResponse {
+  items?: unknown[];
+  budgetItems?: unknown[];
+}
+
 interface DataRequirement {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   category: 'documents' | 'structural' | 'mep' | 'sitework' | 'pricing';
   status: 'available' | 'partial' | 'missing' | 'loading';
   count?: number;
@@ -71,50 +107,50 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
       ]);
 
       // Parse responses
-      const docs = documentsRes.status === 'fulfilled' && documentsRes.value.ok 
+      const docs: { documents: ProjectDocument[] } = documentsRes.status === 'fulfilled' && documentsRes.value.ok
         ? await documentsRes.value.json() : { documents: [] };
-      const takeoffs = takeoffsRes.status === 'fulfilled' && takeoffsRes.value.ok
+      const takeoffs: { takeoffs: TakeoffData[] } = takeoffsRes.status === 'fulfilled' && takeoffsRes.value.ok
         ? await takeoffsRes.value.json() : { takeoffs: [] };
-      const mep = mepRes.status === 'fulfilled' && mepRes.value.ok
+      const mep: MEPResponse = mepRes.status === 'fulfilled' && mepRes.value.ok
         ? await mepRes.value.json() : { exists: false };
-      const budget = budgetRes.status === 'fulfilled' && budgetRes.value.ok
+      const budget: BudgetResponse = budgetRes.status === 'fulfilled' && budgetRes.value.ok
         ? await budgetRes.value.json() : { items: [] };
       const _equipment = equipmentRes.status === 'fulfilled' && equipmentRes.value.ok
         ? await equipmentRes.value.json() : { equipment: [] };
 
       // Categorize documents
-      const documents = docs.documents || [];
-      const planDocs = documents.filter((d: any) => 
-        ['plan', 'drawing', 'floor', 'sheet', 'elevation', 'section'].some(k => 
+      const documents: ProjectDocument[] = docs.documents || [];
+      const planDocs = documents.filter((d: ProjectDocument) =>
+        ['plan', 'drawing', 'floor', 'sheet', 'elevation', 'section'].some(k =>
           d.name?.toLowerCase().includes(k) || d.category?.toLowerCase().includes(k)
         )
       );
-      const specDocs = documents.filter((d: any) => 
+      const specDocs = documents.filter((d: ProjectDocument) =>
         ['spec', 'specification', 'technical'].some(k => d.name?.toLowerCase().includes(k))
       );
-      const _scheduleDocs = documents.filter((d: any) => 
+      const _scheduleDocs = documents.filter((d: ProjectDocument) =>
         ['schedule', 'timeline', 'phase'].some(k => d.name?.toLowerCase().includes(k))
       );
 
       // Calculate takeoff items by category
-      const allLineItems = takeoffs.takeoffs?.flatMap((t: any) => t.lineItems || []) || [];
-      const structuralItems = allLineItems.filter((i: any) => 
-        ['concrete', 'steel', 'masonry', 'lumber', 'wood', 'structural', 'foundation', 'footing', 'slab', 'beam', 'column'].some(k => 
+      const allLineItems: TakeoffLineItem[] = takeoffs.takeoffs?.flatMap((t: TakeoffData) => t.lineItems || []) || [];
+      const structuralItems = allLineItems.filter((i: TakeoffLineItem) =>
+        ['concrete', 'steel', 'masonry', 'lumber', 'wood', 'structural', 'foundation', 'footing', 'slab', 'beam', 'column'].some(k =>
           i.category?.toLowerCase().includes(k) || i.itemName?.toLowerCase().includes(k)
         )
       );
-      const mepItems = allLineItems.filter((i: any) => 
-        ['electrical', 'plumbing', 'hvac', 'mechanical', 'pipe', 'duct', 'conduit', 'wire'].some(k => 
+      const mepItems = allLineItems.filter((i: TakeoffLineItem) =>
+        ['electrical', 'plumbing', 'hvac', 'mechanical', 'pipe', 'duct', 'conduit', 'wire'].some(k =>
           i.category?.toLowerCase().includes(k) || i.itemName?.toLowerCase().includes(k)
         )
       );
-      const finishItems = allLineItems.filter((i: any) => 
-        ['drywall', 'flooring', 'painting', 'finish', 'ceiling', 'trim', 'door', 'window'].some(k => 
+      const finishItems = allLineItems.filter((i: TakeoffLineItem) =>
+        ['drywall', 'flooring', 'painting', 'finish', 'ceiling', 'trim', 'door', 'window'].some(k =>
           i.category?.toLowerCase().includes(k) || i.itemName?.toLowerCase().includes(k)
         )
       );
-      const siteworkItems = allLineItems.filter((i: any) => 
-        ['earthwork', 'grading', 'paving', 'concrete', 'landscape', 'site', 'excavation'].some(k => 
+      const siteworkItems = allLineItems.filter((i: TakeoffLineItem) =>
+        ['earthwork', 'grading', 'paving', 'concrete', 'landscape', 'site', 'excavation'].some(k =>
           i.category?.toLowerCase().includes(k) || i.itemName?.toLowerCase().includes(k)
         )
       );
@@ -185,8 +221,8 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
           description: 'Panels, circuits, outlets, lighting',
           icon: Zap,
           category: 'mep',
-          status: (mep.electrical?.itemCount || 0) > 0 ? 'available' : mepItems.some((i: any) => i.category?.toLowerCase().includes('electrical')) ? 'partial' : 'missing',
-          count: mep.electrical?.itemCount || mepItems.filter((i: any) => i.category?.toLowerCase().includes('electrical')).length,
+          status: (mep.electrical?.itemCount || 0) > 0 ? 'available' : mepItems.some((i: TakeoffLineItem) => i.category?.toLowerCase().includes('electrical')) ? 'partial' : 'missing',
+          count: mep.electrical?.itemCount || mepItems.filter((i: TakeoffLineItem) => i.category?.toLowerCase().includes('electrical')).length,
           details: (mep.electrical?.itemCount || 0) > 0
             ? `${mep.electrical?.itemCount} electrical item(s) - $${(mep.electrical?.total || 0).toLocaleString()}`
             : 'Run MEP extraction for electrical data',
@@ -201,8 +237,8 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
           description: 'Pipes, fixtures, water heaters, drains',
           icon: Droplets,
           category: 'mep',
-          status: (mep.plumbing?.itemCount || 0) > 0 ? 'available' : mepItems.some((i: any) => i.category?.toLowerCase().includes('plumbing')) ? 'partial' : 'missing',
-          count: mep.plumbing?.itemCount || mepItems.filter((i: any) => i.category?.toLowerCase().includes('plumbing')).length,
+          status: (mep.plumbing?.itemCount || 0) > 0 ? 'available' : mepItems.some((i: TakeoffLineItem) => i.category?.toLowerCase().includes('plumbing')) ? 'partial' : 'missing',
+          count: mep.plumbing?.itemCount || mepItems.filter((i: TakeoffLineItem) => i.category?.toLowerCase().includes('plumbing')).length,
           details: (mep.plumbing?.itemCount || 0) > 0
             ? `${mep.plumbing?.itemCount} plumbing item(s) - $${(mep.plumbing?.total || 0).toLocaleString()}`
             : 'Run MEP extraction for plumbing data',
@@ -217,8 +253,8 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
           description: 'Ductwork, equipment, controls',
           icon: Wind,
           category: 'mep',
-          status: (mep.hvac?.itemCount || 0) > 0 ? 'available' : mepItems.some((i: any) => i.category?.toLowerCase().includes('hvac')) ? 'partial' : 'missing',
-          count: mep.hvac?.itemCount || mepItems.filter((i: any) => i.category?.toLowerCase().includes('hvac')).length,
+          status: (mep.hvac?.itemCount || 0) > 0 ? 'available' : mepItems.some((i: TakeoffLineItem) => i.category?.toLowerCase().includes('hvac')) ? 'partial' : 'missing',
+          count: mep.hvac?.itemCount || mepItems.filter((i: TakeoffLineItem) => i.category?.toLowerCase().includes('hvac')).length,
           details: (mep.hvac?.itemCount || 0) > 0
             ? `${mep.hvac?.itemCount} HVAC item(s) - $${(mep.hvac?.total || 0).toLocaleString()}`
             : 'Run MEP extraction for HVAC data',
@@ -251,10 +287,10 @@ export function TakeoffDataChecklist({ projectSlug, onTriggerExtraction }: Takeo
           description: 'Material costs, labor rates, regional factors',
           icon: Calculator,
           category: 'pricing',
-          status: allLineItems.some((i: any) => i.unitCost && i.unitCost > 0) ? 'available' : 'partial',
-          count: allLineItems.filter((i: any) => i.unitCost && i.unitCost > 0).length,
-          details: allLineItems.filter((i: any) => i.unitCost > 0).length > 0
-            ? `${allLineItems.filter((i: any) => i.unitCost > 0).length}/${allLineItems.length} items have prices`
+          status: allLineItems.some((i: TakeoffLineItem) => i.unitCost && i.unitCost > 0) ? 'available' : 'partial',
+          count: allLineItems.filter((i: TakeoffLineItem) => i.unitCost && i.unitCost > 0).length,
+          details: allLineItems.filter((i: TakeoffLineItem) => (i.unitCost ?? 0) > 0).length > 0
+            ? `${allLineItems.filter((i: TakeoffLineItem) => (i.unitCost ?? 0) > 0).length}/${allLineItems.length} items have prices`
             : 'Click Auto-Calculate to apply CSI pricing database',
           action: {
             label: 'Auto-Calculate Prices',

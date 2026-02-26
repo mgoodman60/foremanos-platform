@@ -52,12 +52,12 @@ export default function FormsChecklistsPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Real-Time Visibility for PMs</h3>
-              <p className="text-gray-300">See completed forms the moment they're submitted. Know which safety checks are done, which inspections passed, and which punch list items are still open -- without calling the field.</p>
+              <p className="text-gray-300">See completed forms the moment they&apos;re submitted. Know which safety checks are done, which inspections passed, and which punch list items are still open -- without calling the field.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Inspection-Ready Documentation</h3>
-              <p className="text-gray-300">When the inspector asks for your pre-pour checklist or your safety meeting sign-in, it's already in the system. Organized, timestamped, and searchable. No scrambling through binders.</p>
+              <p className="text-gray-300">When the inspector asks for your pre-pour checklist or your safety meeting sign-in, it&apos;s already in the system. Organized, timestamped, and searchable. No scrambling through binders.</p>
             </div>
           </div>
         </div>

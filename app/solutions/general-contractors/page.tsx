@@ -43,11 +43,11 @@ export default function GeneralContractorsPage() {
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Budget Surprises at the Worst Time</h3>
-              <p className="text-gray-300">Change orders pile up, pay apps don't match the SOV, and you don't see the overrun until the draw meeting. Tracking costs across 15 subs in spreadsheets is a full-time job.</p>
+              <p className="text-gray-300">Change orders pile up, pay apps don&apos;t match the SOV, and you don&apos;t see the overrun until the draw meeting. Tracking costs across 15 subs in spreadsheets is a full-time job.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
-              <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Schedule Slippage You Can't See Coming</h3>
-              <p className="text-gray-300">The drywall crew shows up but framing isn't signed off. Critical path delays cascade because nobody caught the conflict two weeks ago.</p>
+              <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Schedule Slippage You Can&apos;t See Coming</h3>
+              <p className="text-gray-300">The drywall crew shows up but framing isn&apos;t signed off. Critical path delays cascade because nobody caught the conflict two weeks ago.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Too Many Subs, Not Enough Visibility</h3>
@@ -65,12 +65,12 @@ export default function GeneralContractorsPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Ask Your Plans Anything</h3>
-              <p className="text-gray-300">"What's the finish schedule for the lobby?" or "Show me the A/E parking requirements." AI reads your uploaded plans and specs, then answers with cited page references.</p>
+              <p className="text-gray-300">&quot;What&apos;s the finish schedule for the lobby?&quot; or &quot;Show me the A/E parking requirements.&quot; AI reads your uploaded plans and specs, then answers with cited page references.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Budget and Cost Tracking</h3>
-              <p className="text-gray-300">Track budgets by CSI division, log change orders, manage pay applications, and see cost variance in real time. No more waiting until the draw meeting to find out you're over.</p>
+              <p className="text-gray-300">Track budgets by CSI division, log change orders, manage pay applications, and see cost variance in real time. No more waiting until the draw meeting to find out you&apos;re over.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
@@ -97,7 +97,7 @@ export default function GeneralContractorsPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Schedule and Critical Path Tracking</h3>
-                <p className="text-gray-300">Gantt charts, look-ahead schedules, and weather-adjusted timelines. See where you're behind before the weekly OAC meeting, not after.</p>
+                <p className="text-gray-300">Gantt charts, look-ahead schedules, and weather-adjusted timelines. See where you&apos;re behind before the weekly OAC meeting, not after.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">

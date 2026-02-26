@@ -260,7 +260,7 @@ export default function ScaleManager({ projectSlug }: ScaleManagerProps) {
           <Ruler className="h-12 w-12 text-gray-600 mx-auto mb-3" aria-hidden="true" />
           <p className="text-gray-400 mb-2">No scales found</p>
           <p className="text-sm text-gray-400 mb-4">
-            Click "Extract Scales" to analyze your drawings
+            Click &quot;Extract Scales&quot; to analyze your drawings
           </p>
         </div>
       ) : (

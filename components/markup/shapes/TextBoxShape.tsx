@@ -24,6 +24,16 @@ export function TextBoxShape({
   const [_isEditing, setIsEditing] = useState(false);
   const _textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const handleClick = useCallback(() => {
+    onSelect(markup.id);
+  }, [onSelect, markup.id]);
+
+  const handleDoubleClick = useCallback(() => {
+    setIsEditing(true);
+    // In a full implementation, create a textarea overlay
+    // For now, just toggle editing state
+  }, []);
+
   if (
     geometry.x == null ||
     geometry.y == null ||
@@ -36,16 +46,6 @@ export function TextBoxShape({
   const topLeft = pdfToKonva(geometry.x, geometry.y + geometry.height, pageHeight, scale);
   const width = geometry.width * scale;
   const height = geometry.height * scale;
-
-  const handleClick = useCallback(() => {
-    onSelect(markup.id);
-  }, [onSelect, markup.id]);
-
-  const handleDoubleClick = useCallback(() => {
-    setIsEditing(true);
-    // In a full implementation, create a textarea overlay
-    // For now, just toggle editing state
-  }, []);
 
   const fontSize = (style.fontSize ?? 12) * scale;
   const fontFamily = style.fontFamily ?? 'Arial';

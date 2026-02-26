@@ -26,7 +26,7 @@ export default function SiteWorkPage() {
               Grading Elevations, Utility Layouts, and Drainage Details -- from Your Civil Plans in Seconds
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-              Upload your C-sheets and ask "What's the invert elevation at MH-3?" or "Show me the storm drain routing." AI reads your grading and utility plans and answers with cited sheet references.
+              Upload your C-sheets and ask &quot;What&apos;s the invert elevation at MH-3?&quot; or &quot;Show me the storm drain routing.&quot; AI reads your grading and utility plans and answers with cited sheet references.
             </p>
           </div>
         </div>
@@ -65,12 +65,12 @@ export default function SiteWorkPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Elevation and Grading Extraction</h3>
-              <p className="text-gray-300">Ask "What's the finish grade at building pad A?" or "What's the slope from MH-1 to MH-3?" AI reads your grading plans, profiles, and civil sheets, then answers with cited sheet references.</p>
+              <p className="text-gray-300">Ask &quot;What&apos;s the finish grade at building pad A?&quot; or &quot;What&apos;s the slope from MH-1 to MH-3?&quot; AI reads your grading plans, profiles, and civil sheets, then answers with cited sheet references.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">Cross-Discipline Utility Search</h3>
-              <p className="text-gray-300">Ask "Show me all utilities at station 15+00." ForemanOS searches across civil, grading, and utility sheets to show storm, sanitary, water, and electric in one answer. Catch conflicts before you trench.</p>
+              <p className="text-gray-300">Ask &quot;Show me all utilities at station 15+00.&quot; ForemanOS searches across civil, grading, and utility sheets to show storm, sanitary, water, and electric in one answer. Catch conflicts before you trench.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
@@ -90,14 +90,14 @@ export default function SiteWorkPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Search Grading and Utility Plans Instantly</h3>
-                <p className="text-gray-300">"What's the invert elevation at the catch basin on grid D-7?" or "Where does the 8-inch storm line connect?" AI searches every uploaded C-sheet and returns answers with exact page references.</p>
+                <p className="text-gray-300">&quot;What&apos;s the invert elevation at the catch basin on grid D-7?&quot; or &quot;Where does the 8-inch storm line connect?&quot; AI searches every uploaded C-sheet and returns answers with exact page references.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">ADA Site Access Compliance</h3>
-                <p className="text-gray-300">Ask "What's the ADA maximum slope for an accessible route?" or "What's the required landing size at a ramp?" Get cited code answers to keep site access inspections on track.</p>
+                <p className="text-gray-300">Ask &quot;What&apos;s the ADA maximum slope for an accessible route?&quot; or &quot;What&apos;s the required landing size at a ramp?&quot; Get cited code answers to keep site access inspections on track.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -118,7 +118,7 @@ export default function SiteWorkPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Share Plans with Utility Subs and Surveyors</h3>
-                <p className="text-gray-300">Role-based access keeps everyone on the same plan revision. Excavation crews, utility subs, and the surveyor all see the current set. No more "which version is this?"</p>
+                <p className="text-gray-300">Role-based access keeps everyone on the same plan revision. Excavation crews, utility subs, and the surveyor all see the current set. No more &quot;which version is this?&quot;</p>
               </div>
             </div>
           </div>

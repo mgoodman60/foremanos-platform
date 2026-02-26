@@ -22,6 +22,10 @@ export function RectangleShape({
 }: RectangleShapeProps) {
   const { geometry, style } = markup;
 
+  const handleClick = useCallback(() => {
+    onSelect(markup.id);
+  }, [onSelect, markup.id]);
+
   if (
     geometry.x == null ||
     geometry.y == null ||
@@ -36,10 +40,6 @@ export function RectangleShape({
   const height = geometry.height * scale;
 
   const dashPattern = getDashPattern(style.lineStyle, style.strokeWidth);
-
-  const handleClick = useCallback(() => {
-    onSelect(markup.id);
-  }, [onSelect, markup.id]);
 
   return (
     <Rect

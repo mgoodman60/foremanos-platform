@@ -47,12 +47,12 @@ export default function QuotesClientsPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Budget vs. Actual by Cost Code</h3>
-              <p className="text-gray-300">See where you're over and where you're under by CSI division. Change orders, invoices, and pay applications update the budget in real time instead of sitting in a spreadsheet until month-end.</p>
+              <p className="text-gray-300">See where you&apos;re over and where you&apos;re under by CSI division. Change orders, invoices, and pay applications update the budget in real time instead of sitting in a spreadsheet until month-end.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold mb-3">Change Order Tracking</h3>
-              <p className="text-gray-300">Log change orders as they happen with cost impact, approval status, and supporting documentation. No more change orders that don't make it into the budget until the draw meeting.</p>
+              <p className="text-gray-300">Log change orders as they happen with cost impact, approval status, and supporting documentation. No more change orders that don&apos;t make it into the budget until the draw meeting.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-green-500 mb-4" />
@@ -86,7 +86,7 @@ export default function QuotesClientsPage() {
               <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold">3</div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">Report with Confidence</h3>
-                <p className="text-gray-300">Pull budget summaries for draw meetings, owner updates, or internal reviews. Data is always current because it's updated in real time, not reconstructed from spreadsheets.</p>
+                <p className="text-gray-300">Pull budget summaries for draw meetings, owner updates, or internal reviews. Data is always current because it&apos;s updated in real time, not reconstructed from spreadsheets.</p>
               </div>
             </div>
           </div>

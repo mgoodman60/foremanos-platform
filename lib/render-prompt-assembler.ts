@@ -45,6 +45,72 @@ export interface AssembledPrompt {
   };
 }
 
+// ── Metadata Shape Interfaces ──────────────────────────────────────────
+
+interface FacadeMaterial {
+  material?: string;
+  finish?: string;
+  location?: string;
+}
+
+interface RoofMetadata {
+  roofType?: string;
+  material?: string;
+  pitch?: string;
+}
+
+interface PlantEntry {
+  species?: string;
+  quantity?: number;
+}
+
+interface TreeEntry {
+  species?: string;
+  caliper?: string;
+  toRemain?: boolean;
+}
+
+interface HardscapeEntry {
+  type?: string;
+  material?: string;
+  finish?: string;
+}
+
+interface LandscapeData {
+  plantSchedule?: PlantEntry[];
+  existingTrees?: TreeEntry[];
+  hardscape?: HardscapeEntry[];
+}
+
+interface ExteriorElevationData {
+  facadeMaterials?: FacadeMaterial[];
+  windowPattern?: string;
+  storiesVisible?: number | string;
+}
+
+interface SpecialDrawingData {
+  exteriorElevation?: ExteriorElevationData;
+  roofData?: RoofMetadata;
+}
+
+interface VisualMaterialEntry {
+  material?: string;
+  locations?: string[];
+}
+
+interface ChunkMetadata {
+  specialDrawingData?: SpecialDrawingData;
+  siteAndConcrete?: { landscapeData?: LandscapeData };
+  visualMaterials?: VisualMaterialEntry[];
+  [key: string]: unknown;
+}
+
+interface VisionExtractedData {
+  facadeMaterials: Array<{ material: string; finish?: string; location?: string }>;
+  roofDetails: Array<{ type?: string; material?: string; pitch?: string }>;
+  landscaping: Array<{ species?: string; quantity?: number; type?: string; material?: string; finish?: string }>;
+}
+
 // ── Constants ──────────────────────────────────────────────────────────
 
 const MAX_PROMPT_LENGTH = 4000;
@@ -314,14 +380,14 @@ export async function gatherExteriorData(projectId: string): Promise<Record<stri
       take: 20,
     });
 
-    const visionExtractedData: Record<string, any> = {
+    const visionExtractedData: VisionExtractedData = {
       facadeMaterials: [],
       roofDetails: [],
       landscaping: [],
     };
 
     for (const chunk of chunks) {
-      const meta = chunk.metadata as Record<string, any> | null;
+      const meta = chunk.metadata as ChunkMetadata | null;
       if (!meta) continue;
 
       // Exterior elevation data
@@ -352,9 +418,9 @@ export async function gatherExteriorData(projectId: string): Promise<Record<stri
       const landscape = meta.siteAndConcrete?.landscapeData;
       if (landscape) {
         if (landscape.plantSchedule && Array.isArray(landscape.plantSchedule)) {
-          const plants = landscape.plantSchedule
-            .filter((p: any) => p.species)
-            .map((p: any) => ({ species: p.species, quantity: p.quantity }));
+          const plants = (landscape.plantSchedule as PlantEntry[])
+            .filter((p) => p.species)
+            .map((p) => ({ species: p.species, quantity: p.quantity }));
           visionExtractedData.landscaping.push(...plants);
         }
         if (landscape.hardscape && Array.isArray(landscape.hardscape)) {
@@ -390,15 +456,15 @@ export async function gatherExteriorData(projectId: string): Promise<Record<stri
     // Pull structured extraction data from document metadata to fill in missing fields
     try {
       for (const chunk of chunks) {
-        const meta = chunk.metadata as Record<string, any> | null;
+        const meta = chunk.metadata as ChunkMetadata | null;
         if (!meta) continue;
 
         // Exterior elevation data → facade description
         const elevData = meta.specialDrawingData?.exteriorElevation;
         if (elevData) {
-          if (elevData.facadeMaterials?.length > 0 && !fields.exteriorMaterials) {
+          if (elevData.facadeMaterials && elevData.facadeMaterials.length > 0 && !fields.exteriorMaterials) {
             const facadeMaterialsText = elevData.facadeMaterials
-              .map((f: any) => `${f.material}${f.location ? ` (${f.location})` : ''}`)
+              .map((f: FacadeMaterial) => `${f.material}${f.location ? ` (${f.location})` : ''}`)
               .join('; ');
             fields.exteriorMaterials = facadeMaterialsText;
           }
@@ -425,25 +491,25 @@ export async function gatherExteriorData(projectId: string): Promise<Record<stri
         const landscape = meta.siteAndConcrete?.landscapeData;
         if (landscape && !fields.landscapingNotes) {
           const landscapeParts: string[] = [];
-          if (landscape.plantSchedule?.length > 0) {
-            const plants = landscape.plantSchedule
-              .filter((p: any) => p.species)
+          if (landscape.plantSchedule && landscape.plantSchedule.length > 0) {
+            const plants = (landscape.plantSchedule as PlantEntry[])
+              .filter((p) => p.species)
               .slice(0, 5)
-              .map((p: any) => p.species);
+              .map((p) => p.species);
             if (plants.length > 0) landscapeParts.push(`Plants: ${plants.join(', ')}`);
           }
-          if (landscape.existingTrees?.length > 0) {
-            const trees = landscape.existingTrees
-              .filter((t: any) => t.species)
+          if (landscape.existingTrees && landscape.existingTrees.length > 0) {
+            const trees = (landscape.existingTrees as TreeEntry[])
+              .filter((t) => t.species)
               .slice(0, 3)
-              .map((t: any) => t.species);
+              .map((t) => t.species);
             if (trees.length > 0) landscapeParts.push(`Trees: ${trees.join(', ')}`);
           }
-          if (landscape.hardscape?.length > 0) {
-            const hard = landscape.hardscape
-              .filter((h: any) => h.material)
+          if (landscape.hardscape && landscape.hardscape.length > 0) {
+            const hard = (landscape.hardscape as HardscapeEntry[])
+              .filter((h) => h.material)
               .slice(0, 3)
-              .map((h: any) => `${h.type || 'surface'}: ${h.material}`);
+              .map((h) => `${h.type || 'surface'}: ${h.material}`);
             if (hard.length > 0) landscapeParts.push(hard.join(', '));
           }
           if (landscapeParts.length > 0) {
@@ -574,13 +640,13 @@ export async function extractColorFinishFromChunks(projectId: string, roomName?:
 
     // Also extract structured data from vision metadata
     for (const chunk of chunks) {
-      const meta = chunk.metadata as Record<string, any> | null;
+      const meta = chunk.metadata as ChunkMetadata | null;
       if (!meta) continue;
 
       // Visual materials (from hatching analysis)
       if (meta.visualMaterials && Array.isArray(meta.visualMaterials)) {
         for (const vm of meta.visualMaterials) {
-          if (vm.material && vm.locations?.length > 0) {
+          if (vm.material && vm.locations && vm.locations.length > 0) {
             colorInfo.push(`${vm.material} (${vm.locations.join(', ')})`);
           }
         }
@@ -609,18 +675,18 @@ export async function extractColorFinishFromChunks(projectId: string, roomName?:
       const landscape = meta.siteAndConcrete?.landscapeData;
       if (landscape) {
         if (landscape.plantSchedule && Array.isArray(landscape.plantSchedule)) {
-          const plantNames = landscape.plantSchedule
-            .filter((p: any) => p.species)
-            .map((p: any) => p.species)
+          const plantNames = (landscape.plantSchedule as PlantEntry[])
+            .filter((p) => p.species)
+            .map((p) => p.species)
             .slice(0, 5);
           if (plantNames.length > 0) {
             colorInfo.push(`Landscaping: ${plantNames.join(', ')}`);
           }
         }
         if (landscape.existingTrees && Array.isArray(landscape.existingTrees)) {
-          const treeNames = landscape.existingTrees
-            .filter((t: any) => t.species && t.toRemain)
-            .map((t: any) => `${t.species}${t.caliper ? ` (${t.caliper})` : ''}`)
+          const treeNames = (landscape.existingTrees as TreeEntry[])
+            .filter((t) => t.species && t.toRemain)
+            .map((t) => `${t.species}${t.caliper ? ` (${t.caliper})` : ''}`)
             .slice(0, 5);
           if (treeNames.length > 0) {
             colorInfo.push(`Existing trees: ${treeNames.join(', ')}`);

@@ -26,7 +26,7 @@ export default function ConstructionManagersPage() {
               Complete Project Visibility, Across Every Trade
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto">
-              Track schedule variance, monitor budgets, and answer owner questions in real time. AI-powered dashboards and document intelligence purpose-built for construction managers and owner's reps.
+              Track schedule variance, monitor budgets, and answer owner questions in real time. AI-powered dashboards and document intelligence purpose-built for construction managers and owner&apos;s reps.
             </p>
           </div>
         </div>
@@ -39,11 +39,11 @@ export default function ConstructionManagersPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Owner Asks a Question, You Need an Hour</h3>
-              <p className="text-gray-300">"Where are we on budget?" "What's the schedule variance?" You shouldn't have to dig through three spreadsheets and call two PMs to answer a basic status question.</p>
+              <p className="text-gray-300">&quot;Where are we on budget?&quot; &quot;What&apos;s the schedule variance?&quot; You shouldn&apos;t have to dig through three spreadsheets and call two PMs to answer a basic status question.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Multi-Project Blind Spots</h3>
-              <p className="text-gray-300">Managing four projects across different GCs, each with their own filing system. You can't compare performance metrics or spot which job is trending over budget.</p>
+              <p className="text-gray-300">Managing four projects across different GCs, each with their own filing system. You can&apos;t compare performance metrics or spot which job is trending over budget.</p>
             </div>
             <div className="bg-red-900/20 rounded-lg p-6 border border-red-700/50">
               <h3 className="text-xl font-semibold mb-3 text-red-400">❌ Trade Coordination Bottlenecks</h3>
@@ -70,7 +70,7 @@ export default function ConstructionManagersPage() {
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
               <h3 className="text-xl font-semibold mb-3">AI Document Chat Across All Docs</h3>
-              <p className="text-gray-300">Ask "What's the curtain wall spec?" or "Show me the MEP rough-in schedule." AI searches plans, specs, RFIs, and submittals, then answers with cited page references.</p>
+              <p className="text-gray-300">Ask &quot;What&apos;s the curtain wall spec?&quot; or &quot;Show me the MEP rough-in schedule.&quot; AI searches plans, specs, RFIs, and submittals, then answers with cited page references.</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
               <CheckCircle className="w-10 h-10 text-[#F97316] mb-4" />
@@ -84,7 +84,7 @@ export default function ConstructionManagersPage() {
       {/* Features for Construction Managers */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-900/50">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Built for the CM and Owner's Rep Workflow</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Built for the CM and Owner&apos;s Rep Workflow</h2>
           <div className="space-y-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
@@ -111,14 +111,14 @@ export default function ConstructionManagersPage() {
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">OneDrive Integration</h3>
-                <p className="text-gray-300">One source of truth. Sync documents from OneDrive so owners, trades, and inspectors all work from the latest revision. No more "which version is current?"</p>
+                <p className="text-gray-300">One source of truth. Sync documents from OneDrive so owners, trades, and inspectors all work from the latest revision. No more &quot;which version is current?&quot;</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-2 h-2 bg-[#F97316] rounded-full mt-2"></div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Mobile Access for Site Walks</h3>
-                <p className="text-gray-300">Pull up any document, check field photos, or review punch list items from your phone during walk-throughs. Answer owner questions on the spot instead of "I'll get back to you."</p>
+                <p className="text-gray-300">Pull up any document, check field photos, or review punch list items from your phone during walk-throughs. Answer owner questions on the spot instead of &quot;I&apos;ll get back to you.&quot;</p>
               </div>
             </div>
           </div>
