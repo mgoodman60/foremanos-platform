@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Building2, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -100,7 +100,7 @@ export function FloorPlanViewer({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showRoomModal, setShowRoomModal] = useState(false);
@@ -301,9 +301,9 @@ export function FloorPlanViewer({
     return rooms.filter(room => String(room.floorNumber) === currentFloorPlan.floor);
   }, [rooms, currentFloorPlan, selectedFloor]);
 
-  const roomsWithHotspots = floorRooms.filter(
+  const roomsWithHotspots = useMemo(() => floorRooms.filter(
     room => room.hotspotX !== undefined && room.hotspotY !== undefined
-  );
+  ), [floorRooms]);
 
   const gridLayout = useMemo(() => {
     const totalRooms = floorRooms.length;
@@ -319,33 +319,37 @@ export function FloorPlanViewer({
   const showAutoGrid = !imageUrl && !hasPlanDocuments && !hasDwg;
 
   // Zoom handlers
-  const handleZoomIn = () => setZoom(z => Math.min(z * 1.2, 4));
-  const handleZoomOut = () => setZoom(z => Math.max(z / 1.2, 0.5));
-  const handleReset = () => {
+  const handleZoomIn = useCallback(() => setZoom(z => Math.min(z * 1.2, 4)), []);
+  const handleZoomOut = useCallback(() => setZoom(z => Math.max(z / 1.2, 0.5)), []);
+  const handleReset = useCallback(() => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
-  };
+  }, []);
 
   // Pan (drag) handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsDragging(true);
-    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-  };
+    dragStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+  }, [pan]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging) return;
-    setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
-  };
+    setPan({ x: e.clientX - dragStartRef.current.x, y: e.clientY - dragStartRef.current.y });
+  }, [isDragging]);
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
 
   // Room interaction
-  const handleRoomClick = (room: Room) => {
+  const handleRoomClick = useCallback((room: Room) => {
     setSelectedRoom(room);
     setShowRoomModal(true);
     onRoomSelect?.(room);
-  };
+  }, [onRoomSelect]);
+
+  // Toolbar toggle handlers
+  const handleCollapseToggle = useCallback(() => setIsCollapsed(prev => !prev), []);
+  const handleProgressToggle = useCallback(() => setShowProgressOverlay(prev => !prev), []);
 
   const handleSaveRoom = async (editedRoom: Partial<Room>) => {
     if (!selectedRoom) return;
@@ -413,11 +417,11 @@ export function FloorPlanViewer({
         showProgressOverlay={showProgressOverlay}
         expanded={expanded}
         onToggleExpand={onToggleExpand}
-        onCollapseToggle={() => setIsCollapsed(!isCollapsed)}
+        onCollapseToggle={handleCollapseToggle}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onReset={handleReset}
-        onProgressToggle={() => setShowProgressOverlay(!showProgressOverlay)}
+        onProgressToggle={handleProgressToggle}
         onNavigateFloor={navigateFloorPlan}
         onNavigateDocument={navigateDocument}
       />

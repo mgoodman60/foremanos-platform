@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { ImagePlus, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -83,12 +84,12 @@ export function RenderStep4Photos({
                   aria-pressed={selected}
                   aria-label={photo.caption ? `Select ${photo.caption}` : `Select photo`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={photo.url}
                     alt={photo.caption ?? 'Project photo'}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
+                    fill
+                    unoptimized
+                    className="object-cover"
                   />
                   {selected && (
                     <div className="absolute inset-0 flex items-center justify-center bg-primary/30">

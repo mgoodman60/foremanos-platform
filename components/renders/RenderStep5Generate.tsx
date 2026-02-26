@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Loader2, Download, RefreshCw, Check, AlertTriangle, ArrowLeft, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -225,12 +226,13 @@ export function RenderStep5Generate({
   if (stage === 'completed' && imageUrl) {
     return (
       <div className="space-y-6">
-        <div className="overflow-hidden rounded-lg border">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <div className="relative aspect-video overflow-hidden rounded-lg border">
+          <Image
             src={imageUrl}
             alt="Generated render"
-            className="w-full object-contain"
+            fill
+            unoptimized
+            className="object-contain"
           />
         </div>
 

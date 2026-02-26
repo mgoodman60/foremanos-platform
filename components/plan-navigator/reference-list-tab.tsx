@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   ArrowRight,
   ChevronDown,
@@ -24,7 +25,7 @@ interface ReferenceListTabProps {
   generateReferenceSummary: (ref: DocumentReference) => string;
 }
 
-export function ReferenceListTab({
+export const ReferenceListTab = React.memo(function ReferenceListTab({
   filteredRefs,
   expandedRefs,
   sheetPreviews,
@@ -190,4 +191,4 @@ export function ReferenceListTab({
       })}
     </div>
   );
-}
+});

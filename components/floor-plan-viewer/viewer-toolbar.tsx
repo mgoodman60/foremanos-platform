@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   ZoomIn,
   ZoomOut,
@@ -74,7 +75,7 @@ interface ViewerToolbarProps {
   onNavigateDocument: (direction: 'prev' | 'next') => void;
 }
 
-export function ViewerToolbar({
+export const ViewerToolbar = React.memo(function ViewerToolbar({
   imageUrl,
   showPlanDocument,
   showDwg,
@@ -283,4 +284,4 @@ export function ViewerToolbar({
       </div>
     </div>
   );
-}
+});

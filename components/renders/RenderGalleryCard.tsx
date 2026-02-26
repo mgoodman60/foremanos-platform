@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Building2, Home, Plane, Star, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -103,12 +104,12 @@ export function RenderGalleryCard({ render, onClick }: RenderGalleryCardProps) {
       {/* Thumbnail area */}
       <div className="relative aspect-video overflow-hidden">
         {render.thumbnailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={render.thumbnailUrl}
             alt={getAutoTitle(render)}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
+            fill
+            unoptimized
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 flex items-center justify-center">

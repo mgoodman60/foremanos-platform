@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface PageThumbnailNavProps {
   documentId: string;
@@ -66,18 +67,17 @@ export function PageThumbnailNav({ documentId, totalPages, currentPage, onPageCh
             key={pageNumber}
             data-page={pageNumber}
             className={`
-              relative cursor-pointer rounded border-2 transition-all
+              relative cursor-pointer rounded border-2 transition-all aspect-[8.5/11]
               ${isCurrent ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300 hover:border-gray-400'}
             `}
             onClick={() => onPageChange(pageNumber)}
           >
             {isLoaded ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={`/api/documents/${documentId}/page-image?pageNumber=${pageNumber}&zoom=0.2`}
                 alt={`Page ${pageNumber}`}
-                className="w-full h-auto"
-                loading="lazy"
+                fill
+                className="object-contain"
               />
             ) : (
               <div className="w-full aspect-[8.5/11] bg-gray-200 flex items-center justify-center">

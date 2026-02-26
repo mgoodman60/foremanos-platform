@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   X,
   Download,
@@ -31,7 +32,7 @@ interface BulkActionsToolbarProps {
   onToggleBulkAccessMenu: () => void;
 }
 
-export function BulkActionsToolbar({
+export const BulkActionsToolbar = React.memo(function BulkActionsToolbar({
   selectedCount,
   totalCount,
   bulkActionLoading,
@@ -133,7 +134,7 @@ export function BulkActionsToolbar({
       </div>
     </div>
   );
-}
+});
 
 // ─── Normal header (shown when no docs selected) ──────────────────────────────
 

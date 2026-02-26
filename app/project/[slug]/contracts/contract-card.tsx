@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -27,7 +28,7 @@ interface ContractCardProps {
   formatDate: (dateString: string) => string;
 }
 
-export function ContractCard({
+export const ContractCard = React.memo(function ContractCard({
   contract,
   onView,
   onStatusAction,
@@ -154,4 +155,4 @@ export function ContractCard({
       </div>
     </Card>
   );
-}
+});

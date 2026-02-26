@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Map,
@@ -36,6 +36,8 @@ interface PlanNavigatorProps {
   projectSlug: string;
   onClose?: () => void;
 }
+
+const DISCIPLINE_ORDER = ['General', 'Architectural', 'Structural', 'Civil', 'Electrical', 'Plumbing', 'Mechanical', 'Fire Protection', 'Other'];
 
 export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
   const { data: _session } = useSession() || {};
@@ -128,17 +130,22 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
   };
 
   // ── Interaction handlers ───────────────────────────────────────────────────
-  const toggleRefExpansion = async (refKey: string, sourceDocId: string, targetDocId: string) => {
-    const newExpanded = new Set(expandedRefs);
-    if (newExpanded.has(refKey)) {
-      newExpanded.delete(refKey);
-    } else {
-      newExpanded.add(refKey);
+  const toggleRefExpansion = useCallback(async (refKey: string, sourceDocId: string, targetDocId: string) => {
+    const wasExpanded = expandedRefs.has(refKey);
+    setExpandedRefs((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(refKey)) {
+        newSet.delete(refKey);
+      } else {
+        newSet.add(refKey);
+      }
+      return newSet;
+    });
+    if (!wasExpanded) {
       await loadSheetPreview(sourceDocId);
       await loadSheetPreview(targetDocId);
     }
-    setExpandedRefs(newExpanded);
-  };
+  }, [expandedRefs]);
 
   const loadSheetPreview = async (docId: string) => {
     if (sheetPreviews[docId] || loadingPreviews.has(docId)) return;
@@ -167,17 +174,16 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
     }
   };
 
-  const toggleDiscipline = (discipline: string) => {
-    const newExpanded = new Set(expandedDisciplines);
-    if (newExpanded.has(discipline)) {
-      newExpanded.delete(discipline);
-    } else {
-      newExpanded.add(discipline);
-    }
-    setExpandedDisciplines(newExpanded);
-  };
+  const toggleDiscipline = useCallback((discipline: string) => {
+    setExpandedDisciplines((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(discipline)) newSet.delete(discipline);
+      else newSet.add(discipline);
+      return newSet;
+    });
+  }, []);
 
-  const handleExtractCrossReferences = async () => {
+  const handleExtractCrossReferences = useCallback(async () => {
     try {
       setExtracting(true);
       toast.loading('Extracting cross-references from documents...', { id: 'extract-refs' });
@@ -208,19 +214,18 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
     } finally {
       setExtracting(false);
     }
-  };
+  }, [projectSlug]);
 
-  const toggleDoc = (docId: string) => {
-    const newExpanded = new Set(expandedDocs);
-    if (newExpanded.has(docId)) {
-      newExpanded.delete(docId);
-    } else {
-      newExpanded.add(docId);
-    }
-    setExpandedDocs(newExpanded);
-  };
+  const toggleDoc = useCallback((docId: string) => {
+    setExpandedDocs((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(docId)) newSet.delete(docId);
+      else newSet.add(docId);
+      return newSet;
+    });
+  }, []);
 
-  const handleJumpToDocument = async (docId: string, docName: string) => {
+  const handleJumpToDocument = useCallback(async (docId: string, docName: string) => {
     try {
       const response = await fetch(`/api/documents/${docId}`);
       if (response.ok) {
@@ -238,36 +243,10 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
       console.error('Error opening document:', error);
       toast.error(`Failed to open ${docName}`);
     }
-  };
-
-  const exportToCSV = () => {
-    const filtered = getFilteredReferences();
-
-    const header = ['Source Document', 'Target Document', 'Reference Type', 'Location', 'Context'].join(',');
-    const rows = filtered.map(ref => [
-      `"${ref.sourceDoc?.name || 'Unknown'}"`,
-      `"${ref.targetDoc?.name || 'Unknown'}"`,
-      ref.referenceType,
-      `"${ref.location}"`,
-      `"${ref.context}"`,
-    ].join(','));
-
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CrossReferences_${projectSlug}_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-
-    toast.success('Exported to CSV');
-  };
+  }, []);
 
   // ── Derived data ───────────────────────────────────────────────────────────
-  const getFilteredReferences = (): DocumentReference[] => {
+  const filteredRefs = useMemo(() => {
     return references.filter((ref) => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -284,9 +263,9 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
       if (filterType !== 'all' && ref.referenceType !== filterType) return false;
       return true;
     });
-  };
+  }, [references, searchQuery, selectedDoc, filterType]);
 
-  const getDocumentsByDiscipline = (): Record<string, SheetDocument[]> => {
+  const documentsByDiscipline = useMemo(() => {
     const groups: Record<string, SheetDocument[]> = {};
 
     allDocuments
@@ -313,11 +292,31 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
     });
 
     return groups;
-  };
+  }, [allDocuments, sheetSearch]);
 
-  const filteredRefs = getFilteredReferences();
-  const documentsByDiscipline = getDocumentsByDiscipline();
-  const disciplineOrder = ['General', 'Architectural', 'Structural', 'Civil', 'Electrical', 'Plumbing', 'Mechanical', 'Fire Protection', 'Other'];
+  const exportToCSV = useCallback(() => {
+    const header = ['Source Document', 'Target Document', 'Reference Type', 'Location', 'Context'].join(',');
+    const rows = filteredRefs.map(ref => [
+      `"${ref.sourceDoc?.name || 'Unknown'}"`,
+      `"${ref.targetDoc?.name || 'Unknown'}"`,
+      ref.referenceType,
+      `"${ref.location}"`,
+      `"${ref.context}"`,
+    ].join(','));
+
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CrossReferences_${projectSlug}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    toast.success('Exported to CSV');
+  }, [filteredRefs, projectSlug]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -542,7 +541,7 @@ export function PlanNavigator({ projectSlug, onClose }: PlanNavigatorProps) {
         ) : activeTab === 'sheets' ? (
           <SheetIndexTab
             documentsByDiscipline={documentsByDiscipline}
-            disciplineOrder={disciplineOrder}
+            disciplineOrder={DISCIPLINE_ORDER}
             expandedDisciplines={expandedDisciplines}
             sheetSearch={sheetSearch}
             onToggleDiscipline={toggleDiscipline}

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -38,7 +39,7 @@ interface DeleteConfirmDialogProps {
   onCancel: () => void;
 }
 
-export function DeleteConfirmDialog({
+export const DeleteConfirmDialog = React.memo(function DeleteConfirmDialog({
   open,
   pendingDeleteDoc,
   deletionImpact,
@@ -153,4 +154,4 @@ export function DeleteConfirmDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+});

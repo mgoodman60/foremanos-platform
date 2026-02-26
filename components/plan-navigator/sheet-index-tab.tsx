@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   ChevronDown,
   ChevronRight,
@@ -22,7 +23,7 @@ interface SheetIndexTabProps {
   onJumpToDocument: (docId: string, docName: string) => void;
 }
 
-export function SheetIndexTab({
+export const SheetIndexTab = React.memo(function SheetIndexTab({
   documentsByDiscipline,
   disciplineOrder,
   expandedDisciplines,
@@ -152,4 +153,4 @@ export function SheetIndexTab({
       )}
     </div>
   );
-}
+});

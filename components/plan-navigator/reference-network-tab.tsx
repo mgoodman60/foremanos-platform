@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   ArrowRight,
   ChevronDown,
@@ -23,7 +24,7 @@ interface ReferenceNetworkTabProps {
   generateReferenceSummary: (ref: DocumentReference) => string;
 }
 
-export function ReferenceNetworkTab({
+export const ReferenceNetworkTab = React.memo(function ReferenceNetworkTab({
   nodes,
   referencesByDoc,
   expandedDocs,
@@ -125,4 +126,4 @@ export function ReferenceNetworkTab({
         })}
     </div>
   );
-}
+});

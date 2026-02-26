@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Search, ArrowUp, ArrowDown, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,7 @@ function getFloorLabel(floor: number) {
   return `${floor}th Floor`;
 }
 
-export function RoomFiltersPanel({
+export const RoomFiltersPanel = React.memo(function RoomFiltersPanel({
   searchQuery,
   filterType,
   filterStatus,
@@ -204,4 +205,4 @@ export function RoomFiltersPanel({
       )}
     </div>
   );
-}
+});

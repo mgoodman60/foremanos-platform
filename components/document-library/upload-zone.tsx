@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { FileText, Upload, Shield, CheckCircle2, X } from 'lucide-react';
 import { getCategoryLabel } from '@/lib/document-categorizer';
 import { DocumentCategory } from './types';
@@ -12,7 +13,7 @@ interface DragOverlayProps {
   preSelectedCategory: string | null;
 }
 
-export function DragOverlay({
+export const DragOverlay = React.memo(function DragOverlay({
   isDragging,
   userRole,
   preSelectedCategory,
@@ -46,7 +47,7 @@ export function DragOverlay({
       </div>
     </div>
   );
-}
+});
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
@@ -55,7 +56,7 @@ interface EmptyStateProps {
   onUploadClick: () => void;
 }
 
-export function EmptyState({ userRole, onUploadClick }: EmptyStateProps) {
+export const EmptyState = React.memo(function EmptyState({ userRole, onUploadClick }: EmptyStateProps) {
   return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center max-w-md px-4">
@@ -104,7 +105,7 @@ export function EmptyState({ userRole, onUploadClick }: EmptyStateProps) {
       </div>
     </div>
   );
-}
+});
 
 // ─── Category pre-selection badge ─────────────────────────────────────────────
 

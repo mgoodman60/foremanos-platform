@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RenderActionBar } from './RenderActionBar';
@@ -139,7 +140,7 @@ export function RenderDetailView({
         <div className="p-4 shrink-0">
           <div
             className={`relative rounded-lg overflow-hidden bg-dark-base cursor-zoom-in ${
-              imageZoomed ? 'fixed inset-4 z-60 cursor-zoom-out' : ''
+              imageZoomed ? 'fixed inset-4 z-60 cursor-zoom-out' : 'aspect-video'
             }`}
             onClick={() => setImageZoomed(!imageZoomed)}
             role="button"
@@ -156,11 +157,12 @@ export function RenderDetailView({
             }}
           >
             {render.imageUrl || render.thumbnailUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={render.imageUrl || render.thumbnailUrl || ''}
                 alt={render.title || 'Architectural render'}
-                className={`w-full ${imageZoomed ? 'h-full object-contain' : 'object-cover'}`}
+                fill
+                unoptimized
+                className={imageZoomed ? 'object-contain' : 'object-cover'}
               />
             ) : (
               <div className="aspect-video flex items-center justify-center text-gray-400">

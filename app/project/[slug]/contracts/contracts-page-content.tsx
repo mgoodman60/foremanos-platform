@@ -26,6 +26,23 @@ interface ContractsPageContentProps {
   project: Project;
 }
 
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default function ContractsPageContent({ project }: ContractsPageContentProps) {
   const searchParams = useSearchParams();
   const projectSlug = project.slug;
@@ -219,7 +236,7 @@ export default function ContractsPageContent({ project }: ContractsPageContentPr
     }
   };
 
-  const handleViewContract = async (contractId: string) => {
+  const handleViewContract = useCallback(async (contractId: string) => {
     try {
       setDetailLoading(true);
       setShowDetailDialog(true);
@@ -234,9 +251,9 @@ export default function ContractsPageContent({ project }: ContractsPageContentPr
     } finally {
       setDetailLoading(false);
     }
-  };
+  }, [projectSlug]);
 
-  const handleStatusAction = async (contractId: string, action: string) => {
+  const handleStatusAction = useCallback(async (contractId: string, action: string) => {
     try {
       const response = await fetch(`/api/projects/${projectSlug}/contracts/${contractId}`, {
         method: 'PATCH',
@@ -251,7 +268,7 @@ export default function ContractsPageContent({ project }: ContractsPageContentPr
       console.error('Error updating contract:', error);
       toast.error('Failed to update contract');
     }
-  };
+  }, [projectSlug, fetchContracts]);
 
   const handlePreviewBudgetImpact = async (co: any) => {
     if (!selectedContract) return;
@@ -319,7 +336,7 @@ export default function ContractsPageContent({ project }: ContractsPageContentPr
     }
   };
 
-  const handleChangeOrderAction = async (co: any, action: string) => {
+  const handleChangeOrderAction = useCallback(async (co: any, action: string) => {
     if (!selectedContract) return;
 
     try {
@@ -352,24 +369,7 @@ export default function ContractsPageContent({ project }: ContractsPageContentPr
       console.error('Error updating change order:', error);
       toast.error('Failed to update change order');
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  }, [selectedContract, projectSlug, handleViewContract]);
 
   if (loading) {
     return (

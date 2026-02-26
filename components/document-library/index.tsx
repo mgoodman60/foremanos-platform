@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { FileText, RefreshCw } from 'lucide-react';
 import { useFocusTrap } from '@/hooks/use-focus-trap';
 import { useRouter } from 'next/navigation';
@@ -129,10 +129,12 @@ export function DocumentLibrary({
   // ── Derived ────────────────────────────────────────────────────────────────
   const canDeleteDocuments = userRole === 'admin' || userRole === 'client';
   const canChangeVisibility = userRole === 'admin' || userRole === 'client';
-  const filteredDocuments =
-    selectedCategory === 'all'
+  const filteredDocuments = useMemo(
+    () => selectedCategory === 'all'
       ? documents
-      : documents.filter((doc) => doc.category === selectedCategory);
+      : documents.filter((doc) => doc.category === selectedCategory),
+    [documents, selectedCategory]
+  );
 
   // ── Data fetching ──────────────────────────────────────────────────────────
 
@@ -566,7 +568,7 @@ export function DocumentLibrary({
 
   // ── Document actions ───────────────────────────────────────────────────────
 
-  const handleDownload = async (doc: Document) => {
+  const handleDownload = useCallback(async (doc: Document) => {
     try {
       const response = await fetch(`/api/documents/${doc.id}?download=true`);
       if (!response.ok) throw new Error('Failed to generate download URL');
@@ -585,9 +587,9 @@ export function DocumentLibrary({
       console.error('Download error:', error);
       toast.error('Failed to download document');
     }
-  };
+  }, []);
 
-  const handleForceResume = async (documentId: string, documentName: string) => {
+  const handleForceResume = useCallback(async (documentId: string, documentName: string) => {
     try {
       const res = await fetch(`/api/documents/${documentId}/resume-processing`, {
         method: 'POST',
@@ -602,7 +604,7 @@ export function DocumentLibrary({
     } catch {
       toast.error('Failed to resume processing');
     }
-  };
+  }, [fetchDocuments]);
 
   const handleRename = async () => {
     if (!renameDocument || !newDocumentName.trim()) {
@@ -650,16 +652,16 @@ export function DocumentLibrary({
     }
   };
 
-  const openRenameModal = (doc: Document) => {
+  const openRenameModal = useCallback((doc: Document) => {
     setRenameDocument(doc);
     setNewDocumentName(doc.name);
     setRenameModalOpen(true);
-  };
+  }, []);
 
-  const openPreviewModal = (doc: Document) => {
+  const openPreviewModal = useCallback((doc: Document) => {
     setPreviewDocument(doc);
     setPreviewModalOpen(true);
-  };
+  }, []);
 
   const handleAccessLevelChange = async (
     doc: Document,
@@ -686,7 +688,7 @@ export function DocumentLibrary({
     }
   };
 
-  const handleDelete = async (doc: Document) => {
+  const handleDelete = useCallback(async (doc: Document) => {
     setPendingDeleteDoc(doc);
     setShowDeleteConfirm(true);
     setDeletionImpact(null);
@@ -703,7 +705,7 @@ export function DocumentLibrary({
     } finally {
       setDeletionImpactLoading(false);
     }
-  };
+  }, []);
 
   const doDelete = async () => {
     setShowDeleteConfirm(false);
@@ -733,23 +735,23 @@ export function DocumentLibrary({
     }
   };
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setShowDeleteConfirm(false);
     setPendingDeleteDoc(null);
     setDeletionImpact(null);
     setCleanupExtracted(false);
-  };
+  }, []);
 
   // ── Bulk action handlers ───────────────────────────────────────────────────
 
-  const toggleDocSelection = (docId: string) => {
+  const toggleDocSelection = useCallback((docId: string) => {
     setSelectedDocs((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(docId)) newSet.delete(docId);
       else newSet.add(docId);
       return newSet;
     });
-  };
+  }, []);
 
   const selectAllDocs = () => {
     if (selectedDocs.size === documents.length) {

@@ -17,7 +17,11 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  images: {},
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.r2.cloudflarestorage.com' },
+    ],
+  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = config.externals || [];

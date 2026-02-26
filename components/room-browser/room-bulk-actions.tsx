@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { FileDown, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +21,7 @@ interface RoomBulkActionsProps {
   onBulkUpdateFloor: (newFloor: number | null) => void;
 }
 
-export function RoomBulkActions({
+export const RoomBulkActions = React.memo(function RoomBulkActions({
   selectedCount,
   bulkUpdating,
   bulkExporting,
@@ -97,4 +98,4 @@ export function RoomBulkActions({
       </div>
     </div>
   );
-}
+});

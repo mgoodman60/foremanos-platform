@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { FileText, DollarSign, TrendingUp, Receipt } from 'lucide-react';
 import { ContractStats } from './types';
@@ -9,7 +10,7 @@ interface ContractStatsCardsProps {
   formatCurrency: (value: number) => string;
 }
 
-export function ContractStatsCards({ stats, formatCurrency }: ContractStatsCardsProps) {
+export const ContractStatsCards = React.memo(function ContractStatsCards({ stats, formatCurrency }: ContractStatsCardsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <Card className="bg-dark-card border-gray-700 p-4">
@@ -58,4 +59,4 @@ export function ContractStatsCards({ stats, formatCurrency }: ContractStatsCards
       </Card>
     </div>
   );
-}
+});

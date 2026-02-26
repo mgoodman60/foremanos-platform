@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Building2,
@@ -387,7 +387,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
   // Export handlers
   // ---------------------------------------------------------------------------
 
-  const exportRoomToPDF = async (room: Room) => {
+  const exportRoomToPDF = useCallback(async (room: Room) => {
     try {
       setExportingRoomId(room.id);
       toast.loading('Generating room sheet PDF...', { id: `export-room-${room.id}` });
@@ -421,9 +421,9 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
     } finally {
       setExportingRoomId(null);
     }
-  };
+  }, [projectSlug]);
 
-  const exportRoomToDOCX = async (room: Room) => {
+  const exportRoomToDOCX = useCallback(async (room: Room) => {
     try {
       setExportingDocxRoomId(room.id);
       toast.loading('Generating room sheet DOCX...', { id: `export-docx-${room.id}` });
@@ -457,7 +457,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
     } finally {
       setExportingDocxRoomId(null);
     }
-  };
+  }, [projectSlug]);
 
   const bulkExportRooms = async (format: 'pdf' | 'docx') => {
     try {
@@ -503,24 +503,18 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
   // Selection helpers
   // ---------------------------------------------------------------------------
 
-  const toggleRoomSelection = (roomId: string) => {
-    const newSelected = new Set(selectedRoomIds);
-    if (newSelected.has(roomId)) {
-      newSelected.delete(roomId);
-    } else {
-      newSelected.add(roomId);
-    }
-    setSelectedRoomIds(newSelected);
-  };
+  const toggleRoomSelection = useCallback((roomId: string) => {
+    setSelectedRoomIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(roomId)) newSet.delete(roomId);
+      else newSet.add(roomId);
+      return newSet;
+    });
+  }, []);
 
-  const selectAllVisible = () => {
-    const visibleRoomIds = new Set(sortedRooms.map((r) => r.id));
-    setSelectedRoomIds(visibleRoomIds);
-  };
-
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setSelectedRoomIds(new Set());
-  };
+  }, []);
 
   const bulkUpdateFloor = async (newFloor: number | null) => {
     if (selectedRoomIds.size === 0) return;
@@ -576,25 +570,23 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
   // Expand helpers
   // ---------------------------------------------------------------------------
 
-  const toggleRoomDetails = (roomId: string) => {
-    const newExpanded = new Set(expandedRooms);
-    if (newExpanded.has(roomId)) {
-      newExpanded.delete(roomId);
-    } else {
-      newExpanded.add(roomId);
-    }
-    setExpandedRooms(newExpanded);
-  };
+  const toggleRoomDetails = useCallback((roomId: string) => {
+    setExpandedRooms((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(roomId)) newSet.delete(roomId);
+      else newSet.add(roomId);
+      return newSet;
+    });
+  }, []);
 
-  const toggleFloor = (floor: number) => {
-    const newExpanded = new Set(expandedFloors);
-    if (newExpanded.has(floor)) {
-      newExpanded.delete(floor);
-    } else {
-      newExpanded.add(floor);
-    }
-    setExpandedFloors(newExpanded);
-  };
+  const toggleFloor = useCallback((floor: number) => {
+    setExpandedFloors((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(floor)) newSet.delete(floor);
+      else newSet.add(floor);
+      return newSet;
+    });
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Floor plan callbacks
@@ -637,7 +629,7 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
   // Derived data
   // ---------------------------------------------------------------------------
 
-  const filteredRooms = rooms.filter((room) => {
+  const filteredRooms = useMemo(() => rooms.filter((room) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -646,9 +638,9 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
       room.type.toLowerCase().includes(query) ||
       room.gridLocation?.toLowerCase().includes(query)
     );
-  });
+  }), [rooms, searchQuery]);
 
-  const sortedRooms = [...filteredRooms].sort((a, b) => {
+  const sortedRooms = useMemo(() => [...filteredRooms].sort((a, b) => {
     let comparison = 0;
     switch (sortBy) {
       case 'roomNumber': {
@@ -674,9 +666,14 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
         break;
     }
     return sortDirection === 'asc' ? comparison : -comparison;
-  });
+  }), [filteredRooms, sortBy, sortDirection]);
 
-  const roomsByFloor = sortedRooms.reduce(
+  const selectAllVisible = useCallback(() => {
+    const visibleRoomIds = new Set(sortedRooms.map((r) => r.id));
+    setSelectedRoomIds(visibleRoomIds);
+  }, [sortedRooms]);
+
+  const roomsByFloor = useMemo(() => sortedRooms.reduce(
     (acc, room) => {
       const floor = room.floorNumber ?? -1;
       if (!acc[floor]) acc[floor] = [];
@@ -684,20 +681,20 @@ ${Object.entries(data.roomNumbersInFinishChunks || {})
       return acc;
     },
     {} as Record<number, Room[]>
-  );
+  ), [sortedRooms]);
 
-  const floors = Object.keys(roomsByFloor)
+  const floors = useMemo(() => Object.keys(roomsByFloor)
     .map(Number)
-    .sort((a, b) => a - b);
+    .sort((a, b) => a - b), [roomsByFloor]);
 
-  const uniqueTypes = Array.from(new Set(rooms.map((r) => r.type)));
-  const uniqueFloors = Array.from(
+  const uniqueTypes = useMemo(() => Array.from(new Set(rooms.map((r) => r.type))), [rooms]);
+  const uniqueFloors = useMemo(() => Array.from(
     new Set(
       rooms
         .map((r) => r.floorNumber)
         .filter((f): f is number => f !== null && f !== undefined)
     )
-  );
+  ), [rooms]);
 
   const hasActiveFilters =
     !!searchQuery || filterType !== 'all' || filterStatus !== 'all' || filterFloor !== 'all';
