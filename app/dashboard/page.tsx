@@ -336,18 +336,13 @@ export default function DashboardPage() {
     }
 
     try {
-      const response = await fetchWithRetry('/api/projects', {
+      const { csrfFetch } = await import('@/lib/csrf-client');
+      const response = await csrfFetch('/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newProjectData),
-        retryOptions: {
-          maxRetries: 3,
-          onRetry: (attempt) => {
-            toast.loading(`Creating project... (attempt ${attempt}/3)`, { id: 'create-project' });
-          }
-        }
       });
 
       toast.dismiss('create-project');
