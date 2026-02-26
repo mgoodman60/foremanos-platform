@@ -106,13 +106,17 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 
 ```
 app/api/              # 428 API routes organized by feature domain
+app/project/[slug]/   # 14 SC pages + client children (*-page-content.tsx), 6 loading.tsx, 6 error.tsx
 lib/                  # 295 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
+  lib/auth.ts         # requireAuth() — shared server auth helper wrapping getServerSession
+  lib/data/           # 8 server data modules (16 cache()-wrapped Prisma queries for SC pages)
   lib/rag/            # 25 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
   lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
   lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
   lib/plugin/         # 7 modules — AI intelligence plugin integration (see Plugin System below)
 components/           # 398 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
+  components/dashboard/  # Dashboard widgets + server-widgets.tsx (async SC wrappers) + widget-skeletons.tsx
 prisma/               # Database schema and migrations (112 models)
 __tests__/            # Vitest tests (248 test files)
 e2e/                  # Playwright E2E tests (23 spec files)
@@ -181,6 +185,46 @@ ai-intelligence/      # Git submodule — foreman-os plugin (42 skills, 10 agent
 | `lib/plugin/index.ts` | Barrel re-export → `lib/plugin/` (7 modules: skill-loader, skill-selector, extraction-prompt-loader, agent-executor, reference-loader, command-router) |
 
 295 total service modules in `lib/` — see directory for full listing.
+
+### Server Data Layer (`lib/data/`)
+
+All project pages are Server Components. Data is fetched via `cache()`-wrapped Prisma queries in `lib/data/`, bypassing API routes entirely for SC pages.
+
+| File | Exports | Purpose |
+|------|---------|---------|
+| `get-project.ts` | `getProject(slug)` | Auth + project lookup (shared by all SC pages) |
+| `get-documents.ts` | `getDocuments`, `getDocumentCount` | Document queries for SC pages |
+| `get-budget-data.ts` | `getBudgetSummary` | Budget + change order + invoice aggregation |
+| `get-schedule-data.ts` | `getScheduleSummary` | Active schedule + task summary |
+| `get-field-ops.ts` | `getRecentDailyReports`, `getPunchListSummary`, `getOpenRFIs` | Field ops queries |
+| `get-intelligence.ts` | `getIntelligenceSummary` | Document intelligence aggregation |
+| `get-dashboard-data.ts` | 10 functions (`getDashboard*`) | Dashboard widget data (budget, health, schedule, docs, field ops, submittals, takeoffs, rooms, photos, activity) |
+| `index.ts` | Barrel re-export | All 16 functions |
+
+### Project Page Architecture
+
+All 14 project pages follow the SC pattern:
+
+```
+page.tsx (async SC)
+  ├─ await getProject(slug)     ← shared auth + data
+  └─ <PageContent data={...} /> ← 'use client' child
+```
+
+Dashboard page uses streaming with per-widget `<Suspense>` boundaries:
+
+```
+page.tsx (async SC)
+  ├─ getProject(slug)
+  ├─ <DashboardToolbar />                      ← 'use client' (interactive shell)
+  ├─ <Suspense> → <HealthWidgetServer />       ← async SC → CompactHealthWidget
+  ├─ <Suspense> → <ScheduleWidgetServer />     ← async SC → ExpandedScheduleWidget
+  ├─ <Suspense> → <BudgetWidgetServer />       ← async SC → DashboardWidget
+  ├─ ... (8 total Suspense boundaries)
+  └─ <AskForemanWidget />                      ← 'use client' (AI drawer)
+```
+
+Server widget wrappers are in `components/dashboard/server-widgets.tsx`. Client widgets accept optional `initialData` props — when provided (from SC parent), they skip their `useEffect` fetch; when absent, they fall back to client-side fetch for backward compatibility.
 
 ### Type Helper Files
 
@@ -544,6 +588,9 @@ npm run build
 ```
 
 ## Recent Changes & Known Blockers
+
+### React Modernization (Feb 2026, commit `f10b023`)
+All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Build verified with 0 type errors, deployed to Vercel production.
 
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:
