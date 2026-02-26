@@ -19,21 +19,9 @@ interface DocumentsPageContentProps {
 export default function DocumentsPageContent({ project, userRole }: DocumentsPageContentProps) {
   const [documentCount, setDocumentCount] = useState(project.documentCount);
 
-  const fetchProject = useCallback(async () => {
-    try {
-      const res = await fetch('/api/dashboard');
-      if (!res.ok) throw new Error('Failed to fetch projects');
-      const data = await res.json();
-      const found = data.projects?.find(
-        (p: { slug: string; documentCount: number }) => p.slug === project.slug
-      );
-      if (found) {
-        setDocumentCount(found.documentCount);
-      }
-    } catch {
-      // Count stays at current value on error
-    }
-  }, [project.slug]);
+  const handleDocumentsChange = useCallback((newCount: number) => {
+    setDocumentCount(newCount);
+  }, []);
 
   return (
     <div className="min-h-screen bg-dark-surface">
@@ -53,7 +41,8 @@ export default function DocumentsPageContent({ project, userRole }: DocumentsPag
         <DocumentLibrary
           userRole={userRole}
           projectId={project.id}
-          onDocumentsChange={fetchProject}
+          projectSlug={project.slug}
+          onDocumentsChange={handleDocumentsChange}
         />
       </div>
     </div>

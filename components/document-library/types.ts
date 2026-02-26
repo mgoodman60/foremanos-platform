@@ -3,7 +3,8 @@ export type DocumentCategory = string;
 export interface DocumentLibraryProps {
   userRole: string;
   projectId: string;
-  onDocumentsChange?: () => void;
+  projectSlug: string;
+  onDocumentsChange?: (documentCount: number) => void;
 }
 
 export interface DocumentProgress {

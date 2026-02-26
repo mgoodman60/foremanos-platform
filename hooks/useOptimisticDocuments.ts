@@ -14,10 +14,8 @@ interface UseOptimisticDocumentsOptions<T extends BaseDocument> {
   documents: T[];
   /** Setter function for documents */
   setDocuments: (docs: T[]) => void;
-  /** Function to refresh documents from server */
+  /** Function to refresh documents from server (used on failure rollback) */
   fetchDocuments: () => Promise<void>;
-  /** Optional callback when documents change */
-  onDocumentsChange?: () => void;
 }
 
 interface UseOptimisticDocumentsReturn {
@@ -54,7 +52,6 @@ export function useOptimisticDocuments<T extends BaseDocument>({
   documents,
   setDocuments,
   fetchDocuments,
-  onDocumentsChange,
 }: UseOptimisticDocumentsOptions<T>): UseOptimisticDocumentsReturn {
   const optimisticDelete = useCallback(
     async (docIds: string[]): Promise<boolean> => {
@@ -89,11 +86,9 @@ export function useOptimisticDocuments<T extends BaseDocument>({
         return false;
       }
 
-      // 5. Notify parent of successful changes
-      onDocumentsChange?.();
       return true;
     },
-    [documents, setDocuments, fetchDocuments, onDocumentsChange]
+    [documents, setDocuments, fetchDocuments]
   );
 
   const optimisticChangeAccess = useCallback(
@@ -137,11 +132,9 @@ export function useOptimisticDocuments<T extends BaseDocument>({
         return false;
       }
 
-      // 5. Notify parent of successful changes
-      onDocumentsChange?.();
       return true;
     },
-    [documents, setDocuments, onDocumentsChange]
+    [documents, setDocuments]
   );
 
   return { optimisticDelete, optimisticChangeAccess };

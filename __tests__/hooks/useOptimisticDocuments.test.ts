@@ -23,8 +23,6 @@ describe('useOptimisticDocuments', () => {
   let documents: typeof mockDocuments;
   let setDocuments: ReturnType<typeof vi.fn>;
   let fetchDocuments: ReturnType<typeof vi.fn>;
-  let onDocumentsChange: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
     documents = [...mockDocuments];
@@ -32,7 +30,6 @@ describe('useOptimisticDocuments', () => {
       documents = newDocs;
     });
     fetchDocuments = vi.fn().mockResolvedValue(undefined);
-    onDocumentsChange = vi.fn();
     mockFetch.mockReset();
   });
 
@@ -45,7 +42,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -55,7 +52,7 @@ describe('useOptimisticDocuments', () => {
 
       // Check setDocuments was called to remove the documents
       expect(setDocuments).toHaveBeenCalledWith([mockDocuments[2]]);
-      expect(onDocumentsChange).toHaveBeenCalled();
+
     });
 
     it('should rollback on API failure', async () => {
@@ -66,7 +63,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -86,7 +83,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -109,7 +106,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -131,7 +128,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -142,7 +139,7 @@ describe('useOptimisticDocuments', () => {
       // Check setDocuments was called with updated access level
       const setDocumentsCall = setDocuments.mock.calls[0][0];
       expect(setDocumentsCall[0].accessLevel).toBe('guest');
-      expect(onDocumentsChange).toHaveBeenCalled();
+
     });
 
     it('should rollback on API failure', async () => {
@@ -153,7 +150,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -172,7 +169,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -192,7 +189,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 
@@ -218,7 +215,7 @@ describe('useOptimisticDocuments', () => {
           documents,
           setDocuments,
           fetchDocuments,
-          onDocumentsChange,
+
         })
       );
 

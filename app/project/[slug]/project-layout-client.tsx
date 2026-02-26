@@ -220,6 +220,7 @@ function ProjectLayoutInner({ children }: { children: React.ReactNode }) {
           <LazyDocumentLibrary
             userRole={session.user.role || 'guest'}
             projectId={project.id}
+            projectSlug={slug}
             onDocumentsChange={() => refreshProject()}
           />
         </ModalWrapper>

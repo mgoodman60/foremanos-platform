@@ -37,154 +37,42 @@ function isCADFile(filename: string): boolean {
   return CAD_EXTENSIONS.includes(ext);
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export function DocumentLibrary({
-  userRole,
-  projectId,
-  onDocumentsChange,
-}: DocumentLibraryProps) {
-  const router = useRouter();
-
-  // ── State ──────────────────────────────────────────────────────────────────
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Rename modal
-  const [renameModalOpen, setRenameModalOpen] = useState(false);
-  const [renameDocument, setRenameDocument] = useState<Document | null>(null);
-  const [newDocumentName, setNewDocumentName] = useState('');
-
-  // Preview
-  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-
-  // Bulk selection
+function useDocumentSelection(documents: Document[]) {
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
-  const [showBulkAccessMenu, setShowBulkAccessMenu] = useState(false);
 
-  // Category filter
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+  const toggleDocSelection = useCallback((docId: string) => {
+    setSelectedDocs((prev) => {
+      const next = new Set(prev);
+      if (next.has(docId)) next.delete(docId);
+      else next.add(docId);
+      return next;
+    });
+  }, []);
 
-  // Upload
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [preSelectedCategory, setPreSelectedCategory] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const _cadFileInputRef = useRef<HTMLInputElement>(null);
+  const selectAllDocs = useCallback(() => {
+    setSelectedDocs((prev) => {
+      if (prev.size === documents.length) {
+        return new Set();
+      }
+      return new Set(documents.map((d) => d.id));
+    });
+  }, [documents]);
 
-  // Project slug (for links / rescan)
-  const [projectSlug, setProjectSlug] = useState<string>('');
+  return { selectedDocs, setSelectedDocs, toggleDocSelection, selectAllDocs };
+}
 
-  // Modals / confirm dialogs
-  const [showViewModelConfirm, setShowViewModelConfirm] = useState(false);
-  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
-  const [deletionImpact, setDeletionImpact] = useState<{
-    impact: {
-      rooms: number;
-      doors: number;
-      windows: number;
-      finishes: number;
-      floorPlans: number;
-      hardware: number;
-      takeoffs: number;
-      chunks: number;
-    };
-    hasExtractedData: boolean;
-  } | null>(null);
-  const [deletionImpactLoading, setDeletionImpactLoading] = useState(false);
-  const [cleanupExtracted, setCleanupExtracted] = useState(false);
-
-  // Processing progress polling
+function useDocumentProcessingProgress(
+  documents: Document[],
+  fetchDocuments: () => Promise<void>,
+) {
   const [progressMap, setProgressMap] = useState<Record<string, DocumentProgress>>({});
   const [lastPollTimes, setLastPollTimes] = useState<Record<string, number>>({});
   const [completedBanners, setCompletedBanners] = useState<
     Array<{ docId: string; docName: string; intelligence: DocumentIntelligence }>
   >([]);
   const prevProcessingIdsRef = useRef<Set<string>>(new Set());
-
-  // Rescan
-  const [rescanningAll, setRescanningAll] = useState(false);
-  const [rescanMessage, setRescanMessage] = useState<string | null>(null);
-
-  // Rename modal focus trap
-  const renameModalRef = useFocusTrap({
-    isActive: renameModalOpen,
-    onEscape: () => {
-      setRenameModalOpen(false);
-      setRenameDocument(null);
-      setNewDocumentName('');
-    },
-  });
-
-  const categories = getAllCategories();
-
-  // ── Derived ────────────────────────────────────────────────────────────────
-  const canDeleteDocuments = userRole === 'admin' || userRole === 'client';
-  const canChangeVisibility = userRole === 'admin' || userRole === 'client';
-  const filteredDocuments = useMemo(
-    () => selectedCategory === 'all'
-      ? documents
-      : documents.filter((doc) => doc.category === selectedCategory),
-    [documents, selectedCategory]
-  );
-
-  // ── Data fetching ──────────────────────────────────────────────────────────
-
-  const fetchProjectSlug = async () => {
-    try {
-      const response = await fetch(`/api/projects/by-id/${projectId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setProjectSlug(data.project?.slug || '');
-      }
-    } catch (error) {
-      console.error('Error fetching project slug:', error);
-    }
-  };
-
-  const fetchDocuments = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/documents?projectId=${projectId}&include=intelligence`,
-      );
-      if (!response.ok) throw new Error('Failed to fetch documents');
-      const data = await response.json();
-      const accessible =
-        userRole === 'admin' || userRole === 'client'
-          ? data.documents
-          : data.documents.filter(
-              (doc: Document) => doc.accessLevel === 'guest',
-            );
-      setDocuments(accessible);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-      toast.error('Failed to load documents');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Optimistic updates hook (must be after fetchDocuments is defined)
-  const { optimisticDelete, optimisticChangeAccess } = useOptimisticDocuments({
-    documents,
-    setDocuments,
-    fetchDocuments,
-    onDocumentsChange,
-  });
-
-  useEffect(() => {
-    fetchDocuments();
-    fetchProjectSlug();
-  }, [projectId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const fetchDocsRef = useRef(fetchDocuments);
+  fetchDocsRef.current = fetchDocuments;
 
   // Track processing IDs and detect newly completed documents for feedback banners
   useEffect(() => {
@@ -243,10 +131,12 @@ export function DocumentLibrary({
             setProgressMap((prev) => ({ ...prev, [doc.id]: data }));
             setLastPollTimes((prev) => ({ ...prev, [doc.id]: Date.now() }));
             if (data.currentPhase === 'completed') {
-              fetchDocuments();
+              fetchDocsRef.current();
             }
           }
-        } catch { /* ignore polling errors */ }
+        } catch {
+          /* ignore polling errors */
+        }
       }
     };
 
@@ -254,6 +144,150 @@ export function DocumentLibrary({
     const interval = setInterval(fetchProgress, 3000);
     return () => clearInterval(interval);
   }, [documents.map((d) => `${d.id}:${d.queueStatus}`).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return { progressMap, lastPollTimes, completedBanners, setCompletedBanners };
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function DocumentLibrary({
+  userRole,
+  projectId,
+  projectSlug,
+  onDocumentsChange,
+}: DocumentLibraryProps) {
+  const router = useRouter();
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Rename modal
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [renameDocument, setRenameDocument] = useState<Document | null>(null);
+  const [newDocumentName, setNewDocumentName] = useState('');
+
+  // Preview
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+
+  // Bulk selection
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [showBulkAccessMenu, setShowBulkAccessMenu] = useState(false);
+
+  // Category filter
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+
+  // Upload
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [preSelectedCategory, setPreSelectedCategory] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const _cadFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Modals / confirm dialogs
+  const [showViewModelConfirm, setShowViewModelConfirm] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteDoc, setPendingDeleteDoc] = useState<Document | null>(null);
+  const [deletionImpact, setDeletionImpact] = useState<{
+    impact: {
+      rooms: number;
+      doors: number;
+      windows: number;
+      finishes: number;
+      floorPlans: number;
+      hardware: number;
+      takeoffs: number;
+      chunks: number;
+    };
+    hasExtractedData: boolean;
+  } | null>(null);
+  const [deletionImpactLoading, setDeletionImpactLoading] = useState(false);
+  const [cleanupExtracted, setCleanupExtracted] = useState(false);
+
+
+  // Rescan
+  const [rescanningAll, setRescanningAll] = useState(false);
+  const [rescanMessage, setRescanMessage] = useState<string | null>(null);
+
+  // Rename modal focus trap
+  const renameModalRef = useFocusTrap({
+    isActive: renameModalOpen,
+    onEscape: () => {
+      setRenameModalOpen(false);
+      setRenameDocument(null);
+      setNewDocumentName('');
+    },
+  });
+
+  const categories = getAllCategories();
+
+  const {
+    selectedDocs,
+    setSelectedDocs,
+    toggleDocSelection,
+    selectAllDocs,
+  } = useDocumentSelection(documents);
+
+  // ── Derived ────────────────────────────────────────────────────────────────
+  const canDeleteDocuments = userRole === 'admin' || userRole === 'client';
+  const canChangeVisibility = userRole === 'admin' || userRole === 'client';
+  const filteredDocuments = useMemo(
+    () => selectedCategory === 'all'
+      ? documents
+      : documents.filter((doc) => doc.category === selectedCategory),
+    [documents, selectedCategory]
+  );
+
+  // ── Data fetching ──────────────────────────────────────────────────────────
+
+  const fetchDocuments = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/documents?projectId=${projectId}&include=intelligence`,
+      );
+      if (!response.ok) throw new Error('Failed to fetch documents');
+      const data = await response.json();
+      // API returns access-filtered list in 'accessible'; fallback to 'documents' for backwards compat
+      const accessible: Document[] = data.accessible ?? data.documents;
+      setDocuments(accessible);
+      if (typeof onDocumentsChange === 'function') {
+        const totalCount = Array.isArray(data.documents) ? data.documents.length : accessible.length;
+        onDocumentsChange(totalCount);
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error fetching documents:', error);
+      }
+      toast.error('Failed to load documents');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Optimistic updates hook (must be after fetchDocuments is defined)
+  const { optimisticDelete, optimisticChangeAccess } = useOptimisticDocuments({
+    documents,
+    setDocuments,
+    fetchDocuments,
+  });
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [projectId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const {
+    progressMap,
+    lastPollTimes,
+    completedBanners,
+    setCompletedBanners,
+  } = useDocumentProcessingProgress(documents, fetchDocuments);
 
   // ── Upload handlers ────────────────────────────────────────────────────────
 
@@ -444,7 +478,9 @@ export function DocumentLibrary({
       if (fileInputRef.current) fileInputRef.current.value = '';
       fetchDocuments();
     } catch (error) {
-      console.error('Upload error:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Upload error:', error);
+      }
       toast.error(
         error instanceof Error ? error.message : 'Failed to upload document',
       );
@@ -584,7 +620,9 @@ export function DocumentLibrary({
         throw new Error('Invalid response from server');
       }
     } catch (error) {
-      console.error('Download error:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Download error:', error);
+      }
       toast.error('Failed to download document');
     }
   }, []);
@@ -645,7 +683,9 @@ export function DocumentLibrary({
       setNewDocumentName('');
       fetchDocuments();
     } catch (error) {
-      console.error('Error renaming document:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error renaming document:', error);
+      }
       toast.error(
         error instanceof Error ? error.message : 'Failed to rename document',
       );
@@ -681,7 +721,9 @@ export function DocumentLibrary({
       toast.success(data.message || 'Document visibility updated');
       fetchDocuments();
     } catch (error) {
-      console.error('Error updating access level:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error updating access level:', error);
+      }
       toast.error(
         error instanceof Error ? error.message : 'Failed to update visibility',
       );
@@ -726,9 +768,10 @@ export function DocumentLibrary({
       }
       toast.success('Document deleted successfully');
       fetchDocuments();
-      onDocumentsChange?.();
     } catch (error) {
-      console.error('Error deleting document:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error deleting document:', error);
+      }
       toast.error(
         error instanceof Error ? error.message : 'Failed to delete document',
       );
@@ -744,23 +787,6 @@ export function DocumentLibrary({
 
   // ── Bulk action handlers ───────────────────────────────────────────────────
 
-  const toggleDocSelection = useCallback((docId: string) => {
-    setSelectedDocs((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(docId)) newSet.delete(docId);
-      else newSet.add(docId);
-      return newSet;
-    });
-  }, []);
-
-  const selectAllDocs = () => {
-    if (selectedDocs.size === documents.length) {
-      setSelectedDocs(new Set());
-    } else {
-      setSelectedDocs(new Set(documents.map((doc) => doc.id)));
-    }
-  };
-
   const bulkDownload = async () => {
     if (selectedDocs.size === 0) return;
     setBulkActionLoading(true);
@@ -772,7 +798,9 @@ export function DocumentLibrary({
           await handleDownload(doc);
           successCount++;
         } catch (error) {
-          console.error(`Failed to download ${doc.name}:`, error);
+          if (process.env.NODE_ENV !== 'production') {
+            console.error(`Failed to download ${doc.name}:`, error);
+          }
         }
       }
     }
@@ -795,7 +823,10 @@ export function DocumentLibrary({
     const success = await optimisticDelete(Array.from(selectedDocs));
     setBulkActionLoading(false);
     setSelectedDocs(new Set());
-    if (success) toast.success(`Deleted ${docCount} document(s)`);
+    if (success) {
+      toast.success(`Deleted ${docCount} document(s)`);
+      fetchDocuments();
+    }
   };
 
   const bulkChangeAccess = async (newAccessLevel: 'admin' | 'client' | 'guest') => {

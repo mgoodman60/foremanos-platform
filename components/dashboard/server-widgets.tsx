@@ -11,6 +11,8 @@ import {
   getDashboardActivity,
 } from '@/lib/data/get-dashboard-data';
 
+import { chartThemeHelpers } from '@/lib/chart-theme';
+
 import { CompactHealthWidget } from './compact-health-widget';
 import { ExpandedScheduleWidget } from './expanded-schedule-widget';
 import { RecentActivityFeed } from './recent-activity-feed';
@@ -29,13 +31,6 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
-
-// Format helpers (duplicated from project-overview since they're simple)
-function formatCurrency(value: number): string {
-  if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-  if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
-  return `$${value.toFixed(0)}`;
-}
 
 // ----- Health Widget Server -----
 export async function HealthWidgetServer({ projectId, projectSlug }: { projectId: string; projectSlug: string }) {
@@ -77,7 +72,7 @@ export async function BudgetWidgetServer({ projectId, projectSlug }: { projectId
       icon={DollarSign}
       iconColor="bg-emerald-600"
       primaryMetric={{
-        value: budget.hasBudget ? formatCurrency(budget.totalBudget) : '--',
+        value: budget.hasBudget ? chartThemeHelpers.formatCurrency(budget.totalBudget) : '--',
         label: budget.hasBudget
           ? `${budget.percentSpent.toFixed(0)}% spent`
           : 'No budget configured',
@@ -89,7 +84,7 @@ export async function BudgetWidgetServer({ projectId, projectSlug }: { projectId
       secondaryMetrics={budget.hasBudget ? [
         {
           label: 'Actual cost',
-          value: formatCurrency(budget.actualCost),
+          value: chartThemeHelpers.formatCurrency(budget.actualCost),
           icon: DollarSign,
           color: budget.costPerformanceIndex >= 1 ? 'text-green-400' : 'text-red-400',
         },
