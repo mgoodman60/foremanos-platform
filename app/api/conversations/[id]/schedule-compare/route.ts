@@ -16,10 +16,8 @@ export const dynamic = 'force-dynamic';
  * POST /api/conversations/[id]/schedule-compare
  * Compare reported activities against master schedule and generate update draft
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

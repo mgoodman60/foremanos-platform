@@ -11,7 +11,7 @@ interface UseFloorPlanCanvasReturn {
   zoom: number;
   pan: PanState;
   isDragging: boolean;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   handleZoomIn: () => void;
   handleZoomOut: () => void;
   handleZoomReset: () => void;

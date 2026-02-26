@@ -30,10 +30,8 @@ function mapEquipmentTypeToTrade(type: string): string {
 }
 
 // GET /api/projects/[slug]/rooms - List all rooms
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -517,10 +515,8 @@ export async function GET(
 }
 
 // POST /api/projects/[slug]/rooms - Create new room
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

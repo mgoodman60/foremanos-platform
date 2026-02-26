@@ -74,10 +74,8 @@ function mapStatus(dbStatus: string): 'installed' | 'pending' | 'ordered' {
   return statusMap[dbStatus?.toUpperCase()] || 'pending';
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

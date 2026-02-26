@@ -6,7 +6,8 @@ import { runAutoMEPExtraction, countDoorsByType } from '@/lib/auto-mep-extractor
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_AUTO_ENHANCE');
 
-export async function POST(req: Request, { params }: { params: { slug: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -56,7 +57,8 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
   }
 }
 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },

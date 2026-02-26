@@ -18,8 +18,9 @@ import {
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string; type: string } }
+  props: { params: Promise<{ slug: string; type: string }> }
 ) {
+  const params = await props.params;
   try {
     // 1. Rate limit by IP (unauthenticated endpoint)
     const ip = getClientIp(request);

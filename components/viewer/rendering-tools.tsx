@@ -9,7 +9,7 @@ import {
 import type { ViewerHandle } from './index';
 
 interface RenderingToolsProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
 }
 
 // Environment presets available in Autodesk Viewer

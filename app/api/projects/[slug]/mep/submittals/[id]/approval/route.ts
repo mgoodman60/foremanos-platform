@@ -12,10 +12,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_SUBMITTALS_APPROVAL');
 
 // GET: Fetch approval history and available actions
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -51,10 +49,8 @@ export async function GET(
 }
 
 // POST: Perform an approval action
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

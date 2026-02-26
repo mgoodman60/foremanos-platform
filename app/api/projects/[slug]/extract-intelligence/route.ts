@@ -14,7 +14,8 @@ const logger = createLogger('PROJECTS_EXTRACT_INTELLIGENCE');
  * Useful for re-processing or processing documents that were added before
  * the automatic extraction system was implemented.
  */
-export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     
@@ -116,7 +117,8 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
  * 
  * Get extraction status and statistics
  */
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     

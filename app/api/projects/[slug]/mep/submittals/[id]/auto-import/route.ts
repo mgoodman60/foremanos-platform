@@ -6,7 +6,8 @@ import { extractAllRequirements, autoImportRequirements, getAvailableCategories 
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_SUBMITTALS_AUTO_IMPORT');
 
-export async function GET(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,7 +23,8 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   } catch (error) { logger.error('[AutoImport GET] Error', error); return NextResponse.json({ error: 'Failed to fetch requirements' }, { status: 500 }); }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
+export async function POST(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

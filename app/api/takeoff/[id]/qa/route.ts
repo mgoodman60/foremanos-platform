@@ -18,10 +18,8 @@ const logger = createLogger('TAKEOFF_QA');
  * GET /api/takeoff/[id]/qa
  * Get QA metrics and issues for a takeoff
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -98,10 +96,8 @@ export async function GET(
  * POST /api/takeoff/[id]/qa
  * Perform QA actions
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

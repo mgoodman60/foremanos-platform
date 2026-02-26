@@ -10,9 +10,9 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_TAKEOFFS_ENHANCED');
 
 interface RouteContext {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 /**
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { params } = context;
+    const params = await context.params;
     const { slug } = params;
 
     // Get user
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { params } = context;
+    const params = await context.params;
     const { slug } = params;
     const { searchParams } = new URL(request.url);
     const takeoffId = searchParams.get('takeoffId');

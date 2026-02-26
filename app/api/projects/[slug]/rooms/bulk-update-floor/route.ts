@@ -9,10 +9,8 @@ const logger = createLogger('PROJECTS_ROOMS_BULK_UPDATE_FLOOR');
  * POST /api/projects/[slug]/rooms/bulk-update-floor
  * Bulk update floor assignment for multiple rooms
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);

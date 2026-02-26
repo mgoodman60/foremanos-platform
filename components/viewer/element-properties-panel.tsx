@@ -23,7 +23,7 @@ interface ElementProperties {
 }
 
 interface ElementPropertiesPanelProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   selectedIds: number[];
   className?: string;
 }

@@ -6,10 +6,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_SCHEDULES_RESOURCES');
 
 // GET /api/projects/[slug]/schedules/resources - Get resource histogram and earned value data
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

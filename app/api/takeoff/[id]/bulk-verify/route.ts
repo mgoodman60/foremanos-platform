@@ -6,10 +6,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('TAKEOFF_BULK_VERIFY');
 
 // POST /api/takeoff/[id]/bulk-verify - Bulk verify multiple line items
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

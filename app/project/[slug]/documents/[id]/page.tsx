@@ -1,7 +1,8 @@
 import DocumentDetailPage from '@/components/documents/DocumentDetailPage';
 import { AskForemanButton } from '@/components/shared/ask-foreman-button';
 
-export default function DocumentPage({ params }: { params: { slug: string; id: string } }) {
+export default async function DocumentPage(props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   return (
     <>
       <DocumentDetailPage projectSlug={params.slug} documentId={params.id} />

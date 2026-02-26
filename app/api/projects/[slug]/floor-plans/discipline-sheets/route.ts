@@ -11,10 +11,8 @@ import { safeErrorMessage } from '@/lib/api-error';
  * Returns MEP sheets that match the floor level of the base architectural sheet
  * Used for overlay visualization in the floor plan viewer
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);

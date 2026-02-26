@@ -10,10 +10,8 @@ import type { processDocumentTask } from '@/src/trigger/process-document';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

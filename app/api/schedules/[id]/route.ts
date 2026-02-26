@@ -9,10 +9,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('SCHEDULES');
 
 // GET /api/schedules/[id] - Get single schedule with tasks
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -83,10 +81,8 @@ export async function GET(
 }
 
 // PUT /api/schedules/[id] - Update schedule
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -169,10 +165,8 @@ export async function PUT(
 }
 
 // DELETE /api/schedules/[id] - Delete schedule
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

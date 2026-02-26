@@ -14,7 +14,7 @@ interface TreeNode {
 }
 
 interface ModelElementTreeProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   selectedIds: number[];
   onSelect: (ids: number[]) => void;
   className?: string;

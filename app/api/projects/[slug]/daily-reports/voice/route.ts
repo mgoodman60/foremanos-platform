@@ -11,10 +11,8 @@ import { transcribeVoiceToReport } from '@/lib/daily-report-enhancements';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_DAILY_REPORTS_VOICE');
 
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

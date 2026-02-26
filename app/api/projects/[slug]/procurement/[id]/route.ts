@@ -7,7 +7,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_PROCUREMENT');
 
 // GET /api/projects/[slug]/procurement/[id]
-export async function GET(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -35,7 +36,8 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 }
 
 // PATCH /api/projects/[slug]/procurement/[id]
-export async function PATCH(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -95,7 +97,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { slug: stri
 }
 
 // DELETE /api/projects/[slug]/procurement/[id]
-export async function DELETE(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

@@ -5,7 +5,8 @@ import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_COST_ALERTS');
 
-export async function PATCH(req: NextRequest, { params }: { params: { slug: string; id: string } }) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

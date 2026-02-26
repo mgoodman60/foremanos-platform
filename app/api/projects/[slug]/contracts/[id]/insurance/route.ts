@@ -12,10 +12,8 @@ import { generatePresignedUploadUrl, getFileUrl } from '@/lib/s3';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_CONTRACTS_INSURANCE');
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -82,10 +80,8 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

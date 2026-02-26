@@ -16,10 +16,8 @@ const logger = createLogger('workflow-steps');
  * POST /api/workflows/[workflowId]/steps
  * Get next 3-5 steps based on current responses
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { workflowId: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ workflowId: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

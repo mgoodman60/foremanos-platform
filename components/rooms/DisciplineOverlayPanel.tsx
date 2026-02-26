@@ -23,7 +23,7 @@ interface DisciplineOverlayPanelProps {
   projectSlug: string;
   baseSheetNumber: string | null;
   panZoomTransform: { transform: string; transformOrigin: string };
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   visible: boolean;
   onToggle: () => void;
 }
@@ -281,7 +281,6 @@ export function DisciplineOverlayPanel({
             />
           );
         })}
-
       {/* Control panel */}
       <div
         className={`fixed top-20 right-4 z-40 transition-transform duration-300 ${

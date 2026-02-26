@@ -12,10 +12,8 @@ export const dynamic = 'force-dynamic';
  * GET /api/projects/[slug]/logo
  * Get current project logo URL
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -65,10 +63,8 @@ export async function GET(
  * Generate presigned URL for logo upload
  * Only Project Owner or Admin can upload logo
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -155,10 +151,8 @@ export async function POST(
  * Remove project logo
  * Only Project Owner or Admin can delete logo
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

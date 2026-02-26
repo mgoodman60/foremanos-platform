@@ -8,8 +8,9 @@ const logger = createLogger('PROJECTS_SCHEDULES_TASKS');
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { slug: string; taskId: string } }
+  props: { params: Promise<{ slug: string; taskId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -120,8 +121,9 @@ export async function PATCH(
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string; taskId: string } }
+  props: { params: Promise<{ slug: string; taskId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

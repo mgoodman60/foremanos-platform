@@ -11,10 +11,8 @@ const logger = createLogger('PROJECTS_GUEST');
 export const dynamic = 'force-dynamic';
 
 // GET /api/projects/[slug]/guest - Get guest credentials and activity
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -75,10 +73,8 @@ export async function GET(
 }
 
 // PATCH /api/projects/[slug]/guest - Update guest credentials
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -180,10 +176,8 @@ export async function PATCH(
 }
 
 // DELETE /api/projects/[slug]/guest - Revoke guest access
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

@@ -1,5 +1,6 @@
 import { PunchListContent } from './punch-list-content';
 
-export default function PunchListPage({ params }: { params: { slug: string } }) {
+export default async function PunchListPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return <PunchListContent projectSlug={params.slug} />;
 }

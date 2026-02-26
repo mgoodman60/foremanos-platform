@@ -14,8 +14,9 @@ const logger = createLogger('PROJECTS_CHANGE_ORDERS');
 // GET - Get single change order
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -50,8 +51,9 @@ export async function GET(
 // PATCH - Update change order
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -155,8 +157,9 @@ export async function PATCH(
 // DELETE - Delete change order
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

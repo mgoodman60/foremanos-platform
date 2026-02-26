@@ -88,7 +88,7 @@ export default function DocumentFilterBar({
   onCategoryChange, onDisciplinesChange, onDrawingTypesChange, onSearchChange,
 }: Props) {
   const [localSearch, setLocalSearch] = useState(searchQuery);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout>(undefined);
 
   const handleSearchChange = useCallback((value: string) => {
     setLocalSearch(value);

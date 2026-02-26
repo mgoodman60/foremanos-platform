@@ -7,7 +7,8 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import ScaleValidator from '@/components/scale-validator';
 
-export default function ScalesPage({ params }: { params: { slug: string } }) {
+export default async function ScalesPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

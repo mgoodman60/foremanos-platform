@@ -7,10 +7,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_BUDGET_AUTO_SYNC');
 
 // POST /api/projects/[slug]/budget/auto-sync - Manually trigger budget sync from documents
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -82,10 +80,8 @@ export async function POST(
 }
 
 // GET /api/projects/[slug]/budget/auto-sync - Get budget vs takeoff comparison
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },

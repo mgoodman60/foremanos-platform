@@ -22,7 +22,8 @@ import {
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_SCALES');
 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role === 'guest') {

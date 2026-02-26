@@ -35,10 +35,8 @@ interface ExtractionRequest {
   force?: boolean;               // Re-extract even if already processed
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // Authentication
     const session = await getServerSession(authOptions);

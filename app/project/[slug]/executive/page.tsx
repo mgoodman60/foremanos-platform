@@ -2,7 +2,8 @@ import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import ExecutiveDashboard from '@/components/executive-dashboard';
 
-export default function ExecutiveDashboardPage({ params }: { params: { slug: string } }) {
+export default async function ExecutiveDashboardPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <div className="min-h-screen bg-dark-base">
       {/* Header */}

@@ -10,10 +10,8 @@ const logger = createLogger('PROJECTS_DEBUG_FINISH_CONTENT');
  * GET /api/projects/[slug]/debug-finish-content
  * Debug endpoint to see what finish-related content exists in documents
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);

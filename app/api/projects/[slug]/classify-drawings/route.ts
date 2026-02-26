@@ -11,10 +11,8 @@ import { safeErrorMessage } from '@/lib/api-error';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_CLASSIFY_DRAWINGS');
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     

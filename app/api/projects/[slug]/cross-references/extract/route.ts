@@ -11,10 +11,8 @@ const logger = createLogger('PROJECTS_CROSS_REFERENCES_EXTRACT');
  * POST /api/projects/[slug]/cross-references/extract
  * Re-extract cross-references from all project documents
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

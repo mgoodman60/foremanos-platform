@@ -143,7 +143,7 @@ export async function generateReportPDF(conversationId: string): Promise<string>
 
   // Generate PDF
   const pdfBuffer = await ReactPDF.renderToBuffer(
-    React.createElement(DailyReportPDF, { data: pdfData }) as React.ReactElement
+    React.createElement(DailyReportPDF, { data: pdfData }) as React.ReactElement<any>
   );
 
   // Upload to S3

@@ -18,10 +18,8 @@ import {
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_SUBMITTALS_OVERRIDES');
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -94,10 +92,8 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -163,7 +159,7 @@ export async function POST(
 
 export async function PATCH(
   request: Request,
-  { params: _params }: { params: { slug: string } }
+  { params: _params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

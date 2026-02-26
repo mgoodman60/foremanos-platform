@@ -20,8 +20,9 @@ const logger = createLogger('PROJECTS_SYNC');
 // POST /api/projects/[slug]/sync/[feature] - Manually sync a specific feature
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string; feature: string } }
+  props: { params: Promise<{ slug: string; feature: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -155,8 +156,9 @@ export async function POST(
 // GET /api/projects/[slug]/sync/[feature] - Get current data source for a feature
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string; feature: string } }
+  props: { params: Promise<{ slug: string; feature: string }> }
 ) {
+  const params = await props.params;
   try {
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },

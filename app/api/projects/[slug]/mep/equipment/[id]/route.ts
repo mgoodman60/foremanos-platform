@@ -12,10 +12,8 @@ import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_EQUIPMENT');
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -59,10 +57,8 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function PATCH(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -136,10 +132,8 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

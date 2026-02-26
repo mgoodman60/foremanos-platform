@@ -11,10 +11,8 @@ export const dynamic = 'force-dynamic';
  * POST /api/projects/[slug]/schedule
  * Set the master schedule for a project
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -109,10 +107,8 @@ export async function POST(
  * GET /api/projects/[slug]/schedule
  * Get the master schedule information for a project
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -165,10 +161,8 @@ export async function GET(
  * DELETE /api/projects/[slug]/schedule
  * Remove the master schedule reference from a project
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

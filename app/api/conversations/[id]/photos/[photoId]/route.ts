@@ -20,8 +20,9 @@ const logger = createLogger('CONVERSATIONS_PHOTOS');
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; photoId: string } }
+  props: { params: Promise<{ id: string; photoId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -100,8 +101,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; photoId: string } }
+  props: { params: Promise<{ id: string; photoId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

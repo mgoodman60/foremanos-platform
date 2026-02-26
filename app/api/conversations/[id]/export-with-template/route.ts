@@ -16,10 +16,8 @@ export const dynamic = 'force-dynamic';
  * GET /api/conversations/[id]/export-with-template
  * Get available templates for this conversation type
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -76,10 +74,8 @@ export async function GET(
  * POST /api/conversations/[id]/export-with-template
  * Export conversation using a template
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

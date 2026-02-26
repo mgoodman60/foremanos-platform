@@ -16,10 +16,8 @@ import {
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_DRAWING_TYPES');
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     

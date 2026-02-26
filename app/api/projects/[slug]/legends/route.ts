@@ -22,7 +22,8 @@ const log = createScopedLogger('LEGENDS_API');
  * - action: 'list' | 'library' | 'search' | 'validate' | 'stats'
  * - query: search query (for action=search)
  */
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

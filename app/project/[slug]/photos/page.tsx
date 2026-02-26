@@ -2,7 +2,8 @@ import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import PhotoDocumentationHub from '@/components/photo-documentation-hub';
 
-export default function PhotoDocumentationPage({ params }: { params: { slug: string } }) {
+export default async function PhotoDocumentationPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <div className="min-h-screen bg-dark-base">
       {/* Header */}

@@ -13,7 +13,7 @@ interface ViewerExtension {
 }
 
 interface ViewerToolbarProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   onToolChange?: (tool: string | null) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;

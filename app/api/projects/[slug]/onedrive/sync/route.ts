@@ -12,10 +12,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for long-running sync
 
 // Manual sync trigger
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   let syncHistoryId: string | null = null;
 
   try {

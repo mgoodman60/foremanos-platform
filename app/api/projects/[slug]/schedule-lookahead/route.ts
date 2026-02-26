@@ -13,7 +13,8 @@ function formatTradeType(trade: string): string {
   return TRADE_DISPLAY_NAMES[trade] || trade.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

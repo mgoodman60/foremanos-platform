@@ -41,7 +41,7 @@ interface DialogContentProps
    * Ref to the element to focus when modal opens.
    * If not provided, focuses the first focusable element.
    */
-  initialFocusRef?: React.RefObject<HTMLElement>;
+  initialFocusRef?: React.RefObject<HTMLElement | null>;
   /**
    * Hide the close button. Use when providing custom close behavior.
    */

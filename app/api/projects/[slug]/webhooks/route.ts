@@ -16,10 +16,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_WEBHOOKS');
 
 // Get webhooks for a project
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -53,10 +51,8 @@ export async function GET(
 }
 
 // Create or test webhook
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -111,10 +107,8 @@ export async function POST(
 }
 
 // Update webhook
-export async function PATCH(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function PATCH(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -150,10 +144,8 @@ export async function PATCH(
 }
 
 // Delete webhook
-export async function DELETE(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

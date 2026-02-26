@@ -8,10 +8,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('DOCUMENTS_EXTRACT_ROOMS');
 
 // POST /api/documents/[id]/extract-rooms - Extract rooms from floor plan
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

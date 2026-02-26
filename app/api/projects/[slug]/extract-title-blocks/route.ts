@@ -17,7 +17,8 @@ const logger = createLogger('PROJECTS_EXTRACT_TITLE_BLOCKS');
  * Extracts title block information from all documents in a project
  * or from a specific document if documentId is provided
  */
-export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

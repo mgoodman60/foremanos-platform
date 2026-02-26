@@ -14,7 +14,7 @@ interface LayerInfo {
 }
 
 interface LayerControlPanelProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   modelId: string;
   projectSlug: string;
   layerCategories?: Record<string, number>;

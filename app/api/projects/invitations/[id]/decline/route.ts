@@ -6,7 +6,8 @@ import { logActivity } from '@/lib/audit-log';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_INVITATIONS_DECLINE');
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

@@ -18,7 +18,8 @@ import { rasterizePdfToImages } from '@/lib/pdf-to-image-raster';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_EXTRACT_SCALES');
 
-export async function POST(req: Request, { params }: { params: { slug: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role === 'guest') {

@@ -7,10 +7,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_PROCESSING_LIMITS');
 
 // GET /api/projects/[slug]/processing-limits - Get usage stats and limits
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -76,10 +74,8 @@ export async function GET(
 }
 
 // PUT /api/projects/[slug]/processing-limits - Update processing limits (admin/owner only)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

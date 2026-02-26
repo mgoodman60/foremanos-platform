@@ -14,7 +14,7 @@ interface SectionPlane {
 }
 
 interface SectionToolsProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   onSectionChange?: (sections: SectionPlane[]) => void;
 }
 

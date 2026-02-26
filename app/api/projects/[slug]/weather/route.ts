@@ -11,10 +11,8 @@ const logger = createLogger('PROJECTS_WEATHER');
 const _FALLBACK_LAT = 38.2085;
 const _FALLBACK_LON = -85.7585;
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

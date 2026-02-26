@@ -8,10 +8,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('DOCUMENTS_PARSE_SCHEDULE');
 
 // POST /api/documents/[id]/parse-schedule - Parse schedule from document using AI
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

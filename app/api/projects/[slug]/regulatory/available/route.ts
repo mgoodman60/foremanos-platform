@@ -15,7 +15,7 @@ const logger = createLogger('PROJECTS_REGULATORY_AVAILABLE');
  */
 export async function GET(
   request: NextRequest,
-  { params: _params }: { params: { slug: string } }
+  { params: _params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

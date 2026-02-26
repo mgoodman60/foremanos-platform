@@ -1,13 +1,18 @@
 import { Suspense } from 'react';
 import MEPNavigation from '@/components/mep/MEPNavigation';
 
-export default function MEPLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: { slug: string };
-}) {
+export default async function MEPLayout(
+  props: {
+    children: React.ReactNode;
+    params: Promise<{ slug: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   return (
     <div className="min-h-screen bg-dark-base">
       <header className="border-b border-gray-700 bg-dark-subtle px-6 py-4">

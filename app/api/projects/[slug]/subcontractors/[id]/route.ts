@@ -9,8 +9,9 @@ const logger = createLogger('PROJECTS_SUBCONTRACTORS');
 // PUT /api/projects/[slug]/subcontractors/[id] - Update a subcontractor
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -88,8 +89,9 @@ export async function PUT(
 // DELETE /api/projects/[slug]/subcontractors/[id] - Delete a subcontractor
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

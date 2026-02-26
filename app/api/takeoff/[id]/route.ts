@@ -8,10 +8,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('TAKEOFF');
 
 // GET /api/takeoff/[id] - Get a specific material takeoff with line items
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -107,10 +105,8 @@ export async function GET(
 }
 
 // PUT /api/takeoff/[id] - Update a material takeoff
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -211,10 +207,8 @@ export async function PUT(
 }
 
 // DELETE /api/takeoff/[id] - Delete a material takeoff
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

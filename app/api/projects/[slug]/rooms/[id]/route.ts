@@ -8,8 +8,9 @@ const logger = createLogger('PROJECTS_ROOMS');
 // GET /api/projects/[slug]/rooms/[id] - Get single room with finish schedules
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -72,8 +73,9 @@ export async function GET(
 // PATCH /api/projects/[slug]/rooms/[id] - Update room
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

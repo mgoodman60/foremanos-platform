@@ -12,10 +12,8 @@ import { safeErrorMessage } from '@/lib/api-error';
  * GET /api/documents/[id]/page-image?page=1&maxWidth=2000
  * Returns a single PDF page as a PNG image for floor plan visualization
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);

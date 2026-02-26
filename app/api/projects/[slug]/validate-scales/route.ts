@@ -18,7 +18,8 @@ const logger = createLogger('PROJECTS_VALIDATE_SCALES');
 /**
  * POST - Validate scales for project
  */
-export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -57,7 +58,8 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 /**
  * GET - Get scale validation statistics for project
  */
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

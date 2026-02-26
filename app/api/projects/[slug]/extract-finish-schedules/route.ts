@@ -11,10 +11,8 @@ const logger = createLogger('PROJECTS_EXTRACT_FINISH_SCHEDULES');
  * POST /api/projects/[slug]/extract-finish-schedules
  * Extract finish schedule data and correlate with existing rooms
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);

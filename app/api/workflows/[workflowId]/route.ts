@@ -9,10 +9,8 @@ const logger = createLogger('WORKFLOWS');
  * GET /api/workflows/[workflowId]
  * Get a specific workflow template with all steps
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { workflowId: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ workflowId: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

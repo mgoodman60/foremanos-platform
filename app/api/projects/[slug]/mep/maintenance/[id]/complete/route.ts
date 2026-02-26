@@ -10,10 +10,8 @@ import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_MAINTENANCE_COMPLETE');
 
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

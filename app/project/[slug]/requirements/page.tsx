@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import RequirementsDashboard from '@/components/submittals/RequirementsDashboard';
 
-export default function RequirementsPage({ params }: { params: { slug: string } }) {
+export default async function RequirementsPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <div className="min-h-screen bg-dark-surface">
       {/* Header */}

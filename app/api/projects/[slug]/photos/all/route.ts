@@ -11,10 +11,8 @@ import { format } from 'date-fns';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_PHOTOS_ALL');
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

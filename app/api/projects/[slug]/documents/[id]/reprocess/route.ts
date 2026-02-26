@@ -16,8 +16,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     // Check authentication
     const session = await getServerSession(authOptions);

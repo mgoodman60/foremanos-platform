@@ -7,7 +7,7 @@ import { toPng } from 'html-to-image';
 import { PDFDocument } from 'pdf-lib';
 
 interface PresentationExportBarProps {
-  previewRef: React.RefObject<HTMLDivElement>;
+  previewRef: React.RefObject<HTMLDivElement | null>;
   boardTitle: string;
   templateId: string;
   onExported: (format: string) => void;

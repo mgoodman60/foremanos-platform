@@ -13,10 +13,8 @@ import { createScopedLogger } from '@/lib/logger';
 
 const log = createScopedLogger('ROOM_EXPORT');
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string; id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

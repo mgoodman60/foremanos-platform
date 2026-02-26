@@ -8,8 +8,9 @@ const logger = createLogger('PROJECTS_SCHEDULE_UPDATES');
 // PATCH /api/projects/[slug]/schedule-updates/[id] - Approve or reject a schedule update
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -135,8 +136,9 @@ export async function PATCH(
 // DELETE /api/projects/[slug]/schedule-updates/[id] - Delete a schedule update
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {

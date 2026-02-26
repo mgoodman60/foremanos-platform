@@ -1,5 +1,6 @@
 import { SubmittalsPageContent } from './submittals-page-content';
 
-export default function SubmittalsPage({ params }: { params: { slug: string } }) {
+export default async function SubmittalsPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return <SubmittalsPageContent projectSlug={params.slug} />;
 }

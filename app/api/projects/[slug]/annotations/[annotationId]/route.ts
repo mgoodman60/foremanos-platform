@@ -11,8 +11,9 @@ const logger = createLogger('PROJECTS_ANNOTATIONS');
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string; annotationId: string } }
+  props: { params: Promise<{ slug: string; annotationId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -98,8 +99,9 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string; annotationId: string } }
+  props: { params: Promise<{ slug: string; annotationId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

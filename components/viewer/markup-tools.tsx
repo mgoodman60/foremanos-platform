@@ -21,7 +21,7 @@ interface Markup {
 }
 
 interface MarkupToolsProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   projectSlug: string;
   modelId?: string;
   onMarkupSave?: (markups: Markup[]) => void;

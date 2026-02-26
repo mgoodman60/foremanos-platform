@@ -6,10 +6,8 @@ const logger = createLogger('PROJECTS_REALTIME');
 
 export const runtime = 'nodejs';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession();
     if (!session) {

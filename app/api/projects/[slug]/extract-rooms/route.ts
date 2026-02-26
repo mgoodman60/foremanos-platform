@@ -12,10 +12,8 @@ const logger = createLogger('PROJECTS_EXTRACT_ROOMS');
  * 
  * Extract rooms and finish schedules from project documents
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await withDatabaseRetry(() => getServerSession(authOptions));
     if (!session?.user?.email) {

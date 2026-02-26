@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { DrawingClassificationBrowser } from '@/components/drawing-classification-browser';
 
-export default function DrawingTypesPage({ params }: { params: { slug: string } }) {
+export default async function DrawingTypesPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <div className="min-h-screen bg-dark-surface">
       {/* Header */}

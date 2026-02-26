@@ -97,7 +97,7 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 ## Architecture Overview
 
 **ForemanOS** is an AI-powered construction project management platform with:
-- **Next.js 14.2** App Router (server/client components)
+- **Next.js 15.5** App Router (server/client components, React 19)
 - **Prisma 6.7** ORM with **112 database models**
 - **PostgreSQL 14+** with serverless connection pooling
 - **NextAuth.js** JWT-based authentication (no session adapter)
@@ -594,7 +594,7 @@ npm run build
 ## Recent Changes & Known Blockers
 
 ### React Modernization (Feb 2026, commits `f10b023`, `ff0154f`, `543e0b4`, `7418c1b`)
-All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Phase 4C: Performance memoization — `useMemo` for derived data, `useCallback` for 30+ handlers, `React.memo` on 11 sub-components, module-level pure function extraction, `dragStart` useState→useRef. Phase 4D: ISR (`revalidate=300`) on legends page, `next/image` with R2 `remotePatterns` + 5 img→Image conversions. 140 unit tests added for discipline-utils and status-helpers. Build verified with 0 type errors, deployed to Vercel production. Remaining: Phase 5 (React 19 + Next.js 15 upgrade — separate session).
+All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Phase 4C: Performance memoization — `useMemo` for derived data, `useCallback` for 30+ handlers, `React.memo` on 11 sub-components, module-level pure function extraction, `dragStart` useState→useRef. Phase 4D: ISR (`revalidate=300`) on legends page, `next/image` with R2 `remotePatterns` + 5 img→Image conversions. 140 unit tests added for discipline-utils and status-helpers. Phase 5: Upgraded to Next.js 15.5 + React 19.2 — 377 route/page params converted to async, 15 files converted for React 19 types, next.config.js cleaned of deprecated options, next-auth v4 retained (v5 deferred). Build verified with 0 type errors, all tests pass.
 
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:

@@ -15,7 +15,7 @@ interface MeasurementResult {
 }
 
 interface MeasurementToolsProps {
-  viewerRef: React.RefObject<ViewerHandle>;
+  viewerRef: React.RefObject<ViewerHandle | null>;
   onMeasurementComplete?: (measurement: MeasurementResult) => void;
   projectSlug: string;
 }

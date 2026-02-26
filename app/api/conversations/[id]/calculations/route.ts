@@ -26,10 +26,8 @@ const logger = createLogger('CONVERSATIONS_CALCULATIONS');
 
 // type QuantityCalculation = any; // Deprecated - removed unused type
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -76,7 +74,7 @@ export async function GET(
 
 export async function POST(
   _request: NextRequest,
-  { params: _params }: { params: { id: string } }
+  { params: _params }: { params: Promise<{ id: string }> }
 ) {
   // This endpoint has been deprecated
   // Use the new Material Takeoff system instead

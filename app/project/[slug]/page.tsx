@@ -20,7 +20,8 @@ import {
   ActivitySkeleton,
 } from '@/components/dashboard/widget-skeletons';
 
-export default async function ProjectPage({ params }: { params: { slug: string } }) {
+export default async function ProjectPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const { project, session } = await getProject(params.slug);
   const userName = session?.user?.username || undefined;
 

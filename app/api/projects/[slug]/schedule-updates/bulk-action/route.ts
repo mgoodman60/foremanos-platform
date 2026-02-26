@@ -7,10 +7,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_SCHEDULE_UPDATES_BULK_ACTION');
 
 // POST /api/projects/[slug]/schedule-updates/bulk-action - Bulk approve or reject schedule updates
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {

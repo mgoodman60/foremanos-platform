@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import { DailyReportsContent } from './daily-reports-content';
 
-export default function DailyReportsPage({ params }: { params: { slug: string } }) {
+export default async function DailyReportsPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-dark-surface flex items-center justify-center">

@@ -13,10 +13,8 @@ export const dynamic = 'force-dynamic';
  * POST /api/projects/[slug]/duplicates
  * Remove duplicate documents from a project
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -77,10 +75,8 @@ export async function POST(
  * GET /api/projects/[slug]/duplicates
  * Get count of duplicate documents in a project
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

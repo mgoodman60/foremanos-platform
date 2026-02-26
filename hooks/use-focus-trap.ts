@@ -28,11 +28,11 @@ interface UseFocusTrapOptions {
   /**
    * Element to focus when trap activates. If not provided, focuses first focusable element.
    */
-  initialFocusRef?: React.RefObject<HTMLElement>;
+  initialFocusRef?: React.RefObject<HTMLElement | null>;
   /**
    * Element to return focus to when trap deactivates. If not provided, returns to previously focused element.
    */
-  returnFocusRef?: React.RefObject<HTMLElement>;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
   /**
    * Whether to return focus when trap deactivates. Default: true
    */

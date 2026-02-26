@@ -3,7 +3,8 @@ import { authOptions } from '@/lib/auth-options';
 import { redirect } from 'next/navigation';
 import { RendersPageContent } from '@/components/renders/RendersPageContent';
 
-export default async function RendersPage({ params }: { params: { slug: string } }) {
+export default async function RendersPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session) redirect('/login');
 

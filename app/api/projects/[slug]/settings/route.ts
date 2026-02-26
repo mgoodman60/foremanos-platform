@@ -6,10 +6,8 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_SETTINGS');
 
 // GET /api/projects/[slug]/settings - Retrieve project settings
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -72,10 +70,8 @@ export async function GET(
 }
 
 // PATCH /api/projects/[slug]/settings - Update project settings
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {

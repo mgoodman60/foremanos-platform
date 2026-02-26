@@ -8,10 +8,8 @@ const logger = createLogger('VIEW_DOCUMENT');
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // Get user session
     const session = await getServerSession(authOptions);

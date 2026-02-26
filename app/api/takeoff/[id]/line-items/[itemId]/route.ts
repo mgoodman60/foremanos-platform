@@ -10,8 +10,9 @@ const logger = createLogger('TAKEOFF_LINE_ITEMS');
 // PUT /api/takeoff/[id]/line-items/[itemId] - Update a line item
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; itemId: string } }
+  props: { params: Promise<{ id: string; itemId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -118,8 +119,9 @@ export async function PUT(
 // DELETE /api/takeoff/[id]/line-items/[itemId] - Delete a line item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; itemId: string } }
+  props: { params: Promise<{ id: string; itemId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

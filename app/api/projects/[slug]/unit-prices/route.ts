@@ -14,10 +14,8 @@ import { saveUnitPrice, getProjectUnitPrices, DEFAULT_UNIT_PRICES, REGIONAL_MULT
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_UNIT_PRICES');
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -86,10 +84,8 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -148,7 +144,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params: _params }: { params: { slug: string } }
+  { params: _params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

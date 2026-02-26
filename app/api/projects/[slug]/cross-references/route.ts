@@ -25,10 +25,8 @@ import {
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_CROSS_REFERENCES');
 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // Authentication
     const session = await getServerSession(authOptions);

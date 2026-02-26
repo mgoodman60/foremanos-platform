@@ -11,7 +11,7 @@ const logger = createLogger('PROJECTS_MEP_PATH_TRACING');
 
 export async function POST(
   _request: NextRequest,
-  { params: _params }: { params: { slug: string } }
+  { params: _params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

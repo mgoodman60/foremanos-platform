@@ -1,5 +1,6 @@
 import EquipmentList from '@/components/mep/EquipmentList';
 
-export default function EquipmentPage({ params }: { params: { slug: string } }) {
+export default async function EquipmentPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return <EquipmentList projectSlug={params.slug} />;
 }

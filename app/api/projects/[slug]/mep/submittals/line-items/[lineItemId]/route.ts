@@ -11,8 +11,9 @@ const logger = createLogger('PROJECTS_MEP_SUBMITTALS_LINE_ITEMS');
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { slug: string; lineItemId: string } }
+  props: { params: Promise<{ slug: string; lineItemId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -110,8 +111,9 @@ export async function PATCH(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { slug: string; lineItemId: string } }
+  props: { params: Promise<{ slug: string; lineItemId: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

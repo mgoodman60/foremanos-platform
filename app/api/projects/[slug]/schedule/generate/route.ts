@@ -22,7 +22,8 @@ export const dynamic = 'force-dynamic';
  * - useSOV: Use Schedule of Values/budget for task generation (default: true)
  * - matchSubcontractors: Match tasks to registered subs (default: true)
  */
-export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -97,7 +98,8 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
  * GET /api/projects/[slug]/schedule/generate
  * Check if schedule generation is available and what sources can be used
  */
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

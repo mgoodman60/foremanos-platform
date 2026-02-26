@@ -1,6 +1,7 @@
 import ProjectHealthWidget from '@/components/field-ops/ProjectHealthWidget';
 
-export default function HealthDashboardPage({ params }: { params: { slug: string } }) {
+export default async function HealthDashboardPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return (
     <div className="space-y-6">
       <div>

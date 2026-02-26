@@ -1,5 +1,6 @@
 import MaintenanceScheduleView from '@/components/mep/MaintenanceSchedule';
 
-export default function MaintenancePage({ params }: { params: { slug: string } }) {
+export default async function MaintenancePage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   return <MaintenanceScheduleView projectSlug={params.slug} />;
 }

@@ -14,10 +14,8 @@ export const dynamic = 'force-dynamic';
  * Generate presigned URL for uploading project logo
  * Only Project Owner or Admin can upload logo
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 

@@ -12,8 +12,9 @@ export const dynamic = 'force-dynamic';
 // GET - Get a single quote with full details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -58,8 +59,9 @@ export async function GET(
 // PATCH - Update quote (manual edits, status changes, approval)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -203,8 +205,9 @@ export async function PATCH(
 // DELETE - Remove a quote
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  props: { params: Promise<{ slug: string; id: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

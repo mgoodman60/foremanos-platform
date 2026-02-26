@@ -14,10 +14,8 @@ import { generateCalendarToken } from '@/lib/calendar-share-token';
 
 const VALID_CALENDAR_TYPES = ['milestones', 'schedule', 'critical-path', 'deadlines', 'all', 'combined'];
 
-export async function POST(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     // 1. Auth check
     const session = await getServerSession(authOptions);

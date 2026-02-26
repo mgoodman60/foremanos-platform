@@ -14,10 +14,8 @@ function generateSlug(name: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
