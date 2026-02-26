@@ -593,8 +593,8 @@ npm run build
 
 ## Recent Changes & Known Blockers
 
-### React Modernization (Feb 2026, commits `f10b023`, `ff0154f`)
-All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Build verified with 0 type errors, deployed to Vercel production.
+### React Modernization (Feb 2026, commits `f10b023`, `ff0154f`, `543e0b4`, `7418c1b`)
+All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Phase 4C: Performance memoization — `useMemo` for derived data, `useCallback` for 30+ handlers, `React.memo` on 11 sub-components, module-level pure function extraction, `dragStart` useState→useRef. Phase 4D: ISR (`revalidate=300`) on legends page, `next/image` with R2 `remotePatterns` + 5 img→Image conversions. 140 unit tests added for discipline-utils and status-helpers. Build verified with 0 type errors, deployed to Vercel production. Remaining: Phase 5 (React 19 + Next.js 15 upgrade — separate session).
 
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:
