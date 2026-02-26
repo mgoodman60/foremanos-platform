@@ -17,14 +17,12 @@ export const mockSession = {
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
 };
 
-export const getServerSessionMock = vi.fn().mockResolvedValue(mockSession);
+export const authMock = vi.fn().mockResolvedValue(mockSession);
+// Legacy alias for tests that reference getServerSessionMock
+export const getServerSessionMock = authMock;
 
-vi.mock('next-auth', () => ({
-  getServerSession: getServerSessionMock,
-}));
-
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: authMock,
 }));
 
 // ============================================

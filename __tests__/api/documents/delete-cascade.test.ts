@@ -15,12 +15,11 @@ const mockPrisma = vi.hoisted(() => ({
   $transaction: vi.fn(),
 }));
 
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(() => mockSession),
+vi.mock('@/auth', () => ({
+  auth: vi.fn(() => mockSession),
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/s3', () => ({
   getFileUrl: vi.fn(),
   deleteFile: vi.fn(),
@@ -42,7 +41,7 @@ vi.mock('@/lib/docx-converter', () => ({
 }));
 
 import { DELETE } from '@/app/api/documents/[id]/route';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/auth';
 
 const mockDoc = {
   id: 'doc-1',
@@ -75,7 +74,7 @@ describe('Document DELETE - Cascade Transaction', () => {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request as any, { params: { id: 'doc-1' } });
+    const response = await DELETE(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
     expect(response.status).toBe(200);
     expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
@@ -89,26 +88,26 @@ describe('Document DELETE - Cascade Transaction', () => {
       method: 'DELETE',
     });
 
-    await DELETE(request as any, { params: { id: 'doc-1' } });
+    await DELETE(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
     // The transaction array should include materialTakeoff.deleteMany, documentChunk.deleteMany,
     // projectDataSource.deleteMany, and document.delete
     const txArg = mockPrisma.$transaction.mock.calls[0][0];
     expect(txArg.length).toBe(4);
 
-    const body = await (await DELETE(request as any, { params: { id: 'doc-1' } })).json();
+    const body = await (await DELETE(request as any, { params: Promise.resolve({ id: 'doc-1' }) })).json();
     expect(body.success).toBe(true);
     expect(body).toHaveProperty('takeoffsCleaned');
   });
 
   it('should return 401 for unauthenticated users', async () => {
-    (getServerSession as any).mockResolvedValueOnce(null);
+    (auth as any).mockResolvedValueOnce(null);
 
     const request = new Request('http://localhost/api/documents/doc-1', {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request as any, { params: { id: 'doc-1' } });
+    const response = await DELETE(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
     expect(response.status).toBe(401);
     const body = await response.json();
@@ -116,7 +115,7 @@ describe('Document DELETE - Cascade Transaction', () => {
   });
 
   it('should return 403 for non-admin non-owner users', async () => {
-    (getServerSession as any).mockResolvedValueOnce({
+    (auth as any).mockResolvedValueOnce({
       user: { id: 'other-user', email: 'other@test.com', role: 'guest' },
     });
 
@@ -124,7 +123,7 @@ describe('Document DELETE - Cascade Transaction', () => {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request as any, { params: { id: 'doc-1' } });
+    const response = await DELETE(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
     expect(response.status).toBe(403);
     const body = await response.json();
@@ -138,7 +137,7 @@ describe('Document DELETE - Cascade Transaction', () => {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request as any, { params: { id: 'nonexistent' } });
+    const response = await DELETE(request as any, { params: Promise.resolve({ id: 'nonexistent' }) });
 
     expect(response.status).toBe(404);
     const body = await response.json();
@@ -150,7 +149,7 @@ describe('Document DELETE - Cascade Transaction', () => {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request as any, { params: { id: 'doc-1' } });
+    const response = await DELETE(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
     const body = await response.json();
     expect(body.success).toBe(true);

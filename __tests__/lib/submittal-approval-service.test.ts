@@ -213,8 +213,10 @@ describe('Submittal Approval Service', () => {
         const results = [];
         for (const callback of callbacks) {
           if (typeof callback === 'function') {
+            // @ts-expect-error strictNullChecks migration
             results.push(await callback());
           } else {
+            // @ts-expect-error strictNullChecks migration
             results.push(callback);
           }
         }

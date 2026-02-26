@@ -14,8 +14,7 @@ const mockPDFDocument = vi.hoisted(() => ({
   load: vi.fn(),
 }));
 
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: mockCheckRateLimit,

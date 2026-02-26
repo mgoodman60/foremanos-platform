@@ -6,9 +6,8 @@
  * only — no file body is received by this endpoint.
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl } from '@/lib/s3';
 import { requireProjectPermission } from '@/lib/project-permissions';
@@ -38,6 +37,7 @@ export async function POST(request: Request) {
   try {
     // 1. Rate limit
     const ip = getClientIp(request);
+    // @ts-expect-error strictNullChecks migration
     const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.UPLOAD);
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Auth check
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

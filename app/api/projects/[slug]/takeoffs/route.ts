@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_TAKEOFFS');
@@ -9,7 +8,7 @@ const logger = createLogger('PROJECTS_TAKEOFFS');
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -129,7 +128,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

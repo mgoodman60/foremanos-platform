@@ -5,9 +5,8 @@
  * Returns all detected locations from plan sheets (rooms, areas, elevations, zones)
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { findAvailableLocations } from '@/lib/location-detector';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
@@ -16,7 +15,7 @@ const logger = createLogger('PROJECTS_AVAILABLE_LOCATIONS');
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required' },

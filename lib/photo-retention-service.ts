@@ -68,6 +68,7 @@ export async function checkPhotoExpiration(
     where: {
       projectId,
       deletedAt: null,
+      // @ts-expect-error strictNullChecks migration
       photos: { not: null },
     },
     select: { id: true, photos: true, onedriveExported: true },
@@ -124,6 +125,7 @@ export async function cleanupExpiredPhotos(
     where: {
       projectId,
       deletedAt: null,
+      // @ts-expect-error strictNullChecks migration
       photos: { not: null },
     },
     select: { id: true, photos: true, onedriveExported: true, status: true },
@@ -230,6 +232,7 @@ export async function getExpirationWarnings(
       projectId,
       deletedAt: null,
       onedriveExported: false,
+      // @ts-expect-error strictNullChecks migration
       photos: { not: null },
     },
     select: { id: true, reportNumber: true, photos: true },

@@ -21,6 +21,7 @@ export function createMockNextRequest(
     init.body = JSON.stringify(body);
   }
 
+  // @ts-expect-error strictNullChecks migration
   return new NextRequest(url, init);
 }
 

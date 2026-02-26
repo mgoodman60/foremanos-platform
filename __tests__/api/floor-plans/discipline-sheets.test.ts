@@ -27,11 +27,8 @@ const mockSheetParser = vi.hoisted(() => ({
   matchesFloor: vi.fn(),
 }));
 
-vi.mock('next-auth', () => ({
-  getServerSession: mockGetServerSession,
-}));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,
   createScopedLogger: vi.fn(() => mockLogger),
@@ -47,7 +44,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockGetServerSession.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -58,7 +55,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockGetServerSession.mockResolvedValue({ user: {} });
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -69,7 +66,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockGetServerSession.mockResolvedValue({ user: { email: 'test@example.com' } });
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -81,7 +78,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.project.findUnique.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -99,7 +96,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -120,7 +117,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     });
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(403);
@@ -142,7 +139,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockSheetParser.parseSheetNumber.mockReturnValue(null);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=INVALID');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -196,7 +193,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     });
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -252,7 +249,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.documentChunk.findFirst.mockResolvedValue({ scaleRatio: 0.25 });
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    await GET(request, { params: { slug: 'test' } });
+    await GET(request, { params: { slug: 'test' } } as any);
 
     expect(mockPrisma.documentChunk.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -311,7 +308,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     });
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -342,7 +339,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -384,7 +381,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockSheetParser.matchesFloor.mockReturnValue(true);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(data.sheets[0].scaleFactor).toBe(2.0); // 0.5 / 0.25
@@ -424,7 +421,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockSheetParser.matchesFloor.mockReturnValue(true);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(data.baseScaleRatio).toBeNull();
@@ -474,7 +471,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockSheetParser.matchesFloor.mockReturnValue(true);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(data.sheets[0].pageNumber).toBe(6); // chunkIndex + 1
@@ -504,7 +501,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
 
     expect(response.status).toBe(200);
   });
@@ -532,7 +529,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
 
     expect(response.status).toBe(200);
   });
@@ -562,7 +559,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.documentChunk.findMany.mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
 
     expect(response.status).toBe(200);
   });
@@ -572,7 +569,7 @@ describe('GET /api/projects/[slug]/floor-plans/discipline-sheets', () => {
     mockPrisma.project.findUnique.mockRejectedValue(new Error('Database error'));
 
     const request = new NextRequest('http://localhost/api/projects/test/floor-plans/discipline-sheets?baseSheet=A-101');
-    const response = await GET(request, { params: { slug: 'test' } });
+    const response = await GET(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);

@@ -148,7 +148,7 @@ export async function extractQuantitiesFromDocument(
     }
 
     // Group items by category and create line items
-    const lineItemsCreated = [];
+    const lineItemsCreated: Awaited<ReturnType<typeof prisma.takeoffLineItem.create>>[] = [];
     for (const categoryData of allExtractedItems) {
       for (const item of categoryData.items) {
         const lineItem = await prisma.takeoffLineItem.create({
@@ -205,7 +205,7 @@ async function extractQuantitiesFromChunk(
   _documentName: string
 ): Promise<QuantityExtractionResult> {
   const metadata = chunk.metadata as any;
-  const items = [];
+  const items: TakeoffItem[] = [];
 
   // Determine category based on content and sheet type
   const category = detectCategory(chunk.content, metadata);

@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../../lib/auth-options';
 import { getNextStepsForWorkflow } from '../../../../../lib/workflow-service';
 import { prisma } from '../../../../../lib/db';
 import { 
@@ -19,7 +18,7 @@ const logger = createLogger('workflow-steps');
 export async function POST(req: NextRequest, props: { params: Promise<{ workflowId: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -59,6 +58,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ workflow
         scheduleContext = await fetchScheduleContextForWorkflow(project.id, projectSlug);
       } catch (error) {
         logger.error('Error fetching schedule context', error as Error);
+        // @ts-expect-error strictNullChecks migration
         scheduleContext = { todayTasks: [], hasSchedule: false, error: 'Failed to load schedule' };
       }
     }

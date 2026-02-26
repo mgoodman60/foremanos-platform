@@ -3,9 +3,8 @@
  * Unified analytics and insights for all Phase A, B, and C features
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { extractMEPElements, detectAllClashes } from '@/lib/mep-path-tracer';
@@ -19,7 +18,7 @@ import {
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Authentication required' },

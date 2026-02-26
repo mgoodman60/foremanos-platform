@@ -1,5 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { SSEStream } from '@/lib/websocket-server';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_REALTIME');
@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession();
+    const session = await auth();
     if (!session) {
       return new Response('Unauthorized', { status: 401 });
     }

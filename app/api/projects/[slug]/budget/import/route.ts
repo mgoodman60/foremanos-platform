@@ -5,9 +5,8 @@
  * Imports the Walker Company budget data for One Senior Care - Morehead
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { importOneSeniorCareBudget, getBudgetSummaryByPhase } from '@/lib/budget-importer';
 import { enhanceProjectData } from '@/lib/project-data-enhancer';
 import { createLogger } from '@/lib/logger';
@@ -16,7 +15,7 @@ const logger = createLogger('PROJECTS_BUDGET_IMPORT');
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

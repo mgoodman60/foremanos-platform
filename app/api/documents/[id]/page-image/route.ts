@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { downloadFile } from '@/lib/s3';
 import { extractPageAsPdf } from '@/lib/pdf-to-image-serverless';
@@ -16,7 +15,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
   const params = await props.params;
   try {
     // Authenticate user
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
@@ -165,6 +164,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('out of range')) {
         return NextResponse.json(
+          // @ts-expect-error strictNullChecks migration
           { error: `Page ${pageNumber} does not exist (document has ${pageCount || 'unknown'} pages)`, code: 'PAGE_OUT_OF_RANGE' },
           { status: 400 }
         );

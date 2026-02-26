@@ -6,9 +6,8 @@
  * Returns the cache status of all available regulatory documents
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { getRegulatoryDocumentsStatus } from '@/lib/regulatory-documents';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('REGULATORY_DOCUMENTS_STATUS');
@@ -18,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

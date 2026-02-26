@@ -4,9 +4,8 @@
  * POST: Add insurance certificate
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl, getFileUrl } from '@/lib/s3';
 import { createLogger } from '@/lib/logger';
@@ -15,7 +14,7 @@ const logger = createLogger('PROJECTS_CONTRACTS_INSURANCE');
 export async function GET(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -49,6 +48,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
     const certsWithStatus = await Promise.all(certificates.map(async (cert) => {
       let fileUrl = null;
       if (cert.cloudStoragePath) {
+        // @ts-expect-error strictNullChecks migration
         fileUrl = await getFileUrl(cert.cloudStoragePath, false);
       }
       
@@ -83,7 +83,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 export async function POST(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

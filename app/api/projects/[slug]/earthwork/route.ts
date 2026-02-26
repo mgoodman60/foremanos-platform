@@ -4,9 +4,8 @@
  * GET: Retrieve saved earthwork calculations for a project
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   calculateGridMethod,
@@ -31,7 +30,7 @@ const logger = createLogger('PROJECTS_EARTHWORK');
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -158,6 +157,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
             const extracted = apiKey
               ? await extractElevationsWithAI(content, docType, apiKey)
               : await extractElevationsFromDocument(content, docType);
+            // @ts-expect-error strictNullChecks migration
             extractedSources.push(extracted);
           } catch (err) {
             logger.error('Failed to extract elevations', err, { document: doc.name });
@@ -231,7 +231,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

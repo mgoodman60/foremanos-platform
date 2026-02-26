@@ -6,9 +6,8 @@
  * (Used by scheduled task)
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import {
   getReportsReadyForFinalization,
   finalizeReport,
@@ -19,7 +18,7 @@ const logger = createLogger('ADMIN_FINALIZE');
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     // Check for cron job authentication via secret header
     const cronSecret = request.headers.get('x-cron-secret');

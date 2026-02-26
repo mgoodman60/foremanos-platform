@@ -148,6 +148,7 @@ export async function processDocument(
           processed: true,
           pagesProcessed: actualPages,
           processingCost: actualCost,
+          // @ts-expect-error strictNullChecks migration
           processorType: classification.processorType,
           queueStatus: 'completed',
           lastProcessingError: null,
@@ -172,6 +173,7 @@ export async function processDocument(
         data: {
           documentId: documentId,
           userId: ownerId,
+          // @ts-expect-error strictNullChecks migration
           processorType: classification.processorType,
           pages: actualPages,
           cost: actualCost,

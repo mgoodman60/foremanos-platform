@@ -67,25 +67,17 @@ export function LoginForm({ onClose }: LoginFormProps) {
     announcer?.announce('Signing in...');
 
     try {
-      // Use NextAuth's built-in redirect to properly handle auth flow
-      const result = await signIn('credentials', {
+      // v5: signIn with redirect:true always redirects on success, throws on error
+      await signIn('credentials', {
         username: data.username,
         password: data.password,
         redirect: true,
         callbackUrl: '/dashboard',
       });
-
-      // This code will only execute if redirect is somehow prevented
-      if (result?.error) {
-        setFormError('Invalid credentials. Please check your username and password.');
-        announcer?.announce('Login failed. Please check your credentials.', 'assertive');
-        toast.error('Login failed');
-        setLoading(false);
-      }
     } catch (err) {
-      setFormError('An error occurred while signing in. Please try again.');
-      announcer?.announce('Connection error. Please try again.', 'assertive');
-      toast.error('Connection error');
+      setFormError('Invalid credentials. Please check your username and password.');
+      announcer?.announce('Login failed. Please check your credentials.', 'assertive');
+      toast.error('Login failed');
       setLoading(false);
     }
   };
@@ -96,25 +88,17 @@ export function LoginForm({ onClose }: LoginFormProps) {
     announcer?.announce('Signing in as guest...');
 
     try {
-      // Use NextAuth's built-in redirect for proper auth flow
-      const result = await signIn('credentials', {
+      // v5: signIn with redirect:true always redirects on success, throws on error
+      await signIn('credentials', {
         username: data.jobPin,
         password: '', // Empty password for guest login
         redirect: true,
         callbackUrl: '/dashboard',
       });
-
-      // This code will only execute if redirect is somehow prevented
-      if (result?.error) {
-        setFormError('Guest login failed. Please check your Job Pin.');
-        announcer?.announce('Guest login failed. Please check your Job Pin.', 'assertive');
-        toast.error('Login failed');
-        setLoading(false);
-      }
     } catch (err) {
-      setFormError('An error occurred. Please try again.');
-      announcer?.announce('Connection error. Please try again.', 'assertive');
-      toast.error('Connection error');
+      setFormError('Guest login failed. Please check your Job Pin.');
+      announcer?.announce('Guest login failed. Please check your Job Pin.', 'assertive');
+      toast.error('Login failed');
       setLoading(false);
     }
   };

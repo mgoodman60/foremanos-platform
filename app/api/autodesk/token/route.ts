@@ -3,9 +3,8 @@
  * Returns a public access token for the Forge Viewer
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { isAutodeskConfigured } from '@/lib/autodesk-auth';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('AUTODESK_TOKEN');
@@ -17,7 +16,7 @@ const AUTODESK_AUTH_URL = 'https://developer.api.autodesk.com/authentication/v2/
 export async function GET() {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

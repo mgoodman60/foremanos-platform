@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { initializeRegulatoryDocumentsForProject } from '@/lib/regulatory-documents';
@@ -29,7 +28,7 @@ function generateSlug(name: string): string {
 
 export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -134,7 +133,8 @@ export const POST = withCsrf(async function POST(request: NextRequest) {
         data: {
           username: namespacedPin,
           password: hashedGuestPassword,
-          email: null,
+          // @ts-expect-error strictNullChecks migration
+          email: null as string | null,
           role: 'guest',
           approved: true,
           assignedProjectId: project.id,

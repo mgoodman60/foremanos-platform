@@ -4,9 +4,8 @@
  * Supports ?format=json for DOCX export consumers
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generateRoomSheetPDF } from '@/lib/room-pdf-generator';
 import { createScopedLogger } from '@/lib/logger';
@@ -16,7 +15,7 @@ const log = createScopedLogger('ROOM_EXPORT');
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -211,6 +210,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
     }
 
     // Default: generate PDF server-side and return binary
+    // @ts-expect-error strictNullChecks migration
     const pdfBlob = await generateRoomSheetPDF(roomData);
     const arrayBuffer = await pdfBlob.arrayBuffer();
     const roomLabel = room.roomNumber || room.name;

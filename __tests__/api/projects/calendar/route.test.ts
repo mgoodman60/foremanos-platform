@@ -20,8 +20,7 @@ const mockExportDeadlines = vi.hoisted(() => vi.fn().mockResolvedValue('BEGIN:VC
 const mockExportProjectCalendar = vi.hoisted(() => vi.fn().mockResolvedValue('BEGIN:VCALENDAR\nEND:VCALENDAR'));
 
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('next-auth', () => ({ getServerSession: vi.fn().mockResolvedValue(null) }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
+vi.mock('@/auth', () => ({ auth: vi.fn().mockResolvedValue(null) }));
 vi.mock('@/lib/calendar-share-token', () => ({
   verifyCalendarToken: mockVerifyCalendarToken,
   generateCalendarToken: vi.fn(),
@@ -56,7 +55,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
 
   it('returns 401 when no token provided', async () => {
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toContain('token required');
@@ -67,7 +66,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
       throw new Error('Invalid or expired calendar token');
     });
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones?token=bad-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toContain('Invalid or expired');
@@ -78,7 +77,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
       throw new Error('Invalid or expired calendar token');
     });
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones?token=expired-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(401);
   });
 
@@ -91,7 +90,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
     mockPrisma.project.findUnique.mockResolvedValue({ id: 'actual-project-id', name: 'Test Project' });
 
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones?token=valid-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(401);
   });
 
@@ -104,7 +103,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
     mockPrisma.project.findUnique.mockResolvedValue({ id: 'proj-123', name: 'Test Project' });
 
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones?token=valid-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('text/calendar');
     const text = await res.text();
@@ -120,7 +119,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
     mockPrisma.project.findUnique.mockResolvedValue(null);
 
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones?token=valid-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(404);
   });
 
@@ -128,7 +127,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
     mockCheckRateLimit.mockResolvedValue({ success: false, limit: 60, remaining: 0, reset: 0, retryAfter: 60 });
 
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/milestones?token=valid-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'milestones' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'milestones' }) });
     expect(res.status).toBe(429);
   });
 
@@ -141,7 +140,7 @@ describe('GET /api/projects/[slug]/calendar/[type]', () => {
     mockPrisma.project.findUnique.mockResolvedValue({ id: 'proj-123', name: 'Test Project' });
 
     const req = makeRequest('http://localhost/api/projects/test-project/calendar/invalid?token=valid-token');
-    const res = await GET(req, { params: { slug: 'test-project', type: 'invalid' } });
+    const res = await GET(req, { params: Promise.resolve({ slug: 'test-project', type: 'invalid' }) });
     expect(res.status).toBe(400);
   });
 });

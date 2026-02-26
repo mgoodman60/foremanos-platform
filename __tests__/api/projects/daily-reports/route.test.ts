@@ -123,15 +123,10 @@ vi.mock('@/lib/db', () => ({
   prisma: prismaMock,
 }));
 
-// Mock NextAuth
+// Mock auth
 const getServerSessionMock = vi.fn();
-vi.mock('next-auth', () => ({
-  getServerSession: getServerSessionMock,
-}));
-
-// Mock auth options
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: getServerSessionMock,
 }));
 
 describe('GET /api/projects/[slug]/daily-reports', () => {
@@ -160,7 +155,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(401);
     const data = await response.json();
@@ -172,7 +167,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -184,7 +179,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -208,7 +203,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     const request = new NextRequest(
       'http://localhost/api/projects/test-project/daily-reports?startDate=2024-01-01'
     );
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith(
@@ -230,7 +225,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     const request = new NextRequest(
       'http://localhost/api/projects/test-project/daily-reports?endDate=2024-01-31'
     );
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith(
@@ -252,7 +247,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
     const request = new NextRequest(
       'http://localhost/api/projects/test-project/daily-reports?status=SUBMITTED'
     );
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.findMany).toHaveBeenCalledWith(
@@ -270,7 +265,7 @@ describe('GET /api/projects/[slug]/daily-reports', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(500);
     const data = await response.json();
@@ -309,7 +304,7 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
       method: 'POST',
       body: JSON.stringify({ reportDate: '2024-01-15' }),
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(401);
   });
@@ -328,7 +323,7 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
         workPerformed: 'Foundation work',
       }),
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.create).toHaveBeenCalledWith(
@@ -351,7 +346,7 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
         weatherCondition: 'Sunny',
       }),
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.create).toHaveBeenCalledWith(
@@ -387,7 +382,7 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
         ],
       }),
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.create).toHaveBeenCalledWith(
@@ -427,7 +422,7 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
         weatherCondition: 'Sunny',
       }),
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(400);
     const data = await response.json();
@@ -444,7 +439,7 @@ describe('POST /api/projects/[slug]/daily-reports', () => {
         reportDate: '2024-01-15',
       }),
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(500);
     const data = await response.json();

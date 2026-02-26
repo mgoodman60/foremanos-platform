@@ -439,6 +439,7 @@ describe('fetch-with-retry', () => {
       // Either contains the HTML or statusText depending on how body was consumed
       expect(result).toHaveProperty('error');
       expect(typeof result.error).toBe('string');
+      // @ts-expect-error strictNullChecks migration
       expect(result.error.length).toBeGreaterThan(0);
     });
 

@@ -167,6 +167,7 @@ export async function generatePaymentApplication(
 
     items.push({
       budgetItemId: budgetItem.id,
+      // @ts-expect-error strictNullChecks migration
       costCode: budgetItem.costCode,
       description: budgetItem.name,
       scheduledValue,
@@ -228,6 +229,7 @@ export async function generatePaymentApplication(
     }
   });
 
+  // @ts-expect-error strictNullChecks migration
   return payApp;
 }
 

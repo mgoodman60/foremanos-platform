@@ -3,9 +3,8 @@
  * Provides comprehensive analysis of MEP systems
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractMEPElements, detectAllClashes, identifyVerticalRisers, type MEPSystem } from '@/lib/mep-path-tracer';
 import { createLogger } from '@/lib/logger';
@@ -14,7 +13,7 @@ const logger = createLogger('PROJECTS_MEP_SYSTEM_ANALYSIS');
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Authentication required' },

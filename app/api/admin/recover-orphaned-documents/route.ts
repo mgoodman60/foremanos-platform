@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import {
   recoverAllOrphanedDocuments,
   getOrphanedDocumentStats,
@@ -19,7 +18,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return apiError('Unauthorized', 401, 'UNAUTHORIZED');
@@ -51,7 +50,7 @@ export async function POST() {
  */
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return apiError('Unauthorized', 401, 'UNAUTHORIZED');

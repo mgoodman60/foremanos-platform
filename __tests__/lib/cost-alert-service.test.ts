@@ -185,6 +185,7 @@ describe('Cost Alert Service - CPI Alerts', () => {
     const cpiCall = mockPrisma.costAlert.create.mock.calls.find(
       call => call[0].data.alertType === 'CPI_LOW'
     );
+    // @ts-expect-error strictNullChecks migration
     expect(cpiCall[0].data.severity).toBe('WARNING');
   });
 

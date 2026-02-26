@@ -1,7 +1,7 @@
 import '../snapshots/mocks';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkQueryLimit } from '@/lib/subscription';
@@ -19,7 +19,7 @@ describe('Chat API Middleware Integration', () => {
 
   it('checkAuth should extract auth info from request', async () => {
     const session = { user: { id: 'user-1', role: 'client' } };
-    vi.mocked(getServerSession).mockResolvedValue(session as never);
+    vi.mocked(auth).mockResolvedValue(session as never);
 
     const request = new NextRequest('http://localhost/api/chat', { method: 'POST' });
     const result = await checkAuth(request);

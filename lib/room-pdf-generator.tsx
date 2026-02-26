@@ -265,7 +265,7 @@ const RoomSheetHeader: React.FC<{ data: RoomSheetData }> = ({ data }) => {
 const RoomSheetFooter: React.FC<{ data: RoomSheetData }> = ({ data }) => {
   let revInfo = '';
   if (data.revision?.lastModifiedBy || data.revision?.lastModifiedAt) {
-    const parts = [];
+    const parts: string[] = [];
     if (data.revision.lastModifiedBy) parts.push(`Modified by: ${data.revision.lastModifiedBy}`);
     if (data.revision.lastModifiedAt) {
       parts.push(new Date(data.revision.lastModifiedAt).toLocaleDateString());
@@ -296,7 +296,7 @@ const RoomDetails: React.FC<{ data: RoomSheetData }> = ({ data }) => {
   ].filter(([_, v]) => v !== undefined) as [string, string][];
 
   // Group into rows of 2
-  const rows = [];
+  const rows: [string, string][][] = [];
   for (let i = 0; i < details.length; i += 2) {
     rows.push([details[i], details[i + 1]]);
   }

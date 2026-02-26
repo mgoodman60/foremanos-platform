@@ -9,9 +9,8 @@
  * Phase B.1 - Document Intelligence Roadmap
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   extractCalloutsFromText,
@@ -39,7 +38,7 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
   const params = await props.params;
   try {
     // Authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },

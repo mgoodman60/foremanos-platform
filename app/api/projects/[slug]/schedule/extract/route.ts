@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { 
   extractScheduleFromDocument, 
@@ -24,7 +23,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -71,7 +70,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
     const matchedTasks = await matchTasksToSubcontractors(extraction.extractedTasks, project.id);
 
     // Import to schedule if requested
-    let importResult = null;
+    let importResult: Awaited<ReturnType<typeof importExtractedTasks>> | null = null;
     if (importToSchedule) {
       const startDate = projectStartDate ? new Date(projectStartDate) : new Date();
       importResult = await importExtractedTasks(importToSchedule, matchedTasks, startDate);
@@ -102,7 +101,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

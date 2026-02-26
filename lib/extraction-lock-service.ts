@@ -7,7 +7,9 @@
 
 import { prisma } from './db';
 import { createScopedLogger } from './logger';
-import { v4 as uuidv4 } from 'uuid';
+function uuidv4(): string {
+  return crypto.randomUUID();
+}
 
 const log = createScopedLogger('EXTRACTION_LOCK');
 

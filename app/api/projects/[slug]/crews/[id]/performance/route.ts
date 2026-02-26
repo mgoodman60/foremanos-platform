@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_CREWS_PERFORMANCE');
@@ -11,7 +10,7 @@ export async function POST(
 ) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -51,6 +50,7 @@ export async function POST(
     // Calculate productivity rate if units provided
     let productivityRate = undefined;
     if (body.unitsProduced && body.hoursWorked > 0) {
+      // @ts-expect-error strictNullChecks migration
       productivityRate = body.unitsProduced / body.hoursWorked;
     }
 
@@ -98,7 +98,7 @@ export async function GET(
 ) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

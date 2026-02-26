@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/auth-options';
 import { saveWorkflowResponse, updateReportingPattern } from '../../../../lib/workflow-service';
 import { prisma } from '../../../../lib/db';
 import { createLogger } from '@/lib/logger';
@@ -12,7 +11,7 @@ const logger = createLogger('WORKFLOWS_RESPONSES');
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Save each response
-    const savedResponses = [];
+    const savedResponses: any[] = [];
     const responsesObj = responses as Record<string, any>;
     for (const [stepId, response] of Object.entries(responsesObj)) {
       const saved = await saveWorkflowResponse(
@@ -72,7 +71,7 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

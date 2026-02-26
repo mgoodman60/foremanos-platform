@@ -2,9 +2,8 @@
  * Photo Unlink API - Unlinks a photo from an entity
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_PHOTOS_UNLINK');
@@ -12,7 +11,7 @@ const logger = createLogger('PROJECTS_PHOTOS_UNLINK');
 export async function POST(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -48,7 +47,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
         await prisma.dailyReport.update({
           where: { id: entityId },
           data: {
-            photoIds: (report.photoIds || []).filter((id: string) => id !== photoId),
+            photoIds: ((report.photoIds || []) as string[]).filter((id: string) => id !== photoId),
           },
         });
         break;
@@ -84,6 +83,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
         // Remove roomId from photo
         await prisma.roomPhoto.update({
           where: { id: photoId },
+          // @ts-expect-error strictNullChecks migration
           data: { roomId: null },
         });
         break;

@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/db';
@@ -42,7 +41,7 @@ export async function POST(request: Request) {
   logger.info('UPLOAD_COMPLETE', 'Starting chunk assembly');
 
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

@@ -376,7 +376,7 @@ export function InteractivePlanViewer({
   const renderGrid = () => {
     if (!showGrid || !imageRef.current) return null;
 
-    const gridLines = [];
+    const gridLines: React.ReactElement[] = [];
     const gridSize = 50; // pixels between grid lines
     const width = imageRef.current.naturalWidth;
     const height = imageRef.current.naturalHeight;
@@ -412,7 +412,7 @@ export function InteractivePlanViewer({
     }
 
     // Grid labels (letters for columns, numbers for rows)
-    const labels = [];
+    const labels: React.ReactElement[] = [];
     const labelStep = gridSize * 2;
 
     // Column labels (A, B, C...)

@@ -1,8 +1,8 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logActivity } from '@/lib/audit-log';
+import { revokeUserSessions } from '@/lib/jwt-revocation';
 import bcrypt from 'bcryptjs';
 import { createLogger } from '@/lib/logger';
 
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json(
@@ -40,10 +40,23 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       updateData.password = await bcrypt.hash(password, 10);
     }
 
+    // Fetch existing user to detect role changes
+    const existingUser = await prisma.user.findUnique({
+      where: { id: params.id },
+      select: { role: true },
+    });
+
     const user = await prisma.user.update({
       where: { id: params.id },
       data: updateData,
     });
+
+    // Revoke sessions when role changes to force re-authentication
+    if (role && existingUser && role !== existingUser.role) {
+      await revokeUserSessions(params.id).catch((error: unknown) => {
+        logger.warn('Failed to revoke sessions after role change', { userId: params.id, error: String(error) });
+      });
+    }
 
     await logActivity({
       userId: session.user.id,
@@ -77,7 +90,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json(

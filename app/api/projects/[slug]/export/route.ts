@@ -1,7 +1,6 @@
 // Export API Route - CSV exports for project data
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { exportProjectData } from '@/lib/export-service';
 import { createLogger } from '@/lib/logger';
@@ -10,7 +9,7 @@ const logger = createLogger('PROJECTS_EXPORT');
 export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

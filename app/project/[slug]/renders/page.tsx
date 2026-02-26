@@ -1,11 +1,10 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { RendersPageContent } from '@/components/renders/RendersPageContent';
 
 export default async function RendersPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) redirect('/login');
 
   return (

@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { createLogger } from '@/lib/logger';
@@ -21,7 +20,7 @@ interface ChunkMetadata {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

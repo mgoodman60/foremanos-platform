@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import {
   findSymbolByCode,
   searchSymbols,
@@ -18,7 +17,7 @@ const logger = createLogger('PROJECTS_SYMBOLS');
  */
 export async function GET(req: NextRequest, { params: _params }: { params: Promise<{ slug: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

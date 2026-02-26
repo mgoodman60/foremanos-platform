@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { removeDuplicates } from '@/lib/duplicate-detector';
 import { requireProjectPermission } from '@/lib/project-permissions';
@@ -16,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -78,7 +77,7 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
 export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

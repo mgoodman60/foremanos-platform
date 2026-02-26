@@ -8,9 +8,8 @@
  * Get finalization status
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import {
   finalizeReport,
   getFinalizationStatus,
@@ -24,7 +23,7 @@ const logger = createLogger('finalize-api');
 export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required' },
@@ -121,7 +120,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required' },

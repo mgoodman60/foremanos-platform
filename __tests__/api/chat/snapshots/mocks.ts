@@ -2,12 +2,8 @@ import { vi } from 'vitest';
 
 process.env.OPENAI_API_KEY = 'test-key';
 
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn().mockResolvedValue(null),
-}));
-
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('@/lib/db', () => ({

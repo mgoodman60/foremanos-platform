@@ -4,9 +4,8 @@
  * POST - Sync lookahead changes back to schedule
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   generateLookahead,
@@ -19,7 +18,7 @@ const logger = createLogger('PROJECTS_LOOKAHEAD');
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -43,7 +42,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
     const lookahead = await generateLookahead(project.id, startDate);
 
     // Optionally include weather adjustment suggestions
-    let weatherAdjustments = null;
+    let weatherAdjustments: Awaited<ReturnType<typeof suggestWeatherAdjustments>> | null = null;
     if (includeAdjustments) {
       weatherAdjustments = await suggestWeatherAdjustments(project.id, lookahead);
     }
@@ -64,7 +63,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
 export async function POST(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

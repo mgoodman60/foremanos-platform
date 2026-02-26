@@ -2,9 +2,8 @@
  * Executive Dashboard PDF Export API
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format, differenceInDays, startOfWeek } from 'date-fns';
 import { createLogger } from '@/lib/logger';
@@ -13,7 +12,7 @@ const logger = createLogger('PROJECTS_EXECUTIVE_DASHBOARD_EXPORT');
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -44,10 +43,10 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
     }
 
     // Calculate all metrics (same as main endpoint)
-    const schedule = project.Schedule[0];
+    const schedule = project.Schedule[0] as typeof project.Schedule[number] | undefined;
     const tasks = schedule?.ScheduleTask || [];
     const now = new Date();
-    
+
     const tasksOnTrack = tasks.filter(t => {
       const endDate = new Date(t.endDate);
       return t.status === 'completed' || (t.percentComplete > 0 && endDate >= now);
@@ -75,6 +74,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
       ? Math.max(0, differenceInDays(scheduleEndDate, now))
       : 0;
 
+    // @ts-expect-error strictNullChecks migration
     const budget = project.ProjectBudget[0];
     const budgetItems = budget?.BudgetItem || [];
     const totalBudget = budgetItems.reduce((sum, item) => sum + (item.budgetedAmount || 0), 0);

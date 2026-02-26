@@ -4,9 +4,8 @@
  * POST: Create change order
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_CONTRACTS_CHANGE_ORDERS');
@@ -14,7 +13,7 @@ const logger = createLogger('PROJECTS_CONTRACTS_CHANGE_ORDERS');
 export async function GET(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -70,7 +69,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 export async function POST(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -121,8 +120,8 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
     const coNumber = `CO-${String(count + 1).padStart(3, '0')}`;
 
     // Calculate new completion date if days added
-    let newCompletionDate = null;
-    if (daysAdded && daysAdded > 0) {
+    let newCompletionDate: Date | null = null;
+    if (daysAdded && daysAdded > 0 && contract.completionDate) {
       newCompletionDate = new Date(contract.completionDate);
       newCompletionDate.setDate(newCompletionDate.getDate() + daysAdded);
     }

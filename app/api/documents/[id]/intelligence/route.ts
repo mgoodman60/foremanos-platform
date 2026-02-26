@@ -3,9 +3,8 @@
  * Aggregates all extracted intelligence data for a document (Phase A/B/C results)
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { createLogger } from '@/lib/logger';
@@ -17,7 +16,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   const params = await props.params;
   try {
     // Auth check
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

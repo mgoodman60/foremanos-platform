@@ -71,6 +71,7 @@ export async function twoPassRetrieval(
 
     for (const doc of precisionQuery) {
       for (const chunk of doc.DocumentChunk) {
+        // @ts-expect-error strictNullChecks migration
         precisionChunks.push({
           ...chunk,
           metadata: {
@@ -109,6 +110,7 @@ export async function twoPassRetrieval(
 
     for (const doc of notesQuery) {
       for (const chunk of doc.DocumentChunk) {
+        // @ts-expect-error strictNullChecks migration
         contextChunks.push({
           ...chunk,
           metadata: {
@@ -147,6 +149,7 @@ export async function twoPassRetrieval(
     for (const chunk of doc.DocumentChunk) {
       // Avoid duplicates using Set lookup (O(1) instead of O(N))
       if (!existingChunkIds.has(chunk.id)) {
+        // @ts-expect-error strictNullChecks migration
         contextChunks.push({
           ...chunk,
           metadata: {
@@ -240,6 +243,7 @@ export async function bundleCrossReferences(
       for (const chunk of doc.DocumentChunk) {
         // Avoid duplicates using Set lookup (O(1) instead of O(N))
         if (!enrichedChunkIds.has(chunk.id)) {
+          // @ts-expect-error strictNullChecks migration
           enrichedChunks.push({
             ...chunk,
             metadata: {

@@ -5,9 +5,8 @@
  * Extracts scale information from all documents in a project
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   detectScalesWithVision,
@@ -21,7 +20,7 @@ const logger = createLogger('PROJECTS_EXTRACT_SCALES');
 export async function POST(req: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || session.user.role === 'guest') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

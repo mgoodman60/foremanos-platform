@@ -193,6 +193,7 @@ export async function extractFinishSchedules(
 
       if (schedule.flooring) {
         const legendData = enrichWithLegend(schedule.flooring.material, schedule.flooring.material, finishLegend);
+        // @ts-expect-error strictNullChecks migration
         finishItems.push({
           roomId: room.id,
           category: 'flooring' as const,
@@ -207,6 +208,7 @@ export async function extractFinishSchedules(
 
       if (schedule.walls) {
         const legendData = enrichWithLegend(schedule.walls.material, schedule.walls.material, finishLegend);
+        // @ts-expect-error strictNullChecks migration
         finishItems.push({
           roomId: room.id,
           category: 'walls' as const,
@@ -221,6 +223,7 @@ export async function extractFinishSchedules(
 
       if (schedule.ceiling) {
         const legendData = enrichWithLegend(schedule.ceiling.material, schedule.ceiling.material, finishLegend);
+        // @ts-expect-error strictNullChecks migration
         finishItems.push({
           roomId: room.id,
           category: 'ceiling' as const,
@@ -236,6 +239,7 @@ export async function extractFinishSchedules(
 
       if (schedule.base) {
         const legendData = enrichWithLegend(schedule.base.material, schedule.base.material, finishLegend);
+        // @ts-expect-error strictNullChecks migration
         finishItems.push({
           roomId: room.id,
           category: 'base' as const,

@@ -4,9 +4,8 @@
  * POST: Create new contract (with optional AI extraction)
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl } from '@/lib/s3';
 import { extractContractData } from '@/lib/contract-extraction-service';
@@ -18,7 +17,7 @@ const logger = createLogger('PROJECTS_CONTRACTS');
 export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -74,6 +73,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
       const totalRetainage = contracts.reduce((sum, c) =>
         sum + c.payments.reduce((rSum, p) => rSum + p.retainageHeld, 0), 0);
       
+      // @ts-expect-error strictNullChecks migration
       stats = {
         totalContracts: contracts.length,
         activeContracts: contracts.filter(c => c.status === 'ACTIVE').length,
@@ -110,7 +110,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

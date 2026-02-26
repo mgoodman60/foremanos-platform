@@ -4,9 +4,8 @@
  * Fetches from both MEPEquipment table AND TakeoffLineItem for MEP categories
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getMEPDashboardStats } from '@/lib/mep-tracking-service';
 import { createLogger } from '@/lib/logger';
@@ -77,7 +76,7 @@ function mapStatus(dbStatus: string): 'installed' | 'pending' | 'ordered' {
 export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

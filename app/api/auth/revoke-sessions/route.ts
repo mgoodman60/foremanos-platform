@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { revokeUserSessions } from '@/lib/jwt-revocation';
 import { logger } from '@/lib/logger';
 
@@ -11,7 +10,7 @@ import { logger } from '@/lib/logger';
  */
 export async function POST() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

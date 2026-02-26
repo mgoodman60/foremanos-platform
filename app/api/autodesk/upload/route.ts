@@ -3,9 +3,8 @@
  * Uploads design files to Autodesk OSS and starts translation
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { uploadFile } from '@/lib/autodesk-oss';
 import { safeErrorMessage } from '@/lib/api-error';
 import { startTranslation, isSupportedFormat, SUPPORTED_FORMATS } from '@/lib/autodesk-model-derivative';
@@ -19,7 +18,7 @@ const log = createLogger('autodesk-upload');
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

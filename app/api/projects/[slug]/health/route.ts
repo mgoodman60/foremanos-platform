@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { calculateProjectHealth, saveHealthSnapshot, getHealthHistory } from '@/lib/project-health-service';
@@ -9,7 +8,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 export async function GET(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
 
     const health = await calculateProjectHealth(project.id);
     
-    let history = null;
+    let history: Awaited<ReturnType<typeof getHealthHistory>> | null = null;
     if (includeHistory) {
       history = await getHealthHistory(project.id, historyDays);
     }
@@ -58,7 +57,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ slug:
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { analyzeScheduleForImprovements } from '@/lib/schedule-improvement-analyzer';
 import { callAbacusLLM } from '@/lib/abacus-llm';
@@ -39,7 +38,7 @@ interface ProposedTask {
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -233,6 +232,7 @@ function identifyMilestoneBreakdowns(tasks: any[]) {
 
     const trades = new Set(phaseTasks.map(t => t.assignedTo).filter(Boolean));
     
+    // @ts-expect-error strictNullChecks migration
     breakdowns.push({
       milestoneId: phase,
       milestoneName: `${phase} Phase`,
@@ -529,7 +529,7 @@ async function getCriticalPathAnalysis(scheduleId: string) {
 export async function PUT(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

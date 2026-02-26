@@ -867,6 +867,7 @@ describe('Lookahead Service - suggestWeatherAdjustments()', () => {
 
     const weatherForecast = [];
     for (let i = 0; i < 20; i++) {
+      // @ts-expect-error strictNullChecks migration
       weatherForecast.push({
         date: format(addDays(new Date('2024-01-15'), i), 'yyyy-MM-dd'),
         condition: 'Rain',

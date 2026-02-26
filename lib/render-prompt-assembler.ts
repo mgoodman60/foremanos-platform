@@ -307,6 +307,7 @@ export async function gatherExteriorData(projectId: string): Promise<Record<stri
           projectId,
           fileType: 'pdf',
         },
+        // @ts-expect-error strictNullChecks migration
         metadata: { not: null },
       },
       select: { metadata: true },

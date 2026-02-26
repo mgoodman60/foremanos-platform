@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { suggestDocumentCategory } from '@/lib/document-categorizer';
 import { safeErrorMessage } from '@/lib/api-error';
 import { createLogger } from '@/lib/logger';
@@ -11,7 +10,7 @@ export const maxDuration = 30;
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

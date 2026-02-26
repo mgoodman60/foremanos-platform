@@ -36,7 +36,7 @@ async function auditDocumentsWithoutProject(): Promise<AuditResult> {
 
   const orphanedDocuments = await prisma.document.findMany({
     where: {
-      projectId: null,
+      projectId: { equals: null } as any,
     },
     select: {
       id: true,
@@ -56,7 +56,7 @@ async function auditDocumentsWithoutProject(): Promise<AuditResult> {
 
   const totalCount = await prisma.document.count({
     where: {
-      projectId: null,
+      projectId: { equals: null } as any,
     },
   });
 
@@ -88,9 +88,9 @@ async function auditDocumentsWithoutProject(): Promise<AuditResult> {
 async function auditUsersWithoutEmail(): Promise<AuditResult> {
   console.log('\n👤 Auditing User.email...');
 
-  const orphanedUsers = await prisma.user.findMany({
+  const orphanedUsers = await (prisma.user.findMany as any)({
     where: {
-      email: null,
+      email: { equals: null },
     },
     select: {
       id: true,
@@ -109,15 +109,15 @@ async function auditUsersWithoutEmail(): Promise<AuditResult> {
         },
       },
     },
-    take: 10, // Limit samples to first 10
+    take: 10,
     orderBy: {
       createdAt: 'desc',
     },
-  });
+  }) as any[];
 
   const totalCount = await prisma.user.count({
     where: {
-      email: null,
+      email: { equals: null } as any,
     },
   });
 

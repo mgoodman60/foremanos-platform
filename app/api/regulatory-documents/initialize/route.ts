@@ -7,9 +7,8 @@
  * Links all available cached regulatory documents to a project
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { initializeRegulatoryDocumentsForProject } from '@/lib/regulatory-documents';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
@@ -18,7 +17,7 @@ const logger = createLogger('REGULATORY_DOCUMENTS_INITIALIZE');
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

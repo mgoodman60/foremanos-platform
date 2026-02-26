@@ -120,9 +120,9 @@ export function PhotoGallery({
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'date-desc':
-          return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
+          return new Date(b.uploadedAt ?? 0).getTime() - new Date(a.uploadedAt ?? 0).getTime();
         case 'date-asc':
-          return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
+          return new Date(a.uploadedAt ?? 0).getTime() - new Date(b.uploadedAt ?? 0).getTime();
         case 'location-asc':
           return (a.location || '').localeCompare(b.location || '');
         case 'location-desc':
@@ -270,6 +270,7 @@ export function PhotoGallery({
                 <SelectContent>
                   <SelectItem value="all">All trades</SelectItem>
                   {uniqueTrades.map((trade) => (
+                    // @ts-expect-error strictNullChecks migration
                     <SelectItem key={trade} value={trade}>
                       {trade}
                     </SelectItem>
@@ -286,6 +287,7 @@ export function PhotoGallery({
                 <SelectContent>
                   <SelectItem value="all">All locations</SelectItem>
                   {uniqueLocations.map((location) => (
+                    // @ts-expect-error strictNullChecks migration
                     <SelectItem key={location} value={location}>
                       {location}
                     </SelectItem>
@@ -455,7 +457,7 @@ export function PhotoGallery({
               <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
                 {photoUrls[selectedPhoto.id] ? (
                   <Image
-                    src={photoUrls[selectedPhoto.id]}
+                    src={photoUrls[selectedPhoto.id] ?? ''}
                     alt={selectedPhoto.caption || 'Construction photo'}
                     fill
                     className="object-contain"
@@ -592,9 +594,9 @@ export function PhotoGallery({
           onOpenChange={setShowAnnotationModal}
           photoId={editingPhoto.id}
           conversationId={conversationId}
-          currentCaption={editingPhoto.caption}
-          currentLocation={editingPhoto.location}
-          currentTrade={editingPhoto.trade}
+          currentCaption={editingPhoto.caption ?? ''}
+          currentLocation={editingPhoto.location ?? ''}
+          currentTrade={editingPhoto.trade ?? ''}
           currentTags={(editingPhoto as any).tags || []}
           onSave={handleAnnotationSave}
         />

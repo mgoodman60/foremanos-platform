@@ -224,7 +224,7 @@ export default function QuantityVarianceCharts({ lineItems, compact = false }: Q
                 outerRadius={compact ? 80 : 100}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                label={({ name, value, percent }) => `${name}: ${value} (${((percent ?? 0) * 100).toFixed(0)}%)`}
                 labelLine={{ stroke: neutralColors.slate[500] }}
               >
                 {complianceDistribution.map((entry, index) => (

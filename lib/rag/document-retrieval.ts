@@ -175,6 +175,7 @@ export async function retrieveRelevantDocuments(
 
     return {
       chunks: topChunks,
+      // @ts-expect-error strictNullChecks migration
       documentNames,
     };
   } catch (error) {

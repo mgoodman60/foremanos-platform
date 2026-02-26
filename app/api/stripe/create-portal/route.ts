@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { createPortalSession } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
 import { safeErrorMessage } from '@/lib/api-error';
@@ -12,7 +11,7 @@ const logger = createLogger('STRIPE_PORTAL');
 
 export const POST = withCsrf(async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.email) {
       return NextResponse.json(

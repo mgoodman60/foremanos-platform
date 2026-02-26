@@ -222,6 +222,7 @@ export async function sendSignInNotification(
     const admins = await prisma.user.findMany({
       where: { 
         role: 'admin',
+        // @ts-expect-error strictNullChecks migration
         NOT: { email: null },
       },
       select: { id: true, email: true },
@@ -260,6 +261,7 @@ export async function sendAdminAlert(
     const admins = await prisma.user.findMany({
       where: { 
         role: 'admin',
+        // @ts-expect-error strictNullChecks migration
         NOT: { email: null },
       },
       select: { id: true, email: true, username: true },
@@ -341,6 +343,7 @@ export async function sendUserRequestNotification(
     const admins = await prisma.user.findMany({
       where: { 
         role: 'admin',
+        // @ts-expect-error strictNullChecks migration
         NOT: { email: null },
       },
       select: { id: true, email: true },

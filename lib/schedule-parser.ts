@@ -124,6 +124,7 @@ export async function parseScheduleFromDocument(
           totalFloat: task.totalFloat
         }
       });
+      // @ts-expect-error strictNullChecks migration
       createdTasks.push(scheduleTask);
     }
 

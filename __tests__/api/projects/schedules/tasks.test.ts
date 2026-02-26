@@ -66,12 +66,8 @@ const mockSession = {
   },
 };
 
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn().mockResolvedValue(mockSession),
-}));
-
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: vi.fn().mockResolvedValue(mockSession),
 }));
 
 describe('Schedule Task Status Updates', () => {

@@ -180,6 +180,7 @@ Respond with ONLY valid JSON in this exact format:
       name: item.name || 'Unknown Item',
       description: item.description || undefined,
       costCode: item.costCode || undefined,
+      // @ts-expect-error strictNullChecks migration
       tradeType: inferTradeType(item.costCode, item.name),
       budgetedAmount: parseFloat(String(item.budgetedAmount)) || 0,
       unit: item.unit || undefined,
@@ -260,6 +261,7 @@ Respond with ONLY valid JSON:
       name: item.name || 'Unknown',
       description: item.description,
       costCode: item.costCode,
+      // @ts-expect-error strictNullChecks migration
       tradeType: inferTradeType(item.costCode, item.name),
       budgetedAmount: parseFloat(String(item.budgetedAmount)) || 0,
       unit: item.unit,

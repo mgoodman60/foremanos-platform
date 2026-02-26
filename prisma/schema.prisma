@@ -1739,6 +1739,7 @@ model User {
   assignedProjectId                                   String?
   role                                                UserRole                   @default(guest)
   lastLoginAt                                         DateTime?
+  sessionsRevokedAt                                   DateTime?
   preferences                                         Json?
   profilePicture                                      String?
   hasCompletedOnboarding                              Boolean                    @default(false)

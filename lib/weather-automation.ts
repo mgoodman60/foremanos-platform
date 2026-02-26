@@ -36,6 +36,7 @@ export function createWeatherSnapshot(
     time,
     timestamp,
     temperature: data.high, // Use high temp as default
+    // @ts-expect-error strictNullChecks migration
     conditions: data.conditions,
     rainChance: data.precipChance || 0,
     rainAmount: data.precipChance > 0 ? 'Possible' : undefined,
@@ -82,6 +83,7 @@ export function analyzeWeatherImpactFromForecast(
   }
 
   // Check conditions
+  // @ts-expect-error strictNullChecks migration
   const lowerConditions = forecast.conditions.toLowerCase();
   if (lowerConditions.includes('thunder') || lowerConditions.includes('storm')) {
     factors.push('Storm conditions expected');

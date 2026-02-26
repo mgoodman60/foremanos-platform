@@ -16,8 +16,7 @@ const mockPrisma = vi.hoisted(() => ({
 }));
 const mockCheckRateLimit = vi.hoisted(() => vi.fn());
 
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: mockCheckRateLimit,

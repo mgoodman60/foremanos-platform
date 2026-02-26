@@ -50,12 +50,8 @@ vi.mock('@/lib/db', () => ({
 
 const getServerSessionMock = vi.fn();
 
-vi.mock('next-auth', () => ({
-  getServerSession: getServerSessionMock,
-}));
-
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: getServerSessionMock,
 }));
 
 const mockSession = {
@@ -82,7 +78,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({ documentId: 'doc-1' }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(401);
     const data = await response.json();
@@ -96,7 +92,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({}),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(400);
     const data = await response.json();
@@ -112,7 +108,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({ documentId: 'doc-1' }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -136,7 +132,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({ documentId: 'doc-1' }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(403);
     const data = await response.json();
@@ -152,7 +148,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({ documentId: 'doc-1' }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -166,7 +162,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({ documentId: 'doc-1' }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -200,7 +196,7 @@ describe('POST /api/projects/[slug]/schedule', () => {
       body: JSON.stringify({ documentId: 'doc-1' }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -223,7 +219,7 @@ describe('GET /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'GET',
     });
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(401);
   });
@@ -235,7 +231,7 @@ describe('GET /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'GET',
     });
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(404);
   });
@@ -250,7 +246,7 @@ describe('GET /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'GET',
     });
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -270,7 +266,7 @@ describe('GET /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'GET',
     });
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -300,7 +296,7 @@ describe('DELETE /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'DELETE',
     });
-    const response = await DELETE(request, { params: { slug: 'test-project' } });
+    const response = await DELETE(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(401);
   });
@@ -316,7 +312,7 @@ describe('DELETE /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'DELETE',
     });
-    const response = await DELETE(request, { params: { slug: 'test-project' } });
+    const response = await DELETE(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(403);
     const data = await response.json();
@@ -335,7 +331,7 @@ describe('DELETE /api/projects/[slug]/schedule', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/schedule', {
       method: 'DELETE',
     });
-    const response = await DELETE(request, { params: { slug: 'test-project' } });
+    const response = await DELETE(request, { params: { slug: 'test-project' } as any });
 
     expect(response.status).toBe(200);
     const data = await response.json();

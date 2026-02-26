@@ -348,7 +348,7 @@ describe('daily-report-docx-generator', () => {
   });
 
   describe('formatDailyReportForExport', () => {
-    const mockReport = {
+    const mockReport: any = {
       id: 'report-1',
       reportNumber: 42,
       reportDate: new Date('2024-01-15'),

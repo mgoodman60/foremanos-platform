@@ -757,6 +757,7 @@ describe('lazy-loader', () => {
 
       // Simulate intersection
       if (observerCallback) {
+        // @ts-expect-error strictNullChecks migration
         observerCallback(
           [
             {
@@ -796,6 +797,7 @@ describe('lazy-loader', () => {
 
       // Simulate no intersection
       if (observerCallback) {
+        // @ts-expect-error strictNullChecks migration
         observerCallback(
           [
             {
@@ -831,6 +833,7 @@ describe('lazy-loader', () => {
 
       // First intersection
       if (observerCallback) {
+        // @ts-expect-error strictNullChecks migration
         observerCallback(
           [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
@@ -841,6 +844,7 @@ describe('lazy-loader', () => {
 
       // Second intersection (should not reload)
       if (observerCallback) {
+        // @ts-expect-error strictNullChecks migration
         observerCallback(
           [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
@@ -875,6 +879,7 @@ describe('lazy-loader', () => {
       loader.observe(img);
 
       if (observerCallback) {
+        // @ts-expect-error strictNullChecks migration
         observerCallback(
           [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver
@@ -933,6 +938,7 @@ describe('lazy-loader', () => {
       loader.observe(img);
 
       if (observerCallback) {
+        // @ts-expect-error strictNullChecks migration
         observerCallback(
           [{ target: img, isIntersecting: true } as unknown as IntersectionObserverEntry],
           {} as IntersectionObserver

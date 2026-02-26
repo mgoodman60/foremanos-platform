@@ -28,6 +28,7 @@ import { classifyQuery } from '@/lib/chat/utils/query-classifier';
 import { selectSkillsForQuery, isPluginAvailable } from '@/lib/plugin';
 import { detectCommand, buildCommandContext } from '@/lib/plugin/command-router';
 import type { ContextBuilderOptions, BuiltContext, WebSearchResult } from '@/types/chat';
+import type { EnhancedChunk } from '@/lib/rag/types';
 
 /**
  * Build context from RAG retrieval and enhancements
@@ -85,7 +86,7 @@ export async function buildContext(options: ContextBuilderOptions): Promise<Buil
 
   // PHASE A ENRICHMENT: Add title block and legend intelligence
   logger.info('PHASE_A', 'Enriching with title block and legend metadata');
-  const enrichedChunks = await enrichWithPhaseAMetadata(crossRefEnrichedChunks, projectSlug);
+  const enrichedChunks = await enrichWithPhaseAMetadata(crossRefEnrichedChunks as any, projectSlug) as unknown as EnhancedChunk[];
   logger.info('PHASE_A', `Enriched chunks with Phase A intelligence`, { chunkCount: enrichedChunks.length });
 
   // ========================================

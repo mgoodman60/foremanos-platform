@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractAllRequirements, autoImportRequirements, getAvailableCategories } from '@/lib/submittal-requirement-service';
 import { createLogger } from '@/lib/logger';
@@ -9,7 +8,7 @@ const logger = createLogger('PROJECTS_MEP_SUBMITTALS_AUTO_IMPORT');
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { slug, id: submittalId } = params;
     const project = await prisma.project.findUnique({ where: { slug }, select: { id: true } });
@@ -26,7 +25,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
 export async function POST(req: NextRequest, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { slug, id: submittalId } = params;
     const body = await req.json();

@@ -24,11 +24,8 @@ const mockLogger = vi.hoisted(() => ({
   debug: vi.fn(),
 }));
 
-vi.mock('next-auth', () => ({
-  getServerSession: mockGetServerSession,
-}));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,
   createScopedLogger: vi.fn(() => mockLogger),
@@ -47,7 +44,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       body: JSON.stringify({ placements: [] }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -62,7 +59,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       body: JSON.stringify({ placements: [] }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -77,7 +74,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       body: JSON.stringify({ placements: 'not-an-array' }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -92,7 +89,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       body: JSON.stringify({ placements: [] }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -117,7 +114,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -143,7 +140,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -168,7 +165,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -194,7 +191,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -220,7 +217,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -246,7 +243,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -273,7 +270,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'nonexistent' } });
+    const response = await POST(request, { params: { slug: 'nonexistent' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -305,7 +302,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -340,7 +337,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(403);
@@ -382,7 +379,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -424,7 +421,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -468,7 +465,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -516,7 +513,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -568,7 +565,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -618,7 +615,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    await POST(request, { params: { slug: 'test' } });
+    await POST(request, { params: { slug: 'test' } } as any);
 
     expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
     const transactionArg = mockPrisma.$transaction.mock.calls[0][0];
@@ -645,7 +642,7 @@ describe('POST /api/projects/[slug]/rooms/bulk-update-hotspots', () => {
       }),
     });
 
-    const response = await POST(request, { params: { slug: 'test' } });
+    const response = await POST(request, { params: { slug: 'test' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);

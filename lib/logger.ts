@@ -4,8 +4,10 @@
  * - Production: JSON lines ({ timestamp, level, scope, message, ...context })
  * - Development: human-readable colored console output
  * - Filterable via LOG_LEVEL env var (default: 'info' in prod, 'debug' in dev)
- * - No external dependencies
+ * - Optional Axiom integration for centralized log aggregation
  */
+
+import { ingestLog } from './axiom';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -111,6 +113,18 @@ function log(level: LogLevel, scope: string, message: string, context?: LogConte
       case 'error': console.error(formatted); break;
     }
   }
+
+  // Send to Axiom for centralized log aggregation (non-blocking, optional)
+  ingestLog({
+    level,
+    context: scope,
+    message,
+    error: context?.errorMessage as string | undefined,
+    stack: context?.stack as string | undefined,
+    meta: context as Record<string, unknown> | undefined,
+    requestId: context?.requestId as string | undefined,
+    timestamp,
+  });
 }
 
 /**

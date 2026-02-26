@@ -28,7 +28,7 @@ const mockLogger = vi.hoisted(() => ({
 
 // Apply mocks
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('bcryptjs', () => ({ default: { hash: mockBcryptHash } }));
 vi.mock('@/lib/email-service', () => ({ sendWelcomeEmail: mockSendWelcomeEmail }));
 vi.mock('@/lib/logger', () => ({

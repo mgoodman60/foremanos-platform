@@ -3,9 +3,8 @@
  * Traces paths between MEP elements through the building
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { tracePath, type MEPSystem } from '@/lib/mep-path-tracer';
 import { createLogger } from '@/lib/logger';
@@ -14,7 +13,7 @@ const logger = createLogger('PROJECTS_MEP_TRACE_PATH');
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Authentication required' },

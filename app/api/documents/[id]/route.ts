@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { convertDocxToPdf, isConversionSupported } from '@/lib/docx-converter';
 import { getFileUrl, deleteFile } from '@/lib/s3';
@@ -39,7 +38,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   const documentId = params.id;
 
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
@@ -273,7 +272,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -375,7 +374,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     }
 
     // IMPORTANT: Handle auto-sync cascade BEFORE deleting the document
-    let syncResult = null;
+    let syncResult: Awaited<ReturnType<typeof handleDocumentDeletion>> | null = null;
     try {
       syncResult = await handleDocumentDeletion(documentId, document.projectId);
       logger.info('DOCUMENT_DELETE', 'Auto-sync cascade complete', {

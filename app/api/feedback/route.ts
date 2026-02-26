@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 
@@ -11,7 +10,7 @@ export const dynamic = 'force-dynamic';
 // POST /api/feedback - Submit feedback for a message
 export async function POST(request: NextRequest) {
   try {
-    const _session = await getServerSession(authOptions);
+    const _session = await auth();
     const { messageId, rating, comment } = await request.json();
 
     if (!messageId || !rating) {

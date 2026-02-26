@@ -448,7 +448,7 @@ const PhotosSection: React.FC<{ photos?: Photo[] }> = ({ photos }) => {
   
   // Split photos into pages of 4
   const photosPerPage = 4;
-  const photoPages = [];
+  const photoPages: Photo[][] = [];
   for (let i = 0; i < photos.length; i += photosPerPage) {
     photoPages.push(photos.slice(i, i + photosPerPage));
   }

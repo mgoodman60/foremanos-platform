@@ -2,7 +2,7 @@ import '../snapshots/mocks';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/chat/route';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/auth';
 import { getCachedResponse } from '@/lib/query-cache';
 import { checkRateLimit, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkQueryLimit } from '@/lib/subscription';
@@ -138,7 +138,7 @@ describe('Chat API Full Request Flow', () => {
   });
 
   it('should surface query limit errors with tier metadata', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
+    vi.mocked(auth).mockResolvedValue({
       user: { id: 'user-1', role: 'client' },
     } as never);
     vi.mocked(checkQueryLimit).mockResolvedValue({

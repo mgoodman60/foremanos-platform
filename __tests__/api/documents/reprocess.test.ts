@@ -24,8 +24,7 @@ const mockTasksTrigger = vi.hoisted(() => vi.fn().mockResolvedValue({ id: 'test-
 const mockDownloadFile = vi.hoisted(() => vi.fn());
 const mockGetDocumentMetadata = vi.hoisted(() => vi.fn());
 
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 vi.mock('@trigger.dev/sdk/v3', () => ({
   tasks: { trigger: mockTasksTrigger },
@@ -111,7 +110,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockGetServerSession.mockResolvedValue(null);
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(401);
@@ -122,7 +121,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.project.findUnique.mockResolvedValue(null);
 
     const response = await POST(createRequest(), {
-      params: { slug: 'nonexistent', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'nonexistent', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(404);
@@ -138,7 +137,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     );
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(403);
@@ -156,7 +155,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     );
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(429);
@@ -180,7 +179,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.document.update.mockResolvedValue({});
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(200);
@@ -203,7 +202,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.document.update.mockResolvedValue({});
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(200);
@@ -224,7 +223,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.document.update.mockResolvedValue({});
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(200);
@@ -250,7 +249,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     mockPrisma.document.update.mockResolvedValue({});
 
     await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     // Verify old queue entries were cleaned up
@@ -272,7 +271,7 @@ describe('POST /api/projects/[slug]/documents/[id]/reprocess', () => {
     );
 
     const response = await POST(createRequest(), {
-      params: { slug: 'test-project', id: 'doc-1' },
+      params: Promise.resolve({ slug: 'test-project', id: 'doc-1' }),
     });
 
     expect(response.status).toBe(400);

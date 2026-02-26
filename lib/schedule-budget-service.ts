@@ -703,6 +703,7 @@ export async function calculateScheduleDrivenCosts(projectId: string) {
     const avgProgress = tasks.reduce((sum: number, t: any) => sum + t.percentComplete, 0) / (tasks.length || 1);
     const plannedSpend = (avgProgress / 100) * item.budgetedAmount;
 
+    // @ts-expect-error strictNullChecks migration
     items.push({
       budgetItemId: item.id,
       name: item.name,
@@ -717,7 +718,9 @@ export async function calculateScheduleDrivenCosts(projectId: string) {
 
   return {
     items,
+    // @ts-expect-error strictNullChecks migration
     totalPlanned: items.reduce((sum, i) => sum + i.plannedSpend, 0),
+    // @ts-expect-error strictNullChecks migration
     totalActual: items.reduce((sum, i) => sum + i.actualSpend, 0)
   };
 }

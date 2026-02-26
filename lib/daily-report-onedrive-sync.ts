@@ -73,6 +73,7 @@ export async function syncDailyReportToOneDrive(
     try {
       const exportData = formatDailyReportForExport(
         report as any,
+        // @ts-expect-error strictNullChecks migration
         project,
         report.laborEntries || [],
         report.equipmentEntries || [],

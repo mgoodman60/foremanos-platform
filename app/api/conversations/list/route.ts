@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('CONVERSATIONS_LIST');
@@ -9,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,7 +39,7 @@ export async function GET(request: NextRequest) {
     };
 
     // If projectSlug is provided, filter by project
-    let projectData = null;
+    let projectData: { id: string; dailyReportEnabled: boolean } | null = null;
     if (projectSlug) {
       projectData = await prisma.project.findUnique({
         where: { slug: projectSlug },

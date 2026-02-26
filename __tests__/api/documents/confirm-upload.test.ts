@@ -32,8 +32,7 @@ const mockValidateS3Config = vi.hoisted(() => vi.fn());
 const mockSendDocumentUploadNotification = vi.hoisted(() => vi.fn());
 const mockMarkDocumentUploaded = vi.hoisted(() => vi.fn());
 
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/project-permissions', () => ({
   requireProjectPermission: mockRequireProjectPermission,

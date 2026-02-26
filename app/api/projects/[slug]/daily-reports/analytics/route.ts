@@ -3,9 +3,8 @@
  * Provides trend analytics, completeness scoring, and equipment summaries
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   calculateCompletenessScore,
@@ -19,7 +18,7 @@ const logger = createLogger('PROJECTS_DAILY_REPORTS_ANALYTICS');
 export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

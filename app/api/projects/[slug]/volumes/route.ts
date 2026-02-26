@@ -3,9 +3,8 @@
  * Calculates concrete, aggregate, and backfill volumes with costs
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import {
   calculateConcreteVolume,
   calculateAggregateVolume,
@@ -25,7 +24,7 @@ const logger = createLogger('PROJECTS_VOLUMES');
 // POST: Calculate volumes
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

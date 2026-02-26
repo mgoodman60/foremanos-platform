@@ -461,7 +461,7 @@ describe('Material Extraction Service', () => {
       const result = await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15'),
         'user-1'
       );
@@ -505,7 +505,7 @@ describe('Material Extraction Service', () => {
       const result = await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -560,7 +560,7 @@ describe('Material Extraction Service', () => {
       const result = await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -607,7 +607,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -658,7 +658,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -706,7 +706,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -757,7 +757,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -808,7 +808,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -859,7 +859,7 @@ describe('Material Extraction Service', () => {
       const result = await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -913,7 +913,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -973,7 +973,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -1024,7 +1024,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -1296,7 +1296,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -1356,7 +1356,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -1408,7 +1408,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         new Date('2024-01-15')
       );
 
@@ -1461,7 +1461,7 @@ describe('Material Extraction Service', () => {
       await saveMaterialEntries(
         'project-1',
         'conv-1',
-        materialData,
+        materialData as any,
         reportDate
       );
 

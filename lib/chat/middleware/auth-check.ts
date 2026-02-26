@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import type { AuthCheckResult } from '@/types/chat';
 
@@ -9,7 +8,7 @@ import type { AuthCheckResult } from '@/types/chat';
  * Extracted from app/api/chat/route.ts lines 77-102
  */
 export async function checkAuth(request: NextRequest): Promise<AuthCheckResult> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const userId = session?.user?.id || null;
   const clientIp = getClientIp(request);
   const rateLimitId = getRateLimitIdentifier(userId, clientIp);
@@ -19,7 +18,7 @@ export async function checkAuth(request: NextRequest): Promise<AuthCheckResult> 
     session,
     userId,
     userRole,
-    clientIp,
+    clientIp: clientIp || 'unknown',
     rateLimitId,
   };
 }

@@ -318,6 +318,7 @@ describe('takeoff-calculator', () => {
         const room = createMockRoom({
           area: 400,
           FinishScheduleItem: [
+            // @ts-expect-error strictNullChecks migration
             createMockFinishItem('flooring', null), // No material
             createMockFinishItem('ceiling', 'ACT 2x2'),
           ],

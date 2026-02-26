@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { TAKEOFF_TO_BUDGET_MAP, ONE_SENIOR_CARE_BUDGET } from '@/lib/budget-parser';
 import { createLogger } from '@/lib/logger';
@@ -68,7 +67,7 @@ function findPhaseForCategory(category: string): number | null {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

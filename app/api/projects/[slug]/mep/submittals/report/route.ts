@@ -3,9 +3,8 @@
  * POST: Generate PDF report for submittal verification
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
 import { createLogger } from '@/lib/logger';
@@ -19,7 +18,7 @@ interface ReportRequest {
 export async function POST(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -85,7 +84,7 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
     }
 
     // Generate HTML report
-    const htmlContent = generateReportHTML(project, submittals, projectWide);
+    const htmlContent = generateReportHTML(project, submittals, projectWide ?? false);
 
     // Return HTML content for browser-based PDF printing
     // The client can use window.print() or a library like html2pdf.js

@@ -911,7 +911,9 @@ function generateSVGVisualization(
     const end1 = toIso(i, 100, 0);
     const start2 = toIso(0, i, 0);
     const end2 = toIso(100, i, 0);
+    // @ts-expect-error strictNullChecks migration
     gridLines.push(`<line x1="${start1.isoX}" y1="${start1.isoY}" x2="${end1.isoX}" y2="${end1.isoY}" stroke="#374151" stroke-width="0.5" opacity="0.3"/>`);
+    // @ts-expect-error strictNullChecks migration
     gridLines.push(`<line x1="${start2.isoX}" y1="${start2.isoY}" x2="${end2.isoX}" y2="${end2.isoY}" stroke="#374151" stroke-width="0.5" opacity="0.3"/>`);
   }
 

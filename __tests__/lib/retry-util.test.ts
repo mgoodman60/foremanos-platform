@@ -478,6 +478,7 @@ describe('retry-util', () => {
       await vi.advanceTimersByTimeAsync(100);
 
       expect(caughtError).toBeInstanceOf(Error);
+      // @ts-expect-error strictNullChecks migration
       expect((caughtError as Error).message).toBe('connect error');
       expect(mockFn).toHaveBeenCalledTimes(2); // Initial + 1 retry
     });
@@ -593,6 +594,7 @@ describe('retry-util', () => {
       await vi.advanceTimersByTimeAsync(100);
 
       expect(caughtError).toBeInstanceOf(Error);
+      // @ts-expect-error strictNullChecks migration
       expect((caughtError as Error).message).toBe('connect error');
       expect(mockFn).toHaveBeenCalledTimes(3);
     });
@@ -713,7 +715,9 @@ describe('retry-util', () => {
       await vi.advanceTimersByTimeAsync(100);
 
       expect(caughtError).toBeInstanceOf(Error);
+      // @ts-expect-error strictNullChecks migration
       expect(caughtError?.message).toContain('503');
+      // @ts-expect-error strictNullChecks migration
       expect(caughtError?.status).toBe(503);
     });
 

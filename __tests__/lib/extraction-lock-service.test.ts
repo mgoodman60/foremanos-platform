@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
-// Mock UUID generator
+// Mock crypto.randomUUID via globalThis
 const mockUuid = vi.hoisted(() => vi.fn());
-vi.mock('uuid', () => ({ v4: mockUuid }));
+const originalRandomUUID = globalThis.crypto.randomUUID.bind(globalThis.crypto);
+beforeEach(() => {
+  vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => mockUuid() || originalRandomUUID());
+});
 
 // Mock Prisma with vi.hoisted
 const mockPrisma = vi.hoisted(() => ({

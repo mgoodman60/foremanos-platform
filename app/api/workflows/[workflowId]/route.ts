@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/auth-options';
 import { getWorkflowById } from '../../../../lib/workflow-service';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('WORKFLOWS');
@@ -12,7 +11,7 @@ const logger = createLogger('WORKFLOWS');
 export async function GET(req: NextRequest, props: { params: Promise<{ workflowId: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

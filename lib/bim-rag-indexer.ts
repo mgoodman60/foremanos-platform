@@ -343,6 +343,7 @@ export async function getBIMContext(
       where: {
         project: { id: projectId },
         is2D: true,
+        // @ts-expect-error strictNullChecks migration
         extractedMetadata: { not: null },
       },
       select: {

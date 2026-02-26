@@ -5,9 +5,8 @@
  * DELETE: Delete calculation
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_LOAD_CALCULATIONS');
@@ -15,7 +14,7 @@ const logger = createLogger('PROJECTS_MEP_LOAD_CALCULATIONS');
 export async function GET(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -45,7 +44,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 export async function PATCH(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -120,7 +119,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ slug: s
 export async function DELETE(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

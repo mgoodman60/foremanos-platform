@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractRoomsFromDocuments, saveExtractedRooms } from '@/lib/room-extractor';
 import { withDatabaseRetry } from '@/lib/retry-util';
@@ -15,7 +14,7 @@ const logger = createLogger('PROJECTS_EXTRACT_ROOMS');
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await withDatabaseRetry(() => getServerSession(authOptions));
+    const session = await withDatabaseRetry(() => auth());
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

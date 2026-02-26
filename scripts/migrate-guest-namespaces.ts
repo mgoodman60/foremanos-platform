@@ -12,6 +12,7 @@ const prisma = new PrismaClient();
 
 async function migrateGuestNamespaces() {
   const projects = await prisma.project.findMany({
+    // @ts-expect-error strictNullChecks migration
     where: { guestUsername: { not: null } },
   });
 

@@ -415,6 +415,7 @@ export async function createRegulatoryDocuments(
       code.version
     );
 
+    // @ts-expect-error strictNullChecks migration
     results.push({
       standard: code.standard,
       version: code.version,

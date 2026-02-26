@@ -718,8 +718,11 @@ describe('Document Intelligence Router - getProjectDataSources', () => {
     const result = await getProjectDataSources('project-1');
 
     expect(result[0].Document).toBeDefined();
+    // @ts-expect-error strictNullChecks migration
     expect(result[0].Document.id).toBe('doc-1');
+    // @ts-expect-error strictNullChecks migration
     expect(result[0].Document.fileName).toBe('building.rvt');
+    // @ts-expect-error strictNullChecks migration
     expect(result[0].Document.category).toBe('architectural_plans');
   });
 

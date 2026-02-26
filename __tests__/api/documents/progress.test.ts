@@ -16,8 +16,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 
 // Import route handler after mocks
@@ -55,7 +54,7 @@ describe('GET /api/documents/[id]/progress', () => {
   it('should return 401 when not authenticated', async () => {
     mockGetServerSession.mockResolvedValue(null);
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
 
     expect(response.status).toBe(401);
   });
@@ -64,7 +63,7 @@ describe('GET /api/documents/[id]/progress', () => {
     mockGetServerSession.mockResolvedValue(adminSession);
     mockPrisma.document.findUnique.mockResolvedValue(null);
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
 
     expect(response.status).toBe(404);
   });
@@ -90,7 +89,7 @@ describe('GET /api/documents/[id]/progress', () => {
     });
     mockPrisma.processingQueue.count.mockResolvedValue(0);
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -120,7 +119,7 @@ describe('GET /api/documents/[id]/progress', () => {
       lastError: null,
     });
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -149,7 +148,7 @@ describe('GET /api/documents/[id]/progress', () => {
       lastError: null,
     });
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -171,7 +170,7 @@ describe('GET /api/documents/[id]/progress', () => {
       Project: { ownerId: 'user-1' },
     });
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
 
     expect(response.status).toBe(403);
   });
@@ -188,7 +187,7 @@ describe('GET /api/documents/[id]/progress', () => {
     });
     mockPrisma.processingQueue.findFirst.mockResolvedValue(null);
 
-    const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+    const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -226,7 +225,7 @@ describe('GET /api/documents/[id]/progress', () => {
         },
       });
 
-      const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+      const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -260,7 +259,7 @@ describe('GET /api/documents/[id]/progress', () => {
         metadata: { batchSize: 1 }, // No concurrency fields
       });
 
-      const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+      const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -291,7 +290,7 @@ describe('GET /api/documents/[id]/progress', () => {
         metadata: { concurrency: 3, processingMode: 'concurrent' },
       });
 
-      const response = await GET(createRequest('doc-1'), { params: { id: 'doc-1' } });
+      const response = await GET(createRequest('doc-1'), { params: Promise.resolve({ id: 'doc-1' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);

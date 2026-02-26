@@ -3,9 +3,8 @@
  * Handles document uploads, AI parsing, and creates payment application records
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { parsePayAppDocument, matchItemsToBudget } from '@/lib/pay-app-parser';
 import { uploadFile, downloadFile } from '@/lib/s3';
@@ -17,7 +16,7 @@ export const maxDuration = 60; // Allow up to 60 seconds for processing
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -69,6 +68,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
       fileType = body.contentType || 'application/octet-stream';
 
       logger.info('PAY_APP_UPLOAD', `Downloading file from R2 for parsing: ${fileName}`, { cloudStoragePath });
+      // @ts-expect-error strictNullChecks migration
       buffer = await downloadFile(cloudStoragePath);
     } else {
       // Legacy FormData flow

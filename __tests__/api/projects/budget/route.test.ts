@@ -51,12 +51,8 @@ vi.mock('@/lib/db', () => ({
 }));
 
 const getServerSessionMock = vi.fn();
-vi.mock('next-auth', () => ({
-  getServerSession: getServerSessionMock,
-}));
-
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: getServerSessionMock,
 }));
 
 describe('GET /api/projects/[slug]/budget', () => {
@@ -70,7 +66,7 @@ describe('GET /api/projects/[slug]/budget', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/budget/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/budget');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(401);
     const data = await response.json();
@@ -82,7 +78,7 @@ describe('GET /api/projects/[slug]/budget', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/budget/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/budget');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -118,7 +114,7 @@ describe('GET /api/projects/[slug]/budget', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/budget/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/budget');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -135,7 +131,7 @@ describe('GET /api/projects/[slug]/budget', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/budget/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/budget');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -147,7 +143,7 @@ describe('GET /api/projects/[slug]/budget', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/budget/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/budget');
-    const response = await GET(request, { params: { slug: 'test-project' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(500);
     const data = await response.json();
@@ -169,7 +165,7 @@ describe('POST /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ contingency: 50000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(400);
     const data = await response.json();
@@ -183,7 +179,7 @@ describe('POST /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: -100 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(400);
     const data = await response.json();
@@ -202,7 +198,7 @@ describe('POST /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: 1000000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(409);
     const data = await response.json();
@@ -221,7 +217,7 @@ describe('POST /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: 1000000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(403);
     const data = await response.json();
@@ -242,7 +238,7 @@ describe('POST /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: 1000000, contingency: 75000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(201);
     const data = await response.json();
@@ -279,7 +275,7 @@ describe('POST /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: 1000000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await POST(request, { params: { slug: 'test-project' } });
+    const response = await POST(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(201);
   });
@@ -307,7 +303,7 @@ describe('PUT /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: 1200000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await PUT(request, { params: { slug: 'test-project' } });
+    const response = await PUT(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -338,7 +334,7 @@ describe('PUT /api/projects/[slug]/budget', () => {
       }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await PUT(request, { params: { slug: 'test-project' } });
+    const response = await PUT(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -371,7 +367,7 @@ describe('PUT /api/projects/[slug]/budget', () => {
       body: JSON.stringify({ totalBudget: 1200000 }),
       headers: { 'Content-Type': 'application/json' },
     });
-    const response = await PUT(request, { params: { slug: 'test-project' } });
+    const response = await PUT(request, { params: Promise.resolve({ slug: 'test-project' }) });
 
     expect(response.status).toBe(403);
   });

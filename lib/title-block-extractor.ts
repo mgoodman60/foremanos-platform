@@ -393,8 +393,8 @@ export async function storeTitleBlockData(
   try {
     // Extract scale information if available
     const scaleData = null;
-    let primaryScale = null;
-    let scaleRatio = null;
+    let primaryScale: string | null = null;
+    let scaleRatio: number | null = null;
     let scaleType: string | null = null;
     let hasMultipleScales = false;
 

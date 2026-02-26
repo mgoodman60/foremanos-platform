@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('FEEDBACK_CORRECTIONS');
@@ -10,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/feedback/corrections - List all admin corrections (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -88,7 +87,7 @@ export async function GET(request: NextRequest) {
 // POST /api/feedback/corrections - Create a new admin correction (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get project ID
-    let projectId = null;
+    let projectId: string | null = null;
     if (projectSlug) {
       const project = await prisma.project.findUnique({
         where: { slug: projectSlug },

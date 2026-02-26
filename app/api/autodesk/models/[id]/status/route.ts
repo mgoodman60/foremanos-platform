@@ -4,9 +4,8 @@
  * Auto-triggers BIM extraction when model becomes ready
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { getTranslationStatus } from '@/lib/autodesk-model-derivative';
 import { prisma } from '@/lib/db';
 import { extractBIMData } from '@/lib/bim-metadata-extractor';
@@ -19,7 +18,7 @@ const logger = createLogger('autodesk-status');
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

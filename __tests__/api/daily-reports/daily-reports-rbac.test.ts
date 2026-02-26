@@ -21,11 +21,8 @@ const mockPrisma = vi.hoisted(() => ({
   user: { findUnique: vi.fn() },
 }));
 
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(() => mockSession),
-}));
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: vi.fn(() => mockSession),
 }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 
@@ -116,8 +113,8 @@ const mockSanitizeText = sanitizeText as ReturnType<typeof vi.fn>;
 // --- Helpers ---
 
 const PROJECT = { id: 'project-1', name: 'Test Project' };
-const PARAMS_SLUG = { params: { slug: 'test-project' } };
-const PARAMS_SLUG_ID = { params: { slug: 'test-project', id: 'report-1' } };
+const PARAMS_SLUG = { params: { slug: 'test-project' } } as any;
+const PARAMS_SLUG_ID = { params: { slug: 'test-project', id: 'report-1' } } as any;
 
 function makeRequest(
   path: string,
@@ -126,7 +123,7 @@ function makeRequest(
   const init: RequestInit = {};
   if (options?.method) init.method = options.method;
   if (options?.body) init.body = JSON.stringify(options.body);
-  return new NextRequest(`http://localhost:3000${path}`, init);
+  return new NextRequest(`http://localhost:3000${path}`, init as any);
 }
 
 const sampleReport = {

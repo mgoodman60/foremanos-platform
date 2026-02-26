@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getRoomSuggestionsForPhoto, getRoomSuggestionsFromText } from '@/lib/room-suggester';
 import { createLogger } from '@/lib/logger';
@@ -14,7 +13,7 @@ const logger = createLogger('PROJECTS_PHOTOS_SUGGEST_ROOMS');
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

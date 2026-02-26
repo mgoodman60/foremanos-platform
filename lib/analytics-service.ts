@@ -398,6 +398,7 @@ export async function getScheduleAnalytics(projectId: string): Promise<ScheduleA
   const averageTaskDuration = tasks.length > 0 ? totalDuration / tasks.length : 0;
 
   const longestTask = tasks.reduce((longest, t) => {
+    // @ts-expect-error strictNullChecks migration
     if (!longest || t.duration > longest.duration) {
       return { name: t.name, duration: t.duration };
     }

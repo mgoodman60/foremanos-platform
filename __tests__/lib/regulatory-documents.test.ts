@@ -520,9 +520,13 @@ describe('regulatory-documents', () => {
       ]);
 
       expect(results).toHaveLength(2);
+      // @ts-expect-error strictNullChecks migration
       expect(results[0].success).toBe(true);
+      // @ts-expect-error strictNullChecks migration
       expect(results[0].cached).toBe(true);
+      // @ts-expect-error strictNullChecks migration
       expect(results[1].success).toBe(true);
+      // @ts-expect-error strictNullChecks migration
       expect(results[1].needsProcessing).toBe(true);
     });
 
@@ -545,7 +549,9 @@ describe('regulatory-documents', () => {
         { standard: 'ADA 2010 Standards', version: '2010' },
       ]);
 
+      // @ts-expect-error strictNullChecks migration
       expect(results[0].success).toBe(false);
+      // @ts-expect-error strictNullChecks migration
       expect(results[0].error).toBe('Database error');
     });
   });

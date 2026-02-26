@@ -547,8 +547,8 @@ export function WorkflowModal({
                     <div className="text-right text-sm text-gray-400">
                       <div>Wind: {weatherData.windSpeed} mph</div>
                       <div>Humidity: {weatherData.humidity}%</div>
-                      {weatherData.precipitation > 0 && (
-                        <div className="text-yellow-400">Rain: {weatherData.precipitation.toFixed(2)}"</div>
+                      {(weatherData.precipitation ?? 0) > 0 && (
+                        <div className="text-yellow-400">Rain: {weatherData.precipitation!.toFixed(2)}"</div>
                       )}
                     </div>
                   </div>

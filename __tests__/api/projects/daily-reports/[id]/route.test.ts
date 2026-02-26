@@ -138,15 +138,10 @@ vi.mock('@/lib/db', () => ({
   prisma: prismaMock,
 }));
 
-// Mock NextAuth
+// Mock auth
 const getServerSessionMock = vi.fn();
-vi.mock('next-auth', () => ({
-  getServerSession: getServerSessionMock,
-}));
-
-// Mock auth options
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
+vi.mock('@/auth', () => ({
+  auth: getServerSessionMock,
 }));
 
 describe('GET /api/projects/[slug]/daily-reports/[id]', () => {
@@ -176,7 +171,7 @@ describe('GET /api/projects/[slug]/daily-reports/[id]', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1');
-    const response = await GET(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(401);
     const data = await response.json();
@@ -188,7 +183,7 @@ describe('GET /api/projects/[slug]/daily-reports/[id]', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1');
-    const response = await GET(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -198,7 +193,7 @@ describe('GET /api/projects/[slug]/daily-reports/[id]', () => {
   it('should return report with relations', async () => {
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1');
-    const response = await GET(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -212,7 +207,7 @@ describe('GET /api/projects/[slug]/daily-reports/[id]', () => {
 
     const { GET } = await import('@/app/api/projects/[slug]/daily-reports/[id]/route');
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1');
-    const response = await GET(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await GET(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(500);
     const data = await response.json();
@@ -258,7 +253,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
       method: 'PATCH',
       body: JSON.stringify({ workPerformed: 'Updated work' }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(401);
   });
@@ -273,7 +268,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
         safetyIncidents: 1,
       }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.update).toHaveBeenCalledWith(
@@ -294,7 +289,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
       method: 'PATCH',
       body: JSON.stringify({ status: 'SUBMITTED' }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.update).toHaveBeenCalledWith(
@@ -320,7 +315,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
       method: 'PATCH',
       body: JSON.stringify({ status: 'APPROVED' }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     expect(prismaMock.dailyReport.update).toHaveBeenCalledWith(
@@ -362,7 +357,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
         ],
       }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     // Should delete existing entries
@@ -405,7 +400,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
         rejectionReason: 'Missing labor entries',
       }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     expect(mockSendDailyReportStatusEmail).toHaveBeenCalled();
@@ -422,7 +417,7 @@ describe('PATCH /api/projects/[slug]/daily-reports/[id]', () => {
       method: 'PATCH',
       body: JSON.stringify({ workPerformed: 'Updated' }),
     });
-    const response = await PATCH(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await PATCH(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(500);
     const data = await response.json();
@@ -461,7 +456,7 @@ describe('DELETE /api/projects/[slug]/daily-reports/[id]', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1', {
       method: 'DELETE',
     });
-    const response = await DELETE(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await DELETE(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(401);
   });
@@ -471,7 +466,7 @@ describe('DELETE /api/projects/[slug]/daily-reports/[id]', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1', {
       method: 'DELETE',
     });
-    const response = await DELETE(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await DELETE(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -490,7 +485,7 @@ describe('DELETE /api/projects/[slug]/daily-reports/[id]', () => {
     const request = new NextRequest('http://localhost/api/projects/test-project/daily-reports/report-1', {
       method: 'DELETE',
     });
-    const response = await DELETE(request, { params: { slug: 'test-project', id: 'report-1' } });
+    const response = await DELETE(request, { params: Promise.resolve({ slug: 'test-project', id: 'report-1' }) });
 
     expect(response.status).toBe(500);
     const data = await response.json();

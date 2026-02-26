@@ -4,9 +4,8 @@
  * Generates a signed share URL for calendar feeds.
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS, getClientIp, getRateLimitIdentifier } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
@@ -18,7 +17,7 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
   const params = await props.params;
   try {
     // 1. Auth check
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

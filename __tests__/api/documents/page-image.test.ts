@@ -25,11 +25,8 @@ const mockDownloadFile = vi.hoisted(() => vi.fn());
 const mockExtractPageAsPdf = vi.hoisted(() => vi.fn());
 const mockRasterizeSinglePage = vi.hoisted(() => vi.fn());
 
-vi.mock('next-auth', () => ({
-  getServerSession: mockGetServerSession,
-}));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,
   createScopedLogger: vi.fn(() => mockLogger),
@@ -53,7 +50,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -65,7 +62,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue({ user: {} });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -77,7 +74,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue({ user: { email: 'test@example.com' } });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -89,7 +86,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue({ user: { email: 'test@example.com' } });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=abc');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -101,7 +98,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue({ user: { email: 'test@example.com' } });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=0');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -113,7 +110,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue({ user: { email: 'test@example.com' } });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1&maxWidth=50');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -125,7 +122,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockGetServerSession.mockResolvedValue({ user: { email: 'test@example.com' } });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1&maxWidth=9000');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -138,7 +135,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockPrisma.document.findUnique.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -157,7 +154,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(410);
@@ -176,7 +173,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -196,7 +193,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -220,7 +217,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockPrisma.project.findUnique.mockResolvedValue(null);
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -248,7 +245,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(403);
@@ -286,7 +283,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('image/png');
@@ -323,7 +320,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('image/png');
@@ -361,7 +358,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('image/png');
@@ -389,7 +386,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockDownloadFile.mockRejectedValue(new Error('Download timeout'));
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(504);
@@ -418,7 +415,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockDownloadFile.mockRejectedValue(new Error('S3 connection failed'));
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -448,7 +445,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockExtractPageAsPdf.mockRejectedValue(new Error('Page 10 is out of range'));
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=10');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -477,7 +474,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockExtractPageAsPdf.mockRejectedValue(new Error('PDF parsing failed'));
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -511,7 +508,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     mockRasterizeSinglePage.mockRejectedValue(new Error('Rendering failed'));
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    const response = await GET(request, { params: { id: 'doc-1' } });
+    const response = await GET(request, { params: { id: 'doc-1' } } as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -549,7 +546,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1&maxWidth=1500');
-    await GET(request, { params: { id: 'doc-1' } });
+    await GET(request, { params: { id: 'doc-1' } } as any);
 
     expect(mockRasterizeSinglePage).toHaveBeenCalledWith(
       expect.any(Buffer),
@@ -592,7 +589,7 @@ describe('GET /api/documents/[id]/page-image', () => {
     });
 
     const request = new NextRequest('http://localhost/api/documents/doc-1/page-image?page=1');
-    await GET(request, { params: { id: 'doc-1' } });
+    await GET(request, { params: { id: 'doc-1' } } as any);
 
     expect(mockRasterizeSinglePage).toHaveBeenCalledWith(
       expect.any(Buffer),

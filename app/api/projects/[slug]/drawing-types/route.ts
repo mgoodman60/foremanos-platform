@@ -3,9 +3,8 @@
  * Get drawing type classifications for a project
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { safeErrorMessage } from '@/lib/api-error';
 import {
   getProjectDrawingTypes,
@@ -19,7 +18,7 @@ const logger = createLogger('PROJECTS_DRAWING_TYPES');
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json(

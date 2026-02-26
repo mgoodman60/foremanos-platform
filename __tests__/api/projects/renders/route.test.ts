@@ -30,7 +30,7 @@ const mockPrisma = vi.hoisted(() => ({
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 
 const mockSession = vi.hoisted(() => vi.fn());
-vi.mock('next-auth', () => ({ getServerSession: mockSession }));
+vi.mock('@/auth', () => ({ auth: mockSession }));
 
 const mockCheckRateLimit = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/rate-limiter', () => ({
@@ -72,7 +72,6 @@ vi.mock('@/lib/s3', () => ({
   getFileUrl: mockGetFileUrl,
 }));
 
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/logger', () => ({
   createScopedLogger: () => ({
     info: vi.fn(),
@@ -125,6 +124,7 @@ const TEST_RENDER = {
 };
 
 function makeRequest(url: string, options?: RequestInit) {
+  // @ts-expect-error strictNullChecks migration
   return new NextRequest(new URL(url, 'http://localhost:3000'), options);
 }
 
@@ -245,6 +245,7 @@ describe('GET /api/projects/[slug]/renders', () => {
     setupProject({
       ...TEST_PROJECT,
       ownerId: 'other-owner',
+      // @ts-expect-error strictNullChecks migration
       ProjectMember: [{ userId: 'user-1' }],
     });
     mockPrisma.projectRender.findMany.mockResolvedValue([]);
@@ -621,6 +622,7 @@ describe('DELETE /api/projects/[slug]/renders/[id]', () => {
     setupProject({
       ...TEST_PROJECT,
       ownerId: 'owner-user',
+      // @ts-expect-error strictNullChecks migration
       ProjectMember: [{ userId: 'other-user' }],
     });
     mockPrisma.projectRender.findUnique.mockResolvedValue({

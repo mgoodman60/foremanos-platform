@@ -247,6 +247,7 @@ describe('db-helpers', () => {
       await vi.advanceTimersByTimeAsync(100); // Extra time to ensure all retries complete
 
       expect(caughtError).toBeInstanceOf(Error);
+      // @ts-expect-error strictNullChecks migration
       expect((caughtError as Error).message).toBe('Connection refused');
       expect(operation).toHaveBeenCalledTimes(4); // Initial + 3 retries
     });

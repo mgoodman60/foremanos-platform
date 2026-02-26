@@ -1,13 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
-// Mock next-auth to return no session (unauthenticated)
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn().mockResolvedValue(null),
-}));
-
-vi.mock('@/lib/auth', () => ({
-  authOptions: {},
+// Mock auth to return no session (unauthenticated)
+vi.mock('@/auth', () => ({
+  auth: vi.fn().mockResolvedValue(null),
 }));
 
 // Mock prisma
@@ -60,7 +56,7 @@ describe('Serverless Routes Smoke Tests', () => {
         method: 'GET',
       });
 
-      const response = await GET(request, { params: { id: 'test-id' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'test-id' }) });
 
       // Should return 401 (unauthorized) or 404 (not found - which is also acceptable for smoke test)
       expect([401, 404]).toContain(response.status);
@@ -77,7 +73,7 @@ describe('Serverless Routes Smoke Tests', () => {
       );
 
       const response = await GET(request, {
-        params: { slug: 'test-project', documentId: 'test-doc' }
+        params: Promise.resolve({ slug: 'test-project', documentId: 'test-doc' })
       });
 
       // Should return 401, 403, or 404 for invalid/unauthorized requests
@@ -99,7 +95,7 @@ describe('Serverless Routes Smoke Tests', () => {
       );
 
       const response = await POST(request, {
-        params: { slug: 'test-project' }
+        params: Promise.resolve({ slug: 'test-project' })
       });
 
       // Should return 401, 403, or 404 for invalid/unauthorized requests

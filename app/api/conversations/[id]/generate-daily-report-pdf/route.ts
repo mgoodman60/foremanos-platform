@@ -12,10 +12,9 @@
  * 7. Returns download URL
  */
 
+import { auth } from '@/auth';
 import React from 'react';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePresignedUploadUrl, getFileUrl } from '@/lib/s3';
 import { format } from 'date-fns';
@@ -29,7 +28,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -142,7 +141,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     }
 
     // Build schedule updates from workflow data
-    const scheduleUpdates = [];
+    const scheduleUpdates: Array<{ activity: string; plannedStatus: string; actualStatus: string }> = [];
     if (reportData.delays === 'yes' && reportData.delayReason) {
       scheduleUpdates.push({
         activity: 'Daily Work',
@@ -152,7 +151,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     }
 
     // Build weather snapshots
-    const weatherSnapshots = [];
+    const weatherSnapshots: Array<{ time: string; temperature: number; conditions: string; humidity: number; windSpeed: number }> = [];
     if (conversation.weatherSnapshots) {
       const weather = conversation.weatherSnapshots as any;
       if (Array.isArray(weather)) {

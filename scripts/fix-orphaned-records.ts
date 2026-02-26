@@ -53,6 +53,7 @@ async function fixDocumentsWithoutProject(options: FixOptions): Promise<number> 
 
   const orphanedDocuments = await prisma.document.findMany({
     where: {
+      // @ts-expect-error strictNullChecks migration
       projectId: null,
     },
     select: {
@@ -83,6 +84,7 @@ async function fixDocumentsWithoutProject(options: FixOptions): Promise<number> 
     } else {
       const result = await prisma.document.deleteMany({
         where: {
+          // @ts-expect-error strictNullChecks migration
           projectId: null,
         },
       });
@@ -158,6 +160,7 @@ async function fixDocumentsWithoutProject(options: FixOptions): Promise<number> 
   } else {
     const result = await prisma.document.updateMany({
       where: {
+        // @ts-expect-error strictNullChecks migration
         projectId: null,
       },
       data: {
@@ -178,6 +181,7 @@ async function fixUsersWithoutEmail(options: FixOptions): Promise<number> {
 
   const orphanedUsers = await prisma.user.findMany({
     where: {
+      // @ts-expect-error strictNullChecks migration
       email: null,
     },
     select: {
@@ -204,9 +208,11 @@ async function fixUsersWithoutEmail(options: FixOptions): Promise<number> {
 
   // Separate users into deletable (never logged in, not approved) and fixable
   const deletableUsers = orphanedUsers.filter(
+    // @ts-expect-error strictNullChecks migration
     u => !u.lastLoginAt && !u.approved && u.Account.length === 0
   );
   const fixableUsers = orphanedUsers.filter(
+    // @ts-expect-error strictNullChecks migration
     u => u.lastLoginAt || u.approved || u.Account.length > 0
   );
 

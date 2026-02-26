@@ -1,16 +1,17 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from './db';
-import { logActivity } from './audit-log';
-import { sendSignInNotification } from './email-service';
-import { isTokenRevoked } from './jwt-revocation';
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import { authConfig } from './auth.config';
+import { prisma } from './lib/db';
+import { logActivity } from './lib/audit-log';
+import { sendSignInNotification } from './lib/email-service';
+import { isTokenRevoked } from './lib/jwt-revocation';
 import bcrypt from 'bcryptjs';
-import { logger } from './logger';
+import { logger } from './lib/logger';
 
-export const authOptions: NextAuthOptions = {
-  // No adapter needed for JWT-only sessions (reduces DB load by 90%)
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
@@ -19,9 +20,9 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         // Accept either username or email field
-        const identifier = credentials?.username || credentials?.email;
-        
-        if (!identifier) {
+        const identifier = (credentials?.username || credentials?.email) as string | undefined;
+
+        if (!identifier || typeof identifier !== 'string') {
           return null;
         }
 
@@ -49,7 +50,6 @@ export const authOptions: NextAuthOptions = {
           if (namespacedUsers.length === 1) {
             user = namespacedUsers[0];
           }
-          // If 0 or 2+ matches, user stays null (handled below)
         }
 
         if (!user) {
@@ -61,16 +61,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Your account is pending approval');
         }
 
+        const password = credentials.password as string | undefined;
+
         // Password-less login is ONLY allowed for explicit guest accounts
-        // Security: Requires both null password AND guest role to prevent
-        // accidental access if a non-guest user's password is cleared
         if (!user.password) {
           if (user.role !== 'guest') {
-            // Non-guest users must have a password - reject login
             return null;
           }
-          // Guest account: allow login without password
-          if (!credentials.password || credentials.password === '') {
+          if (!password || password === '') {
             return {
               id: user.id,
               email: user.email || '',
@@ -80,18 +78,16 @@ export const authOptions: NextAuthOptions = {
               subscriptionTier: user.subscriptionTier,
             };
           } else {
-            // Password provided but guest user has no password set
             return null;
           }
         }
 
-        // For accounts with passwords, validate it
-        if (!credentials.password) {
+        if (!password || typeof password !== 'string') {
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(
-          credentials.password,
+          password,
           user.password
         );
 
@@ -110,64 +106,10 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  session: {
-    strategy: 'jwt',
-    // JWT strategy allows multiple concurrent sessions for the same user
-    // No session limit - users can be logged in from multiple devices/browsers simultaneously
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60,     // Update session every 24 hours
-  },
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  pages: {
-    signIn: '/login',
-    signOut: '/signout',
-    error: '/login', // Redirect errors back to login page
-  },
   callbacks: {
-    async signIn({ user: __user }) {
-      // Always allow sign in - we handle approval checks in authorize()
-      return true;
-    },
-    async redirect({ url, baseUrl }) {
-      // Enhanced redirect logic with comprehensive handling
-      try {
-        // Default to dashboard
-        const defaultUrl = `${baseUrl}/dashboard`;
-        
-        // If url is not provided or empty, use default
-        if (!url) {
-          return defaultUrl;
-        }
-        
-        // If url is relative, prepend baseUrl
-        if (url.startsWith('/')) {
-          return `${baseUrl}${url}`;
-        }
-        
-        // If url is from same origin, allow it
-        try {
-          const urlObj = new URL(url);
-          if (urlObj.origin === baseUrl) {
-            return url;
-          }
-        } catch (e) {
-          // Invalid URL, fall through to default
-          logger.warn('AUTH', 'Invalid URL in redirect', { url });
-        }
-        
-        // For any other case (external URLs, etc.), redirect to dashboard
-        return defaultUrl;
-      } catch (error) {
-        logger.error('AUTH', 'Redirect error', error as Error);
-        // Fallback to a safe default
-        return `${baseUrl}/dashboard`;
-      }
-    },
-    async jwt({ token, user, trigger: __trigger }) {
-      // On subsequent requests (not initial sign-in), check if token is revoked
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      // On subsequent requests, check if token is revoked
       if (!user && token.sub && token.iat) {
         const revoked = await isTokenRevoked(token.sub, token.iat as number);
         if (revoked) {
@@ -178,27 +120,24 @@ export const authOptions: NextAuthOptions = {
 
       if (user) {
         token.id = user.id;
-        token.username = user.username;
-        token.role = user.role;
-        token.Project_User_assignedProjectIdToProjectId = user.assignedProjectId;
-        token.subscriptionTier = user.subscriptionTier;
-        
-        // CRITICAL FIX: Only run database operations on INITIAL login (when user object is present)
+        token.username = (user as any).username;
+        token.role = (user as any).role;
+        token.Project_User_assignedProjectIdToProjectId = (user as any).assignedProjectId;
+        token.subscriptionTier = (user as any).subscriptionTier;
+
+        // CRITICAL FIX: Only run database operations on INITIAL login
         // This prevents connection pool exhaustion from JWT refreshes
-        // Mark that we've logged this session
         if (!token.loginLogged) {
           token.loginLogged = true;
-          
+
           // Run all database operations in the background (non-blocking)
-          // This prevents the JWT callback from being delayed by slow DB operations
-          // Using void to explicitly mark as fire-and-forget pattern
           void Promise.all([
             prisma.user.update({
               where: { id: user.id },
               data: { lastLoginAt: new Date() },
             }).catch((error: unknown) => {
               logger.error('AUTH', 'Error updating lastLoginAt', error as Error);
-              return null; // Return value to ensure Promise.all doesn't reject
+              return null;
             }),
 
             logActivity({
@@ -206,8 +145,8 @@ export const authOptions: NextAuthOptions = {
               action: 'user_login',
               resource: 'auth',
               details: {
-                username: user.username,
-                role: user.role,
+                username: (user as any).username,
+                role: (user as any).role,
               },
             }).catch((error: unknown) => {
               logger.error('AUTH', 'Error logging activity', error as Error);
@@ -215,17 +154,15 @@ export const authOptions: NextAuthOptions = {
             }),
 
             sendSignInNotification(
-              user.email || user.username,
-              user.username,
-              'N/A', // IP address not available in JWT callback
-              'N/A'  // User agent not available in JWT callback
+              user.email || (user as any).username,
+              (user as any).username,
+              'N/A',
+              'N/A'
             ).catch((error: unknown) => {
               logger.error('AUTH', 'Error sending sign-in notification', error as Error);
               return null;
             }),
           ]).catch((error: unknown) => {
-            // This should never fire if individual catches return values,
-            // but log if it does for debugging unexpected errors
             logger.error('AUTH', 'Unexpected Promise.all error', error as Error);
           });
         }
@@ -233,11 +170,9 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // If token was revoked, return empty session to force re-auth
-      if (token?.revoked) {
+      if ((token as any)?.revoked) {
         return { ...session, user: undefined } as any;
       }
-
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
@@ -248,4 +183,4 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-};
+});

@@ -11,13 +11,7 @@ const mockPrisma = vi.hoisted(() => ({
 }));
 const mockGenerateRoomSheetPDF = vi.hoisted(() => vi.fn());
 
-vi.mock('next-auth', () => ({
-  getServerSession: mockGetServerSession,
-}));
-
-vi.mock('@/lib/auth-options', () => ({
-  authOptions: {},
-}));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
@@ -101,7 +95,7 @@ describe('Room Export PDF API', () => {
     mockGetServerSession.mockResolvedValue(null);
 
     const req = createRequest('test-project', 'room-1');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(401);
     const body = await response.json();
@@ -112,7 +106,7 @@ describe('Room Export PDF API', () => {
     mockGetServerSession.mockResolvedValue({ user: { id: 'user-123' } });
 
     const req = createRequest('test-project', 'room-1');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(401);
   });
@@ -121,7 +115,7 @@ describe('Room Export PDF API', () => {
     mockPrisma.project.findUnique.mockResolvedValue(null);
 
     const req = createRequest('nonexistent', 'room-1');
-    const response = await GET(req, { params: { slug: 'nonexistent', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'nonexistent', id: 'room-1' }) });
 
     expect(response.status).toBe(404);
     const body = await response.json();
@@ -132,7 +126,7 @@ describe('Room Export PDF API', () => {
     mockPrisma.room.findUnique.mockResolvedValue(null);
 
     const req = createRequest('test-project', 'nonexistent');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'nonexistent' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'nonexistent' }) });
 
     expect(response.status).toBe(404);
     const body = await response.json();
@@ -150,7 +144,7 @@ describe('Room Export PDF API', () => {
     mockGenerateRoomSheetPDF.mockResolvedValue(fakeBlob);
 
     const req = createRequest('test-project', 'room-1');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('application/pdf');
@@ -164,7 +158,7 @@ describe('Room Export PDF API', () => {
 
   it('returns JSON when ?format=json is specified', async () => {
     const req = createRequest('test-project', 'room-1', 'format=json');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -181,7 +175,7 @@ describe('Room Export PDF API', () => {
 
   it('does not call generateRoomSheetPDF when format=json', async () => {
     const req = createRequest('test-project', 'room-1', 'format=json');
-    await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(mockGenerateRoomSheetPDF).not.toHaveBeenCalled();
   });
@@ -190,7 +184,7 @@ describe('Room Export PDF API', () => {
     mockGenerateRoomSheetPDF.mockResolvedValue(createMockPdfBlob());
 
     const req = createRequest('test-project', 'room-1');
-    await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(mockGenerateRoomSheetPDF).toHaveBeenCalledTimes(1);
     const calledWith = mockGenerateRoomSheetPDF.mock.calls[0][0];
@@ -210,7 +204,7 @@ describe('Room Export PDF API', () => {
     mockPrisma.takeoffLineItem.findMany.mockResolvedValue([]);
 
     const req = createRequest('test-project', 'room-1', 'format=json');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -229,7 +223,7 @@ describe('Room Export PDF API', () => {
     mockGenerateRoomSheetPDF.mockResolvedValue(createMockPdfBlob());
 
     const req = createRequest('test-project', 'room-1');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.headers.get('Content-Disposition')).toContain('Conference Room A-room-sheet-');
   });
@@ -243,7 +237,7 @@ describe('Room Export PDF API', () => {
     mockPrisma.project.findUnique.mockResolvedValue(projectNoExtras);
 
     const req = createRequest('test-project', 'room-1', 'format=json');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -287,7 +281,7 @@ describe('Room Export PDF API', () => {
     mockPrisma.room.findUnique.mockResolvedValue(roomWithDupes);
 
     const req = createRequest('test-project', 'room-1', 'format=json');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     const body = await response.json();
     // totalItems is raw count from FinishScheduleItem
@@ -301,7 +295,7 @@ describe('Room Export PDF API', () => {
     mockGenerateRoomSheetPDF.mockRejectedValue(new Error('PDF render failed'));
 
     const req = createRequest('test-project', 'room-1');
-    const response = await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    const response = await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(response.status).toBe(500);
     const body = await response.json();
@@ -312,7 +306,7 @@ describe('Room Export PDF API', () => {
     mockGenerateRoomSheetPDF.mockResolvedValue(createMockPdfBlob());
 
     const req = createRequest('test-project', 'room-1');
-    await GET(req, { params: { slug: 'test-project', id: 'room-1' } });
+    await GET(req, { params: Promise.resolve({ slug: 'test-project', id: 'room-1' }) as any });
 
     expect(mockPrisma.project.findUnique).toHaveBeenCalledWith({
       where: { slug: 'test-project' },

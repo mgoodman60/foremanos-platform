@@ -1,12 +1,11 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { createS3Client, getBucketConfig, validateS3Config } from '@/lib/aws-config';
 import { HeadBucketCommand } from '@aws-sdk/client-s3';
 
 export async function GET() {
   // Admin-only endpoint
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

@@ -1,7 +1,6 @@
+import { auth } from '@/auth';
 import { Suspense } from 'react';
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { MarkupPage } from './MarkupPage';
 
@@ -13,7 +12,7 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user?.email) {
     redirect('/login');
   }
@@ -63,6 +62,7 @@ export default async function Page({ params }: PageProps) {
         slug={slug}
         documentId={id}
         documentName={document.name}
+        // @ts-expect-error strictNullChecks migration
         projectName={document.Project.name}
         userId={user.id}
       />

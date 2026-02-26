@@ -22,7 +22,7 @@ const mockPrisma = vi.hoisted(() => ({
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
 
 const mockGetServerSession = vi.hoisted(() => vi.fn());
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 
 const mockCheckRateLimit = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/rate-limiter', () => ({
@@ -41,7 +41,6 @@ vi.mock('@/lib/s3', () => ({
   generatePresignedUploadUrl: mockGeneratePresignedUploadUrl,
 }));
 
-vi.mock('@/lib/auth-options', () => ({ authOptions: {} }));
 vi.mock('@/lib/logger', () => ({
   createScopedLogger: () => ({
     info: vi.fn(),
@@ -86,6 +85,7 @@ const TEST_BOARD = {
 };
 
 function makeRequest(url: string, options?: RequestInit) {
+  // @ts-expect-error strictNullChecks migration
   return new NextRequest(new URL(url, 'http://localhost:3000'), options);
 }
 
@@ -171,6 +171,7 @@ describe('GET /api/projects/[slug]/presentations', () => {
     setupProject({
       ...TEST_PROJECT,
       ownerId: 'other-owner',
+      // @ts-expect-error strictNullChecks migration
       ProjectMember: [{ userId: 'user-1' }],
     });
     mockPrisma.presentationBoard.findMany.mockResolvedValue([]);
@@ -568,6 +569,7 @@ describe('DELETE /api/projects/[slug]/presentations/[id]', () => {
     setupProject({
       ...TEST_PROJECT,
       ownerId: 'owner-user',
+      // @ts-expect-error strictNullChecks migration
       ProjectMember: [{ userId: 'other-user' }],
     });
     mockPrisma.presentationBoard.findUnique.mockResolvedValue({

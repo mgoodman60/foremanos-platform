@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { generatePresignedUploadUrl } from '@/lib/s3';
 import { validateS3Config } from '@/lib/aws-config';
 import { prisma } from '@/lib/db';
@@ -11,7 +10,7 @@ const logger = createLogger('CONVERSATIONS_PHOTOS_PRESIGNED');
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

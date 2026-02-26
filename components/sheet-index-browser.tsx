@@ -199,7 +199,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Sheets</p>
-                <p className="text-2xl font-bold text-gray-100">{stats.totalSheets}</p>
+                <p className="text-2xl font-bold text-gray-100">{stats!.totalSheets}</p>
               </div>
               <Layers className="h-8 w-8 text-orange-500" />
             </div>
@@ -211,7 +211,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Disciplines</p>
-                <p className="text-2xl font-bold text-gray-100">{stats.byDiscipline.length}</p>
+                <p className="text-2xl font-bold text-gray-100">{stats!.byDiscipline.length}</p>
               </div>
               <Building2 className="h-8 w-8 text-blue-500" />
             </div>
@@ -223,7 +223,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Latest Revision</p>
-                <p className="text-2xl font-bold text-gray-100">{stats.latestRevision}</p>
+                <p className="text-2xl font-bold text-gray-100">{stats!.latestRevision}</p>
               </div>
               <Hash className="h-8 w-8 text-green-500" />
             </div>
@@ -236,7 +236,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
               <div>
                 <p className="text-sm text-gray-400">Latest Issue</p>
                 <p className="text-sm font-bold text-gray-100">
-                  {stats.dateRange.latest ? new Date(stats.dateRange.latest).toLocaleDateString() : 'N/A'}
+                  {stats!.dateRange.latest ? new Date(stats!.dateRange.latest).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
               <Calendar className="h-8 w-8 text-purple-500" />
@@ -288,7 +288,7 @@ export default function SheetIndexBrowser({ projectSlug, onSheetSelect }: SheetI
               <TabsTrigger value="all" className="data-[state=active]:bg-orange-500">
                 All ({sheets.length})
               </TabsTrigger>
-              {stats.byDiscipline.map((disc: DisciplineStats) => (
+              {stats!.byDiscipline.map((disc: DisciplineStats) => (
                 <TabsTrigger
                   key={disc.discipline}
                   value={disc.discipline}

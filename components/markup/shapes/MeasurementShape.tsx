@@ -22,15 +22,16 @@ export function MeasurementShape({
 }: MeasurementShapeProps) {
   const { geometry, style, shapeType, measurementValue, measurementUnit } = markup;
 
-  if (!geometry.points || geometry.points.length < 4) {
+  const points = geometry.points;
+  if (!points || points.length < 4) {
     return null;
   }
 
   // Convert points from PDF space to Konva space
   const konvaPoints: number[] = [];
-  for (let i = 0; i < geometry.points.length; i += 2) {
-    const pdfX = geometry.points[i];
-    const pdfY = geometry.points[i + 1];
+  for (let i = 0; i < points.length; i += 2) {
+    const pdfX = points[i];
+    const pdfY = points[i + 1];
     const konvaPoint = pdfToKonva(pdfX, pdfY, pageHeight, scale);
     konvaPoints.push(konvaPoint.x, konvaPoint.y);
   }
@@ -46,25 +47,25 @@ export function MeasurementShape({
     }
 
     // Fallback calculations
-    if (shapeType === 'distance_measurement' && geometry.points.length >= 4) {
-      const dx = geometry.points[2] - geometry.points[0];
-      const dy = geometry.points[3] - geometry.points[1];
+    if (shapeType === 'distance_measurement' && points.length >= 4) {
+      const dx = points[2] - points[0];
+      const dy = points[3] - points[1];
       const distance = Math.sqrt(dx * dx + dy * dy);
       return `${distance.toFixed(2)} units`;
     }
 
-    if (shapeType === 'area_measurement' && geometry.points.length >= 6) {
-      const area = polygonArea(geometry.points);
+    if (shapeType === 'area_measurement' && points.length >= 6) {
+      const area = polygonArea(points);
       return `${area.toFixed(2)} sq units`;
     }
 
-    if (shapeType === 'perimeter_measurement' && geometry.points.length >= 6) {
-      const perimeter = polygonPerimeter(geometry.points);
+    if (shapeType === 'perimeter_measurement' && points.length >= 6) {
+      const perimeter = polygonPerimeter(points);
       return `${perimeter.toFixed(2)} units`;
     }
 
     return '';
-  }, [shapeType, measurementValue, measurementUnit, geometry.points]);
+  }, [shapeType, measurementValue, measurementUnit, points]);
 
   // Label position (midpoint for line, centroid for polygon)
   const labelPos = useMemo(() => {

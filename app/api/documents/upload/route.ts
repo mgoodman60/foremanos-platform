@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { uploadFile } from '@/lib/s3';
 import { requireProjectPermission } from '@/lib/project-permissions';
@@ -30,6 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const ip = getClientIp(request);
+    // @ts-expect-error strictNullChecks migration
     const rateLimitResult = await checkRateLimit(ip, RATE_LIMITS.UPLOAD);
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
     logger.info('Scanning for viruses...');
     const scanStartTime = Date.now();
     let virusStatus = 'skipped';
-    let virusScanProvider = null;
+    let virusScanProvider: string | null = null;
     try {
       const scanResult = await scanFileBuffer(buffer, fileName, {
         timeout: 30000,

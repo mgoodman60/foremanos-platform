@@ -32,7 +32,7 @@ describe('Document Access Auth', () => {
         method: 'GET',
       });
 
-      const response = await GET(request as any, { params: { id: 'doc-1' } });
+      const response = await GET(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
       expect(response.status).toBe(401);
       const data = await response.json();
@@ -46,7 +46,7 @@ describe('Document Access Auth', () => {
         method: 'GET',
       });
 
-      const response = await GET(request as any, { params: { id: 'doc-1' } });
+      const response = await GET(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
       expect(response.status).toBe(401);
       const data = await response.json();
@@ -64,7 +64,7 @@ describe('Document Access Auth', () => {
         method: 'GET',
       });
 
-      const response = await GET(request as any, { params: { id: 'nonexistent' } });
+      const response = await GET(request as any, { params: Promise.resolve({ id: 'nonexistent' }) });
 
       expect(response.status).toBe(404);
       const data = await response.json();
@@ -92,7 +92,7 @@ describe('Document Access Auth', () => {
         method: 'GET',
       });
 
-      const response = await GET(request as any, { params: { id: 'doc-1' } });
+      const response = await GET(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
       expect(response.status).toBe(403);
       const data = await response.json();
@@ -106,7 +106,7 @@ describe('Document Access Auth', () => {
         method: 'GET',
       });
 
-      await GET(request as any, { params: { id: 'doc-1' } });
+      await GET(request as any, { params: Promise.resolve({ id: 'doc-1' }) });
 
       expect(prismaMock.document.findUnique).not.toHaveBeenCalled();
     });

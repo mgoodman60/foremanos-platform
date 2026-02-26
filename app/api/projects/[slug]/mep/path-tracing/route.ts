@@ -3,9 +3,8 @@
  * Redirects to the new trace-path endpoint
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_PATH_TRACING');
 
@@ -14,7 +13,7 @@ export async function POST(
   { params: _params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Authentication required' },

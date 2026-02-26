@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getProcessingLimits, getRemainingPages, shouldResetQuota, getNextResetDate } from '@/lib/processing-limits';
 import { createLogger } from '@/lib/logger';
@@ -14,7 +13,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(_request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

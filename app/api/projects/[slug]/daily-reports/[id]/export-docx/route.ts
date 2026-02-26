@@ -3,9 +3,8 @@
  * Generates editable Word document for daily field reports
  */
 
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import {
   generateDailyReportDOCX,
@@ -20,7 +19,7 @@ export async function GET(
 ) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -64,6 +63,7 @@ export async function GET(
     const reportWithRelations = report as any;
     const exportData = formatDailyReportForExport(
       reportWithRelations,
+      // @ts-expect-error strictNullChecks migration
       project,
       reportWithRelations.laborEntries || [],
       reportWithRelations.equipmentEntries || [],

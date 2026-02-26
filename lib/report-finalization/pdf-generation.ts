@@ -143,6 +143,7 @@ export async function generateReportPDF(conversationId: string): Promise<string>
 
   // Generate PDF
   const pdfBuffer = await ReactPDF.renderToBuffer(
+    // @ts-expect-error strictNullChecks migration
     React.createElement(DailyReportPDF, { data: pdfData }) as React.ReactElement<any>
   );
 

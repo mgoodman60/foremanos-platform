@@ -5,9 +5,8 @@
  * DELETE: Delete contract
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getFileUrl, deleteFile } from '@/lib/s3';
 import { calculateContractFinancials, checkInsuranceCompliance } from '@/lib/contract-extraction-service';
@@ -17,7 +16,7 @@ const logger = createLogger('PROJECTS_CONTRACTS');
 export async function GET(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -63,6 +62,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
     // Get file URL if exists
     let fileUrl = null;
     if (contract.cloudStoragePath) {
+      // @ts-expect-error strictNullChecks migration
       fileUrl = await getFileUrl(contract.cloudStoragePath, false);
     }
 
@@ -104,7 +104,7 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 export async function PATCH(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -244,7 +244,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ slug: s
 export async function DELETE(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

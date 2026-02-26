@@ -171,6 +171,7 @@ describe.skip('fillPdfForm', () => {
       report_title: null,
     };
 
+    // @ts-expect-error strictNullChecks migration
     const filledPdfBuffer = await fillPdfForm(pdfBuffer, data);
 
     const filledPdf = await PDFDocument.load(filledPdfBuffer);

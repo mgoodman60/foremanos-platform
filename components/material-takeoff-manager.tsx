@@ -1382,14 +1382,14 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
       />
 
       {/* Pricing Warning Banner */}
-      {costSummary && costSummary.unpricedItems?.length > 0 && costSummary.unpricedItems.length > costSummary.pricedItemCount && (
+      {costSummary && (costSummary.unpricedItems?.length ?? 0) > 0 && (costSummary.unpricedItems?.length ?? 0) > (costSummary.pricedItemCount ?? 0) && (
         <div className="border-b border-yellow-600/50 p-3 bg-yellow-900/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
               <div>
                 <span className="text-sm font-medium text-yellow-400">
-                  {costSummary.unpricedItems.length.toLocaleString()} items need pricing
+                  {(costSummary.unpricedItems?.length ?? 0).toLocaleString()} items need pricing
                 </span>
                 <p className="text-xs text-yellow-500/70 mt-0.5">
                   Total cost shown may be incomplete. Import from your uploaded Budget.pdf ($2.77M) to apply division pricing.
@@ -1563,9 +1563,9 @@ export function MaterialTakeoffManager({ projectSlug, onClose }: MaterialTakeoff
             </div>
             <div className="flex items-center gap-4 text-xs text-gray-400">
               <span>{costSummary.pricedItemCount || 0}/{costSummary.itemCount || 0} items priced</span>
-              {costSummary.unpricedItems?.length > 0 && (
+              {(costSummary.unpricedItems?.length ?? 0) > 0 && (
                 <span className="text-yellow-500">
-                  {costSummary.unpricedItems.length} items need pricing
+                  {costSummary.unpricedItems!.length} items need pricing
                 </span>
               )}
             </div>

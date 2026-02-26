@@ -24,7 +24,7 @@ const mockLogger = vi.hoisted(() => ({
 
 // Apply mocks
 vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }));
+vi.mock('@/auth', () => ({ auth: mockGetServerSession }));
 vi.mock('@/lib/retry-util', () => ({ withDatabaseRetry: mockWithDatabaseRetry }));
 vi.mock('@/lib/logger', () => ({
   logger: mockLogger,

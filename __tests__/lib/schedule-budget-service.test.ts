@@ -1685,7 +1685,9 @@ describe('calculateScheduleDrivenCosts', () => {
     const result = await calculateScheduleDrivenCosts('project-1');
 
     expect(result.items).toHaveLength(1);
+    // @ts-expect-error strictNullChecks migration
     expect(result.items[0].plannedSpend).toBe(50000); // 50% of 100k
+    // @ts-expect-error strictNullChecks migration
     expect(result.items[0].variance).toBe(5000); // 50k - 45k
     expect(result.totalPlanned).toBe(50000);
     expect(result.totalActual).toBe(45000);
@@ -1737,7 +1739,9 @@ describe('calculateScheduleDrivenCosts', () => {
 
     const result = await calculateScheduleDrivenCosts('project-1');
 
+    // @ts-expect-error strictNullChecks migration
     expect(result.items[0].avgTaskProgress).toBe(75); // (100 + 50) / 2
+    // @ts-expect-error strictNullChecks migration
     expect(result.items[0].plannedSpend).toBe(150000); // 75% of 200k
   });
 

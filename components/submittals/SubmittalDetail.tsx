@@ -404,7 +404,7 @@ export default function SubmittalDetail({ projectSlug, submittalId }: SubmittalD
           currentSpecSection={submittal?.specSection}
           tradeCategory={lineItems[0]?.tradeCategory}
           onSpecSectionChange={(section) => {
-            setSubmittal(prev => prev ? { ...prev, specSection: section } : null);
+            setSubmittal(prev => prev ? { ...prev, specSection: section ?? undefined } : null);
           }}
         />
       ) : activeTab === 'approval' ? (

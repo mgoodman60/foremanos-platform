@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { MaintenancePage } from '@/components/maintenance-page';
@@ -21,7 +20,7 @@ export default async function Home() {
     return <MaintenancePage message={maintenance.message} />;
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   // If user is logged in, redirect to dashboard
   if (session) {

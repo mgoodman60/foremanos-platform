@@ -52,7 +52,7 @@ export function DependencyLines({
             id: `${task.taskId}-${successorId}`,
             fromTask: task,
             toTask: successor,
-            isCritical: task.isCritical && successor.isCritical,
+            isCritical: (task.isCritical ?? false) && (successor.isCritical ?? false),
             type: dependencyType
           });
         }

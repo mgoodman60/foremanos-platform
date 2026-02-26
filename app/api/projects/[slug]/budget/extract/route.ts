@@ -1,6 +1,5 @@
+import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { extractBudgetWithAI, importBudgetToProject } from '@/lib/budget-extractor-ai';
 import { safeErrorMessage } from '@/lib/api-error';
@@ -13,7 +12,7 @@ const logger = createLogger('PROJECTS_BUDGET_EXTRACT');
 export async function POST(request: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -72,7 +71,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
     );
 
     // Auto-import if requested
-    let importResult = null;
+    let importResult: Awaited<ReturnType<typeof importBudgetToProject>> | null = null;
     if (autoImport) {
       importResult = await importBudgetToProject(
         project.id,
@@ -82,7 +81,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ slug
     }
 
     // Auto-sync takeoff pricing from the newly imported budget
-    let takeoffSyncResult = null;
+    let takeoffSyncResult: any = null;
     if (importResult) {
       try {
         logger.info('Auto-syncing takeoff pricing from budget...');

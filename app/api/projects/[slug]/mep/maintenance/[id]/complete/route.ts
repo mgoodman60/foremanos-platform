@@ -3,9 +3,8 @@
  * POST: Log completion of a maintenance task
  */
 
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 const logger = createLogger('PROJECTS_MEP_MAINTENANCE_COMPLETE');
@@ -13,7 +12,7 @@ const logger = createLogger('PROJECTS_MEP_MAINTENANCE_COMPLETE');
 export async function POST(request: Request, props: { params: Promise<{ slug: string; id: string }> }) {
   const params = await props.params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

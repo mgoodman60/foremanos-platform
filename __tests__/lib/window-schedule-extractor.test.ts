@@ -347,6 +347,7 @@ describe('Window Schedule Extractor', () => {
             operationType: 'CASEMENT',
             hardwareFinish: 'BRONZE',
             screenType: 'FULL',
+            // @ts-expect-error strictNullChecks migration
             fireRating: null,
             egressCompliant: true,
             manufacturer: 'ANDERSEN',
