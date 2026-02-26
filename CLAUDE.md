@@ -115,8 +115,12 @@ lib/                  # 295 service modules (RAG, S3, Stripe, auth, offline-stor
   lib/sitework/       # 8 split modules (from sitework-takeoff-extractor.ts barrel re-export)
   lib/report-finalization/  # 9 split modules (from report-finalization.ts barrel re-export)
   lib/plugin/         # 7 modules — AI intelligence plugin integration (see Plugin System below)
-components/           # 398 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
+components/           # 422 React components (Shadcn/Radix UI primitives + dashboard + document intelligence)
   components/dashboard/  # Dashboard widgets + server-widgets.tsx (async SC wrappers) + widget-skeletons.tsx
+  components/document-library/   # 7 files (index.tsx orchestrator + 5 sub-components + types.ts)
+  components/room-browser/       # 9 files (index.tsx orchestrator + 7 sub-components + types.ts)
+  components/plan-navigator/     # 7 files (index.tsx orchestrator + 4 sub-components + discipline-utils.ts + types.ts)
+  components/floor-plan-viewer/  # 7 files (index.tsx orchestrator + 4 sub-components + status-helpers.ts + status-icon.tsx)
 prisma/               # Database schema and migrations (112 models)
 __tests__/            # Vitest tests (248 test files)
 e2e/                  # Playwright E2E tests (23 spec files)
@@ -589,8 +593,8 @@ npm run build
 
 ## Recent Changes & Known Blockers
 
-### React Modernization (Feb 2026, commit `f10b023`)
-All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Build verified with 0 type errors, deployed to Vercel production.
+### React Modernization (Feb 2026, commits `f10b023`, `ff0154f`)
+All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Build verified with 0 type errors, deployed to Vercel production.
 
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:

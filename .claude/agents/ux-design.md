@@ -37,7 +37,7 @@ Map user journeys for these core workflows:
 | Workflow | Key Components | User Goals |
 |----------|----------------|------------|
 | Daily Reports | `daily-report-*.tsx` | Quick field data entry, weather logging |
-| Document Management | `document-library.tsx` | Upload, search, review drawings |
+| Document Management | `document-library/` | Upload, search, review drawings |
 | MEP Submittals | `components/mep/` | Track approvals, compliance |
 | Quantity Takeoffs | `takeoff-*.tsx` | Extract quantities, export data |
 | Photo Documentation | `photo-*.tsx` | Capture progress, annotate issues |

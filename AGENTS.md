@@ -33,7 +33,7 @@ AI-powered construction project management platform. Think "Procore meets AI" �
 app/api/              # 428 API routes (auth → rate limit → validate → logic → response)
 lib/                  # 295 service modules (the backend brain)
 lib/plugin/           # 7 modules — AI intelligence plugin integration
-components/           # 398 React components (Shadcn/Radix UI)
+components/           # 422 React components (Shadcn/Radix UI)
 prisma/               # 112-model schema (sync with `npx prisma db push`)
 __tests__/            # Vitest unit/integration tests
 e2e/                  # Playwright E2E tests

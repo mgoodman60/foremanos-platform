@@ -132,7 +132,7 @@ lib/                # 295 service modules
   plugin/           # 7 modules — AI intelligence plugin integration
   chat/             # Chat pipeline: middleware, processors, utils
 
-components/         # 398 React components
+components/         # 422 React components
   documents/        # 18 document intelligence components
   rooms/            # Floor plan viewer, placement editor, MEP overlays
   dashboard/        # Dashboard widgets, health indicators, schedule view
