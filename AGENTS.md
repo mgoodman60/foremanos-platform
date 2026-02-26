@@ -220,3 +220,46 @@ See `CLAUDE.md` for the full list with descriptions.
 - **Build**: Clean, 0 TypeScript errors
 - **Recent work**: Document processing pipeline optimization (Gemini 2.5 Pro swap, GPT-5.2 rasterization fix, Smart Routing optimization)
 - **No active feature branches** — work directly on `main` with commits
+
+---
+
+## Cursor Cloud specific instructions
+
+### Local PostgreSQL Setup
+
+The dev server and build require a PostgreSQL database. In the Cloud VM:
+
+1. Start PostgreSQL: `sudo pg_ctlcluster 16 main start`
+2. The database `foremanos` with user `foremanos:foremanos` should already exist
+3. If not, create them: `sudo -u postgres psql -c "CREATE USER foremanos WITH PASSWORD 'foremanos' SUPERUSER;" && sudo -u postgres psql -c "CREATE DATABASE foremanos OWNER foremanos;"`
+4. Sync schema: `npx prisma db push`
+5. Seed test user: `npm run seed:test-user` (creates MGoodman60 / password: 123)
+
+### Required `.env` variables (minimum for dev server)
+
+```
+DATABASE_URL='postgresql://foremanos:foremanos@localhost:5432/foremanos?connect_timeout=15&connection_limit=10'
+DIRECT_DATABASE_URL='postgresql://foremanos:foremanos@localhost:5432/foremanos?connect_timeout=15'
+NEXTAUTH_SECRET=<any 32-char random string>
+NEXTAUTH_URL=http://localhost:3000
+OPENAI_API_KEY=sk-placeholder-for-build
+```
+
+The `OPENAI_API_KEY` placeholder is needed because the OpenAI client initializes at import time during `npm run build`. The `DIRECT_DATABASE_URL` is required by the Prisma schema's `directUrl` field.
+
+### Running tests
+
+Tests use `cross-env NODE_OPTIONS=--no-webstorage` in `package.json` which requires Node.js v25. On Node.js v22, run tests directly: `npx vitest --run` instead of `npm test -- --run`.
+
+### Key commands
+
+See `CLAUDE.md` "Build & Development Commands" section for the full reference. Key shortcuts:
+- **Dev server**: `npm run dev` (port 3000)
+- **Tests**: `npx vitest --run` (on Node <25) or `npm test -- --run` (on Node 25+)
+- **Lint**: `npm run lint` (27 pre-existing `react/no-unescaped-entities` errors — ESLint is ignored during builds)
+- **Build**: `npm run build` (requires `OPENAI_API_KEY` env var, even a placeholder)
+
+### Gotchas discovered during setup
+
+- **CSP blocks dev mode**: The `next.config.js` CSP policy needs `'unsafe-eval'` in `script-src` for Next.js HMR/hot reload to work in development. Without it, the app renders a blank page. A fix was added for `NODE_ENV === 'development'`.
+- **`__Host-csrf-token` cookie**: The app uses a `__Host-` prefixed cookie for CSRF protection. The `__Host-` prefix requires the `Secure` flag per spec, but in dev mode `secure` is set to `false`. Browsers typically allow this on localhost, but `curl` and other strict HTTP clients will not store the cookie. When testing API mutations via curl, manually inject the cookie with `--cookie "__Host-csrf-token=<token>"`.
