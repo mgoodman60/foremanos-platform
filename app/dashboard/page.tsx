@@ -12,7 +12,6 @@ import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { BillingCard } from '@/components/billing-card';
 import { QuotaIndicator } from '@/components/quota-indicator';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
-import { csrfFetch } from '@/lib/csrf-client';
 import { SkeletonDashboard } from '@/components/ui/skeleton-card';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 
@@ -337,12 +336,18 @@ export default function DashboardPage() {
     }
 
     try {
-      const response = await csrfFetch('/api/projects', {
+      const response = await fetchWithRetry('/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newProjectData),
+        retryOptions: {
+          maxRetries: 3,
+          onRetry: (attempt) => {
+            toast.loading(`Creating project... (attempt ${attempt}/3)`, { id: 'create-project' });
+          }
+        }
       });
 
       toast.dismiss('create-project');
