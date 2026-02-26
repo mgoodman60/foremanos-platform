@@ -46,7 +46,7 @@ const nextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' https://unpkg.com https://developer.api.autodesk.com https://js.stripe.com",
+          `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : ''} https://unpkg.com https://developer.api.autodesk.com https://js.stripe.com`,
           "style-src 'self' 'unsafe-inline' https://unpkg.com https://developer.api.autodesk.com",
           "img-src 'self' data: blob: *.r2.cloudflarestorage.com",
           "connect-src 'self' *.amazonaws.com *.r2.cloudflarestorage.com https://developer.api.autodesk.com https://js.stripe.com *.ingest.sentry.io",
