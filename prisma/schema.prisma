@@ -555,7 +555,16 @@ model Document {
   virusScanAt             DateTime?
   virusScanProvider       String? // "virustotal"
   sheetIndex              Json?
+  avgQualityScore         Float?
+  lowQualityPageCount     Int                     @default(0)
+  deadLetterPageCount     Int                     @default(0)
+  correctionPassesRun     Int                     @default(0)
+  lastQualityCheckAt      DateTime?
+  phasesRun               Json?
+  tradeFocusRun           Json?
+  pendingQuestionCount    Int                     @default(0)
   DetailCallout           DetailCallout[]
+  QualityQuestion         QualityQuestion[]
   DimensionAnnotation     DimensionAnnotation[]
   Project                 Project?                @relation(fields: [projectId], references: [id], onDelete: Cascade)
   DocumentChunk           DocumentChunk[]
@@ -618,8 +627,17 @@ model DocumentChunk {
   dimensionCount        Int?
   dimensionSummary      Json?
   dimensions            Json?
+  qualityScore          Float?
+  qualityPassed         Boolean?
+  correctionAttempts    Int         @default(0)
+  isDeadLetter          Boolean     @default(false)
+  deadLetterReason      String?
+  qualityHistory        Json?
+  extractionDuration    Int?
+  correctionCost        Float?
   Document              Document?           @relation(fields: [documentId], references: [id], onDelete: Cascade)
   RegulatoryDocument    RegulatoryDocument? @relation(fields: [regulatoryDocumentId], references: [id], onDelete: Cascade)
+  QualityQuestion       QualityQuestion[]
 
   @@index([chunkIndex])
   @@index([discipline])
@@ -628,6 +646,7 @@ model DocumentChunk {
   @@index([drawingType])
   @@index([regulatoryDocumentId])
   @@index([sheetNumber])
+  @@index([documentId, isDeadLetter])
 }
 
 model DrawingType {
@@ -901,14 +920,40 @@ model ProcessingQueue {
   totalBatches   Int
   lastError      String?
   retriesCount   Int                   @default(0)
-  metadata       Json?
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  Document       Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  metadata              Json?
+  correctionPagesRun    Int         @default(0)
+  qualityImprovement    Float?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  Document              Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([documentId])
   @@index([status])
+}
+
+model QualityQuestion {
+  id              String    @id @default(cuid())
+  documentId      String
+  document        Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkId         String?
+  chunk           DocumentChunk? @relation(fields: [chunkId], references: [id], onDelete: SetNull)
+  pageNumber      Int
+  field           String
+  questionText    String
+  questionType    String
+  options         Json?
+  answer          String?
+  answeredBy      String?
+  answeredAt      DateTime?
+  applied         Boolean   @default(false)
+  generatedFrom   String
+  confidenceBefore Float?
+  confidenceAfter  Float?
+  createdAt       DateTime  @default(now())
+
+  @@index([documentId, applied])
+  @@index([chunkId])
 }
 
 model Project {

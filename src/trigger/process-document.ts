@@ -323,6 +323,32 @@ export const processDocumentTask = task({
         }),
       ]);
 
+      // 6.5. Quality aggregation across all chunks
+      try {
+        const allChunks = await prisma.documentChunk.findMany({
+          where: { documentId },
+          select: { qualityScore: true, isDeadLetter: true, correctionAttempts: true },
+        });
+        const scores = allChunks.filter(c => c.qualityScore != null).map(c => c.qualityScore!);
+        const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+
+        await prisma.document.update({
+          where: { id: documentId },
+          data: {
+            avgQualityScore: avgScore,
+            lowQualityPageCount: scores.filter(s => s < 40).length,
+            deadLetterPageCount: allChunks.filter(c => c.isDeadLetter).length,
+            correctionPassesRun: allChunks.reduce((sum, c) => sum + (c.correctionAttempts || 0), 0),
+            lastQualityCheckAt: new Date(),
+          },
+        });
+        logger.info('TRIGGER_PROCESS', `Quality aggregation complete`, {
+          documentId, avgScore, deadLetters: allChunks.filter(c => c.isDeadLetter).length,
+        });
+      } catch (qualityErr: unknown) {
+        logger.warn('TRIGGER_PROCESS', `Quality aggregation failed (non-blocking)`, { documentId });
+      }
+
       // 7. Run post-processing (intelligence extraction, rooms, takeoffs, project enhancement)
       // Only run if we successfully processed at least some pages
       if (!allPagesFailed) {
@@ -340,6 +366,54 @@ export const processDocumentTask = task({
           logger.error('TRIGGER_PROCESS', `Post-processing failed`, postError as Error, { documentId });
           triggerLogger.error(`Post-processing failed: ${sanitizeError(postError)}`, { documentId });
         }
+      }
+
+      // 7.5. Generate quality questions for low-quality and dead-letter pages
+      try {
+        const { generateQualityQuestions } = await import('@/lib/quality-question-generator');
+        const lowQualityChunks = await prisma.documentChunk.findMany({
+          where: {
+            documentId,
+            OR: [
+              { qualityScore: { lt: 40 } },
+              { isDeadLetter: true },
+            ],
+          },
+          select: { id: true, pageNumber: true, content: true, discipline: true, qualityScore: true, qualityHistory: true },
+          take: 10,
+          orderBy: { qualityScore: 'asc' },
+        });
+
+        if (lowQualityChunks.length > 0) {
+          const questions: { documentId: string; chunkId: string; pageNumber: number; field: string; questionText: string; questionType: string; options?: unknown; generatedFrom: string }[] = [];
+          for (const chunk of lowQualityChunks) {
+            if (!chunk.pageNumber) continue;
+            let chunkData: Record<string, unknown> = {};
+            try { chunkData = JSON.parse(chunk.content); } catch { /* skip */ }
+            const chunkQuestions = generateQualityQuestions(
+              chunkData as Record<string, unknown> & { sheetNumber?: string; sheetTitle?: string; scale?: string; content?: string },
+              { score: chunk.qualityScore || 0, passed: false, issues: [], suggestions: [] },
+              chunk.pageNumber,
+              chunk.discipline || 'Unknown',
+            );
+            questions.push(...chunkQuestions.map(q => ({
+              ...q,
+              documentId,
+              chunkId: chunk.id,
+              options: q.options ? q.options : undefined,
+            })));
+          }
+          if (questions.length > 0) {
+            await prisma.qualityQuestion.createMany({ data: questions.slice(0, 20) as any });
+            await prisma.document.update({
+              where: { id: documentId },
+              data: { pendingQuestionCount: Math.min(questions.length, 20) },
+            });
+            logger.info('TRIGGER_PROCESS', `Generated ${Math.min(questions.length, 20)} quality questions`, { documentId });
+          }
+        }
+      } catch (questionErr: unknown) {
+        logger.warn('TRIGGER_PROCESS', `Quality question generation failed (non-blocking)`, { documentId });
       }
 
       // 8. Return summary

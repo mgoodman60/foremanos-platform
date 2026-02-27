@@ -28,6 +28,27 @@ import {
   isStalled,
 } from './processing-status-card';
 
+// ─── Quality badge ────────────────────────────────────────────────────────────
+
+function QualityBadge({ score, deadLetters }: { score: number | null | undefined; deadLetters?: number }) {
+  if ((score === null || score === undefined) && !deadLetters) return null;
+  const color = score === null || score === undefined
+    ? 'bg-gray-400'
+    : score >= 60 ? 'bg-green-500'
+    : score >= 40 ? 'bg-yellow-500'
+    : 'bg-red-500';
+  return (
+    <span className="inline-flex items-center gap-1 ml-1">
+      <span className={`w-2 h-2 rounded-full ${color}`} title={`Quality: ${score ?? 'N/A'}/100`} aria-hidden="true" />
+      {deadLetters != null && deadLetters > 0 && (
+        <span className="text-xs text-red-500" aria-label={`${deadLetters} dead letter pages`}>
+          {deadLetters}
+        </span>
+      )}
+    </span>
+  );
+}
+
 // ─── Pure helper functions ────────────────────────────────────────────────────
 
 export function formatFileSize(bytes: number | null): string {
@@ -253,6 +274,7 @@ export function DocumentGrid({
                     ) : (
                       doc.name
                     )}
+                    <QualityBadge score={(doc as any).avgQualityScore} deadLetters={(doc as any).deadLetterPageCount} />
                   </h3>
                   <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
                     <span className="font-medium uppercase">
@@ -346,6 +368,7 @@ export function DocumentGrid({
                           ) : (
                             doc.name
                           )}
+                          <QualityBadge score={(doc as any).avgQualityScore} deadLetters={(doc as any).deadLetterPageCount} />
                         </h3>
                         {isRecentlyUpdated(doc.updatedAt) && (
                           <span className="px-2 py-1 bg-green-900/30 text-green-400 border border-green-700 text-xs font-bold rounded-full whitespace-nowrap flex items-center gap-1">

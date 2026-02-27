@@ -8,9 +8,10 @@ interface Props {
   drawingTypes: any[];
   selectedSheet: string | null;
   onSelectSheet: (sheet: string) => void;
+  qualityScores?: Record<number, { score: number | null; isDeadLetter: boolean }>;
 }
 
-export default function SheetNavigator({ sheets, drawingTypes, selectedSheet, onSelectSheet }: Props) {
+export default function SheetNavigator({ sheets, drawingTypes, selectedSheet, onSelectSheet, qualityScores }: Props) {
   const typeMap: Record<string, any> = {};
   for (const dt of drawingTypes) {
     typeMap[dt.sheetNumber] = dt;
@@ -54,7 +55,20 @@ export default function SheetNavigator({ sheets, drawingTypes, selectedSheet, on
                       : 'border-transparent hover:bg-gray-50 text-gray-700'
                   }`}
                 >
-                  <div className="font-medium truncate">{sheet.sheetNumber}</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium truncate">{sheet.sheetNumber}</span>
+                    {qualityScores && sheet.pageNumber != null && qualityScores[sheet.pageNumber] && (
+                      <span
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          qualityScores[sheet.pageNumber].isDeadLetter ? 'bg-gray-400' :
+                          (qualityScores[sheet.pageNumber].score || 0) >= 60 ? 'bg-green-500' :
+                          (qualityScores[sheet.pageNumber].score || 0) >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        title={`Quality: ${qualityScores[sheet.pageNumber].score ?? 'N/A'}/100`}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400 truncate">
                     {dt ? getDrawingTypeLabel(dt.type) : 'Unknown type'}
                   </div>

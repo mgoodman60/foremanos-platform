@@ -21,6 +21,10 @@ interface Summary {
   lowConfidenceCount: number;
   fixtureCount: number;
   roomCount: number;
+  avgQualityScore?: number | null;
+  correctionPassesRun?: number;
+  deadLetterCount?: number;
+  pendingQuestionCount?: number;
 }
 
 interface Props {
@@ -88,6 +92,36 @@ export default function IntelligenceSummary({ summary }: Props) {
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">Fixtures</div>
             <div className="text-xl font-bold text-gray-900">{summary.fixtureCount}</div>
+          </div>
+        )}
+
+        {summary.avgQualityScore != null && (
+          <div className={`rounded-lg p-3 ${(summary.avgQualityScore || 0) >= 60 ? 'bg-green-50' : (summary.avgQualityScore || 0) >= 40 ? 'bg-yellow-50' : 'bg-red-50'}`}>
+            <div className="text-xs text-gray-600 mb-1">Avg Quality</div>
+            <div className={`text-xl font-bold ${(summary.avgQualityScore || 0) >= 60 ? 'text-green-600' : (summary.avgQualityScore || 0) >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+              {Math.round(summary.avgQualityScore)}
+            </div>
+          </div>
+        )}
+
+        {summary.correctionPassesRun != null && summary.correctionPassesRun > 0 && (
+          <div className="bg-cyan-50 rounded-lg p-3">
+            <div className="text-xs text-gray-600 mb-1">Corrections</div>
+            <div className="text-xl font-bold text-cyan-600">{summary.correctionPassesRun}</div>
+          </div>
+        )}
+
+        {summary.deadLetterCount != null && summary.deadLetterCount > 0 && (
+          <div className="bg-red-50 rounded-lg p-3">
+            <div className="text-xs text-gray-600 mb-1">Dead Letters</div>
+            <div className="text-xl font-bold text-red-600">{summary.deadLetterCount}</div>
+          </div>
+        )}
+
+        {summary.pendingQuestionCount != null && summary.pendingQuestionCount > 0 && (
+          <div className="bg-yellow-50 rounded-lg p-3">
+            <div className="text-xs text-gray-600 mb-1">Questions</div>
+            <div className="text-xl font-bold text-yellow-600">{summary.pendingQuestionCount}</div>
           </div>
         )}
       </div>

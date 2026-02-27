@@ -78,6 +78,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       doors,
       windows,
       materialTakeoffs,
+      qualityAggData,
+      deadLetterPages,
     ] = await Promise.all([
       prisma.documentChunk.findMany({
         where: { documentId },
@@ -129,6 +131,16 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
         include: { TakeoffLineItem: true },
         orderBy: { createdAt: 'desc' },
         take: 500,
+      }),
+      prisma.documentChunk.aggregate({
+        where: { documentId },
+        _avg: { qualityScore: true },
+        _count: { _all: true },
+      }),
+      prisma.documentChunk.findMany({
+        where: { documentId, isDeadLetter: true },
+        select: { pageNumber: true, deadLetterReason: true, qualityScore: true, sheetNumber: true },
+        take: 100,
       }),
     ]);
 
@@ -248,6 +260,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       summary,
       processingLog,
       visionPipeline,
+      quality: {
+        avgScore: qualityAggData._avg.qualityScore,
+        totalChunks: qualityAggData._count._all,
+        deadLetterPages,
+        lastQualityCheck: (document as Record<string, unknown>).lastQualityCheckAt || null,
+      },
     });
   } catch (error) {
     logger.error('Error fetching document intelligence', error);

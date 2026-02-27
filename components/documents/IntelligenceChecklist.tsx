@@ -8,12 +8,18 @@ interface IntelligenceChecklistProps {
   checklist: IntelligenceChecklistItem[];
   overallScore: number;
   projectSlug: string;
+  avgQualityScore?: number | null;
+  deadLetterCount?: number;
+  correctionPassesRun?: number;
 }
 
 export function IntelligenceChecklist({
   checklist,
   overallScore,
   projectSlug,
+  avgQualityScore,
+  deadLetterCount,
+  correctionPassesRun,
 }: IntelligenceChecklistProps) {
   const [reprocessing, setReprocessing] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -36,12 +42,22 @@ export function IntelligenceChecklist({
           ? 'bg-orange-500'
           : 'bg-red-500';
 
+  const buttonText = deadLetterCount && deadLetterCount > 0
+    ? 'Retry Dead Letters'
+    : avgQualityScore != null && avgQualityScore < 60
+      ? 'Improve Quality'
+      : 'Re-Analyze Documents';
+
   const handleReanalyze = async () => {
     setReprocessing(true);
     setToastMessage('');
     try {
+      const mode = deadLetterCount && deadLetterCount > 0 ? 'improve' : 'full';
+      const body = mode === 'improve' ? { mode, includeDeadLetter: true } : { mode };
       const res = await fetch(`/api/projects/${projectSlug}/rescan`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (res.ok) {
@@ -79,7 +95,14 @@ export function IntelligenceChecklist({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-white">Intelligence Quality</h3>
-        <span className={`text-2xl font-bold ${scoreColor}`}>{overallScore}%</span>
+        <div className="flex items-center gap-1">
+          <span className={`text-2xl font-bold ${scoreColor}`}>{overallScore}%</span>
+          {avgQualityScore != null && (
+            <span className="text-sm text-gray-400 ml-2">
+              (Quality: {Math.round(avgQualityScore)}/100)
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -89,9 +112,14 @@ export function IntelligenceChecklist({
           style={{ width: `${Math.min(100, overallScore)}%` }}
         />
       </div>
-      <p className="text-xs text-gray-400 mb-6">
+      <p className="text-xs text-gray-400 mb-2">
         {completeCount} of {checklist.length} items complete
       </p>
+      {correctionPassesRun != null && correctionPassesRun > 0 && (
+        <p className="text-xs text-gray-400 mb-6">
+          {correctionPassesRun} pages corrected{deadLetterCount ? `, ${deadLetterCount} dead-lettered` : ''}
+        </p>
+      )}
 
       {/* Checklist items */}
       <div className="space-y-3">
@@ -131,10 +159,11 @@ export function IntelligenceChecklist({
       <button
         onClick={handleReanalyze}
         disabled={reprocessing}
-        className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+        className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors min-h-[44px]"
+        aria-label={buttonText}
       >
         <RotateCw className={`h-4 w-4 ${reprocessing ? 'animate-spin' : ''}`} aria-hidden="true" />
-        {reprocessing ? 'Queuing...' : 'Re-analyze Documents'}
+        {reprocessing ? 'Queuing...' : buttonText}
       </button>
 
       {/* Toast */}

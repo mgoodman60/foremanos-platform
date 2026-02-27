@@ -4,6 +4,7 @@
  */
 
 import { prisma } from './db';
+import { Prisma } from '@prisma/client';
 import { getFileUrl } from './s3';
 import { analyzeWithSmartRouting, analyzeWithOpusFallback, getProviderDisplayName, callGeminiVision, callGeminiPro3Vision, type VisionProvider } from './vision-api-multi-provider';
 import { performQualityCheck, formatQualityReport, isBlankPage, assessPageComplexity, type ExtractedData } from './vision-api-quality';
@@ -16,6 +17,8 @@ import { PREMIUM_MODEL } from '@/lib/model-config';
 import { classifyPage } from './discipline-classifier';
 import { loadSymbolContext } from './symbol-context-loader';
 import { getDisciplinePrompt } from './discipline-prompts';
+import { normalizeExtractedData } from './data-normalizer';
+import { correctExtraction } from './extraction-corrector';
 
 // --- Vision extraction sub-types (shapes returned by LLM JSON) ---
 
@@ -1083,6 +1086,14 @@ export async function processDocumentBatch(
         let chunkContent = '';
         let metadata: VisionChunkMetadata = { page: pageNum, source: 'pending' };
 
+        // E->V->C quality tracking variables (scoped to page level for use in chunk creation)
+        let qualityCheck: { score: number; passed: boolean; issues: string[]; suggestions: string[] } | null = null;
+        let correctionAttempts = 0;
+        let isDeadLetter = false;
+        let deadLetterReason: string | null = null;
+        let correctionCost = 0;
+        let qualityHistory: Record<string, unknown>[] = [];
+
         if (visionResult.success && visionResult.content) {
           // Track which provider was used with timing
           const providerName = getProviderDisplayName(visionResult.provider);
@@ -1131,17 +1142,71 @@ export async function processDocumentBatch(
             const parsedData = typeof contentToParse === 'string'
               ? JSON.parse(contentToParse)
               : contentToParse;
-            
-            // Perform quality check
-            const qualityCheck = performQualityCheck(parsedData, pageNum);
+
+            // Normalize extracted data
+            const normalized = normalizeExtractedData(parsedData, 'Unknown');
+            let finalData = normalized.normalizedData;
+
+            // Perform quality check on normalized data
+            qualityCheck = performQualityCheck(finalData, pageNum);
             logger.info('BATCH_PROCESSOR', formatQualityReport(qualityCheck, pageNum));
 
+            // E->V->C correction tracking
+            const MIN_QUALITY = parseInt(process.env.MIN_QUALITY_SCORE || '40', 10);
+            const MAX_CORRECTIONS = parseInt(process.env.MAX_CORRECTION_ATTEMPTS || '1', 10);
+            qualityHistory = [{
+              attempt: 0,
+              score: qualityCheck.score,
+              issues: qualityCheck.issues,
+              normalizations: normalized.changesApplied,
+              timestamp: new Date().toISOString(),
+            }];
+
+            // E->V->C: Attempt correction if below threshold and not blank
+            if (qualityCheck.score < MIN_QUALITY && !isBlankPage(finalData)) {
+              for (let attempt = 1; attempt <= MAX_CORRECTIONS; attempt++) {
+                try {
+                  const correction = await correctExtraction(
+                    finalData, qualityCheck, pageNum,
+                    'Unknown',
+                    { timeout: 30000 }
+                  );
+                  correctionAttempts = attempt;
+                  finalData = correction.correctedData;
+                  qualityCheck = performQualityCheck(finalData, pageNum);
+                  correctionCost += correction.estimatedCost;
+                  qualityHistory.push({
+                    attempt,
+                    score: qualityCheck.score,
+                    issues: qualityCheck.issues,
+                    provider: correction.correctionProvider,
+                    normalizations: correction.normalizationsApplied,
+                    timestamp: new Date().toISOString(),
+                  });
+                  if (qualityCheck.score >= MIN_QUALITY) break;
+                } catch (corrErr: unknown) {
+                  const corrMsg = corrErr instanceof Error ? corrErr.message : String(corrErr);
+                  logger.warn('BATCH_PROCESSOR', `Correction attempt ${attempt} failed for page ${pageNum}`, { error: corrMsg });
+                  if (corrMsg.includes('timeout')) {
+                    isDeadLetter = true;
+                    deadLetterReason = 'Timeout during correction attempt';
+                    break;
+                  }
+                }
+              }
+              // Still below threshold -> dead letter
+              if (qualityCheck.score < MIN_QUALITY && !isDeadLetter) {
+                isDeadLetter = true;
+                deadLetterReason = `Score ${qualityCheck.score}/100 after ${correctionAttempts} correction(s): ${qualityCheck.issues.join('; ')}`;
+              }
+            }
+
             // Check if page is blank
-            if (isBlankPage(parsedData)) {
+            if (isBlankPage(finalData)) {
               logger.warn('BATCH_PROCESSOR', `Page ${pageNum} appears to be blank`);
             }
-            
-            chunkContent = formatVisionData(parsedData);
+
+            chunkContent = formatVisionData(finalData);
             metadata = {
               page: pageNum,
               source: 'vision-analysis',
@@ -1154,10 +1219,10 @@ export async function processDocumentBatch(
               interpretationProvider: visionResult.interpretationProvider || null,
               pass2Provider: visionResult.pass2Provider || null,
               processingTier: visionResult.processingTier || 'single-pass',
-              ...extractMetadata(parsedData),
+              ...extractMetadata(finalData),
             };
 
-            logger.info('BATCH_PROCESSOR', `Page ${pageNum} processed`, { provider: getProviderDisplayName(visionResult.provider), quality: qualityCheck.score, confidence: visionResult.confidenceScore });
+            logger.info('BATCH_PROCESSOR', `Page ${pageNum} processed`, { provider: getProviderDisplayName(visionResult.provider), quality: qualityCheck.score, confidence: visionResult.confidenceScore, correctionAttempts, isDeadLetter });
           } catch (parseError) {
             logger.error('BATCH_PROCESSOR', `Failed to parse vision response for page ${pageNum}`, parseError as Error);
             
@@ -1196,6 +1261,14 @@ export async function processDocumentBatch(
             sheetNumber: metadata.sheetNumber || null,
             titleBlockData: (metadata.titleBlock || null) as any,
             discipline: metadata.discipline || null,
+            qualityScore: qualityCheck?.score ?? null,
+            qualityPassed: qualityCheck?.passed ?? null,
+            correctionAttempts,
+            isDeadLetter,
+            deadLetterReason,
+            qualityHistory: qualityHistory.length > 0 ? (qualityHistory as unknown as Prisma.InputJsonValue) : Prisma.DbNull,
+            extractionDuration: processingTime,
+            correctionCost: correctionCost > 0 ? correctionCost : null,
           },
         });
 
@@ -1221,6 +1294,14 @@ export async function processDocumentBatch(
               skipForRag: true,
               extractionError: errMsg,
             },
+            qualityScore: null,
+            qualityPassed: null,
+            correctionAttempts: 0,
+            isDeadLetter: true,
+            deadLetterReason: errMsg,
+            qualityHistory: Prisma.DbNull,
+            extractionDuration: null,
+            correctionCost: null,
           },
         });
 

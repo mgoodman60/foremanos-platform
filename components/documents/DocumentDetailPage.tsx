@@ -9,6 +9,11 @@ import SheetDetailPanel from './SheetDetailPanel';
 import IntelligenceSummary from './IntelligenceSummary';
 import ProcessingLogPanel from './ProcessingLogPanel';
 import ConfidenceIndicator from './ConfidenceIndicator';
+import QualityDashboard from './QualityDashboard';
+import DeadLetterPanel from './DeadLetterPanel';
+import ExtractionPhasePicker from './ExtractionPhasePicker';
+import TradeFocusPanel from './TradeFocusPanel';
+import QualityQuestionsPanel from './QualityQuestionsPanel';
 
 interface Props {
   projectSlug: string;
@@ -20,6 +25,7 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSheet, setSelectedSheet] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'sheets' | 'quality'>('sheets');
 
   const fetchIntelligence = useCallback(async () => {
     setLoading(true);
@@ -106,8 +112,37 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
         </div>
       </div>
 
+      {/* Tab bar */}
+      <div className="bg-white border-b px-4 sm:px-6">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('sheets')}
+            className={`py-2 px-1 text-sm font-medium border-b-2 transition-colors min-h-[44px] ${
+              activeTab === 'sheets' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+            aria-label="Sheets tab"
+          >
+            Sheets
+          </button>
+          <button
+            onClick={() => setActiveTab('quality')}
+            className={`py-2 px-1 text-sm font-medium border-b-2 transition-colors min-h-[44px] ${
+              activeTab === 'quality' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+            aria-label="Quality tab"
+          >
+            Quality
+            {data.quality?.deadLetterPages?.length > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 text-xs rounded-full" aria-label={`${data.quality.deadLetterPages.length} dead letter pages`}>
+                {data.quality.deadLetterPages.length}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Mobile sheet selector */}
-      <div className="lg:hidden px-4 py-2 bg-white border-b">
+      <div className={`lg:hidden px-4 py-2 bg-white border-b ${activeTab !== 'sheets' ? 'hidden' : ''}`}>
         <label htmlFor="sheet-select" className="sr-only">Select sheet</label>
         <select
           id="sheet-select"
@@ -125,43 +160,81 @@ export default function DocumentDetailPage({ projectSlug, documentId }: Props) {
 
       {/* Main content */}
       <div className="flex">
-        {/* Desktop sidebar */}
-        <nav
-          className="hidden lg:block w-60 flex-shrink-0 bg-white border-r h-[calc(100vh-64px)] overflow-y-auto sticky top-0"
-          aria-label="Sheet navigation"
-        >
-          <SheetNavigator
-            sheets={data.sheets || []}
-            drawingTypes={data.drawingTypes || []}
-            selectedSheet={selectedSheet}
-            onSelectSheet={setSelectedSheet}
-          />
-        </nav>
-
-        {/* Detail panel */}
-        <main className="flex-1 p-4 sm:p-6 space-y-6 overflow-y-auto">
-          {selectedSheetData ? (
-            <SheetDetailPanel
-              sheet={selectedSheetData}
-              drawingType={data.drawingTypes?.find((d: any) => d.sheetNumber === selectedSheet)}
-              dimensions={data.dimensions?.filter((d: any) => d.sheetNumber === selectedSheet)}
-              callouts={data.detailCallouts?.filter((d: any) => d.sourceSheet === selectedSheet)}
-              legends={data.legends?.filter((l: any) => l.sheetNumber === selectedSheet)}
-              annotations={data.enhancedAnnotations?.filter((a: any) => a.sheetNumber === selectedSheet)}
-              rooms={data.rooms || []}
-              doors={data.doors || []}
-              windows={data.windows || []}
-              onNavigateSheet={(sheet: string) => setSelectedSheet(sheet)}
+        {/* Desktop sidebar — only visible on sheets tab */}
+        {activeTab === 'sheets' && (
+          <nav
+            className="hidden lg:block w-60 flex-shrink-0 bg-white border-r h-[calc(100vh-108px)] overflow-y-auto sticky top-0"
+            aria-label="Sheet navigation"
+          >
+            <SheetNavigator
+              sheets={data.sheets || []}
+              drawingTypes={data.drawingTypes || []}
+              selectedSheet={selectedSheet}
+              onSelectSheet={setSelectedSheet}
             />
-          ) : (
-            <div className="text-center py-12 text-gray-400">
-              {data.sheets?.length > 0 ? 'Select a sheet to view details' : 'No sheets extracted'}
-            </div>
-          )}
+          </nav>
+        )}
 
-          {data.summary && <IntelligenceSummary summary={data.summary} />}
-          {data.processingLog && <ProcessingLogPanel log={data.processingLog} visionPipeline={data.visionPipeline} />}
-        </main>
+        {/* Sheets tab content */}
+        {activeTab === 'sheets' && (
+          <main className="flex-1 p-4 sm:p-6 space-y-6 overflow-y-auto">
+            {selectedSheetData ? (
+              <SheetDetailPanel
+                sheet={selectedSheetData}
+                drawingType={data.drawingTypes?.find((d: any) => d.sheetNumber === selectedSheet)}
+                dimensions={data.dimensions?.filter((d: any) => d.sheetNumber === selectedSheet)}
+                callouts={data.detailCallouts?.filter((d: any) => d.sourceSheet === selectedSheet)}
+                legends={data.legends?.filter((l: any) => l.sheetNumber === selectedSheet)}
+                annotations={data.enhancedAnnotations?.filter((a: any) => a.sheetNumber === selectedSheet)}
+                rooms={data.rooms || []}
+                doors={data.doors || []}
+                windows={data.windows || []}
+                onNavigateSheet={(sheet: string) => setSelectedSheet(sheet)}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-400">
+                {data.sheets?.length > 0 ? 'Select a sheet to view details' : 'No sheets extracted'}
+              </div>
+            )}
+
+            {data.summary && <IntelligenceSummary summary={data.summary} />}
+            {data.processingLog && <ProcessingLogPanel log={data.processingLog} visionPipeline={data.visionPipeline} />}
+          </main>
+        )}
+
+        {/* Quality tab content */}
+        {activeTab === 'quality' && (
+          <main className="flex-1 p-4 sm:p-6 space-y-6 overflow-y-auto">
+            <QualityDashboard documentId={documentId} projectSlug={projectSlug} />
+            {data.quality?.deadLetterPages?.length > 0 && (
+              <DeadLetterPanel
+                documentId={documentId}
+                projectSlug={projectSlug}
+                pages={data.quality.deadLetterPages.map((p: any) => ({
+                  pageNumber: p.pageNumber,
+                  qualityScore: p.qualityScore,
+                  sheetNumber: p.sheetNumber,
+                  discipline: null,
+                  deadLetterReason: p.deadLetterReason,
+                  correctionAttempts: 0,
+                  provider: null,
+                }))}
+                onRefresh={fetchIntelligence}
+              />
+            )}
+            <ExtractionPhasePicker
+              documentId={documentId}
+              phasesRun={(data.document as any)?.phasesRun || []}
+            />
+            <TradeFocusPanel
+              documentId={documentId}
+              projectSlug={projectSlug}
+              tradeFocusRun={(data.document as any)?.tradeFocusRun || []}
+              detectedDisciplines={Object.keys(data.summary?.disciplineBreakdown || {})}
+            />
+            <QualityQuestionsPanel documentId={documentId} />
+          </main>
+        )}
       </div>
     </div>
     </ErrorBoundary>
