@@ -148,17 +148,17 @@ npx tsx scripts/test-upload-pipeline.ts --url http://localhost:3000  # E2E uploa
 
 **ForemanOS** is an AI-powered construction project management platform with:
 - **Next.js 15.5** App Router (server/client components, React 19)
-- **Prisma 6.7** ORM with **112 database models**
+- **Prisma 6.7** ORM with **124 database models**
 - **PostgreSQL 14+** with serverless connection pooling
 - **NextAuth.js** JWT-based authentication (no session adapter)
 
 ### Core Directories
 
 ```
-app/api/              # 428 API routes organized by feature domain
+app/api/              # 437 API routes organized by feature domain
 app/project/[slug]/   # 14 SC pages + client children (*-page-content.tsx), 6 loading.tsx, 6 error.tsx
 lib/                  # 295 service modules (RAG, S3, Stripe, auth, offline-store, intelligence, etc.)
-  lib/auth.ts         # requireAuth() — shared server auth helper wrapping getServerSession
+  lib/auth.ts         # requireAuth() — shared server auth helper wrapping auth() (v5 API)
   lib/data/           # 8 server data modules (16 cache()-wrapped Prisma queries for SC pages)
   lib/rag/            # 25 split modules (from rag.ts + rag-enhancements.ts barrel re-exports)
   lib/mep-takeoff/    # 5 split modules (from mep-takeoff-generator.ts barrel re-export)
@@ -171,11 +171,11 @@ components/           # 422 React components (Shadcn/Radix UI primitives + dashb
   components/room-browser/       # 9 files (index.tsx orchestrator + 7 sub-components + types.ts)
   components/plan-navigator/     # 7 files (index.tsx orchestrator + 4 sub-components + discipline-utils.ts + types.ts)
   components/floor-plan-viewer/  # 7 files (index.tsx orchestrator + 4 sub-components + status-helpers.ts + status-icon.tsx)
-prisma/               # Database schema and migrations (112 models)
+prisma/               # Database schema and migrations (124 models)
 __tests__/            # Vitest tests (248 test files)
 e2e/                  # Playwright E2E tests (23 spec files)
 src/trigger/          # Trigger.dev v3 long-running tasks (document processing + 10 plugin agent tasks)
-ai-intelligence/      # Git submodule — foreman-os plugin (42 skills, 10 agents, 37 commands, 21 references)
+ai-intelligence/      # Git submodule — foreman-os plugin (56 skills, 12 agents, 40 commands, 21 references)
 .claude/agents/       # 24 custom Claude Code agents
 .claude/skills/       # 14 project slash commands + 24 installed skills (see below)
 ```
@@ -185,7 +185,7 @@ ai-intelligence/      # Git submodule — foreman-os plugin (42 skills, 10 agent
 | File | Purpose |
 |------|---------|
 | `lib/db.ts` | Prisma singleton with connection management |
-| `lib/auth-options.ts` | NextAuth configuration |
+| `lib/auth.ts` | requireAuth() — shared server auth helper wrapping auth() (next-auth v5) |
 | `lib/rag.ts` | Barrel re-export → `lib/rag/` (5 modules: core-types, document-retrieval, context-generation, query-classifiers, phase-instructions) |
 | `lib/rag-enhancements.ts` | Barrel re-export → `lib/rag/` (14 modules: types, query-classification, measurement-extraction, takeoff-extraction, symbol-legend, mep-coordination, compliance-checking, scale-detection, abbreviations, spatial-analysis, system-topology, isometric-views, symbol-learning, export-utilities) |
 | `lib/s3.ts` | AWS S3 operations with timeout/retry |
@@ -328,7 +328,7 @@ The `foreman-os` plugin repo is mounted as a git submodule at `ai-intelligence/`
 
 **Submodule**: `https://github.com/mgoodman60/foreman-os.git` → `ai-intelligence/`
 
-**Plugin contents**: 42 skills, 10 agents, 37 slash commands, 21 field-reference docs. All markdown/JSON — no executable code.
+**Plugin contents**: 56 skills, 12 agents, 40 slash commands, 21 field-reference docs. All markdown/JSON — no executable code.
 
 **Integration modules** (`lib/plugin/`):
 
@@ -644,7 +644,7 @@ npm run build
 ## Recent Changes & Known Blockers
 
 ### React Modernization (Feb 2026, commits `f10b023`, `ff0154f`, `543e0b4`, `7418c1b`)
-All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Phase 4C: Performance memoization — `useMemo` for derived data, `useCallback` for 30+ handlers, `React.memo` on 11 sub-components, module-level pure function extraction, `dragStart` useState→useRef. Phase 4D: ISR (`revalidate=300`) on legends page, `next/image` with R2 `remotePatterns` + 5 img→Image conversions. 140 unit tests added for discipline-utils and status-helpers. Phase 5: Upgraded to Next.js 15.5 + React 19.2 — 377 route/page params converted to async, 15 files converted for React 19 types, next.config.js cleaned of deprecated options, next-auth v4 retained (v5 deferred). Build verified with 0 type errors, all tests pass.
+All 14 project pages converted from `'use client'` to Server Components. Dashboard uses streaming `<Suspense>` with 8 independent widget boundaries. No `'use client'` page.tsx files remain under `app/project/[slug]/`. Phase 4B: 5 large components (document-library, room-browser, contracts-page-content, plan-navigator, floor-plan-viewer) decomposed into subdirectory modules with 32 sub-component files. Phase 4C: Performance memoization — `useMemo` for derived data, `useCallback` for 30+ handlers, `React.memo` on 11 sub-components, module-level pure function extraction, `dragStart` useState→useRef. Phase 4D: ISR (`revalidate=300`) on legends page, `next/image` with R2 `remotePatterns` + 5 img→Image conversions. 140 unit tests added for discipline-utils and status-helpers. Phase 5: Upgraded to Next.js 15.5 + React 19.2 — 377 route/page params converted to async, 15 files converted for React 19 types, next.config.js cleaned of deprecated options, next-auth v5 (5.0.0-beta.30). Build verified with 0 type errors, all tests pass.
 
 ### LLM Model Config (actively referenced)
 Centralized in `lib/model-config.ts`. Key points:
@@ -710,7 +710,7 @@ See `S3_SETUP_GUIDE.md` for detailed setup instructions (Option B: Cloudflare R2
 | Project | wispy-scene-93200332 |
 | Region | us-east-1 |
 | Connection | Pooled (serverless) |
-| Schema | 112 Prisma models |
+| Schema | 124 Prisma models |
 | Status | In sync with schema |
 
 ## Installed Skills (Community + Custom)
