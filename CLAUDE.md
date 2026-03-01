@@ -1,3 +1,5 @@
+> See `~/.claude/CLAUDE.md` for universal workflow, agent teams, security, ecosystem, and key commands.
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -71,6 +73,54 @@ Delegate all coding work to specialized agents or agent teams.
 - Immediately stop spawning new agents
 - Do NOT start "cleanup" or "verification" agents
 - Report current state and wait for instructions
+
+### Agent Routing Quick-Reference
+
+| Agent | Trigger Keywords | Domain |
+|-------|-----------------|--------|
+| coder | implement, create, build, scaffold | New code |
+| fixer | fix, bug, error, broken, diagnose | Bug fixes |
+| tester | test, coverage, spec, vitest | Testing |
+| tdd-guide | tdd, red-green-refactor | TDD workflow |
+| code-reviewer | review, quality, patterns | Code review |
+| security | security, vulnerability, audit | Security |
+| build-error-resolver | build fail, type error, EPERM | Build fixes |
+| planner | plan, design, approach, strategy | Planning |
+| architect | architecture, scale, system design | Architecture |
+| refactoring-agent | refactor, restructure, clean up | Refactoring |
+| database | prisma, migration, schema, query | Database |
+| ui | component, shadcn, tailwind, layout | UI components |
+| ux-design | wireframe, user flow, research | UX design |
+| stripe-expert | stripe, payment, billing, subscription | Payments |
+| e2e-runner | e2e, playwright, browser test | E2E testing |
+| doc-updater | docs, readme, codemap, documentation | Documentation |
+| pdf-specialist | pdf, document processing | PDF handling |
+| field-operations | daily report, field, crew, weather | Field ops |
+| document-intelligence | extraction, OCR, processing | Doc extraction |
+| project-controls | budget, schedule, EVM, cost | Cost/schedule |
+| compliance-checker | permit, OSHA, inspection, closeout | Compliance |
+| bim-specialist | BIM, clash detection, autodesk | BIM |
+| quantity-surveyor | takeoff, quantity, pricing, bid | Quantities |
+| submittal-tracker | submittal, RFI, spec compliance | Submittals |
+
+### Team Execution Patterns
+
+**Creating a team:**
+1. `TeamCreate` with descriptive name (e.g., `feature-daily-report-v2`)
+2. `TaskCreate` for each work item — assign with `TaskUpdate` owner param
+3. `Agent` tool with `team_name` + `name` params to spawn teammates
+4. Teammates work on assigned tasks, mark complete with `TaskUpdate`
+5. `SendMessage` type: "shutdown_request" to all teammates when done
+6. `TeamDelete` to clean up
+
+**Task type → Team selection:**
+| Task | Team Size | Core Agents | Background Agents |
+|------|-----------|-------------|-------------------|
+| New feature | 3-5 | planner, coder, tester | code-reviewer, security |
+| Bug fix | 2-3 | fixer, tester | security |
+| Refactoring | 2-3 | refactoring-agent, tester | build-error-resolver |
+| PR review | 3-4 | code-reviewer, security, tester | database (if DB changes) |
+| Construction ops | 2-4 | field-operations + domain agents | — |
 
 ## Build & Development Commands
 
